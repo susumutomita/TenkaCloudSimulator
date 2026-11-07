@@ -144,7 +144,11 @@ type iamTrustStatement struct {
 	Sid       string `json:"Sid,omitempty"`
 	Effect    string
 	Action    core.StringList
-	Principal struct{ Service core.StringList }
+	Principal struct {
+		Service core.StringList
+		AWS     core.StringList
+	}
+	Condition map[string]map[string]core.StringList `json:"Condition,omitempty"`
 }
 type iamTrustStatements []iamTrustStatement
 
@@ -169,13 +173,13 @@ func iamTrustFields(data []byte, allowed ...string) bool {
 }
 
 func (s *iamTrustStatement) UnmarshalJSON(data []byte) error {
-	if !iamTrustFields(data, "Sid", "Effect", "Action", "Principal") {
+	if !iamTrustFields(data, "Sid", "Effect", "Action", "Principal", "Condition") {
 		return fmt.Errorf("use canonical trust statement field names")
 	}
 	var fields map[string]json.RawMessage
 	_ = json.Unmarshal(data, &fields)
-	if !iamTrustFields(fields["Principal"], "Service") {
-		return fmt.Errorf("use canonical Service principal fields")
+	if !iamTrustFields(fields["Principal"], "Service", "AWS") {
+		return fmt.Errorf("use canonical Service or AWS principal fields")
 	}
 	type plain iamTrustStatement
 	return iamStrictJSON(data, (*plain)(s))
@@ -214,19 +218,22 @@ func iamTrust(document string) (bool, error) {
 		Version   string
 		Statement iamTrustStatements
 	}
-	if len(document) > 32<<10 || !iamTrustFields([]byte(document), "Version", "Statement") || iamStrictJSON([]byte(document), &trust) != nil || trust.Version != "2012-10-17" || len(trust.Statement) == 0 || len(trust.Statement) > 10 {
-		return false, ssmFailure{"MalformedPolicyDocument", "Use the bounded service-principal trust policy subset."}
+	if len(document) > 32<<10 || !stsUniqueJSON([]byte(document)) || !iamTrustFields([]byte(document), "Version", "Statement") || iamStrictJSON([]byte(document), &trust) != nil || trust.Version != "2012-10-17" || len(trust.Statement) == 0 || len(trust.Statement) > 10 {
+		return false, ssmFailure{"MalformedPolicyDocument", "Use the bounded Service/AWS-principal trust policy subset."}
 	}
 	allowed, denied := false, false
 	for _, statement := range trust.Statement {
-		if (statement.Effect != "Allow" && statement.Effect != "Deny") || len(statement.Action) != 1 || statement.Action[0] != "sts:AssumeRole" || len(statement.Principal.Service) == 0 || len(statement.Principal.Service) > 10 {
-			return false, ssmFailure{"MalformedPolicyDocument", "Only Allow/Deny, sts:AssumeRole and Service principals are supported."}
+		if (statement.Effect != "Allow" && statement.Effect != "Deny") || len(statement.Action) != 1 || statement.Action[0] != "sts:AssumeRole" || len(statement.Principal.Service)+len(statement.Principal.AWS) == 0 || len(statement.Principal.Service)+len(statement.Principal.AWS) > 10 {
+			return false, ssmFailure{"MalformedPolicyDocument", "Only Allow/Deny, sts:AssumeRole and explicit Service/AWS principals are supported."}
+		}
+		if err := stsValidateTrustStatement(statement); err != nil {
+			return false, err
 		}
 		for _, principal := range statement.Principal.Service {
 			if !iamServicePrincipal.MatchString(principal) {
 				return false, ssmFailure{"MalformedPolicyDocument", "Use an explicit supported service principal."}
 			}
-			if principal == "lambda.amazonaws.com" {
+			if principal == "lambda.amazonaws.com" && len(statement.Condition) == 0 {
 				if statement.Effect == "Deny" {
 					denied = true
 				} else {

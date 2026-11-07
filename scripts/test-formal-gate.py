@@ -33,9 +33,117 @@ class FormalGateTests(unittest.TestCase):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, target)
 
+    def test_sts_registry_guards_and_source_scope_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        baseline = json.loads(original)
+        entry = next(m for m in baseline['models'] if m['id'] == 'STSSessionLifecycle')
+        self.assertEqual(set(entry['properties']), {'TypeOK', 'IssueRequiresAllGuards', 'UseRequiresAllGuards'})
+        self.assertEqual({m['id'] for m in entry['mutants']}, {'SkipGeneration', 'SkipExpiry', 'SkipSignature', 'SkipTrust', 'SkipExternal', 'SkipPermission', 'SkipTenant', 'SkipChain'})
+        model_path, config_path = self.root / entry['model'], self.root / entry['config']
+        model_bytes, config_bytes = model_path.read_bytes(), config_path.read_bytes()
+        removed = json.loads(original)
+        removed['models'] = [m for m in removed['models'] if m['id'] != 'STSSessionLifecycle']
+        path.write_text(json.dumps(removed))
+        model_path.unlink(); config_path.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model_path.write_bytes(model_bytes); config_path.write_bytes(config_bytes)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == 'STSSessionLifecycle')
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            path.write_text(json.dumps(changed))
+            config_path.write_text(config_bytes.decode().replace('INVARIANT ' + prop + '\n', ''))
+            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+        config_path.write_bytes(config_bytes)
+        for scope in (entry['source_scope'][1:], entry['source_scope'] + ['internal/core/store.go']):
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == 'STSSessionLifecycle')['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        path.write_text(original)
+        source = model_bytes.decode()
+        for mutant in entry['mutants']:
+            broken = json.loads(json.dumps(mutant))
+            broken['edits'][0]['old'] += 'missing-anchor'
+            with self.subTest(mutant=mutant['id']), self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                apply_mutant(source, entry['id'], broken)
+
+    def test_cfn_event_history_inventory_properties_controls_and_scopes_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'CFNEventHistory')
+        self.assertEqual(set(entry['properties']), {
+            'TypeOK', 'PendingFrameUnchanged', 'FailureAtomic', 'LivePeerPreserved',
+            'EventParentExists', 'RetentionBound', 'LatestDeletedRetained',
+            'SuccessfulLifecycleExact', 'HistoryTracksLatest', 'CleanupAfterAllWrites',
+            'ReadSnapshotUnchanged', 'NoUnauthorizedDisclosure', 'ResolvedGenerationExact',
+            'CursorScoped', 'PageExact', 'NextCursorExact'})
+        self.assertEqual({m['id'] for m in entry['mutants']}, {
+            'PublishPending', 'PublishFailedTransaction', 'SkipEventWriteACK',
+            'SkipHistoryWriteACK', 'SkipDeletedCountACK', 'PruneLiveHistory',
+            'LeaveOrphanEvents', 'SkipSelectedHistoryACK', 'AcknowledgeBeforeFinalWrites',
+            'SkipAuthorization', 'ResolveDeletedByName', 'SkipRegion',
+            'SkipCursorGeneration', 'IgnoreCursorBound', 'ReversePageOrder', 'ReturnFirstRowCursor'})
+        model_path, config_path = self.root / entry['model'], self.root / entry['config']
+        model_bytes, config_bytes = model_path.read_bytes(), config_path.read_bytes()
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(changed))
+        model_path.unlink(); config_path.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model_path.write_bytes(model_bytes); config_path.write_bytes(config_bytes)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            path.write_text(json.dumps(changed))
+            config_path.write_text(config_bytes.decode().replace('INVARIANT ' + prop + '\n', ''))
+            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+        config_path.write_bytes(config_bytes)
+        for control in entry['mutants']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['mutants'] = [m for m in target['mutants'] if m['id'] != control['id']]
+            path.write_text(json.dumps(changed))
+            with self.subTest(control=control['id']), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                load_registry(self.root)
+        for scope in ([p for p in entry['source_scope'] if p != removed] for removed in entry['source_scope']):
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == entry['id'])['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.subTest(scope=scope), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        changed = json.loads(original)
+        next(m for m in changed['models'] if m['id'] == entry['id'])['source_scope'].append('internal/core/store.go')
+        path.write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        path.write_text(original)
+
+    def test_cfn_event_controls_preserve_independent_oracles_and_exact_anchors(self):
+        registry = load_registry(self.root)
+        entry = next(m for m in registry['models'] if m['id'] == 'CFNEventHistory')
+        source = (self.root / entry['model']).read_text()
+        oracle = source[source.index('FrameOK(s) =='):]
+        for control in entry['mutants']:
+            _, mutated = apply_mutant(source, entry['id'], control)
+            self.assertEqual(mutated[mutated.index('FrameOK(s) =='):], oracle)
+            broken = json.loads(json.dumps(control))
+            broken['edits'][0]['old'] += 'missing-anchor'
+            with self.subTest(control=control['id']), self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                apply_mutant(source, entry['id'], broken)
+
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'SNSAdmission', 'SNSLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'CatalogResourceLifecycle', 'CatalogConsoleEpoch', 'LoginInputIntent'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'SNSAdmission', 'SNSLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'CatalogResourceLifecycle', 'CatalogConsoleEpoch', 'LoginInputIntent', 'STSSessionLifecycle', 'CFNEventHistory'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -660,7 +768,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 450)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), sum(len(m['mutants']) for m in registry['models']))
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -677,7 +785,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 450)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), sum(len(m['mutants']) for m in json.loads(original)['models']))
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):

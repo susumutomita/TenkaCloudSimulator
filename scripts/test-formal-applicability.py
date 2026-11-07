@@ -30,6 +30,20 @@ class LandingPresentationBoundaryTests(unittest.TestCase):
             self.assertIsNone(disposition(path), path)
 
 
+class STSFixtureClassificationTests(unittest.TestCase):
+    def test_exact_sts_fixture_and_helper_classification(self):
+        self.assertEqual(disposition('scripts/check-sts-formal-candidate.py'), 'validation-tooling')
+        self.assertEqual(disposition('internal/aws/testdata/sts-original/hello-world.yaml'), 'test-support')
+        for name in ('README.md', 'LICENSE'):
+            self.assertEqual(disposition('internal/aws/testdata/sts-original/' + name), 'documentation')
+        for path in ('scripts/check-sts-other.py',
+                     'internal/aws/testdata/sts-original/other.yaml',
+                     'internal/aws/testdata/sts-original/hello-world.go',
+                     'internal/aws/testdata/sts-original/helper.py',
+                     'internal/aws/sts_roles.go', 'internal/server/access_sdk.go'):
+            self.assertIsNone(disposition(path), path)
+
+
 class ApplicabilityTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix='formal-applicability-unit-')

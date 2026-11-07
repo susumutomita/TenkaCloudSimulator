@@ -1,3534 +1,618 @@
 {
   "version": 1,
-  "base_sha": "79d9116277ca26ee935a7a594426b67d47ccf323",
+  "base_sha": "a24e7c0c6a4857a9ec0421f416a2add4d1dfe155",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "dc9074e3ee09e1b6069c688ce3d93431f56e5e8426be2969cc0dfead4b4fc533",
-      "disposition": "documentation",
-      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
-      "models": []
-    },
-    {
       "path": "README.md",
-      "sha256": "32612b5df76b97dd8582ae4d6b3614fb2bde43350151c206743cc41abb9ec05b",
+      "sha256": "f716bb940a8d44df81309100822c8388f87dd2d9e5a0956690a90cfd33cd2338",
       "disposition": "documentation",
-      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "reason": "Documents the bounded native STS/SDK support and current supported/unsupported behavior; no runtime implementation is in this file.",
       "models": []
     },
     {
-      "path": "docs/azure-catalog.md",
-      "sha256": "66abc5994c4a943a4f587acec0b8d1185220884fd0c803e4d6669c3682ce220a",
+      "path": "docs/cloudformation-rest.md",
+      "sha256": "0562da05063602367b26d0253b588e44b7aea46cbb422f072fe2fd01f799d78b",
       "disposition": "documentation",
-      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "reason": "Documents synchronous local stack-event history, native SDK access and their limits; documentation does not establish AWS asynchronous behavior or native/formal acceptance.",
       "models": []
     },
     {
-      "path": "docs/coverage-assessment.md",
-      "sha256": "2656f8daba79610cd80ceda7a2f9d65b5ab3bd275f77687297298194f27f86b7",
+      "path": "docs/formal-cfn-event-history.md",
+      "sha256": "2d05c8d40a4088e76726f59f18bd633de955373033db7dff526f146051bd4de9",
       "disposition": "documentation",
-      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "reason": "Documents canonical seeds, event/transaction/read correspondence, required properties and sensitivity controls, explicit native/SQL/snapshot assumptions, finite bounds and independent implementation obligations.",
       "models": []
     },
     {
-      "path": "docs/gcp-catalog.md",
-      "sha256": "b2966c89f60150dc7c1149b82d7ef89aef575c9e70cbe3bd28a61578492d7851",
+      "path": "docs/formal-validation.md",
+      "sha256": "958e8d632fd85dcd81d7b5bf01990c09cc9a8e669fbe77b0b99e26996d5366a3",
       "disposition": "documentation",
-      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "reason": "Updates the current combined inventory and links the independently bounded CFN event model; retains exact-blob/immutable-head validation requirements and historical evidence boundaries.",
       "models": []
+    },
+    {
+      "path": "docs/iam.md",
+      "sha256": "0ec01a3edca86ebe446088ff136ea876ccca6d6d9428793e532882e978df34a2",
+      "disposition": "documentation",
+      "reason": "Documents the bounded AWS/Service trust-policy and STS role semantics and unsupported forms; parser/authentication behavior requires independent implementation tests.",
+      "models": []
+    },
+    {
+      "path": "docs/sts-formal-candidate.md",
+      "sha256": "4cc65e8647b52c4361112ff711b14dde08cb2a191325ecd698bde13bf7137873",
+      "disposition": "documentation",
+      "reason": "Records the STS finite guard abstraction, source correspondence, registration and limitations; historical scoped results are not final-candidate or implementation proof.",
+      "models": []
+    },
+    {
+      "path": "docs/sts-native.md",
+      "sha256": "f4ecc10e140e5072f48584282defe07b34b20172c2b66571fcbd9c0bb7817884",
+      "disposition": "documentation",
+      "reason": "Documents the native STS/SigV4/local credential contract, verified lifecycle and exclusions; no new runtime behavior is introduced by the document.",
+      "models": []
+    },
+    {
+      "path": "formal/CFNEventHistory.cfg",
+      "sha256": "730836bf9933c1648537272e0cb828ac059b2f66022e830034ad8e057272fb7e",
+      "disposition": "modeled",
+      "reason": "Selects all sixteen declared event/history safety invariants, canonical finite Init/Next and terminal stuttering without liveness/deadlock claims. No behavior-pruning constraint, view or substitution is enabled.",
+      "models": [
+        {
+          "id": "CFNEventHistory",
+          "properties": [
+            "PendingFrameUnchanged",
+            "FailureAtomic",
+            "LivePeerPreserved",
+            "EventParentExists",
+            "RetentionBound",
+            "LatestDeletedRetained",
+            "SuccessfulLifecycleExact",
+            "HistoryTracksLatest",
+            "CleanupAfterAllWrites",
+            "ReadSnapshotUnchanged",
+            "NoUnauthorizedDisclosure",
+            "ResolvedGenerationExact",
+            "CursorScoped",
+            "PageExact",
+            "NextCursorExact"
+          ],
+          "limits": "Finite event/history/transaction and snapshot-page correspondence only, not all reachable SQL histories. Assumes coherent read snapshot, unique opaque IDs, FK behavior, resource-handler effects and supplied IAM verdict. No SQL/Go/HTTP/XML/parser/cryptographic/concurrency/crash/restart refinement, event-payload privacy, actual100-row/100-generation quota proof, AWS asynchronous lifecycle or liveness proof. Existing final cleanup models remain unchanged; native ignored-write/late-reinsert/rollback/SDK tests are independent obligations."
+        }
+      ]
+    },
+    {
+      "path": "formal/CFNEventHistory.tla",
+      "sha256": "d6b3c6ba0e9e9bfa42e7f7c1895ce9e0794d1f9b5e1a9b781f497978742e7164",
+      "disposition": "modeled",
+      "reason": "Independent finite specification of committed event/history lifecycle, transaction failure isolation, retention/cascade integrity, final cleanup ordering, generation/region authorization and cursor-page semantics. Canonical seeds and reduced quota/page bounds are declared, not an exhaustive Go/SQL state-space proof.",
+      "models": [
+        {
+          "id": "CFNEventHistory",
+          "properties": [
+            "PendingFrameUnchanged",
+            "FailureAtomic",
+            "LivePeerPreserved",
+            "EventParentExists",
+            "RetentionBound",
+            "LatestDeletedRetained",
+            "SuccessfulLifecycleExact",
+            "HistoryTracksLatest",
+            "CleanupAfterAllWrites",
+            "ReadSnapshotUnchanged",
+            "NoUnauthorizedDisclosure",
+            "ResolvedGenerationExact",
+            "CursorScoped",
+            "PageExact",
+            "NextCursorExact"
+          ],
+          "limits": "Finite event/history/transaction and snapshot-page correspondence only, not all reachable SQL histories. Assumes coherent read snapshot, unique opaque IDs, FK behavior, resource-handler effects and supplied IAM verdict. No SQL/Go/HTTP/XML/parser/cryptographic/concurrency/crash/restart refinement, event-payload privacy, actual100-row/100-generation quota proof, AWS asynchronous lifecycle or liveness proof. Existing final cleanup models remain unchanged; native ignored-write/late-reinsert/rollback/SDK tests are independent obligations."
+        }
+      ]
+    },
+    {
+      "path": "formal/README.md",
+      "sha256": "c81d1535c39ab1ed33add2b0f500621ef1f0b78733c98878daf68eb0616f86a3",
+      "disposition": "documentation",
+      "reason": "Updates the complete inventory to 57 models, 474 controls and 531 executions with STS and CFN event/history additions while preserving historical receipts and their exact-source limitations; execution remains a separate gate.",
+      "models": []
+    },
+    {
+      "path": "formal/STSSessionLifecycle.cfg",
+      "sha256": "7a4fe56277f6ff6dcba24b2fb0ff8d291ec08769ebcee09105a5707ffef7b69d",
+      "disposition": "modeled",
+      "reason": "Finite clock/token/generation bounds and all three STS invariants are selected for the registered baseline; the eight guard bypass settings remain false in the normal specification.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/STSSessionLifecycle.tla",
+      "sha256": "a9565f0429fff97829f4e4d6077e909fde41ac2f21f0a4c38dd3cf111d72969c",
+      "disposition": "modeled",
+      "reason": "Finite STS issuance/use guard state machine with role generation, expiry, restart, tenant, signature, trust/external ID, permission and chaining guards; registered semantics are checked by baseline and eight sensitivity variants.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "d81929f6ca8ee55bdcea0a0f3c722f913c3c6e2f8572560a08b271a83ebc7acb",
+      "sha256": "d571f1aed831bbd70c00c8289024d2f42f31b2fa1747d3b18037b4b7ddc3e5e9",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded catalog store model and its twelve protected mutation controls without relaxing any existing model, invariant, control, deadline or applicability rule.",
+      "reason": "Adds only STSSessionLifecycle and CFNEventHistory, their exact source paths, declared substantive properties and 24 combined named controls; all 55 public-base model entries remain structurally identical.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/describe.go",
-      "sha256": "0ec19551fd9015d19cab363c6ad36e2b865eab6f80e4f32724a34508c396e643",
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "268ed9af46edb05470574a8418712e9445114d614ef8d44fa38d84746d3044e7",
       "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "reason": "Uses the coherent SDK policy snapshot for stack requests and composes transactional event/resource lifecycle changes. Event completion/retention precedes the final stack/claim and physical-resource absence checks; no further writes precede commit. STS binds session use, unchanged cleanup models retain their selected final-ACK contracts, and CFNEventHistory independently binds the new lifecycle/event/history and read dispatch correspondence. Concrete native SQL/HTTP/IAM and all-resource behavior are not proved.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "STSSessionLifecycle",
           "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
+            "UseRequiresAllGuards"
           ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
+        },
+        {
+          "id": "CFNFinalCleanupACK",
+          "properties": [
+            "NoFalseFinalRecordACK",
+            "FailureAtomic",
+            "PeerFramePreserved",
+            "PendingFrameUnchanged"
+          ],
+          "limits": "Final selectedstack/ownedclaim record cleanup only. Physicalresource handler success is ASSUMED, not independentlyACKchecked or proved bythismodel. RealretainedFKclaim makes ExecSucceeded false independentlyofmutableACK; IgnoreFinalCleanupACK canwitnessonlyIgnoreStack/ReinsertStack, notIgnoreClaims. Fullrollback/peerframe abstractions, no Go/SQL/auth/provisioning refinement."
+        },
+        {
+          "id": "CFNPhysicalResourceACK",
+          "properties": [
+            "SuccessPhysicalAbsent",
+            "FailureAtomic",
+            "PeerFramePreserved",
+            "PendingFrameUnchanged"
+          ],
+          "limits": "Onlyend-of-Tx selectedSSM/S3physicalabsence+rollback/peerframe contract. ActualSQLhandler effects abstracted bydeliveredrowbits withIGNORE/reinsert/lateclaim/latestack/crosscleanup faults. Independentfinalpredicate readsactualworkingrows, notackflag. earlyOK usedonlymutant torepresentwrongearlycheck. NoSQL/Go/auth/parser/fullCFNrefinement or otherresourceACKproof. Success doesnotimplyfinalstack/claimACK (separatemodel)."
+        },
+        {
+          "id": "CFNEventHistory",
+          "properties": [
+            "PendingFrameUnchanged",
+            "FailureAtomic",
+            "LivePeerPreserved",
+            "EventParentExists",
+            "RetentionBound",
+            "LatestDeletedRetained",
+            "SuccessfulLifecycleExact",
+            "HistoryTracksLatest",
+            "CleanupAfterAllWrites",
+            "ReadSnapshotUnchanged",
+            "NoUnauthorizedDisclosure",
+            "ResolvedGenerationExact",
+            "CursorScoped",
+            "PageExact",
+            "NextCursorExact"
+          ],
+          "limits": "Finite event/history/transaction and snapshot-page correspondence only, not all reachable SQL histories. Assumes coherent read snapshot, unique opaque IDs, FK behavior, resource-handler effects and supplied IAM verdict. No SQL/Go/HTTP/XML/parser/cryptographic/concurrency/crash/restart refinement, event-payload privacy, actual100-row/100-generation quota proof, AWS asynchronous lifecycle or liveness proof. Existing final cleanup models remain unchanged; native ignored-write/late-reinsert/rollback/SDK tests are independent obligations."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/review_test.go",
-      "sha256": "938f0f55f1d02744086347f5dd517a4467f17ae28a9b0de6e85122845faae64b",
+      "path": "internal/aws/cloudformation_conditions_boundaries_test.go",
+      "sha256": "73b63f10c678908e1f70f19d94e19f3b4d0b7907e8b980b3c932eb1e20fcc7c6",
       "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "reason": "Native regression test source for aws/cloudformation_conditions_boundaries_test.go; exercises real implementation behavior and failure/rollback cases independently from the finite models, without changing runtime code.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/services_data.go",
-      "sha256": "705cbdc24537b700d6d9b2022fef0aa668a8e611ce8b2a29ed085e425a9db2dd",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/describe.go",
-      "sha256": "04a61dbfb9385b13154b30cc13dd5c5b3ab1a79616bf2b386708ba158da15110",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/edges_test.go",
-      "sha256": "88985d8b3ade7b98a7128e457b334816984a1a96ee8b80516bde15e8315e0820",
+      "path": "internal/aws/cloudformation_conditions_integration_test.go",
+      "sha256": "cbf37ce59f0d12542c2d67188e51a9098c43e4a6c698b1120fb53e1f6d983f07",
       "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "reason": "Native regression test source for aws/cloudformation_conditions_integration_test.go; exercises real implementation behavior and failure/rollback cases independently from the finite models, without changing runtime code.",
       "models": []
     },
     {
-      "path": "internal/azure/arm/engine.go",
-      "sha256": "eb8cd37194844d4ca73c17c3261f67da032668541c1a20e0cfb1c5265e557241",
+      "path": "internal/aws/cloudformation_events.go",
+      "sha256": "8852397d9b7c9c056ebaf17b477767408d80a32011213db4282316f6a55cccbd",
       "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "reason": "Event/history writes publish with the stack lifecycle in one transaction; ignored writes and retention/late-write failures abort. Generation/region resolution, explicit authorization, stored generation-scoped cursors and descending pages use a coherent snapshot. CFNEventHistory represents these bounded contracts, while SQL/FK/randomness/actual quotas/HTTP and payload privacy remain separate native obligations.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CFNEventHistory",
           "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
+            "PendingFrameUnchanged",
+            "FailureAtomic",
+            "LivePeerPreserved",
+            "EventParentExists",
+            "RetentionBound",
+            "LatestDeletedRetained",
+            "SuccessfulLifecycleExact",
+            "HistoryTracksLatest",
+            "CleanupAfterAllWrites",
+            "ReadSnapshotUnchanged",
+            "NoUnauthorizedDisclosure",
+            "ResolvedGenerationExact",
+            "CursorScoped",
+            "PageExact",
+            "NextCursorExact"
           ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+          "limits": "Finite event/history/transaction and snapshot-page correspondence only, not all reachable SQL histories. Assumes coherent read snapshot, unique opaque IDs, FK behavior, resource-handler effects and supplied IAM verdict. No SQL/Go/HTTP/XML/parser/cryptographic/concurrency/crash/restart refinement, event-payload privacy, actual100-row/100-generation quota proof, AWS asynchronous lifecycle or liveness proof. Existing final cleanup models remain unchanged; native ignored-write/late-reinsert/rollback/SDK tests are independent obligations."
         }
       ]
     },
     {
-      "path": "internal/azure/arm/engine_test.go",
-      "sha256": "4b57dd1dd54239062c5b3edbb85fe1dd88472b67163df692338a806264d8dd15",
+      "path": "internal/aws/cloudformation_events_cleanup_order_test.go",
+      "sha256": "9148c2ab1642334712ebd321e6c7cfc68a235319b60725f329b4a65fd6203de5",
+      "disposition": "modeled",
+      "reason": "Native fault-injection regressions require rollback when event/history completion writes reinsert selected SSM/S3 resources. CFNEventHistory binds the final-after-all-writes and failure-frame contracts; exact trigger/SQL behavior and native source assertions remain independently executed obligations.",
+      "models": [
+        {
+          "id": "CFNEventHistory",
+          "properties": [
+            "CleanupAfterAllWrites",
+            "FailureAtomic",
+            "PendingFrameUnchanged"
+          ],
+          "limits": "Finite event/history/transaction and snapshot-page correspondence only, not all reachable SQL histories. Assumes coherent read snapshot, unique opaque IDs, FK behavior, resource-handler effects and supplied IAM verdict. No SQL/Go/HTTP/XML/parser/cryptographic/concurrency/crash/restart refinement, event-payload privacy, actual100-row/100-generation quota proof, AWS asynchronous lifecycle or liveness proof. Existing final cleanup models remain unchanged; native ignored-write/late-reinsert/rollback/SDK tests are independent obligations."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_events_test.go",
+      "sha256": "87dd1e59cde6ef114178d76870f8ee1a6318f1193af9a191fa1a96805114fb30",
+      "disposition": "modeled",
+      "reason": "Native lifecycle/restart/name-reuse, authorization/pagination, transaction failure, retention/pruning and ignored-write regressions are correspondence evidence for CFNEventHistory. They exercise actual Go/SQL and native quotas independently; model registration does not prove test execution or implementation refinement.",
+      "models": [
+        {
+          "id": "CFNEventHistory",
+          "properties": [
+            "PendingFrameUnchanged",
+            "FailureAtomic",
+            "LivePeerPreserved",
+            "EventParentExists",
+            "RetentionBound",
+            "LatestDeletedRetained",
+            "SuccessfulLifecycleExact",
+            "HistoryTracksLatest",
+            "CleanupAfterAllWrites",
+            "ReadSnapshotUnchanged",
+            "NoUnauthorizedDisclosure",
+            "ResolvedGenerationExact",
+            "CursorScoped",
+            "PageExact",
+            "NextCursorExact"
+          ],
+          "limits": "Finite event/history/transaction and snapshot-page correspondence only, not all reachable SQL histories. Assumes coherent read snapshot, unique opaque IDs, FK behavior, resource-handler effects and supplied IAM verdict. No SQL/Go/HTTP/XML/parser/cryptographic/concurrency/crash/restart refinement, event-payload privacy, actual100-row/100-generation quota proof, AWS asynchronous lifecycle or liveness proof. Existing final cleanup models remain unchanged; native ignored-write/late-reinsert/rollback/SDK tests are independent obligations."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/iam_managed_query.go",
+      "sha256": "707130e147271e24621571fb5c4295086016cd15b336445df5f25de5fe7f8b2a",
+      "disposition": "modeled",
+      "reason": "Routes managed-policy Query authorization through the coherent SDK policy decision for native credentials while retaining existing managed-policy state transitions; the changed correspondence is guarded credential use.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/iam_query.go",
+      "sha256": "ffdf57f347e1dc4ad333b2cdac0e18b6d1dfe21b8565990cd1bdbc056603246e",
+      "disposition": "modeled",
+      "reason": "Routes native IAM authorization through the coherent SDK policy decision when a native credential is present, retaining the legacy decision otherwise. The changed seam is session-use admission, not a new modeled IAM storage transition.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/iam_roles.go",
+      "sha256": "be3b57845b2374834c930f645f39229ee0a0c5b0156cab0ebbb1e21a7bbf445f",
+      "disposition": "modeled",
+      "reason": "Extends strict bounded trust parsing to explicit AWS principals and supported conditions, feeding the STS trust/external-ID issue guards. Existing role-name ownership and policy lifecycle are not changed by this parser extension; parsing, duplicate-key rejection and service compatibility remain native-test obligations.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "IssueRequiresAllGuards"
+          ],
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "d7c20736a730083c8f9ff0642c1c99a5809c9d443a2930652d070d36a043edf4",
+      "disposition": "modeled",
+      "reason": "Adds STS dispatch before existing provider handlers and uses the coherent native SDK policy decision for SSM authorization. The changed path corresponds to STS guard admission; complete HTTP routing and SSM state semantics are independent native obligations.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sts.go",
+      "sha256": "c3b2cb906689af6cc720f6a4fe695b73e4035c26101b8a7cc0fc9df2640b7fa3",
+      "disposition": "modeled",
+      "reason": "STS Query operations resolve an already authenticated local principal and authorize bounded identity/session issuance. The model covers the abstract issue/use admission conjunction, not Query/XML parsing or full AWS STS.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sts_credentials.go",
+      "sha256": "4190b261280c129facfcab1663071e22895ee687cad5e5b4418693503d9c3a40",
+      "disposition": "modeled",
+      "reason": "Local SDK credential representation and request-context authority are correspondence seams for guarded issue/use and role-generation-bound policy; exact secret handling and concrete concurrency are native obligations.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sts_credentials_test.go",
+      "sha256": "e1b638c07085eb731219fb926fb8c91a150872e273d3fd8c96aaf7be9cf741ee",
       "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "reason": "Native regression test source for aws/sts_credentials_test.go; exercises real implementation behavior and failure/rollback cases independently from the finite models, without changing runtime code.",
       "models": []
     },
     {
-      "path": "internal/azure/arm/model.go",
-      "sha256": "d473af0b064d2830ad26e81093eab541ebda6336c2ee8da0614ccdd122561620",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/models/Microsoft.AppConfiguration.json",
-      "sha256": "7b5b6a1ce620ff07b10c65d3d3a4eb803b1416ac09b6664b400a8b461e7ba0f2",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/models/Microsoft.ContainerRegistry.json",
-      "sha256": "08a5ae8e3b5acdfb4fbafd41114d01a8222fd84f0ad445cfa96b6462a2039afa",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/models/Microsoft.DocumentDB.json",
-      "sha256": "862e556fc95a4ac4b9dd7875649bd7f423da95b718a3c493cb7c29ae7a21005c",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/models/Microsoft.EventHub.json",
-      "sha256": "44505a41ed6fe561fd1c10389e1b7350e37556fba9824fb7090c361af4ff7a93",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/models/Microsoft.KeyVault.json",
-      "sha256": "97e888d4ad20315bdb2badc5d78e194d064034729a384f578bbd8f9a31f4c9fa",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/models/Microsoft.ManagedIdentity.json",
-      "sha256": "bea2f3a9558d8c360efeeb5f988d6347d702c8248b6e74d6ea0a5383b591d9a0",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/models/Microsoft.Network.json",
-      "sha256": "f8cddaafdc196750f3f01285e1b5c9b0bf5fae77d42639805b65da5ec17552f6",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/models/Microsoft.OperationalInsights.json",
-      "sha256": "7acde11866205495d96d979686716a96ff24333931c786cf2565b724f2bf0082",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/models/Microsoft.Resources.json",
-      "sha256": "1c13ee02dbc6af4ca8691c79a96280de310c29a6815577294ba610de91cde62e",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/models/Microsoft.ServiceBus.json",
-      "sha256": "8380a45db5660250acb553b3ef51a522296607e9d7bf8176983a51ae46bbb4be",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/models/Microsoft.Web.json",
-      "sha256": "cd56b328dda2a69b77995a2afa866daf27074b3d3f7497356abb27d8db5efb59",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/openapi.go",
-      "sha256": "43ac447d54ca333b2ef726b021a87c9d0453dafe223afc7466b03162ab162847",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/openapi_test.go",
-      "sha256": "b93c3a940cfd4e6ed507357c35ad6eeecc238391ba4f0fa3e5f85ac36ba1c7bc",
+      "path": "internal/aws/sts_failure_test.go",
+      "sha256": "1d4b40c039fee2ea27316aaa9f7299279d0d26e8fbaf26db22e161b52d0f8627",
       "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "reason": "Native regression test source for aws/sts_failure_test.go; exercises real implementation behavior and failure/rollback cases independently from the finite models, without changing runtime code.",
       "models": []
     },
     {
-      "path": "internal/azure/arm/products_test.go",
-      "sha256": "0ca1fb65858630fa186030f0f4ea0e7923f18e4f994c235d51b0123a52526265",
+      "path": "internal/aws/sts_roles.go",
+      "sha256": "3fea3989c56051561d58f63d2fd198e6068f0b338caac0d8e992bdcfe16a0170",
+      "disposition": "modeled",
+      "reason": "Role session issuance/use validates trust, external-ID, chaining, generation and coherent policy snapshots. IssueRequiresAllGuards and UseRequiresAllGuards model these abstract decisions; concrete SQL snapshot implementation is separately tested.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sts_roles_test.go",
+      "sha256": "8054df523f62b1cefd8c3aa1b3af4f4fc82fa5836ac97e1e8bc088b4740b4a80",
       "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "reason": "Native regression test source for aws/sts_roles_test.go; exercises real implementation behavior and failure/rollback cases independently from the finite models, without changing runtime code.",
       "models": []
     },
     {
-      "path": "internal/azure/arm/providers.go",
-      "sha256": "a8c9b1706f84864eb2946ef301364aba2bdaee71b1aa8e2fc256f65cbfb61fdc",
+      "path": "internal/aws/sts_signature.go",
+      "sha256": "f9edb871e073472e0d8ed5a917becb22221b1e1b8a9db6da6f065b668514eb4f",
       "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "reason": "SigV4 verification supplies the trusted signature-valid verdict used by UseRequiresAllGuards. The model does not validate canonicalization, HMAC/security properties or byte-level request parsing.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "STSSessionLifecycle",
           "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
+            "UseRequiresAllGuards"
           ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
         }
       ]
     },
     {
-      "path": "internal/azure/arm/providers_core.go",
-      "sha256": "b23fde0e4fc37fa39cce36604c17a63b02edc6e7864c0a47e764825801642e16",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/providers_network.go",
-      "sha256": "61a4732a4ad04c549787528d61fa720cc98af56f281105dc256dc14b2247831b",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/providers_platform.go",
-      "sha256": "1fce3c50fcef98f23a0bc728419385b9f67b9c7f301605beaffae54bb54941ca",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/selection.json",
-      "sha256": "4502510ec062ece69282fa61b338baac25e3f00ce616f4cdc5914de061f0352a",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/selection_test.go",
-      "sha256": "eb542b8129b99a95a99dbd196359cb2f9a8a1abf1a3fed34865f344178d3bcf3",
+      "path": "internal/aws/sts_test.go",
+      "sha256": "d2f357f274f8557b2b8beb749b1fc51d4a7a92b62ccccd248ae07f03d46196d0",
       "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "reason": "Native regression test source for aws/sts_test.go; exercises real implementation behavior and failure/rollback cases independently from the finite models, without changing runtime code.",
       "models": []
     },
     {
-      "path": "internal/azure/arm/semantics.go",
-      "sha256": "2703e89931eacc35a6324f490005c39aac05fe1f21797f8e0e88eac728d95558",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/semantics_test.go",
-      "sha256": "ce48a72f236ed4f0776b6b1f2629d7d1ec609bf796f1d2643f2e4fa56a8b856f",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/arm/spec.go",
-      "sha256": "cc1b0fdf9ed0761548c29fc3adea96eed9e1cdbe39a72f2a0ffa69614455409c",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/store.go",
-      "sha256": "59b69d46376ed2be230c78fc892e7befcb85447d430b95a75f5bce7b0b1329b7",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/synthetic_test.go",
-      "sha256": "4a9eae7d0227b706400980429de7d3fdd980cddab177d1f392842c899e387684",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/arm/value.go",
-      "sha256": "fa5a02d66d54a643a5d4283e2aefc547a69023b968adbe534eeca23320b1486f",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/arm/value_test.go",
-      "sha256": "32f12e05496e3f7a4bfbeb01dc66ec463506e493786d371b4057479aa6efb623",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/apis.go",
-      "sha256": "99a64b1b68a620f7c6a80a8106c6c33a39ddaa01d7f5660465307a6e6f50909c",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/apis_analytics.go",
-      "sha256": "2f4f52b44ee28dd324682e90529e548ba319e902d7413cb1423a206f6bf61f19",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/apis_analytics_test.go",
-      "sha256": "b0f11844d3202c71cac8414710476db2c937154f85553a73559fd4c63b7bdcc5",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/apis_compute.go",
-      "sha256": "7ca0876315ea90b689678b7d06f41ab754ce3506c997a4ccf1d657cf68ec7ea7",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/apis_compute_test.go",
-      "sha256": "c25cce44d2ba1f2f26d37f075356c231555a74921e8856dce427b6a25b36cef3",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/apis_databases.go",
-      "sha256": "b178e14d5be002fd4089fe94786be53762c0a4d62b8529d14372dd345f814047",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/apis_devtools.go",
-      "sha256": "cd0ff85f1ce8fb27fe1fed8eabc0227ad3a56c5373bf25f3363611c228bb2ca4",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/apis_devtools_test.go",
-      "sha256": "4264af58888d5b811b81f9179f3a39efd348a729a22ec56c70fc39c03be79f64",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/apis_netops.go",
-      "sha256": "9c67c2cfdadbb517addc10b5d3beb304c3de876ed5b6622037c87f76c006e50e",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/apis_netops_test.go",
-      "sha256": "204d13ff09e657310ff396d8639042096a472aa6c8b67a5860a604dbc7deff89",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/apis_storage.go",
-      "sha256": "d2859ca382d6ceef700d81abb432da59fbb843f0d516b24849fd553400af28bd",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/apis_storage_test.go",
-      "sha256": "41a098c1743397ecd1152a0b771d8d77c6569115554da77b96dfdada2b5bb867",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/compose_test.go",
-      "sha256": "b26a876122fd6eb038b51d8ae159614101dc566810c336e5156fd6eeb9b16180",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/describe.go",
-      "sha256": "2ca2c429609da6255763751cfc19135d458e112dcf053f8f039cfa3a86bae852",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/edges_test.go",
-      "sha256": "68691dca6ee7ac16afcbb1ed36f4215a95f71e54761a32e71e6e1c1153737fc4",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/engine.go",
-      "sha256": "2dc557cec828aa446faf03f7285701fd529a5ed0f69718b84f731c66b4eefcd0",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/engine_scope_test.go",
-      "sha256": "f389022b5a1d9734f96c3bd3eda832d9eb86167fc7e44147ff47ba5b97595b14",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/engine_test.go",
-      "sha256": "d189d48ef56564cc44bfda2d91ef89d88fa01ba50bc58781e88e2ae0c9466b3f",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/flat.go",
-      "sha256": "b5ea576847cfa8b03579e59f182db979237dfc174c589a5f994a57405afeb254",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/flat_test.go",
-      "sha256": "435fc426f0b7213cfbb44e31eccd212d2adad3b58e800835863c6c47e98e71bd",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/model.go",
-      "sha256": "8c70f7bc3b2282da6fc98a696c2729cb6bdce30f0c109136e83c8e10b0263cb0",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/alloydb.v1.json",
-      "sha256": "7d9708c4bdeb338ddad7bd78ee867add357cefa099a17f1ef4693762747d93e4",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/artifactregistry.v1.json",
-      "sha256": "26c6a8b8ad076dd2fb042d4cec5c0467026e5d430f7d1f8a45681d31b8cafabc",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/backupdr.v1.json",
-      "sha256": "2aa91767e9ffb15525d689e064ce92f4ff0b1d40f15574a3064f5c0c20031bac",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/biglake.v1.json",
-      "sha256": "515f7c60dce0b61fe935eb15cfbc35a753045911b87957a5772df045fbe16891",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/blockchainnodeengine.v1.json",
-      "sha256": "bef2fe94e7aaa997f3740a7df2d55e0596c0d3311effa8067846206e18121044",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/cloudbuild.v1.json",
-      "sha256": "115ce0813b2417c964ea0ee520029a33932ab6e0f114ecd4ce522be8b3b4b3dd",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/clouddeploy.v1.json",
-      "sha256": "f7bb375d4357bdd939002b9bb4bd27e829d571af860388c46466dc7be494e852",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/composer.v1.json",
-      "sha256": "7b2fd1efbaaa342be660458543681d4989c2cf791d88becb4d6e9c397cd3ede6",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/compute.v1.json",
-      "sha256": "ba7d8b1782eb2cce36fe990b03a9dd1c4e1e8f368219a983e1db70d8aa66d307",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/dataform.v1.json",
-      "sha256": "cf6df4b794fd8954d35ecc6ea7e21a6b200ee0509bc63631b93345187685c2d4",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/datafusion.v1.json",
-      "sha256": "7f0cdb965450a15d7bb394835fe1f077dc56a68ff7a2417014fc83b8eac83535",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/dataplex.v1.json",
-      "sha256": "8686df89e9342de2952cb9a9c8187643c899198505877f65afbdda16bf23f99b",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/dataproc.v1.json",
-      "sha256": "e95c182554790d7b3e95ef91721e41b1962938c51c4f1305381f0adbb5959f7d",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/datastream.v1.json",
-      "sha256": "864583814343d686d293f3414278d0a71cf015bfc0311808fb0131dfab98a6be",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/developerconnect.v1.json",
-      "sha256": "6263307c646cfa5217171f41e17c7b7169bd412b5c97b8b25be132a7ce6be59a",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/file.v1.json",
-      "sha256": "d572d6603c158c16290e9c1966433e019cb39b9215bbcaef3c9364c0032a8d0f",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/firebaseapphosting.v1.json",
-      "sha256": "a32c677d28eb03558fc11362f6f5d99058d26c509a5dad429cafd1c44d718a7c",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/firestore.v1.json",
-      "sha256": "6d78e8129787abc15c5af108f5c9ea190b821e7102c6f1d8428412d416065f02",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/gkebackup.v1.json",
-      "sha256": "28bd1ff4d7eb87e01dd66d8f9fd12fe9c891df1e13b7ab8b6d1a9a34af8d2eae",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/hypercomputecluster.v1.json",
-      "sha256": "1721295527d6e35d7ba889a904a6effb5f14ec7b7b0dcca343905429b1fbbd6d",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/ids.v1.json",
-      "sha256": "48959b3d027fbab079c0b2995564fad7946ba1d2a98562ee4b11aff1b50a0667",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/logging.v2.json",
-      "sha256": "60dd0c25c19484f8dc3640e142f7346546e733b321105cd63e2f4f872f31edb6",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/looker.v1.json",
-      "sha256": "a6aefb4977c072004e56f62141907a120cff54d240ba211ecf4589dd3a08f0fc",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/managedkafka.v1.json",
-      "sha256": "714bc1c49e9ddebb2a5a127cdb1c92b3f3c88fd929d33dd0dfcdee115d3ecb6c",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/memcache.v1.json",
-      "sha256": "d138aebd732387ec083eb65e9688c34527c8c94febfebff44c7c1bf56f0b7e84",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/metastore.v1.json",
-      "sha256": "2ed8ab8954c24f920d57d3cc16f93b7f1e9a3a8ff36c6b417ff67b6f957094bb",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/monitoring.v3.json",
-      "sha256": "e6dc9e8c405aa21f2fda155809c5e61733123c635a1130de1a66fe0c8891582e",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/netapp.v1.json",
-      "sha256": "7968c327947c52fe94aa00f330943ba833667375276fd95913b3f82f099c6877",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/networkconnectivity.v1.json",
-      "sha256": "f69160464e1911eb0399a1db5afe755c19f2d04ceaf487f2982bae8ec523bd45",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/networkmanagement.v1.json",
-      "sha256": "5219b75053a9c31c09cff2b6d094785d8b2953f3feb601e5422b31b90d90f8a3",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/networksecurity.v1.json",
-      "sha256": "b7079d29fba002de1cf9672af91e6b155a141634b5de529f1141819ba0181982",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/networkservices.v1.json",
-      "sha256": "3e5915b07ea4f414cfe1d5562fd5889f645e61d684e374cb7c36188240921117",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/osconfig.v1.json",
-      "sha256": "2c72cad767a404d09e161d3968eecf0059ec95209edadab1df4697bb0cef936a",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/redis.v1.json",
-      "sha256": "07f7dc444ad07f3776957bd62f06513ed352db84e1a6049fe71cdc3191c29b0a",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/securesourcemanager.v1.json",
-      "sha256": "56572ad82ab3447b009ae93d3eee46f41154c64664659251814c357546b7cbf2",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/servicedirectory.v1.json",
-      "sha256": "822142397887e28bdd474c3caca90eefa403809fa5ae07bda3447cf7d8792270",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/spanner.v1.json",
-      "sha256": "e26bc8d88da30cd12c907d79b2c250afe8b8a5b59222f73c937e4cd16ebee898",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/vmwareengine.v1.json",
-      "sha256": "9ee917715e910e9dd8bfc27e400c2daa4a5d61bdbdcbc2a7da6d2fd6455651ad",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/workloadmanager.v1.json",
-      "sha256": "942649c0f509a25ab49be7740344dc5679c5c766dd3deb4307c3f62886e83f96",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/models/workstations.v1.json",
-      "sha256": "d207ee7f3887c82f11fe20a5595071ff98fa11fa6c1f6d5de2b46c70b03a46e6",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/openapi.go",
-      "sha256": "b38bd2727250651191666f434b2a02e0c4035962fd0219ac8671eabe2f206f8c",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/openapi_test.go",
-      "sha256": "f8702caa6a12ee76d2f6cf6f8e16f103135c4b6f8415f3ab5192d15d46bc19c6",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/references.go",
-      "sha256": "101faa355b41be3afc848b870e60194835fd11a8782908832db4f82f3397d0b8",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/review_test.go",
-      "sha256": "0d7cad9e329509d96075afd2b46b370be3c2b8e7fb1f78bb1a0ece81550c47c2",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/routing_test.go",
-      "sha256": "a01a13d1708251bbb5d16ca73f908fabe39148e45632243ba343dff7af1ef3d5",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/selection.json",
-      "sha256": "5be53bd530db77e036f6709ea1b852107172b2f36f908945df29b7b161e4f911",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/selection_test.go",
-      "sha256": "c3ba33e6bdc6c2c35668a06f6ba335bd3a5eaa38dcf73a80a6a427c1f90c31bd",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/semantics.go",
-      "sha256": "256f653eb63ad449352b2dfc9672776b0465324877fbfe34e18b93950addadce",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/spec.go",
-      "sha256": "906bc253af0ac16c80e3839da2b3819f2951d6b8f555c64372e66c5a0cd0c6fb",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/store.go",
-      "sha256": "4f473334250b96977ce110736ba14de06a81851f2e99e9e7efe69afd892d35ee",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/catalog/synthetic_test.go",
-      "sha256": "9b4f371b976a929af61ae47eca85df68980fd810336714ae9e4aa1dde6cf220c",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/catalog/value.go",
-      "sha256": "582996206c9c6a4b03cc4f8f2458553d805f894dc4a2acd46fc808d01984be16",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/legal/assets/AZURE-REST-API-SPECS-NOTICES.txt",
-      "sha256": "94f10eaf2bf61c97cc3d90ad30b2c4d7e5ca8f3954379847c6487bf46a0390d2",
+      "path": "internal/aws/testdata/sts-original/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
       "disposition": "documentation",
-      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "reason": "Retains the original fixture license text; legal/source documentation only.",
       "models": []
     },
     {
-      "path": "internal/legal/assets/GOOGLE-DISCOVERY-NOTICES.txt",
-      "sha256": "f2dc01c20ad7faac31d65aeeede2a34118db165213d8ebb60d9d204f3f873725",
+      "path": "internal/aws/testdata/sts-original/README.md",
+      "sha256": "858a3e8887f124456c86e3aec20ab390c6caf1a4af0399bacbda824bd7a1b458",
       "disposition": "documentation",
-      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "reason": "Records the pinned original Hello World fixture source and unchanged-byte boundary; documentation only.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/testdata/sts-original/hello-world.yaml",
+      "sha256": "ad8b4fcf3f1d42475c5c2e8617d3194536810cc044a6ea166a2699cac719c8bb",
+      "disposition": "test-support",
+      "reason": "Unchanged pinned original Hello World template used only by native/SDK acceptance tests; this exact fixture path is classified, not arbitrary runtime/testdata files.",
       "models": []
     },
     {
       "path": "internal/server/access.go",
-      "sha256": "09f323882a7201d5457b56690b25a5e8c7d02c5b7bc9859703d28225f23b3ac9",
+      "sha256": "f6f0a4e06acbeb2d9022e5a6f68b7bb53d2721e6bffb668d36ab9878fb676ca4",
       "disposition": "modeled",
-      "reason": "Access admission seam: an unauthenticated provider request is still refused with 401 before any provider handler runs; only the error body for Azure Resource Manager paths changes to the ARM envelope. Token-boundary admission is projected by LandingAccessAdmission; the body is covered by server and SDK tests.",
+      "reason": "Adds the SDK authority initialization and authenticated SDK request hook before existing token/cookie fallback. STS binds signature/session admission; BrowserSessions and ProviderActor preserve the separate SDK-versus-browser authority and authenticated actor attachment contracts. Concrete request/context dispatch and browser behavior require separate tests.",
       "models": [
         {
-          "id": "LandingAccessAdmission",
+          "id": "STSSessionLifecycle",
           "properties": [
-            "ExternalBoundary",
-            "PublicResponse",
-            "TokenBoundary",
-            "UnknownNeverStatic"
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
           ],
-          "limits": "Admission boundary only: no HTTP body formatting, token parsing or provider routing is modeled."
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
+        },
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "SDKAuthorityPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        },
+        {
+          "id": "ProviderActor",
+          "properties": [
+            "NoActorOnRejected",
+            "AuthenticatedRequestsAttach",
+            "CredentialIdentityPreserved",
+            "ParticipantBound"
+          ],
+          "limits": "Finite auth-result/identity-selection attachment abstraction only. Not crypto/TTL/cookies/revocation/HTTP/context internals/Unicode/SQL/provider authorization or Go refinement proof. Actor validity checks also need Go unit evidence. Root adapter source binding is limited to ActorFromContext validity and forwarding ExerciseIdentity rather than CredentialIdentity/CredentialRole in the two extractor callbacks. It does not establish provider environment/owner policy, header authentication, SQL state, callbacks or downstream permission enforcement."
         }
       ]
     },
     {
-      "path": "internal/server/apidocs/azure-catalog.html",
-      "sha256": "4ac334fab7ab9be076a0c48808187b26c52e30af257f9debc7fc54648b612711",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/Microsoft.AppConfiguration.json",
-      "sha256": "9d6c592cfaea7e378d728e61d3037d6807c66cad5c9366dc310786b229dfbeea",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/Microsoft.ContainerRegistry.json",
-      "sha256": "24eccc864f446d7ade7ab5e6f6023ec8aef252701e888cc37d9c17dfaf24b879",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/Microsoft.DocumentDB.json",
-      "sha256": "8b4227843dea163668f374c1b5d2c46f0e2aad7bdbd1ec4e26935efe8b420a04",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/Microsoft.EventHub.json",
-      "sha256": "9ae5166b65c87a70f034300678c2f02e2d79f5472d1028cf162705bcf7abf116",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/Microsoft.KeyVault.json",
-      "sha256": "689f22927bdccc82ae3ae1eec1608658da2306ef40d217973b954c816d730b17",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/Microsoft.ManagedIdentity.json",
-      "sha256": "e51f35bcf455033e867141b3d67b6c55b877a9c53343f215b2e7a1abd78928e4",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/Microsoft.Network.json",
-      "sha256": "f7a022d13528e12db7683a9e409148e56e64711b04e71e52c3890e789c5a6a6f",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/Microsoft.OperationalInsights.json",
-      "sha256": "b9eb90994807c7ac47ef5ae477ac9407909f0a28d3c4f850359f31f97e7eaa55",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/Microsoft.Resources.json",
-      "sha256": "8a9da0503c19bc49ba14522bbdabdba01dcba2988fae68be10a4be48dc94c663",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/Microsoft.ServiceBus.json",
-      "sha256": "09fcbd67c261e8bffe8a8032cbbe36a20de075f7efd00779da4c58fa1e179b21",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/Microsoft.Web.json",
-      "sha256": "ed6f21007d507bc2fbc647eb59968cfadf0f23346e98cf59836b277df8c4c5eb",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-catalog/index.json",
-      "sha256": "8dda92bb6d6299218d20377e244a66d991ad07b7c6826bccd1f97d71eff4c018",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog-init.js",
-      "sha256": "e5eb7f818bbe3955d88fce9e55eacd8340c7a47d47b76602e67482f39f6b9c8f",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog.html",
-      "sha256": "597f9717644bf23986bcd25e67eba30875dc169d15844783c880e1997612e7f5",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/alloydb.v1.json",
-      "sha256": "5c32fd289bdff87f3c5bd9f2aeb0ab645051c15740360584b2434c09e8a782ab",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/artifactregistry.v1.json",
-      "sha256": "d880cca6351b96f37ddc8a6fefe9ce9fa26aa28c5caa47ddb043e425e52cc71f",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/backupdr.v1.json",
-      "sha256": "f10ae9ccfcf85ffe5b3f09d7520a09420790eecbd5b962527aa0354aa85b2351",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/biglake.v1.json",
-      "sha256": "65c3b4c5d16cdce8ac2c4ee9c0c340c39ee9989f99cfa0f287adc9c86dcd58d3",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/blockchainnodeengine.v1.json",
-      "sha256": "c11be8468cb36568f22146b5317610f13b9c201e0d887705a8812b3d8a280803",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/cloudbuild.v1.json",
-      "sha256": "90b72add36d916eabe835eb87a94cba65f00de96ae10eaed832b31fea525c696",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/clouddeploy.v1.json",
-      "sha256": "4b8828d723a31f7885b2e9fff57b9cca6f5a002098d96d1dd6ff30fe2b5900b5",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/composer.v1.json",
-      "sha256": "837b1885ef7fe92a16d596cb38ed89e3bc0ad71cf24435e892eb0bff91686c33",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/compute.v1.json",
-      "sha256": "c2403b3eb0fe0944d6bb00d65c556a3092a1b07aae604aaf1cc20ac00eb82b4f",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/dataform.v1.json",
-      "sha256": "18a02f50b153d459bd026c282d32bb38d39207e4260e2d574fe91b36138ad05f",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/datafusion.v1.json",
-      "sha256": "657c8a1b4892f7485518c1ef733518ce72d28932e013346d2fa97470e468c152",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/dataplex.v1.json",
-      "sha256": "9c7ae09416081b06cbb7210363360864ad9e5d65536fd9c3114b1e7dfcc5c5cc",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/dataproc.v1.json",
-      "sha256": "dc772704b059c96d5395d008ebb75306ed8571b681e5fa1189b1a1a5c1465821",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/datastream.v1.json",
-      "sha256": "3f5fee7293062cacb3c5806d09affb725f17705ce37e185178dba41be3997940",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/developerconnect.v1.json",
-      "sha256": "44c7df5349173c8f12a3431ca2631b9c0e63bb85fdee71faa72358d6be177fcc",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/file.v1.json",
-      "sha256": "17d7b60aa899fb10045bcbe807e400c1424ac790a4b5723210b83392fbafddd9",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/firebaseapphosting.v1.json",
-      "sha256": "36db756a82324d1f7d523554fc493de47eb413ef2adf75f89bf11eb12c39b40f",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/firestore.v1.json",
-      "sha256": "110d659d66ab0e10e910c84f666e6536dc9d1c6e8c5db43646f17fe09b71f831",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/gkebackup.v1.json",
-      "sha256": "b58c18b5e8df7dd373c2e6b346147e0f69e8fdee4db6b5c22a1491606b55566e",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/hypercomputecluster.v1.json",
-      "sha256": "5f8dcc9aa33f4c58ac14ea1d161c244f0d72720e0f3454e00600cddb60639551",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/ids.v1.json",
-      "sha256": "ad7b18976a0fde13d0c4b9b08532ddf65eeb926914c880b217eb358ec00df499",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/index.json",
-      "sha256": "7731bc534e6ed4b3ec5b89c8e97d4f7639cf20c2979df1b3d63a26d52fe45481",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/logging.v2.json",
-      "sha256": "d02b0e4689bb77bd2e014250b655d6f6b1dbe5b890579d6986f90263459660b0",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/looker.v1.json",
-      "sha256": "a838a9e028ccc6dddcb32c409e0dc640ee8c6984480c77db302e59de77754702",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/managedkafka.v1.json",
-      "sha256": "43ad27114a48728fb5cdabc2c87385b08065dd2c8f048fb3f7b984bbe4d53ba9",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/memcache.v1.json",
-      "sha256": "8ca5f701c8c2bab108d7754c4d3d79230e2979ea6e869483b0a09e28f0a67c44",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/metastore.v1.json",
-      "sha256": "15ce124e775ffd7f092a71590c002cc5a77cfa1e1589ab18453ce3c6731b30f8",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/monitoring.v3.json",
-      "sha256": "921fba798b17c91f3b537573f2b98b1b935bbc027a7f4c3d105fe1a76cecaebe",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/netapp.v1.json",
-      "sha256": "1e65044addcaba25b03353d8531e6f31f1354d83f3fe105b4383db6ac1f8356a",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/networkconnectivity.v1.json",
-      "sha256": "2fc425c7f83f4a1e7ffc496c872247034c788b683b7fb10b576140e4c800455b",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/networkmanagement.v1.json",
-      "sha256": "90f4e9bcf5b926c8f31240b8e4f444a538394fe6794e11d4b275fe838864c2b6",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/networksecurity.v1.json",
-      "sha256": "8110dec741d4751986a5e94c432edcd21e2cf0f9f0d98be4690c2b592544ffa8",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/networkservices.v1.json",
-      "sha256": "ce11063e7bf3e921915de676f019ad5495f532a8060c11fd6561df774ad74f3d",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/osconfig.v1.json",
-      "sha256": "000a156d03c64907575efc445004699901f0dc9e12c690cf5e939b4d9da686b8",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/redis.v1.json",
-      "sha256": "1616255a12b1dc70f526e52cac698a29eb378073bf8196d42d1a58dcaf3e424b",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/securesourcemanager.v1.json",
-      "sha256": "6827b49eaf78af21567c5e7db885efe63d24a69b78678c86552ec241b18314e5",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/servicedirectory.v1.json",
-      "sha256": "07667f5db39f4c8b9da154a7bce1dbd11f92afed70c3b7cc7134487c406bef2b",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/spanner.v1.json",
-      "sha256": "0690de24707adf002d03735b7c286bc46870613c9cc46e824feb26b0ea917197",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/vmwareengine.v1.json",
-      "sha256": "2e865b8caddded33e850ef54b94ce6610111703cacfd63d12387f0f870f00f36",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/workloadmanager.v1.json",
-      "sha256": "a4ea2d195f48ed903f77f510e5fba2c86f7ad90673a6b4a68967601f2560f9b7",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog/workstations.v1.json",
-      "sha256": "e3433a7e4373991dad32bcd03edc145b7b5028b0fb1d319e373f66f729fa552e",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/azure_catalog.go",
-      "sha256": "b40291441b402e4dab3458b734ac3387f169bd2d70a5c1721488f4dac68421d7",
+      "path": "internal/server/access_sdk.go",
+      "sha256": "fd31f1376e67ff8a3e93c774dc41cbb801b9b718fdc947718a77f8f24ba15635",
       "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "reason": "Selects native local SDK credentials, rejects conflicting local-token/browser-cookie authority, delegates verification to the AWS STSAuthority Authenticate method and forwards only its accepted principal. UseRequiresAllGuards binds this guarded-use seam; credential issuance/lifetime/generation implementation resides in the AWS STS files, not this middleware. Concrete HTTP selection, typed error envelopes and context dispatch remain native obligations.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "STSSessionLifecycle",
           "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
+            "UseRequiresAllGuards"
           ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+          "limits": "Finite issue/use guard and role-generation/session-lifetime abstraction only. Assumes a coherent generation-and-policy authorization snapshot. Does not prove concrete trust/JSON/query parsing, SigV4 cryptography, HTTP/context routing, clocks, randomness, SQL isolation, concurrency or cross-process tenant isolation; these require native/SDK tests. No Go refinement or liveness proof."
         }
       ]
     },
     {
-      "path": "internal/server/azure_catalog_test.go",
-      "sha256": "f4de6651907ac8d28b762cdbe865fdf2e5b1c69a7b0aca9282c4f4934efe6a4a",
+      "path": "internal/server/access_sdk_test.go",
+      "sha256": "cc60b527e2e4e5ae6063b281bac650d47212af7f3e28421d30961dbc8b4f0c1b",
       "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "reason": "Native regression test source for server/access_sdk_test.go; exercises real implementation behavior and failure/rollback cases independently from the finite models, without changing runtime code.",
       "models": []
     },
     {
-      "path": "internal/server/cloud_storage.go",
-      "sha256": "a471723a7196ba3362885e3a7981df299f4084b6034b57c747083ca5e1064803",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/gcp_catalog_test.go",
-      "sha256": "6efd6dbd3f763a09a5608dccea1a6b1d4d0b59ff742ea5ebe038e2a0cf51fbce",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/server/sakura_provider_test.go",
-      "sha256": "2bcbe1ff2fa98579e32ed26fd08cb0978770ee0e5c6aed1d2dd61df08b52b111",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "a57dfd37adc0b4ad55c67a23187e5c747618d18c11fd4982d05498303c0f7dc8",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/web/app.css",
-      "sha256": "da83c8235680f11c28e5ce6439a6636695bfb20227838a9507ed8da32de91432",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "internal/server/web/app.js",
-      "sha256": "c3197712f07f6dc7769d65fbcbf8b834e96e112f9b6f017f91434f950e567d64",
-      "disposition": "modeled",
-      "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "View sequencing only: no DOM rendering, accessibility, React scheduling, form conversion or native response correctness is modeled."
-        }
-      ]
-    },
-    {
-      "path": "scripts/requirements-test.txt",
-      "sha256": "ddebc752336cb0b6f7db12197ac6082ca7e7d11b9d466baa7904b7c9c08bc625",
+      "path": "scripts/check-sts-formal-candidate.py",
+      "sha256": "972009e50b18396bcc5f7eda4bbdf80250c28fc2ba7cf09f9b0a1083ebf90991",
       "disposition": "validation-tooling",
-      "reason": "Validation tooling only; no runtime behavior.",
+      "reason": "Historical optional scoped STS diagnostic helper. Its docstring now distinguishes registered gate evidence; it is not the final immutable-head gate or runtime implementation.",
       "models": []
     },
     {
-      "path": "test/console/navigation.test.mjs",
-      "sha256": "bb44b3b0617db5a18592e4cb7f710d6945645411cbd96929952e2b3f61b04599",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "path": "scripts/formal_applicability.py",
+      "sha256": "7b0c162ceead96964b7f69214296030bfad9ea957581586e8bd511abc21d8493",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds only the named STS fixture, its README/LICENSE and the optional diagnostic helper to explicit classifications; no generic runtime or testdata exemption is introduced.",
       "models": []
     },
     {
-      "path": "test/e2e/aws_catalog_console.py",
-      "sha256": "81714793dcb649060f6ccfea3e542c34e533556b5eff46670a6566d87d0c84df",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "33c7f79d46e237ac641df337d8f297fc6286967cb5185102c1742ca196a76dae",
+      "disposition": "formal-infrastructure",
+      "reason": "Protects the independent STS and CFN event model identities, required properties, named controls and exact implementation/test scopes in addition to every existing protected entry; this is gate policy, not runtime code.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_catalog_console.py",
-      "sha256": "371591144d463270effbf0893d0e57ef6cb8ba6488df9fd6250ddfe1c038fd05",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "50a16d39cfc81a9fe8a298012726f8a6b711d1874aa7ff0bfac9de1a573dfbda",
+      "disposition": "formal-infrastructure",
+      "reason": "Tests only the precise STS fixture/document/helper classifications, including refusal to generalize those classifications to unknown runtime inputs.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_catalog_fixtures.py",
-      "sha256": "936b1979879264674fc88672628fec6c5417111e36e1b04d5ec5a508e2b5b0b9",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_catalog_fixtures/Microsoft.AppConfiguration.json",
-      "sha256": "fce8aa255d75bce21bba9d8217d214908f1dc1895d76bb4e09de1dba688f25f8",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_catalog_fixtures/Microsoft.ContainerRegistry.json",
-      "sha256": "b4a5597a592c26176f885281540ca16e93337321562569dc916496d7a4f2d865",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_catalog_fixtures/Microsoft.DocumentDB.json",
-      "sha256": "602d8930e5cf405bed3be09c69672bf99cdb427f37a38f95082675029d3b7ff8",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_catalog_fixtures/Microsoft.EventHub.json",
-      "sha256": "0f27cd23146a720e35ed89e2ce8590cedba959ed9b14d59a389867ed8278ab51",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_catalog_fixtures/Microsoft.KeyVault.json",
-      "sha256": "2232261d8ee0294b93a76b05e0ac545444702bf53c5a8359320866da27999a30",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_catalog_fixtures/Microsoft.ManagedIdentity.json",
-      "sha256": "cf9575b522db6c4c551a961148fef1942c732a9f26a33a1ba1b16050c4f31625",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_catalog_fixtures/Microsoft.Network.json",
-      "sha256": "a33831e58ae91fe0c7d21eae12291f981fb57fcf4ba7c83203be9ff5488d8ad4",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_catalog_fixtures/Microsoft.OperationalInsights.json",
-      "sha256": "f024316cea570d9bd95dd204a35903ae58cb1b557ae57e2fcfaa4a906f311022",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_catalog_fixtures/Microsoft.Resources.json",
-      "sha256": "9f7a64f8bc2ed575aab75e6a898e3b7c6873d9554661116e42e7e393863debf8",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_catalog_fixtures/Microsoft.ServiceBus.json",
-      "sha256": "558d60c12105536e25eb3b09816b2462b46bdfa28caf8200c634e2723e5a3747",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_catalog_fixtures/Microsoft.Web.json",
-      "sha256": "578f24339c2fc04f2a0c9abf42e207adf8f8a459f5d57151a476fbd51d10cc9d",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "0984eb1b3d3f555aa8dd133a921c48538a18ad8c03bf4e1e8d7d393ba110f344",
+      "disposition": "formal-infrastructure",
+      "reason": "Tests mandatory STS and CFN event registration/properties/controls/scope, exact mutation anchors and unchanged independent event oracles; derives aggregate totals from the complete protected registry while mandatory model/control removal detection remains intact.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "eb7b007dc65bd2cad2072827f5ac4e82901dd1d4a96e281004af74bffec4ac2c",
+      "sha256": "a79bc6be54e85fa9b08f14f86f137f8e897f34f27fe56affcd7c194671a9e7db",
       "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "reason": "Adds invocation of the official SDK STS/native original-template acceptance suite to the E2E test runner; test orchestration is distinct from executed browser/SDK evidence.",
       "models": []
     },
     {
-      "path": "test/e2e/gcp_catalog_console.py",
-      "sha256": "7101c5efa6f6a921f2192f4c76195d937db05525602386ede09d5eef5a462e87",
+      "path": "test/e2e/sts_sdk.py",
+      "sha256": "299d3f1337dde3cab738ed38e94d90f9c0a0696aa64552c88b313dfca1b387b1",
       "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "reason": "Official SDK acceptance exercises real-binary local STS credentials, original-template deployment/events, participant denials and cleanup; test support, not application runtime.",
       "models": []
     },
     {
-      "path": "test/e2e/gcp_catalog_fixtures.py",
-      "sha256": "8596858be9c91c284052cd3123e97daedcc65ff0bc6a9eb385ddbe9a4850ff02",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/alloydb.v1.json",
-      "sha256": "5bd4688be515c5264254db63ddd0195edfb47bfebe0a03c0af223944de072c21",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/artifactregistry.v1.json",
-      "sha256": "113b074456ba382fa909b71edc52a2c1fcfb184b4600fe3c5ca416180e94595e",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/backupdr.v1.json",
-      "sha256": "14560169ae4adc0672021d1b1b4e21a0ba8037c1f7ceb67d9acfeb150047f804",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/biglake.v1.json",
-      "sha256": "2a48bbfce14975185109dc8da85408349acab4c780d748134d5bcc15d14eb9d3",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/blockchainnodeengine.v1.json",
-      "sha256": "60f53555e94ca87f6b003fcc93f88e09c81c3c5fa6629e085c71ca47a24a5a93",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/cloudbuild.v1.json",
-      "sha256": "6d867639f8a3b67de91b6c529b3efbbf715184fec7c64caeb17ac39064c97ee0",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/clouddeploy.v1.json",
-      "sha256": "3da7a7d6dff443f9992d01faadf0c0d2adfbaaab10bd7accc70fe4b714f10b13",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/composer.v1.json",
-      "sha256": "a97a48c8d87d8968557584f98997d02b6a6525d8799545adeb427823a54fcbe2",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/compute.v1.json",
-      "sha256": "fd74952e8d17fa279c4743fd897aa015d207a2f52ca7ad8169b00f3cc4444687",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/dataform.v1.json",
-      "sha256": "52d2e39808c783c249646db71b66cc7f121b5e0e841bcba39074b8435699fdae",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/datafusion.v1.json",
-      "sha256": "5ad74d214eecdae758e9f63ebe56cee0b83aedbd1c9da3f88a3fbbc99298cd44",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/dataplex.v1.json",
-      "sha256": "5c8a9592aef70d16eb7bd152c7bd75ffa0b89e7b111de6a3166b374b27d93823",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/dataproc.v1.json",
-      "sha256": "5c45f0346c0070d3f6f59e7f8ffe63b9ac9b6ea4ad1e7067352c69aa73223dfc",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/datastream.v1.json",
-      "sha256": "4d8856dd9da82aefdacfb3f77afb0611fbb0b1ea99c3a594e91497b445bf73b2",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/developerconnect.v1.json",
-      "sha256": "023fff3572cc226dde076346a0b7d80d030dd8600bee1c0513369f3cf2c66c11",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/file.v1.json",
-      "sha256": "44683e76364dce5238a39564254650b76871be127df7fce0f4c07a149a52fe4a",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/firebaseapphosting.v1.json",
-      "sha256": "af003e75134fcef29a31fe8e18b9ded1ff2356c4e899c91ae6f5605e25c19e44",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/firestore.v1.json",
-      "sha256": "68f53a2caf2fa790d754ba2c17d011132f0ad478738040b9d38a33122b573d96",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/gkebackup.v1.json",
-      "sha256": "16ad40dc6c96b428df539819914e750a8ebdbec533da01c4068ad478fbc5ece7",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/hypercomputecluster.v1.json",
-      "sha256": "882e5464e8b237c347f3b3a1896c292dea1098a152cf1b071683dd6abaebc7c5",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/ids.v1.json",
-      "sha256": "b5f5304980927cba74afb9f06d5cc9d855fde6ab03d14134af4b27185bbc49ef",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/logging.v2.json",
-      "sha256": "c87c75d500565989e236658a237f646d5178d58bdcb68e55bf86abc3d37c3ac6",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/looker.v1.json",
-      "sha256": "126c670ff63418cffb79b1fe0e328d8835f51778b424b56fc96558936e63f703",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/managedkafka.v1.json",
-      "sha256": "e02b267358b75ba7013a6ada649d093faef80ba840fc86a1b2fed5946f02aef2",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/memcache.v1.json",
-      "sha256": "380fb72c3f9a286f3a30eb3878b298d3ac6c7aa107312fe6e11ba821cc5a7e39",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/metastore.v1.json",
-      "sha256": "a3f6e07f9029ebaff7cdaba7974337828086f9ef93174bfae006c0827f261fe8",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/monitoring.v3.json",
-      "sha256": "118348695df4420028cb452d908d574ec5db6839c9d255c321bc16ab316a9a5d",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/netapp.v1.json",
-      "sha256": "bf01fa94c408d7879825c8f97944233de933a45cca77940f2433febefa4bc89b",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/networkconnectivity.v1.json",
-      "sha256": "83e72a249c0af8ed3b330554d710ea6543849ac34021723122c62b970b0119f0",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/networkmanagement.v1.json",
-      "sha256": "588ec1f53b3f416e54a01d98186e4d7982564dbbf65d0b44abf89ee0b94cb501",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/networksecurity.v1.json",
-      "sha256": "af34476c5596496c769ecae6cbd6777b151d1dc695352cb0d8bf355d404fcfe2",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/networkservices.v1.json",
-      "sha256": "ba7770fccbf16ac82821b40656250ed43e0744c977a611d411dc0bcfe583438a",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/osconfig.v1.json",
-      "sha256": "07b8ab2af2a5623635c3d6e9e70bebcc5c45f6f27e6cd863fc372ab67a32c726",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/redis.v1.json",
-      "sha256": "788d6b053841128355ef7d80f475f0c8fa0d0dbcf221b3cd53e4a4772f8522aa",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/securesourcemanager.v1.json",
-      "sha256": "3513781ae45d51bf9d7b927bb55306a9c27fae605e21b236513949a5189e93b1",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/servicedirectory.v1.json",
-      "sha256": "539f634aca0313e56d29860d0cd0c6ef71fea24689580b02f4db1acb99d81012",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/spanner.v1.json",
-      "sha256": "d08a597db12dc614da1c83c9b69e36cf92f305ecf46671e8df43ff42b0c4dbbb",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/vmwareengine.v1.json",
-      "sha256": "c734bf43f0805ebab106f0bd2f502fbb6f28d437e8b18dc247c913ec247b6e81",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/workloadmanager.v1.json",
-      "sha256": "cfbe7b28a64182ea82599132a975c1c25518cb4783799e2b59a29d350b1657c4",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_catalog_fixtures/workstations.v1.json",
-      "sha256": "bc0fa09d7961083422e4508024670bb3db2a99a10c9d2852c0118fe9fc04f4ba",
-      "disposition": "test-support",
-      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
-      "models": []
-    },
-    {
-      "path": "third_party/AZURE-REST-API-SPECS-NOTICES.txt",
-      "sha256": "94f10eaf2bf61c97cc3d90ad30b2c4d7e5ca8f3954379847c6487bf46a0390d2",
+      "path": "third_party/independent-native-source.json",
+      "sha256": "45613adce9efe8084fbc47a7a97e5aa1f4a0c4f456048dbf8bd0db4fdf5a04da",
       "disposition": "documentation",
-      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "reason": "Records exact independent native source/provenance review identities and scoped acceptance metadata. This manifest is source/legal evidence, not runtime implementation, a fresh legal-rights proof or model checking.",
       "models": []
     },
     {
-      "path": "third_party/GOOGLE-DISCOVERY-NOTICES.txt",
-      "sha256": "f2dc01c20ad7faac31d65aeeede2a34118db165213d8ebb60d9d204f3f873725",
+      "path": "third_party/kumo-apigateway.json",
+      "sha256": "11be626257d252296349a77642a7ba4745d5c303b2893c4a629ce067882f3608",
       "disposition": "documentation",
-      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "reason": "Records exact independent native source/provenance review identities and scoped acceptance metadata. This manifest is source/legal evidence, not runtime implementation, a fresh legal-rights proof or model checking.",
       "models": []
     },
     {
-      "path": "tools/azuremodels/extract.py",
-      "sha256": "2cba38e10ea3c146182212c0da9c128332d2a3fdb728d0498fd0ed5f79a3b39a",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "59e2146cd059eb36705a7b1e079d411e6756bb78de536221796c6337cfe8b42a",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "path": "third_party/kumo-cloudwatch-logs.json",
+      "sha256": "c32b855393fc9161737e2514ed8a63b0568d92a64a901fd191e7cfb8e341926e",
+      "disposition": "documentation",
+      "reason": "Records exact independent native source/provenance review identities and scoped acceptance metadata. This manifest is source/legal evidence, not runtime implementation, a fresh legal-rights proof or model checking.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "b3e3f2d4c708304cff50db07a4a2966c6e84170e5cabdfef85ae8d2df8657b34",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "path": "third_party/kumo-iam.json",
+      "sha256": "ecb53fc4c9d4ef6b73d4fab8b406e5b39f105e53a33a71153c2357c826af0413",
+      "disposition": "documentation",
+      "reason": "Records exact independent native source/provenance review identities and scoped acceptance metadata. This manifest is source/legal evidence, not runtime implementation, a fresh legal-rights proof or model checking.",
       "models": []
     },
     {
-      "path": "tools/console/src/azure-arm.css",
-      "sha256": "0ee3626b7677ed75bf593482991532342edb7c7a65d9365a64aacea16d9f381e",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "path": "third_party/kumo-kms.json",
+      "sha256": "7abee7618120ba75df1afea9192f685fdb29ce48ec0aee74f92b0fdf4acf4766",
+      "disposition": "documentation",
+      "reason": "Records exact independent native source/provenance review identities and scoped acceptance metadata. This manifest is source/legal evidence, not runtime implementation, a fresh legal-rights proof or model checking.",
       "models": []
-    },
-    {
-      "path": "tools/console/src/azure-arm.jsx",
-      "sha256": "7eb4d7e20f44f87e2532f050e20e571012bb024eaa335583429890e76d1c6444",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/catalog.jsx",
-      "sha256": "e98ffd0d944a6aeb09711fa807d1ffc5b21be55260f24ebc13c813aad172789a",
-      "disposition": "modeled",
-      "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "View sequencing only: no DOM rendering, accessibility, React scheduling, form conversion or native response correctness is modeled."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "557da08673273a0c1c223adf11619561199b814ed6ee5199fc046ee236934a10",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/gcp-catalog.jsx",
-      "sha256": "c70494c2d32faa1f3931a92703371a8206bd3a3e193a4b8a89e56b6b6ed2c0f5",
-      "disposition": "modeled",
-      "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "View sequencing only: no DOM rendering, accessibility, React scheduling, form conversion or native response correctness is modeled."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/gcp-console-shell.jsx",
-      "sha256": "f045706cad8667d72aeb9cfc044e73c81d7a6213c8bd9cb4c50a6316da355bcc",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/gcp-storage.css",
-      "sha256": "3bd272b5b9d63c38a1dfe9559b930d84c4ea5a01cffc0da2c5e7ef2fb8fa2be3",
-      "disposition": "presentation",
-      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "be83f27612007640f01b2ca62447000ae7f3eac2df88203944f2208a08409e8d",
-      "disposition": "modeled",
-      "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "View sequencing only: no DOM rendering, accessibility, React scheduling, form conversion or native response correctness is modeled."
-        }
-      ]
-    },
-    {
-      "path": "tools/gcpmodels/extract.py",
-      "sha256": "d268c94c3a30c0e0e403e200e2906aafee16973361294a3199c92d739a9d39cc",
-      "disposition": "modeled",
-      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "ReplayNoDuplicate",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "UniqueNames",
-            "FreshIDs",
-            "StaleWriteRejected",
-            "GenerationAdvances",
-            "ChildGuard",
-            "TokenBinding",
-            "TokenOnce"
-          ],
-          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
-        }
-      ]
     }
   ]
 }

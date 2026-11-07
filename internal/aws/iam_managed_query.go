@@ -172,7 +172,7 @@ func (g *Gateway) serveIAMManaged(w http.ResponseWriter, r *http.Request, action
 	if principal == "" {
 		principal = core.Administrator
 	}
-	decision, err := g.Identities.DecisionContext(r.Context(), principal, "iam:"+action, resource)
+	decision, err := g.sdkDecision(r, principal, "iam:"+action, resource)
 	if err != nil {
 		iamError(w, err)
 		return

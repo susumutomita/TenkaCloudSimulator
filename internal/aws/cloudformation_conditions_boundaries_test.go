@@ -163,10 +163,11 @@ func TestStackConditionBoundaryAdmissionRefusesWithoutGraphAndRecovers(t *testin
 			if _, err = parameters.Get("ap-northeast-1", "/boundary/hidden"); err == nil {
 				t.Fatal("disabled declaration was provisioned")
 			}
+			generation := conditionBoundaryGeneration(t, stacks)
 			if w := conditionBoundarySend(g, "DeleteStack", "", "", nil); w.Code != 200 {
 				t.Fatalf("cleanup status %d", w.Code)
 			}
-			if stackConditionalDBFrame(t, db.Database()) != before || stackConditionalDBFrame(t, peer.Database()) != peerBefore {
+			if conditionBoundaryCompletedFrame(t, stacks, generation) != before || stackConditionalDBFrame(t, peer.Database()) != peerBefore {
 				t.Fatal("repair/cleanup changed preexisting state")
 			}
 		})
@@ -201,10 +202,11 @@ func TestStackConditionBoundarySuppliedBytesAndDuplicateNames(t *testing.T) {
 	if err != nil || item.Value != "first" {
 		t.Fatal("repaired supplied value not used")
 	}
+	generation := conditionBoundaryGeneration(t, stacks)
 	if w := conditionBoundarySend(g, "DeleteStack", "", "", nil); w.Code != 200 {
 		t.Fatal("cleanup failed")
 	}
-	if stackConditionalDBFrame(t, db.Database()) != before {
+	if conditionBoundaryCompletedFrame(t, stacks, generation) != before {
 		t.Fatal("cleanup did not restore baseline")
 	}
 }
@@ -264,10 +266,11 @@ func TestStackConditionBoundaryPolicyOutageIsNotDeniedAndRecovers(t *testing.T) 
 	if response = conditionBoundarySend(g, "CreateStack", body, "boundary-caller", nil); response.Code != 200 {
 		t.Fatal("repaired caller could not create")
 	}
+	generation := conditionBoundaryGeneration(t, stacks)
 	if response = conditionBoundarySend(g, "DeleteStack", "", "boundary-caller", nil); response.Code != 200 {
 		t.Fatal("repaired caller could not delete")
 	}
-	if stackConditionalDBFrame(t, db.Database()) != before {
+	if conditionBoundaryCompletedFrame(t, stacks, generation) != before {
 		t.Fatal("post-repair lifecycle changed preexisting identity")
 	}
 }
@@ -340,6 +343,7 @@ func TestStackConditionBoundaryAliasDepthIndependentOfMemoOrder(t *testing.T) {
 			g := &Gateway{Store: db, S3: s3, Stacks: stacks, Parameters: parameters, Identities: core.NewIdentities(db)}
 			before := stackConditionalDBFrame(t, db.Database())
 			response := conditionBoundarySend(g, "CreateStack", body, "", nil)
+			generation := ""
 			if tc.reject != "" {
 				if valueErr == nil || values != nil || !strings.Contains(valueErr.Error(), tc.reject) {
 					t.Error("invalid graph returned condition values or wrong refusal")
@@ -358,6 +362,7 @@ func TestStackConditionBoundaryAliasDepthIndependentOfMemoOrder(t *testing.T) {
 				// Only the test-owned false-ACK stack can exist on the old faulty revision.
 				// Real cleanup makes the regression safe to run before applying the fix.
 				if response.Code == 200 {
+					generation = conditionBoundaryGeneration(t, stacks)
 					if cleanup := conditionBoundarySend(g, "DeleteStack", "", "", nil); cleanup.Code != 200 {
 						t.Fatal("false-ACK fixture cleanup failed")
 					}
@@ -377,13 +382,85 @@ func TestStackConditionBoundaryAliasDepthIndependentOfMemoOrder(t *testing.T) {
 				if item, err := parameters.Get("ap-northeast-1", "/boundary/live"); err != nil || item.Value != "safe" {
 					t.Fatal("accepted graph did not create native SSM")
 				}
+				generation = conditionBoundaryGeneration(t, stacks)
 				if cleanup := conditionBoundarySend(g, "DeleteStack", "", "", nil); cleanup.Code != 200 {
 					t.Fatal("valid graph cleanup failed")
 				}
 			}
-			if stackConditionalDBFrame(t, db.Database()) != before {
+			if conditionBoundaryCompletedFrame(t, stacks, generation) != before {
 				t.Fatal("test-owned cleanup did not restore original graph")
 			}
 		})
+	}
+}
+
+func conditionBoundaryGeneration(t *testing.T, stacks *StackStore) string {
+	t.Helper()
+	records, err := stacks.Records("ap-northeast-1", "boundary")
+	if err != nil || len(records) != 1 {
+		t.Fatalf("expected one live boundary generation: %v", err)
+	}
+	return records[0].ID
+}
+
+// A successful create/delete leaves exactly the eight stack/one-active-resource
+// events. Validate those independently before excluding ONLY that generation
+// from the full resource, neighbor and preexisting-history comparison.
+func conditionBoundaryCompletedFrame(t *testing.T, stacks *StackStore, id string) string {
+	t.Helper()
+	if id == "" {
+		return stackConditionalDBFrame(t, stacks.db)
+	}
+	events, next, err := stacks.Events("ap-northeast-1", id, "", nil)
+	if err != nil || next != "" || len(events) != 8 {
+		t.Fatalf("completed lifecycle history: count=%d next=%q error=%v", len(events), next, err)
+	}
+	statuses := []string{"DELETE_COMPLETE", "DELETE_COMPLETE", "DELETE_IN_PROGRESS", "DELETE_IN_PROGRESS", "CREATE_COMPLETE", "CREATE_COMPLETE", "CREATE_IN_PROGRESS", "CREATE_IN_PROGRESS"}
+	seen := map[string]bool{}
+	for i, event := range events {
+		logical, physical, kind := "boundary", id, "AWS::CloudFormation::Stack"
+		if i%4 == 1 || i%4 == 2 {
+			logical, physical, kind = "Live", "/boundary/live", "AWS::SSM::Parameter"
+		}
+		if event.StackID != id || event.StackName != "boundary" || event.ResourceStatus != statuses[i] || event.LogicalResourceID != logical || event.PhysicalResourceID != physical || event.ResourceType != kind || event.Timestamp == "" || event.EventID == "" || seen[event.EventID] {
+			t.Fatal("unexpected completed lifecycle event")
+		}
+		seen[event.EventID] = true
+	}
+	var deleted int
+	if err = stacks.db.QueryRow("SELECT deleted FROM aws_cfn_event_history WHERE stack_id=?", id).Scan(&deleted); err != nil || deleted != 1 {
+		t.Fatal("missing completed history", err)
+	}
+	return stackConditionalFrameExceptHistory(t, stacks.db, id)
+}
+
+func TestStackConditionalCleanupFramePreservesResourceAndPeerHistoryChecks(t *testing.T) {
+	db, _, stacks, _ := s3StackState(t)
+	peer, err := compileStack("ap-northeast-1", "peer", eventTemplate, nil, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = stacks.Create(peer); err != nil {
+		t.Fatal(err)
+	}
+	before := stackConditionalFrameExceptHistory(t, db.Database(), "completed-generation")
+	// Even accidental reuse of the excluded ID cannot hide native resource rows.
+	if _, err = db.Database().Exec("UPDATE aws_ssm_parameters SET value='unexpected' WHERE name='/events/parameter'"); err != nil {
+		t.Fatal(err)
+	}
+	if before == stackConditionalFrameExceptHistory(t, db.Database(), "completed-generation") {
+		t.Fatal("resource mutation escaped cleanup detector")
+	}
+	if _, err = db.Database().Exec("UPDATE aws_ssm_parameters SET value='private-value-do-not-log' WHERE name='/events/parameter'"); err != nil {
+		t.Fatal(err)
+	}
+	if before != stackConditionalFrameExceptHistory(t, db.Database(), "completed-generation") {
+		t.Fatal("fixture restoration failed")
+	}
+	if _, err = db.Database().Exec("UPDATE aws_cfn_events SET status='unexpected' WHERE stack_id=?", peer.ID); err != nil {
+		t.Fatal(err)
+	}
+	if before == stackConditionalFrameExceptHistory(t, db.Database(), "completed-generation") {
+		t.Fatal("peer history mutation escaped cleanup detector")
 	}
 }
