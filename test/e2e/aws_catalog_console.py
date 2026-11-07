@@ -4,6 +4,7 @@ The browser signs in with a real local token, uses only same-origin native
 requests, and the SDK observes the same SQLite state. Desktop and 390 px
 layouts are checked with axe; no AWS console screen is claimed.
 """
+from console_locale import select_console_locale
 import hashlib
 import json
 import os
@@ -115,9 +116,9 @@ def run():
                 expect(page.get_by_text('dependent resources', exact=False)).to_be_visible()
                 assert len(hosting.list_apps()['apps']) == 1
                 # Japanese presentation keeps identifiers and native state.
-                page.get_by_role('combobox', name='Language', exact=True).select_option('ja')
+                select_console_locale(page, 'ja')
                 expect(page.get_by_role('heading', level=1, name='AWS サービスカタログ')).to_be_visible()
-                page.get_by_role('combobox', name='言語', exact=True).select_option('en')
+                select_console_locale(page, 'en')
                 # The served reference lists every catalog service document.
                 docs = context.new_page()
                 docs.goto(team.endpoint + '/_simulator/docs/catalog.html')

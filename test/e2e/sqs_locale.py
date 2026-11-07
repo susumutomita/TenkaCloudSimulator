@@ -3,6 +3,7 @@
 Two real CLI/SQLite/token authorities and actual boto3/browser HTTP. No mocked
 API, skipped checks, cloud endpoint, VM guest, or credential/receipt output.
 """
+from console_locale import select_console_locale
 import hashlib
 import json
 import os
@@ -163,7 +164,7 @@ def _run():
                         def locale(value):
                             current = page.locator('html').get_attribute('lang')
                             before = dict(calls)
-                            page.get_by_role('combobox', name='言語' if current == 'ja' else 'Language', exact=True).select_option(value)
+                            select_console_locale(page, value)
                             expect(page.locator('html')).to_have_attribute('lang', value)
                             page.wait_for_timeout(100)  # Bounded observation of locale-caused replay.
                             assert calls == before, 'Language switch issued another native SQS request'

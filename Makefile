@@ -1,12 +1,13 @@
 GO ?= go
 PYTHON ?= python3
+NODE ?= node
 BINARY := dist/tenkacloud-simulator
 START_LISTEN ?= 127.0.0.1:4566
 START_STATE ?= ./practice.db
 START_TOKEN_FILE ?= ./simulator-token
 export GO START_LISTEN START_STATE START_TOKEN_FILE
 
-.PHONY: build dev start test-start test vet format-check before-commit e2e formal verify-assets cross-check
+.PHONY: build dev start test-start test-ui-source test-scalar-source test vet format-check before-commit e2e formal verify-assets cross-check
 build:
 	mkdir -p dist
 	CGO_ENABLED=0 $(GO) build -trimpath -ldflags='-s -w' -o $(BINARY) ./cmd/simulator
@@ -19,6 +20,20 @@ start:
 
 test-start:
 	$(PYTHON) test/start/check_start.py
+
+test-ui-source:
+	$(NODE) --test \
+		test/console/aws-language-settings.test.mjs \
+		test/console/locale-preference.test.mjs \
+		test/apidocs/execution-contract.test.mjs \
+		test/apidocs/reference-localization.test.mjs \
+		test/apidocs/docs-session-activity.test.mjs \
+		test/console/login-session-experience.test.mjs \
+		test/console/session-activity.test.mjs \
+		test/console/session-recovery.test.mjs
+
+test-scalar-source:
+	$(NODE) --test tools/scalar/test-collapsed-state-transform.mjs
 
 test:
 	mkdir -p reports
@@ -37,7 +52,7 @@ format-check:
 verify-assets:
 	$(PYTHON) scripts/check-assets.py
 
-before-commit: format-check vet verify-assets
+before-commit: format-check vet verify-assets test-ui-source test-scalar-source
 	$(GO) mod verify
 	mkdir -p reports
 	$(MAKE) test build

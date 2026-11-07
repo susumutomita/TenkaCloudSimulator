@@ -95,6 +95,8 @@ class Conformance(unittest.TestCase):
   subprocess.run([sys.executable,str(Path(__file__).with_name('login_paste.py'))],check=True)
  def test_browser_explicit_token_file_and_strict_authentication(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('login_token_file.py'))],check=True)
+ def test_browser_login_session_layout_en_ja_200_percent(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('login_session_layout.py'))], check=True, timeout=300)
  def test_console_language_and_provider_catalog(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('console_language.py'))],check=True)
  def test_s3_provider_prefix_preserves_literal_keys(self):
@@ -340,6 +342,9 @@ def handler(event,context):
  def test_api_reference_cloud_sections_and_live_native_results(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('api_cloud_sections_contract.py')),'--self-test'],check=True)
   subprocess.run([sys.executable,str(Path(__file__).with_name('api_cloud_sections.py'))],check=True,timeout=180)
+
+ def test_api_reference_service_runner_native_auth_isolation_and_locale(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('api_reference_runner.py'))], check=True, timeout=300)
  def test_iam_managed_policy_reaches_saved_lambda_role_sdk(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed_lambda.py'))],check=True,timeout=180)
  def test_iam_managed_policy_sdk_isolation_restart_and_cleanup(self):

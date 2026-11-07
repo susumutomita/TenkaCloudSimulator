@@ -4,6 +4,7 @@ The simulator distributes a locally rebuilt Scalar 1.76.4 API reference, not the
 
 ```sh
 npm ci --prefix tools/scalar --ignore-scripts --no-audit --no-fund
+make test-scalar-source
 node tools/scalar/build.mjs
 python3 tools/scalar/notices.py
 python3 scripts/check-assets.py
@@ -19,3 +20,23 @@ The small local `go.mod` is a traversal boundary, not a second runtime service.
 It prevents root `go test ./...` / `go fmt ./...` / vulnerability scans from
 compiling or rewriting third-party Go examples inside optional node_modules.
 The production binary still has one root Go module and one process.
+
+## Guarded combobox accessibility adaptation
+
+The first-party build adapter in `collapsed-state-transform.mjs` changes only
+CodeInputLite's `aria-expanded` expression: variable-enabled comboboxes expose
+`false` when collapsed and `true` when expanded. Non-combobox inputs retain the
+upstream absence of the attribute. It checks the exact module path, locked
+package versions/integrities, original SHA256, unique source anchor and transformed
+SHA256, and fails closed if any upstream input changes. Installed source files
+are never rewritten. Original copyrights, licenses and legal sidecars remain.
+The build metafile records the transformed input and adapter/lock provenance.
+
+`make test-scalar-source` is mandatory for `make before-commit` and requires the
+approved installed pinned module. Pure development checks may use a separately
+retained original as data through an explicit absolute `SCALAR_ORIGINAL_CODE_INPUT`
+path; CI refuses that override. Such checks do not establish dependency closure,
+asset generation or browser accessibility. The current adapter source has passed
+17 data-only cases; no rebuilt asset or actual combobox/axe success is claimed.
+Rebuild through the approved acquisition process, inspect generated notices and
+provenance, then run real Scalar request-client and strict accessibility checks.

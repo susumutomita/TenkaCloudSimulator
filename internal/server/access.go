@@ -26,7 +26,8 @@ type accessSession struct {
 
 type browserSession struct {
 	accessSession
-	parent [32]byte
+	parent      [32]byte
+	hardExpires time.Time
 }
 
 // Access binds opaque local credentials to exercise identities. A separate
@@ -76,7 +77,7 @@ func (a *Access) browserIdentity(token string) (string, bool) {
 		return "", false
 	}
 	now := a.now()
-	valid := now.Before(session.expires)
+	valid := now.Before(session.expires) && now.Before(session.hardExpires)
 	if session.parent != a.operator {
 		parent, exists := a.sessions[session.parent]
 		valid = valid && exists && now.Before(parent.expires) && parent.principal == session.principal
@@ -97,6 +98,70 @@ func (a *Access) revokeBrowser(r *http.Request) {
 		delete(a.browsers, sha256.Sum256([]byte(cookie.Value)))
 	}
 }
+
+// renewBrowser is deliberately separate from ordinary authenticated requests.
+// The cookie is the only authority; client activity hints confer no permission.
+func (a *Access) renewBrowser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", "POST")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	fail := func(status int, code string) {
+		w.WriteHeader(status)
+		_ = json.NewEncoder(w).Encode(map[string]string{"code": code})
+	}
+	// Global checks already validate an Origin's exact scheme/host/port. Requiring
+	// it and a non-form header here prevents ambient-cookie cross-site renewal.
+	if r.Header.Get("Origin") == "" || r.Header.Get("X-Simulator-Session-Action") != "renew" ||
+		(r.Header.Get("Sec-Fetch-Site") != "" && r.Header.Get("Sec-Fetch-Site") != "same-origin") ||
+		r.Header.Get("X-Simulator-Token") != "" {
+		fail(http.StatusForbidden, "renewal_forbidden")
+		return
+	}
+	cookie, err := r.Cookie(a.cookie)
+	if err != nil {
+		fail(http.StatusUnauthorized, "session_required")
+		return
+	}
+	key := sha256.Sum256([]byte(cookie.Value))
+	a.mu.Lock()
+	session, ok := a.browsers[key]
+	now := a.now()
+	if !ok || !now.Before(session.expires) || !now.Before(session.hardExpires) {
+		delete(a.browsers, key)
+		a.mu.Unlock()
+		fail(http.StatusUnauthorized, "session_required")
+		return
+	}
+	if session.parent != a.operator {
+		parent, exists := a.sessions[session.parent]
+		if !exists || !now.Before(parent.expires) || parent.principal != session.principal {
+			delete(a.browsers, key)
+			a.mu.Unlock()
+			fail(http.StatusUnauthorized, "session_required")
+			return
+		}
+		a.mu.Unlock()
+		fail(http.StatusForbidden, "participant_fixed_lifetime")
+		return
+	}
+	candidate := now.Add(15 * time.Minute)
+	if candidate.After(session.hardExpires) {
+		candidate = session.hardExpires
+	}
+	// Concurrent tabs and a backwards clock cannot drift the issuance cap or
+	// shorten an already-issued live idle window.
+	if candidate.After(session.expires) {
+		session.expires = candidate
+		a.browsers[key] = session
+	}
+	a.mu.Unlock()
+	http.SetCookie(w, a.browserCookie(r, cookie.Value, session.expires))
+	_ = json.NewEncoder(w).Encode(map[string]time.Time{"expiresAt": session.expires, "hardExpiresAt": session.hardExpires})
+}
+
 func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	if r.URL.Path == "/_simulator/login" || r.URL.Path == "/_simulator/v1/capabilities" {
@@ -130,8 +195,19 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	// Public product information is an exact asset allowlist. Host/origin checks
 	// above still apply; API paths and console authentication remain protected.
+	// This exact first-party static module contains no credentials or state and
+	// must load before the docs can present their sign-in UI. No general .mjs
+	// allowance: APIs and every other console route retain authentication.
+	if r.Method == http.MethodGet && r.URL.Path == "/_simulator/console/session-activity.mjs" {
+		a.next.ServeHTTP(w, r)
+		return
+	}
 	if isLandingPath(r.URL.Path) {
 		a.next.ServeHTTP(w, r)
+		return
+	}
+	if r.URL.Path == "/_simulator/session/renew" {
+		a.renewBrowser(w, r)
 		return
 	}
 	if r.URL.Path == "/_simulator/logout" {
@@ -179,12 +255,10 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		browserToken := hex.EncodeToString(random)
+		a.mu.Lock()
 		now := a.now()
 		expires := now.Add(15 * time.Minute)
-		if !parent.expires.IsZero() && parent.expires.Before(expires) {
-			expires = parent.expires
-		}
-		a.mu.Lock()
+		hardExpires := now.Add(60 * time.Minute)
 		parentHash := sha256.Sum256([]byte(token))
 		if parentHash != a.operator {
 			current, exists := a.sessions[parentHash]
@@ -192,6 +266,10 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				a.mu.Unlock()
 				http.Error(w, "Invalid or expired access token", 401)
 				return
+			}
+			hardExpires = current.expires
+			if current.expires.Before(expires) {
+				expires = current.expires
 			}
 		}
 		for key, session := range a.browsers {
@@ -211,7 +289,7 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		a.revokeBrowser(r)
-		a.browsers[sha256.Sum256([]byte(browserToken))] = browserSession{accessSession{parent.principal, expires}, parentHash}
+		a.browsers[sha256.Sum256([]byte(browserToken))] = browserSession{accessSession: accessSession{parent.principal, expires}, parent: parentHash, hardExpires: hardExpires}
 		a.mu.Unlock()
 		http.SetCookie(w, a.browserCookie(r, browserToken, expires))
 		http.Redirect(w, r, "/_simulator/console/", 303)

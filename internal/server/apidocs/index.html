@@ -12,12 +12,19 @@
     <link rel="stylesheet" href="./scalar.css" />
     <link rel="stylesheet" href="./response-guide.css" />
     <link rel="stylesheet" href="./reference-theme.css" />
+    <link rel="stylesheet" href="./execution-ui.css" />
+    <script src="./reference-locale.js" defer></script>
     <script src="./boot.js" defer></script>
     <script src="./scalar.js" defer></script>
     <script src="./response-guide.js" defer></script>
+    <script src="./scalar-locale-ja.js" defer></script>
+    <script src="./reference-config.js" defer></script>
     <script src="./init.js" defer></script>
+    <script type="module" src="./execution-ui.js"></script>
   </head>
   <body>
+    <section id="native-execution" aria-label="Local API execution"><noscript>Enable JavaScript to run local API requests. ローカル API の実行には JavaScript が必要です。</noscript></section>
+    <p id="reference-locale-status" role="status" aria-live="polite"></p>
     <div id="reference"></div>
     <div id="s3-result-announcement" class="reader-sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
     <button id="s3-result-trigger" type="button" aria-haspopup="dialog" aria-controls="s3-result-dialog" aria-keyshortcuts="Alt+Shift+R" hidden>Read live S3 response</button>

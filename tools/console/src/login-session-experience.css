@@ -1,0 +1,41 @@
+/* Standalone sign-in layout only; official Cloudscape controls keep their styles. */
+.simulator-login {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+  padding: clamp(1rem, 3vw, 3rem);
+}
+
+.simulator-login__content {
+  inline-size: 100%;
+  max-inline-size: 42rem;
+  min-inline-size: 0;
+  margin-inline: auto;
+}
+
+.simulator-login__languages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-block-end: 1rem;
+}
+
+.simulator-login__intro,
+.simulator-login__session-note {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.simulator-login__submit {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+@media (max-width: 40rem) {
+  .simulator-login__languages {
+    justify-content: flex-start;
+  }
+}

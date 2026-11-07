@@ -3,6 +3,7 @@
 Uses real authenticated local HTTP and the canonical axe script. No cloud, mocked
 backend, dependency install, storage-secret persistence or optional skip path.
 """
+from console_locale import select_console_locale
 import json
 import os
 from pathlib import Path
@@ -68,9 +69,9 @@ def run_console_language():
                         page.screenshot(path=str(REPORTS/f'language-{label}-{width}.png'), full_page=True, animations='disabled')
                         audits.append([label, width])
 
-                    def locale(next_locale):
-                        current = page.locator('html').get_attribute('lang')
-                        page.get_by_role('combobox', name='言語' if current == 'ja' else 'Language', exact=True).select_option(next_locale)
+                    def locale(next_locale, audit_settings=False):
+                        select_console_locale(page, next_locale, audit=audit if audit_settings else None,
+                                              keyboard=audit_settings)
                         expect(page.locator('html')).to_have_attribute('lang', next_locale)
                         assert page.evaluate('(key)=>localStorage.getItem(key)', PREFERENCE) == next_locale
 
@@ -127,7 +128,7 @@ def run_console_language():
                     page.get_by_role('button', name='Create bucket', exact=True).click()
                     draft = 'unsubmitted-aws-'+str(width)
                     page.get_by_label('Bucket name', exact=True).fill(draft)
-                    locale('ja')
+                    locale('ja', audit_settings=True)
                     expect(page.get_by_role('heading', name='バケットを作成', exact=True)).to_be_visible()
                     expect(page.get_by_label('バケット名', exact=True)).to_have_value(draft)
                     unchanged_authority(); audit('aws-dirty-ja')

@@ -4,8 +4,14 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createCodeInputLiteAdapter } from "./collapsed-state-transform.mjs";
 const root = path.dirname(fileURLToPath(import.meta.url));
 const output = path.resolve(root, "../../internal/server/apidocs");
+const scalarLockSource = await readFile(path.join(root, "package-lock.json"));
+const collapsedStateAdapter = createCodeInputLiteAdapter({
+  root,
+  lock: JSON.parse(scalarLockSource),
+});
 await mkdir(output, { recursive: true });
 const result = await build({
   absWorkingDir: root,
@@ -18,6 +24,7 @@ const result = await build({
   target: ["es2022"],
   preserveSymlinks: true,
   metafile: true,
+  plugins: [collapsedStateAdapter.plugin],
   legalComments: "external",
   treeShaking: true,
   define: {
@@ -39,6 +46,16 @@ const result = await build({
     ".ttf": "dataurl",
   },
 });
+// Record the actual transformed input, not just the immutable installed module.
+// Keep normal esbuild inputs/outputs intact for exclusion and notice collection.
+result.metafile["x-simulator-source-transforms"] = [{
+  ...collapsedStateAdapter.provenance(),
+  adapterPath: "tools/scalar/collapsed-state-transform.mjs",
+  adapterSHA256: createHash("sha256")
+    .update(await readFile(path.join(root, "collapsed-state-transform.mjs")))
+    .digest("hex"),
+  lockSHA256: createHash("sha256").update(scalarLockSource).digest("hex"),
+}];
 const forbidden = Object.keys(result.metafile.inputs).filter((p) =>
   p.includes("@replit/codemirror-css-color-picker"),
 );

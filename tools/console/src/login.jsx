@@ -10,6 +10,13 @@ import FormField from '@cloudscape-design/components/form-field';
 import Input from '@cloudscape-design/components/input';
 import FileInput from '@cloudscape-design/components/file-input';
 import { useLocale } from './i18n.jsx';
+import './login-session-experience.css';
+
+// Closed presentation hints only. A query parameter is never authentication.
+export function loginPresentationReason(search){
+  const reasons=new URLSearchParams(search).getAll('reason');
+  return reasons.length===1&&['signed-out','session-required'].includes(reasons[0])?reasons[0]:'';
+}
 
 // Matches the native server credential alphabet/length and CLI token-file cap.
 // The file parser is deliberately one token line, not a command/JSON extractor.
@@ -114,19 +121,27 @@ export default function Login(){
       location.assign('/_simulator/console/');
     }finally{submitting.current=false;if(alive.current)setBusy(false)}
   }
-  return <ContentLayout header={<Header variant="h1">{t('Open your local sandbox','ローカルサンドボックスにサインイン')}</Header>}><Container><form onSubmit={submit}>
-    <Form errorText={error?t(error.en,error.ja):''} actions={<Button variant="primary" loading={busy} disabled={fileState==='loading'} formAction="submit">{t('Open sandbox','サンドボックスを開く')}</Button>}>
-      <SpaceBetween size="l">
-        <SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={locale==='en'} onClick={()=>setLocale('en')}>English</Button><Button formAction="none" disabled={locale==='ja'} onClick={()=>setLocale('ja')}>日本語</Button></SpaceBetween>
-        <Alert type="info">{t('Use the access token supplied by your host. This is an independent local simulator.','主催者から受け取ったアクセストークンを使ってください。これは独立したローカルシミュレーターです。')}</Alert>
-        <FormField label={t('Access token','アクセストークン')} description={t('Paste the token itself as plain text. It stays hidden; do not include a command or label.','トークンだけをテキストとして貼り付けてください。入力は隠されます。コマンドやラベルは含めないでください。')}>
-          <div onPasteCapture={capturePaste} onInputCapture={synchronizeNativeInput} onFocusCapture={synchronizeNativeInput} onKeyDownCapture={synchronizeNativeInput}><Input value={token} type="password" onChange={({detail})=>changeToken(detail.value)} onBlur={synchronizeNativeInput} autoComplete="off" disableBrowserAutocorrect spellcheck={false} nativeInputAttributes={{ref:tokenInput,name:'simulator-access-token','data-1p-ignore':'true','data-op-ignore':'true'}}/></div>
-        </FormField>
-        <FormField label={t('Token file – optional','トークンファイル（任意）')} description={t('If paste does not work, explicitly choose the token file supplied by your host. Only one UTF-8 token line, at most 512 bytes. The file is read locally, not uploaded.','貼り付けできない場合は、主催者から受け取ったトークンファイルを選べます。512バイト以下のUTF-8テキスト1行だけを使います。ファイルはブラウザー内で読み取り、アップロードしません。')}>
-          <fieldset disabled={busy} onKeyDown={fileKeyDown} aria-label={t('Choose a local token file','ローカルのトークンファイルを選択')} style={{border:0,padding:0,margin:0}}><FileInput value={[]} multiple={false} onChange={({detail})=>chooseTokenFile(detail.value)}>{t('Choose token file','トークンファイルを選択')}</FileInput></fieldset>
-          <div role="status" aria-live="polite">{fileState==='loading'?t('Reading token file…','トークンファイルを読み取り中…'):fileState==='loaded'?t('Token loaded. Choose Open sandbox to verify it.','トークンを読み込みました。「サンドボックスを開く」で確認してください。'):''}</div>
-        </FormField>
-      </SpaceBetween>
-    </Form>
-  </form></Container></ContentLayout>;
+  const reason=loginPresentationReason(location.search);
+  return <main className="simulator-login"><div className="simulator-login__content">
+    <nav className="simulator-login__languages" aria-label={t('Sign-in language','サインイン画面の言語')}><Button formAction="none" disabled={locale==='en'} onClick={()=>setLocale('en')}>English</Button><Button formAction="none" disabled={locale==='ja'} onClick={()=>setLocale('ja')}>日本語</Button></nav>
+    <ContentLayout header={<Header variant="h1">{t('Open your local sandbox','ローカルサンドボックスにサインイン')}</Header>}><Container><form onSubmit={submit}>
+      <Form errorText={error?t(error.en,error.ja):''}>
+        <SpaceBetween size="l">
+          {reason&&<Alert type={reason==='signed-out'?'success':'info'}>{reason==='signed-out'?t('You signed out. Enter a token to start a new browser session.','サインアウトしました。新しいブラウザーセッションを開始するには、トークンを入力してください。'):t('Sign in to continue. Your browser session may have ended, or this simulator address may not have a session.','続けるにはサインインしてください。ブラウザーセッションが終了したか、この接続先にセッションがない可能性があります。')}</Alert>}
+          <p className="simulator-login__intro">{t('Use the access token supplied by your host. This is an independent local simulator.','主催者から受け取ったアクセストークンを使ってください。これは独立したローカルシミュレーターです。')}</p>
+          <SpaceBetween size="s">
+            <FormField label={t('Access token','アクセストークン')} description={t('Paste the token itself as plain text. It stays hidden; do not include a command or label.','トークンだけをテキストとして貼り付けてください。入力は隠されます。コマンドやラベルは含めないでください。')}>
+              <div onPasteCapture={capturePaste} onInputCapture={synchronizeNativeInput} onFocusCapture={synchronizeNativeInput} onKeyDownCapture={synchronizeNativeInput}><Input value={token} type="password" onChange={({detail})=>changeToken(detail.value)} onBlur={synchronizeNativeInput} autoComplete="off" disableBrowserAutocorrect spellcheck={false} nativeInputAttributes={{ref:tokenInput,name:'simulator-access-token','data-1p-ignore':'true','data-op-ignore':'true'}}/></div>
+            </FormField>
+            <div className="simulator-login__submit"><Button variant="primary" loading={busy} disabled={fileState==='loading'} formAction="submit">{t('Open sandbox','サンドボックスを開く')}</Button></div>
+          </SpaceBetween>
+          <FormField label={t('Token file – optional','トークンファイル（任意）')} description={t('If paste does not work, explicitly choose the token file supplied by your host. Only one UTF-8 token line, at most 512 bytes. The file is read locally, not uploaded.','貼り付けできない場合は、主催者から受け取ったトークンファイルを選べます。512バイト以下のUTF-8テキスト1行だけを使います。ファイルはブラウザー内で読み取り、アップロードしません。')}>
+            <fieldset disabled={busy} onKeyDown={fileKeyDown} aria-label={t('Choose a local token file','ローカルのトークンファイルを選択')} style={{border:0,padding:0,margin:0}}><FileInput value={[]} multiple={false} onChange={({detail})=>chooseTokenFile(detail.value)}>{t('Choose token file','トークンファイルを選択')}</FileInput></fieldset>
+            <div role="status" aria-live="polite">{fileState==='loading'?t('Reading token file…','トークンファイルを読み取り中…'):fileState==='loaded'?t('Token loaded. Choose Open sandbox to verify it.','トークンを読み込みました。「サンドボックスを開く」で確認してください。'):''}</div>
+          </FormField>
+          <p className="simulator-login__session-note">{t('Operator sessions can renew during explicit actions: 15 minutes idle and at most 60 minutes from sign-in. Participant sessions keep their original 15-minute parent limit. Restart or revocation can end access sooner; use the same simulator address.','操作者は明示的な操作時に更新でき、無操作15分・ログインから最長60分です。参加者は元の親トークンの15分期限を超えません。再起動や失効で早く終了する場合があります。同じ接続先を使ってください。')}</p>
+        </SpaceBetween>
+      </Form>
+    </form></Container></ContentLayout>
+  </div></main>;
 }

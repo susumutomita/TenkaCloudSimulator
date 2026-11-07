@@ -220,7 +220,7 @@ func TestBrowserSessionQuotaCleanupAndConcurrentRevocation(t *testing.T) {
 	start := time.Unix(1800000000, 0)
 	a.now = func() time.Time { return start }
 	for i := 0; i < 999; i++ {
-		a.browsers[sha256.Sum256([]byte(fmt.Sprint(i)))] = browserSession{accessSession{"simulator-admin", start.Add(time.Minute)}, a.operator}
+		a.browsers[sha256.Sum256([]byte(fmt.Sprint(i)))] = browserSession{accessSession: accessSession{"simulator-admin", start.Add(time.Minute)}, parent: a.operator, hardExpires: start.Add(time.Hour)}
 	}
 	cookie := browserSignIn(t, a, operator, nil)
 	if len(a.browsers) != 1000 {

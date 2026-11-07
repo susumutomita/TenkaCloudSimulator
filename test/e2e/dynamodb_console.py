@@ -1,4 +1,5 @@
 """Prepared real DynamoDB console/SDK acceptance; no mocked API or cloud calls."""
+from console_locale import select_console_locale
 import base64
 import hashlib
 import json
@@ -169,7 +170,7 @@ def _run():
                             assert result.value.status==status
                             return result.value.json()
                         def locale(target):
-                            page.get_by_role('combobox',name='Language' if target=='ja' else '言語',exact=True).select_option(target);expect(page.locator('html')).to_have_attribute('lang',target)
+                            select_console_locale(page, target);expect(page.locator('html')).to_have_attribute('lang',target)
                         def keys():
                             page.get_by_label(pk+' ('+kind+')',exact=True).fill(value)
                             if sort:page.get_by_label('sort (S)',exact=True).fill('entry')

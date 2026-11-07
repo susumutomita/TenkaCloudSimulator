@@ -1,6 +1,7 @@
 """Source acceptance for the root-mounted KMS Aliases tab; no fixture UI/mock API.
 Requires the canonical bundle/CLI with KMSAliasesView mounted on key details.
 """
+from console_locale import select_console_locale
 import collections
 import ipaddress
 import json
@@ -123,11 +124,11 @@ def main():
                     expect(page.get_by_text(first['Arn'], exact=True)).to_be_visible()
                     page.get_by_label('Alias name', exact=True).fill('ui-draft')
                     page.screenshot(path=str(REPORTS / 'kms-aliases-create-1440.png'), full_page=True, animations='disabled')
-                    page.get_by_role('combobox', name='Language', exact=True).select_option('ja')
+                    select_console_locale(page, 'ja')
                     expect(page.get_by_label('エイリアス名', exact=True)).to_have_value('ui-draft')
                     page.screenshot(path=str(REPORTS / 'kms-aliases-create-ja-1440.png'), full_page=True, animations='disabled')
                     expect(page.get_by_text(first['Arn'], exact=True)).to_be_visible()
-                    page.get_by_role('combobox', name='言語', exact=True).select_option('en')
+                    select_console_locale(page, 'en')
                     expect(page.get_by_label('Alias name', exact=True)).to_have_value('ui-draft')
                     page.get_by_role('button', name='Cancel', exact=True).click()
                     assert kms.list_aliases()['Aliases'] == []

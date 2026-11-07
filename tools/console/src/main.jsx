@@ -1,4 +1,6 @@
 import Login from './login.jsx';
+import {createSessionRecovery} from './session-recovery.mjs';
+import {createSessionActivity,SessionRenewalError,sessionRenewalMessage} from '../../../internal/server/web/session-activity.mjs';
 import { LocaleProvider, useLocale } from './i18n.jsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -85,34 +87,55 @@ function Console(){
   const [service,setService]=useState(initial),[bucket,setBucket]=useState(null),[items,setItems]=useState([]),[selected,setSelected]=useState([]),[filter,setFilter]=useState(''),[page,setPage]=useState(1),[sort,setSort]=useState({sortingField:'name'}),[descending,setDescending]=useState(false);
   const [region,setRegion]=useState('us-east-1'),[principal,setPrincipal]=useState('simulator-admin'),[persistent,setPersistent]=useState(false),[busy,setBusy]=useState(true),[ready,setReady]=useState(false),[identitySelection,setIdentitySelection]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState(''),[modal,setModal]=useState(null),[form,setForm]=useState({}),[modalError,setModalError]=useState(''),[saving,setSaving]=useState(false),[navOpen,setNavOpen]=useState(innerWidth>900),[toolsOpen,setToolsOpen]=useState(false),[detail,setDetail]=useState(null);
   const generation=useRef(0), file=useRef(null), opener=useRef(null);
+  const sessionActivity=useRef(null), sessionContext=useRef(null), sessionRecovery=useRef(null);
+  if(!sessionRecovery.current)sessionRecovery.current=createSessionRecovery({locale:()=>sessionContext.current?.locale||'en'});
+  const [sessionLocked,setSessionLocked]=useState(false);
+  function lockSession(){sessionRecovery.current.lock();setSessionLocked(true);throw sessionRecovery.current.error();}
+  useEffect(()=>{const activity=createSessionActivity();sessionActivity.current=activity;return()=>{activity.dispose();sessionActivity.current=null}},[]);
+
   const [navigationVersion,setNavigationVersion]=useState(0);
   const [authenticationRequired,setAuthenticationRequired]=useState(false),[accessError,setAccessError]=useState('');
+  // Presentation changes must not replace the native request callbacks.
+  sessionContext.current={authenticationRequired,identitySelection,locale};
   const [showVersions,setShowVersions]=useState(false),[bucketTab,setBucketTab]=useState("objects");
   const change=(key,v)=>setForm(old=>({...old,[key]:v}));
   const close=()=>{setModal(null);requestAnimationFrame(()=>{const previous=opener.current;if(!previous)return;if(previous.node.isConnected){previous.node.focus();return}const match=[...document.querySelectorAll('button')].find(b=>(b.getAttribute('aria-label')||b.textContent.trim())===previous.label&&!b.disabled&&b.getClientRects().length);match?.focus()})};
   const open=(kind,values={})=>{if(saving)return;opener.current={node:document.activeElement,label:document.activeElement?.getAttribute('aria-label')||document.activeElement?.textContent.trim()};setModalError('');setForm(values);file.current=null;setModal(kind)};
-  const request=useCallback(async(path,options={},identity=principal)=>{
+  async function renewForUserActiveRequest(path){
+    const {authenticationRequired:required,identitySelection:selectable,locale:currentLocale}=sessionContext.current;
+    if(!required||!selectable)return;
+    const url=new URL(path,location.href),p=url.pathname;
+    if(url.origin!==location.origin||['/_simulator/login','/_simulator/logout','/_simulator/session/renew'].includes(p)||p==='/_simulator/v1/access'||p.startsWith('/_simulator/v1/access/'))return;
+    try{await sessionActivity.current?.beforeUserActiveRequest()}
+    catch(error){if(error instanceof SessionRenewalError){if(error.code==='session_required')lockSession();throw Error(sessionRenewalMessage(error.code,currentLocale));}throw error}
+  }
+  const request=useCallback(async(path,options={},identity=principal)=>sessionRecovery.current.run(async assertCurrent=>{
+    await renewForUserActiveRequest(path);assertCurrent();
     const r=await fetch(path,{...options,headers:{'X-Simulator-Principal':identity,...options.headers}});
-    if(r.status===401){location.assign('/_simulator/login');throw Error('Sign in to continue.');}
-    if(!r.ok){const text=await r.text();let message=value(readXML(text),'Message');try{const j=JSON.parse(text);message=j.message||(typeof j.error==='object'?j.error?.message:j.error)||message}catch{};throw Error((value(readXML(text),'Code')||r.status)+': '+(message||text));}
-    return r;
-  },[principal]);
+    assertCurrent();
+    if(r.status===401)lockSession();
+    if(!r.ok){const text=await r.text();assertCurrent();let message=value(readXML(text),'Message');try{const j=JSON.parse(text);message=j.message||(typeof j.error==='object'?j.error?.message:j.error)||message}catch{};throw Error((value(readXML(text),'Code')||r.status)+': '+(message||text));}
+    return sessionRecovery.current.guardResponse(r,assertCurrent);
+  }),[principal]);
   async function signOut(){
     if(saving||!authenticationRequired)return;
     setSaving(true);setAccessError('');
     try{
       const response=await fetch('/_simulator/logout',{method:'POST',credentials:'same-origin'});
       if(response.status!==204)throw Error('The server did not confirm sign out ('+response.status+').');
-      location.replace('/_simulator/login');
+      location.replace('/_simulator/login?reason=signed-out');
     }catch{setAccessError('Sign out was not confirmed. Your session may still be active. Try Sign out again.');setSaving(false)}
   }
-  const invokeRequest=useCallback(async(path,options={})=>{
+  const invokeRequest=useCallback(async(path,options={})=>sessionRecovery.current.run(async assertCurrent=>{
+    await renewForUserActiveRequest(path);assertCurrent();
     const response=await fetch(path,{...options,headers:{'X-Simulator-Principal':principal,...options.headers}});
-    // A guest application may legitimately return 401. Check host authentication
-    // on its own protected endpoint before treating that status as an expired session.
+    assertCurrent();
+    // Guest 401 alone is not host authentication failure. The protected probe
+    // uses request(), which locks this page only on an actual host 401.
     if(response.status===401)await request('/_simulator/v1/capabilities');
-    return response;
-  },[principal,request]);
+    assertCurrent();
+    return sessionRecovery.current.guardResponse(response,assertCurrent);
+  }),[principal,request]);
   const ssm=async(op,input)=> (await request('/',{method:'POST',headers:{'Content-Type':'application/x-amz-json-1.1','X-Amz-Target':'AmazonSSM.'+op,'X-Simulator-Region':region},body:JSON.stringify(input)})).json();
   const cfn=async(op,input={})=>readXML(await (await request('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','X-Simulator-Region':region},body:new URLSearchParams({Action:op,Version:'2010-05-15',...input})})).text());
   async function load(){
@@ -131,7 +154,7 @@ function Console(){
       if(revision===generation.current){setItems(list);setPage(1)}
     }catch(e){if(revision===generation.current){setItems([]);setError(e.message)}}finally{if(revision===generation.current)setBusy(false)}
   }
-  useEffect(()=>{fetch('/_simulator/v1/capabilities').then(async r=>{if(r.status===401){location.assign('/_simulator/login');return null}setAuthenticationRequired(r.headers.get('X-Simulator-Authentication')==='required');return r.json()}).then(c=>{if(!c)return;setCapabilities(c);setPrincipal(c.principal||'simulator-admin');setIdentitySelection(c.identitySelection===true);setPersistent(c.persistence==='file');setCloudStorage(c.cloudStorage||{});setReady(true)}).catch(e=>{setError(e.message);setBusy(false)})},[]);
+  useEffect(()=>{fetch('/_simulator/v1/capabilities').then(async r=>{if(r.status===401){location.assign('/_simulator/login?reason=session-required');return null}setAuthenticationRequired(r.headers.get('X-Simulator-Authentication')==='required');return r.json()}).then(c=>{if(!c)return;setCapabilities(c);setPrincipal(c.principal||'simulator-admin');setIdentitySelection(c.identitySelection===true);setPersistent(c.persistence==='file');setCloudStorage(c.cloudStorage||{});setReady(true)}).catch(e=>{setError(e.message);setBusy(false)})},[]);
   useEffect(()=>{if(ready){setDetail(null);setMessage('');load()}},[ready,capabilities,service,bucket,region,principal,navigationVersion,showVersions]);
   function dismissResourceForm(){setModal(null);setModalError('');setForm({});file.current=null;}
   useEffect(()=>{const change=()=>{generation.current++;setNavigationVersion(v=>v+1);setService(routeService());setBucket(null);setShowVersions(false);setBucketTab('objects');setDetail(null);setFilter('');setSelected([]);dismissResourceForm();};addEventListener('hashchange',change);return()=>removeEventListener('hashchange',change);},[]);
@@ -209,6 +232,7 @@ function Console(){
         <Box color="text-body-secondary" fontSize="body-s">{principal} · {region} · {persistent?t('Persistent environment','永続環境'):t('Temporary environment','一時環境')} · {t('No external cloud connection','外部クラウド接続なし')}</Box>
       </SpaceBetween>;
   return <>
+    {sessionLocked&&<Alert type="warning" header={t('This page is locked; review remaining input','このページはロックされています。残っている入力を確認してください')}><SpaceBetween size="s"><p>{t('No failed action was replayed. Signing in elsewhere will not resume this page or attach its drafts to another session. Keep this tab open to review your input. Actions already acknowledged by the server may have completed.','失敗した操作は再送信していません。別のタブでログインしても、このページの操作や入力を新しいセッションへ引き継ぎません。入力を確認する間はこのタブを開いたままにしてください。サーバーが応答済みの操作は完了している場合があります。')}</p><a href="/_simulator/login?reason=session-required" target="_blank" rel="noopener noreferrer">{t('Sign in in a new tab','新しいタブでログイン')}</a><Button formAction="none" onClick={()=>location.assign('/_simulator/login?reason=session-required')}>{t('Discard this page and start fresh','このページの入力を破棄して新しく開始')}</Button></SpaceBetween></Alert>}
     {provider==='sakura'?<SakuraConsole controls={controls} configuration={sakuraScope}>{ready&&serviceAvailable(service,capabilities)?<SakuraDisks key={sakuraContext} request={request} configuration={sakuraScope} contextKey={sakuraContext}/>:unavailable}</SakuraConsole>:provider==='gcp'?<GCPConsoleShell controls={controls}>{ready&&serviceAvailable(service,capabilities)?<GCPStorageView key={'gcp:'+principal+':'+cloudStorage.gcp?.project} request={request} project={cloudStorage.gcp?.project}/>:unavailable}</GCPConsoleShell>:provider==='azure'?<AzureConsoleShell controls={controls}>{ready&&serviceAvailable(service,capabilities)?<AzureBlobView key={'azure:'+principal+':'+cloudStorage.azure?.account} request={request} account={cloudStorage.azure?.account}/>:unavailable}</AzureConsoleShell>:<>{controls}
     <AppLayout ariaLabels={{navigation:t("Service navigation","サービスナビゲーション"),navigationToggle:t("Toggle service navigation","サービスナビゲーションを切り替え"),navigationClose:t("Close service navigation","サービスナビゲーションを閉じる"),tools:t("Help panel","ヘルプパネル"),toolsToggle:t("Toggle help panel","ヘルプパネルを切り替え"),toolsClose:t("Close help panel","ヘルプパネルを閉じる")}} headerSelector="#navigation" contentType={pageForm?"form":"table"} navigationOpen={navOpen} onNavigationChange={({detail})=>setNavOpen(detail.open)} toolsOpen={toolsOpen} onToolsChange={({detail})=>setToolsOpen(detail.open)} tools={<HelpPanel header={<Header variant="h2">{t('Simulator scope','シミュレーターの対応範囲')}</Header>}><SpaceBetween size="m"><p>{t("Independent local simulator. Not affiliated with AWS. No real cloud resources are created.","AWSとは無関係の独立したローカルシミュレーターです。実クラウドのリソースは作成されません。")}</p><p>{t("S3 basic operations, Standard SSM text parameters, Python 3.12 Lambda functions and only the documented CloudFormation resource types. Stack updates and change sets are not implemented.","S3の基本操作、StandardのSSMテキストパラメータ、Python 3.12のLambdaに対応しています。CloudFormationは記載されたリソースに限定され、更新と変更セットは未対応です。")}</p><p>{t("KMS supports bounded local symmetric keys, explicit IAM and simulator-only ciphertext; no real HSM or other-service encryption integration.","KMSは限定されたローカル対称キー、明示的IAM、専用の暗号文に対応します。実HSMや他サービスの暗号化連携はありません。")}</p><p>{t("Google Cloud Storage and Azure Blob Storage have bounded local owner-only scopes. Google IAM, Azure RBAC, federation and cloud account provisioning are not implemented.","Cloud StorageとBlob Storageはローカル所有者のみの限定スコープです。Google IAM、Azure RBAC、フェデレーション、クラウドアカウント作成は未対応です。")}</p><Button onClick={()=>open('policy',{principal:'reader',policy:defaultPolicy})}>{t('Manage identity policy','IDポリシーを管理')}</Button><Link href="/_simulator/licenses/CONSOLE-NOTICES.txt">{t('Console licenses','コンソールのライセンス')}</Link></SpaceBetween></HelpPanel>}
       navigation={<SideNavigation header={{text:label,href:'#'}} activeHref={'#/'+service} onFollow={e=>{e.preventDefault();const v=e.detail.href;if(v==='#/policy'){open('policy',{principal:'reader',policy:defaultPolicy})}else navigate(v==='#'?service:v.slice(2))}} items={[...(service==='s3'?[{type:'link',text:t('General purpose buckets','汎用バケット'),href:'#/s3'}]:service==='ssm'?[{type:'link',text:t('Parameter Store','Parameter Store'),href:'#/ssm'}]:service==='lambda'?[{type:'link',text:t('Functions','関数'),href:'#/lambda'}]:service==='iam'?[{type:'link',text:t('Roles','ロール'),href:'#/iam'}]:service==='kms'?[{type:'link',text:t('Customer managed keys','カスタマー管理キー'),href:'#/kms'}]:service==='apigateway'?[{type:'link',text:t('APIs','API'),href:'#/apigateway'}]:service==='dynamodb'?[{type:'link',text:t('Tables','テーブル'),href:'#/dynamodb'}]:service==='sqs'?[{type:'link',text:t('Queues','キュー'),href:'#/sqs'}]:service==='logs'?[{type:'link',text:t('Log groups','ロググループ'),href:'#/logs'}]:service==='secretsmanager'?[{type:'link',text:t('Secrets','シークレット'),href:'#/secretsmanager'}]:[{type:'link',text:t('Stacks','スタック'),href:'#/cfn'}]),...(identitySelection?[{type:'divider'},{type:'section',text:t('Simulator controls','シミュレーターの操作'),items:[{type:'link',text:t('Identity policies','IDポリシー'),href:'#/policy'}]}]:[])]}/>} breadcrumbs={<BreadcrumbGroup items={[{text:t('Services','サービス'),href:'#/s3'},{text:label,href:'#/'+service},...(bucket?[{text:bucket,href:'#/s3'}]:[]),...(service==='ssm'?[{text:t('Parameter Store','Parameter Store'),href:'#/ssm'},...(detail?[{text:detail.Name,href:'#/ssm'}]:[])]:[])]} onFollow={e=>{e.preventDefault();navigate(e.detail.href.slice(2))}} ariaLabel={t('Breadcrumbs','パンくずリスト')}/>}

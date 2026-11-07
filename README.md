@@ -184,8 +184,12 @@ After signing in, open `/_simulator/docs/`. Examples are **static documentation,
 not current saved state**. Navigation separates AWS, Google Cloud, Azure and a
 Sakura Disk configuration section. Its [five native Disk operations](docs/sakura.md)
 require the explicitly enabled local provider and configured owner; documentation
-discovery does not enable it or grant permission. Shared AWS endpoint guides explain the
-required routing fields; see [reference navigation](docs/api-reference.md).
+discovery does not enable it or grant permission. The local operation runner selects the service, operation and native routing
+fields for shared AWS endpoints, with editable request drafts and a separate
+actual-response panel. English/Japanese controls share the console language
+preference; operation identifiers and user data keep their native values. Missing
+execution contracts block sending rather than silently hiding operations.
+See [reference navigation](docs/api-reference.md).
 Use **Test Request → Send** to inspect the real status,
 headers and body. Native formats remain intact: S3 XML/bytes, SSM JSON 1.1,
 SQS root POST with `X-Amz-Target: AmazonSQS.<operation>` and JSON 1.0, and IAM/
@@ -221,8 +225,14 @@ identity or admin. Each IAM action is still authorized. Binding to localhost
 alone does not provide authentication or tenant isolation.
 
 The host owns user authentication, team allocation and proxy authorization.
-Browser credentials are separate from SDK credentials and expire within
-15 minutes or the participant's earlier expiry. Logging out leaves other
+Browser credentials are separate from SDK credentials. Operator browser sessions
+may renew using recent genuine interaction within a 15-minute idle window, capped at 60 minutes
+from sign-in; this increases the previous fixed 15-minute hard window fourfold.
+Participant sessions keep their original 15-minute parent limit. A trusted interaction
+while the page is visible and focused is eligible for ten seconds and consumed once
+at an API-request boundary. A refresh can consume that interaction; passive polling
+alone never renews a session. See [session boundaries and current
+verification limits](docs/console-sessions.md). Logging out leaves other
 browsers and SDK tokens valid. A proxy with its own session must implement its
 own logout. Participant/browser sessions expire on process restart; a private
 operator token file can be reused. This does not isolate files from the same OS
@@ -240,8 +250,11 @@ tenant isolation. `--unsafe-no-auth` is for loopback development only.
 
 ## Development and verification
 
+Node.js is required for mandatory UI source checks during development. Set
+`NODE=/path/to/node` if it is not on PATH; the built binary still needs no Node.js.
+
 ```sh
-make before-commit       # format/vet, asset/module checks, race, statement90%, build
+make before-commit       # format/vet, asset/module and UI source checks, race, statement90%, build
 # Enforce source-line90% too, after generating coverage.out above:
 go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > reports/coverage.xml
 python3 scripts/check-coverage.py reports/coverage.out reports/coverage.xml

@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import TopNavigation from '@cloudscape-design/components/top-navigation';
+import {awsLanguageSettings} from './aws-language-settings.mjs';
 import {useLocale} from './i18n.jsx';
 import {PROVIDERS, providerForService, servicesForProvider} from './console-navigation.mjs';
 
@@ -47,6 +48,7 @@ export default function GlobalNavigation({service, capabilities, saving, onNavig
   return <div id="navigation">
     {aws&&<div className="aws-console-top-navigation"><TopNavigation visualContext="top-navigation" identity={{title:'TenkaCloud Simulator',href:'/_simulator/console/'}}
       utilities={[
+        awsLanguageSettings(locale, setLocale, t),
         {type:'menu-dropdown',text:service==='iam'?t('Global','グローバル'):region,title:t('Region','リージョン'),
           items:regions.map(id=>({id,text:id,disabled:saving||service==='iam'})),onItemClick:({detail})=>{if(!saving&&service!=='iam')onRegion(detail.id);}},
         {type:'menu-dropdown',text:principal,title:t('Account','アカウント'),ariaLabel:t('Account menu','アカウントメニュー'),iconName:'user-profile',disableUtilityCollapse:true,
@@ -77,8 +79,8 @@ export default function GlobalNavigation({service, capabilities, saving, onNavig
         <button type="button" onClick={close}>{t('Close','閉じる')}</button>
       </div>}
     </div>
-    <label className="cloud-language">{t('Language','言語')}<select aria-label={t('Language','言語')} value={locale}
-      onChange={event=>setLocale(event.target.value)}><option value="en">English</option><option value="ja">日本語</option></select></label>
+    {!aws&&<label className="cloud-language">{t('Language','言語')}<select aria-label={t('Language','言語')} value={locale}
+      onChange={event=>setLocale(event.target.value)}><option value="en">English</option><option value="ja">日本語</option></select></label>}
     {!aws&&<details className="cloud-session"><summary aria-label={t('Account menu','アカウントメニュー')}>{principal}</summary>
       <div><p>{authenticationRequired?t('Local browser session','ローカルブラウザーセッション'):t('Authentication disabled','認証無効')}</p>
         {identitySelection&&<button type="button" disabled={saving} onClick={event=>{event.currentTarget.closest('details').open=false;onIdentity();}}>{t('Choose identity','演習IDを選択')}</button>}

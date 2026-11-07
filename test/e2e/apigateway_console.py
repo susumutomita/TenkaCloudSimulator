@@ -66,11 +66,47 @@ def handler(event,context):
  assert downloaded.value.suggested_filename=='response.bin'
  assert popup.evaluate('typeof window.unsafe')=='undefined' and page.context.cookies()==cookies and unwanted==[]
  popup.close()
- # Host authority expiration still redirects to sign-in on the invocation path.
- saved_cookies=page.context.cookies();page.context.clear_cookies();page.get_by_role('button',name='Invoke stage',exact=True).click();expect(page.get_by_label('Access token',exact=True)).to_be_visible(timeout=20000);assert '/_simulator/login' in page.url
- page.context.add_cookies(saved_cookies);page.goto(endpoint+'/_simulator/console/');page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='API Gateway',exact=True).click();page.get_by_role('link',name='dummy-console-rest',exact=True).click()
+ # Host401 preserves this mounted draft behind a one-way barrier. Guest401
+ # above remains application data and must never trigger this recovery state.
+ native_requests=[]
+ page.on('request',lambda request:native_requests.append(True) if request.url.startswith(endpoint+'/_simulator/providers/aws/_execute-api/') else None)
+ # Controlled revocation race at the native request boundary: renewal may
+ # succeed first, then a REAL logout revokes that browser session before the
+ # paused native request continues. No Cookie header override or fake response.
+ native_pattern=endpoint+'/_simulator/providers/aws/_execute-api/**'
+ expired_native=[]
+ def expire_native_credential(route):
+  expired_native.append(route.request.url)
+  assert context.request.post(endpoint+'/_simulator/logout',headers={'Origin':endpoint}).status==204
+  route.continue_()
+ page.route(native_pattern,expire_native_credential)
+ with page.expect_response(lambda response:response.request.url.startswith(endpoint+'/_simulator/providers/aws/_execute-api/') and response.status==401) as refused_native:
+  page.get_by_role('button',name='Invoke stage',exact=True).click()
+ assert refused_native.value.status==401 and len(expired_native)==1
+ page.unroute(native_pattern,expire_native_credential)
+ expect(page.get_by_text('This page is locked; review remaining input',exact=True)).to_be_visible(timeout=20000)
+ expect(page.get_by_label('Request path',exact=True)).to_have_value('/wp-json/batch/v1')
+ assert '/_simulator/console/' in page.url
+ recovery=page.get_by_role('link',name='Sign in in a new tab',exact=True)
+ expect(recovery).to_have_attribute('target','_blank');expect(recovery).to_have_attribute('rel','noopener noreferrer')
+ # A real fresh login changes cookie authority, but cannot unlock/replay this tab.
+ assert context.request.post(endpoint+'/_simulator/login',form={'token':token},max_redirects=0).status==303
+ before_locked_retry=len(native_requests)
+ page.get_by_role('button',name='Invoke stage',exact=True).click()
+ page.evaluate('() => new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+ assert len(native_requests)==before_locked_retry,'Locked tab issued another native invocation'
+ expect(page.get_by_label('Request path',exact=True)).to_have_value('/wp-json/batch/v1')
+ from console_locale import select_console_locale
+ select_console_locale(page,'ja')
+ expect(page.get_by_text('このページはロックされています。残っている入力を確認してください',exact=True)).to_be_visible()
+ expect(page.get_by_label('リクエストパス',exact=True)).to_have_value('/wp-json/batch/v1')
+ select_console_locale(page,'en')
+ page.get_by_role('button',name='Discard this page and start fresh',exact=True).click()
+ expect(page.get_by_label('Access token',exact=True)).to_be_visible()
+ # Returning to a fresh page is deliberate, never automatic draft restoration.
+ page.goto(endpoint+'/_simulator/console/');page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='API Gateway',exact=True).click();page.get_by_role('link',name='dummy-console-rest',exact=True).click()
  page.get_by_role('button',name='Delete API',exact=True).click();page.get_by_label('Enter confirm to delete',exact=True).fill('confirm');page.get_by_role('button',name='Delete API',exact=True).click();expect(page.get_by_role('heading',name=re.compile(r'^APIs \(\d+\)$'))).to_be_visible();assert gateway.get_rest_apis()['items']==[]
  from apigateway_docs import verify_rest_docs
  verify_rest_docs(page,endpoint,gateway)
  functions.delete_function(FunctionName='console-api-handler');iam.delete_role(RoleName=role['RoleName']);assert errors==[],errors;assert outside==[],outside;browser.close()
- print(json.dumps({'cloudscapeRESTCreate':True,'realLambdaProxyAndScopedPermission':True,'deployAndActualInvoke':42,'greedyConsoleGrantAndRoute':True,'staleListCannotFreezeLoading':True,'guest400401500Preserved':True,'hostExpiredAuthorityRedirects':True,'actualScalarCreateAndList':True,'guestHTMLDownloadsWithoutExecuting':True,'sameSDKState':True,'desktopAndMobileReflow':True,'externalRequests':0,'browserErrors':0,'teardown':'DELETED','authenticatedAWSScreenObserved':False}))
+ print(json.dumps({'cloudscapeRESTCreate':True,'realLambdaProxyAndScopedPermission':True,'deployAndActualInvoke':42,'greedyConsoleGrantAndRoute':True,'staleListCannotFreezeLoading':True,'guest400401500Preserved':True,'nativeLogoutRaceSeamReal401':True,'host401DraftPreservedBehindLock':True,'freshLoginCannotUnlockOldTab':True,'lockedENJA':True,'explicitDiscard':True,'actualScalarCreateAndList':True,'guestHTMLDownloadsWithoutExecuting':True,'sameSDKState':True,'desktopAndMobileReflow':True,'externalRequests':0,'browserErrors':0,'teardown':'DELETED','authenticatedAWSScreenObserved':False}))

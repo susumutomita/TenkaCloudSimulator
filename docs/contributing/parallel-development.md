@@ -141,3 +141,35 @@ merge result and then main CI. A new commit requires checks for that commit.
 Report service scope and remaining gaps after each increment without calling a
 partial simulator finished. Keep release/deployment/AWS changes within their own
 explicit authorization.
+
+
+## API reference ownership and completion
+
+Assign one writer to each execution/reference scope and identify the native
+protocol owner before editing shared routes or generated assets. The integration
+owner composes shared console entry points, CSS, capability/operation inventories,
+CI registration and generated bundles. Preserve other owners' changes and rebuild
+generated output from the final combined source; never hand-edit bundles.
+
+Every API handoff includes the native operation inventory, an executable docs
+binding and its real method/path/Content-Type/service/target/body contract. Shared
+AWS JSON/Query endpoints need service/operation selection, not a guide asking the
+user to manually assemble routing headers. Keep unsupported or missing bindings
+visible and fail reconciliation rather than hiding them from the success count.
+
+Static descriptions, examples and developer-only requests do not complete a
+service. Acceptance must drive the embedded browser controls into the actual
+local authenticated API, check saved state and returned values, and exercise
+invalid input, missing authentication, denied authority, service switching and
+isolated teams. Use real QueueUrl and ReceiptHandle for the SQS lifecycle and
+actual CloudWatch Logs groups, streams and events. Check that switching clears
+old routing headers. English/Japanese explanations and controls must work after
+reload while protocol identifiers and user values remain unchanged.
+
+Register the regression in required checks and preserve all existing quality,
+E2E, accessibility and applicable formal gates. The Issue/PR handoff states the
+exact source/HEAD, actual commands and evidence, plus every unrun or failed step.
+A resource wait, missing dependency or skipped test is not completion. Never
+lower thresholds, drop assertions/cases, fake native results or bypass a denied
+operation to obtain a green check. Read the working contract's API reference
+acceptance requirements before adding or advertising another operation.

@@ -15,6 +15,7 @@ import time
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from console_locale import select_console_locale
 from check import Config, REPORTS, boto3, expect, running, sync_playwright, assert_reflow
 from secrets_manager import control
 from secrets_versions import frame as secret_frame
@@ -165,7 +166,7 @@ def run():
                 # Preserve the live current page/query and selected host scope.
                 page.evaluate("window.__versionLocaleNode=document.querySelector('[data-secret-versions]')")
                 locale_reads = sum(op == "secretsmanager.ListSecretVersionIds" for op in operations)
-                page.get_by_role("combobox", name="Language", exact=True).select_option("ja")
+                select_console_locale(page, "ja")
                 expect(page.locator("html")).to_have_attribute("lang", "ja")
                 expect(page.get_by_label("バージョンメタデータのシークレット ARN", exact=True)).to_have_value(arn)
                 expect(page.get_by_role("checkbox", name="非推奨バージョンを含める", exact=True)).to_be_checked()
@@ -180,7 +181,7 @@ def run():
                 assert page.evaluate("window.__versionLocaleNode===document.querySelector('[data-secret-versions]')"), "Language change remounted metadata view"
                 assert sum(op == "secretsmanager.ListSecretVersionIds" for op in operations) == locale_reads
                 no_values(page)
-                page.get_by_role("combobox", name="言語", exact=True).select_option("en")
+                select_console_locale(page, "en")
                 expect(page.locator("html")).to_have_attribute("lang", "en")
                 expect(page.get_by_label("Secret ARN for version metadata", exact=True)).to_have_value(arn)
                 expect(page.get_by_role("checkbox", name="Include deprecated versions", exact=True)).to_be_checked()

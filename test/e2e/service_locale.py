@@ -4,6 +4,7 @@ All writes use the real embedded browser UI; independent official SDK clients
 check the same state. Only temporary local processes and dummy values are used.
 Metadata-read failures are injected only after a real native write succeeds.
 """
+from console_locale import select_console_locale
 import json
 import os
 import re
@@ -65,8 +66,7 @@ def run():
 
             def locale(selected):
                 current = page.locator('html').get_attribute('lang')
-                page.get_by_role('combobox', name='言語' if current == 'ja' else 'Language',
-                                 exact=True).select_option(selected)
+                select_console_locale(page, selected)
                 expect(page.locator('html')).to_have_attribute('lang', selected)
 
             def service(name):

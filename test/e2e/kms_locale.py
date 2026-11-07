@@ -3,6 +3,7 @@
 Uses the real embedded UI, a separate official SDK client and local cryptography.
 No request/response substitution, real cloud credential or external endpoint.
 """
+from console_locale import select_console_locale
 import base64
 import json
 import os
@@ -50,7 +51,7 @@ def run():
             page.goto(endpoint + '/_simulator/console/')
             page.get_by_label('Access token', exact=True).fill(operator)
             page.get_by_role('button', name='Open sandbox', exact=True).click()
-            page.get_by_role('combobox', name='Language', exact=True).select_option('ja')
+            select_console_locale(page, 'ja')
             expect(page.locator('html')).to_have_attribute('lang', 'ja')
             page.get_by_role('button', name='サービス', exact=True).click()
             page.get_by_role('menuitem', name='Key Management Service', exact=True).click()
@@ -81,7 +82,7 @@ def run():
             # A locale change retains the native identifiers and user-entered
             # bytes, and does not repeat any request or mint new authority.
             before_locale = list(operations)
-            page.get_by_role('combobox', name='言語', exact=True).select_option('en')
+            select_console_locale(page, 'en')
             expect(page.locator('html')).to_have_attribute('lang', 'en')
             expect(page.get_by_label('Plaintext', exact=True)).to_have_value(plaintext)
             expect(page.get_by_label('Ciphertext blob', exact=True)).to_have_value(ciphertext)

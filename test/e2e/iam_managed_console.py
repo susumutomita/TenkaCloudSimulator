@@ -3,6 +3,7 @@
 Two independent local CLIs/DB/token authorities, no real AWS or fabricated ACK.
 Only one explicitly aborted post-ACK metadata read is an injected failure.
 """
+from console_locale import select_console_locale
 import hashlib
 import json
 import os
@@ -183,7 +184,7 @@ def _run():
                             assert result.value.status == status
 
                         def language(value):
-                            page.get_by_role('combobox', name='Language' if value == 'ja' else '言語', exact=True).select_option(value)
+                            select_console_locale(page, value)
                             expect(page.locator('html')).to_have_attribute('lang', value)
 
                         page.goto(a.endpoint + '/_simulator/console/')

@@ -84,7 +84,7 @@ IAMはAction/Resourceの限定wildcardと明示Deny優先を評価します。�
 
 ## API referenceとSDK
 
-サインイン後、`/_simulator/docs/`を開きます。記載されたexampleは静的な説明であり、現在の保存状態ではありません。**Test Request→Send**で実際に問い合わせ、status・headers・bodyを確認してください。S3はXML/bytes、SSMはJSON 1.1、SQSはroot POSTと`X-Amz-Target: AmazonSQS.<operation>`のJSON 1.0、IAM/CloudFormationはQuery/XML等のnative形式を保ちます。対応するlive S3 metadataの応答は「Read fields」で読み解けます。object bodyは対象外です。
+サインイン後、`/_simulator/docs/`を開きます。記載されたexampleは静的な説明であり、現在の保存状態ではありません。共有AWSエンドポイントでは、ローカル実行欄からサービスと操作を選び、正しいルーティングと編集可能な本文で送信します。実レスポンスは静的な例と別の欄に表示します。日英の操作説明はコンソールと同じ言語設定を使い、API識別子やユーザーデータは翻訳しません。実行定義が不足する操作は黙って除外せず、送信を止めて示します。**Test Request→Send**で実際に問い合わせ、status・headers・bodyを確認してください。S3はXML/bytes、SSMはJSON 1.1、SQSはroot POSTと`X-Amz-Target: AmazonSQS.<operation>`のJSON 1.0、IAM/CloudFormationはQuery/XML等のnative形式を保ちます。対応するlive S3 metadataの応答は「Read fields」で読み解けます。object bodyは対象外です。
 
 ```sh
 # operator用。値を直接コマンド履歴に書かず、出力・共有しない。
@@ -100,7 +100,7 @@ SDKには明示endpoint、region、ダミー`TCSIM…`キーを設定し、reque
 
 1チーム/環境につき、固有のプロセス・SQLite・operator tokenを割り当てます。operatorは`POST /_simulator/v1/access`で固定identityに結び付いた15分participant tokenを発行します。participantは別identityやadminへ切り替えられません。認可は各IAM actionでも評価します。localhostへbindするだけではtenant隔離やユーザー認証は成立しません。
 
-ユーザー認証、チーム割当、proxy認可はホスト側の責務です。browser sessionはSDK tokenとは別のcredentialを使用し、15分以内かつparticipantの期限を超えず、logoutは他browser・SDK tokenを失効させません。ホストproxyが別sessionを持つ場合は、ホスト自身でlogoutを処理する必要があります。participant/browser sessionは再起動で失効します。privateファイルを再利用するoperator tokenとは異なります。同一OS利用者からのファイルアクセスを隔離するものではありません。
+ユーザー認証、チーム割当、proxy認可はホスト側の責務です。browser sessionはSDK tokenとは別のcredentialです。operatorは明示的な操作時に更新でき、無操作15分・ログインから最長60分です。従来の固定15分から絶対期限を4倍にする変更です。participantは元の親tokenの15分期限を超えません。通常のrequestだけでは延長しません。画面が表示・フォーカスされている間の直近10秒以内の実入力をAPI呼び出し時に一度だけ消費し、更新できます。更新取得が直近の入力を消費する場合もありますが、入力なしの定期通信だけでは延命しません。[セッション境界と検証状況](docs/console-sessions.md)を確認してください。logoutは他browser・SDK tokenを失効させません。ホストproxyが別sessionを持つ場合は、ホスト自身でlogoutを処理する必要があります。participant/browser sessionは再起動で失効します。privateファイルを再利用するoperator tokenとは異なります。同一OS利用者からのファイルアクセスを隔離するものではありません。
 
 [問題対応表](docs/catalog.md)では、hello-worldの取り込み→別チーム起動→SSM取得→実ホスト採点→削除を開発用接続で検証しています。全問題対応やTenkaCloud標準起動への自動統合を意味しません。未対応の問題を選択しないでください。
 
@@ -108,8 +108,11 @@ SDKには明示endpoint、region、ダミー`TCSIM…`キーを設定し、reque
 
 ## 開発と検証
 
+開発時の必須 UI ソース検査には Node.js が必要です。PATH にない場合は
+`NODE=/path/to/node` を指定します。ビルド済みバイナリの実行には不要です。
+
 ```sh
-make before-commit       # format/vet、asset/module整合、race、statement90%、build
+make before-commit       # format/vet、asset/module・UIソース検査、race、statement90%、build
 # source-line90%もCIと同様に確認する（上のcoverage.out生成後）
 go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > reports/coverage.xml
 python3 scripts/check-coverage.py reports/coverage.out reports/coverage.xml
