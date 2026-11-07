@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -830,9 +829,15 @@ func (q *request) pagination() (string, string, string) {
 	in := q.b.model.shape(q.official.Input)
 	out := q.b.model.Shapes[q.official.Output]
 	for _, name := range []string{"NextToken", "nextToken", "Marker", "marker"} {
-		if _, ok := in.Members[name]; ok && out != nil {
-			if _, ok := out.Members[name]; ok {
-				inputToken, outputToken = name, name
+		if _, ok := in.Members[name]; !ok || out == nil {
+			continue
+		}
+		// A Marker input continues from NextMarker when the output has
+		// both, since its Marker only echoes the request.
+		for _, candidate := range []string{"Next" + strings.ToUpper(name[:1]) + name[1:], "next" + strings.ToUpper(name[:1]) + name[1:], name} {
+			if _, ok := out.Members[candidate]; ok {
+				inputToken, outputToken = name, candidate
+				break
 			}
 		}
 	}
@@ -847,11 +852,26 @@ func (q *request) pagination() (string, string, string) {
 // maxListLimit bounds any page size before it is converted to int.
 const maxListLimit = 1000
 
-type pageToken struct {
-	Op     string `json:"o"`
-	Region string `json:"r"`
-	Scope  string `json:"s"`
-	After  int64  `json:"a"`
+// pageToken is 32 lowercase hex characters: a 64-bit digest binding the
+// operation, Region and filter scope, then the last listed sequence number.
+// That form fits every bound model's token constraints, including 100- and
+// 128-character limits and standard base64 patterns.
+func pageToken(op, region, scope string, after int64) string {
+	return pageDigest(op, region, scope) + fmt.Sprintf("%016x", after)
+}
+
+func pageDigest(op, region, scope string) string {
+	sum := sha256.Sum256([]byte(op + "\x00" + region + "\x00" + scope))
+	return hex.EncodeToString(sum[:8])
+}
+
+// pageAfter returns the sequence number a token continues after.
+func pageAfter(text, op, region, scope string) (int64, bool) {
+	if len(text) != 32 || text[:16] != pageDigest(op, region, scope) {
+		return 0, false
+	}
+	after, err := strconv.ParseInt(text[16:], 16, 64)
+	return after, err == nil && after >= 0 && text[16:] == fmt.Sprintf("%016x", after)
 }
 
 func (q *request) list() (map[string]any, error) {
@@ -946,12 +966,11 @@ func (q *request) list() (map[string]any, error) {
 	scope := fingerprint(clone, "")
 	start := int64(0)
 	if text, ok := q.input[inputToken].(string); ok && text != "" {
-		raw, err := base64.RawURLEncoding.DecodeString(text)
-		var token pageToken
-		if err != nil || json.Unmarshal(raw, &token) != nil || token.Op != q.op.Name || token.Region != q.region || token.Scope != scope {
+		after, ok := pageAfter(text, q.op.Name, q.region, scope)
+		if !ok {
 			return nil, &fault{kind: "token", message: "Invalid pagination token for this request."}
 		}
-		start = token.After
+		start = after
 	}
 	page := []row{}
 	for _, r := range filtered {
@@ -962,8 +981,7 @@ func (q *request) list() (map[string]any, error) {
 	next := ""
 	if outputToken != "" && len(page) > limit {
 		page = page[:limit]
-		data, _ := json.Marshal(pageToken{q.op.Name, q.region, scope, page[len(page)-1].Seq})
-		next = base64.RawURLEncoding.EncodeToString(data)
+		next = pageToken(q.op.Name, q.region, scope, page[len(page)-1].Seq)
 	}
 	out := q.listOutput(page, parent, outputToken, next)
 	if q.op.HasMore != "" {

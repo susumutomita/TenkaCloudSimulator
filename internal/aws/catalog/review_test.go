@@ -306,3 +306,97 @@ func TestDescriptorsNameLookupIdentityAndPayloadOutputs(t *testing.T) {
 		}
 	}
 }
+
+// EFS pages continue from NextMarker, and a request Marker continues from the
+// output's NextMarker even when no official paginator names it.
+func TestMarkerPagesContinueFromNextMarker(t *testing.T) {
+	h := newHarness(t, efs)
+	for _, token := range []string{"t1", "t2"} {
+		expect(t, h.rest("efs", "POST", "/2015-02-01/file-systems", map[string]any{"CreationToken": token}), 201, "")
+	}
+	first := h.rest("efs", "GET", "/2015-02-01/file-systems?MaxItems=1", nil)
+	expect(t, first, 200, "")
+	next := str(first.body["NextMarker"])
+	if len(first.body["FileSystems"].([]any)) != 1 || next == "" || first.body["Marker"] != nil {
+		t.Fatalf("first page %v", first.body)
+	}
+	second := h.rest("efs", "GET", "/2015-02-01/file-systems?MaxItems=1&Marker="+url.QueryEscape(next), nil)
+	expect(t, second, 200, "")
+	if len(second.body["FileSystems"].([]any)) != 1 || second.body["NextMarker"] != nil {
+		t.Fatalf("second page %v", second.body)
+	}
+
+	model := &Model{Shapes: map[string]*Shape{
+		"In":  {Type: "structure", Members: map[string]Member{"Marker": {Shape: "S"}, "MaxItems": {Shape: "S"}}},
+		"Out": {Type: "structure", Members: map[string]Member{"Marker": {Shape: "S"}, "NextMarker": {Shape: "S"}}},
+		"S":   {Type: "string"},
+	}}
+	q := &request{b: &binding{model: model}, official: &Operation{Input: "In", Output: "Out"}}
+	if in, out, limit := q.pagination(); in != "Marker" || out != "NextMarker" || limit != "MaxItems" {
+		t.Fatalf("pagination() = %q, %q, %q", in, out, limit)
+	}
+	model.Shapes["Out"].Members = map[string]Member{"Marker": {Shape: "S"}}
+	if in, out, _ := q.pagination(); in != "Marker" || out != "Marker" {
+		t.Fatalf("pagination() without NextMarker = %q, %q", in, out)
+	}
+}
+
+// Leaving the provisioned throughput mode drops the provisioned throughput,
+// and throughput alone cannot be added to an elastic or bursting file system.
+func TestEFSThroughputUpdatesValidateTheMergedFileSystem(t *testing.T) {
+	h := newHarness(t, efs)
+	created := h.rest("efs", "POST", "/2015-02-01/file-systems", map[string]any{"CreationToken": "t1", "ThroughputMode": "elastic"})
+	expect(t, created, 201, "")
+	path := "/2015-02-01/file-systems/" + str(created.body["FileSystemId"])
+	expect(t, h.rest("efs", "PUT", path, map[string]any{"ProvisionedThroughputInMibps": 10.0}), 400, "BadRequest")
+	expect(t, h.rest("efs", "PUT", path, map[string]any{"ThroughputMode": "provisioned", "ProvisionedThroughputInMibps": 10.0}), 202, "")
+	expect(t, h.rest("efs", "PUT", path, map[string]any{"ProvisionedThroughputInMibps": 20.0}), 202, "")
+	updated := h.rest("efs", "PUT", path, map[string]any{"ThroughputMode": "elastic"})
+	expect(t, updated, 202, "")
+	if _, ok := updated.body["ProvisionedThroughputInMibps"]; ok || updated.body["ThroughputMode"] != "elastic" {
+		t.Fatalf("elastic update kept provisioned throughput: %v", updated.body)
+	}
+	listed := h.rest("efs", "GET", "/2015-02-01/file-systems", nil)
+	if fs := listed.body["FileSystems"].([]any)[0].(map[string]any); fs["ProvisionedThroughputInMibps"] != nil {
+		t.Fatalf("stored file system %v", fs)
+	}
+}
+
+// Every bound list accepts the tokens it issues: they fit each official
+// token member's length limits and pattern.
+func TestPageTokensFitEveryOfficialTokenMember(t *testing.T) {
+	h := newHarness(t, Services()...)
+	token := pageToken("Op", "us-east-1", "scope", 1<<40)
+	checked := 0
+	for _, b := range h.engine.bindings {
+		for name, op := range b.ops {
+			if op.Kind != List {
+				continue
+			}
+			q := &request{b: b, op: op, official: b.model.Operations[name]}
+			inputToken, _, _ := q.pagination()
+			if inputToken == "" {
+				continue
+			}
+			shape := b.model.shape(b.model.shape(q.official.Input).Members[inputToken].Shape)
+			if shape.Max != nil && float64(len(token)) > *shape.Max || shape.Min != nil && float64(len(token)) < *shape.Min {
+				t.Fatalf("%s %s: token length %d outside [%v, %v]", b.spec.Model, name, len(token), shape.Min, shape.Max)
+			}
+			if re := compiledPattern(shape.Pattern); shape.Pattern != "" && re != nil && !re.MatchString(token) {
+				t.Fatalf("%s %s: token %q does not match %s", b.spec.Model, name, token, shape.Pattern)
+			}
+			checked++
+		}
+	}
+	if checked < 50 {
+		t.Fatalf("only %d list operations checked", checked)
+	}
+	if after, ok := pageAfter(token, "Op", "us-east-1", "scope"); !ok || after != 1<<40 {
+		t.Fatalf("pageAfter(%q) = %d, %v", token, after, ok)
+	}
+	for _, bad := range []string{token[:31], pageToken("Other", "us-east-1", "scope", 1), pageToken("Op", "us-east-1", "scope", 1)[:16] + "zzzzzzzzzzzzzzzz", pageToken("Op", "us-east-1", "scope", 1)[:16] + "000000000000000A"} {
+		if _, ok := pageAfter(bad, "Op", "us-east-1", "scope"); ok {
+			t.Fatalf("pageAfter accepted %q", bad)
+		}
+	}
+}
