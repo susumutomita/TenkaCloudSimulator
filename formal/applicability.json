@@ -4,14 +4,14 @@
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "f70a30ad3736bf144790f87be45d3134c22ee0ecbfc05d77970b5d25ec2f2cde",
+      "sha256": "dc9074e3ee09e1b6069c688ce3d93431f56e5e8426be2969cc0dfead4b4fc533",
       "disposition": "documentation",
       "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "8859e18ccd3bd47f77ad1e5d3bb53f1c17df8ae22d871e8decc50b36fa10ffbb",
+      "sha256": "32612b5df76b97dd8582ae4d6b3614fb2bde43350151c206743cc41abb9ec05b",
       "disposition": "documentation",
       "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
       "models": []
@@ -26,6 +26,13 @@
     {
       "path": "docs/aws-catalog.md",
       "sha256": "2b6692fdda51bc97d6d4deace0faab7ecb070b46e6565220e51492a6e4add86d",
+      "disposition": "documentation",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "models": []
+    },
+    {
+      "path": "docs/azure-catalog.md",
+      "sha256": "66abc5994c4a943a4f587acec0b8d1185220884fd0c803e4d6669c3682ce220a",
       "disposition": "documentation",
       "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
       "models": []
@@ -53,7 +60,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "841408081958d26bb2962ee27aaee989a175369e79ef05a2e88c42633d316313",
+      "sha256": "d81929f6ca8ee55bdcea0a0f3c722f913c3c6e2f8572560a08b271a83ebc7acb",
       "disposition": "formal-infrastructure",
       "reason": "Registers the bounded catalog store model and its twelve protected mutation controls without relaxing any existing model, invariant, control, deadline or applicability rule.",
       "models": []
@@ -3570,6 +3577,686 @@
       ]
     },
     {
+      "path": "internal/azure/arm/describe.go",
+      "sha256": "04a61dbfb9385b13154b30cc13dd5c5b3ab1a79616bf2b386708ba158da15110",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/edges_test.go",
+      "sha256": "88985d8b3ade7b98a7128e457b334816984a1a96ee8b80516bde15e8315e0820",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/azure/arm/engine.go",
+      "sha256": "eb8cd37194844d4ca73c17c3261f67da032668541c1a20e0cfb1c5265e557241",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/engine_test.go",
+      "sha256": "4b57dd1dd54239062c5b3edbb85fe1dd88472b67163df692338a806264d8dd15",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/azure/arm/model.go",
+      "sha256": "d473af0b064d2830ad26e81093eab541ebda6336c2ee8da0614ccdd122561620",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/models/Microsoft.AppConfiguration.json",
+      "sha256": "7b5b6a1ce620ff07b10c65d3d3a4eb803b1416ac09b6664b400a8b461e7ba0f2",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/models/Microsoft.ContainerRegistry.json",
+      "sha256": "08a5ae8e3b5acdfb4fbafd41114d01a8222fd84f0ad445cfa96b6462a2039afa",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/models/Microsoft.DocumentDB.json",
+      "sha256": "862e556fc95a4ac4b9dd7875649bd7f423da95b718a3c493cb7c29ae7a21005c",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/models/Microsoft.EventHub.json",
+      "sha256": "44505a41ed6fe561fd1c10389e1b7350e37556fba9824fb7090c361af4ff7a93",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/models/Microsoft.KeyVault.json",
+      "sha256": "97e888d4ad20315bdb2badc5d78e194d064034729a384f578bbd8f9a31f4c9fa",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/models/Microsoft.ManagedIdentity.json",
+      "sha256": "bea2f3a9558d8c360efeeb5f988d6347d702c8248b6e74d6ea0a5383b591d9a0",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/models/Microsoft.Network.json",
+      "sha256": "f8cddaafdc196750f3f01285e1b5c9b0bf5fae77d42639805b65da5ec17552f6",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/models/Microsoft.OperationalInsights.json",
+      "sha256": "7acde11866205495d96d979686716a96ff24333931c786cf2565b724f2bf0082",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/models/Microsoft.Resources.json",
+      "sha256": "1c13ee02dbc6af4ca8691c79a96280de310c29a6815577294ba610de91cde62e",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/models/Microsoft.ServiceBus.json",
+      "sha256": "8380a45db5660250acb553b3ef51a522296607e9d7bf8176983a51ae46bbb4be",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/models/Microsoft.Web.json",
+      "sha256": "cd56b328dda2a69b77995a2afa866daf27074b3d3f7497356abb27d8db5efb59",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/openapi.go",
+      "sha256": "43ac447d54ca333b2ef726b021a87c9d0453dafe223afc7466b03162ab162847",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/openapi_test.go",
+      "sha256": "b93c3a940cfd4e6ed507357c35ad6eeecc238391ba4f0fa3e5f85ac36ba1c7bc",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/azure/arm/products_test.go",
+      "sha256": "0ca1fb65858630fa186030f0f4ea0e7923f18e4f994c235d51b0123a52526265",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/azure/arm/providers.go",
+      "sha256": "a8c9b1706f84864eb2946ef301364aba2bdaee71b1aa8e2fc256f65cbfb61fdc",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/providers_core.go",
+      "sha256": "b23fde0e4fc37fa39cce36604c17a63b02edc6e7864c0a47e764825801642e16",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/providers_network.go",
+      "sha256": "61a4732a4ad04c549787528d61fa720cc98af56f281105dc256dc14b2247831b",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/providers_platform.go",
+      "sha256": "1fce3c50fcef98f23a0bc728419385b9f67b9c7f301605beaffae54bb54941ca",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/selection.json",
+      "sha256": "4502510ec062ece69282fa61b338baac25e3f00ce616f4cdc5914de061f0352a",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/selection_test.go",
+      "sha256": "eb542b8129b99a95a99dbd196359cb2f9a8a1abf1a3fed34865f344178d3bcf3",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/azure/arm/semantics.go",
+      "sha256": "2703e89931eacc35a6324f490005c39aac05fe1f21797f8e0e88eac728d95558",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/semantics_test.go",
+      "sha256": "ce48a72f236ed4f0776b6b1f2629d7d1ec609bf796f1d2643f2e4fa56a8b856f",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/azure/arm/spec.go",
+      "sha256": "cc1b0fdf9ed0761548c29fc3adea96eed9e1cdbe39a72f2a0ffa69614455409c",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/store.go",
+      "sha256": "59b69d46376ed2be230c78fc892e7befcb85447d430b95a75f5bce7b0b1329b7",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/synthetic_test.go",
+      "sha256": "4a9eae7d0227b706400980429de7d3fdd980cddab177d1f392842c899e387684",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/azure/arm/value.go",
+      "sha256": "fa5a02d66d54a643a5d4283e2aefc547a69023b968adbe534eeca23320b1486f",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/arm/value_test.go",
+      "sha256": "32f12e05496e3f7a4bfbeb01dc66ec463506e493786d371b4057479aa6efb623",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
       "path": "internal/gcp/catalog/apis.go",
       "sha256": "99a64b1b68a620f7c6a80a8106c6c33a39ddaa01d7f5660465307a6e6f50909c",
       "disposition": "modeled",
@@ -5183,6 +5870,13 @@
       ]
     },
     {
+      "path": "internal/legal/assets/AZURE-REST-API-SPECS-NOTICES.txt",
+      "sha256": "94f10eaf2bf61c97cc3d90ad30b2c4d7e5ca8f3954379847c6487bf46a0390d2",
+      "disposition": "documentation",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "models": []
+    },
+    {
       "path": "internal/legal/assets/GOOGLE-DISCOVERY-NOTICES.txt",
       "sha256": "f2dc01c20ad7faac31d65aeeede2a34118db165213d8ebb60d9d204f3f873725",
       "disposition": "documentation",
@@ -5190,8 +5884,117 @@
       "models": []
     },
     {
+      "path": "internal/server/access.go",
+      "sha256": "09f323882a7201d5457b56690b25a5e8c7d02c5b7bc9859703d28225f23b3ac9",
+      "disposition": "modeled",
+      "reason": "Access admission seam: an unauthenticated provider request is still refused with 401 before any provider handler runs; only the error body for Azure Resource Manager paths changes to the ARM envelope. Token-boundary admission is projected by LandingAccessAdmission; the body is covered by server and SDK tests.",
+      "models": [
+        {
+          "id": "LandingAccessAdmission",
+          "properties": [
+            "ExternalBoundary",
+            "PublicResponse",
+            "TokenBoundary",
+            "UnknownNeverStatic"
+          ],
+          "limits": "Admission boundary only: no HTTP body formatting, token parsing or provider routing is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog.html",
+      "sha256": "4ac334fab7ab9be076a0c48808187b26c52e30af257f9debc7fc54648b612711",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/Microsoft.AppConfiguration.json",
+      "sha256": "9d6c592cfaea7e378d728e61d3037d6807c66cad5c9366dc310786b229dfbeea",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/Microsoft.ContainerRegistry.json",
+      "sha256": "24eccc864f446d7ade7ab5e6f6023ec8aef252701e888cc37d9c17dfaf24b879",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/Microsoft.DocumentDB.json",
+      "sha256": "8b4227843dea163668f374c1b5d2c46f0e2aad7bdbd1ec4e26935efe8b420a04",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/Microsoft.EventHub.json",
+      "sha256": "9ae5166b65c87a70f034300678c2f02e2d79f5472d1028cf162705bcf7abf116",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/Microsoft.KeyVault.json",
+      "sha256": "689f22927bdccc82ae3ae1eec1608658da2306ef40d217973b954c816d730b17",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/Microsoft.ManagedIdentity.json",
+      "sha256": "e51f35bcf455033e867141b3d67b6c55b877a9c53343f215b2e7a1abd78928e4",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/Microsoft.Network.json",
+      "sha256": "f7a022d13528e12db7683a9e409148e56e64711b04e71e52c3890e789c5a6a6f",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/Microsoft.OperationalInsights.json",
+      "sha256": "b9eb90994807c7ac47ef5ae477ac9407909f0a28d3c4f850359f31f97e7eaa55",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/Microsoft.Resources.json",
+      "sha256": "8a9da0503c19bc49ba14522bbdabdba01dcba2988fae68be10a4be48dc94c663",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/Microsoft.ServiceBus.json",
+      "sha256": "09fcbd67c261e8bffe8a8032cbbe36a20de075f7efd00779da4c58fa1e179b21",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/Microsoft.Web.json",
+      "sha256": "ed6f21007d507bc2fbc647eb59968cfadf0f23346e98cf59836b277df8c4c5eb",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/azure-catalog/index.json",
+      "sha256": "8dda92bb6d6299218d20377e244a66d991ad07b7c6826bccd1f97d71eff4c018",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
       "path": "internal/server/apidocs/catalog-init.js",
-      "sha256": "f2742662eb09235b666df78b4860984551c8f36522fd54bb5cde18e5027458bf",
+      "sha256": "e5eb7f818bbe3955d88fce9e55eacd8340c7a47d47b76602e67482f39f6b9c8f",
       "disposition": "presentation",
       "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
@@ -6294,6 +7097,39 @@
       "models": []
     },
     {
+      "path": "internal/server/azure_catalog.go",
+      "sha256": "b40291441b402e4dab3458b734ac3387f169bd2d70a5c1721488f4dac68421d7",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/azure_catalog_test.go",
+      "sha256": "f4de6651907ac8d28b762cdbe865fdf2e5b1c69a7b0aca9282c4f4934efe6a4a",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
       "path": "internal/server/cloud_storage.go",
       "sha256": "a471723a7196ba3362885e3a7981df299f4084b6034b57c747083ca5e1064803",
       "disposition": "modeled",
@@ -6327,8 +7163,15 @@
       "models": []
     },
     {
+      "path": "internal/server/sakura_provider_test.go",
+      "sha256": "2bcbe1ff2fa98579e32ed26fd08cb0978770ee0e5c6aed1d2dd61df08b52b111",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
       "path": "internal/server/server.go",
-      "sha256": "70687660346033cfb5ab01e05ee8487892cf5102e298a55d171f5b2d2c0cdb14",
+      "sha256": "a57dfd37adc0b4ad55c67a23187e5c747618d18c11fd4982d05498303c0f7dc8",
       "disposition": "modeled",
       "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
       "models": [
@@ -6354,14 +7197,14 @@
     },
     {
       "path": "internal/server/web/app.css",
-      "sha256": "43068067aa204e5422ab22f0b0d88174be62f140596f21adfe30ffda596c5d63",
+      "sha256": "da83c8235680f11c28e5ce6439a6636695bfb20227838a9507ed8da32de91432",
       "disposition": "presentation",
       "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "3a7cbeb0403006e933eed451e5e92c7b71fb3e46c2369ca09dc6a320c2695aa4",
+      "sha256": "119a09764f22d888dfb55caf5d4d8c50c4dc836008364bf440297840605726d6",
       "disposition": "modeled",
       "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
       "models": [
@@ -6380,9 +7223,16 @@
     },
     {
       "path": "scripts/requirements-test.txt",
-      "sha256": "d057ec2d53f8cf3efc695ac54eee7bf731cdc5fcc72ad362ccd9f0cf7dd12ec6",
+      "sha256": "ddebc752336cb0b6f7db12197ac6082ca7e7d11b9d466baa7904b7c9c08bc625",
       "disposition": "validation-tooling",
       "reason": "Validation tooling only; no runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "test/console/navigation.test.mjs",
+      "sha256": "bb44b3b0617db5a18592e4cb7f710d6945645411cbd96929952e2b3f61b04599",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
       "models": []
     },
     {
@@ -6402,6 +7252,97 @@
     {
       "path": "test/e2e/aws_catalog_fixtures.py",
       "sha256": "e0820925dab4dabe9c51e7f248c5f38293cdefbf004651c2fa8604aa97d7d085",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_console.py",
+      "sha256": "371591144d463270effbf0893d0e57ef6cb8ba6488df9fd6250ddfe1c038fd05",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures.py",
+      "sha256": "936b1979879264674fc88672628fec6c5417111e36e1b04d5ec5a508e2b5b0b9",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures/Microsoft.AppConfiguration.json",
+      "sha256": "fce8aa255d75bce21bba9d8217d214908f1dc1895d76bb4e09de1dba688f25f8",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures/Microsoft.ContainerRegistry.json",
+      "sha256": "b4a5597a592c26176f885281540ca16e93337321562569dc916496d7a4f2d865",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures/Microsoft.DocumentDB.json",
+      "sha256": "602d8930e5cf405bed3be09c69672bf99cdb427f37a38f95082675029d3b7ff8",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures/Microsoft.EventHub.json",
+      "sha256": "0f27cd23146a720e35ed89e2ce8590cedba959ed9b14d59a389867ed8278ab51",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures/Microsoft.KeyVault.json",
+      "sha256": "2232261d8ee0294b93a76b05e0ac545444702bf53c5a8359320866da27999a30",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures/Microsoft.ManagedIdentity.json",
+      "sha256": "cf9575b522db6c4c551a961148fef1942c732a9f26a33a1ba1b16050c4f31625",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures/Microsoft.Network.json",
+      "sha256": "a33831e58ae91fe0c7d21eae12291f981fb57fcf4ba7c83203be9ff5488d8ad4",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures/Microsoft.OperationalInsights.json",
+      "sha256": "f024316cea570d9bd95dd204a35903ae58cb1b557ae57e2fcfaa4a906f311022",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures/Microsoft.Resources.json",
+      "sha256": "9f7a64f8bc2ed575aab75e6a898e3b7c6873d9554661116e42e7e393863debf8",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures/Microsoft.ServiceBus.json",
+      "sha256": "558d60c12105536e25eb3b09816b2462b46bdfa28caf8200c634e2723e5a3747",
+      "disposition": "test-support",
+      "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_catalog_fixtures/Microsoft.Web.json",
+      "sha256": "578f24339c2fc04f2a0c9abf42e207adf8f8a459f5d57151a476fbd51d10cc9d",
       "disposition": "test-support",
       "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
       "models": []
@@ -7164,7 +8105,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "fd553054c3d9587298558eddcf9c16bcb17ffb53ca635e242776a4a632afd708",
+      "sha256": "eb7b007dc65bd2cad2072827f5ac4e82901dd1d4a96e281004af74bffec4ac2c",
       "disposition": "test-support",
       "reason": "Native, SDK, browser or gate tests for the catalog; tests do not change runtime state semantics.",
       "models": []
@@ -7464,6 +8405,13 @@
       "models": []
     },
     {
+      "path": "third_party/AZURE-REST-API-SPECS-NOTICES.txt",
+      "sha256": "94f10eaf2bf61c97cc3d90ad30b2c4d7e5ca8f3954379847c6487bf46a0390d2",
+      "disposition": "documentation",
+      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "models": []
+    },
+    {
       "path": "third_party/GOOGLE-DISCOVERY-NOTICES.txt",
       "sha256": "f2dc01c20ad7faac31d65aeeede2a34118db165213d8ebb60d9d204f3f873725",
       "disposition": "documentation",
@@ -7471,15 +8419,55 @@
       "models": []
     },
     {
+      "path": "tools/azuremodels/extract.py",
+      "sha256": "2cba38e10ea3c146182212c0da9c128332d2a3fdb728d0498fd0ed5f79a3b39a",
+      "disposition": "modeled",
+      "reason": "Catalog engine, specification, embedded official model subset or composition seam whose atomic store transitions are projected by CatalogResourceLifecycle; wire decoding and projection are covered by native and SDK tests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Finite store projection only: no wire parsing, shape validation, ARN formatting, SQL/locking/crash behavior or Go refinement is modeled."
+        }
+      ]
+    },
+    {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "fd5288fbe5b78eb28705734d0763c0394ca829baeca0b0701e14720925790013",
+      "sha256": "0bd05c38014bc4c60099763c3b837d6f2a4cff9ffafafd3869bd54dd3b948ac1",
       "disposition": "presentation",
       "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "12b56d36d0995a8a973289b7f3539cb6cecd801336ee3c832461087d60eaeade",
+      "sha256": "d3cfa79f8c7429f1eadeabc9cd318543b3fa34c9a0e05dfd088b8b7749449813",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/azure-arm.css",
+      "sha256": "0ee3626b7677ed75bf593482991532342edb7c7a65d9365a64aacea16d9f381e",
+      "disposition": "presentation",
+      "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/azure-arm.jsx",
+      "sha256": "7eb4d7e20f44f87e2532f050e20e571012bb024eaa335583429890e76d1c6444",
       "disposition": "presentation",
       "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
@@ -7505,7 +8493,7 @@
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "cb1fcb578ec9ea1f64dad7a088ef4738816be60a33ca2e80811cd040928ad554",
+      "sha256": "557da08673273a0c1c223adf11619561199b814ed6ee5199fc046ee236934a10",
       "disposition": "presentation",
       "reason": "Generated or authored presentation for the catalog console or served reference; actual behavior is verified by browser and SDK end-to-end tests, not by the finite model.",
       "models": []
@@ -7545,7 +8533,7 @@
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "d18e8e1b06f8544420f3b3a1731f78ffcfb19d86e921bf1221857d65db102286",
+      "sha256": "be83f27612007640f01b2ca62447000ae7f3eac2df88203944f2208a08409e8d",
       "disposition": "modeled",
       "reason": "Catalog console view source or its embedded bundle; view acceptance, single-write sequencing and failure visibility are projected by CatalogConsoleEpoch; rendering and native results are covered by browser tests.",
       "models": [
