@@ -55,6 +55,9 @@ type OpDescriptor struct {
 	// "arn", "id" or "name".
 	LookupKey string `json:"lookupKey,omitempty"`
 	Parent    string `json:"parent,omitempty"`
+	// Fixed holds input members, by official name, that every request of
+	// this operation sends with these values.
+	Fixed map[string]any `json:"fixed,omitempty"`
 }
 
 // ResourceDescriptor describes one reviewed resource kind. The *Member
@@ -155,7 +158,7 @@ func (b *binding) describeOp(op *Op, res *Resource) OpDescriptor {
 	if b.model.Metadata.Protocol == "json" {
 		method, uri = "POST", "/"
 	}
-	od := OpDescriptor{Name: op.Name, Method: method, URI: uri, Lookup: op.Lookup, Parent: op.Parent, LookupKey: lookupKey(op.Lookup, res)}
+	od := OpDescriptor{Name: op.Name, Method: method, URI: uri, Lookup: op.Lookup, Parent: op.Parent, LookupKey: lookupKey(op.Lookup, res), Fixed: op.Fixed}
 	if input := b.model.Shapes[official.Input]; input != nil {
 		for _, name := range input.sortedMembers() {
 			member := input.Members[name]
