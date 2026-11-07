@@ -89,8 +89,13 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const keys=rowKeys(resource);
  const identity=item=>item?.[keys.name]||item?.[keys.id]||item?.[keys.arn]||'';
  const lookupValue=(item,op)=>{
-  const member=op.lookup;if(member===resource.arnMember||/arn$/i.test(member))return item[keys.arn]||item[member];
-  if(member===resource.idMember)return item[keys.id];return item[keys.name]||item[member]||item[keys.id]||item[keys.arn]||identity(item);
+  // Prefer the identity the lookup member names, then any candidate that
+  // matches the member's official pattern (an ID, not a display name).
+  const order=op.lookupKey==='arn'?['arn','id','name']:op.lookupKey==='id'?['id','name','arn']:['name','id','arn'];
+  const values=[...order.map(k=>item[keys[k]]),item[op.lookup]].filter(v=>v!==undefined&&v!==null&&v!=='');
+  const member=(op.members||[]).find(m=>m.name===op.lookup);
+  if(member?.pattern){try{const re=new RegExp('^(?:'+member.pattern+')$');const hit=values.find(v=>re.test(String(v)));if(hit!==undefined)return hit}catch{/* An RE2-only pattern falls back to the identity order. */}}
+  return values[0]??identity(item);
  };
  const parentInput=op=>op?.parent&&parent?{[op.parent]:parent}:{};
  // Some official lists return plain ARNs or names; each becomes an item

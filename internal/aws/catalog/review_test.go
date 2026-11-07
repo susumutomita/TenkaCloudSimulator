@@ -275,3 +275,34 @@ func TestNumberReadsRequestAndStoredValues(t *testing.T) {
 		t.Fatal("a malformed number is not a number")
 	}
 }
+
+// Lookups name the identity they carry, and REST payload outputs are not
+// wrapped: AppConfig reads by ApplicationId, App Mesh returns the mesh body.
+func TestDescriptorsNameLookupIdentityAndPayloadOutputs(t *testing.T) {
+	h := newHarness(t, appConfig, appMesh)
+	ops := map[string]OpDescriptor{}
+	for _, d := range h.engine.Describe() {
+		for _, r := range d.Resources {
+			for kind, op := range r.Ops {
+				ops[d.Model+"/"+r.Kind+"/"+kind] = op
+			}
+		}
+	}
+	read := ops["appconfig/application/read"]
+	if read.LookupKey != "id" {
+		t.Fatalf("appconfig read %+v", read)
+	}
+	for _, m := range read.Members {
+		if m.Name == "ApplicationId" && m.Pattern == "" {
+			t.Fatal("the lookup member must carry its official pattern")
+		}
+	}
+	if mesh := ops["appmesh/mesh/read"]; mesh.Wrapper != "" {
+		t.Fatalf("payload output must not be wrapped: %+v", mesh)
+	}
+	for lookup, want := range map[string]string{"ResourceArn": "arn", "Name": "name", "": ""} {
+		if got := lookupKey(lookup, &Resource{}); got != want {
+			t.Fatalf("lookupKey(%q) = %q, want %q", lookup, got, want)
+		}
+	}
+}

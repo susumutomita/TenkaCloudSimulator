@@ -1,6 +1,9 @@
 package catalog
 
-import "sort"
+import (
+	"sort"
+	"strings"
+)
 
 // MemberDescriptor describes one top-level official input member.
 type MemberDescriptor struct {
@@ -13,6 +16,9 @@ type MemberDescriptor struct {
 	Enum         []string `json:"enum,omitempty"`
 	Min          *float64 `json:"min,omitempty"`
 	Max          *float64 `json:"max,omitempty"`
+	// Pattern is the official string pattern, so clients send a value the
+	// member accepts (for example an ID rather than a display name).
+	Pattern string `json:"pattern,omitempty"`
 }
 
 // OpDescriptor tells first-party clients how to send one official operation.
@@ -45,7 +51,10 @@ type OpDescriptor struct {
 	InputToken  string `json:"inputToken,omitempty"`
 	OutputToken string `json:"outputToken,omitempty"`
 	Lookup      string `json:"lookup,omitempty"`
-	Parent      string `json:"parent,omitempty"`
+	// LookupKey says which resource identity the lookup member names:
+	// "arn", "id" or "name".
+	LookupKey string `json:"lookupKey,omitempty"`
+	Parent    string `json:"parent,omitempty"`
 }
 
 // ResourceDescriptor describes one reviewed resource kind. The *Member
@@ -146,12 +155,12 @@ func (b *binding) describeOp(op *Op, res *Resource) OpDescriptor {
 	if b.model.Metadata.Protocol == "json" {
 		method, uri = "POST", "/"
 	}
-	od := OpDescriptor{Name: op.Name, Method: method, URI: uri, Lookup: op.Lookup, Parent: op.Parent}
+	od := OpDescriptor{Name: op.Name, Method: method, URI: uri, Lookup: op.Lookup, Parent: op.Parent, LookupKey: lookupKey(op.Lookup, res)}
 	if input := b.model.Shapes[official.Input]; input != nil {
 		for _, name := range input.sortedMembers() {
 			member := input.Members[name]
 			shape := b.model.shape(member.Shape)
-			md := MemberDescriptor{Name: name, Location: member.Location, LocationName: member.LocationName, Type: shape.Type, Enum: shape.Enum, Min: shape.Min, Max: shape.Max}
+			md := MemberDescriptor{Name: name, Location: member.Location, LocationName: member.LocationName, Type: shape.Type, Enum: shape.Enum, Min: shape.Min, Max: shape.Max, Pattern: shape.Pattern}
 			for _, required := range input.Required {
 				md.Required = md.Required || required == name
 			}
@@ -164,7 +173,8 @@ func (b *binding) describeOp(op *Op, res *Resource) OpDescriptor {
 	if output := b.model.Shapes[official.Output]; output != nil {
 		for _, name := range output.sortedMembers() {
 			member := output.Members[name]
-			if member.Shape == res.Shape || member.Shape == res.Summary {
+			// A REST payload member is the whole body, not a wrapper key.
+			if (member.Shape == res.Shape || member.Shape == res.Summary) && output.Payload != name {
 				od.Wrapper = member.wire(name)
 			}
 			if shape := b.model.shape(member.Shape); shape.Type == "list" && (shape.Member.Shape == res.Shape || shape.Member.Shape == res.Summary) {
@@ -250,4 +260,22 @@ func itemKey(item *Shape, res *Resource, member, generator string) string {
 		}
 	}
 	return ""
+}
+
+// lookupKey names the resource identity a lookup member carries: the ARN
+// member or an *Arn member, the ID member or an *Id/*Identifier member, or
+// otherwise the name.
+func lookupKey(lookup string, res *Resource) string {
+	if lookup == "" {
+		return ""
+	}
+	last := lookup[strings.LastIndex(lookup, ".")+1:]
+	lower := strings.ToLower(last)
+	switch {
+	case last == res.ARNMember || strings.HasSuffix(lower, "arn"):
+		return "arn"
+	case last == res.IDMember || res.IDMember != "" && (strings.HasSuffix(lower, "id") || strings.HasSuffix(lower, "identifier")):
+		return "id"
+	}
+	return "name"
 }

@@ -155,6 +155,30 @@ def run():
                 expect(page.get_by_role('link', name='person')).to_be_visible()
                 directory.delete_facet(SchemaArn=schema, Name='person')
                 directory.delete_schema(SchemaArn=schema)
+                # Lookups send the identity the member accepts (AppConfig IDs), and
+                # REST payload outputs open unwrapped (App Mesh meshes).
+                configs = team.client('appconfig')
+                application = configs.create_application(Name='sdk-app')['Id']
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^AWS AppConfig')).click()
+                page.get_by_role('tab', name='application').click()
+                page.get_by_role('link', name='sdk-app').click()
+                expect(page.get_by_text(application, exact=True).first).to_be_visible()
+                page.get_by_role('button', name='Back to list').click()
+                page.get_by_role('button', name='Delete sdk-app').click()
+                page.get_by_role('dialog').get_by_role('button', name='Delete').click()
+                expect(page.get_by_text('Resource deleted.')).to_be_visible()
+                assert configs.list_applications()['Items'] == []
+                meshes = team.client('appmesh')
+                meshes.create_mesh(meshName='sdk-mesh')
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^AWS App Mesh')).click()
+                page.get_by_role('tab', name='mesh').click()
+                page.get_by_role('link', name='sdk-mesh').click()
+                expect(page.get_by_text('sdk-mesh', exact=True).first).to_be_visible()
+                expect(page.get_by_text('No details', exact=False)).to_have_count(0)
+                page.get_by_role('button', name='Back to list').click()
+                meshes.delete_mesh(meshName='sdk-mesh')
                 # A REST-JSON parent and child through the same generic view.
                 page.get_by_role('button', name=re.compile('^Catalog service')).click()
                 page.get_by_role('option', name=re.compile('^AWS Amplify')).click()
