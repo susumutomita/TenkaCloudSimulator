@@ -52,8 +52,14 @@ func noPassword(body map[string]any) error {
 }
 
 // clusterNetwork accepts the current networkConfig.network or the deprecated
-// top-level network, as the official field descriptions allow.
+// top-level network, as the official field descriptions allow. It also
+// refuses initialUser.password, which the simulator never stores.
 func clusterNetwork(body map[string]any) error {
+	if user, ok := body["initialUser"].(map[string]any); ok {
+		if err := noPassword(user); err != nil {
+			return err
+		}
+	}
 	if network, _ := body["network"].(string); network != "" {
 		return nil
 	}

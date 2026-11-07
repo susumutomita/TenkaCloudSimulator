@@ -49,3 +49,17 @@ func TestPatchesRespectTheAggregateMetadataBudget(t *testing.T) {
 	}
 	expect(t, h.call("owner", "POST", loc+"/clusters?clusterId=c2", map[string]any{"network": strings.Repeat("n", 200)}), 429, "RESOURCE_EXHAUSTED")
 }
+
+// An AlloyDB cluster's initial user password is refused like a user's, so
+// it is never stored or echoed.
+func TestAlloyDBClusterInitialUserPasswordIsRefused(t *testing.T) {
+	network := map[string]any{"networkConfig": map[string]any{"network": "projects/p/global/networks/default"}}
+	withPassword := map[string]any{"initialUser": map[string]any{"user": "postgres", "password": "secret"}, "networkConfig": network["networkConfig"]}
+	if err := clusterNetwork(withPassword); err == nil {
+		t.Fatal("initialUser.password was accepted")
+	}
+	withoutPassword := map[string]any{"initialUser": map[string]any{"user": "postgres"}, "networkConfig": network["networkConfig"]}
+	if err := clusterNetwork(withoutPassword); err != nil {
+		t.Fatalf("initialUser without password: %v", err)
+	}
+}
