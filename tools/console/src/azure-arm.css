@@ -1,0 +1,24 @@
+/* Azure Resource Manager view: extends the Azure console styling with scope
+   selectors, a resource-type menu and read-only JSON. No Microsoft assets. */
+.azure-arm-view select{font:inherit;color:var(--az-text);background:#fff;border:1px solid #737373;min-height:32px;padding:4px 6px;max-width:100%;width:100%}
+.azure-arm-scope{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 16px;align-items:end;margin-bottom:12px}
+.azure-arm-scope label{font-weight:600;font-size:13px;grid-row:1}
+.azure-arm-scope select{grid-row:2}
+.azure-arm-menu{max-height:none}
+.azure-arm-menu button{background:#fff;border-inline-start:3px solid transparent;font-weight:400;margin:1px 0}
+.azure-arm-menu button[aria-current=page]{background:#edebe9;border-inline-start-color:var(--az-blue);font-weight:600}
+.azure-arm-menu button.azure-arm-child{padding-inline-start:24px}
+.azure-arm-menu label{display:block}
+.azure-arm-reference{color:var(--az-blue);padding:5px 10px;min-height:32px;display:inline-flex;align-items:center}
+.azure-arm-confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.azure-arm-confirm p{flex-basis:100%;margin:0}
+.azure-arm-json{margin:0 0 12px;max-height:24rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#f8f8f8;border:1px solid var(--az-border);padding:8px}
+.azure-arm-json:focus-visible{outline:2px solid #005a9e;outline-offset:2px}
+.azure-arm-view .azure-pane-body select{display:block;margin-top:6px;font-weight:400}
+.azure-arm-check{display:flex!important;gap:8px;align-items:center}
+.azure-arm-hint{display:block;font-weight:400;font-size:12px;color:#565656;margin-top:4px}
+.azure-arm-view .azure-pane-body h3{font-size:14px;margin:18px 0 6px}
+/* Narrow screens collapse the type menu behind a disclosure button. */
+.azure-arm-view .azure-arm-menu-toggle{display:none;width:100%;text-align:start;background:#fff;border:1px solid var(--az-border);font-weight:600}
+@media(max-width:700px){.azure-arm-scope{grid-template-columns:minmax(0,1fr)}.azure-arm-scope label,.azure-arm-scope select{grid-row:auto}
+.azure-arm-view .azure-arm-menu-toggle{display:block}.azure-arm-menu-list{display:none;margin-top:8px}.azure-arm-menu-list.is-open{display:block}}
