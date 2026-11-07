@@ -15,10 +15,12 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The combined registry requires **53 baselines/429 required named mutation
-controls (482 executions)**. Main's 52/415 inventory is preserved: the earlier
+The combined registry requires **55 baselines/450 required named mutation
+controls (505 executions)**. Main's 52/415 inventory is preserved: the earlier
 50/398 plus CatalogResourceLifecycle (twelve controls) and CatalogConsoleEpoch
-(five). LoginInputIntent adds one model and fourteen controls. The earlier
+(five). LoginInputIntent adds one model and fourteen controls. SNSAdmission/SNSLifecycle
+add two finite normalized-admission/local-record models and twenty-one controls,
+not Go/SQL, parser, cryptography or external-delivery refinement. The earlier
 pre-landing 48/381 inventory gained LandingAccessAdmission (six controls) and
 LandingTopologyState (eleven). Exact-HEAD whole-gate validation after this main
 integration is pending; pre-merge `8149cac` receipts for 463 executions or 102

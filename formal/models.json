@@ -6133,6 +6133,290 @@
      "expect_invariant": "AdoptedValueExact"
     }
    ]
+  },
+  {
+   "id": "SNSLifecycle",
+   "model": "formal/SNSLifecycle.tla",
+   "config": "formal/SNSLifecycle.cfg",
+   "bounds": "2 topic names,2 subscription IDs,2 message IDs;1 stored message,2 abstract bytes,1 delivery row; sizes1..3; Boolean write acknowledgements; no arbitrary SQL execution.",
+   "properties": [
+    "TypeOK",
+    "NoOrphans",
+    "MessageCountBounded",
+    "ByteBudgetBounded",
+    "DeliveryBudgetBounded",
+    "DurableAck",
+    "PublishRecipientsExact",
+    "PeerFrame",
+    "NoDanglingDeliveredMessage",
+    "DeleteAckEmpty",
+    "DeleteRetryAcknowledged"
+   ],
+   "limits": "Atomic state transitions assume transaction rollback and model validated existing state. Captured post-operation ACK and frozen-delete ownership, globally bounded count/abstract byte/delivery budgets and target/peer frames only. Not SQL/driver/crash/Go refinement, UUID allocation, schema migration, UTF-8 byte calculation, quotas at real cardinality, IAM or outbound delivery. Delivery audit may outlive Unsubscribe, but not its stored message or topic. Ignored/vanishing/late-reinsert native SQLite faults and two-host SDK checks are separate executable obligations.",
+   "source_scope": [
+    "internal/aws/sns_store.go",
+    "internal/aws/sns_storage_regression_test.go",
+    "internal/aws/sns_test.go",
+    "internal/server/sns_test.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "MissingTopicGuard",
+     "edits": [
+      {
+       "old": "ParentExists(t) == t \\in live",
+       "new": "ParentExists(t) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOrphans"
+    },
+    {
+     "id": "IgnoreWriteAcknowledgement",
+     "edits": [
+      {
+       "old": "Committed(writeOK) == writeOK",
+       "new": "Committed(writeOK) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DurableAck"
+    },
+    {
+     "id": "IgnoreMessageCount",
+     "edits": [
+      {
+       "old": "CountFits == Cardinality(Stored) < MaxMessages",
+       "new": "CountFits == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "MessageCountBounded"
+    },
+    {
+     "id": "IgnoreByteBudget",
+     "edits": [
+      {
+       "old": "BytesFit(n) == ByteSum(Stored) + n <= MaxBytes",
+       "new": "BytesFit(n) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ByteBudgetBounded"
+    },
+    {
+     "id": "IgnoreDeliveryBudget",
+     "edits": [
+      {
+       "old": "DeliveryFits(t) == Cardinality(deliveries) + Cardinality({s \\in Subs : subOwner[s] = t}) <= MaxDeliveries",
+       "new": "DeliveryFits(t) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeliveryBudgetBounded"
+    },
+    {
+     "id": "KeepDeletedMessages",
+     "edits": [
+      {
+       "old": "ClearMsgs(t) == [m \\in Messages |-> IF msgOwner[m] = t THEN None ELSE msgOwner[m]]",
+       "new": "ClearMsgs(t) == msgOwner",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOrphans"
+    },
+    {
+     "id": "KeepDeletedDeliveries",
+     "edits": [
+      {
+       "old": "ClearDeliveries(t) == {d \\in deliveries : msgOwner[d[1]] # t /\\ subOwner[d[2]] # t}",
+       "new": "ClearDeliveries(t) == deliveries",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoDanglingDeliveredMessage"
+    },
+    {
+     "id": "AcknowledgeWithoutCleanup",
+     "edits": [
+      {
+       "old": "remove == ok /\\ w IN",
+       "new": "remove == FALSE IN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DurableAck"
+    },
+    {
+     "id": "DeletePeerSubscriptions",
+     "edits": [
+      {
+       "old": "ClearSubs(t) == [s \\in Subs |-> IF subOwner[s] = t THEN None ELSE subOwner[s]]",
+       "new": "ClearSubs(t) == [s \\in Subs |-> None]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PeerFrame"
+    },
+    {
+     "id": "OmitDeliveryRows",
+     "edits": [
+      {
+       "old": "deliveries \\cup {<<m,s>> : s \\in {k \\in Subs : subOwner[k] = t}}",
+       "new": "deliveries",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PublishRecipientsExact"
+    },
+    {
+     "id": "RejectAbsentDelete",
+     "edits": [
+      {
+       "old": "Delete(t,w) == LET ok == Committed(w)",
+       "new": "Delete(t,w) == LET ok == ParentExists(t) /\\ Committed(w)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeleteRetryAcknowledged"
+    }
+   ]
+  },
+  {
+   "id": "SNSAdmission",
+   "model": "formal/SNSAdmission.tla",
+   "config": "formal/SNSAdmission.cfg",
+   "bounds": "1536 request combinations:6 operation classes x8Boolean admission witnesses; request captured once, one dispatch step and terminal stuttering; no constraints prune combinations.",
+   "properties": [
+    "TypeOK",
+    "NoUnauthorizedEffect",
+    "NoFIFOPublish",
+    "NoRegionMismatch",
+    "NoSuccessOnRefusal",
+    "NoRejectedMutation"
+   ],
+   "limits": "Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence.",
+   "source_scope": [
+    "internal/aws/sns.go",
+    "internal/aws/sns_admission_regression_test.go",
+    "internal/aws/ssm.go",
+    "internal/aws/s3.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "IgnoreDuplicateFields",
+     "edits": [
+      {
+       "old": "Single(r) == r.single",
+       "new": "Single(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "IgnoreAttributeAdmission",
+     "edits": [
+      {
+       "old": "Attributes(r) == r.attrs",
+       "new": "Attributes(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "IgnoreValueAdmission",
+     "edits": [
+      {
+       "old": "Value(r) == r.value",
+       "new": "Value(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "IgnoreSigningScope",
+     "edits": [
+      {
+       "old": "Scope(r) == r.scope",
+       "new": "Scope(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "IgnoreRegionBinding",
+     "edits": [
+      {
+       "old": "Region(r) == r.region",
+       "new": "Region(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoRegionMismatch"
+    },
+    {
+     "id": "PermitFIFOPublication",
+     "edits": [
+      {
+       "old": "FIFO(r) == r.op # \"Publish\" \\/ ~r.fifo",
+       "new": "FIFO(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoFIFOPublish"
+    },
+    {
+     "id": "BypassAuthorization",
+     "edits": [
+      {
+       "old": "Authorized(r) == r.authorized",
+       "new": "Authorized(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoUnauthorizedEffect"
+    },
+    {
+     "id": "IgnoreInitialization",
+     "edits": [
+      {
+       "old": "Initialized(r) == r.initialized",
+       "new": "Initialized(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "AcceptUnknownOperation",
+     "edits": [
+      {
+       "old": "Supported(r) == r.op # \"Unknown\"",
+       "new": "Supported(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "MutateAfterRejection",
+     "edits": [
+      {
+       "old": "mutated' = (accepted /\\ request.op \\in Writes)",
+       "new": "mutated' = (request.op \\in Writes)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoRejectedMutation"
+    }
+   ]
   }
  ]
 }

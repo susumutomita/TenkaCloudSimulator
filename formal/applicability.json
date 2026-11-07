@@ -1,325 +1,404 @@
 {
   "version": 1,
-  "base_sha": "b81496f73e31be6150fc237f4641d6369446cc38",
+  "base_sha": "3a9b0ce9b7afed3f6b3253f4df9e7c59c3764e9a",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "8972043a53d2e865878c1d44e18ec21f079bd17d95d1009f39b2a22570545963",
-      "disposition": "formal-infrastructure",
-      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
-      "models": []
-    },
-    {
       "path": "README.ja.md",
-      "sha256": "0d1c722a1ed51bc7c4fe238f0bb6463e94c2427bff945b6800180c33cd0fdd80",
+      "sha256": "3c2d6c651c23f243615b6bcc8df20f4405e9edf4a3cc814e0c329713a7c3fc7a",
       "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
+      "reason": "Document the bounded SNS SDK-only subset, atomic cleanup, quotas, verification scope and remaining limitations; no new runtime behavior in this file.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "4c06f05e306088185a3234de48691de6f9d84b1af845826ea69b653e3b0dbe6f",
+      "sha256": "8dce971286e6f27dff991ec0c739bbe5acf1b8ea209ae084e370948872602e61",
       "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
-      "models": []
-    },
-    {
-      "path": "docs/ci.md",
-      "sha256": "51dd009b4eda9bb6022ab440cd120c864217e1fa3965385475d8dd507a5db2bd",
-      "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
-      "models": []
-    },
-    {
-      "path": "docs/development-status.md",
-      "sha256": "9a60bdb0061a38c5c5ec79be4eb79cfd59dc33d27ee7851922633826a3c93c85",
-      "disposition": "documentation",
-      "reason": "Documents the bounded catalog scope, evidence and limits or mirrors original third-party notices; no runtime guarantee is added.",
+      "reason": "Document the bounded SNS SDK-only subset, atomic cleanup, quotas, verification scope and remaining limitations; no new runtime behavior in this file.",
       "models": []
     },
     {
       "path": "docs/formal-validation.md",
-      "sha256": "b5df8e4730a42cd809b7734c00aa3f5232ad6dfe144b85b7b59181ef02b0b53a",
+      "sha256": "8101b0cfa71bbceb3b780465c7e64ac1604e507448018f721d18c5390c7354e5",
       "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
+      "reason": "Document the bounded SNS SDK-only subset, atomic cleanup, quotas, verification scope and remaining limitations; no new runtime behavior in this file.",
       "models": []
     },
     {
-      "path": "docs/login-token-file.md",
-      "sha256": "c80bd0e6301eb70ddc34ca2032c45d676a447f81d81f0b84d433d61bd8e2d8a5",
+      "path": "docs/sns.md",
+      "sha256": "03c429c24de32382d5c4dd33efada08dd3bf0fbcd67c3daeb095c076650e617b",
       "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
+      "reason": "Document the bounded SNS SDK-only subset, atomic cleanup, quotas, verification scope and remaining limitations; no new runtime behavior in this file.",
       "models": []
-    },
-    {
-      "path": "formal/LoginInputIntent.cfg",
-      "sha256": "7d32b58320c5f67308bbe66657f1fbe55b389c09a99d91cbbbc8b473d7863297",
-      "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; implementation, build and browser checks remain separate obligations after the main-catalog integration.",
-      "models": [
-        {
-          "id": "LoginInputIntent",
-          "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
-          ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
-        }
-      ]
-    },
-    {
-      "path": "formal/LoginInputIntent.tla",
-      "sha256": "ceacbdba0324f66335c0a77dd6ad7bdb6ce97c6d474f891cfd8518e1dc684eaa",
-      "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; implementation, build and browser checks remain separate obligations after the main-catalog integration.",
-      "models": [
-        {
-          "id": "LoginInputIntent",
-          "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
-          ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
-        }
-      ]
     },
     {
       "path": "formal/README.md",
-      "sha256": "6f4bd6b4293470e12941b8d22da30f089f8c717568a4128e34b280547da3a7d4",
+      "sha256": "c527b6c23eaf17c2789ec7d358286e791cb96072a14dd230e443c4b29af699bc",
       "disposition": "documentation",
-      "reason": "Login/CI documentation only; no runtime authorization or proof claim.",
+      "reason": "Document the bounded SNS SDK-only subset, atomic cleanup, quotas, verification scope and remaining limitations; no new runtime behavior in this file.",
       "models": []
+    },
+    {
+      "path": "formal/SNSAdmission.cfg",
+      "sha256": "2d4ebf12e48ac05cdaa5878cdbe069fc7ea88988374b6a47d53a3f53a232b6e6",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
+      "models": [
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Finite normalized admission witnesses for six operation classes and Boolean guards. Does not execute Go parsers, UTF8, XML, IAM policy evaluation, pagination encoding or cryptography. Native refusal and isolation tests independently check implementation paths."
+        }
+      ]
+    },
+    {
+      "path": "formal/SNSAdmission.tla",
+      "sha256": "c12a144f40e839fd2021baef4fcb4da88ae9bcdea9372b6f041703cfd30518d5",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
+      "models": [
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Finite normalized admission witnesses for six operation classes and Boolean guards. Does not execute Go parsers, UTF8, XML, IAM policy evaluation, pagination encoding or cryptography. Native refusal and isolation tests independently check implementation paths."
+        }
+      ]
+    },
+    {
+      "path": "formal/SNSLifecycle.cfg",
+      "sha256": "a6a35d388bc2784cafafefe237d2242569b71cc81f390ada4ef7813b57b44cd3",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
+      "models": [
+        {
+          "id": "SNSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "MessageCountBounded",
+            "ByteBudgetBounded",
+            "DeliveryBudgetBounded",
+            "DurableAck",
+            "PublishRecipientsExact",
+            "PeerFrame",
+            "NoDanglingDeliveredMessage",
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
+          ],
+          "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/SNSLifecycle.tla",
+      "sha256": "f15003d049b5b1097e97d2102dc39f2acf5ddac21c24bf3077013116d89e247c",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
+      "models": [
+        {
+          "id": "SNSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "MessageCountBounded",
+            "ByteBudgetBounded",
+            "DeliveryBudgetBounded",
+            "DurableAck",
+            "PublishRecipientsExact",
+            "PeerFrame",
+            "NoDanglingDeliveredMessage",
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
+          ],
+          "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "dc91f28d9b3d23d1211beed4ccab4d0db96f2784b703572c931104eb8aee1d88",
+      "sha256": "5c302e620adbb1bc139db774fd15993cf79ddb8be822ab91995bf7929518d4d3",
       "disposition": "formal-infrastructure",
-      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
+      "reason": "Register two SNS models with twenty-one required mutation controls while retaining all prior model obligations and exact registry assertions. No validation threshold, source-binding or immutable-head gate is relaxed.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "51b912dab747d62ed0a96c38939f40c67d8f7eaa96e820507f35671cb0ab5b5d",
+      "path": "internal/aws/s3.go",
+      "sha256": "8501454200cc2d93e1e3af1be7a1fb41363e2c17eb77f7aa46cae33816183ff6",
       "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; implementation, build and browser checks remain separate obligations after the main-catalog integration.",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
       "models": [
         {
-          "id": "SecretsRevealEpoch",
+          "id": "SNSAdmission",
           "properties": [
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
           ],
-          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
+          "limits": "Finite normalized admission witnesses for six operation classes and Boolean guards. Does not execute Go parsers, UTF8, XML, IAM policy evaluation, pagination encoding or cryptography. Native refusal and isolation tests independently check implementation paths."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns.go",
+      "sha256": "15e04d9a2da7720ed5686295797ef90802627f3412189dee20d85dbe0e08e409",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence. Standard wire-code projection is verified separately with official SDK modeled exception classes; the normalized admission model does not prove XML or exception factory behavior.",
+      "models": [
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Finite normalized admission witnesses for six operation classes and Boolean guards. Does not execute Go parsers, UTF8, XML, IAM policy evaluation, pagination encoding or cryptography. Native refusal and isolation tests independently check implementation paths."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_admission_regression_test.go",
+      "sha256": "b043823b8fe1b89e649f94bd37076a50f550f5e045a3a4e5dffadecbbce736ec",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
+      "models": [
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Finite normalized admission witnesses for six operation classes and Boolean guards. Does not execute Go parsers, UTF8, XML, IAM policy evaluation, pagination encoding or cryptography. Native refusal and isolation tests independently check implementation paths."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_review_regression_test.go",
+      "sha256": "6981b0d1093a14570bdc2aaee6aa7a8e0b55b89cb9c5c1dbc5f64b0006f3d729",
+      "disposition": "test-support",
+      "reason": "Exercise native SNS protocol/persistence and actual binary SDK isolation; tests do not constitute a formal implementation refinement. Existing mandatory E2E cases remain required.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/sns_storage_faults_test.go",
+      "sha256": "2b083c76e50e5d6300f595c57683a208de3be0330fb17d2b18100d91025c72bd",
+      "disposition": "test-support",
+      "reason": "Exercise native SNS protocol/persistence and actual binary SDK isolation; tests do not constitute a formal implementation refinement. Existing mandatory E2E cases remain required.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/sns_storage_regression_test.go",
+      "sha256": "096cdaa6bbb4f548bfc68eef4c8f7f2af06ccce7830efaaba9008e917b571f99",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
+      "models": [
+        {
+          "id": "SNSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "MessageCountBounded",
+            "ByteBudgetBounded",
+            "DeliveryBudgetBounded",
+            "DurableAck",
+            "PublishRecipientsExact",
+            "PeerFrame",
+            "NoDanglingDeliveredMessage",
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
+          ],
+          "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_store.go",
+      "sha256": "98a8ca570566f83192de92ec07e9c2e9a1b22985c704a0a54da47d50999c474c",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence. DeleteRetryAcknowledged covers committed absent-topic no-ops; native SQL read/commit faults and exact row snapshots verify implementation separately.",
+      "models": [
+        {
+          "id": "SNSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "MessageCountBounded",
+            "ByteBudgetBounded",
+            "DeliveryBudgetBounded",
+            "DurableAck",
+            "PublishRecipientsExact",
+            "PeerFrame",
+            "NoDanglingDeliveredMessage",
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
+          ],
+          "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_test.go",
+      "sha256": "623ad6977405ddaca8f1ed4d356ab3899223583f56890a4ed5c05b5ee39c8094",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
+      "models": [
+        {
+          "id": "SNSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "MessageCountBounded",
+            "ByteBudgetBounded",
+            "DeliveryBudgetBounded",
+            "DurableAck",
+            "PublishRecipientsExact",
+            "PeerFrame",
+            "NoDanglingDeliveredMessage",
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
+          ],
+          "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_wire_boundaries_test.go",
+      "sha256": "f8e16cf98aeaea2f56a9ce7edc0e5b025cfcb2f9a2cec415127f5f33f8a37d84",
+      "disposition": "test-support",
+      "reason": "Exercise native SNS protocol/persistence and actual binary SDK isolation; tests do not constitute a formal implementation refinement. Existing mandatory E2E cases remain required.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "3ff2c317e32c31a0d6c7547c16887244c170ba0c49df144ed5e06417313b00f2",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
+      "models": [
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Finite normalized admission witnesses for six operation classes and Boolean guards. Does not execute Go parsers, UTF8, XML, IAM policy evaluation, pagination encoding or cryptography. Native refusal and isolation tests independently check implementation paths."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "4d8ee9a5b9a1e12788a4c3011b47c37c143bf9074fa9c914f620ce07031a72a7",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
+      "models": [
+        {
+          "id": "SNSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "MessageCountBounded",
+            "ByteBudgetBounded",
+            "DeliveryBudgetBounded",
+            "DurableAck",
+            "PublishRecipientsExact",
+            "PeerFrame",
+            "NoDanglingDeliveredMessage",
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
+          ],
+          "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
         },
         {
-          "id": "SakuraDisksViewEpoch",
+          "id": "SNSAdmission",
           "properties": [
-            "AcceptedReadScope",
-            "SuccessfulReadOnly",
-            "RenderedScopeBound",
-            "RenderedResourceBound",
-            "StaleReadFrame",
-            "StaleWriteFrame",
-            "NavigationACKFrame",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryOnly",
-            "SingleWriteSend",
-            "LocaleFrame",
-            "CancelDraftClear"
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
           ],
-          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
-        },
+          "limits": "Finite normalized admission witnesses for six operation classes and Boolean guards. Does not execute Go parsers, UTF8, XML, IAM policy evaluation, pagination encoding or cryptography. Native refusal and isolation tests independently check implementation paths."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/sns_test.go",
+      "sha256": "2a7db94c2df8eed0c72ff09baeec209987f267e6c961e075be5d1a4e3231bedd",
+      "disposition": "modeled",
+      "reason": "SNS-only delta: admission, local-record persistence, guarded acknowledgement and topic-owned cleanup. Shared gateway/server edits compose SNS with existing providers; their other behavior is unchanged. Native SQLite fault, protocol and SDK tests remain separate implementation evidence.",
+      "models": [
         {
-          "id": "DynamoDBConsoleEpoch",
+          "id": "SNSLifecycle",
           "properties": [
-            "NoStalePublication",
-            "ReadGenerationVerified",
-            "DisplayedKeyBound",
-            "CancelNoOrphanLoading",
-            "AckClosesDraft",
-            "AckBelongsToCurrentView",
-            "ReadRetryNeverWrites",
-            "SingleSendBeforeACK",
-            "LocalePreservesDraft"
+            "TypeOK",
+            "NoOrphans",
+            "MessageCountBounded",
+            "ByteBudgetBounded",
+            "DeliveryBudgetBounded",
+            "DurableAck",
+            "PublishRecipientsExact",
+            "PeerFrame",
+            "NoDanglingDeliveredMessage",
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
           ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
-        },
-        {
-          "id": "SecretMetadataViewEpoch",
-          "properties": [
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
-          ],
-          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
-        },
-        {
-          "id": "KMSAliasesViewEpoch",
-          "properties": [
-            "CurrentListOutcome",
-            "NoCachedRowsOnFailure",
-            "CurrentTargetMetadata",
-            "ClosedFormHasNoTarget",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryNeverWrites",
-            "OnlyVerifiedTargetSubmitted",
-            "DeleteRequiresExactConfirmation",
-            "LocalePreservesIntent"
-          ],
-          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
-        },
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
-        },
-        {
-          "id": "LoginInputIntent",
-          "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
-          ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification. Compiled bundle binding covers only this declared state/guard projection, not unrelated bundle code or a compiler refinement proof."
+          "limits": "Finite two-topic/two-subscription/two-message atomic transition projection with abstract byte and delivery budgets, valid initialization and rollback assumed. No SQL/Go refinement, real SQS transport, host failure, cryptography or unbounded concurrency proof."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "1b892154e7293894313af31a0ac776c58cd1226862c6c15b5d600220a0264de5",
+      "sha256": "bb373cefead7ad715410d5162ab431308afafbbb6f5ee9fff3901bfbd6d2f8db",
       "disposition": "formal-infrastructure",
-      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
+      "reason": "Register two SNS models with twenty-one required mutation controls while retaining all prior model obligations and exact registry assertions. No validation threshold, source-binding or immutable-head gate is relaxed.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "76384bc35d5d253da07c1540575a9a06fe4cdde90787516481cb6b5b0dc998d3",
+      "sha256": "312cb55beacda0a40bffcf4aa82f3e5bef6efe558db47f8717a8dfc155cbad09",
       "disposition": "formal-infrastructure",
-      "reason": "Mandatory policy or CI validation wiring; original models, invariants, controls and check behavior retained.",
+      "reason": "Register two SNS models with twenty-one required mutation controls while retaining all prior model obligations and exact registry assertions. No validation threshold, source-binding or immutable-head gate is relaxed.",
       "models": []
     },
     {
-      "path": "test/console/login-native-input.test.mjs",
-      "sha256": "c2f067382e7cf9d0d40025fefbeefe409add4b33cab7a8a7cc204747496b33b5",
-      "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; implementation, build and browser checks remain separate obligations after the main-catalog integration.",
-      "models": [
-        {
-          "id": "LoginInputIntent",
-          "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
-          ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
-        }
-      ]
-    },
-    {
-      "path": "test/e2e/login_paste.py",
-      "sha256": "f1e5657c21bf5d71434927846a0e4b35f150508539ff38adfbc12824c72a07d7",
-      "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; implementation, build and browser checks remain separate obligations after the main-catalog integration.",
-      "models": [
-        {
-          "id": "LoginInputIntent",
-          "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
-          ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "7be2724c2413e41619e270e53068e8b194b51fcb9d5a7f489817ca56e40a01ca",
-      "disposition": "presentation",
-      "reason": "Generated build input/digest metadata only; final rebuilt exact hashes and canonical build provenance remain pending.",
+      "path": "test/e2e/check.py",
+      "sha256": "e4abe2a0398036cdd4f4a42fe4a40aefb83f5516a272ed7bf2fdbe37db81f5ed",
+      "disposition": "test-support",
+      "reason": "Exercise native SNS protocol/persistence and actual binary SDK isolation; tests do not constitute a formal implementation refinement. Existing mandatory E2E cases remain required.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "93e808e6d0af6486dbf56fa4d9f38cc3c786a7cdb2a5eae5bf6d2636f9529d7a",
-      "disposition": "presentation",
-      "reason": "Generated build input/digest metadata only; final rebuilt exact hashes and canonical build provenance remain pending.",
+      "path": "test/e2e/sns_admission.py",
+      "sha256": "b642c178e6fa3310ea742649bd77ddd27683f595162344cedd82db8111229897",
+      "disposition": "test-support",
+      "reason": "Exercise native SNS protocol/persistence and actual binary SDK isolation; tests do not constitute a formal implementation refinement. Existing mandatory E2E cases remain required.",
       "models": []
-    },
-    {
-      "path": "tools/console/src/login.jsx",
-      "sha256": "28a06d99aa801b01e414ea56110ba7812d36deb2927c86fb873be696eedcd9ae",
-      "disposition": "modeled",
-      "reason": "Declared finite state and guard projection with named safety invariants; implementation, build and browser checks remain separate obligations after the main-catalog integration.",
-      "models": [
-        {
-          "id": "BrowserSessions",
-          "properties": [
-            "RevokedCookiesDenied",
-            "AcceptedOnlyLiveParent",
-            "SDKAuthorityPreserved",
-            "UnrelatedSessionsPreserved",
-            "NoRawSDKCookie",
-            "NoBrowserSDKAuthority",
-            "ParentLifetimeBound"
-          ],
-          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
-        },
-        {
-          "id": "LoginInputIntent",
-          "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
-          ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
-        }
-      ]
     }
   ]
 }
