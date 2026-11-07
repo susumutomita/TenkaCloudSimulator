@@ -159,3 +159,17 @@ Checksum failure is outside the transport retry. Exhaustion or refusal remains
 a failed job; no model run is inferred from another job. The local fixture used
 a 0.2s outer deadline; full 95s expiry, SIGKILL fallback and real CDN availability
 are not established by that fixture. Hosted checks validate the actual runner.
+
+## Browser acquisition budgets
+
+Both browser jobs install the pinned Python test requirements, the complete
+Playwright Chromium system dependencies (including fonts), and the matching
+browser in separate required steps, with budgets of 3, 12 and 5 minutes. The
+focused Japanese job has a 30-minute overall budget for build, acquisition,
+acceptance and evidence upload. The individual maxima do not promise that all
+steps can consume their full budgets simultaneously.
+
+A failed acquisition step fails its job; skipped UI checks do not establish
+acceptance. Browser test deadlines, dependency inputs, Action pins, permissions,
+coverage floors and formal gates are unchanged. No package or browser cache,
+alternate download source, or host-validation bypass is introduced.
