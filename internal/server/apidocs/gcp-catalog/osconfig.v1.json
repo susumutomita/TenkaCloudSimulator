@@ -1,0 +1,841 @@
+{
+ "components": {
+  "schemas": {
+   "AptSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "excludes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "exclusivePackages": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "type": {
+      "enum": [
+       "TYPE_UNSPECIFIED",
+       "DIST",
+       "UPGRADE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Empty": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "ExecStep": {
+    "additionalProperties": false,
+    "properties": {
+     "linuxExecStepConfig": {
+      "$ref": "#/components/schemas/ExecStepConfig"
+     },
+     "windowsExecStepConfig": {
+      "$ref": "#/components/schemas/ExecStepConfig"
+     }
+    },
+    "type": "object"
+   },
+   "ExecStepConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedSuccessCodes": {
+      "items": {
+       "format": "int32",
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "gcsObject": {
+      "$ref": "#/components/schemas/GcsObject"
+     },
+     "interpreter": {
+      "enum": [
+       "INTERPRETER_UNSPECIFIED",
+       "NONE",
+       "SHELL",
+       "POWERSHELL"
+      ],
+      "type": "string"
+     },
+     "localPath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FixedOrPercent": {
+    "additionalProperties": false,
+    "properties": {
+     "fixed": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "percent": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "GcsObject": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "type": "string"
+     },
+     "generationNumber": {
+      "format": "int64",
+      "type": "string"
+     },
+     "object": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GooSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "ListPatchDeploymentsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "patchDeployments": {
+      "items": {
+       "$ref": "#/components/schemas/PatchDeployment"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MonthlySchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "monthDay": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "weekDayOfMonth": {
+      "$ref": "#/components/schemas/WeekDayOfMonth"
+     }
+    },
+    "type": "object"
+   },
+   "OneTimeSchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "executeTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PatchConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "apt": {
+      "$ref": "#/components/schemas/AptSettings"
+     },
+     "goo": {
+      "$ref": "#/components/schemas/GooSettings"
+     },
+     "migInstancesAllowed": {
+      "type": "boolean"
+     },
+     "postStep": {
+      "$ref": "#/components/schemas/ExecStep"
+     },
+     "preStep": {
+      "$ref": "#/components/schemas/ExecStep"
+     },
+     "rebootConfig": {
+      "enum": [
+       "REBOOT_CONFIG_UNSPECIFIED",
+       "DEFAULT",
+       "ALWAYS",
+       "NEVER"
+      ],
+      "type": "string"
+     },
+     "skipUnpatchableVms": {
+      "type": "boolean"
+     },
+     "windowsUpdate": {
+      "$ref": "#/components/schemas/WindowsUpdateSettings"
+     },
+     "yum": {
+      "$ref": "#/components/schemas/YumSettings"
+     },
+     "zypper": {
+      "$ref": "#/components/schemas/ZypperSettings"
+     }
+    },
+    "type": "object"
+   },
+   "PatchDeployment": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "duration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "instanceFilter": {
+      "$ref": "#/components/schemas/PatchInstanceFilter"
+     },
+     "lastExecuteTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "oneTimeSchedule": {
+      "$ref": "#/components/schemas/OneTimeSchedule"
+     },
+     "patchConfig": {
+      "$ref": "#/components/schemas/PatchConfig"
+     },
+     "recurringSchedule": {
+      "$ref": "#/components/schemas/RecurringSchedule"
+     },
+     "rollout": {
+      "$ref": "#/components/schemas/PatchRollout"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "ACTIVE",
+       "PAUSED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PatchInstanceFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "all": {
+      "type": "boolean"
+     },
+     "groupLabels": {
+      "items": {
+       "$ref": "#/components/schemas/PatchInstanceFilterGroupLabel"
+      },
+      "type": "array"
+     },
+     "instanceNamePrefixes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "instances": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "zones": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PatchInstanceFilterGroupLabel": {
+    "additionalProperties": false,
+    "properties": {
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PatchRollout": {
+    "additionalProperties": false,
+    "properties": {
+     "disruptionBudget": {
+      "$ref": "#/components/schemas/FixedOrPercent"
+     },
+     "mode": {
+      "enum": [
+       "MODE_UNSPECIFIED",
+       "ZONE_BY_ZONE",
+       "CONCURRENT_ZONES"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RecurringSchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "endTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "frequency": {
+      "enum": [
+       "FREQUENCY_UNSPECIFIED",
+       "WEEKLY",
+       "MONTHLY",
+       "DAILY"
+      ],
+      "type": "string"
+     },
+     "lastExecuteTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "monthly": {
+      "$ref": "#/components/schemas/MonthlySchedule"
+     },
+     "nextExecuteTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "startTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "timeOfDay": {
+      "$ref": "#/components/schemas/TimeOfDay"
+     },
+     "timeZone": {
+      "$ref": "#/components/schemas/TimeZone"
+     },
+     "weekly": {
+      "$ref": "#/components/schemas/WeeklySchedule"
+     }
+    },
+    "type": "object"
+   },
+   "TimeOfDay": {
+    "additionalProperties": false,
+    "properties": {
+     "hours": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minutes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nanos": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "seconds": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "TimeZone": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WeekDayOfMonth": {
+    "additionalProperties": false,
+    "properties": {
+     "dayOfWeek": {
+      "enum": [
+       "DAY_OF_WEEK_UNSPECIFIED",
+       "MONDAY",
+       "TUESDAY",
+       "WEDNESDAY",
+       "THURSDAY",
+       "FRIDAY",
+       "SATURDAY",
+       "SUNDAY"
+      ],
+      "type": "string"
+     },
+     "dayOffset": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "weekOrdinal": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "WeeklySchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "dayOfWeek": {
+      "enum": [
+       "DAY_OF_WEEK_UNSPECIFIED",
+       "MONDAY",
+       "TUESDAY",
+       "WEDNESDAY",
+       "THURSDAY",
+       "FRIDAY",
+       "SATURDAY",
+       "SUNDAY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WindowsUpdateSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "classifications": {
+      "items": {
+       "enum": [
+        "CLASSIFICATION_UNSPECIFIED",
+        "CRITICAL",
+        "SECURITY",
+        "DEFINITION",
+        "DRIVER",
+        "FEATURE_PACK",
+        "SERVICE_PACK",
+        "TOOL",
+        "UPDATE_ROLLUP",
+        "UPDATE"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "excludes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "exclusivePatches": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "YumSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "excludes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "exclusivePackages": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "minimal": {
+      "type": "boolean"
+     },
+     "security": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ZypperSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "categories": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "excludes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "exclusivePatches": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "severities": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "withOptional": {
+      "type": "boolean"
+     },
+     "withUpdate": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official OS Config API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Patch deployments are configuration metadata: no patch job is ever executed on any VM, no execution time is computed, and pause, resume and patch jobs are not implemented. Exactly one of oneTimeSchedule and recurringSchedule is required, and schedules cannot be updated. OS policy assignments are not served because they live in zone locations.",
+  "title": "VM Manager (OS Config) (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/patchDeployments": {
+   "get": {
+    "operationId": "osconfig.projects.patchDeployments.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListPatchDeploymentsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.patchDeployments.list",
+    "tags": [
+     "VM Manager (OS Config)"
+    ]
+   },
+   "post": {
+    "operationId": "osconfig.projects.patchDeployments.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "patchDeploymentId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PatchDeployment"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PatchDeployment"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.patchDeployments.create",
+    "tags": [
+     "VM Manager (OS Config)"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/patchDeployments/{patchDeploymentsId}": {
+   "delete": {
+    "operationId": "osconfig.projects.patchDeployments.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "patchDeploymentsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.patchDeployments.delete",
+    "tags": [
+     "VM Manager (OS Config)"
+    ]
+   },
+   "get": {
+    "operationId": "osconfig.projects.patchDeployments.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "patchDeploymentsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PatchDeployment"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.patchDeployments.get",
+    "tags": [
+     "VM Manager (OS Config)"
+    ]
+   },
+   "patch": {
+    "operationId": "osconfig.projects.patchDeployments.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "patchDeploymentsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PatchDeployment"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PatchDeployment"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.patchDeployments.patch",
+    "tags": [
+     "VM Manager (OS Config)"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/osconfig"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official OS Config API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Patch deployments are configuration metadata: no patch job is ever executed on any VM, no execution time is computed, and pause, resume and patch jobs are not implemented. Exactly one of oneTimeSchedule and recurringSchedule is required, and schedules cannot be updated. OS policy assignments are not served because they live in zone locations.",
+   "name": "VM Manager (OS Config)"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/osconfig.v1.json",
+  "sha256": "857a45eab98791fc1f15cbc730930168dbab8b454b2508f441c9ef02b9e2b02c",
+  "license": "Apache-2.0",
+  "revision": "20260611"
+ }
+}

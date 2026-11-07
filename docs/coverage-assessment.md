@@ -72,6 +72,7 @@ Pinned sources:
 | #213 | AWS Trusted Advisor | Checks and recommendations are AWS-owned data. |
 | #198 | AWS Health | Events and entities are AWS-owned data; the rest is organization-level. |
 | #217 | AWS Marketplace | Catalog change sets are listing requests reviewed by AWS; agreements and entitlements are purchases. |
+| #210 | Service Quotas | Quotas, AWS default values and the service list are AWS-owned data. Increase requests and support cases are sent to AWS, request templates need an AWS Organizations management account, and automatic management starts AWS-side utilization monitoring and notifications. |
 | #301 | AWS Support | Cases are real support requests to AWS. |
 | #195 | AWS Control Tower | Landing zones, controls and baselines deploy across an AWS Organizations organization; catalogs are AWS-owned. |
 | #199 | AWS Launch Wizard | Deployments provision workloads; workloads and patterns are AWS-owned catalogs. |
@@ -83,4 +84,7 @@ Pinned sources:
 | #369 | Spectrum Access System | Alpha only; device registration and signing are regulated real-world actions. |
 | #360 | Media CDN | `networkservices` offers only IAM policy methods for edge cache services, origins and keysets. |
 | #334 | Cloud Storage for Firebase | `addFirebase` links an existing Cloud Storage bucket from another provider; the default bucket provisions a real bucket. |
-| #383 | Cloud Source Repositories | Discovery documents end of sales from 2024-06-17 (existing customers only). |
+| #383 | Cloud Source Repositories | The `sourcerepo.v1` discovery document states end of sales from 2024-06-17: only projects that enabled the API before then can use it. |
+| #346 | Dedicated Interconnect | `compute.v1` `interconnects.insert` orders physical links (`requestedLinkCount`) at an interconnect location. Partner Interconnect attachments (#347) are served. |
+| #348 | Cross-Cloud Interconnect | The same `interconnects.insert` orders physical links to another cloud provider. |
+| #349 | Cross-Site Interconnect | `compute.v1` `wireGroups` group the physical wires between interconnect locations. |

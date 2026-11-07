@@ -77,3 +77,7 @@
 .gcp-console-controls .cloud-global-nav :is(button,select,summary){background:#fff;color:var(--gcp-ink);border-color:var(--gcp-border);border-radius:4px}
 .gcp-console-controls .cloud-provider-choices button[aria-pressed=true]{background:#e8f0fe;color:#174ea6;border-color:#a8c7fa}
 .gcp-console-controls .cloud-api-reference{color:#174ea6}
+
+/* Catalog resource descriptions stay readable without overflowing the view. */
+.gcp-catalog-json { margin: 0 0 12px; max-height: 24rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.875rem; }
+@media(max-width:760px){.gcp-storage table.gcp-catalog-table{min-width:0}}

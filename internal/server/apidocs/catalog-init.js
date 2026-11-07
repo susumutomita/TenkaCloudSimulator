@@ -1,7 +1,15 @@
 "use strict";
 // One OpenAPI document per catalog service, generated from the embedded
-// official botocore subsets. Requests stay on this simulator origin.
-fetch("/_simulator/docs/catalog/index.json", { credentials: "same-origin" })
+// official botocore, Google discovery or Azure REST API specification subsets. The page names its catalog directory from a fixed
+// allowlist; requests stay on this simulator origin.
+const catalogDirectory = ["gcp-catalog", "azure-catalog"].includes(
+  document.getElementById("reference").dataset.catalog,
+)
+  ? document.getElementById("reference").dataset.catalog
+  : "catalog";
+fetch("/_simulator/docs/" + catalogDirectory + "/index.json", {
+  credentials: "same-origin",
+})
   .then((response) => {
     if (!response.ok) throw new Error("Catalog reference index unavailable.");
     return response.json();
@@ -11,7 +19,12 @@ fetch("/_simulator/docs/catalog/index.json", { credentials: "same-origin" })
       sources: services.map((service, index) => ({
         title: service.title,
         slug: service.model,
-        url: "/_simulator/docs/catalog/" + service.model + ".json",
+        url:
+          "/_simulator/docs/" +
+          catalogDirectory +
+          "/" +
+          service.model +
+          ".json",
         default: index === 0,
       })),
       withDefaultFonts: false,

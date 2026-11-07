@@ -78,30 +78,36 @@ type ResourceDescriptor struct {
 
 // Descriptor is the capability entry of one catalog service.
 type Descriptor struct {
-	Model        string                  `json:"model"`
-	Title        string                  `json:"title"`
-	ServiceID    string                  `json:"serviceId"`
-	APIVersion   string                  `json:"apiVersion"`
-	Protocol     string                  `json:"protocol"`
-	JSONVersion  string                  `json:"jsonVersion,omitempty"`
-	TargetPrefix string                  `json:"targetPrefix,omitempty"`
-	SigningName  string                  `json:"signingName"`
-	IAMPrefix    string                  `json:"iamPrefix"`
-	Global       bool                    `json:"global,omitempty"`
-	Issues       []int                   `json:"issues"`
-	Operations   []string                `json:"operations"`
-	Official     int                     `json:"officialOperations"`
-	Resources    []ResourceDescriptor    `json:"resources"`
-	Tagging      map[string]OpDescriptor `json:"tagging,omitempty"`
-	Bounds       []string                `json:"bounds"`
-	Source       Source                  `json:"source"`
+	Model        string `json:"model"`
+	Title        string `json:"title"`
+	ServiceID    string `json:"serviceId"`
+	APIVersion   string `json:"apiVersion"`
+	Protocol     string `json:"protocol"`
+	JSONVersion  string `json:"jsonVersion,omitempty"`
+	TargetPrefix string `json:"targetPrefix,omitempty"`
+	SigningName  string `json:"signingName"`
+	IAMPrefix    string `json:"iamPrefix"`
+	Global       bool   `json:"global,omitempty"`
+	// Account is the simulator account, and AccountMembers the input
+	// members that must name it; first-party clients fill required ones.
+	Account        string                  `json:"account"`
+	AccountMembers []string                `json:"accountMembers,omitempty"`
+	Issues         []int                   `json:"issues"`
+	Operations     []string                `json:"operations"`
+	Official       int                     `json:"officialOperations"`
+	Resources      []ResourceDescriptor    `json:"resources"`
+	Tagging        map[string]OpDescriptor `json:"tagging,omitempty"`
+	Bounds         []string                `json:"bounds"`
+	Source         Source                  `json:"source"`
 }
 
 // Describe lists every catalog service for capabilities and clients.
 func (e *Engine) Describe() []Descriptor {
 	out := make([]Descriptor, 0, len(e.bindings))
 	for _, b := range e.bindings {
-		out = append(out, b.describe())
+		d := b.describe()
+		d.Account = e.cfg.Account
+		out = append(out, d)
 	}
 	return out
 }
@@ -110,7 +116,7 @@ func (b *binding) describe() Descriptor {
 	m := b.model
 	d := Descriptor{Model: b.spec.Model, Title: b.spec.Title, ServiceID: m.Metadata.ServiceID, APIVersion: m.Metadata.APIVersion,
 		Protocol: m.Metadata.Protocol, JSONVersion: m.Metadata.JSONVersion, TargetPrefix: m.Metadata.TargetPrefix,
-		SigningName: b.signingName(), IAMPrefix: b.spec.IAMPrefix, Global: b.spec.Global, Issues: b.spec.Issues,
+		SigningName: b.signingName(), IAMPrefix: b.spec.IAMPrefix, Global: b.spec.Global, Issues: b.spec.Issues, AccountMembers: b.spec.AccountMembers,
 		Official: len(m.Routes), Bounds: b.spec.Bounds, Source: m.Source}
 	for _, op := range b.spec.Ops {
 		d.Operations = append(d.Operations, op.Name)

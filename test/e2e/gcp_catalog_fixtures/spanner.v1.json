@@ -1,0 +1,40 @@
+{
+ "api": "spanner.v1",
+ "steps": [
+  {"call": "projects.instances.create", "args": {"parent": "projects/tenkacloud-local"}, "body": {"instanceId": "fixture", "instance": {"config": "projects/tenkacloud-local/instanceConfigs/regional-us-central1", "displayName": "Fixture instance", "nodeCount": 1, "labels": {"team": "a"}}}, "save": {"op": "name", "instance": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.instances.operations.get", "args": {"name": "${op}"}, "expect": {"response.state": "READY"}},
+  {"call": "projects.instances.operations.list", "args": {"name": "${instance}/operations"}, "expect": {"operations#count": 1}},
+  {"call": "projects.instances.get", "args": {"name": "${instance}"}, "expect": {"labels.team": "a", "nodeCount": 1}},
+  {"call": "projects.instances.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"instances#count": 1}},
+  {"call": "projects.instances.patch", "args": {"name": "${instance}"}, "body": {"instance": {"name": "${instance}", "nodeCount": 2}, "fieldMask": "nodeCount"}},
+  {"call": "projects.instances.databases.create", "args": {"parent": "${instance}"}, "body": {"createStatement": "CREATE DATABASE `orders`"}, "save": {"dbop": "name", "database": "response.name"}, "expect": {"response.databaseDialect": "GOOGLE_STANDARD_SQL"}},
+  {"call": "projects.instances.databases.operations.get", "args": {"name": "${dbop}"}, "expect": {"done": true}},
+  {"call": "projects.instances.databases.operations.list", "args": {"name": "${database}/operations"}, "expect": {"operations#count": 1}},
+  {"call": "projects.instances.databases.get", "args": {"name": "${database}"}, "expect": {"state": "READY"}},
+  {"call": "projects.instances.databases.list", "args": {"parent": "${instance}"}, "expect": {"databases#count": 1}},
+  {"call": "projects.instances.databases.patch", "args": {"name": "${database}", "updateMask": "enableDropProtection"}, "body": {"enableDropProtection": true}},
+  {"call": "projects.instances.databases.backupSchedules.create", "args": {"parent": "${database}", "backupScheduleId": "daily"}, "body": {"spec": {"cronSpec": {"text": "0 2 * * *"}}, "retentionDuration": "86400s", "fullBackupSpec": {}}, "save": {"schedule": "name"}},
+  {"call": "projects.instances.databases.backupSchedules.get", "args": {"name": "${schedule}"}, "expect": {"retentionDuration": "86400s"}},
+  {"call": "projects.instances.databases.backupSchedules.list", "args": {"parent": "${database}"}, "expect": {"backupSchedules#count": 1}},
+  {"call": "projects.instances.databases.backupSchedules.patch", "args": {"name": "${schedule}", "updateMask": "retentionDuration"}, "body": {"retentionDuration": "172800s"}},
+  {"call": "projects.instances.databases.create", "args": {"parent": "${instance}"}, "body": {"createStatement": "CREATE DATABASE `ddl`", "extraStatements": ["CREATE TABLE t (id INT64) PRIMARY KEY (id)"]}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.instances.databases.dropDatabase", "args": {"database": "${database}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.instances.delete", "args": {"name": "${instance}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.instances.databases.sessions.create", "args": {"database": "${database}", "body": {}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.instances.list", "args": {"parent": "projects/other-project"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.instances.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"instances#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.instances.get", "args": {"name": "${instance}"}, "expect": {"nodeCount": 2}},
+  {"call": "projects.instances.databases.backupSchedules.get", "args": {"name": "${schedule}"}, "expect": {"retentionDuration": "172800s"}}
+ ],
+ "cleanup": [
+  {"call": "projects.instances.databases.backupSchedules.delete", "args": {"name": "${schedule}"}},
+  {"call": "projects.instances.databases.patch", "args": {"name": "${database}", "updateMask": "enableDropProtection"}, "body": {"enableDropProtection": false}},
+  {"call": "projects.instances.databases.dropDatabase", "args": {"database": "${database}"}},
+  {"call": "projects.instances.delete", "args": {"name": "${instance}"}},
+  {"call": "projects.instances.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"instances#count": 0}}
+ ]
+}

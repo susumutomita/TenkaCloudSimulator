@@ -63,16 +63,21 @@ make build
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack、DescribeStacks、DeleteStack。S3 Bucket、SSM Parameter、inline Python Lambda、限定IAM Role、API Gateway 5 resource types・Lambda Permission、限定Ref/Sub/GetAtt/DependsOn、String/Number制約、Equals/条件alias、resource/outputのCondition、If/NoValue選択 | UpdateStack、And/Or/Not、NoEcho秘匿、一般resource types、実AWS相当の非同期lifecycle、CFN専用service role |
 | [API Gateway](docs/apigateway.md) | Regional REST管理16操作。API/resource/method/integration、immutable deployment、新規stage、ローカルLambda proxy実行 | HTTP/WebSocket API、authorizer、API key、既存stage編集、public endpoint |
 | [サービスカタログ](docs/aws-catalog.md) | 追加の AWS 112 サービス（[生成済みの一覧](docs/aws-catalog-services.md)）の設定メタデータを、各サービスのネイティブ JSON または REST-JSON で扱います。汎用コンソール画面とサービス別 API リファレンスを含みます | ワークロード、実行、データプレーン、配信、OAuth、一覧にない公式操作（HTTP 501）。提供しない製品は根拠とともに[対応範囲の評価](docs/coverage-assessment.md)に記載しています |
+| [Azure Resource Manager カタログ](docs/azure-catalog.md) | リソース グループと、Key Vault、仮想ネットワーク・サブネット・NSG・パブリック IP、ユーザー割り当てマネージド ID、Log Analytics、App Configuration、Container Registry、Event Hubs、Service Bus、Cosmos DB、App Service プランの設定メタデータを、公式の ARM パスと api-version で扱います。Azure 風のコンソール画面とプロバイダー別 API リファレンスを含みます | データプレーン、キー、シークレット、接続文字列、通信経路、Azure RBAC、一覧にない公式操作（HTTP 501） |
 
 対応regionは`us-east-1`、`us-west-2`、`ap-northeast-1`、`eu-west-1`。S3 objectは8 MiB、保持version合計64 MiB、SSM値4096 UTF-8 bytes、CFN TemplateBody51200 bytesなどの上限があります。全フィールド・エラー・quotaの範囲は各サービス資料を確認してください。 1プロセスの上限は1000 buckets、10000 objects/versions/delete markers、1000 parameters/identities、100 stacks、100 resources/stackです。これらはプロセスメモリ全体の上限ではありません。
 
 S3のCloudFormationはBucketName/Versioning/PublicAccessBlock/ユーザーTagsとRef/Arnに対応し、空でない履歴は削除しません。呼出者にはStack ARNと各リソース操作の両方の権限が必要で、CAPABILITY_IAMは権限を付与しません。
 
-SQSの操作画面とAPI referenceはnative JSON 1.0 APIを使用し、SDKと同じ状態を操作します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。下記の限定GCP Storage・Azure Blob実装がありますが、両クラウドの他サービスは未対応です。[Sakura Disk構成メタデータAPI](docs/sakura.md)は明示的な有効化で使用できますが、既定は無効です。有効化したローカルscopeではSakura Cloud → Disksから構成を作成・参照・名前変更・削除できます。VM・実ストレージは作成しません。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
+SQSの操作画面とAPI referenceはnative JSON 1.0 APIを使用し、SDKと同じ状態を操作します。保持中・期限切れ未回収を含む物理message rowはプロセス全体10000件、UTF-8 bodyとserialized attribute JSONの合計64 MiBまでです。これはSQLiteファイル全体・プロセスメモリ・AWS課金サイズの上限ではありません。下記の限定GCP Storage・Azure Blob実装と、Azure Resource Manager カタログの設定メタデータがありますが、両クラウドの他サービスは未対応です。[Sakura Disk構成メタデータAPI](docs/sakura.md)は明示的な有効化で使用できますが、既定は無効です。有効化したローカルscopeではSakura Cloud → Disksから構成を作成・参照・名前変更・削除できます。VM・実ストレージは作成しません。Issueや計画は実装完了を意味しません。[開発状況](docs/development-status.md)を参照してください。Cloudscapeを使用していますが、本物のAWSコンソールとの全画面・全挙動の一致や実AWSとの差分検証完了は主張していません。
+
+## Azure Resource Manager カタログ
+
+Azure の管理 SDK は `base_url` に `http://127.0.0.1:4566/_simulator/providers/azure-arm` を指定し、1 つの synthetic サブスクリプションへ公式の `/subscriptions/...` 要求を送れます。画面では **Azure → サービス → Resource Manager** を開きます。権限は下記の Azure 所有者設定だけで、Azure RBAC ではありません。[製品・動作・制限](docs/azure-catalog.md)を参照してください。
 
 ## Google Cloud Storage・Azure Blob Storageのローカル接続
 
-クラウド選択で AWS／Google Cloud／Azure を切り替え、サービス一覧から対象を検索して開きます。Google Cloud の Cloud Storage と Azure の Blob Storage は別のナビゲーションを持ちます。日本語／英語は画面の言語設定で切り替えられ、サービス名・リソース名・API識別子は変更しません。固定のsynthetic project/accountで、作成→upload→実ファイルdownload→削除を操作できます。2 CLI・別DB/tokenとPC/390pxの実操作は受入テストの対象です。最新リビジョンの成否は[CI結果](https://github.com/susumutomita/TenkaCloudSimulator/actions/workflows/ci.yml)で確認してください。ナビゲーション／言語は各クラウド共通の操作で、サービス固有のAPI識別子と利用者データは翻訳しません。公式SDKの対応範囲は[専用の受入検証](docs/acceptance/crossprovider-official-storage.md)を参照してください。認証済み実クラウド画面との一致は未検証です。[対応・制限](docs/multicloud-storage.md)。
+クラウド選択で AWS／Google Cloud／Azure を切り替え、サービス一覧から対象を検索して開きます。Google Cloud の Cloud Storage と Azure の Blob Storage は別のナビゲーションを持ちます。日本語／英語は画面の言語設定で切り替えられ、サービス名・リソース名・API識別子は変更しません。固定のsynthetic project/accountで、作成→upload→実ファイルdownload→削除を操作できます。2 CLI・別DB/tokenとPC/390pxの実操作は受入テストの対象です。最新リビジョンの成否は[CI結果](https://github.com/susumutomita/TenkaCloudSimulator/actions/workflows/ci.yml)で確認してください。ナビゲーション／言語は各クラウド共通の操作で、サービス固有のAPI識別子と利用者データは翻訳しません。公式SDKの対応範囲は[専用の受入検証](docs/acceptance/crossprovider-official-storage.md)を参照してください。[Google Cloud サービスカタログ](docs/gcp-catalog.md)は、AlloyDB、Compute Engine のネットワーク、Cloud Logging など 40 の Google Cloud API の設定メタデータを、公式ディスカバリードキュメントのパスと Google Cloud コンソールで扱います。認証済み実クラウド画面との一致は未検証です。[対応・制限](docs/multicloud-storage.md)。
 
 既定所有者はsimulator-adminです。参加者に使わせる新規環境は、ホストが`--cloud-storage-owner=learner`を指定し、learnerへ固定したparticipant tokenを発行します。この所有者設定はGoogle IAMやAzure RBACではなく、AWSの権限も付与しません。同じDBの所有者変更は拒否します。CLIフラグは実CLIの再起動・所有者変更拒否・AWS権限非付与までGo/raceで検証しています。
 

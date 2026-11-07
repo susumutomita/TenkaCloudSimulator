@@ -1,0 +1,25 @@
+{
+ "api": "networkmanagement.v1",
+ "steps": [
+  {"call": "projects.locations.global.connectivityTests.create", "args": {"parent": "projects/tenkacloud-local/locations/global", "testId": "web-1"}, "body": {"source": {"ipAddress": "10.0.0.1", "network": "projects/tenkacloud-local/global/networks/default"}, "destination": {"ipAddress": "10.0.0.2", "port": 443}, "protocol": "TCP"}, "save": {"op0": "name", "r0": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.global.operations.get", "args": {"name": "${op0}"}, "expect": {"done": true}},
+  {"call": "projects.locations.global.operations.list", "args": {"name": "projects/tenkacloud-local/locations/global"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.global.connectivityTests.get", "args": {"name": "${r0}"}},
+  {"call": "projects.locations.global.connectivityTests.list", "args": {"parent": "projects/tenkacloud-local/locations/global"}, "expect": {"resources#count": 1}},
+  {"call": "projects.locations.global.connectivityTests.patch", "args": {"name": "${r0}", "updateMask": "description"}, "body": {"description": "Web reachability"}},
+  {"call": "projects.locations.global.connectivityTests.create", "args": {"parent": "projects/tenkacloud-local/locations/global", "testId": "Bad_ID"}, "error": "INVALID_ARGUMENT", "status": 400, "body": {"source": {"ipAddress": "10.0.0.1"}, "destination": {"ipAddress": "10.0.0.2"}}},
+  {"call": "projects.locations.global.connectivityTests.rerun", "args": {"name": "projects/tenkacloud-local/locations/global/connectivityTests/web-1", "body": {}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.global.connectivityTests.get", "args": {"name": "projects/tenkacloud-local/locations/global/connectivityTests/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.global.connectivityTests.list", "args": {"parent": "projects/other-project/locations/global"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.global.connectivityTests.list", "args": {"parent": "projects/tenkacloud-local/locations/global"}, "expect": {"resources#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.global.connectivityTests.get", "args": {"name": "${r0}"}, "expect": {"description": "Web reachability"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.global.connectivityTests.delete", "args": {"name": "${r0}"}},
+  {"call": "projects.locations.global.connectivityTests.list", "args": {"parent": "projects/tenkacloud-local/locations/global"}, "expect": {"resources#count": 0}}
+ ]
+}

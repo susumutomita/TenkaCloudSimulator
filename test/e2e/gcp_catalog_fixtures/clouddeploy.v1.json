@@ -1,0 +1,414 @@
+{
+ "api": "clouddeploy.v1",
+ "steps": [
+  {
+   "call": "projects.locations.targets.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "targetId": "fixture-staging"
+   },
+   "body": {
+    "run": {
+     "location": "projects/tenkacloud-local/locations/us-central1"
+    }
+   },
+   "save": {
+    "op_target": "name",
+    "target": "response.name"
+   },
+   "expect": {
+    "done": true,
+    "response.targetId": "fixture-staging"
+   }
+  },
+  {
+   "call": "projects.locations.targets.get",
+   "args": {
+    "name": "${target}"
+   }
+  },
+  {
+   "call": "projects.locations.targets.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "targets#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.targets.patch",
+   "args": {
+    "name": "${target}",
+    "updateMask": "requireApproval"
+   },
+   "body": {
+    "requireApproval": true
+   },
+   "expect": {
+    "done": true,
+    "response.requireApproval": true
+   }
+  },
+  {
+   "call": "projects.locations.targets.delete",
+   "args": {
+    "name": "${target}",
+    "allowMissing": true
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.deliveryPipelines.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "deliveryPipelineId": "fixture-web"
+   },
+   "body": {
+    "serialPipeline": {
+     "stages": [
+      {
+       "targetId": "fixture-staging"
+      }
+     ]
+    }
+   },
+   "save": {
+    "op_pipeline": "name",
+    "pipeline": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.deliveryPipelines.get",
+   "args": {
+    "name": "${pipeline}"
+   }
+  },
+  {
+   "call": "projects.locations.deliveryPipelines.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "deliveryPipelines#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.deliveryPipelines.patch",
+   "args": {
+    "name": "${pipeline}",
+    "updateMask": "suspended"
+   },
+   "body": {
+    "suspended": true
+   },
+   "expect": {
+    "done": true,
+    "response.suspended": true
+   }
+  },
+  {
+   "call": "projects.locations.deliveryPipelines.delete",
+   "args": {
+    "name": "${pipeline}",
+    "allowMissing": true
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.customTargetTypes.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "customTargetTypeId": "fixture-helm"
+   },
+   "body": {
+    "customActions": {
+     "deployAction": "deploy"
+    }
+   },
+   "save": {
+    "op_custom": "name",
+    "custom": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.customTargetTypes.get",
+   "args": {
+    "name": "${custom}"
+   }
+  },
+  {
+   "call": "projects.locations.customTargetTypes.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "customTargetTypes#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.customTargetTypes.patch",
+   "args": {
+    "name": "${custom}",
+    "updateMask": "description"
+   },
+   "body": {
+    "description": "Helm"
+   },
+   "expect": {
+    "done": true,
+    "response.description": "Helm"
+   }
+  },
+  {
+   "call": "projects.locations.customTargetTypes.delete",
+   "args": {
+    "name": "${custom}",
+    "allowMissing": true
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.deployPolicies.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "deployPolicyId": "fixture-freeze"
+   },
+   "body": {
+    "selectors": [
+     {
+      "deliveryPipeline": {
+       "id": "fixture-web"
+      }
+     }
+    ],
+    "rules": [
+     {
+      "rolloutRestriction": {
+       "id": "weekend",
+       "timeWindows": {
+        "timeZone": "UTC"
+       }
+      }
+     }
+    ]
+   },
+   "save": {
+    "op_policy": "name",
+    "policy": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.deployPolicies.get",
+   "args": {
+    "name": "${policy}"
+   }
+  },
+  {
+   "call": "projects.locations.deployPolicies.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "deployPolicies#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.deployPolicies.patch",
+   "args": {
+    "name": "${policy}",
+    "updateMask": "description"
+   },
+   "body": {
+    "description": "Freeze"
+   },
+   "expect": {
+    "done": true,
+    "response.description": "Freeze"
+   }
+  },
+  {
+   "call": "projects.locations.deployPolicies.delete",
+   "args": {
+    "name": "${policy}",
+    "allowMissing": true
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.operations.get",
+   "args": {
+    "name": "${op_target}"
+   },
+   "expect": {
+    "response.targetId": "fixture-staging"
+   }
+  },
+  {
+   "call": "projects.locations.operations.list",
+   "args": {
+    "name": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "operations#count": 8
+   }
+  },
+  {
+   "call": "projects.locations.deployPolicies.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "deployPolicyId": "empty"
+   },
+   "body": {
+    "rules": []
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.deliveryPipelines.releases.create",
+   "args": {
+    "parent": "${pipeline}",
+    "releaseId": "r1",
+    "body": {}
+   },
+   "error": "UNIMPLEMENTED",
+   "status": 501
+  },
+  {
+   "call": "projects.locations.targets.list",
+   "args": {
+    "parent": "projects/other-project/locations/us-central1"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.locations.targets.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "targets#count": 0
+   }
+  },
+  {
+   "call": "projects.locations.deliveryPipelines.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "deliveryPipelines#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.locations.targets.get",
+   "args": {
+    "name": "${target}"
+   },
+   "expect": {
+    "requireApproval": true
+   }
+  },
+  {
+   "call": "projects.locations.deliveryPipelines.get",
+   "args": {
+    "name": "${pipeline}"
+   },
+   "expect": {
+    "suspended": true
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.locations.deliveryPipelines.delete",
+   "args": {
+    "name": "${pipeline}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.deliveryPipelines.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "deliveryPipelines#count": 0
+   }
+  },
+  {
+   "call": "projects.locations.customTargetTypes.delete",
+   "args": {
+    "name": "${custom}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.customTargetTypes.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "customTargetTypes#count": 0
+   }
+  },
+  {
+   "call": "projects.locations.deployPolicies.delete",
+   "args": {
+    "name": "${policy}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.deployPolicies.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "deployPolicies#count": 0
+   }
+  },
+  {
+   "call": "projects.locations.targets.delete",
+   "args": {
+    "name": "${target}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.targets.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "targets#count": 0
+   }
+  }
+ ]
+}

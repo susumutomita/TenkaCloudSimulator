@@ -156,6 +156,31 @@ def run():
                 expect(page.get_by_text(profile, exact=True).first).to_be_visible()
                 page.get_by_role('button', name='Back to list').click()
                 models.delete_inference_profile(inferenceProfileIdentifier=profile)
+                # Account inputs: Glacier sends the caller account "-", and
+                # Budgets sends the simulator account as AccountId.
+                vaults = team.client('glacier')
+                vaults.create_vault(accountId='-', vaultName='sdk-vault')
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^Amazon S3 Glacier')).click()
+                page.get_by_role('tab', name='vault').click()
+                expect(page.get_by_role('link', name='sdk-vault')).to_be_visible()
+                page.get_by_role('link', name='sdk-vault').click()
+                expect(page.get_by_text('arn:aws:glacier:us-east-1:000000000000:vaults/sdk-vault', exact=True).first).to_be_visible()
+                page.get_by_role('button', name='Back to list').click()
+                page.get_by_role('button', name='Delete sdk-vault').click()
+                page.get_by_role('dialog').get_by_role('button', name='Delete').click()
+                expect(page.get_by_text('Resource deleted.')).to_be_visible()
+                assert vaults.list_vaults(accountId='-')['VaultList'] == []
+                spending = team.client('budgets')
+                spending.create_budget(AccountId='000000000000', Budget={'BudgetName': 'sdk-budget', 'BudgetType': 'COST', 'TimeUnit': 'MONTHLY', 'BudgetLimit': {'Amount': '10', 'Unit': 'USD'}})
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^AWS Budgets')).click()
+                page.get_by_role('tab', name='budget').click()
+                expect(page.get_by_role('link', name='sdk-budget')).to_be_visible()
+                page.get_by_role('link', name='sdk-budget').click()
+                expect(page.get_by_text('MONTHLY', exact=True).first).to_be_visible()
+                page.get_by_role('button', name='Back to list').click()
+                spending.delete_budget(AccountId='000000000000', BudgetName='sdk-budget')
                 # ARN-only parents: Cloud Directory facets live under schema ARNs.
                 directory = team.client('clouddirectory')
                 schema = directory.create_schema(Name='sdk_org')['SchemaArn']

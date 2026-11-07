@@ -1,0 +1,2005 @@
+{
+ "components": {
+  "schemas": {
+   "AsymmetricAutoscalingOption": {
+    "additionalProperties": false,
+    "properties": {
+     "overrides": {
+      "$ref": "#/components/schemas/AutoscalingConfigOverrides"
+     },
+     "replicaSelection": {
+      "$ref": "#/components/schemas/InstanceReplicaSelection"
+     }
+    },
+    "type": "object"
+   },
+   "AutoscalingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "asymmetricAutoscalingOptions": {
+      "items": {
+       "$ref": "#/components/schemas/AsymmetricAutoscalingOption"
+      },
+      "type": "array"
+     },
+     "autoscalingLimits": {
+      "$ref": "#/components/schemas/AutoscalingLimits"
+     },
+     "autoscalingTargets": {
+      "$ref": "#/components/schemas/AutoscalingTargets"
+     }
+    },
+    "type": "object"
+   },
+   "AutoscalingConfigOverrides": {
+    "additionalProperties": false,
+    "properties": {
+     "autoscalingLimits": {
+      "$ref": "#/components/schemas/AutoscalingLimits"
+     },
+     "autoscalingTargetHighPriorityCpuUtilizationPercent": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "autoscalingTargetTotalCpuUtilizationPercent": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "disableHighPriorityCpuAutoscaling": {
+      "type": "boolean"
+     },
+     "disableTotalCpuAutoscaling": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "AutoscalingLimits": {
+    "additionalProperties": false,
+    "properties": {
+     "maxNodes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "maxProcessingUnits": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minNodes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minProcessingUnits": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "AutoscalingTargets": {
+    "additionalProperties": false,
+    "properties": {
+     "highPriorityCpuUtilizationPercent": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "storageUtilizationPercent": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "totalCpuUtilizationPercent": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "BackupInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "backup": {
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "sourceDatabase": {
+      "type": "string"
+     },
+     "versionTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BackupSchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionConfig": {
+      "$ref": "#/components/schemas/CreateBackupEncryptionConfig"
+     },
+     "fullBackupSpec": {
+      "$ref": "#/components/schemas/FullBackupSpec"
+     },
+     "incrementalBackupSpec": {
+      "$ref": "#/components/schemas/IncrementalBackupSpec"
+     },
+     "name": {
+      "type": "string"
+     },
+     "retentionDuration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "spec": {
+      "$ref": "#/components/schemas/BackupScheduleSpec"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BackupScheduleSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "cronSpec": {
+      "$ref": "#/components/schemas/CrontabSpec"
+     }
+    },
+    "type": "object"
+   },
+   "CreateBackupEncryptionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionType": {
+      "enum": [
+       "ENCRYPTION_TYPE_UNSPECIFIED",
+       "USE_DATABASE_ENCRYPTION",
+       "GOOGLE_DEFAULT_ENCRYPTION",
+       "CUSTOMER_MANAGED_ENCRYPTION"
+      ],
+      "type": "string"
+     },
+     "kmsKeyName": {
+      "type": "string"
+     },
+     "kmsKeyNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CreateDatabaseRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "createStatement": {
+      "type": "string"
+     },
+     "databaseDialect": {
+      "enum": [
+       "DATABASE_DIALECT_UNSPECIFIED",
+       "GOOGLE_STANDARD_SQL",
+       "POSTGRESQL"
+      ],
+      "type": "string"
+     },
+     "encryptionConfig": {
+      "$ref": "#/components/schemas/EncryptionConfig"
+     },
+     "extraStatements": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "protoDescriptors": {
+      "format": "byte",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateInstanceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "instance": {
+      "$ref": "#/components/schemas/Instance"
+     },
+     "instanceId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CrontabSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "creationWindow": {
+      "format": "google-duration",
+      "readOnly": true,
+      "type": "string"
+     },
+     "text": {
+      "type": "string"
+     },
+     "timeZone": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Database": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "databaseDialect": {
+      "enum": [
+       "DATABASE_DIALECT_UNSPECIFIED",
+       "GOOGLE_STANDARD_SQL",
+       "POSTGRESQL"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "defaultLeader": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "earliestVersionTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "enableDropProtection": {
+      "type": "boolean"
+     },
+     "encryptionConfig": {
+      "$ref": "#/components/schemas/EncryptionConfig"
+     },
+     "encryptionInfo": {
+      "items": {
+       "$ref": "#/components/schemas/EncryptionInfo"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "name": {
+      "type": "string"
+     },
+     "quorumInfo": {
+      "$ref": "#/components/schemas/QuorumInfo"
+     },
+     "reconciling": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "restoreInfo": {
+      "$ref": "#/components/schemas/RestoreInfo"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "READY",
+       "READY_OPTIMIZING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "versionRetentionPeriod": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DualRegionQuorum": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Empty": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "EncryptionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKeyName": {
+      "type": "string"
+     },
+     "kmsKeyNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionStatus": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "encryptionType": {
+      "enum": [
+       "TYPE_UNSPECIFIED",
+       "GOOGLE_DEFAULT_ENCRYPTION",
+       "CUSTOMER_MANAGED_ENCRYPTION"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "kmsKeyVersion": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FreeInstanceMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "expireBehavior": {
+      "enum": [
+       "EXPIRE_BEHAVIOR_UNSPECIFIED",
+       "FREE_TO_PROVISIONED",
+       "REMOVE_AFTER_GRACE_PERIOD"
+      ],
+      "type": "string"
+     },
+     "expireTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "upgradeTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FullBackupSpec": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "IncrementalBackupSpec": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Instance": {
+    "additionalProperties": false,
+    "properties": {
+     "autoscalingConfig": {
+      "$ref": "#/components/schemas/AutoscalingConfig"
+     },
+     "config": {
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "defaultBackupScheduleType": {
+      "enum": [
+       "DEFAULT_BACKUP_SCHEDULE_TYPE_UNSPECIFIED",
+       "NONE",
+       "AUTOMATIC"
+      ],
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "edition": {
+      "enum": [
+       "EDITION_UNSPECIFIED",
+       "STANDARD",
+       "ENTERPRISE",
+       "ENTERPRISE_PLUS"
+      ],
+      "type": "string"
+     },
+     "endpointUris": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "freeInstanceMetadata": {
+      "$ref": "#/components/schemas/FreeInstanceMetadata"
+     },
+     "instanceType": {
+      "enum": [
+       "INSTANCE_TYPE_UNSPECIFIED",
+       "PROVISIONED",
+       "FREE_INSTANCE"
+      ],
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "nodeCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "processingUnits": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "replicaComputeCapacity": {
+      "items": {
+       "$ref": "#/components/schemas/ReplicaComputeCapacity"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "READY"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceReplicaSelection": {
+    "additionalProperties": false,
+    "properties": {
+     "location": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListBackupSchedulesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "backupSchedules": {
+      "items": {
+       "$ref": "#/components/schemas/BackupSchedule"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListDatabasesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "databases": {
+      "items": {
+       "$ref": "#/components/schemas/Database"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListInstancesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "instances": {
+      "items": {
+       "$ref": "#/components/schemas/Instance"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "QuorumInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "initiator": {
+      "enum": [
+       "INITIATOR_UNSPECIFIED",
+       "GOOGLE",
+       "USER"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "quorumType": {
+      "$ref": "#/components/schemas/QuorumType"
+     },
+     "startTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "QuorumType": {
+    "additionalProperties": false,
+    "properties": {
+     "dualRegion": {
+      "$ref": "#/components/schemas/DualRegionQuorum"
+     },
+     "singleRegion": {
+      "$ref": "#/components/schemas/SingleRegionQuorum"
+     }
+    },
+    "type": "object"
+   },
+   "ReplicaComputeCapacity": {
+    "additionalProperties": false,
+    "properties": {
+     "nodeCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "processingUnits": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "replicaSelection": {
+      "$ref": "#/components/schemas/InstanceReplicaSelection"
+     }
+    },
+    "type": "object"
+   },
+   "RestoreInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "backupInfo": {
+      "$ref": "#/components/schemas/BackupInfo"
+     },
+     "sourceType": {
+      "enum": [
+       "TYPE_UNSPECIFIED",
+       "BACKUP"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SingleRegionQuorum": {
+    "additionalProperties": false,
+    "properties": {
+     "servingLocation": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateInstanceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "fieldMask": {
+      "format": "google-fieldmask",
+      "type": "string"
+     },
+     "instance": {
+      "$ref": "#/components/schemas/Instance"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Cloud Spanner API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Instances, databases and backup schedules are configuration metadata: no compute capacity, storage, schema, session, SQL or DML execution, or backup exists, and resources report READY immediately. Google-managed instance configurations are not listed; an instance records its config name as given. A database ID comes from its CREATE DATABASE statement, and extra DDL statements and proto descriptors are refused because no DDL runs. Deleting an instance removes its databases unless one has drop protection, which also blocks dropDatabase. Operations complete synchronously under the instance or database they act on.",
+  "title": "Spanner (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/instances": {
+   "get": {
+    "operationId": "spanner.projects.instances.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "instanceDeadline",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListInstancesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.list",
+    "tags": [
+     "Spanner"
+    ]
+   },
+   "post": {
+    "operationId": "spanner.projects.instances.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CreateInstanceRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.create",
+    "tags": [
+     "Spanner"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/instances/{instancesId}": {
+   "delete": {
+    "operationId": "spanner.projects.instances.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.delete",
+    "tags": [
+     "Spanner"
+    ]
+   },
+   "get": {
+    "operationId": "spanner.projects.instances.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "fieldMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Instance"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.get",
+    "tags": [
+     "Spanner"
+    ]
+   },
+   "patch": {
+    "operationId": "spanner.projects.instances.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UpdateInstanceRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.patch",
+    "tags": [
+     "Spanner"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/instances/{instancesId}/databases": {
+   "get": {
+    "operationId": "spanner.projects.instances.databases.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListDatabasesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.list",
+    "tags": [
+     "Spanner"
+    ]
+   },
+   "post": {
+    "operationId": "spanner.projects.instances.databases.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CreateDatabaseRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.create",
+    "tags": [
+     "Spanner"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/instances/{instancesId}/databases/{databasesId}": {
+   "delete": {
+    "operationId": "spanner.projects.instances.databases.dropDatabase",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.dropDatabase",
+    "tags": [
+     "Spanner"
+    ]
+   },
+   "get": {
+    "operationId": "spanner.projects.instances.databases.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Database"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.get",
+    "tags": [
+     "Spanner"
+    ]
+   },
+   "patch": {
+    "operationId": "spanner.projects.instances.databases.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Database"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.patch",
+    "tags": [
+     "Spanner"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/instances/{instancesId}/databases/{databasesId}/backupSchedules": {
+   "get": {
+    "operationId": "spanner.projects.instances.databases.backupSchedules.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListBackupSchedulesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.backupSchedules.list",
+    "tags": [
+     "Spanner"
+    ]
+   },
+   "post": {
+    "operationId": "spanner.projects.instances.databases.backupSchedules.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "backupScheduleId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BackupSchedule"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BackupSchedule"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.backupSchedules.create",
+    "tags": [
+     "Spanner"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/instances/{instancesId}/databases/{databasesId}/backupSchedules/{backupSchedulesId}": {
+   "delete": {
+    "operationId": "spanner.projects.instances.databases.backupSchedules.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupSchedulesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.backupSchedules.delete",
+    "tags": [
+     "Spanner"
+    ]
+   },
+   "get": {
+    "operationId": "spanner.projects.instances.databases.backupSchedules.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupSchedulesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BackupSchedule"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.backupSchedules.get",
+    "tags": [
+     "Spanner"
+    ]
+   },
+   "patch": {
+    "operationId": "spanner.projects.instances.databases.backupSchedules.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupSchedulesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BackupSchedule"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BackupSchedule"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.backupSchedules.patch",
+    "tags": [
+     "Spanner"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/instances/{instancesId}/databases/{databasesId}/operations": {
+   "get": {
+    "operationId": "spanner.projects.instances.databases.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.operations.list",
+    "tags": [
+     "Spanner"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/instances/{instancesId}/databases/{databasesId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "spanner.projects.instances.databases.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.databases.operations.get",
+    "tags": [
+     "Spanner"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/instances/{instancesId}/operations": {
+   "get": {
+    "operationId": "spanner.projects.instances.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.operations.list",
+    "tags": [
+     "Spanner"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/instances/{instancesId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "spanner.projects.instances.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.instances.operations.get",
+    "tags": [
+     "Spanner"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/spanner"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Cloud Spanner API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Instances, databases and backup schedules are configuration metadata: no compute capacity, storage, schema, session, SQL or DML execution, or backup exists, and resources report READY immediately. Google-managed instance configurations are not listed; an instance records its config name as given. A database ID comes from its CREATE DATABASE statement, and extra DDL statements and proto descriptors are refused because no DDL runs. Deleting an instance removes its databases unless one has drop protection, which also blocks dropDatabase. Operations complete synchronously under the instance or database they act on.",
+   "name": "Spanner"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/spanner.v1.json",
+  "sha256": "de9d2346f925558c1e92f317fd01f15fa72ad436b17c076ed28cf04af941c2f3",
+  "license": "Apache-2.0",
+  "revision": "20260622"
+ }
+}

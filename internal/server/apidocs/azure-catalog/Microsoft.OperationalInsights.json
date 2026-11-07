@@ -1,0 +1,970 @@
+{
+ "components": {
+  "schemas": {
+   "AzureEntityResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DataIngestionStatus": {
+    "enum": [
+     "RespectQuota",
+     "ForceOn",
+     "ForceOff",
+     "OverQuota",
+     "SubscriptionSuspended",
+     "ApproachingQuota"
+    ],
+    "type": "string"
+   },
+   "Identity": {
+    "properties": {
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tenantId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "$ref": "#/components/schemas/IdentityType"
+     },
+     "userAssignedIdentities": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/UserIdentityProperties"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "IdentityType": {
+    "enum": [
+     "SystemAssigned",
+     "UserAssigned",
+     "None"
+    ],
+    "type": "string"
+   },
+   "PrivateLinkScopedResource": {
+    "properties": {
+     "resourceId": {
+      "type": "string"
+     },
+     "scopeId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Resource": {
+    "properties": {
+     "id": {
+      "format": "arm-id",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "systemData": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/systemData"
+       }
+      ],
+      "readOnly": true
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TrackedResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "location": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "location"
+    ],
+    "type": "object"
+   },
+   "UserIdentityProperties": {
+    "properties": {
+     "clientId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Workspace": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/TrackedResource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "type": "string"
+     },
+     "identity": {
+      "$ref": "#/components/schemas/Identity"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/WorkspaceProperties"
+     }
+    },
+    "type": "object"
+   },
+   "WorkspaceCapping": {
+    "properties": {
+     "dailyQuotaGb": {
+      "format": "double",
+      "type": "number"
+     },
+     "dataIngestionStatus": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/DataIngestionStatus"
+       }
+      ],
+      "readOnly": true
+     },
+     "quotaNextResetTime": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WorkspaceEntityStatus": {
+    "enum": [
+     "Creating",
+     "Succeeded",
+     "Failed",
+     "Canceled",
+     "Deleting",
+     "ProvisioningAccount",
+     "Updating"
+    ],
+    "type": "string"
+   },
+   "WorkspaceFailoverProperties": {
+    "properties": {
+     "lastModifiedDate": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "state": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/WorkspaceFailoverState"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "type": "object"
+   },
+   "WorkspaceFailoverState": {
+    "enum": [
+     "Inactive",
+     "Activating",
+     "Active",
+     "Deactivating",
+     "Failed"
+    ],
+    "type": "string"
+   },
+   "WorkspaceFeatures": {
+    "additionalProperties": {},
+    "properties": {
+     "associations": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "clusterResourceId": {
+      "type": "string"
+     },
+     "disableLocalAuth": {
+      "type": "boolean"
+     },
+     "enableDataExport": {
+      "type": "boolean"
+     },
+     "enableLogAccessUsingOnlyResourcePermissions": {
+      "type": "boolean"
+     },
+     "immediatePurgeDataOn30Days": {
+      "type": "boolean"
+     },
+     "unifiedSentinelBillingOnly": {
+      "readOnly": true,
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "WorkspaceListResult": {
+    "properties": {
+     "nextLink": {
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/Workspace"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "WorkspacePatch": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/AzureEntityResource"
+     }
+    ],
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/Identity"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/WorkspaceProperties"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "WorkspaceProperties": {
+    "properties": {
+     "createdDate": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "customerId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "defaultDataCollectionRuleResourceId": {
+      "type": "string"
+     },
+     "failover": {
+      "$ref": "#/components/schemas/WorkspaceFailoverProperties"
+     },
+     "features": {
+      "$ref": "#/components/schemas/WorkspaceFeatures"
+     },
+     "forceCmkForQuery": {
+      "type": "boolean"
+     },
+     "modifiedDate": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "privateLinkScopedResources": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateLinkScopedResource"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/WorkspaceEntityStatus"
+       }
+      ],
+      "readOnly": true
+     },
+     "publicNetworkAccessForIngestion": {
+      "enum": [
+       "Enabled",
+       "Disabled",
+       "SecuredByPerimeter"
+      ],
+      "type": "string"
+     },
+     "publicNetworkAccessForQuery": {
+      "enum": [
+       "Enabled",
+       "Disabled",
+       "SecuredByPerimeter"
+      ],
+      "type": "string"
+     },
+     "replication": {
+      "$ref": "#/components/schemas/WorkspaceReplicationProperties"
+     },
+     "retentionInDays": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/WorkspaceSku"
+     },
+     "workspaceCapping": {
+      "$ref": "#/components/schemas/WorkspaceCapping"
+     }
+    },
+    "type": "object"
+   },
+   "WorkspaceReplicationProperties": {
+    "properties": {
+     "createdDate": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "lastModifiedDate": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "location": {
+      "type": "string"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/WorkspaceReplicationState"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "type": "object"
+   },
+   "WorkspaceReplicationState": {
+    "enum": [
+     "Succeeded",
+     "EnableRequested",
+     "Enabling",
+     "DisableRequested",
+     "Disabling",
+     "RollbackRequested",
+     "RollingBack",
+     "Failed",
+     "Canceled"
+    ],
+    "type": "string"
+   },
+   "WorkspaceSku": {
+    "properties": {
+     "capacityReservationLevel": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "lastSkuUpdate": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "$ref": "#/components/schemas/WorkspaceSkuNameEnum"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "WorkspaceSkuNameEnum": {
+    "enum": [
+     "Free",
+     "Standard",
+     "Premium",
+     "PerNode",
+     "PerGB2018",
+     "Standalone",
+     "CapacityReservation",
+     "LACluster"
+    ],
+    "type": "string"
+   },
+   "systemData": {
+    "properties": {
+     "createdAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "createdByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "lastModifiedBy": {
+      "type": "string"
+     },
+     "lastModifiedByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     }
+    },
+    "readOnly": true,
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Microsoft.OperationalInsights api-version 2025-07-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Workspace metadata only: no log ingestion, query, table, agent or shared key exists. Deletion is always immediate and permanent (force is accepted and changes nothing); deleted-workspace recovery is not simulated. Retention must be 30-730 days; failover, replication, data collection rules and every other operation are not implemented (HTTP 501).",
+  "title": "Log Analytics (Microsoft.OperationalInsights, simulator catalog)",
+  "version": "2025-07-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/subscriptions/{subscriptionId}/providers/Microsoft.OperationalInsights/workspaces": {
+   "get": {
+    "operationId": "Workspaces_List",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-07-01",
+       "enum": [
+        "2025-07-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WorkspaceListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Workspaces_List",
+    "tags": [
+     "Log Analytics"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces": {
+   "get": {
+    "operationId": "Workspaces_ListByResourceGroup",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-07-01",
+       "enum": [
+        "2025-07-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WorkspaceListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Workspaces_ListByResourceGroup",
+    "tags": [
+     "Log Analytics"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}": {
+   "delete": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "Workspaces_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-07-01",
+       "enum": [
+        "2025-07-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Workspaces_Delete",
+    "tags": [
+     "Log Analytics"
+    ]
+   },
+   "get": {
+    "operationId": "Workspaces_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-07-01",
+       "enum": [
+        "2025-07-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Workspace"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Workspaces_Get",
+    "tags": [
+     "Log Analytics"
+    ]
+   },
+   "patch": {
+    "operationId": "Workspaces_Update",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-07-01",
+       "enum": [
+        "2025-07-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WorkspacePatch"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Workspace"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Workspaces_Update",
+    "tags": [
+     "Log Analytics"
+    ]
+   },
+   "put": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "Workspaces_CreateOrUpdate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-07-01",
+       "enum": [
+        "2025-07-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Workspace"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Workspace"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Workspace"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Workspaces_CreateOrUpdate",
+    "tags": [
+     "Log Analytics"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/azure-arm"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Microsoft.OperationalInsights api-version 2025-07-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Workspace metadata only: no log ingestion, query, table, agent or shared key exists. Deletion is always immediate and permanent (force is accepted and changes nothing); deleted-workspace recovery is not simulated. Retention must be 30-730 days; failover, replication, data collection rules and every other operation are not implemented (HTTP 501).",
+   "name": "Log Analytics"
+  }
+ ],
+ "x-simulator-source": {
+  "repository": "github.com/Azure/azure-rest-api-specs",
+  "commit": "8254fa29b6360b48084554122a7c49f6c4237d84",
+  "license": "MIT",
+  "files": [
+   {
+    "path": "specification/common-types/resource-management/v5/types.json",
+    "sha256": "66767620b8edfbc04093c76b78d168cc59822cd9da1e726d35a9d45b73e642c1"
+   },
+   {
+    "path": "specification/operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/openapi.json",
+    "sha256": "f7ecefbd3eeefe017c7a7014e1603dbfcd7ecfa2737c1d85ff12a6963162b1cb"
+   }
+  ]
+ }
+}

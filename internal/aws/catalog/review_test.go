@@ -417,3 +417,35 @@ func TestDescriptorsPublishFixedListInputs(t *testing.T) {
 	}
 	t.Fatal("no inference profile descriptor")
 }
+
+// Descriptors publish the simulator account and each service's account
+// members, and Glacier publishes its documented caller account "-", so the
+// console sends the same account inputs as SDK clients.
+func TestDescriptorsPublishAccountInputs(t *testing.T) {
+	h := newHarness(t, glacier, budgets)
+	seen := 0
+	for _, d := range h.engine.Describe() {
+		if d.Account != "000000000000" {
+			t.Fatalf("%s account %q", d.Model, d.Account)
+		}
+		switch d.Model {
+		case "budgets":
+			if len(d.AccountMembers) != 1 || d.AccountMembers[0] != "AccountId" {
+				t.Fatalf("budgets account members %v", d.AccountMembers)
+			}
+			seen++
+		case "glacier":
+			for _, r := range d.Resources {
+				for kind, op := range r.Ops {
+					if op.Fixed["accountId"] != "-" {
+						t.Fatalf("glacier %s/%s fixed %v", r.Kind, kind, op.Fixed)
+					}
+				}
+			}
+			seen++
+		}
+	}
+	if seen != 2 {
+		t.Fatalf("saw %d services", seen)
+	}
+}

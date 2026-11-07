@@ -1,0 +1,2750 @@
+{
+ "components": {
+  "schemas": {
+   "AuthorizedNetwork": {
+    "additionalProperties": false,
+    "properties": {
+     "cidrRange": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AutomatedBackupPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "backupWindow": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "encryptionConfig": {
+      "$ref": "#/components/schemas/EncryptionConfig"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "location": {
+      "type": "string"
+     },
+     "quantityBasedRetention": {
+      "$ref": "#/components/schemas/QuantityBasedRetention"
+     },
+     "timeBasedRetention": {
+      "$ref": "#/components/schemas/TimeBasedRetention"
+     },
+     "weeklySchedule": {
+      "$ref": "#/components/schemas/WeeklySchedule"
+     }
+    },
+    "type": "object"
+   },
+   "BackupDrBackupSource": {
+    "additionalProperties": false,
+    "properties": {
+     "backup": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BackupDrEnabledWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "automatedBackupPreviouslyEnabled": {
+      "type": "boolean"
+     },
+     "backupPlanAssociation": {
+      "type": "string"
+     },
+     "continuousBackupPreviousRecoveryWindowDays": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "continuousBackupPreviouslyEnabled": {
+      "type": "boolean"
+     },
+     "continuousBackupPreviouslyEnabledTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "dataSource": {
+      "type": "string"
+     },
+     "disabledTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "enabledTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "logRetentionPeriod": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BackupDrInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "currentWindow": {
+      "$ref": "#/components/schemas/BackupDrEnabledWindow"
+     },
+     "previousWindows": {
+      "items": {
+       "$ref": "#/components/schemas/BackupDrEnabledWindow"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BackupSource": {
+    "additionalProperties": false,
+    "properties": {
+     "backupName": {
+      "type": "string"
+     },
+     "backupUid": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ClientConnectionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "requireConnectors": {
+      "type": "boolean"
+     },
+     "sslConfig": {
+      "$ref": "#/components/schemas/SslConfig"
+     }
+    },
+    "type": "object"
+   },
+   "CloudSQLBackupRunSource": {
+    "additionalProperties": false,
+    "properties": {
+     "backupRunId": {
+      "format": "int64",
+      "type": "string"
+     },
+     "instanceId": {
+      "type": "string"
+     },
+     "project": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Cluster": {
+    "additionalProperties": false,
+    "properties": {
+     "annotations": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "automatedBackupPolicy": {
+      "$ref": "#/components/schemas/AutomatedBackupPolicy"
+     },
+     "backupSource": {
+      "$ref": "#/components/schemas/BackupSource"
+     },
+     "backupdrBackupSource": {
+      "$ref": "#/components/schemas/BackupDrBackupSource"
+     },
+     "backupdrInfo": {
+      "$ref": "#/components/schemas/BackupDrInfo"
+     },
+     "cloudsqlBackupRunSource": {
+      "$ref": "#/components/schemas/CloudSQLBackupRunSource"
+     },
+     "clusterType": {
+      "enum": [
+       "CLUSTER_TYPE_UNSPECIFIED",
+       "PRIMARY",
+       "SECONDARY"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "continuousBackupConfig": {
+      "$ref": "#/components/schemas/ContinuousBackupConfig"
+     },
+     "continuousBackupInfo": {
+      "$ref": "#/components/schemas/ContinuousBackupInfo"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "databaseVersion": {
+      "enum": [
+       "DATABASE_VERSION_UNSPECIFIED",
+       "POSTGRES_13",
+       "POSTGRES_14",
+       "POSTGRES_15",
+       "POSTGRES_16",
+       "POSTGRES_17",
+       "POSTGRES_18"
+      ],
+      "type": "string"
+     },
+     "dataplexConfig": {
+      "$ref": "#/components/schemas/DataplexConfig"
+     },
+     "deleteTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "encryptionConfig": {
+      "$ref": "#/components/schemas/EncryptionConfig"
+     },
+     "encryptionInfo": {
+      "$ref": "#/components/schemas/EncryptionInfo"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "initialUser": {
+      "$ref": "#/components/schemas/UserPassword"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "maintenanceSchedule": {
+      "$ref": "#/components/schemas/MaintenanceSchedule"
+     },
+     "maintenanceUpdatePolicy": {
+      "$ref": "#/components/schemas/MaintenanceUpdatePolicy"
+     },
+     "maintenanceVersionSelectionPolicy": {
+      "enum": [
+       "MAINTENANCE_VERSION_SELECTION_POLICY_UNSPECIFIED",
+       "MAINTENANCE_VERSION_SELECTION_POLICY_LATEST",
+       "MAINTENANCE_VERSION_SELECTION_POLICY_DEFAULT"
+      ],
+      "type": "string"
+     },
+     "migrationSource": {
+      "$ref": "#/components/schemas/MigrationSource"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     },
+     "networkConfig": {
+      "$ref": "#/components/schemas/NetworkConfig"
+     },
+     "primaryConfig": {
+      "$ref": "#/components/schemas/PrimaryConfig"
+     },
+     "pscConfig": {
+      "$ref": "#/components/schemas/PscConfig"
+     },
+     "reconciling": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "secondaryConfig": {
+      "$ref": "#/components/schemas/SecondaryConfig"
+     },
+     "sslConfig": {
+      "$ref": "#/components/schemas/SslConfig"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "READY",
+       "STOPPED",
+       "EMPTY",
+       "CREATING",
+       "DELETING",
+       "FAILED",
+       "BOOTSTRAPPING",
+       "MAINTENANCE",
+       "PROMOTING",
+       "SWITCHOVER"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "subscriptionType": {
+      "enum": [
+       "SUBSCRIPTION_TYPE_UNSPECIFIED",
+       "STANDARD",
+       "TRIAL"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "trialMetadata": {
+      "$ref": "#/components/schemas/TrialMetadata"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectionPoolConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authproxyPoolerCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "authproxyPoolerScalingType": {
+      "enum": [
+       "POOLER_SCALING_TYPE_UNSPECIFIED",
+       "POOLER_NONE",
+       "POOLER_MACHINE_SIZED",
+       "POOLER_MANUAL_OVERRIDE"
+      ],
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "flags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "poolerCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "poolerScalingType": {
+      "enum": [
+       "POOLER_SCALING_TYPE_UNSPECIFIED",
+       "POOLER_NONE",
+       "POOLER_MACHINE_SIZED",
+       "POOLER_MANUAL_OVERRIDE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ContinuousBackupConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "encryptionConfig": {
+      "$ref": "#/components/schemas/EncryptionConfig"
+     },
+     "recoveryWindowDays": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ContinuousBackupInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "earliestRestorableTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "enabledTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "encryptionInfo": {
+      "$ref": "#/components/schemas/EncryptionInfo"
+     },
+     "schedule": {
+      "items": {
+       "enum": [
+        "DAY_OF_WEEK_UNSPECIFIED",
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+        "SUNDAY"
+       ],
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DataplexConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "DenyMaintenancePeriod": {
+    "additionalProperties": false,
+    "properties": {
+     "endDate": {
+      "$ref": "#/components/schemas/GoogleTypeDate"
+     },
+     "startDate": {
+      "$ref": "#/components/schemas/GoogleTypeDate"
+     },
+     "time": {
+      "$ref": "#/components/schemas/GoogleTypeTimeOfDay"
+     }
+    },
+    "type": "object"
+   },
+   "Empty": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "EncryptionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKeyName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionType": {
+      "enum": [
+       "TYPE_UNSPECIFIED",
+       "GOOGLE_DEFAULT_ENCRYPTION",
+       "CUSTOMER_MANAGED_ENCRYPTION"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "kmsKeyVersions": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleTypeDate": {
+    "additionalProperties": false,
+    "properties": {
+     "day": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "month": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "year": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleTypeTimeOfDay": {
+    "additionalProperties": false,
+    "properties": {
+     "hours": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minutes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nanos": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "seconds": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Instance": {
+    "additionalProperties": false,
+    "properties": {
+     "activationPolicy": {
+      "enum": [
+       "ACTIVATION_POLICY_UNSPECIFIED",
+       "ALWAYS",
+       "NEVER"
+      ],
+      "type": "string"
+     },
+     "annotations": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "availabilityType": {
+      "enum": [
+       "AVAILABILITY_TYPE_UNSPECIFIED",
+       "ZONAL",
+       "REGIONAL"
+      ],
+      "type": "string"
+     },
+     "clientConnectionConfig": {
+      "$ref": "#/components/schemas/ClientConnectionConfig"
+     },
+     "connectionPoolConfig": {
+      "$ref": "#/components/schemas/ConnectionPoolConfig"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "dataApiAccess": {
+      "enum": [
+       "DEFAULT_DATA_API_ENABLED_FOR_GOOGLE_CLOUD_SERVICES",
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "databaseFlags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "deleteTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "gceZone": {
+      "type": "string"
+     },
+     "instanceType": {
+      "enum": [
+       "INSTANCE_TYPE_UNSPECIFIED",
+       "PRIMARY",
+       "READ_POOL",
+       "SECONDARY"
+      ],
+      "type": "string"
+     },
+     "ipAddress": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "machineConfig": {
+      "$ref": "#/components/schemas/MachineConfig"
+     },
+     "maintenanceVersionName": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "networkConfig": {
+      "$ref": "#/components/schemas/InstanceNetworkConfig"
+     },
+     "nodes": {
+      "items": {
+       "$ref": "#/components/schemas/Node"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "observabilityConfig": {
+      "$ref": "#/components/schemas/ObservabilityInstanceConfig"
+     },
+     "outboundPublicIpAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "pscInstanceConfig": {
+      "$ref": "#/components/schemas/PscInstanceConfig"
+     },
+     "publicIpAddress": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "queryInsightsConfig": {
+      "$ref": "#/components/schemas/QueryInsightsInstanceConfig"
+     },
+     "readPoolConfig": {
+      "$ref": "#/components/schemas/ReadPoolConfig"
+     },
+     "reconciling": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "READY",
+       "STOPPED",
+       "CREATING",
+       "DELETING",
+       "MAINTENANCE",
+       "FAILED",
+       "BOOTSTRAPPING",
+       "PROMOTING",
+       "SWITCHOVER",
+       "STOPPING",
+       "STARTING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "writableNode": {
+      "$ref": "#/components/schemas/Node"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceNetworkConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "allocatedIpRangeOverride": {
+      "type": "string"
+     },
+     "authorizedExternalNetworks": {
+      "items": {
+       "$ref": "#/components/schemas/AuthorizedNetwork"
+      },
+      "type": "array"
+     },
+     "enableOutboundPublicIp": {
+      "type": "boolean"
+     },
+     "enablePublicIp": {
+      "type": "boolean"
+     },
+     "network": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListClustersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "clusters": {
+      "items": {
+       "$ref": "#/components/schemas/Cluster"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListInstancesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "instances": {
+      "items": {
+       "$ref": "#/components/schemas/Instance"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListUsersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "users": {
+      "items": {
+       "$ref": "#/components/schemas/User"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MachineConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "cpuCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "machineType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceSchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "startTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceUpdatePolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "denyMaintenancePeriods": {
+      "items": {
+       "$ref": "#/components/schemas/DenyMaintenancePeriod"
+      },
+      "type": "array"
+     },
+     "maintenanceWindows": {
+      "items": {
+       "$ref": "#/components/schemas/MaintenanceWindow"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "day": {
+      "enum": [
+       "DAY_OF_WEEK_UNSPECIFIED",
+       "MONDAY",
+       "TUESDAY",
+       "WEDNESDAY",
+       "THURSDAY",
+       "FRIDAY",
+       "SATURDAY",
+       "SUNDAY"
+      ],
+      "type": "string"
+     },
+     "startTime": {
+      "$ref": "#/components/schemas/GoogleTypeTimeOfDay"
+     }
+    },
+    "type": "object"
+   },
+   "MigrationSource": {
+    "additionalProperties": false,
+    "properties": {
+     "hostPort": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "referenceId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceType": {
+      "enum": [
+       "MIGRATION_SOURCE_TYPE_UNSPECIFIED",
+       "DMS"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "allocatedIpRange": {
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Node": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "ip": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "isHotStandby": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "state": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "zoneId": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ObservabilityInstanceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "maxQueryStringLength": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "preserveComments": {
+      "type": "boolean"
+     },
+     "queryPlansPerMinute": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "recordApplicationTags": {
+      "type": "boolean"
+     },
+     "trackActiveQueries": {
+      "type": "boolean"
+     },
+     "trackWaitEventTypes": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "trackWaitEvents": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PrimaryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "secondaryClusterNames": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PscAutoConnectionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "consumerNetwork": {
+      "type": "string"
+     },
+     "consumerNetworkStatus": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "consumerProject": {
+      "type": "string"
+     },
+     "ipAddress": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "status": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PscConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "pscEnabled": {
+      "type": "boolean"
+     },
+     "serviceOwnedProjectNumber": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PscInstanceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedConsumerProjects": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "pscAutoConnections": {
+      "items": {
+       "$ref": "#/components/schemas/PscAutoConnectionConfig"
+      },
+      "type": "array"
+     },
+     "pscDnsName": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "pscInterfaceConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/PscInterfaceConfig"
+      },
+      "type": "array"
+     },
+     "serviceAttachmentLink": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PscInterfaceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "networkAttachmentResource": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "QuantityBasedRetention": {
+    "additionalProperties": false,
+    "properties": {
+     "count": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "QueryInsightsInstanceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "queryPlansPerMinute": {
+      "format": "uint32",
+      "type": "integer"
+     },
+     "queryStringLength": {
+      "format": "uint32",
+      "type": "integer"
+     },
+     "recordApplicationTags": {
+      "type": "boolean"
+     },
+     "recordClientAddress": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ReadPoolConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "nodeCount": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "SecondaryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "primaryClusterName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SslConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "caSource": {
+      "enum": [
+       "CA_SOURCE_UNSPECIFIED",
+       "CA_SOURCE_MANAGED"
+      ],
+      "type": "string"
+     },
+     "sslMode": {
+      "enum": [
+       "SSL_MODE_UNSPECIFIED",
+       "SSL_MODE_ALLOW",
+       "SSL_MODE_REQUIRE",
+       "SSL_MODE_VERIFY_CA",
+       "ALLOW_UNENCRYPTED_AND_ENCRYPTED",
+       "ENCRYPTED_ONLY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TimeBasedRetention": {
+    "additionalProperties": false,
+    "properties": {
+     "retentionPeriod": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TrialMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "endTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "graceEndTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "startTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "upgradeTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "User": {
+    "additionalProperties": false,
+    "properties": {
+     "databaseRoles": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "keepExtraRoles": {
+      "type": "boolean"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "password": {
+      "type": "string"
+     },
+     "userType": {
+      "enum": [
+       "USER_TYPE_UNSPECIFIED",
+       "ALLOYDB_BUILT_IN",
+       "ALLOYDB_IAM_USER"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UserPassword": {
+    "additionalProperties": false,
+    "properties": {
+     "password": {
+      "type": "string"
+     },
+     "user": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WeeklySchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "daysOfWeek": {
+      "items": {
+       "enum": [
+        "DAY_OF_WEEK_UNSPECIFIED",
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+        "SUNDAY"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "startTimes": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleTypeTimeOfDay"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AlloyDB API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Clusters, instances and users are configuration metadata: no PostgreSQL engine, network endpoint, storage or backup is created; instances report READY immediately. Long-running operations complete synchronously and remain readable through operations.get/list. User passwords are refused and never stored; delete a cluster with children only with force=true.",
+  "title": "AlloyDB for PostgreSQL (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters": {
+   "get": {
+    "operationId": "alloydb.projects.locations.clusters.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListClustersResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.list",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   },
+   "post": {
+    "operationId": "alloydb.projects.locations.clusters.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clusterId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Cluster"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.create",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}": {
+   "delete": {
+    "operationId": "alloydb.projects.locations.clusters.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.delete",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   },
+   "get": {
+    "operationId": "alloydb.projects.locations.clusters.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "view",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Cluster"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.get",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   },
+   "patch": {
+    "operationId": "alloydb.projects.locations.clusters.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Cluster"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.patch",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/instances": {
+   "get": {
+    "operationId": "alloydb.projects.locations.clusters.instances.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListInstancesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.instances.list",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   },
+   "post": {
+    "operationId": "alloydb.projects.locations.clusters.instances.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "instanceId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Instance"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.instances.create",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/instances/{instancesId}": {
+   "delete": {
+    "operationId": "alloydb.projects.locations.clusters.instances.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.instances.delete",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   },
+   "get": {
+    "operationId": "alloydb.projects.locations.clusters.instances.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "view",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Instance"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.instances.get",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   },
+   "patch": {
+    "operationId": "alloydb.projects.locations.clusters.instances.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Instance"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.instances.patch",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/users": {
+   "get": {
+    "operationId": "alloydb.projects.locations.clusters.users.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListUsersResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.users.list",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   },
+   "post": {
+    "operationId": "alloydb.projects.locations.clusters.users.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "userId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/User"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/User"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.users.create",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/clusters/{clustersId}/users/{usersId}": {
+   "delete": {
+    "operationId": "alloydb.projects.locations.clusters.users.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "usersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.users.delete",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   },
+   "get": {
+    "operationId": "alloydb.projects.locations.clusters.users.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "usersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/User"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.users.get",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   },
+   "patch": {
+    "operationId": "alloydb.projects.locations.clusters.users.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clustersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "usersId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/User"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/User"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.clusters.users.patch",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "alloydb.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "alloydb.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "AlloyDB for PostgreSQL"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/alloydb"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AlloyDB API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Clusters, instances and users are configuration metadata: no PostgreSQL engine, network endpoint, storage or backup is created; instances report READY immediately. Long-running operations complete synchronously and remain readable through operations.get/list. User passwords are refused and never stored; delete a cluster with children only with force=true.",
+   "name": "AlloyDB for PostgreSQL"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/alloydb.v1.json",
+  "sha256": "ae8c61ad90eaf4d09c9a3aa5bc04669d52a6092eb84dc3ec7b648d17e047010f",
+  "license": "Apache-2.0",
+  "revision": "20260730"
+ }
+}

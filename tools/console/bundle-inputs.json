@@ -31558,11 +31558,11 @@
       "format": "esm"
     },
     "src/gcp-storage.css": {
-      "bytes": 8222,
+      "bytes": 8522,
       "imports": []
     },
     "src/gcp-console-shell.jsx": {
-      "bytes": 2655,
+      "bytes": 2978,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -31650,6 +31650,36 @@
           "path": "src/azure-blob.css",
           "kind": "import-statement",
           "original": "./azure-blob.css"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/azure-arm.css": {
+      "bytes": 2227,
+      "imports": []
+    },
+    "src/azure-arm.jsx": {
+      "bytes": 23883,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/azure-blob.css",
+          "kind": "import-statement",
+          "original": "./azure-blob.css"
+        },
+        {
+          "path": "src/azure-arm.css",
+          "kind": "import-statement",
+          "original": "./azure-arm.css"
         }
       ],
       "format": "esm"
@@ -32202,7 +32232,7 @@
       "format": "esm"
     },
     "src/console-navigation.mjs": {
-      "bytes": 6294,
+      "bytes": 7501,
       "imports": [],
       "format": "esm"
     },
@@ -32233,7 +32263,7 @@
       "format": "esm"
     },
     "src/catalog.jsx": {
-      "bytes": 17609,
+      "bytes": 17976,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -32333,8 +32363,29 @@
       ],
       "format": "esm"
     },
+    "src/gcp-catalog.jsx": {
+      "bytes": 19320,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/gcp-storage.css",
+          "kind": "import-statement",
+          "original": "./gcp-storage.css"
+        }
+      ],
+      "format": "esm"
+    },
     "src/main.jsx": {
-      "bytes": 43510,
+      "bytes": 44229,
       "imports": [
         {
           "path": "src/login.jsx",
@@ -32567,6 +32618,11 @@
           "original": "./azure-console-shell.jsx"
         },
         {
+          "path": "src/azure-arm.jsx",
+          "kind": "import-statement",
+          "original": "./azure-arm.jsx"
+        },
+        {
           "path": "src/sakura-console.jsx",
           "kind": "import-statement",
           "original": "./sakura-console.jsx"
@@ -32585,6 +32641,11 @@
           "path": "src/catalog.jsx",
           "kind": "import-statement",
           "original": "./catalog.jsx"
+        },
+        {
+          "path": "src/gcp-catalog.jsx",
+          "kind": "import-statement",
+          "original": "./gcp-catalog.jsx"
         },
         {
           "path": "src/console-navigation.mjs",
@@ -33464,7 +33525,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 40876
+          "bytesInOutput": 41425
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -34076,13 +34137,13 @@
           "bytesInOutput": 575
         },
         "node_modules/@dnd-kit/sortable/dist/sortable.esm.js": {
-          "bytesInOutput": 5386
+          "bytesInOutput": 5406
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/keyboard-sensor/utilities/events.js": {
           "bytesInOutput": 183
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/use-drag-and-drop-reorder.js": {
-          "bytesInOutput": 1698
+          "bytesInOutput": 1702
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/keyboard-sensor/defaults.js": {
           "bytesInOutput": 75
@@ -34091,7 +34152,7 @@
           "bytesInOutput": 302
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/keyboard-sensor/utilities/scroll.js": {
-          "bytesInOutput": 1135
+          "bytesInOutput": 1141
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/keyboard-sensor/index.js": {
           "bytesInOutput": 2627
@@ -35456,7 +35517,7 @@
           "bytesInOutput": 27668
         },
         "src/gcp-console-shell.jsx": {
-          "bytesInOutput": 2593
+          "bytesInOutput": 2868
         },
         "src/gcp-storage.css": {
           "bytesInOutput": 0
@@ -35469,6 +35530,12 @@
         },
         "src/azure-console-shell.jsx": {
           "bytesInOutput": 551
+        },
+        "src/azure-arm.jsx": {
+          "bytesInOutput": 21770
+        },
+        "src/azure-arm.css": {
+          "bytesInOutput": 0
         },
         "src/sakura-console.jsx": {
           "bytesInOutput": 2568
@@ -35534,13 +35601,16 @@
           "bytesInOutput": 63
         },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 5384
+          "bytesInOutput": 6438
         },
         "src/catalog.jsx": {
-          "bytesInOutput": 12518
+          "bytesInOutput": 12713
+        },
+        "src/gcp-catalog.jsx": {
+          "bytesInOutput": 14712
         }
       },
-      "bytes": 1734296
+      "bytes": 1772881
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],
@@ -36064,10 +36134,13 @@
           "bytesInOutput": 2526
         },
         "src/gcp-storage.css": {
-          "bytesInOutput": 7983
+          "bytesInOutput": 8184
         },
         "src/azure-blob.css": {
           "bytesInOutput": 8581
+        },
+        "src/azure-arm.css": {
+          "bytesInOutput": 1978
         },
         "src/sakura-console.css": {
           "bytesInOutput": 6165
@@ -36082,7 +36155,7 @@
           "bytesInOutput": 0
         }
       },
-      "bytes": 1294303
+      "bytes": 1296482
     }
   }
 }

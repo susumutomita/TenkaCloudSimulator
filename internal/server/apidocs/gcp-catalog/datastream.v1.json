@@ -1,0 +1,3935 @@
+{
+ "components": {
+  "schemas": {
+   "AppendOnly": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "AvroFileFormat": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "BackfillAllStrategy": {
+    "additionalProperties": false,
+    "properties": {
+     "mongodbExcludedObjects": {
+      "$ref": "#/components/schemas/MongodbCluster"
+     },
+     "mysqlExcludedObjects": {
+      "$ref": "#/components/schemas/MysqlRdbms"
+     },
+     "oracleExcludedObjects": {
+      "$ref": "#/components/schemas/OracleRdbms"
+     },
+     "postgresqlExcludedObjects": {
+      "$ref": "#/components/schemas/PostgresqlRdbms"
+     },
+     "saasExcludedObjects": {
+      "$ref": "#/components/schemas/SourceCatalog"
+     },
+     "salesforceExcludedObjects": {
+      "$ref": "#/components/schemas/SalesforceOrg"
+     },
+     "spannerExcludedObjects": {
+      "$ref": "#/components/schemas/SpannerDatabase"
+     },
+     "sqlServerExcludedObjects": {
+      "$ref": "#/components/schemas/SqlServerRdbms"
+     }
+    },
+    "type": "object"
+   },
+   "BackfillNoneStrategy": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "BasicEncryption": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "BigQueryClustering": {
+    "additionalProperties": false,
+    "properties": {
+     "columns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BigQueryDestinationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "appendOnly": {
+      "$ref": "#/components/schemas/AppendOnly"
+     },
+     "blmtConfig": {
+      "$ref": "#/components/schemas/BlmtConfig"
+     },
+     "dataFreshness": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "merge": {
+      "$ref": "#/components/schemas/Merge"
+     },
+     "singleTargetDataset": {
+      "$ref": "#/components/schemas/SingleTargetDataset"
+     },
+     "sourceHierarchyDatasets": {
+      "$ref": "#/components/schemas/SourceHierarchyDatasets"
+     }
+    },
+    "type": "object"
+   },
+   "BigQueryPartitioning": {
+    "additionalProperties": false,
+    "properties": {
+     "ingestionTimePartition": {
+      "$ref": "#/components/schemas/IngestionTimePartition"
+     },
+     "integerRangePartition": {
+      "$ref": "#/components/schemas/IntegerRangePartition"
+     },
+     "requirePartitionFilter": {
+      "type": "boolean"
+     },
+     "timeUnitPartition": {
+      "$ref": "#/components/schemas/TimeUnitPartition"
+     }
+    },
+    "type": "object"
+   },
+   "BigQueryProfile": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "BinaryLogParser": {
+    "additionalProperties": false,
+    "properties": {
+     "logFileDirectories": {
+      "$ref": "#/components/schemas/LogFileDirectories"
+     },
+     "oracleAsmLogFileAccess": {
+      "$ref": "#/components/schemas/OracleAsmLogFileAccess"
+     }
+    },
+    "type": "object"
+   },
+   "BinaryLogPosition": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "BlmtConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "type": "string"
+     },
+     "connectionName": {
+      "type": "string"
+     },
+     "fileFormat": {
+      "enum": [
+       "FILE_FORMAT_UNSPECIFIED",
+       "PARQUET"
+      ],
+      "type": "string"
+     },
+     "rootPath": {
+      "type": "string"
+     },
+     "tableFormat": {
+      "enum": [
+       "TABLE_FORMAT_UNSPECIFIED",
+       "ICEBERG"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectionProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "bigqueryProfile": {
+      "$ref": "#/components/schemas/BigQueryProfile"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "dataverseProfile": {
+      "$ref": "#/components/schemas/DataverseProfile"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "forwardSshConnectivity": {
+      "$ref": "#/components/schemas/ForwardSshTunnelConnectivity"
+     },
+     "gcsProfile": {
+      "$ref": "#/components/schemas/GcsProfile"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "mongodbProfile": {
+      "$ref": "#/components/schemas/MongodbProfile"
+     },
+     "mysqlProfile": {
+      "$ref": "#/components/schemas/MysqlProfile"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "oracleProfile": {
+      "$ref": "#/components/schemas/OracleProfile"
+     },
+     "postgresqlProfile": {
+      "$ref": "#/components/schemas/PostgresqlProfile"
+     },
+     "privateConnectivity": {
+      "$ref": "#/components/schemas/PrivateConnectivity"
+     },
+     "salesforceMarketingCloudProfile": {
+      "$ref": "#/components/schemas/SalesforceMarketingCloudProfile"
+     },
+     "salesforceProfile": {
+      "$ref": "#/components/schemas/SalesforceProfile"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "serviceNowProfile": {
+      "$ref": "#/components/schemas/ServiceNowProfile"
+     },
+     "spannerProfile": {
+      "$ref": "#/components/schemas/SpannerProfile"
+     },
+     "sqlServerProfile": {
+      "$ref": "#/components/schemas/SqlServerProfile"
+     },
+     "staticServiceIpConnectivity": {
+      "$ref": "#/components/schemas/StaticServiceIpConnectivity"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "workdayProfile": {
+      "$ref": "#/components/schemas/WorkdayProfile"
+     }
+    },
+    "type": "object"
+   },
+   "CustomizationRule": {
+    "additionalProperties": false,
+    "properties": {
+     "bigqueryClustering": {
+      "$ref": "#/components/schemas/BigQueryClustering"
+     },
+     "bigqueryPartitioning": {
+      "$ref": "#/components/schemas/BigQueryPartitioning"
+     }
+    },
+    "type": "object"
+   },
+   "DatasetTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "datasetIdPrefix": {
+      "type": "string"
+     },
+     "kmsKeyName": {
+      "type": "string"
+     },
+     "location": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DataverseProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "environmentUrl": {
+      "type": "string"
+     },
+     "oauthClientCredentials": {
+      "$ref": "#/components/schemas/OauthClientCredentials"
+     },
+     "tenantId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DataverseSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeObjects": {
+      "$ref": "#/components/schemas/SourceCatalog"
+     },
+     "includeObjects": {
+      "$ref": "#/components/schemas/SourceCatalog"
+     },
+     "pollingInterval": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DestinationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bigqueryDestinationConfig": {
+      "$ref": "#/components/schemas/BigQueryDestinationConfig"
+     },
+     "destinationConnectionProfile": {
+      "type": "string"
+     },
+     "gcsDestinationConfig": {
+      "$ref": "#/components/schemas/GcsDestinationConfig"
+     }
+    },
+    "type": "object"
+   },
+   "DropLargeObjects": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "EncryptionAndServerValidation": {
+    "additionalProperties": false,
+    "properties": {
+     "caCertificate": {
+      "type": "string"
+     },
+     "serverCertificateHostname": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionNotEnforced": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Error": {
+    "additionalProperties": false,
+    "properties": {
+     "details": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "errorTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "errorUuid": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     },
+     "reason": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ForwardSshTunnelConnectivity": {
+    "additionalProperties": false,
+    "properties": {
+     "hostname": {
+      "type": "string"
+     },
+     "password": {
+      "type": "string"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "privateKey": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GcsDestinationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "avroFileFormat": {
+      "$ref": "#/components/schemas/AvroFileFormat"
+     },
+     "fileRotationInterval": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "fileRotationMb": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "jsonFileFormat": {
+      "$ref": "#/components/schemas/JsonFileFormat"
+     },
+     "path": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GcsProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "type": "string"
+     },
+     "rootPath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Gtid": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "HostAddress": {
+    "additionalProperties": false,
+    "properties": {
+     "hostname": {
+      "type": "string"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "IngestionTimePartition": {
+    "additionalProperties": false,
+    "properties": {
+     "partitioningTimeGranularity": {
+      "enum": [
+       "PARTITIONING_TIME_GRANULARITY_UNSPECIFIED",
+       "PARTITIONING_TIME_GRANULARITY_HOUR",
+       "PARTITIONING_TIME_GRANULARITY_DAY",
+       "PARTITIONING_TIME_GRANULARITY_MONTH",
+       "PARTITIONING_TIME_GRANULARITY_YEAR"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IntegerRangePartition": {
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "type": "string"
+     },
+     "end": {
+      "format": "int64",
+      "type": "string"
+     },
+     "interval": {
+      "format": "int64",
+      "type": "string"
+     },
+     "start": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "JsonFileFormat": {
+    "additionalProperties": false,
+    "properties": {
+     "compression": {
+      "enum": [
+       "JSON_COMPRESSION_UNSPECIFIED",
+       "NO_COMPRESSION",
+       "GZIP"
+      ],
+      "type": "string"
+     },
+     "schemaFileFormat": {
+      "enum": [
+       "SCHEMA_FILE_FORMAT_UNSPECIFIED",
+       "NO_SCHEMA_FILE",
+       "AVRO_SCHEMA_FILE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListConnectionProfilesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "connectionProfiles": {
+      "items": {
+       "$ref": "#/components/schemas/ConnectionProfile"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListPrivateConnectionsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "privateConnections": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateConnection"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListRoutesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "routes": {
+      "items": {
+       "$ref": "#/components/schemas/Route"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListStreamsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "streams": {
+      "items": {
+       "$ref": "#/components/schemas/Stream"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LogFileDirectories": {
+    "additionalProperties": false,
+    "properties": {
+     "archivedLogDirectory": {
+      "type": "string"
+     },
+     "onlineLogDirectory": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LogMiner": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Merge": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "MongodbCluster": {
+    "additionalProperties": false,
+    "properties": {
+     "databases": {
+      "items": {
+       "$ref": "#/components/schemas/MongodbDatabase"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MongodbCollection": {
+    "additionalProperties": false,
+    "properties": {
+     "collection": {
+      "type": "string"
+     },
+     "fields": {
+      "items": {
+       "$ref": "#/components/schemas/MongodbField"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MongodbDatabase": {
+    "additionalProperties": false,
+    "properties": {
+     "collections": {
+      "items": {
+       "$ref": "#/components/schemas/MongodbCollection"
+      },
+      "type": "array"
+     },
+     "database": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MongodbField": {
+    "additionalProperties": false,
+    "properties": {
+     "field": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MongodbObjectIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "collection": {
+      "type": "string"
+     },
+     "database": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MongodbProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "hostAddresses": {
+      "items": {
+       "$ref": "#/components/schemas/HostAddress"
+      },
+      "type": "array"
+     },
+     "password": {
+      "type": "string"
+     },
+     "replicaSet": {
+      "type": "string"
+     },
+     "secretManagerStoredPassword": {
+      "type": "string"
+     },
+     "srvConnectionFormat": {
+      "$ref": "#/components/schemas/SrvConnectionFormat"
+     },
+     "sslConfig": {
+      "$ref": "#/components/schemas/MongodbSslConfig"
+     },
+     "standardConnectionFormat": {
+      "$ref": "#/components/schemas/StandardConnectionFormat"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MongodbSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeObjects": {
+      "$ref": "#/components/schemas/MongodbCluster"
+     },
+     "includeObjects": {
+      "$ref": "#/components/schemas/MongodbCluster"
+     },
+     "jsonMode": {
+      "enum": [
+       "MONGODB_JSON_MODE_UNSPECIFIED",
+       "STRICT",
+       "CANONICAL"
+      ],
+      "type": "string"
+     },
+     "maxConcurrentBackfillTasks": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "MongodbSslConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "caCertificate": {
+      "type": "string"
+     },
+     "caCertificateSet": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "clientCertificate": {
+      "type": "string"
+     },
+     "clientCertificateSet": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "clientKey": {
+      "type": "string"
+     },
+     "clientKeySet": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "secretManagerStoredClientKey": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MysqlColumn": {
+    "additionalProperties": false,
+    "properties": {
+     "collation": {
+      "type": "string"
+     },
+     "column": {
+      "type": "string"
+     },
+     "dataType": {
+      "type": "string"
+     },
+     "length": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nullable": {
+      "type": "boolean"
+     },
+     "ordinalPosition": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "precision": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "primaryKey": {
+      "type": "boolean"
+     },
+     "scale": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "MysqlDatabase": {
+    "additionalProperties": false,
+    "properties": {
+     "database": {
+      "type": "string"
+     },
+     "mysqlTables": {
+      "items": {
+       "$ref": "#/components/schemas/MysqlTable"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MysqlObjectIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "database": {
+      "type": "string"
+     },
+     "table": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MysqlProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "hostname": {
+      "type": "string"
+     },
+     "password": {
+      "type": "string"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "secretManagerStoredPassword": {
+      "type": "string"
+     },
+     "sslConfig": {
+      "$ref": "#/components/schemas/MysqlSslConfig"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MysqlRdbms": {
+    "additionalProperties": false,
+    "properties": {
+     "mysqlDatabases": {
+      "items": {
+       "$ref": "#/components/schemas/MysqlDatabase"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MysqlSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "binaryLogPosition": {
+      "$ref": "#/components/schemas/BinaryLogPosition"
+     },
+     "excludeObjects": {
+      "$ref": "#/components/schemas/MysqlRdbms"
+     },
+     "gtid": {
+      "$ref": "#/components/schemas/Gtid"
+     },
+     "includeObjects": {
+      "$ref": "#/components/schemas/MysqlRdbms"
+     },
+     "maxConcurrentBackfillTasks": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "maxConcurrentCdcTasks": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "MysqlSslConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "caCertificate": {
+      "type": "string"
+     },
+     "caCertificateSet": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "clientCertificate": {
+      "type": "string"
+     },
+     "clientCertificateSet": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "clientKey": {
+      "type": "string"
+     },
+     "clientKeySet": {
+      "readOnly": true,
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "MysqlTable": {
+    "additionalProperties": false,
+    "properties": {
+     "mysqlColumns": {
+      "items": {
+       "$ref": "#/components/schemas/MysqlColumn"
+      },
+      "type": "array"
+     },
+     "table": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Oauth2ClientCredentials": {
+    "additionalProperties": false,
+    "properties": {
+     "clientId": {
+      "type": "string"
+     },
+     "clientSecret": {
+      "type": "string"
+     },
+     "secretManagerStoredClientSecret": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OauthClientCredentials": {
+    "additionalProperties": false,
+    "properties": {
+     "clientId": {
+      "type": "string"
+     },
+     "clientSecret": {
+      "$ref": "#/components/schemas/Secret"
+     }
+    },
+    "type": "object"
+   },
+   "OauthRefreshTokenCredentials": {
+    "additionalProperties": false,
+    "properties": {
+     "oauthClientCredentials": {
+      "$ref": "#/components/schemas/OauthClientCredentials"
+     },
+     "refreshToken": {
+      "$ref": "#/components/schemas/Secret"
+     }
+    },
+    "type": "object"
+   },
+   "ObjectFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "sourceObjectIdentifier": {
+      "$ref": "#/components/schemas/SourceObjectIdentifier"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "OracleAsmConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "asmService": {
+      "type": "string"
+     },
+     "connectionAttributes": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "hostname": {
+      "type": "string"
+     },
+     "oracleSslConfig": {
+      "$ref": "#/components/schemas/OracleSslConfig"
+     },
+     "password": {
+      "type": "string"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "secretManagerStoredPassword": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OracleAsmLogFileAccess": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "OracleColumn": {
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "type": "string"
+     },
+     "dataType": {
+      "type": "string"
+     },
+     "encoding": {
+      "type": "string"
+     },
+     "length": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nullable": {
+      "type": "boolean"
+     },
+     "ordinalPosition": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "precision": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "primaryKey": {
+      "type": "boolean"
+     },
+     "scale": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "OracleObjectIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "schema": {
+      "type": "string"
+     },
+     "table": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OracleProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "connectionAttributes": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "databaseService": {
+      "type": "string"
+     },
+     "hostname": {
+      "type": "string"
+     },
+     "oracleAsmConfig": {
+      "$ref": "#/components/schemas/OracleAsmConfig"
+     },
+     "oracleSslConfig": {
+      "$ref": "#/components/schemas/OracleSslConfig"
+     },
+     "password": {
+      "type": "string"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "secretManagerStoredPassword": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OracleRdbms": {
+    "additionalProperties": false,
+    "properties": {
+     "oracleSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/OracleSchema"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "OracleSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "oracleTables": {
+      "items": {
+       "$ref": "#/components/schemas/OracleTable"
+      },
+      "type": "array"
+     },
+     "schema": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OracleSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "binaryLogParser": {
+      "$ref": "#/components/schemas/BinaryLogParser"
+     },
+     "dropLargeObjects": {
+      "$ref": "#/components/schemas/DropLargeObjects"
+     },
+     "excludeObjects": {
+      "$ref": "#/components/schemas/OracleRdbms"
+     },
+     "includeObjects": {
+      "$ref": "#/components/schemas/OracleRdbms"
+     },
+     "logMiner": {
+      "$ref": "#/components/schemas/LogMiner"
+     },
+     "maxConcurrentBackfillTasks": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "maxConcurrentCdcTasks": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "streamLargeObjects": {
+      "$ref": "#/components/schemas/StreamLargeObjects"
+     }
+    },
+    "type": "object"
+   },
+   "OracleSslConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "caCertificate": {
+      "type": "string"
+     },
+     "caCertificateSet": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "serverCertificateDistinguishedName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OracleTable": {
+    "additionalProperties": false,
+    "properties": {
+     "oracleColumns": {
+      "items": {
+       "$ref": "#/components/schemas/OracleColumn"
+      },
+      "type": "array"
+     },
+     "table": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PostgresqlColumn": {
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "type": "string"
+     },
+     "dataType": {
+      "type": "string"
+     },
+     "length": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nullable": {
+      "type": "boolean"
+     },
+     "ordinalPosition": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "precision": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "primaryKey": {
+      "type": "boolean"
+     },
+     "scale": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "PostgresqlObjectIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "schema": {
+      "type": "string"
+     },
+     "table": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PostgresqlProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "database": {
+      "type": "string"
+     },
+     "hostname": {
+      "type": "string"
+     },
+     "password": {
+      "type": "string"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "secretManagerStoredPassword": {
+      "type": "string"
+     },
+     "sslConfig": {
+      "$ref": "#/components/schemas/PostgresqlSslConfig"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PostgresqlRdbms": {
+    "additionalProperties": false,
+    "properties": {
+     "postgresqlSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/PostgresqlSchema"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PostgresqlSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "postgresqlTables": {
+      "items": {
+       "$ref": "#/components/schemas/PostgresqlTable"
+      },
+      "type": "array"
+     },
+     "schema": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PostgresqlSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeObjects": {
+      "$ref": "#/components/schemas/PostgresqlRdbms"
+     },
+     "includeObjects": {
+      "$ref": "#/components/schemas/PostgresqlRdbms"
+     },
+     "maxConcurrentBackfillTasks": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "publication": {
+      "type": "string"
+     },
+     "replicationSlot": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PostgresqlSslConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "serverAndClientVerification": {
+      "$ref": "#/components/schemas/ServerAndClientVerification"
+     },
+     "serverVerification": {
+      "$ref": "#/components/schemas/ServerVerification"
+     }
+    },
+    "type": "object"
+   },
+   "PostgresqlTable": {
+    "additionalProperties": false,
+    "properties": {
+     "postgresqlColumns": {
+      "items": {
+       "$ref": "#/components/schemas/PostgresqlColumn"
+      },
+      "type": "array"
+     },
+     "table": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateConnection": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Error"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "pscInterfaceConfig": {
+      "$ref": "#/components/schemas/PscInterfaceConfig"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "CREATED",
+       "FAILED",
+       "DELETING",
+       "FAILED_TO_DELETE"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "vpcPeeringConfig": {
+      "$ref": "#/components/schemas/VpcPeeringConfig"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateConnectivity": {
+    "additionalProperties": false,
+    "properties": {
+     "privateConnection": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PscInterfaceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "networkAttachment": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Route": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "destinationAddress": {
+      "type": "string"
+     },
+     "destinationPort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RuleSet": {
+    "additionalProperties": false,
+    "properties": {
+     "customizationRules": {
+      "items": {
+       "$ref": "#/components/schemas/CustomizationRule"
+      },
+      "type": "array"
+     },
+     "objectFilter": {
+      "$ref": "#/components/schemas/ObjectFilter"
+     }
+    },
+    "type": "object"
+   },
+   "SalesforceField": {
+    "additionalProperties": false,
+    "properties": {
+     "dataType": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "nillable": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "SalesforceMarketingCloudProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "oauthClientCredentials": {
+      "$ref": "#/components/schemas/OauthClientCredentials"
+     },
+     "subdomain": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SalesforceMarketingCloudSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeObjects": {
+      "$ref": "#/components/schemas/SourceCatalog"
+     },
+     "fullRefreshPollingInterval": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "includeObjects": {
+      "$ref": "#/components/schemas/SourceCatalog"
+     },
+     "pollingInterval": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SalesforceObject": {
+    "additionalProperties": false,
+    "properties": {
+     "fields": {
+      "items": {
+       "$ref": "#/components/schemas/SalesforceField"
+      },
+      "type": "array"
+     },
+     "objectName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SalesforceObjectIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "objectName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SalesforceOrg": {
+    "additionalProperties": false,
+    "properties": {
+     "objects": {
+      "items": {
+       "$ref": "#/components/schemas/SalesforceObject"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SalesforceProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "domain": {
+      "type": "string"
+     },
+     "oauth2ClientCredentials": {
+      "$ref": "#/components/schemas/Oauth2ClientCredentials"
+     },
+     "userCredentials": {
+      "$ref": "#/components/schemas/UserCredentials"
+     }
+    },
+    "type": "object"
+   },
+   "SalesforceSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeObjects": {
+      "$ref": "#/components/schemas/SalesforceOrg"
+     },
+     "includeObjects": {
+      "$ref": "#/components/schemas/SalesforceOrg"
+     },
+     "pollingInterval": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Secret": {
+    "additionalProperties": false,
+    "properties": {
+     "rawValue": {
+      "type": "string"
+     },
+     "secretVersion": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServerAndClientVerification": {
+    "additionalProperties": false,
+    "properties": {
+     "caCertificate": {
+      "type": "string"
+     },
+     "clientCertificate": {
+      "type": "string"
+     },
+     "clientKey": {
+      "type": "string"
+     },
+     "serverCertificateHostname": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServerVerification": {
+    "additionalProperties": false,
+    "properties": {
+     "caCertificate": {
+      "type": "string"
+     },
+     "serverCertificateHostname": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceNowProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "instance": {
+      "type": "string"
+     },
+     "oauthClientCredentials": {
+      "$ref": "#/components/schemas/OauthClientCredentials"
+     },
+     "userPasswordCredentials": {
+      "$ref": "#/components/schemas/UserPasswordCredentials"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceNowSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeObjects": {
+      "$ref": "#/components/schemas/SourceCatalog"
+     },
+     "includeObjects": {
+      "$ref": "#/components/schemas/SourceCatalog"
+     },
+     "pollingInterval": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SingleTargetDataset": {
+    "additionalProperties": false,
+    "properties": {
+     "datasetId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SourceCatalog": {
+    "additionalProperties": false,
+    "properties": {
+     "objects": {
+      "items": {
+       "$ref": "#/components/schemas/SourceObject"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "dataverseSourceConfig": {
+      "$ref": "#/components/schemas/DataverseSourceConfig"
+     },
+     "mongodbSourceConfig": {
+      "$ref": "#/components/schemas/MongodbSourceConfig"
+     },
+     "mysqlSourceConfig": {
+      "$ref": "#/components/schemas/MysqlSourceConfig"
+     },
+     "oracleSourceConfig": {
+      "$ref": "#/components/schemas/OracleSourceConfig"
+     },
+     "postgresqlSourceConfig": {
+      "$ref": "#/components/schemas/PostgresqlSourceConfig"
+     },
+     "salesforceMarketingCloudSourceConfig": {
+      "$ref": "#/components/schemas/SalesforceMarketingCloudSourceConfig"
+     },
+     "salesforceSourceConfig": {
+      "$ref": "#/components/schemas/SalesforceSourceConfig"
+     },
+     "serviceNowSourceConfig": {
+      "$ref": "#/components/schemas/ServiceNowSourceConfig"
+     },
+     "sourceConnectionProfile": {
+      "type": "string"
+     },
+     "spannerSourceConfig": {
+      "$ref": "#/components/schemas/SpannerSourceConfig"
+     },
+     "sqlServerSourceConfig": {
+      "$ref": "#/components/schemas/SqlServerSourceConfig"
+     },
+     "workdaySourceConfig": {
+      "$ref": "#/components/schemas/WorkdaySourceConfig"
+     }
+    },
+    "type": "object"
+   },
+   "SourceHierarchyDatasets": {
+    "additionalProperties": false,
+    "properties": {
+     "datasetTemplate": {
+      "$ref": "#/components/schemas/DatasetTemplate"
+     },
+     "projectId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SourceObject": {
+    "additionalProperties": false,
+    "properties": {
+     "objectName": {
+      "type": "string"
+     },
+     "properties": {
+      "items": {
+       "$ref": "#/components/schemas/SourceProperty"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SourceObjectIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "mongodbIdentifier": {
+      "$ref": "#/components/schemas/MongodbObjectIdentifier"
+     },
+     "mysqlIdentifier": {
+      "$ref": "#/components/schemas/MysqlObjectIdentifier"
+     },
+     "oracleIdentifier": {
+      "$ref": "#/components/schemas/OracleObjectIdentifier"
+     },
+     "postgresqlIdentifier": {
+      "$ref": "#/components/schemas/PostgresqlObjectIdentifier"
+     },
+     "salesforceIdentifier": {
+      "$ref": "#/components/schemas/SalesforceObjectIdentifier"
+     },
+     "spannerIdentifier": {
+      "$ref": "#/components/schemas/SpannerObjectIdentifier"
+     },
+     "sqlServerIdentifier": {
+      "$ref": "#/components/schemas/SqlServerObjectIdentifier"
+     }
+    },
+    "type": "object"
+   },
+   "SourceProperty": {
+    "additionalProperties": false,
+    "properties": {
+     "primaryKey": {
+      "type": "boolean"
+     },
+     "properties": {
+      "items": {
+       "$ref": "#/components/schemas/SourceProperty"
+      },
+      "type": "array"
+     },
+     "propertyName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SpannerColumn": {
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "type": "string"
+     },
+     "dataType": {
+      "type": "string"
+     },
+     "isPrimaryKey": {
+      "type": "boolean"
+     },
+     "ordinalPosition": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SpannerDatabase": {
+    "additionalProperties": false,
+    "properties": {
+     "schemas": {
+      "items": {
+       "$ref": "#/components/schemas/SpannerSchema"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SpannerObjectIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "schema": {
+      "type": "string"
+     },
+     "table": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SpannerProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "database": {
+      "type": "string"
+     },
+     "host": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SpannerSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "schema": {
+      "type": "string"
+     },
+     "tables": {
+      "items": {
+       "$ref": "#/components/schemas/SpannerTable"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SpannerSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "backfillDataBoostEnabled": {
+      "type": "boolean"
+     },
+     "changeStreamName": {
+      "type": "string"
+     },
+     "excludeObjects": {
+      "$ref": "#/components/schemas/SpannerDatabase"
+     },
+     "fgacRole": {
+      "type": "string"
+     },
+     "includeObjects": {
+      "$ref": "#/components/schemas/SpannerDatabase"
+     },
+     "maxConcurrentBackfillTasks": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "maxConcurrentCdcTasks": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "spannerRpcPriority": {
+      "enum": [
+       "SPANNER_RPC_PRIORITY_UNSPECIFIED",
+       "LOW",
+       "MEDIUM",
+       "HIGH"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SpannerTable": {
+    "additionalProperties": false,
+    "properties": {
+     "columns": {
+      "items": {
+       "$ref": "#/components/schemas/SpannerColumn"
+      },
+      "type": "array"
+     },
+     "table": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SqlServerChangeTables": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "SqlServerColumn": {
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "type": "string"
+     },
+     "dataType": {
+      "type": "string"
+     },
+     "length": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nullable": {
+      "type": "boolean"
+     },
+     "ordinalPosition": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "precision": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "primaryKey": {
+      "type": "boolean"
+     },
+     "scale": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "SqlServerObjectIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "schema": {
+      "type": "string"
+     },
+     "table": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SqlServerProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "database": {
+      "type": "string"
+     },
+     "hostname": {
+      "type": "string"
+     },
+     "password": {
+      "type": "string"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "secretManagerStoredPassword": {
+      "type": "string"
+     },
+     "sslConfig": {
+      "$ref": "#/components/schemas/SqlServerSslConfig"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SqlServerRdbms": {
+    "additionalProperties": false,
+    "properties": {
+     "schemas": {
+      "items": {
+       "$ref": "#/components/schemas/SqlServerSchema"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SqlServerSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "schema": {
+      "type": "string"
+     },
+     "tables": {
+      "items": {
+       "$ref": "#/components/schemas/SqlServerTable"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SqlServerSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "changeTables": {
+      "$ref": "#/components/schemas/SqlServerChangeTables"
+     },
+     "excludeObjects": {
+      "$ref": "#/components/schemas/SqlServerRdbms"
+     },
+     "includeObjects": {
+      "$ref": "#/components/schemas/SqlServerRdbms"
+     },
+     "maxConcurrentBackfillTasks": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "maxConcurrentCdcTasks": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "transactionLogs": {
+      "$ref": "#/components/schemas/SqlServerTransactionLogs"
+     }
+    },
+    "type": "object"
+   },
+   "SqlServerSslConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "basicEncryption": {
+      "$ref": "#/components/schemas/BasicEncryption"
+     },
+     "encryptionAndServerValidation": {
+      "$ref": "#/components/schemas/EncryptionAndServerValidation"
+     },
+     "encryptionNotEnforced": {
+      "$ref": "#/components/schemas/EncryptionNotEnforced"
+     }
+    },
+    "type": "object"
+   },
+   "SqlServerTable": {
+    "additionalProperties": false,
+    "properties": {
+     "columns": {
+      "items": {
+       "$ref": "#/components/schemas/SqlServerColumn"
+      },
+      "type": "array"
+     },
+     "table": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SqlServerTransactionLogs": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "SrvConnectionFormat": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "StandardConnectionFormat": {
+    "additionalProperties": false,
+    "properties": {
+     "directConnection": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "StaticServiceIpConnectivity": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Stream": {
+    "additionalProperties": false,
+    "properties": {
+     "backfillAll": {
+      "$ref": "#/components/schemas/BackfillAllStrategy"
+     },
+     "backfillNone": {
+      "$ref": "#/components/schemas/BackfillNoneStrategy"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "customerManagedEncryptionKey": {
+      "type": "string"
+     },
+     "destinationConfig": {
+      "$ref": "#/components/schemas/DestinationConfig"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "errors": {
+      "items": {
+       "$ref": "#/components/schemas/Error"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "lastRecoveryTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "ruleSets": {
+      "items": {
+       "$ref": "#/components/schemas/RuleSet"
+      },
+      "type": "array"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "sourceConfig": {
+      "$ref": "#/components/schemas/SourceConfig"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "NOT_STARTED",
+       "RUNNING",
+       "PAUSED",
+       "MAINTENANCE",
+       "FAILED",
+       "FAILED_PERMANENTLY",
+       "STARTING",
+       "DRAINING"
+      ],
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StreamLargeObjects": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "TimeUnitPartition": {
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "type": "string"
+     },
+     "partitioningTimeGranularity": {
+      "enum": [
+       "PARTITIONING_TIME_GRANULARITY_UNSPECIFIED",
+       "PARTITIONING_TIME_GRANULARITY_HOUR",
+       "PARTITIONING_TIME_GRANULARITY_DAY",
+       "PARTITIONING_TIME_GRANULARITY_MONTH",
+       "PARTITIONING_TIME_GRANULARITY_YEAR"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UserCredentials": {
+    "additionalProperties": false,
+    "properties": {
+     "password": {
+      "type": "string"
+     },
+     "secretManagerStoredPassword": {
+      "type": "string"
+     },
+     "secretManagerStoredSecurityToken": {
+      "type": "string"
+     },
+     "securityToken": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UserPasswordCredentials": {
+    "additionalProperties": false,
+    "properties": {
+     "password": {
+      "$ref": "#/components/schemas/Secret"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VpcPeeringConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "subnet": {
+      "type": "string"
+     },
+     "vpc": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WorkdayProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "host": {
+      "type": "string"
+     },
+     "oauthRefreshTokenCredentials": {
+      "$ref": "#/components/schemas/OauthRefreshTokenCredentials"
+     },
+     "tenant": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WorkdaySourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "excludeObjects": {
+      "$ref": "#/components/schemas/SourceCatalog"
+     },
+     "includeObjects": {
+      "$ref": "#/components/schemas/SourceCatalog"
+     },
+     "pollingInterval": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Datastream API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Connection profiles, private connections, routes and streams are configuration metadata: no source or destination is contacted, connectivity is never validated (as with force=true), and no VPC peering, PSC interface or route is created. Passwords, private keys, client secrets, security tokens and raw secret values are refused and never stored; Secret Manager references are kept as given. Streams stay NOT_STARTED: a create or patch that sets any other state is refused, streams.run is unimplemented, and no data, stream object or backfill exists. Connection profile references in streams are not resolved; deleting a private connection with routes requires force=true.",
+  "title": "Datastream (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/connectionProfiles": {
+   "get": {
+    "operationId": "datastream.projects.locations.connectionProfiles.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListConnectionProfilesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connectionProfiles.list",
+    "tags": [
+     "Datastream"
+    ]
+   },
+   "post": {
+    "operationId": "datastream.projects.locations.connectionProfiles.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "connectionProfileId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConnectionProfile"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connectionProfiles.create",
+    "tags": [
+     "Datastream"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/connectionProfiles/{connectionProfilesId}": {
+   "delete": {
+    "operationId": "datastream.projects.locations.connectionProfiles.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectionProfilesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connectionProfiles.delete",
+    "tags": [
+     "Datastream"
+    ]
+   },
+   "get": {
+    "operationId": "datastream.projects.locations.connectionProfiles.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectionProfilesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionProfile"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connectionProfiles.get",
+    "tags": [
+     "Datastream"
+    ]
+   },
+   "patch": {
+    "operationId": "datastream.projects.locations.connectionProfiles.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectionProfilesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConnectionProfile"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connectionProfiles.patch",
+    "tags": [
+     "Datastream"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "datastream.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Datastream"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "datastream.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Datastream"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/privateConnections": {
+   "get": {
+    "operationId": "datastream.projects.locations.privateConnections.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListPrivateConnectionsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.privateConnections.list",
+    "tags": [
+     "Datastream"
+    ]
+   },
+   "post": {
+    "operationId": "datastream.projects.locations.privateConnections.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "privateConnectionId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PrivateConnection"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.privateConnections.create",
+    "tags": [
+     "Datastream"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/privateConnections/{privateConnectionsId}": {
+   "delete": {
+    "operationId": "datastream.projects.locations.privateConnections.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "privateConnectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.privateConnections.delete",
+    "tags": [
+     "Datastream"
+    ]
+   },
+   "get": {
+    "operationId": "datastream.projects.locations.privateConnections.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "privateConnectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PrivateConnection"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.privateConnections.get",
+    "tags": [
+     "Datastream"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/privateConnections/{privateConnectionsId}/routes": {
+   "get": {
+    "operationId": "datastream.projects.locations.privateConnections.routes.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "privateConnectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListRoutesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.privateConnections.routes.list",
+    "tags": [
+     "Datastream"
+    ]
+   },
+   "post": {
+    "operationId": "datastream.projects.locations.privateConnections.routes.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "privateConnectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "routeId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Route"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.privateConnections.routes.create",
+    "tags": [
+     "Datastream"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/privateConnections/{privateConnectionsId}/routes/{routesId}": {
+   "delete": {
+    "operationId": "datastream.projects.locations.privateConnections.routes.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "privateConnectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "routesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.privateConnections.routes.delete",
+    "tags": [
+     "Datastream"
+    ]
+   },
+   "get": {
+    "operationId": "datastream.projects.locations.privateConnections.routes.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "privateConnectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "routesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Route"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.privateConnections.routes.get",
+    "tags": [
+     "Datastream"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/streams": {
+   "get": {
+    "operationId": "datastream.projects.locations.streams.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListStreamsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.streams.list",
+    "tags": [
+     "Datastream"
+    ]
+   },
+   "post": {
+    "operationId": "datastream.projects.locations.streams.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "streamId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Stream"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.streams.create",
+    "tags": [
+     "Datastream"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/streams/{streamsId}": {
+   "delete": {
+    "operationId": "datastream.projects.locations.streams.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "streamsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.streams.delete",
+    "tags": [
+     "Datastream"
+    ]
+   },
+   "get": {
+    "operationId": "datastream.projects.locations.streams.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "streamsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Stream"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.streams.get",
+    "tags": [
+     "Datastream"
+    ]
+   },
+   "patch": {
+    "operationId": "datastream.projects.locations.streams.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "streamsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Stream"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.streams.patch",
+    "tags": [
+     "Datastream"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/datastream"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Datastream API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Connection profiles, private connections, routes and streams are configuration metadata: no source or destination is contacted, connectivity is never validated (as with force=true), and no VPC peering, PSC interface or route is created. Passwords, private keys, client secrets, security tokens and raw secret values are refused and never stored; Secret Manager references are kept as given. Streams stay NOT_STARTED: a create or patch that sets any other state is refused, streams.run is unimplemented, and no data, stream object or backfill exists. Connection profile references in streams are not resolved; deleting a private connection with routes requires force=true.",
+   "name": "Datastream"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/datastream.v1.json",
+  "sha256": "95aeb2fc491030e22805038fe13c3c96e60322ed86c9b3f5fd28e3c3e29dea98",
+  "license": "Apache-2.0",
+  "revision": "20260719"
+ }
+}
