@@ -64,8 +64,25 @@ func (q *request) identifier() string {
 	if q.resource() != nil && q.resource().Singleton {
 		return "default"
 	}
-	value, _ := q.input[q.op.Lookup].(string)
-	return value
+	for _, member := range append([]string{q.op.Lookup}, q.op.LookupAlt...) {
+		if value, ok := lookupPath(q.input, member).(string); ok && value != "" {
+			return value
+		}
+	}
+	return ""
+}
+
+// lookupPath reads a member or a dotted path into nested structures.
+func lookupPath(input map[string]any, path string) any {
+	var current any = input
+	for _, part := range strings.Split(path, ".") {
+		object, ok := current.(map[string]any)
+		if !ok {
+			return nil
+		}
+		current = object[part]
+	}
+	return current
 }
 
 // put creates the identified resource or replaces the supplied members of
@@ -106,7 +123,7 @@ func (q *request) put() (map[string]any, error) {
 			found.Tags[k] = v
 		}
 		if len(found.Tags) > maxTagsPerResource {
-			return nil, &fault{kind: "limit", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
+			return nil, &fault{kind: "tags", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
 		}
 	}
 	for _, key := range q.op.Touch {
@@ -142,8 +159,13 @@ func (q *request) members() map[string]any {
 
 // passive reports input members that carry no state change of their own.
 func (q *request) passive(key string) bool {
-	if key == q.op.Lookup || key == q.op.Parent || key == q.op.Names {
+	if key == q.op.Lookup || key == q.op.Parent || key == q.op.Names || key == strings.Split(q.op.Lookup, ".")[0] {
 		return true
+	}
+	for _, member := range q.op.LookupAlt {
+		if key == member {
+			return true
+		}
 	}
 	for _, member := range q.op.Accept {
 		if key == member {
@@ -192,7 +214,7 @@ func (q *request) checkRefs(res *Resource, document map[string]any) error {
 }
 
 func (q *request) authorize(resource string) error {
-	decision, err := q.e.cfg.Authorize(q.ctx, q.principal, q.b.spec.IAMPrefix+":"+q.op.Name, resource)
+	decision, err := q.e.cfg.Authorize(q.ctx, q.principal, q.b.spec.IAMPrefix+":"+q.op.action(), resource)
 	if err != nil {
 		return err
 	}
@@ -204,6 +226,14 @@ func (q *request) authorize(resource string) error {
 }
 
 func (q *request) resource() *Resource { return q.b.spec.resource(q.op.Resource) }
+
+// action is the IAM action name an operation is authorized as.
+func (op *Op) action() string {
+	if op.Action != "" {
+		return op.Action
+	}
+	return op.Name
+}
 
 func (q *request) arnRegion() string {
 	if q.b.spec.Global {
@@ -351,6 +381,11 @@ func (m *Model) tagLike(shapeName string) (string, string, string) {
 
 func (q *request) tagMember(shapeName string) string {
 	shape := q.b.model.shape(shapeName)
+	for _, name := range []string{"Tags", "tags", "TagList", "tagList", "Tag"} {
+		if member, ok := shape.Members[name]; ok && q.b.model.isTagShape(member.Shape) {
+			return name
+		}
+	}
 	for _, name := range shape.sortedMembers() {
 		if kind, _, _ := q.b.model.tagLike(shape.Members[name].Shape); kind != "" && strings.Contains(strings.ToLower(name), "tag") {
 			return name
@@ -423,6 +458,24 @@ func fingerprint(input map[string]any, skip string) string {
 func (q *request) now() time.Time { return q.e.cfg.Now().UTC().Truncate(time.Millisecond) }
 
 func (q *request) generated(value any, r row, parent *row) any {
+	switch nested := value.(type) {
+	case map[string]any:
+		out := map[string]any{}
+		for key, item := range nested {
+			if generated := q.generated(item, r, parent); generated != nil {
+				out[key] = generated
+			}
+		}
+		return out
+	case []any:
+		out := []any{}
+		for _, item := range nested {
+			if generated := q.generated(item, r, parent); generated != nil {
+				out = append(out, generated)
+			}
+		}
+		return out
+	}
 	text, ok := value.(string)
 	if !ok || !strings.HasPrefix(text, "$") {
 		return value
@@ -474,6 +527,7 @@ func (q *request) create() (map[string]any, error) {
 	tokenMember := idempotencyMember(inputShape)
 	name := ""
 	document := map[string]any{}
+	supplied := map[string]bool{}
 	members := q.members()
 	for key, value := range members {
 		// A Put names its resource with the lookup member, which is stored.
@@ -488,6 +542,7 @@ func (q *request) create() (map[string]any, error) {
 			return nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}
 		}
 		document[target] = stored(value)
+		supplied[target] = true
 	}
 	if res.NameMember != "" {
 		name, _ = document[res.NameMember].(string)
@@ -512,7 +567,7 @@ func (q *request) create() (map[string]any, error) {
 		}
 	}
 	if len(tags) > maxTagsPerResource {
-		return nil, invalid("At most %d tags are supported per resource.", maxTagsPerResource)
+		return nil, &fault{kind: "tags", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
 	}
 	r := row{Service: q.b.spec.Model, Region: q.region, Kind: res.Kind, Parent: parentID(parent), ID: id, Name: name, Tags: tags}
 	r.ARN = q.formatARN(res, id, name, parent)
@@ -528,8 +583,11 @@ func (q *request) create() (map[string]any, error) {
 	}
 	sort.Strings(keys)
 	for _, key := range keys {
-		if _, supplied := document[key]; supplied && !strings.HasPrefix(fmt.Sprint(res.Generate[key]), "$") {
-			continue // A literal default never overrides a supplied official member.
+		// Literal and $name defaults are fallbacks: they never override a
+		// supplied member. Other generators are server-authoritative.
+		generator := fmt.Sprint(res.Generate[key])
+		if _, present := document[key]; present && !strings.HasPrefix(generator, "$") || supplied[key] && generator == "$name" {
+			continue
 		}
 		if value := q.generated(res.Generate[key], r, parent); value != nil {
 			document[key] = value
@@ -592,12 +650,8 @@ func (q *request) create() (map[string]any, error) {
 			return nil, &fault{kind: "conflict", message: fmt.Sprintf("The %s %s already exists.", res.Kind, r.Name)}
 		}
 	}
-	total, err := storedBytes(tx)
-	if err != nil {
+	if err := parentAlive(tx, parent); err != nil {
 		return nil, err
-	}
-	if total > maxStoredBytes {
-		return nil, &fault{kind: "limit", message: "The simulator catalog metadata budget is exhausted."}
 	}
 	if r.Seq, err = nextSeq(tx); err != nil {
 		return nil, err
@@ -668,6 +722,11 @@ func (q *request) update() (map[string]any, error) {
 	for key, value := range q.op.Set {
 		r.Document[key] = q.generated(value, r, parent)
 	}
+	if q.op.Merged != nil {
+		if err := q.op.Merged(r.Document, members); err != nil {
+			return nil, err
+		}
+	}
 	if err := q.checkRefs(res, r.Document); err != nil {
 		return nil, err
 	}
@@ -722,8 +781,16 @@ func (q *request) remove() (map[string]any, error) {
 		return nil, err
 	}
 	r, parent, err := q.lookup()
+	var missing *fault
+	if errors.As(err, &missing) && missing.kind == "notfound" && q.op.IdempotentDelete {
+		// The official operation succeeds when the resource is already gone.
+		return map[string]any{}, nil
+	}
 	if err != nil {
 		return nil, err
+	}
+	if r.Seq == 0 {
+		return nil, &fault{kind: "notfound", message: fmt.Sprintf("The %s has no stored configuration.", q.resource().Kind)}
 	}
 	res := q.resource()
 	kinds := q.children(res)
@@ -762,20 +829,23 @@ func (q *request) pagination() (string, string, string) {
 	var inputToken, outputToken, limitKey string
 	in := q.b.model.shape(q.official.Input)
 	out := q.b.model.Shapes[q.official.Output]
-	for _, name := range []string{"NextToken", "nextToken"} {
+	for _, name := range []string{"NextToken", "nextToken", "Marker", "marker"} {
 		if _, ok := in.Members[name]; ok && out != nil {
 			if _, ok := out.Members[name]; ok {
 				inputToken, outputToken = name, name
 			}
 		}
 	}
-	for _, name := range []string{"MaxResults", "maxResults"} {
+	for _, name := range []string{"MaxResults", "maxResults", "Limit", "limit", "MaxItems", "maxItems", "MaxRecords", "PageSize", "pageSize"} {
 		if _, ok := in.Members[name]; ok {
 			limitKey = name
 		}
 	}
 	return inputToken, outputToken, limitKey
 }
+
+// maxListLimit bounds any page size before it is converted to int.
+const maxListLimit = 1000
 
 type pageToken struct {
 	Op     string `json:"o"`
@@ -808,7 +878,8 @@ func (q *request) list() (map[string]any, error) {
 			if n < 1 {
 				return nil, invalid("%s must be at least 1.", limitKey)
 			}
-			if int(n) < limit {
+			// The bound check keeps the conversion within int on every platform.
+			if n <= maxListLimit && int(n) < limit {
 				limit = int(n)
 			}
 		}
@@ -844,6 +915,10 @@ func (q *request) list() (map[string]any, error) {
 				}
 			}
 			if match == nil && q.op.Failures != "" {
+				if q.op.FailureItem == nil {
+					failures = append(failures, identifier)
+					continue
+				}
 				item := map[string]any{}
 				for key, value := range q.op.FailureItem {
 					if text, ok := value.(string); ok {
@@ -891,6 +966,9 @@ func (q *request) list() (map[string]any, error) {
 		next = base64.RawURLEncoding.EncodeToString(data)
 	}
 	out := q.listOutput(page, parent, outputToken, next)
+	if q.op.HasMore != "" {
+		out[q.op.HasMore] = next != ""
+	}
 	if q.op.Failures != "" {
 		enc := &encoder{model: q.b.model, protocol: q.b.model.Metadata.Protocol}
 		if failures == nil {
@@ -1005,7 +1083,26 @@ func (q *request) tagged() (row, error) {
 	if err := q.authorize(found.ARN); err != nil {
 		return row{}, err
 	}
+	if found.Region != q.region {
+		// Tagging stays inside the request's regional scope, like reads.
+		return row{}, &fault{kind: "notfound", message: "The resource " + arn + " does not exist."}
+	}
 	return found, nil
+}
+
+// parentAlive rechecks inside the insert transaction that the parent read
+// before authorization still exists, so a concurrent parent deletion
+// cannot leave an orphaned child.
+func parentAlive(tx *sql.Tx, parent *row) error {
+	if parent == nil {
+		return nil
+	}
+	if _, err := findARN(tx, parent.Service, parent.ARN); errors.Is(err, sql.ErrNoRows) {
+		return &fault{kind: "notfound", message: "The parent resource " + parent.ARN + " no longer exists."}
+	} else if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (q *request) tag() (map[string]any, error) {
@@ -1034,7 +1131,7 @@ func (q *request) tag() (map[string]any, error) {
 		}
 	}
 	if len(r.Tags) > maxTagsPerResource {
-		return nil, &fault{kind: "limit", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
+		return nil, &fault{kind: "tags", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
 	}
 	if err := q.commit(func(tx *sql.Tx) error { return updateRow(tx, r) }); err != nil {
 		return nil, err

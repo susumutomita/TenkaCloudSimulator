@@ -1,0 +1,26 @@
+{
+ "client": "budgets",
+ "steps": [
+  {"op": "create_budget", "args": {"AccountId": "000000000000", "Budget": {"BudgetName": "fixture-monthly", "BudgetLimit": {"Amount": "100", "Unit": "USD"}, "TimeUnit": "MONTHLY", "BudgetType": "COST"}, "ResourceTags": [{"Key": "team", "Value": "a"}]}},
+  {"op": "describe_budget", "args": {"AccountId": "000000000000", "BudgetName": "fixture-monthly"}, "expect": {"Budget.BudgetLimit.Amount": "100", "Budget.BudgetType": "COST"}},
+  {"op": "describe_budgets", "args": {"AccountId": "000000000000"}, "expect": {"Budgets#count": 1}},
+  {"op": "update_budget", "args": {"AccountId": "000000000000", "NewBudget": {"BudgetName": "fixture-monthly", "BudgetLimit": {"Amount": "250", "Unit": "USD"}, "TimeUnit": "MONTHLY", "BudgetType": "COST"}}},
+  {"op": "tag_resource", "args": {"ResourceARN": "arn:aws:budgets::000000000000:budget/fixture-monthly", "ResourceTags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "arn:aws:budgets::000000000000:budget/fixture-monthly", "ResourceTagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "arn:aws:budgets::000000000000:budget/fixture-monthly"}, "expect": {"ResourceTags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "create_budget", "args": {"AccountId": "000000000000", "Budget": {"BudgetName": "fixture-monthly", "BudgetLimit": {"Amount": "1", "Unit": "USD"}, "TimeUnit": "MONTHLY", "BudgetType": "COST"}}, "error": "DuplicateRecordException", "status": 400},
+  {"op": "create_budget", "args": {"AccountId": "000000000000", "Budget": {"BudgetName": "fixture-spend", "BudgetLimit": {"Amount": "1", "Unit": "USD"}, "TimeUnit": "MONTHLY", "BudgetType": "COST", "CalculatedSpend": {"ActualSpend": {"Amount": "5", "Unit": "USD"}}}}, "error": "InvalidParameterException", "status": 400},
+  {"op": "describe_budget_performance_history", "args": {"AccountId": "000000000000", "BudgetName": "fixture-monthly"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_budget", "args": {"AccountId": "000000000000", "BudgetName": "missing"}, "error": "NotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "describe_budgets", "args": {"AccountId": "000000000000"}, "expect": {"Budgets#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_budget", "args": {"AccountId": "000000000000", "BudgetName": "fixture-monthly"}, "expect": {"Budget.BudgetLimit.Amount": "250"}}
+ ],
+ "cleanup": [
+  {"op": "delete_budget", "args": {"AccountId": "000000000000", "BudgetName": "fixture-monthly"}},
+  {"op": "describe_budgets", "args": {"AccountId": "000000000000"}, "expect": {"Budgets#count": 0}}
+ ]
+}

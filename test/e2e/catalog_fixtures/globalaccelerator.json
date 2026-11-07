@@ -1,0 +1,39 @@
+{
+ "client": "globalaccelerator",
+ "steps": [
+  {"op": "create_accelerator", "args": {"Name": "fixture-accelerator", "Enabled": false, "IdempotencyToken": "fixture-1", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"acc": "Accelerator.AcceleratorArn"}, "expect": {"Accelerator.Name": "fixture-accelerator", "Accelerator.Enabled": false, "Accelerator.Status": "DEPLOYED", "Accelerator.IpAddressType": "IPV4", "Accelerator.IpSets#count": 0}},
+  {"op": "describe_accelerator", "args": {"AcceleratorArn": "${acc}"}, "expect": {"Accelerator.AcceleratorArn": "${acc}"}},
+  {"op": "list_accelerators", "args": {}, "expect": {"Accelerators#count": 1}},
+  {"op": "update_accelerator", "args": {"AcceleratorArn": "${acc}", "Name": "renamed", "IpAddressType": "DUAL_STACK"}, "expect": {"Accelerator.Name": "renamed", "Accelerator.IpAddressType": "DUAL_STACK"}},
+  {"op": "update_accelerator", "args": {"AcceleratorArn": "${acc}", "Enabled": true}, "error": "InvalidArgumentException"},
+  {"op": "create_accelerator", "args": {"Name": "enabled", "IdempotencyToken": "fixture-2"}, "error": "InvalidArgumentException"},
+  {"op": "create_custom_routing_accelerator", "args": {"Name": "fixture-custom", "Enabled": false, "IdempotencyToken": "fixture-3"}, "save": {"custom": "Accelerator.AcceleratorArn"}, "expect": {"Accelerator.Status": "DEPLOYED"}},
+  {"op": "describe_custom_routing_accelerator", "args": {"AcceleratorArn": "${custom}"}, "expect": {"Accelerator.Name": "fixture-custom"}},
+  {"op": "list_custom_routing_accelerators", "args": {}, "expect": {"Accelerators#count": 1}},
+  {"op": "update_custom_routing_accelerator", "args": {"AcceleratorArn": "${custom}", "Name": "custom-renamed"}, "expect": {"Accelerator.Name": "custom-renamed"}},
+  {"op": "describe_accelerator", "args": {"AcceleratorArn": "${custom}"}, "error": "AcceleratorNotFoundException"},
+  {"op": "create_cross_account_attachment", "args": {"Name": "fixture-attachment", "Principals": ["111122223333"], "Resources": [{"Cidr": "203.0.113.0/24"}], "IdempotencyToken": "fixture-4"}, "save": {"att": "CrossAccountAttachment.AttachmentArn"}, "expect": {"CrossAccountAttachment.Principals": ["111122223333"]}},
+  {"op": "describe_cross_account_attachment", "args": {"AttachmentArn": "${att}"}, "expect": {"CrossAccountAttachment.Resources[0].Cidr": "203.0.113.0/24"}},
+  {"op": "list_cross_account_attachments", "args": {}, "expect": {"CrossAccountAttachments#count": 1}},
+  {"op": "update_cross_account_attachment", "args": {"AttachmentArn": "${att}", "Name": "attachment-renamed"}, "expect": {"CrossAccountAttachment.Name": "attachment-renamed"}},
+  {"op": "update_cross_account_attachment", "args": {"AttachmentArn": "${att}", "AddPrincipals": ["444455556666"]}, "error": "InvalidArgumentException"},
+  {"op": "tag_resource", "args": {"ResourceArn": "${acc}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${acc}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${acc}"}, "expect": {"Tags": [{"Key": "team", "Value": "a"}]}},
+  {"op": "create_listener", "args": {"AcceleratorArn": "${acc}", "PortRanges": [{"FromPort": 80, "ToPort": 80}], "Protocol": "TCP", "IdempotencyToken": "fixture-5"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_accelerator", "args": {"AcceleratorArn": "arn:aws:globalaccelerator::000000000000:accelerator/00000000-0000-4000-8000-000000000000"}, "error": "AcceleratorNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_accelerators", "args": {}, "expect": {"Accelerators#count": 0}},
+  {"op": "list_cross_account_attachments", "args": {}, "expect": {"CrossAccountAttachments#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_accelerator", "args": {"AcceleratorArn": "${acc}"}, "expect": {"Accelerator.Name": "renamed"}}
+ ],
+ "cleanup": [
+  {"op": "delete_accelerator", "args": {"AcceleratorArn": "${acc}"}},
+  {"op": "delete_custom_routing_accelerator", "args": {"AcceleratorArn": "${custom}"}},
+  {"op": "delete_cross_account_attachment", "args": {"AttachmentArn": "${att}"}},
+  {"op": "list_accelerators", "args": {}, "expect": {"Accelerators#count": 0}}
+ ]
+}

@@ -1,0 +1,33 @@
+{
+ "client": "resiliencehub",
+ "steps": [
+  {"op": "create_resiliency_policy", "args": {"policyName": "fixture-gold", "tier": "Critical", "policy": {"Software": {"rpoInSecs": 300, "rtoInSecs": 600}, "Hardware": {"rpoInSecs": 300, "rtoInSecs": 600}, "AZ": {"rpoInSecs": 600, "rtoInSecs": 1800}}, "tags": {"team": "a"}}, "save": {"policy": "policy.policyArn"}},
+  {"op": "describe_resiliency_policy", "args": {"policyArn": "${policy}"}, "expect": {"policy.tier": "Critical", "policy.policy.AZ.rtoInSecs": 1800}},
+  {"op": "list_resiliency_policies", "args": {}, "expect": {"resiliencyPolicies#count": 1}},
+  {"op": "update_resiliency_policy", "args": {"policyArn": "${policy}", "policyDescription": "Gold tier"}, "expect": {"policy.policyDescription": "Gold tier"}},
+  {"op": "create_app", "args": {"name": "fixture-shop", "policyArn": "${policy}", "assessmentSchedule": "Disabled", "tags": {"team": "a"}}, "save": {"app": "app.appArn"}, "expect": {"app.status": "Active", "app.policyArn": "${policy}"}},
+  {"op": "describe_app", "args": {"appArn": "${app}"}, "expect": {"app.name": "fixture-shop"}},
+  {"op": "list_apps", "args": {"name": "fixture-shop"}, "expect": {"appSummaries#count": 1}},
+  {"op": "update_app", "args": {"appArn": "${app}", "description": "Web shop"}, "expect": {"app.description": "Web shop"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${app}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${app}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${app}"}, "expect": {"tags": {"k": "v"}}},
+  {"op": "create_app", "args": {"name": "fixture-daily", "assessmentSchedule": "Daily"}, "error": "ValidationException", "status": 400},
+  {"op": "start_app_assessment", "args": {"appArn": "${app}", "appVersion": "release", "assessmentName": "fixture"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_app", "args": {"appArn": "arn:aws:resiliencehub:us-east-1:000000000000:app/00000000-0000-0000-0000-000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_apps", "args": {}, "expect": {"appSummaries#count": 0}},
+  {"op": "list_resiliency_policies", "args": {}, "expect": {"resiliencyPolicies#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_app", "args": {"appArn": "${app}"}, "expect": {"app.description": "Web shop"}},
+  {"op": "describe_resiliency_policy", "args": {"policyArn": "${policy}"}, "expect": {"policy.policyDescription": "Gold tier"}}
+ ],
+ "cleanup": [
+  {"op": "delete_app", "args": {"appArn": "${app}"}, "expect": {"appArn": "${app}"}},
+  {"op": "delete_resiliency_policy", "args": {"policyArn": "${policy}"}, "expect": {"policyArn": "${policy}"}},
+  {"op": "list_apps", "args": {}, "expect": {"appSummaries#count": 0}},
+  {"op": "list_resiliency_policies", "args": {}, "expect": {"resiliencyPolicies#count": 0}}
+ ]
+}

@@ -1,0 +1,149 @@
+{
+ "client": "gameliftstreams",
+ "steps": [
+  {
+   "op": "create_application",
+   "args": {
+    "Description": "Demo game",
+    "RuntimeEnvironment": {
+     "Type": "PROTON",
+     "Version": "20241007"
+    },
+    "ExecutablePath": "game/start.exe",
+    "ApplicationSourceUri": "s3://fixture-games/demo",
+    "Tags": {
+     "team": "a"
+    }
+   },
+   "save": {
+    "app": "Arn",
+    "id": "Id"
+   },
+   "expect": {
+    "Status": "INITIALIZED"
+   }
+  },
+  {
+   "op": "get_application",
+   "args": {
+    "Identifier": "${id}"
+   },
+   "expect": {
+    "Arn": "${app}",
+    "RuntimeEnvironment.Version": "20241007",
+    "AssociatedStreamGroups#count": 0
+   }
+  },
+  {
+   "op": "list_applications",
+   "args": {},
+   "expect": {
+    "Items#count": 1
+   }
+  },
+  {
+   "op": "update_application",
+   "args": {
+    "Identifier": "${app}",
+    "Description": "Demo game v2"
+   },
+   "expect": {
+    "Description": "Demo game v2"
+   }
+  },
+  {
+   "op": "create_application",
+   "args": {
+    "Description": "Web game",
+    "RuntimeEnvironment": {
+     "Type": "PROTON",
+     "Version": "20241007"
+    },
+    "ExecutablePath": "start.exe",
+    "ApplicationSourceUri": "https://example.com/game"
+   },
+   "error": "ValidationException"
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "ResourceArn": "${app}",
+    "Tags": {
+     "stage": "dev"
+    }
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "ResourceArn": "${app}",
+    "TagKeys": [
+     "stage"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "ResourceArn": "${app}"
+   },
+   "expect": {
+    "Tags": {
+     "team": "a"
+    }
+   }
+  },
+  {
+   "op": "create_stream_group",
+   "args": {
+    "Description": "Group",
+    "StreamClass": "gen4n_high"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "get_application",
+   "args": {
+    "Identifier": "a-000000000"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_applications",
+   "args": {},
+   "expect": {
+    "Items#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_application",
+   "args": {
+    "Identifier": "${app}"
+   },
+   "expect": {
+    "Description": "Demo game v2",
+    "Status": "INITIALIZED"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_application",
+   "args": {
+    "Identifier": "${id}"
+   }
+  },
+  {
+   "op": "list_applications",
+   "args": {},
+   "expect": {
+    "Items#count": 0
+   }
+  }
+ ]
+}

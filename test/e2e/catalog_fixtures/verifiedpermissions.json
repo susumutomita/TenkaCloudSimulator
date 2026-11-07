@@ -1,0 +1,26 @@
+{
+ "client": "verifiedpermissions",
+ "steps": [
+  {"op": "create_policy_store", "args": {"validationSettings": {"mode": "OFF"}, "description": "Fixture store", "tags": {"team": "a"}}, "save": {"store": "policyStoreId", "storeArn": "arn"}},
+  {"op": "get_policy_store", "args": {"policyStoreId": "${store}"}, "expect": {"validationSettings.mode": "OFF", "cedarVersion": "CEDAR_4", "deletionProtection": "DISABLED", "arn": "arn:aws:verifiedpermissions::000000000000:policy-store/${store}"}},
+  {"op": "list_policy_stores", "args": {}, "expect": {"policyStores#count": 1, "policyStores[0].description": "Fixture store"}},
+  {"op": "update_policy_store", "args": {"policyStoreId": "${store}", "validationSettings": {"mode": "STRICT"}}, "expect": {"arn": "${storeArn}"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${storeArn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${storeArn}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${storeArn}"}, "expect": {"tags": {"k": "v"}}},
+  {"op": "get_policy_store", "args": {"policyStoreId": "${store}", "tags": true}, "expect": {"tags": {"k": "v"}}},
+  {"op": "create_policy_store", "args": {"validationSettings": {"mode": "OFF"}, "deletionProtection": "ENABLED"}, "error": "ValidationException", "status": 400},
+  {"op": "is_authorized", "args": {"policyStoreId": "${store}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_policy_store", "args": {"policyStoreId": "missingstore"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_policy_stores", "args": {}, "expect": {"policyStores#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_policy_store", "args": {"policyStoreId": "${store}"}, "expect": {"validationSettings.mode": "STRICT"}}
+ ],
+ "cleanup": [
+  {"op": "delete_policy_store", "args": {"policyStoreId": "${store}"}},
+  {"op": "list_policy_stores", "args": {}, "expect": {"policyStores#count": 0}}
+ ]
+}

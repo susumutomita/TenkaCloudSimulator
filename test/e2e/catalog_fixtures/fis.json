@@ -1,0 +1,25 @@
+{
+ "client": "fis",
+ "steps": [
+  {"op": "create_experiment_template", "args": {"description": "Stop web instances", "roleArn": "arn:aws:iam::000000000000:role/fixture-fis", "stopConditions": [{"source": "none"}], "targets": {"web": {"resourceType": "aws:ec2:instance", "resourceTags": {"role": "web"}, "selectionMode": "ALL"}}, "actions": {"stop": {"actionId": "aws:ec2:stop-instances", "targets": {"Instances": "web"}}}, "tags": {"team": "a"}}, "save": {"template": "experimentTemplate.id", "templateArn": "experimentTemplate.arn"}, "expect": {"experimentTemplate.experimentOptions.accountTargeting": "single-account"}},
+  {"op": "get_experiment_template", "args": {"id": "${template}"}, "expect": {"experimentTemplate.arn": "arn:aws:fis:us-east-1:000000000000:experiment-template/${template}", "experimentTemplate.targets.web.selectionMode": "ALL"}},
+  {"op": "list_experiment_templates", "args": {}, "expect": {"experimentTemplates#count": 1}},
+  {"op": "update_experiment_template", "args": {"id": "${template}", "description": "Stop all web instances"}, "expect": {"experimentTemplate.description": "Stop all web instances"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${templateArn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${templateArn}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${templateArn}"}, "expect": {"tags": {"k": "v"}}},
+  {"op": "create_experiment_template", "args": {"description": "Alarm without value", "roleArn": "arn:aws:iam::000000000000:role/fixture-fis", "stopConditions": [{"source": "aws:cloudwatch:alarm"}], "actions": {"wait": {"actionId": "aws:fis:wait", "parameters": {"duration": "PT1M"}}}}, "error": "ValidationException", "status": 400},
+  {"op": "start_experiment", "args": {"experimentTemplateId": "${template}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_experiment_template", "args": {"id": "EXTmissing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_experiment_templates", "args": {}, "expect": {"experimentTemplates#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_experiment_template", "args": {"id": "${template}"}, "expect": {"experimentTemplate.description": "Stop all web instances", "experimentTemplate.tags": {"k": "v"}}}
+ ],
+ "cleanup": [
+  {"op": "delete_experiment_template", "args": {"id": "${template}"}, "expect": {"experimentTemplate.id": "${template}"}},
+  {"op": "list_experiment_templates", "args": {}, "expect": {"experimentTemplates#count": 0}}
+ ]
+}

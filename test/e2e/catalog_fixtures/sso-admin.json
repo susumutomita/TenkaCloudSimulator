@@ -1,0 +1,32 @@
+{
+ "client": "sso-admin",
+ "steps": [
+  {"op": "create_instance", "args": {"Name": "fixture-center", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"instance": "InstanceArn"}},
+  {"op": "describe_instance", "args": {"InstanceArn": "${instance}"}, "expect": {"Name": "fixture-center", "Status": "ACTIVE", "OwnerAccountId": "000000000000"}},
+  {"op": "list_instances", "args": {}, "expect": {"Instances#count": 1, "Instances[0].InstanceArn": "${instance}"}},
+  {"op": "update_instance", "args": {"InstanceArn": "${instance}", "Name": "fixture-center-renamed"}},
+  {"op": "create_permission_set", "args": {"InstanceArn": "${instance}", "Name": "ReadOnly", "Description": "Read only access", "SessionDuration": "PT4H"}, "save": {"permissionSet": "PermissionSet.PermissionSetArn"}, "expect": {"PermissionSet.SessionDuration": "PT4H"}},
+  {"op": "describe_permission_set", "args": {"InstanceArn": "${instance}", "PermissionSetArn": "${permissionSet}"}, "expect": {"PermissionSet.Name": "ReadOnly", "PermissionSet.Description": "Read only access"}},
+  {"op": "list_permission_sets", "args": {"InstanceArn": "${instance}"}, "expect": {"PermissionSets": ["${permissionSet}"]}},
+  {"op": "update_permission_set", "args": {"InstanceArn": "${instance}", "PermissionSetArn": "${permissionSet}", "SessionDuration": "PT8H", "RelayState": "https://console.aws.amazon.com/"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${permissionSet}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${instance}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${permissionSet}"}, "expect": {"Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "create_permission_set", "args": {"InstanceArn": "${instance}", "Name": "TooLong", "SessionDuration": "PT13H"}, "error": "ValidationException"},
+  {"op": "create_permission_set", "args": {"InstanceArn": "${instance}", "Name": "ReadOnly"}, "error": "ConflictException"},
+  {"op": "put_inline_policy_to_permission_set", "args": {"InstanceArn": "${instance}", "PermissionSetArn": "${permissionSet}", "InlinePolicy": "{\"Version\":\"2012-10-17\",\"Statement\":[]}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_instance", "args": {"InstanceArn": "arn:aws:sso:::instance/ssoins-0000000000000000"}, "error": "ValidationException"}
+ ],
+ "isolation": [
+  {"op": "list_instances", "args": {}, "expect": {"Instances#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_permission_set", "args": {"InstanceArn": "${instance}", "PermissionSetArn": "${permissionSet}"}, "expect": {"PermissionSet.SessionDuration": "PT8H"}},
+  {"op": "describe_instance", "args": {"InstanceArn": "${instance}"}, "expect": {"Name": "fixture-center-renamed"}}
+ ],
+ "cleanup": [
+  {"op": "delete_permission_set", "args": {"InstanceArn": "${instance}", "PermissionSetArn": "${permissionSet}"}},
+  {"op": "delete_instance", "args": {"InstanceArn": "${instance}"}},
+  {"op": "list_instances", "args": {}, "expect": {"Instances#count": 0}}
+ ]
+}

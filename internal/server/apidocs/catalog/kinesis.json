@@ -1,0 +1,692 @@
+{
+ "components": {
+  "schemas": {
+   "CreateStreamInput": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxRecordSizeInKiB": {
+      "maximum": 10240,
+      "minimum": 1024,
+      "type": "integer"
+     },
+     "ShardCount": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "StreamModeDetails": {
+      "$ref": "#/components/schemas/StreamModeDetails"
+     },
+     "StreamName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "WarmThroughputMiBps": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "StreamName"
+    ],
+    "type": "object"
+   },
+   "DecreaseStreamRetentionPeriodInput": {
+    "additionalProperties": false,
+    "properties": {
+     "RetentionPeriodHours": {
+      "type": "integer"
+     },
+     "StreamARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "RetentionPeriodHours"
+    ],
+    "type": "object"
+   },
+   "DeleteStreamInput": {
+    "additionalProperties": false,
+    "properties": {
+     "EnforceConsumerDeletion": {
+      "type": "boolean"
+     },
+     "StreamARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeStreamSummaryInput": {
+    "additionalProperties": false,
+    "properties": {
+     "StreamARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeStreamSummaryOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "StreamDescriptionSummary": {
+      "$ref": "#/components/schemas/StreamDescriptionSummary"
+     }
+    },
+    "required": [
+     "StreamDescriptionSummary"
+    ],
+    "type": "object"
+   },
+   "EnhancedMetrics": {
+    "additionalProperties": false,
+    "properties": {
+     "ShardLevelMetrics": {
+      "items": {
+       "enum": [
+        "IncomingBytes",
+        "IncomingRecords",
+        "OutgoingBytes",
+        "OutgoingRecords",
+        "WriteProvisionedThroughputExceeded",
+        "ReadProvisionedThroughputExceeded",
+        "IteratorAgeMilliseconds",
+        "ALL"
+       ],
+       "type": "string"
+      },
+      "maxItems": 7,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "IncreaseStreamRetentionPeriodInput": {
+    "additionalProperties": false,
+    "properties": {
+     "RetentionPeriodHours": {
+      "type": "integer"
+     },
+     "StreamARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "RetentionPeriodHours"
+    ],
+    "type": "object"
+   },
+   "ListStreamsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "ExclusiveStartStreamName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Limit": {
+      "maximum": 10000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1048576,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListStreamsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "HasMoreStreams": {
+      "type": "boolean"
+     },
+     "NextToken": {
+      "maxLength": 1048576,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamNames": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "StreamSummaries": {
+      "items": {
+       "$ref": "#/components/schemas/StreamSummary"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "StreamNames",
+     "HasMoreStreams"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceARN"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "StartStreamEncryptionInput": {
+    "additionalProperties": false,
+    "properties": {
+     "EncryptionType": {
+      "enum": [
+       "NONE",
+       "KMS"
+      ],
+      "type": "string"
+     },
+     "KeyId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "EncryptionType",
+     "KeyId"
+    ],
+    "type": "object"
+   },
+   "StopStreamEncryptionInput": {
+    "additionalProperties": false,
+    "properties": {
+     "EncryptionType": {
+      "enum": [
+       "NONE",
+       "KMS"
+      ],
+      "type": "string"
+     },
+     "KeyId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "EncryptionType",
+     "KeyId"
+    ],
+    "type": "object"
+   },
+   "StreamDescriptionSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "ConsumerCount": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "EncryptionType": {
+      "enum": [
+       "NONE",
+       "KMS"
+      ],
+      "type": "string"
+     },
+     "EnhancedMonitoring": {
+      "items": {
+       "$ref": "#/components/schemas/EnhancedMetrics"
+      },
+      "type": "array"
+     },
+     "KeyId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "MaxRecordSizeInKiB": {
+      "maximum": 10240,
+      "minimum": 1024,
+      "type": "integer"
+     },
+     "OpenShardCount": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "RetentionPeriodHours": {
+      "type": "integer"
+     },
+     "StreamARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamCreationTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "StreamModeDetails": {
+      "$ref": "#/components/schemas/StreamModeDetails"
+     },
+     "StreamName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamStatus": {
+      "enum": [
+       "CREATING",
+       "DELETING",
+       "ACTIVE",
+       "UPDATING"
+      ],
+      "type": "string"
+     },
+     "WarmThroughput": {
+      "$ref": "#/components/schemas/WarmThroughputObject"
+     }
+    },
+    "required": [
+     "StreamName",
+     "StreamARN",
+     "StreamStatus",
+     "RetentionPeriodHours",
+     "StreamCreationTimestamp",
+     "EnhancedMonitoring",
+     "OpenShardCount"
+    ],
+    "type": "object"
+   },
+   "StreamModeDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "StreamMode": {
+      "enum": [
+       "PROVISIONED",
+       "ON_DEMAND"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "StreamMode"
+    ],
+    "type": "object"
+   },
+   "StreamSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "StreamARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamCreationTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "StreamModeDetails": {
+      "$ref": "#/components/schemas/StreamModeDetails"
+     },
+     "StreamName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamStatus": {
+      "enum": [
+       "CREATING",
+       "DELETING",
+       "ACTIVE",
+       "UPDATING"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "StreamName",
+     "StreamARN",
+     "StreamStatus"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "TagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "Tags",
+     "ResourceARN"
+    ],
+    "type": "object"
+   },
+   "UntagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "TagKeys",
+     "ResourceARN"
+    ],
+    "type": "object"
+   },
+   "UpdateStreamModeInput": {
+    "additionalProperties": false,
+    "properties": {
+     "StreamARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StreamModeDetails": {
+      "$ref": "#/components/schemas/StreamModeDetails"
+     },
+     "WarmThroughputMiBps": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "StreamARN",
+     "StreamModeDetails"
+    ],
+    "type": "object"
+   },
+   "WarmThroughputObject": {
+    "additionalProperties": false,
+    "properties": {
+     "CurrentMiBps": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "TargetMiBps": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Kinesis API (2013-12-02). Every other official operation returns HTTP 501 UnknownOperationException. Streams are stored configuration that becomes ACTIVE immediately: no shard, record, sequence number, iterator, consumer or enhanced fan-out exists, and PutRecord, GetRecords, DescribeStream, ListShards and resharding APIs return UnknownOperationException with HTTP 501. CreateStream needs ShardCount for a provisioned stream or StreamModeDetails ON_DEMAND (stored with 4 open shards); WarmThroughputMiBps is refused. Retention changes accept 24 to 8760 hours without comparing them with the current period. Encryption stores the KMS key identifier without contacting KMS. Name-based tag APIs (AddTagsToStream, RemoveTagsFromStream, ListTagsForStream) are not implemented; use TagResource, UntagResource and ListTagsForResource with the stream ARN.",
+  "title": "Amazon Kinesis Data Streams (simulator catalog)",
+  "version": "2013-12-02"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "kinesisJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "Kinesis_20131202.CreateStream",
+        "Kinesis_20131202.DecreaseStreamRetentionPeriod",
+        "Kinesis_20131202.DeleteStream",
+        "Kinesis_20131202.DescribeStreamSummary",
+        "Kinesis_20131202.IncreaseStreamRetentionPeriod",
+        "Kinesis_20131202.ListStreams",
+        "Kinesis_20131202.ListTagsForResource",
+        "Kinesis_20131202.StartStreamEncryption",
+        "Kinesis_20131202.StopStreamEncryption",
+        "Kinesis_20131202.TagResource",
+        "Kinesis_20131202.UntagResource",
+        "Kinesis_20131202.UpdateStreamMode"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateStream": {
+         "summary": "X-Amz-Target: Kinesis_20131202.CreateStream",
+         "value": {}
+        },
+        "DecreaseStreamRetentionPeriod": {
+         "summary": "X-Amz-Target: Kinesis_20131202.DecreaseStreamRetentionPeriod",
+         "value": {}
+        },
+        "DeleteStream": {
+         "summary": "X-Amz-Target: Kinesis_20131202.DeleteStream",
+         "value": {}
+        },
+        "DescribeStreamSummary": {
+         "summary": "X-Amz-Target: Kinesis_20131202.DescribeStreamSummary",
+         "value": {}
+        },
+        "IncreaseStreamRetentionPeriod": {
+         "summary": "X-Amz-Target: Kinesis_20131202.IncreaseStreamRetentionPeriod",
+         "value": {}
+        },
+        "ListStreams": {
+         "summary": "X-Amz-Target: Kinesis_20131202.ListStreams",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: Kinesis_20131202.ListTagsForResource",
+         "value": {}
+        },
+        "StartStreamEncryption": {
+         "summary": "X-Amz-Target: Kinesis_20131202.StartStreamEncryption",
+         "value": {}
+        },
+        "StopStreamEncryption": {
+         "summary": "X-Amz-Target: Kinesis_20131202.StopStreamEncryption",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: Kinesis_20131202.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: Kinesis_20131202.UntagResource",
+         "value": {}
+        },
+        "UpdateStreamMode": {
+         "summary": "X-Amz-Target: Kinesis_20131202.UpdateStreamMode",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon Kinesis Data Streams JSON 1.1 operations",
+    "tags": [
+     "Amazon Kinesis Data Streams"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Kinesis API (2013-12-02). Every other official operation returns HTTP 501 UnknownOperationException. Streams are stored configuration that becomes ACTIVE immediately: no shard, record, sequence number, iterator, consumer or enhanced fan-out exists, and PutRecord, GetRecords, DescribeStream, ListShards and resharding APIs return UnknownOperationException with HTTP 501. CreateStream needs ShardCount for a provisioned stream or StreamModeDetails ON_DEMAND (stored with 4 open shards); WarmThroughputMiBps is refused. Retention changes accept 24 to 8760 hours without comparing them with the current period. Encryption stores the KMS key identifier without contacting KMS. Name-based tag APIs (AddTagsToStream, RemoveTagsFromStream, ListTagsForStream) are not implemented; use TagResource, UntagResource and ListTagsForResource with the stream ARN.",
+   "name": "Amazon Kinesis Data Streams"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/kinesis/2013-12-02/service-2.json",
+  "sha256": "2e9f91e8dc0c6e110dd2190744b408703572db7e5e806061661d7b10f6400d91",
+  "license": "Apache-2.0"
+ }
+}

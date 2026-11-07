@@ -1,0 +1,31 @@
+{
+ "client": "codedeploy",
+ "steps": [
+  {"op": "create_application", "args": {"applicationName": "fixture-app", "computePlatform": "ECS", "tags": [{"Key": "team", "Value": "a"}]}, "save": {"app": "applicationId"}},
+  {"op": "get_application", "args": {"applicationName": "fixture-app"}, "expect": {"application.computePlatform": "ECS", "application.applicationId": "${app}", "application.linkedToGitHub": false}},
+  {"op": "list_applications", "args": {}, "expect": {"applications": ["fixture-app"]}},
+  {"op": "create_deployment_config", "args": {"deploymentConfigName": "fixture-half", "minimumHealthyHosts": {"type": "FLEET_PERCENT", "value": 50}}, "save": {"config": "deploymentConfigId"}},
+  {"op": "get_deployment_config", "args": {"deploymentConfigName": "fixture-half"}, "expect": {"deploymentConfigInfo.deploymentConfigId": "${config}", "deploymentConfigInfo.minimumHealthyHosts.value": 50, "deploymentConfigInfo.computePlatform": "Server"}},
+  {"op": "list_deployment_configs", "args": {}, "expect": {"deploymentConfigsList": ["fixture-half"]}},
+  {"op": "create_deployment_config", "args": {"deploymentConfigName": "fixture-bad"}, "error": "InvalidMinimumHealthyHostValueException"},
+  {"op": "get_deployment_config", "args": {"deploymentConfigName": "CodeDeployDefault.OneAtATime"}, "error": "InvalidDeploymentConfigNameException"},
+  {"op": "tag_resource", "args": {"ResourceArn": "arn:aws:codedeploy:us-east-1:000000000000:deploymentconfig:fixture-half", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "arn:aws:codedeploy:us-east-1:000000000000:deploymentconfig:fixture-half", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "arn:aws:codedeploy:us-east-1:000000000000:application:fixture-app"}, "expect": {"Tags[0].Key": "team"}},
+  {"op": "create_deployment", "args": {"applicationName": "fixture-app"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_application", "args": {"applicationName": "missing"}, "error": "ApplicationDoesNotExistException"}
+ ],
+ "isolation": [
+  {"op": "list_applications", "args": {}, "expect": {"applications#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_application", "args": {"applicationName": "fixture-app"}, "expect": {"application.applicationId": "${app}"}},
+  {"op": "get_deployment_config", "args": {"deploymentConfigName": "fixture-half"}, "expect": {"deploymentConfigInfo.minimumHealthyHosts.type": "FLEET_PERCENT"}}
+ ],
+ "cleanup": [
+  {"op": "delete_deployment_config", "args": {"deploymentConfigName": "fixture-half"}},
+  {"op": "delete_application", "args": {"applicationName": "fixture-app"}},
+  {"op": "list_applications", "args": {}, "expect": {"applications#count": 0}},
+  {"op": "list_deployment_configs", "args": {}, "expect": {"deploymentConfigsList#count": 0}}
+ ]
+}

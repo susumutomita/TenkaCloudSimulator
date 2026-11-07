@@ -60,7 +60,7 @@ BASE_MODELS = {'AzureBlobState',
  'SecretsVersionLifecycle',
  'StackOwnership',
  'StartupTokenVisibility',
- 'LandingTopologyState', 'LandingAccessAdmission'}
+ 'LandingTopologyState', 'LandingAccessAdmission', 'LoginInputIntent'}
 BASE_INVARIANTS = {'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'ReloadOnlyAfterAck', 'OnlyCurrentReplies', 'FailureVisible', 'SingleWriter'},
  'CatalogResourceLifecycle': {'PeerFrame', 'QuotaBound', 'FailureFrame', 'FreshIDs', 'TokenOnce', 'GenerationAdvances', 'ChildGuard', 'StaleWriteRejected', 'AuthorizationFirst', 'TokenBinding', 'UniqueNames', 'TypeOK', 'ReplayNoDuplicate'},
  'AzureBlobState': {'BudgetBounded',
@@ -473,7 +473,8 @@ BASE_INVARIANTS = {'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'R
                           'RetiredCallbackNoEffect',
                           'RetiredCanvasHidden',
                           'TypeOK',
-                          'UnsupportedCanvasHidden'}}
+                          'UnsupportedCanvasHidden'},
+ 'LoginInputIntent': {'LocaleIntentFrame', 'NoEmptyPOST', 'IntentInvalidatesAsync', 'TypeOK', 'SubmissionSelectionExact', 'NoPOSTWhileBlocked', 'StaleFileCompletionFrame', 'AdoptedValueExact'}}
 # Established controls require an explicit gate-policy change before retirement.
 REQUIRED_MUTANTS = {'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureError', 'ReloadAfterFailedWrite', 'AcceptAfterUnmount', 'AllowConcurrentWrites'},
  'CatalogResourceLifecycle': {'AllowDuplicateNames', 'ReplayCommits', 'IgnoreGeneration', 'TokenToFutureID', 'UpdateKeepsGeneration', 'ReplayCreatesRow', 'WritePeerScope', 'ReuseDeletedID', 'IgnoreQuota', 'DeleteParentWithChildren', 'FaultCommits', 'DeniedCommits'},
@@ -869,7 +870,8 @@ REQUIRED_MUTANTS = {'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureE
                           'ResetInitialFragmentSelectionOnMount',
                           'RevealUnsupportedCanvas',
                           'WrongDetailProjection',
-                          'WrongProviderDefault'}}
+                          'WrongProviderDefault'},
+ 'LoginInputIntent': {'FileCompletionIgnoresRevision', 'NonemptyDOMUsesControlledState', 'UnmountedFileCompletionPublishes', 'LocaleClearsIntent', 'LocaleInvalidatesCurrentFile', 'SubmitIgnoresBusy', 'CurrentFileErrorDiscarded', 'FlushDoesNotAdoptNativeValue', 'NativeAdoptionSkipsNewIntent', 'EmptyDOMReusesOldCredential', 'OldPasteSurvivesNewIntent', 'SubmitIgnoresFileGate', 'FocusSkipsNativeAdoption', 'KeyDownSkipsNativeAdoption'}}
 REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation.go',
                            'internal/aws/cloudformation_conditions.go',
                            'internal/aws/cloudformation_conditions_link.go'},
@@ -907,7 +909,57 @@ REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation
                             'internal/server/server.go'},
  'LandingTopologyState': {'internal/server/landing/landing.mjs',
                           'internal/server/landing/topology-canvas.mjs',
-                          'internal/server/landing/topology-data.mjs'}}
+                          'internal/server/landing/topology-data.mjs'},
+ 'LoginInputIntent': {'tools/console/src/login.jsx', 'test/e2e/login_paste.py', 'test/console/login-native-input.test.mjs', 'internal/server/web/app.js', 'test/e2e/login_token_file.py'}}
+# SNS obligations are fixed policy, not inferred from a mutable registry.
+BASE_MODELS.update({'SNSLifecycle', 'SNSAdmission'})
+BASE_INVARIANTS.update({'SNSAdmission': {'NoFIFOPublish',
+                  'NoRegionMismatch',
+                  'NoRejectedMutation',
+                  'NoSuccessOnRefusal',
+                  'NoUnauthorizedEffect',
+                  'TypeOK'},
+ 'SNSLifecycle': {'DeleteRetryAcknowledged', 'ByteBudgetBounded',
+                  'DeleteAckEmpty',
+                  'DeliveryBudgetBounded',
+                  'DurableAck',
+                  'MessageCountBounded',
+                  'NoDanglingDeliveredMessage',
+                  'NoOrphans',
+                  'PeerFrame',
+                  'PublishRecipientsExact',
+                  'TypeOK'}})
+REQUIRED_MUTANTS.update({'SNSAdmission': {'AcceptUnknownOperation',
+                  'BypassAuthorization',
+                  'IgnoreAttributeAdmission',
+                  'IgnoreDuplicateFields',
+                  'IgnoreInitialization',
+                  'IgnoreRegionBinding',
+                  'IgnoreSigningScope',
+                  'IgnoreValueAdmission',
+                  'MutateAfterRejection',
+                  'PermitFIFOPublication'},
+ 'SNSLifecycle': {'RejectAbsentDelete', 'AcknowledgeWithoutCleanup',
+                  'DeletePeerSubscriptions',
+                  'IgnoreByteBudget',
+                  'IgnoreDeliveryBudget',
+                  'IgnoreMessageCount',
+                  'IgnoreWriteAcknowledgement',
+                  'KeepDeletedDeliveries',
+                  'KeepDeletedMessages',
+                  'MissingTopicGuard',
+                  'OmitDeliveryRows'}})
+REQUIRED_SOURCE_SCOPES.update({'SNSAdmission': {'internal/aws/s3.go',
+                  'internal/aws/sns.go',
+                  'internal/aws/sns_admission_regression_test.go',
+                  'internal/aws/ssm.go',
+                  'internal/server/server.go'},
+ 'SNSLifecycle': {'internal/aws/sns_storage_regression_test.go',
+                  'internal/aws/sns_store.go',
+                  'internal/aws/sns_test.go',
+                  'internal/server/server.go',
+                  'internal/server/sns_test.go'}})
+
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a

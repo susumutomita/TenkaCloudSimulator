@@ -1,0 +1,41 @@
+{
+ "client": "devicefarm",
+ "steps": [
+  {"op": "create_project", "args": {"name": "fixture-project", "defaultJobTimeoutMinutes": 60}, "save": {"project": "project.arn"}, "expect": {"project.name": "fixture-project", "project.defaultJobTimeoutMinutes": 60}},
+  {"op": "get_project", "args": {"arn": "${project}"}, "expect": {"project.arn": "${project}"}},
+  {"op": "list_projects", "args": {}, "expect": {"projects#count": 1}},
+  {"op": "list_projects", "args": {"arn": "${project}"}, "expect": {"projects#count": 1}},
+  {"op": "update_project", "args": {"arn": "${project}", "name": "renamed-project"}, "expect": {"project.name": "renamed-project", "project.defaultJobTimeoutMinutes": 60}},
+  {"op": "create_instance_profile", "args": {"name": "fixture-profile", "rebootAfterUse": false}, "save": {"profile": "instanceProfile.arn"}, "expect": {"instanceProfile.packageCleanup": false, "instanceProfile.rebootAfterUse": false}},
+  {"op": "get_instance_profile", "args": {"arn": "${profile}"}, "expect": {"instanceProfile.name": "fixture-profile"}},
+  {"op": "list_instance_profiles", "args": {}, "expect": {"instanceProfiles#count": 1}},
+  {"op": "update_instance_profile", "args": {"arn": "${profile}", "description": "lab"}, "expect": {"instanceProfile.description": "lab"}},
+  {"op": "create_test_grid_project", "args": {"name": "fixture-grid", "description": "selenium"}, "save": {"grid": "testGridProject.arn"}, "expect": {"testGridProject.name": "fixture-grid"}},
+  {"op": "get_test_grid_project", "args": {"projectArn": "${grid}"}, "expect": {"testGridProject.description": "selenium"}},
+  {"op": "list_test_grid_projects", "args": {}, "expect": {"testGridProjects#count": 1}},
+  {"op": "update_test_grid_project", "args": {"projectArn": "${grid}", "description": "updated"}, "expect": {"testGridProject.description": "updated"}},
+  {"op": "create_vpce_configuration", "args": {"vpceConfigurationName": "fixture-vpce", "vpceServiceName": "com.amazonaws.vpce.us-west-2.vpce-svc-0123456789abcdef0", "serviceDnsName": "app.example.com"}, "save": {"vpce": "vpceConfiguration.arn"}, "expect": {"vpceConfiguration.serviceDnsName": "app.example.com"}},
+  {"op": "get_vpce_configuration", "args": {"arn": "${vpce}"}, "expect": {"vpceConfiguration.vpceConfigurationName": "fixture-vpce"}},
+  {"op": "list_vpce_configurations", "args": {}, "expect": {"vpceConfigurations#count": 1}},
+  {"op": "update_vpce_configuration", "args": {"arn": "${vpce}", "vpceConfigurationDescription": "private app"}, "expect": {"vpceConfiguration.vpceConfigurationDescription": "private app"}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${project}", "Tags": [{"Key": "team", "Value": "a"}, {"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${project}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${project}"}, "expect": {"Tags": [{"Key": "team", "Value": "a"}]}},
+  {"op": "create_device_pool", "args": {"projectArn": "${project}", "name": "pool", "rules": [{"attribute": "PLATFORM", "operator": "EQUALS", "value": "\"ANDROID\""}]}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_project", "args": {"arn": "arn:aws:devicefarm:us-east-1:000000000000:project:00000000-0000-4000-8000-000000000000"}, "error": "NotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_projects", "args": {}, "expect": {"projects#count": 0}},
+  {"op": "list_test_grid_projects", "args": {}, "expect": {"testGridProjects#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_project", "args": {"arn": "${project}"}, "expect": {"project.name": "renamed-project"}}
+ ],
+ "cleanup": [
+  {"op": "delete_project", "args": {"arn": "${project}"}},
+  {"op": "delete_instance_profile", "args": {"arn": "${profile}"}},
+  {"op": "delete_test_grid_project", "args": {"projectArn": "${grid}"}},
+  {"op": "delete_vpce_configuration", "args": {"arn": "${vpce}"}},
+  {"op": "list_projects", "args": {}, "expect": {"projects#count": 0}}
+ ]
+}

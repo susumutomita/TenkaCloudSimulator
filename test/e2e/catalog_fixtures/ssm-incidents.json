@@ -1,0 +1,25 @@
+{
+ "client": "ssm-incidents",
+ "steps": [
+  {"op": "create_response_plan", "args": {"name": "fixture-plan", "displayName": "Fixture plan", "incidentTemplate": {"title": "Checkout outage", "impact": 3}, "tags": {"team": "a"}}, "save": {"plan": "arn"}, "expect": {"arn": "arn:aws:ssm-incidents::000000000000:response-plan/fixture-plan"}},
+  {"op": "get_response_plan", "args": {"arn": "${plan}"}, "expect": {"incidentTemplate.impact": 3, "displayName": "Fixture plan"}},
+  {"op": "list_response_plans", "args": {}, "expect": {"responsePlanSummaries#count": 1}},
+  {"op": "update_response_plan", "args": {"arn": "${plan}", "displayName": "Fixture plan v2", "engagements": ["arn:aws:ssm-contacts:us-east-1:000000000000:contact/oncall"]}},
+  {"op": "tag_resource", "args": {"resourceArn": "${plan}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${plan}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${plan}"}, "expect": {"tags": {"k": "v"}}},
+  {"op": "update_response_plan", "args": {"arn": "${plan}", "incidentTemplateTitle": "Renamed"}, "error": "ValidationException", "status": 400},
+  {"op": "start_incident", "args": {"responsePlanArn": "${plan}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_response_plan", "args": {"arn": "arn:aws:ssm-incidents::000000000000:response-plan/missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_response_plans", "args": {}, "expect": {"responsePlanSummaries#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_response_plan", "args": {"arn": "${plan}"}, "expect": {"displayName": "Fixture plan v2", "engagements": ["arn:aws:ssm-contacts:us-east-1:000000000000:contact/oncall"]}}
+ ],
+ "cleanup": [
+  {"op": "delete_response_plan", "args": {"arn": "${plan}"}},
+  {"op": "list_response_plans", "args": {}, "expect": {"responsePlanSummaries#count": 0}}
+ ]
+}

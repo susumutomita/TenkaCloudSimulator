@@ -1,0 +1,22 @@
+{
+ "client": "servicecatalog",
+ "steps": [
+  {"op": "create_portfolio", "args": {"DisplayName": "Fixture portfolio", "ProviderName": "Platform", "Description": "fixture", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"portfolio": "PortfolioDetail.Id", "arn": "PortfolioDetail.ARN"}, "expect": {"Tags[0].Key": "team"}},
+  {"op": "describe_portfolio", "args": {"Id": "${portfolio}"}, "expect": {"PortfolioDetail.DisplayName": "Fixture portfolio", "PortfolioDetail.ARN": "arn:aws:catalog:us-east-1:000000000000:portfolio/${portfolio}", "Tags#count": 1}},
+  {"op": "list_portfolios", "args": {"AcceptLanguage": "en"}, "expect": {"PortfolioDetails#count": 1, "PortfolioDetails[0].Id": "${portfolio}"}},
+  {"op": "update_portfolio", "args": {"Id": "${portfolio}", "Description": "updated"}, "expect": {"PortfolioDetail.Description": "updated", "Tags#count": 1}},
+  {"op": "list_portfolios", "args": {"AcceptLanguage": "jp"}, "error": "InvalidParametersException"},
+  {"op": "create_product", "args": {"Name": "fixture-product", "Owner": "Platform", "ProductType": "CLOUD_FORMATION_TEMPLATE"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_portfolio", "args": {"Id": "port-missing000000"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_portfolios", "args": {}, "expect": {"PortfolioDetails#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_portfolio", "args": {"Id": "${portfolio}"}, "expect": {"PortfolioDetail.Description": "updated"}}
+ ],
+ "cleanup": [
+  {"op": "delete_portfolio", "args": {"Id": "${portfolio}"}},
+  {"op": "list_portfolios", "args": {}, "expect": {"PortfolioDetails#count": 0}}
+ ]
+}

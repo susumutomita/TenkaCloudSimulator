@@ -1,0 +1,43 @@
+{
+ "client": "vpc-lattice",
+ "steps": [
+  {"op": "create_service_network", "args": {"name": "fixture-network", "authType": "AWS_IAM", "tags": {"team": "a"}}, "save": {"sn": "id", "snArn": "arn"}, "expect": {"name": "fixture-network", "authType": "AWS_IAM"}},
+  {"op": "get_service_network", "args": {"serviceNetworkIdentifier": "${sn}"}, "expect": {"arn": "${snArn}", "numberOfAssociatedServices": 0}},
+  {"op": "list_service_networks", "args": {}, "expect": {"items#count": 1, "items[0].id": "${sn}"}},
+  {"op": "update_service_network", "args": {"serviceNetworkIdentifier": "${snArn}", "authType": "NONE"}, "expect": {"authType": "NONE"}},
+  {"op": "create_service", "args": {"name": "fixture-service", "clientToken": "fixture-1"}, "save": {"svc": "id", "svcArn": "arn"}, "expect": {"status": "ACTIVE", "authType": "NONE"}},
+  {"op": "get_service", "args": {"serviceIdentifier": "${svc}"}, "expect": {"name": "fixture-service"}},
+  {"op": "list_services", "args": {}, "expect": {"items#count": 1, "items[0].status": "ACTIVE"}},
+  {"op": "update_service", "args": {"serviceIdentifier": "${svc}", "authType": "AWS_IAM"}, "expect": {"authType": "AWS_IAM"}},
+  {"op": "create_service", "args": {"name": "fixture-service"}, "error": "ConflictException"},
+  {"op": "create_listener", "args": {"serviceIdentifier": "${svc}", "name": "http", "protocol": "HTTP", "defaultAction": {"fixedResponse": {"statusCode": 404}}}, "save": {"listener": "id"}, "expect": {"port": 80, "serviceId": "${svc}", "serviceArn": "${svcArn}"}},
+  {"op": "get_listener", "args": {"serviceIdentifier": "${svc}", "listenerIdentifier": "${listener}"}, "expect": {"defaultAction.fixedResponse.statusCode": 404}},
+  {"op": "list_listeners", "args": {"serviceIdentifier": "${svc}"}, "expect": {"items#count": 1, "items[0].port": 80}},
+  {"op": "update_listener", "args": {"serviceIdentifier": "${svc}", "listenerIdentifier": "${listener}", "defaultAction": {"fixedResponse": {"statusCode": 500}}}, "expect": {"defaultAction.fixedResponse.statusCode": 500}},
+  {"op": "create_target_group", "args": {"name": "fixture-targets", "type": "IP", "config": {"port": 8080, "protocol": "HTTP", "vpcIdentifier": "vpc-0123456789abcdef0"}}, "save": {"tg": "id"}, "expect": {"status": "ACTIVE", "config.port": 8080}},
+  {"op": "create_listener", "args": {"serviceIdentifier": "${svc}", "name": "forward", "protocol": "HTTP", "defaultAction": {"forward": {"targetGroups": [{"targetGroupIdentifier": "${tg}"}]}}}, "error": "ValidationException"},
+  {"op": "create_target_group", "args": {"name": "fixture-lambda", "type": "LAMBDA", "config": {"vpcIdentifier": "vpc-0123456789abcdef0"}}, "error": "ValidationException"},
+  {"op": "get_target_group", "args": {"targetGroupIdentifier": "${tg}"}, "expect": {"type": "IP", "config.vpcIdentifier": "vpc-0123456789abcdef0", "serviceArns#count": 0}},
+  {"op": "list_target_groups", "args": {"targetGroupType": "IP"}, "expect": {"items#count": 1}},
+  {"op": "list_target_groups", "args": {"targetGroupType": "LAMBDA"}, "expect": {"items#count": 0}},
+  {"op": "tag_resource", "args": {"resourceArn": "${snArn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${snArn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${snArn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "create_service_network_service_association", "args": {"serviceIdentifier": "${svc}", "serviceNetworkIdentifier": "${sn}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_service", "args": {"serviceIdentifier": "svc-00000000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_services", "args": {}, "expect": {"items#count": 0}},
+  {"op": "list_service_networks", "args": {}, "expect": {"items#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_listener", "args": {"serviceIdentifier": "${svc}", "listenerIdentifier": "${listener}"}, "expect": {"defaultAction.fixedResponse.statusCode": 500}}
+ ],
+ "cleanup": [
+  {"op": "delete_listener", "args": {"serviceIdentifier": "${svc}", "listenerIdentifier": "${listener}"}},
+  {"op": "delete_service", "args": {"serviceIdentifier": "${svc}"}, "expect": {"status": "DELETE_IN_PROGRESS"}},
+  {"op": "delete_target_group", "args": {"targetGroupIdentifier": "${tg}"}, "expect": {"status": "DELETE_IN_PROGRESS"}},
+  {"op": "delete_service_network", "args": {"serviceNetworkIdentifier": "${sn}"}},
+  {"op": "list_services", "args": {}, "expect": {"items#count": 0}}
+ ]
+}

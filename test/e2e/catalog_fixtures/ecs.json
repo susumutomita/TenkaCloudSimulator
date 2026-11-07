@@ -1,0 +1,40 @@
+{
+ "client": "ecs",
+ "steps": [
+  {"op": "create_cluster", "args": {"clusterName": "fixture-cluster", "tags": [{"key": "team", "value": "a"}], "capacityProviders": ["FARGATE"], "defaultCapacityProviderStrategy": [{"capacityProvider": "FARGATE", "weight": 1}]}, "save": {"cluster": "cluster.clusterArn"}, "expect": {"cluster.status": "ACTIVE", "cluster.runningTasksCount": 0}},
+  {"op": "create_cluster", "args": {}, "save": {"default": "cluster.clusterArn"}, "expect": {"cluster.clusterName": "default"}},
+  {"op": "describe_clusters", "args": {}, "expect": {"clusters[0].clusterArn": "${default}", "failures#count": 0}},
+  {"op": "describe_clusters", "args": {"clusters": ["fixture-cluster", "missing"], "include": ["TAGS"]}, "expect": {"clusters#count": 1, "clusters[0].tags[0].key": "team", "failures[0].arn": "missing", "failures[0].reason": "MISSING"}},
+  {"op": "list_clusters", "args": {}, "expect": {"clusterArns#count": 2}},
+  {"op": "update_cluster", "args": {"cluster": "fixture-cluster", "settings": [{"name": "containerInsights", "value": "enabled"}]}, "expect": {"cluster.settings[0].value": "enabled"}},
+  {"op": "update_cluster_settings", "args": {"cluster": "${cluster}", "settings": [{"name": "containerInsights", "value": "disabled"}]}, "expect": {"cluster.settings[0].value": "disabled"}},
+  {"op": "put_cluster_capacity_providers", "args": {"cluster": "fixture-cluster", "capacityProviders": ["FARGATE", "FARGATE_SPOT"], "defaultCapacityProviderStrategy": [{"capacityProvider": "FARGATE_SPOT", "weight": 1}]}, "expect": {"cluster.capacityProviders#count": 2}},
+  {"op": "put_cluster_capacity_providers", "args": {"cluster": "fixture-cluster", "capacityProviders": ["my-asg-provider"], "defaultCapacityProviderStrategy": []}, "error": "InvalidParameterException"},
+  {"op": "register_task_definition", "args": {"family": "fixture-web", "requiresCompatibilities": ["FARGATE"], "networkMode": "awsvpc", "cpu": "256", "memory": "512", "containerDefinitions": [{"name": "web", "image": "public.ecr.aws/nginx/nginx:latest", "essential": true, "portMappings": [{"containerPort": 80}]}], "tags": [{"key": "app", "value": "web"}]}, "save": {"task": "taskDefinition.taskDefinitionArn"}, "expect": {"taskDefinition.revision": 1, "taskDefinition.status": "ACTIVE", "tags[0].key": "app"}},
+  {"op": "register_task_definition", "args": {"family": "fixture-big", "requiresCompatibilities": ["FARGATE"], "networkMode": "awsvpc", "cpu": "0.25 vCPU", "memory": "4 GB", "containerDefinitions": [{"name": "web", "image": "nginx"}]}, "error": "ClientException"},
+  {"op": "register_task_definition", "args": {"family": "fixture-bridge", "requiresCompatibilities": ["FARGATE"], "networkMode": "bridge", "cpu": "256", "memory": "512", "containerDefinitions": [{"name": "web", "image": "nginx"}]}, "error": "ClientException"},
+  {"op": "describe_task_definition", "args": {"taskDefinition": "fixture-web:1", "include": ["TAGS"]}, "expect": {"taskDefinition.family": "fixture-web", "taskDefinition.taskDefinitionArn": "${task}", "tags[0].value": "web"}},
+  {"op": "describe_task_definition", "args": {"taskDefinition": "fixture-web:2"}, "error": "ClientException"},
+  {"op": "list_task_definitions", "args": {}, "expect": {"taskDefinitionArns[0]": "${task}"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${cluster}", "tags": [{"key": "k", "value": "v"}]}},
+  {"op": "untag_resource", "args": {"resourceArn": "${cluster}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${task}"}, "expect": {"tags[0].key": "app"}},
+  {"op": "run_task", "args": {"cluster": "fixture-cluster", "taskDefinition": "fixture-web"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "delete_cluster", "args": {"cluster": "missing"}, "error": "ClusterNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_clusters", "args": {}, "expect": {"clusterArns#count": 0}},
+  {"op": "list_task_definitions", "args": {}, "expect": {"taskDefinitionArns#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_clusters", "args": {"clusters": ["${cluster}"]}, "expect": {"clusters[0].capacityProviders#count": 2, "clusters[0].defaultCapacityProviderStrategy[0].capacityProvider": "FARGATE_SPOT"}},
+  {"op": "describe_task_definition", "args": {"taskDefinition": "${task}"}, "expect": {"taskDefinition.cpu": "256"}}
+ ],
+ "cleanup": [
+  {"op": "deregister_task_definition", "args": {"taskDefinition": "fixture-web:1"}, "expect": {"taskDefinition.status": "INACTIVE"}},
+  {"op": "delete_cluster", "args": {"cluster": "fixture-cluster"}, "expect": {"cluster.status": "INACTIVE"}},
+  {"op": "delete_cluster", "args": {"cluster": "default"}},
+  {"op": "list_clusters", "args": {}, "expect": {"clusterArns#count": 0}},
+  {"op": "list_task_definitions", "args": {}, "expect": {"taskDefinitionArns#count": 0}}
+ ]
+}

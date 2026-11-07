@@ -71,6 +71,9 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_sns_native_admission_persistence_and_isolation(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name("sns_admission.py"))], check=True, timeout=180)
+
  def test_landing_topology_html_fallback_keyboard_and_public_navigation(self):
   from landing_topology import run_landing_topology
   # The fixture owns fresh dummy credentials for readiness only. The helper

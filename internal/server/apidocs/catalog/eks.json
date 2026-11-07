@@ -1,0 +1,1231 @@
+{
+ "components": {
+  "schemas": {
+   "AccessConfigResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "authenticationMode": {
+      "enum": [
+       "API",
+       "API_AND_CONFIG_MAP",
+       "CONFIG_MAP"
+      ],
+      "type": "string"
+     },
+     "bootstrapClusterCreatorAdminPermissions": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "BlockStorage": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Certificate": {
+    "additionalProperties": false,
+    "properties": {
+     "data": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Cluster": {
+    "additionalProperties": false,
+    "properties": {
+     "accessConfig": {
+      "$ref": "#/components/schemas/AccessConfigResponse"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "certificateAuthority": {
+      "$ref": "#/components/schemas/Certificate"
+     },
+     "clientRequestToken": {
+      "type": "string"
+     },
+     "computeConfig": {
+      "$ref": "#/components/schemas/ComputeConfigResponse"
+     },
+     "connectorConfig": {
+      "$ref": "#/components/schemas/ConnectorConfigResponse"
+     },
+     "controlPlaneScalingConfig": {
+      "$ref": "#/components/schemas/ControlPlaneScalingConfig"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "deletionProtection": {
+      "type": "boolean"
+     },
+     "encryptionConfig": {
+      "items": {
+       "$ref": "#/components/schemas/EncryptionConfig"
+      },
+      "maxItems": 1,
+      "type": "array"
+     },
+     "endpoint": {
+      "type": "string"
+     },
+     "health": {
+      "$ref": "#/components/schemas/ClusterHealth"
+     },
+     "id": {
+      "type": "string"
+     },
+     "identity": {
+      "$ref": "#/components/schemas/Identity"
+     },
+     "kubernetesNetworkConfig": {
+      "$ref": "#/components/schemas/KubernetesNetworkConfigResponse"
+     },
+     "logging": {
+      "$ref": "#/components/schemas/Logging"
+     },
+     "name": {
+      "type": "string"
+     },
+     "outpostConfig": {
+      "$ref": "#/components/schemas/OutpostConfigResponse"
+     },
+     "platformVersion": {
+      "type": "string"
+     },
+     "remoteNetworkConfig": {
+      "$ref": "#/components/schemas/RemoteNetworkConfigResponse"
+     },
+     "resourcesVpcConfig": {
+      "$ref": "#/components/schemas/VpcConfigResponse"
+     },
+     "roleArn": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "FAILED",
+       "UPDATING",
+       "PENDING"
+      ],
+      "type": "string"
+     },
+     "storageConfig": {
+      "$ref": "#/components/schemas/StorageConfigResponse"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "upgradePolicy": {
+      "$ref": "#/components/schemas/UpgradePolicyResponse"
+     },
+     "version": {
+      "type": "string"
+     },
+     "zonalShiftConfig": {
+      "$ref": "#/components/schemas/ZonalShiftConfigResponse"
+     }
+    },
+    "type": "object"
+   },
+   "ClusterHealth": {
+    "additionalProperties": false,
+    "properties": {
+     "issues": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterIssue"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ClusterIssue": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "enum": [
+       "AccessDenied",
+       "ClusterUnreachable",
+       "ConfigurationConflict",
+       "InternalFailure",
+       "ResourceLimitExceeded",
+       "ResourceNotFound",
+       "IamRoleNotFound",
+       "VpcNotFound",
+       "InsufficientFreeAddresses",
+       "Ec2ServiceNotSubscribed",
+       "Ec2SubnetNotFound",
+       "Ec2SecurityGroupNotFound",
+       "KmsGrantRevoked",
+       "KmsKeyNotFound",
+       "KmsKeyMarkedForDeletion",
+       "KmsKeyDisabled",
+       "StsRegionalEndpointDisabled",
+       "UnsupportedVersion",
+       "Other"
+      ],
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     },
+     "resourceIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ComputeConfigRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "nodePools": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "nodeRoleArn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ComputeConfigResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "nodePools": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "nodeRoleArn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectorConfigResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "activationCode": {
+      "type": "string"
+     },
+     "activationExpiry": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "activationId": {
+      "type": "string"
+     },
+     "provider": {
+      "type": "string"
+     },
+     "roleArn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ControlPlanePlacementRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "groupName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ControlPlanePlacementResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "groupName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ControlPlaneScalingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "tier": {
+      "enum": [
+       "standard",
+       "tier-xl",
+       "tier-2xl",
+       "tier-4xl"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateAccessConfigRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "authenticationMode": {
+      "enum": [
+       "API",
+       "API_AND_CONFIG_MAP",
+       "CONFIG_MAP"
+      ],
+      "type": "string"
+     },
+     "bootstrapClusterCreatorAdminPermissions": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ElasticLoadBalancing": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "provider": {
+      "$ref": "#/components/schemas/Provider"
+     },
+     "resources": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Identity": {
+    "additionalProperties": false,
+    "properties": {
+     "oidc": {
+      "$ref": "#/components/schemas/OIDC"
+     }
+    },
+    "type": "object"
+   },
+   "KubernetesNetworkConfigRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "elasticLoadBalancing": {
+      "$ref": "#/components/schemas/ElasticLoadBalancing"
+     },
+     "ipFamily": {
+      "enum": [
+       "ipv4",
+       "ipv6"
+      ],
+      "type": "string"
+     },
+     "serviceIpv4Cidr": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "KubernetesNetworkConfigResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "elasticLoadBalancing": {
+      "$ref": "#/components/schemas/ElasticLoadBalancing"
+     },
+     "ipFamily": {
+      "enum": [
+       "ipv4",
+       "ipv6"
+      ],
+      "type": "string"
+     },
+     "serviceIpv4Cidr": {
+      "type": "string"
+     },
+     "serviceIpv6Cidr": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LogSetup": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "types": {
+      "items": {
+       "enum": [
+        "api",
+        "audit",
+        "authenticator",
+        "controllerManager",
+        "scheduler"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Logging": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterLogging": {
+      "items": {
+       "$ref": "#/components/schemas/LogSetup"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "OIDC": {
+    "additionalProperties": false,
+    "properties": {
+     "issuer": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OutpostConfigRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "controlPlaneInstanceType": {
+      "type": "string"
+     },
+     "controlPlanePlacement": {
+      "$ref": "#/components/schemas/ControlPlanePlacementRequest"
+     },
+     "outpostArns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "outpostArns",
+     "controlPlaneInstanceType"
+    ],
+    "type": "object"
+   },
+   "OutpostConfigResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "controlPlaneInstanceType": {
+      "type": "string"
+     },
+     "controlPlanePlacement": {
+      "$ref": "#/components/schemas/ControlPlanePlacementResponse"
+     },
+     "outpostArns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "outpostArns",
+     "controlPlaneInstanceType"
+    ],
+    "type": "object"
+   },
+   "Provider": {
+    "additionalProperties": false,
+    "properties": {
+     "keyArn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RemoteNetworkConfigRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "remoteNodeNetworks": {
+      "items": {
+       "$ref": "#/components/schemas/RemoteNodeNetwork"
+      },
+      "maxItems": 1,
+      "type": "array"
+     },
+     "remotePodNetworks": {
+      "items": {
+       "$ref": "#/components/schemas/RemotePodNetwork"
+      },
+      "maxItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RemoteNetworkConfigResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "remoteNodeNetworks": {
+      "items": {
+       "$ref": "#/components/schemas/RemoteNodeNetwork"
+      },
+      "maxItems": 1,
+      "type": "array"
+     },
+     "remotePodNetworks": {
+      "items": {
+       "$ref": "#/components/schemas/RemotePodNetwork"
+      },
+      "maxItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RemoteNodeNetwork": {
+    "additionalProperties": false,
+    "properties": {
+     "cidrs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RemotePodNetwork": {
+    "additionalProperties": false,
+    "properties": {
+     "cidrs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "StorageConfigRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "blockStorage": {
+      "$ref": "#/components/schemas/BlockStorage"
+     }
+    },
+    "type": "object"
+   },
+   "StorageConfigResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "blockStorage": {
+      "$ref": "#/components/schemas/BlockStorage"
+     }
+    },
+    "type": "object"
+   },
+   "UpgradePolicyRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "supportType": {
+      "enum": [
+       "STANDARD",
+       "EXTENDED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpgradePolicyResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "supportType": {
+      "enum": [
+       "STANDARD",
+       "EXTENDED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VpcConfigRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "endpointPrivateAccess": {
+      "type": "boolean"
+     },
+     "endpointPublicAccess": {
+      "type": "boolean"
+     },
+     "publicAccessCidrs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "securityGroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "subnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "VpcConfigResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterSecurityGroupId": {
+      "type": "string"
+     },
+     "endpointPrivateAccess": {
+      "type": "boolean"
+     },
+     "endpointPublicAccess": {
+      "type": "boolean"
+     },
+     "publicAccessCidrs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "securityGroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "subnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "vpcId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ZonalShiftConfigRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ZonalShiftConfigResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Elastic Kubernetes Service API (2017-11-01). Every other official operation returns HTTP 501 UnknownOperationException. Clusters are configuration metadata that stay CREATING: no Kubernetes control plane, endpoint, certificate, OIDC issuer or network interface is provisioned, and no Kubernetes API is served. Kubernetes versions are stored as given in major.minor form without checking the supported list. Outposts local clusters and deletion protection are refused. Cluster updates, node groups, Fargate profiles, add-ons, access entries, pod identity associations and connected clusters return UnknownOperationException with HTTP 501; ListClusters include is refused.",
+  "title": "Amazon Elastic Kubernetes Service (simulator catalog)",
+  "version": "2017-11-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/clusters": {
+   "get": {
+    "operationId": "eksListClusters",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "eks"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "include",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "clusters": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListClusters",
+    "tags": [
+     "Amazon Elastic Kubernetes Service"
+    ]
+   },
+   "post": {
+    "operationId": "eksCreateCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "eks"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accessConfig": {
+          "$ref": "#/components/schemas/CreateAccessConfigRequest"
+         },
+         "bootstrapSelfManagedAddons": {
+          "type": "boolean"
+         },
+         "clientRequestToken": {
+          "type": "string"
+         },
+         "computeConfig": {
+          "$ref": "#/components/schemas/ComputeConfigRequest"
+         },
+         "controlPlaneScalingConfig": {
+          "$ref": "#/components/schemas/ControlPlaneScalingConfig"
+         },
+         "deletionProtection": {
+          "type": "boolean"
+         },
+         "encryptionConfig": {
+          "items": {
+           "$ref": "#/components/schemas/EncryptionConfig"
+          },
+          "maxItems": 1,
+          "type": "array"
+         },
+         "kubernetesNetworkConfig": {
+          "$ref": "#/components/schemas/KubernetesNetworkConfigRequest"
+         },
+         "logging": {
+          "$ref": "#/components/schemas/Logging"
+         },
+         "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "outpostConfig": {
+          "$ref": "#/components/schemas/OutpostConfigRequest"
+         },
+         "remoteNetworkConfig": {
+          "$ref": "#/components/schemas/RemoteNetworkConfigRequest"
+         },
+         "resourcesVpcConfig": {
+          "$ref": "#/components/schemas/VpcConfigRequest"
+         },
+         "roleArn": {
+          "type": "string"
+         },
+         "storageConfig": {
+          "$ref": "#/components/schemas/StorageConfigRequest"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         },
+         "upgradePolicy": {
+          "$ref": "#/components/schemas/UpgradePolicyRequest"
+         },
+         "version": {
+          "type": "string"
+         },
+         "zonalShiftConfig": {
+          "$ref": "#/components/schemas/ZonalShiftConfigRequest"
+         }
+        },
+        "required": [
+         "name",
+         "resourcesVpcConfig",
+         "roleArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "cluster": {
+           "$ref": "#/components/schemas/Cluster"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateCluster",
+    "tags": [
+     "Amazon Elastic Kubernetes Service"
+    ]
+   }
+  },
+  "/clusters/{name}": {
+   "delete": {
+    "operationId": "eksDeleteCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "eks"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "cluster": {
+           "$ref": "#/components/schemas/Cluster"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteCluster",
+    "tags": [
+     "Amazon Elastic Kubernetes Service"
+    ]
+   },
+   "get": {
+    "operationId": "eksDescribeCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "eks"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "cluster": {
+           "$ref": "#/components/schemas/Cluster"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeCluster",
+    "tags": [
+     "Amazon Elastic Kubernetes Service"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "eksUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "eks"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Elastic Kubernetes Service"
+    ]
+   },
+   "get": {
+    "operationId": "eksListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "eks"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Elastic Kubernetes Service"
+    ]
+   },
+   "post": {
+    "operationId": "eksTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "eks"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Elastic Kubernetes Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Elastic Kubernetes Service API (2017-11-01). Every other official operation returns HTTP 501 UnknownOperationException. Clusters are configuration metadata that stay CREATING: no Kubernetes control plane, endpoint, certificate, OIDC issuer or network interface is provisioned, and no Kubernetes API is served. Kubernetes versions are stored as given in major.minor form without checking the supported list. Outposts local clusters and deletion protection are refused. Cluster updates, node groups, Fargate profiles, add-ons, access entries, pod identity associations and connected clusters return UnknownOperationException with HTTP 501; ListClusters include is refused.",
+   "name": "Amazon Elastic Kubernetes Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/eks/2017-11-01/service-2.json",
+  "sha256": "e8ddc062c4485d07cfb26931239d750af3f962dcdd6b43873c1a6ca8de023909",
+  "license": "Apache-2.0"
+ }
+}

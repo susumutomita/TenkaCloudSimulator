@@ -1,0 +1,1583 @@
+{
+ "components": {
+  "schemas": {
+   "AllowListCriteria": {
+    "additionalProperties": false,
+    "properties": {
+     "regex": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "s3WordsList": {
+      "$ref": "#/components/schemas/S3WordsList"
+     }
+    },
+    "type": "object"
+   },
+   "AllowListStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "enum": [
+       "OK",
+       "S3_OBJECT_NOT_FOUND",
+       "S3_USER_ACCESS_DENIED",
+       "S3_OBJECT_ACCESS_DENIED",
+       "S3_THROTTLED",
+       "S3_OBJECT_OVERSIZE",
+       "S3_OBJECT_EMPTY",
+       "UNKNOWN_ERROR"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "code"
+    ],
+    "type": "object"
+   },
+   "AllowListSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 89,
+      "minLength": 71,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 22,
+      "minLength": 22,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "CriterionAdditionalProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "eq": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "eqExactMatch": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "gt": {
+      "type": "integer"
+     },
+     "gte": {
+      "type": "integer"
+     },
+     "lt": {
+      "type": "integer"
+     },
+     "lte": {
+      "type": "integer"
+     },
+     "neq": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CustomDataIdentifierSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FindingCriteria": {
+    "additionalProperties": false,
+    "properties": {
+     "criterion": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/CriterionAdditionalProperties"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "FindingsFilterListItem": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "ARCHIVE",
+       "NOOP"
+      ],
+      "type": "string"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "S3WordsList": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "objectKey": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "bucketName",
+     "objectKey"
+    ],
+    "type": "object"
+   },
+   "SeverityLevel": {
+    "additionalProperties": false,
+    "properties": {
+     "occurrencesThreshold": {
+      "type": "integer"
+     },
+     "severity": {
+      "enum": [
+       "LOW",
+       "MEDIUM",
+       "HIGH"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "occurrencesThreshold",
+     "severity"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Macie 2 API (2020-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Allow lists, custom data identifiers and findings filters are configuration metadata that need no prior EnableMacie call: no Amazon S3 bucket is inventoried or inspected, no classification job or automated discovery runs and no finding exists. Allow lists use regex criteria only and report status OK; s3WordsList is refused because it reads an Amazon S3 object. Custom data identifier expressions are stored without being compiled, tested or matched against any data. DeleteCustomDataIdentifier removes the identifier immediately instead of soft-deleting it, ignoreJobChecks is accepted because no classification job exists, and UpdateFindingsFilter accepts clientToken without replaying an earlier result. Classification jobs, findings, sample findings, bucket and usage statistics, the Macie session, publication, export and reveal configuration, sensitivity inspection templates, resource profiles, members, invitations, BatchGetCustomDataIdentifiers and TestCustomDataIdentifier return UnknownOperationException with HTTP 501.",
+  "title": "Amazon Macie (simulator catalog)",
+  "version": "2020-01-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/allow-lists": {
+   "get": {
+    "operationId": "macie2ListAllowLists",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 25,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "allowLists": {
+           "items": {
+            "$ref": "#/components/schemas/AllowListSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListAllowLists",
+    "tags": [
+     "Amazon Macie"
+    ]
+   },
+   "post": {
+    "operationId": "macie2CreateAllowList",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "criteria": {
+          "$ref": "#/components/schemas/AllowListCriteria"
+         },
+         "description": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "clientToken",
+         "criteria",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 89,
+           "minLength": 71,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateAllowList",
+    "tags": [
+     "Amazon Macie"
+    ]
+   }
+  },
+  "/allow-lists/{id}": {
+   "delete": {
+    "operationId": "macie2DeleteAllowList",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "ignoreJobChecks",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteAllowList",
+    "tags": [
+     "Amazon Macie"
+    ]
+   },
+   "get": {
+    "operationId": "macie2GetAllowList",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 89,
+           "minLength": 71,
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "criteria": {
+           "$ref": "#/components/schemas/AllowListCriteria"
+          },
+          "description": {
+           "maxLength": 512,
+           "minLength": 1,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "$ref": "#/components/schemas/AllowListStatus"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetAllowList",
+    "tags": [
+     "Amazon Macie"
+    ]
+   },
+   "put": {
+    "operationId": "macie2UpdateAllowList",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "criteria": {
+          "$ref": "#/components/schemas/AllowListCriteria"
+         },
+         "description": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "criteria",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 89,
+           "minLength": 71,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateAllowList",
+    "tags": [
+     "Amazon Macie"
+    ]
+   }
+  },
+  "/custom-data-identifiers": {
+   "post": {
+    "operationId": "macie2CreateCustomDataIdentifier",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "description": {
+          "type": "string"
+         },
+         "ignoreWords": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "keywords": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "maximumMatchDistance": {
+          "type": "integer"
+         },
+         "name": {
+          "type": "string"
+         },
+         "regex": {
+          "type": "string"
+         },
+         "severityLevels": {
+          "items": {
+           "$ref": "#/components/schemas/SeverityLevel"
+          },
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "name",
+         "regex"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "customDataIdentifierId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateCustomDataIdentifier",
+    "tags": [
+     "Amazon Macie"
+    ]
+   }
+  },
+  "/custom-data-identifiers/list": {
+   "post": {
+    "operationId": "macie2ListCustomDataIdentifiers",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "type": "integer"
+         },
+         "nextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/CustomDataIdentifierSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListCustomDataIdentifiers",
+    "tags": [
+     "Amazon Macie"
+    ]
+   }
+  },
+  "/custom-data-identifiers/{id}": {
+   "delete": {
+    "operationId": "macie2DeleteCustomDataIdentifier",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteCustomDataIdentifier",
+    "tags": [
+     "Amazon Macie"
+    ]
+   },
+   "get": {
+    "operationId": "macie2GetCustomDataIdentifier",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "deleted": {
+           "type": "boolean"
+          },
+          "description": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "ignoreWords": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "keywords": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "maximumMatchDistance": {
+           "type": "integer"
+          },
+          "name": {
+           "type": "string"
+          },
+          "regex": {
+           "type": "string"
+          },
+          "severityLevels": {
+           "items": {
+            "$ref": "#/components/schemas/SeverityLevel"
+           },
+           "type": "array"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetCustomDataIdentifier",
+    "tags": [
+     "Amazon Macie"
+    ]
+   }
+  },
+  "/findingsfilters": {
+   "get": {
+    "operationId": "macie2ListFindingsFilters",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 25,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "findingsFilterListItems": {
+           "items": {
+            "$ref": "#/components/schemas/FindingsFilterListItem"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListFindingsFilters",
+    "tags": [
+     "Amazon Macie"
+    ]
+   },
+   "post": {
+    "operationId": "macie2CreateFindingsFilter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "action": {
+          "enum": [
+           "ARCHIVE",
+           "NOOP"
+          ],
+          "type": "string"
+         },
+         "clientToken": {
+          "type": "string"
+         },
+         "description": {
+          "type": "string"
+         },
+         "findingCriteria": {
+          "$ref": "#/components/schemas/FindingCriteria"
+         },
+         "name": {
+          "type": "string"
+         },
+         "position": {
+          "type": "integer"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "action",
+         "findingCriteria",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateFindingsFilter",
+    "tags": [
+     "Amazon Macie"
+    ]
+   }
+  },
+  "/findingsfilters/{id}": {
+   "delete": {
+    "operationId": "macie2DeleteFindingsFilter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteFindingsFilter",
+    "tags": [
+     "Amazon Macie"
+    ]
+   },
+   "get": {
+    "operationId": "macie2GetFindingsFilter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "action": {
+           "enum": [
+            "ARCHIVE",
+            "NOOP"
+           ],
+           "type": "string"
+          },
+          "arn": {
+           "type": "string"
+          },
+          "description": {
+           "type": "string"
+          },
+          "findingCriteria": {
+           "$ref": "#/components/schemas/FindingCriteria"
+          },
+          "id": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "position": {
+           "type": "integer"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetFindingsFilter",
+    "tags": [
+     "Amazon Macie"
+    ]
+   },
+   "patch": {
+    "operationId": "macie2UpdateFindingsFilter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "action": {
+          "enum": [
+           "ARCHIVE",
+           "NOOP"
+          ],
+          "type": "string"
+         },
+         "clientToken": {
+          "type": "string"
+         },
+         "description": {
+          "type": "string"
+         },
+         "findingCriteria": {
+          "$ref": "#/components/schemas/FindingCriteria"
+         },
+         "name": {
+          "type": "string"
+         },
+         "position": {
+          "type": "integer"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateFindingsFilter",
+    "tags": [
+     "Amazon Macie"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "macie2UntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Macie"
+    ]
+   },
+   "get": {
+    "operationId": "macie2ListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Macie"
+    ]
+   },
+   "post": {
+    "operationId": "macie2TagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "macie2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Macie"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Macie 2 API (2020-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Allow lists, custom data identifiers and findings filters are configuration metadata that need no prior EnableMacie call: no Amazon S3 bucket is inventoried or inspected, no classification job or automated discovery runs and no finding exists. Allow lists use regex criteria only and report status OK; s3WordsList is refused because it reads an Amazon S3 object. Custom data identifier expressions are stored without being compiled, tested or matched against any data. DeleteCustomDataIdentifier removes the identifier immediately instead of soft-deleting it, ignoreJobChecks is accepted because no classification job exists, and UpdateFindingsFilter accepts clientToken without replaying an earlier result. Classification jobs, findings, sample findings, bucket and usage statistics, the Macie session, publication, export and reveal configuration, sensitivity inspection templates, resource profiles, members, invitations, BatchGetCustomDataIdentifiers and TestCustomDataIdentifier return UnknownOperationException with HTTP 501.",
+   "name": "Amazon Macie"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/macie2/2020-01-01/service-2.json",
+  "sha256": "551f99c1cb86a996ef3e6fbfa437d8f9a8ec9ef4a63031538d41fb067ff90336",
+  "license": "Apache-2.0"
+ }
+}

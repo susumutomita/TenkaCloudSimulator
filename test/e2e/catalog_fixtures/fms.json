@@ -1,0 +1,36 @@
+{
+ "client": "fms",
+ "steps": [
+  {"op": "put_apps_list", "args": {"AppsList": {"ListName": "fixture-apps", "AppsList": [{"AppName": "web", "Protocol": "tcp", "Port": 443}]}, "TagList": [{"Key": "team", "Value": "a"}]}, "save": {"apps": "AppsList.ListId", "appsArn": "AppsListArn"}, "expect": {"AppsListArn": "arn:aws:fms:us-east-1:000000000000:applications-list/${apps}"}},
+  {"op": "get_apps_list", "args": {"ListId": "${apps}"}, "expect": {"AppsList.ListName": "fixture-apps", "AppsList.AppsList[0].Port": 443}},
+  {"op": "list_apps_lists", "args": {"MaxResults": 10}, "expect": {"AppsLists#count": 1, "AppsLists[0].ListArn": "${appsArn}"}},
+  {"op": "list_apps_lists", "args": {"MaxResults": 10, "DefaultLists": true}, "expect": {"AppsLists#count": 0}},
+  {"op": "put_protocols_list", "args": {"ProtocolsList": {"ListName": "fixture-protocols", "ProtocolsList": ["tcp", "udp"]}}, "save": {"protocols": "ProtocolsList.ListId"}},
+  {"op": "get_protocols_list", "args": {"ListId": "${protocols}"}, "expect": {"ProtocolsList.ProtocolsList": ["tcp", "udp"]}},
+  {"op": "list_protocols_lists", "args": {"MaxResults": 10}, "expect": {"ProtocolsLists#count": 1}},
+  {"op": "put_resource_set", "args": {"ResourceSet": {"Name": "fixture-set", "Description": "Web tier", "ResourceTypeList": ["AWS::EC2::Instance"]}}, "save": {"set": "ResourceSet.Id"}, "expect": {"ResourceSet.ResourceSetStatus": "ACTIVE"}},
+  {"op": "get_resource_set", "args": {"Identifier": "${set}"}, "expect": {"ResourceSet.Name": "fixture-set", "ResourceSetArn": "arn:aws:fms:us-east-1:000000000000:resource-set/${set}"}},
+  {"op": "list_resource_sets", "args": {}, "expect": {"ResourceSets#count": 1}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${appsArn}", "TagList": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${appsArn}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${appsArn}"}, "expect": {"TagList": [{"Key": "k", "Value": "v"}]}},
+  {"op": "put_apps_list", "args": {"AppsList": {"ListId": "${apps}", "ListName": "fixture-apps", "AppsList": []}}, "error": "InvalidInputException"},
+  {"op": "get_apps_list", "args": {"ListId": "${apps}", "DefaultList": true}, "error": "ResourceNotFoundException"},
+  {"op": "put_policy", "args": {"Policy": {"PolicyName": "p", "SecurityServicePolicyData": {"Type": "WAFV2"}, "ResourceType": "AWS::ElasticLoadBalancingV2::LoadBalancer", "ExcludeResourceTags": false, "RemediationEnabled": false}}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_protocols_list", "args": {"ListId": "00000000-0000-4000-8000-000000000000"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_apps_lists", "args": {"MaxResults": 10}, "expect": {"AppsLists#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_apps_list", "args": {"ListId": "${apps}"}, "expect": {"AppsList.ListName": "fixture-apps"}},
+  {"op": "get_resource_set", "args": {"Identifier": "${set}"}, "expect": {"ResourceSet.ResourceTypeList": ["AWS::EC2::Instance"]}}
+ ],
+ "cleanup": [
+  {"op": "delete_apps_list", "args": {"ListId": "${apps}"}},
+  {"op": "delete_protocols_list", "args": {"ListId": "${protocols}"}},
+  {"op": "delete_resource_set", "args": {"Identifier": "${set}"}},
+  {"op": "list_apps_lists", "args": {"MaxResults": 10}, "expect": {"AppsLists#count": 0}},
+  {"op": "list_resource_sets", "args": {}, "expect": {"ResourceSets#count": 0}}
+ ]
+}

@@ -1,0 +1,7683 @@
+{
+ "components": {
+  "schemas": {
+   "Aggregate": {
+    "additionalProperties": false,
+    "properties": {
+     "Aggs": {
+      "items": {
+       "$ref": "#/components/schemas/AggregateOperation"
+      },
+      "maxItems": 30,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Groups": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Groups",
+     "Aggs"
+    ],
+    "type": "object"
+   },
+   "AggregateOperation": {
+    "additionalProperties": false,
+    "properties": {
+     "AggFunc": {
+      "enum": [
+       "avg",
+       "countDistinct",
+       "count",
+       "first",
+       "last",
+       "kurtosis",
+       "max",
+       "min",
+       "skewness",
+       "stddev_samp",
+       "stddev_pop",
+       "sum",
+       "sumDistinct",
+       "var_samp",
+       "var_pop"
+      ],
+      "type": "string"
+     },
+     "Column": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Column",
+     "AggFunc"
+    ],
+    "type": "object"
+   },
+   "AmazonRedshiftAdvancedOption": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AmazonRedshiftNodeData": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessType": {
+      "type": "string"
+     },
+     "Action": {
+      "type": "string"
+     },
+     "AdvancedOptions": {
+      "items": {
+       "$ref": "#/components/schemas/AmazonRedshiftAdvancedOption"
+      },
+      "type": "array"
+     },
+     "CatalogDatabase": {
+      "$ref": "#/components/schemas/Option"
+     },
+     "CatalogRedshiftSchema": {
+      "type": "string"
+     },
+     "CatalogRedshiftTable": {
+      "type": "string"
+     },
+     "CatalogTable": {
+      "$ref": "#/components/schemas/Option"
+     },
+     "Connection": {
+      "$ref": "#/components/schemas/Option"
+     },
+     "CrawlerConnection": {
+      "type": "string"
+     },
+     "IamRole": {
+      "$ref": "#/components/schemas/Option"
+     },
+     "MergeAction": {
+      "type": "string"
+     },
+     "MergeClause": {
+      "type": "string"
+     },
+     "MergeWhenMatched": {
+      "type": "string"
+     },
+     "MergeWhenNotMatched": {
+      "type": "string"
+     },
+     "PostAction": {
+      "type": "string"
+     },
+     "PreAction": {
+      "type": "string"
+     },
+     "SampleQuery": {
+      "type": "string"
+     },
+     "Schema": {
+      "$ref": "#/components/schemas/Option"
+     },
+     "SelectedColumns": {
+      "items": {
+       "$ref": "#/components/schemas/Option"
+      },
+      "type": "array"
+     },
+     "SourceType": {
+      "type": "string"
+     },
+     "StagingTable": {
+      "type": "string"
+     },
+     "Table": {
+      "$ref": "#/components/schemas/Option"
+     },
+     "TablePrefix": {
+      "type": "string"
+     },
+     "TableSchema": {
+      "items": {
+       "$ref": "#/components/schemas/Option"
+      },
+      "type": "array"
+     },
+     "TempDir": {
+      "type": "string"
+     },
+     "Upsert": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "AmazonRedshiftSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Data": {
+      "$ref": "#/components/schemas/AmazonRedshiftNodeData"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AmazonRedshiftTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "Data": {
+      "$ref": "#/components/schemas/AmazonRedshiftNodeData"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ApplyMapping": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Mapping": {
+      "items": {
+       "$ref": "#/components/schemas/Mapping"
+      },
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Mapping"
+    ],
+    "type": "object"
+   },
+   "AthenaConnectorSource": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "type": "string"
+     },
+     "ConnectionTable": {
+      "type": "string"
+     },
+     "ConnectionType": {
+      "type": "string"
+     },
+     "ConnectorName": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "SchemaName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "ConnectionName",
+     "ConnectorName",
+     "ConnectionType",
+     "SchemaName"
+    ],
+    "type": "object"
+   },
+   "AuditContext": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalAuditContext": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "AllColumnsRequested": {
+      "type": "boolean"
+     },
+     "RequestedColumns": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "AutoDataQuality": {
+    "additionalProperties": false,
+    "properties": {
+     "EvaluationContext": {
+      "type": "string"
+     },
+     "IsEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "BasicCatalogTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "CatalogDeltaSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalDeltaOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "CatalogHudiSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalHudiOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "CatalogIcebergSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalIcebergOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "CatalogKafkaSource": {
+    "additionalProperties": false,
+    "properties": {
+     "DataPreviewOptions": {
+      "$ref": "#/components/schemas/StreamingDataPreviewOptions"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "DetectSchema": {
+      "type": "boolean"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "StreamingOptions": {
+      "$ref": "#/components/schemas/KafkaStreamingSourceOptions"
+     },
+     "Table": {
+      "type": "string"
+     },
+     "WindowSize": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Name",
+     "Table",
+     "Database"
+    ],
+    "type": "object"
+   },
+   "CatalogKinesisSource": {
+    "additionalProperties": false,
+    "properties": {
+     "DataPreviewOptions": {
+      "$ref": "#/components/schemas/StreamingDataPreviewOptions"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "DetectSchema": {
+      "type": "boolean"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "StreamingOptions": {
+      "$ref": "#/components/schemas/KinesisStreamingSourceOptions"
+     },
+     "Table": {
+      "type": "string"
+     },
+     "WindowSize": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Name",
+     "Table",
+     "Database"
+    ],
+    "type": "object"
+   },
+   "CatalogSchemaChangePolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "EnableUpdateCatalog": {
+      "type": "boolean"
+     },
+     "UpdateBehavior": {
+      "enum": [
+       "UPDATE_IN_DATABASE",
+       "LOG"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CatalogSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "PartitionPredicate": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "CatalogTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "type": "string"
+     },
+     "DatabaseName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DlqEventQueueArn": {
+      "type": "string"
+     },
+     "EventQueueArn": {
+      "type": "string"
+     },
+     "Tables": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "DatabaseName",
+     "Tables"
+    ],
+    "type": "object"
+   },
+   "CodeGenConfigurationNode": {
+    "additionalProperties": false,
+    "properties": {
+     "Aggregate": {
+      "$ref": "#/components/schemas/Aggregate"
+     },
+     "AmazonRedshiftSource": {
+      "$ref": "#/components/schemas/AmazonRedshiftSource"
+     },
+     "AmazonRedshiftTarget": {
+      "$ref": "#/components/schemas/AmazonRedshiftTarget"
+     },
+     "ApplyMapping": {
+      "$ref": "#/components/schemas/ApplyMapping"
+     },
+     "AthenaConnectorSource": {
+      "$ref": "#/components/schemas/AthenaConnectorSource"
+     },
+     "CatalogDeltaSource": {
+      "$ref": "#/components/schemas/CatalogDeltaSource"
+     },
+     "CatalogHudiSource": {
+      "$ref": "#/components/schemas/CatalogHudiSource"
+     },
+     "CatalogIcebergSource": {
+      "$ref": "#/components/schemas/CatalogIcebergSource"
+     },
+     "CatalogKafkaSource": {
+      "$ref": "#/components/schemas/CatalogKafkaSource"
+     },
+     "CatalogKinesisSource": {
+      "$ref": "#/components/schemas/CatalogKinesisSource"
+     },
+     "CatalogSource": {
+      "$ref": "#/components/schemas/CatalogSource"
+     },
+     "CatalogTarget": {
+      "$ref": "#/components/schemas/BasicCatalogTarget"
+     },
+     "ConnectorDataSource": {
+      "$ref": "#/components/schemas/ConnectorDataSource"
+     },
+     "ConnectorDataTarget": {
+      "$ref": "#/components/schemas/ConnectorDataTarget"
+     },
+     "CustomCode": {
+      "$ref": "#/components/schemas/CustomCode"
+     },
+     "DirectJDBCSource": {
+      "$ref": "#/components/schemas/DirectJDBCSource"
+     },
+     "DirectKafkaSource": {
+      "$ref": "#/components/schemas/DirectKafkaSource"
+     },
+     "DirectKinesisSource": {
+      "$ref": "#/components/schemas/DirectKinesisSource"
+     },
+     "DropDuplicates": {
+      "$ref": "#/components/schemas/DropDuplicates"
+     },
+     "DropFields": {
+      "$ref": "#/components/schemas/DropFields"
+     },
+     "DropNullFields": {
+      "$ref": "#/components/schemas/DropNullFields"
+     },
+     "DynamicTransform": {
+      "$ref": "#/components/schemas/DynamicTransform"
+     },
+     "DynamoDBCatalogSource": {
+      "$ref": "#/components/schemas/DynamoDBCatalogSource"
+     },
+     "DynamoDBELTConnectorSource": {
+      "$ref": "#/components/schemas/DynamoDBELTConnectorSource"
+     },
+     "EvaluateDataQuality": {
+      "$ref": "#/components/schemas/EvaluateDataQuality"
+     },
+     "EvaluateDataQualityMultiFrame": {
+      "$ref": "#/components/schemas/EvaluateDataQualityMultiFrame"
+     },
+     "FillMissingValues": {
+      "$ref": "#/components/schemas/FillMissingValues"
+     },
+     "Filter": {
+      "$ref": "#/components/schemas/Filter"
+     },
+     "GovernedCatalogSource": {
+      "$ref": "#/components/schemas/GovernedCatalogSource"
+     },
+     "GovernedCatalogTarget": {
+      "$ref": "#/components/schemas/GovernedCatalogTarget"
+     },
+     "JDBCConnectorSource": {
+      "$ref": "#/components/schemas/JDBCConnectorSource"
+     },
+     "JDBCConnectorTarget": {
+      "$ref": "#/components/schemas/JDBCConnectorTarget"
+     },
+     "Join": {
+      "$ref": "#/components/schemas/Join"
+     },
+     "Merge": {
+      "$ref": "#/components/schemas/Merge"
+     },
+     "MicrosoftSQLServerCatalogSource": {
+      "$ref": "#/components/schemas/MicrosoftSQLServerCatalogSource"
+     },
+     "MicrosoftSQLServerCatalogTarget": {
+      "$ref": "#/components/schemas/MicrosoftSQLServerCatalogTarget"
+     },
+     "MySQLCatalogSource": {
+      "$ref": "#/components/schemas/MySQLCatalogSource"
+     },
+     "MySQLCatalogTarget": {
+      "$ref": "#/components/schemas/MySQLCatalogTarget"
+     },
+     "OracleSQLCatalogSource": {
+      "$ref": "#/components/schemas/OracleSQLCatalogSource"
+     },
+     "OracleSQLCatalogTarget": {
+      "$ref": "#/components/schemas/OracleSQLCatalogTarget"
+     },
+     "PIIDetection": {
+      "$ref": "#/components/schemas/PIIDetection"
+     },
+     "PostgreSQLCatalogSource": {
+      "$ref": "#/components/schemas/PostgreSQLCatalogSource"
+     },
+     "PostgreSQLCatalogTarget": {
+      "$ref": "#/components/schemas/PostgreSQLCatalogTarget"
+     },
+     "Recipe": {
+      "$ref": "#/components/schemas/Recipe"
+     },
+     "RedshiftSource": {
+      "$ref": "#/components/schemas/RedshiftSource"
+     },
+     "RedshiftTarget": {
+      "$ref": "#/components/schemas/RedshiftTarget"
+     },
+     "RelationalCatalogSource": {
+      "$ref": "#/components/schemas/RelationalCatalogSource"
+     },
+     "RenameField": {
+      "$ref": "#/components/schemas/RenameField"
+     },
+     "Route": {
+      "$ref": "#/components/schemas/Route"
+     },
+     "S3CatalogDeltaSource": {
+      "$ref": "#/components/schemas/S3CatalogDeltaSource"
+     },
+     "S3CatalogHudiSource": {
+      "$ref": "#/components/schemas/S3CatalogHudiSource"
+     },
+     "S3CatalogIcebergSource": {
+      "$ref": "#/components/schemas/S3CatalogIcebergSource"
+     },
+     "S3CatalogSource": {
+      "$ref": "#/components/schemas/S3CatalogSource"
+     },
+     "S3CatalogTarget": {
+      "$ref": "#/components/schemas/S3CatalogTarget"
+     },
+     "S3CsvSource": {
+      "$ref": "#/components/schemas/S3CsvSource"
+     },
+     "S3DeltaCatalogTarget": {
+      "$ref": "#/components/schemas/S3DeltaCatalogTarget"
+     },
+     "S3DeltaDirectTarget": {
+      "$ref": "#/components/schemas/S3DeltaDirectTarget"
+     },
+     "S3DeltaSource": {
+      "$ref": "#/components/schemas/S3DeltaSource"
+     },
+     "S3DirectTarget": {
+      "$ref": "#/components/schemas/S3DirectTarget"
+     },
+     "S3ExcelSource": {
+      "$ref": "#/components/schemas/S3ExcelSource"
+     },
+     "S3GlueParquetTarget": {
+      "$ref": "#/components/schemas/S3GlueParquetTarget"
+     },
+     "S3HudiCatalogTarget": {
+      "$ref": "#/components/schemas/S3HudiCatalogTarget"
+     },
+     "S3HudiDirectTarget": {
+      "$ref": "#/components/schemas/S3HudiDirectTarget"
+     },
+     "S3HudiSource": {
+      "$ref": "#/components/schemas/S3HudiSource"
+     },
+     "S3HyperDirectTarget": {
+      "$ref": "#/components/schemas/S3HyperDirectTarget"
+     },
+     "S3IcebergCatalogTarget": {
+      "$ref": "#/components/schemas/S3IcebergCatalogTarget"
+     },
+     "S3IcebergDirectTarget": {
+      "$ref": "#/components/schemas/S3IcebergDirectTarget"
+     },
+     "S3JsonSource": {
+      "$ref": "#/components/schemas/S3JsonSource"
+     },
+     "S3ParquetSource": {
+      "$ref": "#/components/schemas/S3ParquetSource"
+     },
+     "SelectFields": {
+      "$ref": "#/components/schemas/SelectFields"
+     },
+     "SelectFromCollection": {
+      "$ref": "#/components/schemas/SelectFromCollection"
+     },
+     "SnowflakeSource": {
+      "$ref": "#/components/schemas/SnowflakeSource"
+     },
+     "SnowflakeTarget": {
+      "$ref": "#/components/schemas/SnowflakeTarget"
+     },
+     "SparkConnectorSource": {
+      "$ref": "#/components/schemas/SparkConnectorSource"
+     },
+     "SparkConnectorTarget": {
+      "$ref": "#/components/schemas/SparkConnectorTarget"
+     },
+     "SparkSQL": {
+      "$ref": "#/components/schemas/SparkSQL"
+     },
+     "Spigot": {
+      "$ref": "#/components/schemas/Spigot"
+     },
+     "SplitFields": {
+      "$ref": "#/components/schemas/SplitFields"
+     },
+     "Union": {
+      "$ref": "#/components/schemas/Union"
+     }
+    },
+    "type": "object"
+   },
+   "Column": {
+    "additionalProperties": false,
+    "properties": {
+     "Comment": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Parameters": {
+      "additionalProperties": {
+       "maxLength": 512000,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Type": {
+      "maxLength": 131072,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "ConditionExpression": {
+    "additionalProperties": false,
+    "properties": {
+     "Condition": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TargetColumn": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 1024,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Condition",
+     "TargetColumn"
+    ],
+    "type": "object"
+   },
+   "ConnectionsList": {
+    "additionalProperties": false,
+    "properties": {
+     "Connections": {
+      "items": {
+       "maxLength": 255,
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectorDataSource": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionType": {
+      "type": "string"
+     },
+     "Data": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "ConnectionType",
+     "Data"
+    ],
+    "type": "object"
+   },
+   "ConnectorDataTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionType": {
+      "type": "string"
+     },
+     "Data": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "ConnectionType",
+     "Data"
+    ],
+    "type": "object"
+   },
+   "Crawler": {
+    "additionalProperties": false,
+    "properties": {
+     "Classifiers": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Configuration": {
+      "type": "string"
+     },
+     "CrawlElapsedTime": {
+      "type": "integer"
+     },
+     "CrawlerSecurityConfiguration": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "LakeFormationConfiguration": {
+      "$ref": "#/components/schemas/LakeFormationConfiguration"
+     },
+     "LastCrawl": {
+      "$ref": "#/components/schemas/LastCrawlInfo"
+     },
+     "LastUpdated": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LineageConfiguration": {
+      "$ref": "#/components/schemas/LineageConfiguration"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RecrawlPolicy": {
+      "$ref": "#/components/schemas/RecrawlPolicy"
+     },
+     "Role": {
+      "type": "string"
+     },
+     "Schedule": {
+      "$ref": "#/components/schemas/Schedule"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/SchemaChangePolicy"
+     },
+     "State": {
+      "enum": [
+       "READY",
+       "RUNNING",
+       "STOPPING"
+      ],
+      "type": "string"
+     },
+     "TablePrefix": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Targets": {
+      "$ref": "#/components/schemas/CrawlerTargets"
+     },
+     "Version": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "CrawlerTargets": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogTargets": {
+      "items": {
+       "$ref": "#/components/schemas/CatalogTarget"
+      },
+      "type": "array"
+     },
+     "DeltaTargets": {
+      "items": {
+       "$ref": "#/components/schemas/DeltaTarget"
+      },
+      "type": "array"
+     },
+     "DynamoDBTargets": {
+      "items": {
+       "$ref": "#/components/schemas/DynamoDBTarget"
+      },
+      "type": "array"
+     },
+     "HudiTargets": {
+      "items": {
+       "$ref": "#/components/schemas/HudiTarget"
+      },
+      "type": "array"
+     },
+     "IcebergTargets": {
+      "items": {
+       "$ref": "#/components/schemas/IcebergTarget"
+      },
+      "type": "array"
+     },
+     "JdbcTargets": {
+      "items": {
+       "$ref": "#/components/schemas/JdbcTarget"
+      },
+      "type": "array"
+     },
+     "MongoDBTargets": {
+      "items": {
+       "$ref": "#/components/schemas/MongoDBTarget"
+      },
+      "type": "array"
+     },
+     "S3Targets": {
+      "items": {
+       "$ref": "#/components/schemas/S3Target"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CreateCrawlerRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Classifiers": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Configuration": {
+      "type": "string"
+     },
+     "CrawlerSecurityConfiguration": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "LakeFormationConfiguration": {
+      "$ref": "#/components/schemas/LakeFormationConfiguration"
+     },
+     "LineageConfiguration": {
+      "$ref": "#/components/schemas/LineageConfiguration"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RecrawlPolicy": {
+      "$ref": "#/components/schemas/RecrawlPolicy"
+     },
+     "Role": {
+      "type": "string"
+     },
+     "Schedule": {
+      "type": "string"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/SchemaChangePolicy"
+     },
+     "TablePrefix": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "Targets": {
+      "$ref": "#/components/schemas/CrawlerTargets"
+     }
+    },
+    "required": [
+     "Name",
+     "Role",
+     "Targets"
+    ],
+    "type": "object"
+   },
+   "CreateCrawlerResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "CreateDatabaseRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseInput": {
+      "$ref": "#/components/schemas/DatabaseInput"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "DatabaseInput"
+    ],
+    "type": "object"
+   },
+   "CreateDatabaseResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "CreateIcebergTableInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Location": {
+      "maxLength": 2056,
+      "type": "string"
+     },
+     "PartitionSpec": {
+      "$ref": "#/components/schemas/IcebergPartitionSpec"
+     },
+     "Properties": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Schema": {
+      "$ref": "#/components/schemas/IcebergSchema"
+     },
+     "WriteOrder": {
+      "$ref": "#/components/schemas/IcebergSortOrder"
+     }
+    },
+    "required": [
+     "Location",
+     "Schema"
+    ],
+    "type": "object"
+   },
+   "CreateJobRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AllocatedCapacity": {
+      "type": "integer"
+     },
+     "CodeGenConfigurationNodes": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/CodeGenConfigurationNode"
+      },
+      "type": "object"
+     },
+     "Command": {
+      "$ref": "#/components/schemas/JobCommand"
+     },
+     "Connections": {
+      "$ref": "#/components/schemas/ConnectionsList"
+     },
+     "DefaultArguments": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ExecutionClass": {
+      "enum": [
+       "FLEX",
+       "STANDARD"
+      ],
+      "maxLength": 16,
+      "type": "string"
+     },
+     "ExecutionProperty": {
+      "$ref": "#/components/schemas/ExecutionProperty"
+     },
+     "GlueVersion": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "JobMode": {
+      "enum": [
+       "SCRIPT",
+       "VISUAL",
+       "NOTEBOOK"
+      ],
+      "type": "string"
+     },
+     "JobRunQueuingEnabled": {
+      "type": "boolean"
+     },
+     "LogUri": {
+      "type": "string"
+     },
+     "MaintenanceWindow": {
+      "type": "string"
+     },
+     "MaxCapacity": {
+      "type": "number"
+     },
+     "MaxRetries": {
+      "type": "integer"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NonOverridableArguments": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "NotificationProperty": {
+      "$ref": "#/components/schemas/NotificationProperty"
+     },
+     "NumberOfWorkers": {
+      "type": "integer"
+     },
+     "Role": {
+      "type": "string"
+     },
+     "SecurityConfiguration": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SourceControlDetails": {
+      "$ref": "#/components/schemas/SourceControlDetails"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "Timeout": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "WorkerType": {
+      "enum": [
+       "Standard",
+       "G.1X",
+       "G.2X",
+       "G.025X",
+       "G.4X",
+       "G.8X",
+       "Z.2X"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Role",
+     "Command"
+    ],
+    "type": "object"
+   },
+   "CreateJobResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateTableRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OpenTableFormatInput": {
+      "$ref": "#/components/schemas/OpenTableFormatInput"
+     },
+     "PartitionIndexes": {
+      "items": {
+       "$ref": "#/components/schemas/PartitionIndex"
+      },
+      "maxItems": 3,
+      "type": "array"
+     },
+     "TableInput": {
+      "$ref": "#/components/schemas/TableInput"
+     },
+     "TransactionId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseName"
+    ],
+    "type": "object"
+   },
+   "CreateTableResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "CustomCode": {
+    "additionalProperties": false,
+    "properties": {
+     "ClassName": {
+      "type": "string"
+     },
+     "Code": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Code",
+     "ClassName"
+    ],
+    "type": "object"
+   },
+   "DDBELTCatalogAdditionalOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DynamodbExport": {
+      "type": "string"
+     },
+     "DynamodbUnnestDDBJson": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "DDBELTConnectionOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DynamodbExport": {
+      "enum": [
+       "ddb",
+       "s3"
+      ],
+      "type": "string"
+     },
+     "DynamodbS3Bucket": {
+      "type": "string"
+     },
+     "DynamodbS3BucketOwner": {
+      "type": "string"
+     },
+     "DynamodbS3Prefix": {
+      "type": "string"
+     },
+     "DynamodbStsRoleArn": {
+      "type": "string"
+     },
+     "DynamodbTableArn": {
+      "type": "string"
+     },
+     "DynamodbUnnestDDBJson": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "DynamodbTableArn"
+    ],
+    "type": "object"
+   },
+   "DQResultsPublishingOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "CloudWatchMetricsEnabled": {
+      "type": "boolean"
+     },
+     "EvaluationContext": {
+      "type": "string"
+     },
+     "ResultsPublishingEnabled": {
+      "type": "boolean"
+     },
+     "ResultsS3Prefix": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DQStopJobOnFailureOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "StopJobOnFailureTiming": {
+      "enum": [
+       "Immediate",
+       "AfterDataLoad"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DataLakePrincipal": {
+    "additionalProperties": false,
+    "properties": {
+     "DataLakePrincipalIdentifier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Database": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreateTableDefaultPermissions": {
+      "items": {
+       "$ref": "#/components/schemas/PrincipalPermissions"
+      },
+      "type": "array"
+     },
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "FederatedDatabase": {
+      "$ref": "#/components/schemas/FederatedDatabase"
+     },
+     "LocationUri": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Parameters": {
+      "additionalProperties": {
+       "maxLength": 512000,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "TargetDatabase": {
+      "$ref": "#/components/schemas/DatabaseIdentifier"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DatabaseIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Region": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseInput": {
+    "additionalProperties": false,
+    "properties": {
+     "CreateTableDefaultPermissions": {
+      "items": {
+       "$ref": "#/components/schemas/PrincipalPermissions"
+      },
+      "type": "array"
+     },
+     "Description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "FederatedDatabase": {
+      "$ref": "#/components/schemas/FederatedDatabase"
+     },
+     "LocationUri": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Parameters": {
+      "additionalProperties": {
+       "maxLength": 512000,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "TargetDatabase": {
+      "$ref": "#/components/schemas/DatabaseIdentifier"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "Datatype": {
+    "additionalProperties": false,
+    "properties": {
+     "Id": {
+      "type": "string"
+     },
+     "Label": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Id",
+     "Label"
+    ],
+    "type": "object"
+   },
+   "DeleteCrawlerRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DeleteCrawlerResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteDatabaseRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DeleteDatabaseResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteJobRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "JobName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "JobName"
+    ],
+    "type": "object"
+   },
+   "DeleteJobResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "JobName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteTableRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TransactionId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseName",
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DeleteTableResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeltaTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "type": "string"
+     },
+     "CreateNativeDeltaTable": {
+      "type": "boolean"
+     },
+     "DeltaTables": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "WriteManifest": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "DirectJDBCSource": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "type": "string"
+     },
+     "ConnectionType": {
+      "enum": [
+       "sqlserver",
+       "mysql",
+       "oracle",
+       "postgresql",
+       "redshift"
+      ],
+      "type": "string"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "RedshiftTmpDir": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table",
+     "ConnectionName",
+     "ConnectionType"
+    ],
+    "type": "object"
+   },
+   "DirectKafkaSource": {
+    "additionalProperties": false,
+    "properties": {
+     "DataPreviewOptions": {
+      "$ref": "#/components/schemas/StreamingDataPreviewOptions"
+     },
+     "DetectSchema": {
+      "type": "boolean"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "StreamingOptions": {
+      "$ref": "#/components/schemas/KafkaStreamingSourceOptions"
+     },
+     "WindowSize": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DirectKinesisSource": {
+    "additionalProperties": false,
+    "properties": {
+     "DataPreviewOptions": {
+      "$ref": "#/components/schemas/StreamingDataPreviewOptions"
+     },
+     "DetectSchema": {
+      "type": "boolean"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "StreamingOptions": {
+      "$ref": "#/components/schemas/KinesisStreamingSourceOptions"
+     },
+     "WindowSize": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DirectSchemaChangePolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "EnableUpdateCatalog": {
+      "type": "boolean"
+     },
+     "Table": {
+      "type": "string"
+     },
+     "UpdateBehavior": {
+      "enum": [
+       "UPDATE_IN_DATABASE",
+       "LOG"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DropDuplicates": {
+    "additionalProperties": false,
+    "properties": {
+     "Columns": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs"
+    ],
+    "type": "object"
+   },
+   "DropFields": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Paths": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Paths"
+    ],
+    "type": "object"
+   },
+   "DropNullFields": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "NullCheckBoxList": {
+      "$ref": "#/components/schemas/NullCheckBoxList"
+     },
+     "NullTextList": {
+      "items": {
+       "$ref": "#/components/schemas/NullValueField"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs"
+    ],
+    "type": "object"
+   },
+   "DynamicTransform": {
+    "additionalProperties": false,
+    "properties": {
+     "FunctionName": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Parameters": {
+      "items": {
+       "$ref": "#/components/schemas/TransformConfigParameter"
+      },
+      "type": "array"
+     },
+     "Path": {
+      "type": "string"
+     },
+     "TransformName": {
+      "type": "string"
+     },
+     "Version": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "TransformName",
+     "Inputs",
+     "FunctionName",
+     "Path"
+    ],
+    "type": "object"
+   },
+   "DynamoDBCatalogSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "$ref": "#/components/schemas/DDBELTCatalogAdditionalOptions"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PitrEnabled": {
+      "type": "boolean"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "DynamoDBELTConnectorSource": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionOptions": {
+      "$ref": "#/components/schemas/DDBELTConnectionOptions"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DynamoDBTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "Path": {
+      "type": "string"
+     },
+     "scanAll": {
+      "type": "boolean"
+     },
+     "scanRate": {
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "ErrorDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "ErrorCode": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ErrorMessage": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EvaluateDataQuality": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Output": {
+      "enum": [
+       "PrimaryInput",
+       "EvaluationResults"
+      ],
+      "type": "string"
+     },
+     "PublishingOptions": {
+      "$ref": "#/components/schemas/DQResultsPublishingOptions"
+     },
+     "Ruleset": {
+      "maxLength": 65536,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StopJobOnFailureOptions": {
+      "$ref": "#/components/schemas/DQStopJobOnFailureOptions"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Ruleset"
+    ],
+    "type": "object"
+   },
+   "EvaluateDataQualityMultiFrame": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalDataSources": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AdditionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PublishingOptions": {
+      "$ref": "#/components/schemas/DQResultsPublishingOptions"
+     },
+     "Ruleset": {
+      "maxLength": 65536,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StopJobOnFailureOptions": {
+      "$ref": "#/components/schemas/DQStopJobOnFailureOptions"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Ruleset"
+    ],
+    "type": "object"
+   },
+   "ExecutionProperty": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxConcurrentRuns": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "FederatedDatabase": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ConnectionType": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Identifier": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FederatedTable": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ConnectionType": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseIdentifier": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Identifier": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FillMissingValues": {
+    "additionalProperties": false,
+    "properties": {
+     "FilledPath": {
+      "type": "string"
+     },
+     "ImputedPath": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "ImputedPath"
+    ],
+    "type": "object"
+   },
+   "Filter": {
+    "additionalProperties": false,
+    "properties": {
+     "Filters": {
+      "items": {
+       "$ref": "#/components/schemas/FilterExpression"
+      },
+      "type": "array"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "LogicalOperator": {
+      "enum": [
+       "AND",
+       "OR"
+      ],
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "LogicalOperator",
+     "Filters"
+    ],
+    "type": "object"
+   },
+   "FilterExpression": {
+    "additionalProperties": false,
+    "properties": {
+     "Negated": {
+      "type": "boolean"
+     },
+     "Operation": {
+      "enum": [
+       "EQ",
+       "LT",
+       "GT",
+       "LTE",
+       "GTE",
+       "REGEX",
+       "ISNULL"
+      ],
+      "type": "string"
+     },
+     "Values": {
+      "items": {
+       "$ref": "#/components/schemas/FilterValue"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Operation",
+     "Values"
+    ],
+    "type": "object"
+   },
+   "FilterValue": {
+    "additionalProperties": false,
+    "properties": {
+     "Type": {
+      "enum": [
+       "COLUMNEXTRACTED",
+       "CONSTANT"
+      ],
+      "type": "string"
+     },
+     "Value": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Type",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "GetCrawlerRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "GetCrawlerResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Crawler": {
+      "$ref": "#/components/schemas/Crawler"
+     }
+    },
+    "type": "object"
+   },
+   "GetCrawlersRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetCrawlersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Crawlers": {
+      "items": {
+       "$ref": "#/components/schemas/Crawler"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetDatabaseRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "GetDatabaseResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "$ref": "#/components/schemas/Database"
+     }
+    },
+    "type": "object"
+   },
+   "GetDatabasesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AttributesToGet": {
+      "items": {
+       "enum": [
+        "NAME",
+        "TARGET_DATABASE"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     },
+     "ResourceShareType": {
+      "enum": [
+       "FOREIGN",
+       "ALL",
+       "FEDERATED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetDatabasesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseList": {
+      "items": {
+       "$ref": "#/components/schemas/Database"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseList"
+    ],
+    "type": "object"
+   },
+   "GetJobRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "JobName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "JobName"
+    ],
+    "type": "object"
+   },
+   "GetJobResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Job": {
+      "$ref": "#/components/schemas/Job"
+     }
+    },
+    "type": "object"
+   },
+   "GetJobsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetJobsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Jobs": {
+      "items": {
+       "$ref": "#/components/schemas/Job"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetTableRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AuditContext": {
+      "$ref": "#/components/schemas/AuditContext"
+     },
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IncludeStatusDetails": {
+      "type": "boolean"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "QueryAsOfTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "TransactionId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseName",
+     "Name"
+    ],
+    "type": "object"
+   },
+   "GetTableResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Table": {
+      "$ref": "#/components/schemas/Table"
+     }
+    },
+    "type": "object"
+   },
+   "GetTablesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AttributesToGet": {
+      "items": {
+       "enum": [
+        "NAME",
+        "TABLE_TYPE"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "AuditContext": {
+      "$ref": "#/components/schemas/AuditContext"
+     },
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Expression": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "IncludeStatusDetails": {
+      "type": "boolean"
+     },
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     },
+     "QueryAsOfTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "TransactionId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseName"
+    ],
+    "type": "object"
+   },
+   "GetTablesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "type": "string"
+     },
+     "TableList": {
+      "items": {
+       "$ref": "#/components/schemas/Table"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GetTagsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 10240,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceArn"
+    ],
+    "type": "object"
+   },
+   "GetTagsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "GlueSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "Columns": {
+      "items": {
+       "$ref": "#/components/schemas/GlueStudioSchemaColumn"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GlueStudioSchemaColumn": {
+    "additionalProperties": false,
+    "properties": {
+     "GlueStudioType": {
+      "maxLength": 131072,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Type": {
+      "maxLength": 131072,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "GovernedCatalogSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "$ref": "#/components/schemas/S3SourceAdditionalOptions"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PartitionPredicate": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "GovernedCatalogTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/CatalogSchemaChangePolicy"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Table",
+     "Database"
+    ],
+    "type": "object"
+   },
+   "GroupFilters": {
+    "additionalProperties": false,
+    "properties": {
+     "Filters": {
+      "items": {
+       "$ref": "#/components/schemas/FilterExpression"
+      },
+      "type": "array"
+     },
+     "GroupName": {
+      "type": "string"
+     },
+     "LogicalOperator": {
+      "enum": [
+       "AND",
+       "OR"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "GroupName",
+     "Filters",
+     "LogicalOperator"
+    ],
+    "type": "object"
+   },
+   "HudiTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "type": "string"
+     },
+     "Exclusions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "MaximumTraversalDepth": {
+      "type": "integer"
+     },
+     "Paths": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "IcebergDocument": {
+    "description": "Arbitrary JSON document"
+   },
+   "IcebergEncryptedKey": {
+    "additionalProperties": false,
+    "properties": {
+     "EncryptedById": {
+      "maxLength": 2056,
+      "type": "string"
+     },
+     "EncryptedKeyMetadata": {
+      "maxLength": 2056,
+      "type": "string"
+     },
+     "KeyId": {
+      "maxLength": 2056,
+      "type": "string"
+     },
+     "Properties": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "KeyId",
+     "EncryptedKeyMetadata"
+    ],
+    "type": "object"
+   },
+   "IcebergInput": {
+    "additionalProperties": false,
+    "properties": {
+     "CreateIcebergTableInput": {
+      "$ref": "#/components/schemas/CreateIcebergTableInput"
+     },
+     "MetadataOperation": {
+      "enum": [
+       "CREATE"
+      ],
+      "type": "string"
+     },
+     "Version": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "MetadataOperation"
+    ],
+    "type": "object"
+   },
+   "IcebergPartitionField": {
+    "additionalProperties": false,
+    "properties": {
+     "FieldId": {
+      "type": "integer"
+     },
+     "Name": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SourceId": {
+      "type": "integer"
+     },
+     "Transform": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "SourceId",
+     "Transform",
+     "Name"
+    ],
+    "type": "object"
+   },
+   "IcebergPartitionSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "Fields": {
+      "items": {
+       "$ref": "#/components/schemas/IcebergPartitionField"
+      },
+      "type": "array"
+     },
+     "SpecId": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Fields"
+    ],
+    "type": "object"
+   },
+   "IcebergSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "Fields": {
+      "items": {
+       "$ref": "#/components/schemas/IcebergStructField"
+      },
+      "type": "array"
+     },
+     "IdentifierFieldIds": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "SchemaId": {
+      "type": "integer"
+     },
+     "Type": {
+      "enum": [
+       "struct"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Fields"
+    ],
+    "type": "object"
+   },
+   "IcebergSortField": {
+    "additionalProperties": false,
+    "properties": {
+     "Direction": {
+      "enum": [
+       "asc",
+       "desc"
+      ],
+      "type": "string"
+     },
+     "NullOrder": {
+      "enum": [
+       "nulls-first",
+       "nulls-last"
+      ],
+      "type": "string"
+     },
+     "SourceId": {
+      "type": "integer"
+     },
+     "Transform": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "SourceId",
+     "Transform",
+     "Direction",
+     "NullOrder"
+    ],
+    "type": "object"
+   },
+   "IcebergSortOrder": {
+    "additionalProperties": false,
+    "properties": {
+     "Fields": {
+      "items": {
+       "$ref": "#/components/schemas/IcebergSortField"
+      },
+      "type": "array"
+     },
+     "OrderId": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "OrderId",
+     "Fields"
+    ],
+    "type": "object"
+   },
+   "IcebergStructField": {
+    "additionalProperties": false,
+    "properties": {
+     "Doc": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Id": {
+      "type": "integer"
+     },
+     "InitialDefault": {
+      "$ref": "#/components/schemas/IcebergDocument"
+     },
+     "Name": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Required": {
+      "type": "boolean"
+     },
+     "Type": {
+      "$ref": "#/components/schemas/IcebergDocument"
+     },
+     "WriteDefault": {
+      "$ref": "#/components/schemas/IcebergDocument"
+     }
+    },
+    "required": [
+     "Id",
+     "Name",
+     "Type",
+     "Required"
+    ],
+    "type": "object"
+   },
+   "IcebergTableUpdate": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "enum": [
+       "add-schema",
+       "set-current-schema",
+       "add-spec",
+       "set-default-spec",
+       "add-sort-order",
+       "set-default-sort-order",
+       "set-location",
+       "set-properties",
+       "remove-properties",
+       "add-encryption-key",
+       "remove-encryption-key"
+      ],
+      "type": "string"
+     },
+     "EncryptionKey": {
+      "$ref": "#/components/schemas/IcebergEncryptedKey"
+     },
+     "KeyId": {
+      "maxLength": 2056,
+      "type": "string"
+     },
+     "Location": {
+      "maxLength": 2056,
+      "type": "string"
+     },
+     "PartitionSpec": {
+      "$ref": "#/components/schemas/IcebergPartitionSpec"
+     },
+     "Properties": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Schema": {
+      "$ref": "#/components/schemas/IcebergSchema"
+     },
+     "SortOrder": {
+      "$ref": "#/components/schemas/IcebergSortOrder"
+     }
+    },
+    "required": [
+     "Schema",
+     "Location"
+    ],
+    "type": "object"
+   },
+   "IcebergTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "type": "string"
+     },
+     "Exclusions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "MaximumTraversalDepth": {
+      "type": "integer"
+     },
+     "Paths": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "JDBCConnectorOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DataTypeMapping": {
+      "additionalProperties": {
+       "enum": [
+        "DATE",
+        "STRING",
+        "TIMESTAMP",
+        "INT",
+        "FLOAT",
+        "LONG",
+        "BIGDECIMAL",
+        "BYTE",
+        "SHORT",
+        "DOUBLE"
+       ],
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "FilterPredicate": {
+      "type": "string"
+     },
+     "JobBookmarkKeys": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "JobBookmarkKeysSortOrder": {
+      "type": "string"
+     },
+     "LowerBound": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "NumPartitions": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "PartitionColumn": {
+      "type": "string"
+     },
+     "UpperBound": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "JDBCConnectorSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "$ref": "#/components/schemas/JDBCConnectorOptions"
+     },
+     "ConnectionName": {
+      "type": "string"
+     },
+     "ConnectionTable": {
+      "type": "string"
+     },
+     "ConnectionType": {
+      "type": "string"
+     },
+     "ConnectorName": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Query": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "ConnectionName",
+     "ConnectorName",
+     "ConnectionType"
+    ],
+    "type": "object"
+   },
+   "JDBCConnectorTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "ConnectionName": {
+      "type": "string"
+     },
+     "ConnectionTable": {
+      "type": "string"
+     },
+     "ConnectionType": {
+      "type": "string"
+     },
+     "ConnectorName": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "ConnectionName",
+     "ConnectionTable",
+     "ConnectorName",
+     "ConnectionType"
+    ],
+    "type": "object"
+   },
+   "JdbcTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "type": "string"
+     },
+     "EnableAdditionalMetadata": {
+      "items": {
+       "enum": [
+        "COMMENTS",
+        "RAWTYPES"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Exclusions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Path": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Job": {
+    "additionalProperties": false,
+    "properties": {
+     "AllocatedCapacity": {
+      "type": "integer"
+     },
+     "CodeGenConfigurationNodes": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/CodeGenConfigurationNode"
+      },
+      "type": "object"
+     },
+     "Command": {
+      "$ref": "#/components/schemas/JobCommand"
+     },
+     "Connections": {
+      "$ref": "#/components/schemas/ConnectionsList"
+     },
+     "CreatedOn": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DefaultArguments": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ExecutionClass": {
+      "enum": [
+       "FLEX",
+       "STANDARD"
+      ],
+      "maxLength": 16,
+      "type": "string"
+     },
+     "ExecutionProperty": {
+      "$ref": "#/components/schemas/ExecutionProperty"
+     },
+     "GlueVersion": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "JobMode": {
+      "enum": [
+       "SCRIPT",
+       "VISUAL",
+       "NOTEBOOK"
+      ],
+      "type": "string"
+     },
+     "JobRunQueuingEnabled": {
+      "type": "boolean"
+     },
+     "LastModifiedOn": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LogUri": {
+      "type": "string"
+     },
+     "MaintenanceWindow": {
+      "type": "string"
+     },
+     "MaxCapacity": {
+      "type": "number"
+     },
+     "MaxRetries": {
+      "type": "integer"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NonOverridableArguments": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "NotificationProperty": {
+      "$ref": "#/components/schemas/NotificationProperty"
+     },
+     "NumberOfWorkers": {
+      "type": "integer"
+     },
+     "ProfileName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Role": {
+      "type": "string"
+     },
+     "SecurityConfiguration": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SourceControlDetails": {
+      "$ref": "#/components/schemas/SourceControlDetails"
+     },
+     "Timeout": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "WorkerType": {
+      "enum": [
+       "Standard",
+       "G.1X",
+       "G.2X",
+       "G.025X",
+       "G.4X",
+       "G.8X",
+       "Z.2X"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "JobCommand": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     },
+     "PythonVersion": {
+      "type": "string"
+     },
+     "Runtime": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "ScriptLocation": {
+      "maxLength": 400000,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "JobUpdate": {
+    "additionalProperties": false,
+    "properties": {
+     "AllocatedCapacity": {
+      "type": "integer"
+     },
+     "CodeGenConfigurationNodes": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/CodeGenConfigurationNode"
+      },
+      "type": "object"
+     },
+     "Command": {
+      "$ref": "#/components/schemas/JobCommand"
+     },
+     "Connections": {
+      "$ref": "#/components/schemas/ConnectionsList"
+     },
+     "DefaultArguments": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ExecutionClass": {
+      "enum": [
+       "FLEX",
+       "STANDARD"
+      ],
+      "maxLength": 16,
+      "type": "string"
+     },
+     "ExecutionProperty": {
+      "$ref": "#/components/schemas/ExecutionProperty"
+     },
+     "GlueVersion": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "JobMode": {
+      "enum": [
+       "SCRIPT",
+       "VISUAL",
+       "NOTEBOOK"
+      ],
+      "type": "string"
+     },
+     "JobRunQueuingEnabled": {
+      "type": "boolean"
+     },
+     "LogUri": {
+      "type": "string"
+     },
+     "MaintenanceWindow": {
+      "type": "string"
+     },
+     "MaxCapacity": {
+      "type": "number"
+     },
+     "MaxRetries": {
+      "type": "integer"
+     },
+     "NonOverridableArguments": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "NotificationProperty": {
+      "$ref": "#/components/schemas/NotificationProperty"
+     },
+     "NumberOfWorkers": {
+      "type": "integer"
+     },
+     "Role": {
+      "type": "string"
+     },
+     "SecurityConfiguration": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SourceControlDetails": {
+      "$ref": "#/components/schemas/SourceControlDetails"
+     },
+     "Timeout": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "WorkerType": {
+      "enum": [
+       "Standard",
+       "G.1X",
+       "G.2X",
+       "G.025X",
+       "G.4X",
+       "G.8X",
+       "Z.2X"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Join": {
+    "additionalProperties": false,
+    "properties": {
+     "Columns": {
+      "items": {
+       "$ref": "#/components/schemas/JoinColumn"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+     },
+     "JoinType": {
+      "enum": [
+       "equijoin",
+       "left",
+       "right",
+       "outer",
+       "leftsemi",
+       "leftanti"
+      ],
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "JoinType",
+     "Columns"
+    ],
+    "type": "object"
+   },
+   "JoinColumn": {
+    "additionalProperties": false,
+    "properties": {
+     "From": {
+      "type": "string"
+     },
+     "Keys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "From",
+     "Keys"
+    ],
+    "type": "object"
+   },
+   "KafkaStreamingSourceOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "AddRecordTimestamp": {
+      "type": "string"
+     },
+     "Assign": {
+      "type": "string"
+     },
+     "BootstrapServers": {
+      "type": "string"
+     },
+     "Classification": {
+      "type": "string"
+     },
+     "ConnectionName": {
+      "type": "string"
+     },
+     "Delimiter": {
+      "type": "string"
+     },
+     "EmitConsumerLagMetrics": {
+      "type": "string"
+     },
+     "EndingOffsets": {
+      "type": "string"
+     },
+     "IncludeHeaders": {
+      "type": "boolean"
+     },
+     "MaxOffsetsPerTrigger": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "MinPartitions": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "NumRetries": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "PollTimeoutMs": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "RetryIntervalMs": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "SecurityProtocol": {
+      "type": "string"
+     },
+     "StartingOffsets": {
+      "type": "string"
+     },
+     "StartingTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "SubscribePattern": {
+      "type": "string"
+     },
+     "TopicName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "KinesisStreamingSourceOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "AddIdleTimeBetweenReads": {
+      "type": "boolean"
+     },
+     "AddRecordTimestamp": {
+      "type": "string"
+     },
+     "AvoidEmptyBatches": {
+      "type": "boolean"
+     },
+     "Classification": {
+      "type": "string"
+     },
+     "Delimiter": {
+      "type": "string"
+     },
+     "DescribeShardInterval": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "EmitConsumerLagMetrics": {
+      "type": "string"
+     },
+     "EndpointUrl": {
+      "type": "string"
+     },
+     "FanoutConsumerARN": {
+      "type": "string"
+     },
+     "IdleTimeBetweenReadsInMs": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "MaxFetchRecordsPerShard": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "MaxFetchTimeInMs": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "MaxRecordPerRead": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "MaxRetryIntervalMs": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "NumRetries": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "RetryIntervalMs": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "RoleArn": {
+      "type": "string"
+     },
+     "RoleSessionName": {
+      "type": "string"
+     },
+     "StartingPosition": {
+      "enum": [
+       "latest",
+       "trim_horizon",
+       "earliest",
+       "timestamp"
+      ],
+      "type": "string"
+     },
+     "StartingTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "StreamArn": {
+      "type": "string"
+     },
+     "StreamName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LakeFormationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AccountId": {
+      "maxLength": 12,
+      "minLength": 0,
+      "type": "string"
+     },
+     "UseLakeFormationCredentials": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "LastCrawlInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "ErrorMessage": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "LogGroup": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LogStream": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "MessagePrefix": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StartTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Status": {
+      "enum": [
+       "SUCCEEDED",
+       "CANCELLED",
+       "FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LineageConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CrawlerLineageSettings": {
+      "enum": [
+       "ENABLE",
+       "DISABLE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListCrawlersRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ListCrawlersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CrawlerNames": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 0,
+      "type": "array"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListJobsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ListJobsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "JobNames": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Mapping": {
+    "additionalProperties": false,
+    "properties": {
+     "Children": {
+      "items": {
+       "$ref": "#/components/schemas/Mapping"
+      },
+      "type": "array"
+     },
+     "Dropped": {
+      "type": "boolean"
+     },
+     "FromPath": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "FromType": {
+      "type": "string"
+     },
+     "ToKey": {
+      "type": "string"
+     },
+     "ToType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Merge": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PrimaryKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "Source": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Source",
+     "PrimaryKeys"
+    ],
+    "type": "object"
+   },
+   "MicrosoftSQLServerCatalogSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "MicrosoftSQLServerCatalogTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "MongoDBTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "type": "string"
+     },
+     "Path": {
+      "type": "string"
+     },
+     "ScanAll": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "MySQLCatalogSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "MySQLCatalogTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "NotificationProperty": {
+    "additionalProperties": false,
+    "properties": {
+     "NotifyDelayAfter": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "NullCheckBoxList": {
+    "additionalProperties": false,
+    "properties": {
+     "IsEmpty": {
+      "type": "boolean"
+     },
+     "IsNegOne": {
+      "type": "boolean"
+     },
+     "IsNullString": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "NullValueField": {
+    "additionalProperties": false,
+    "properties": {
+     "Datatype": {
+      "$ref": "#/components/schemas/Datatype"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Value",
+     "Datatype"
+    ],
+    "type": "object"
+   },
+   "OpenTableFormatInput": {
+    "additionalProperties": false,
+    "properties": {
+     "IcebergInput": {
+      "$ref": "#/components/schemas/IcebergInput"
+     }
+    },
+    "type": "object"
+   },
+   "Option": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "type": "string"
+     },
+     "Label": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OracleSQLCatalogSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "OracleSQLCatalogTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "Order": {
+    "additionalProperties": false,
+    "properties": {
+     "Column": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SortOrder": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Column",
+     "SortOrder"
+    ],
+    "type": "object"
+   },
+   "PIIDetection": {
+    "additionalProperties": false,
+    "properties": {
+     "DetectionParameters": {
+      "type": "string"
+     },
+     "DetectionSensitivity": {
+      "type": "string"
+     },
+     "EntityTypesToDetect": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "MaskValue": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "MatchPattern": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "NumLeftCharsToExclude": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "NumRightCharsToExclude": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "OutputColumnName": {
+      "type": "string"
+     },
+     "PiiType": {
+      "enum": [
+       "RowAudit",
+       "RowHashing",
+       "RowMasking",
+       "RowPartialMasking",
+       "ColumnAudit",
+       "ColumnHashing",
+       "ColumnMasking"
+      ],
+      "type": "string"
+     },
+     "RedactChar": {
+      "type": "string"
+     },
+     "RedactText": {
+      "type": "string"
+     },
+     "SampleFraction": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     },
+     "ThresholdFraction": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "PiiType",
+     "EntityTypesToDetect"
+    ],
+    "type": "object"
+   },
+   "PartitionIndex": {
+    "additionalProperties": false,
+    "properties": {
+     "IndexName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Keys": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Keys",
+     "IndexName"
+    ],
+    "type": "object"
+   },
+   "PostgreSQLCatalogSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "PostgreSQLCatalogTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "PrincipalPermissions": {
+    "additionalProperties": false,
+    "properties": {
+     "Permissions": {
+      "items": {
+       "enum": [
+        "ALL",
+        "SELECT",
+        "ALTER",
+        "DROP",
+        "DELETE",
+        "INSERT",
+        "CREATE_DATABASE",
+        "CREATE_TABLE",
+        "DATA_LOCATION_ACCESS"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Principal": {
+      "$ref": "#/components/schemas/DataLakePrincipal"
+     }
+    },
+    "type": "object"
+   },
+   "Recipe": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "RecipeReference": {
+      "$ref": "#/components/schemas/RecipeReference"
+     },
+     "RecipeSteps": {
+      "items": {
+       "$ref": "#/components/schemas/RecipeStep"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs"
+    ],
+    "type": "object"
+   },
+   "RecipeAction": {
+    "additionalProperties": false,
+    "properties": {
+     "Operation": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Parameters": {
+      "additionalProperties": {
+       "maxLength": 32768,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "Operation"
+    ],
+    "type": "object"
+   },
+   "RecipeReference": {
+    "additionalProperties": false,
+    "properties": {
+     "RecipeArn": {
+      "type": "string"
+     },
+     "RecipeVersion": {
+      "maxLength": 16,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "RecipeArn",
+     "RecipeVersion"
+    ],
+    "type": "object"
+   },
+   "RecipeStep": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "$ref": "#/components/schemas/RecipeAction"
+     },
+     "ConditionExpressions": {
+      "items": {
+       "$ref": "#/components/schemas/ConditionExpression"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Action"
+    ],
+    "type": "object"
+   },
+   "RecrawlPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "RecrawlBehavior": {
+      "enum": [
+       "CRAWL_EVERYTHING",
+       "CRAWL_NEW_FOLDERS_ONLY",
+       "CRAWL_EVENT_MODE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RedshiftSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "RedshiftTmpDir": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     },
+     "TmpDirIAMRole": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "RedshiftTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "RedshiftTmpDir": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     },
+     "TmpDirIAMRole": {
+      "type": "string"
+     },
+     "UpsertRedshiftOptions": {
+      "$ref": "#/components/schemas/UpsertRedshiftTargetOptions"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "RelationalCatalogSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "RenameField": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "SourcePath": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "TargetPath": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "SourcePath",
+     "TargetPath"
+    ],
+    "type": "object"
+   },
+   "Route": {
+    "additionalProperties": false,
+    "properties": {
+     "GroupFiltersList": {
+      "items": {
+       "$ref": "#/components/schemas/GroupFilters"
+      },
+      "type": "array"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "GroupFiltersList"
+    ],
+    "type": "object"
+   },
+   "S3CatalogDeltaSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalDeltaOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "S3CatalogHudiSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalHudiOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "S3CatalogIcebergSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalIcebergOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "S3CatalogSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "$ref": "#/components/schemas/S3SourceAdditionalOptions"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PartitionPredicate": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Database",
+     "Table"
+    ],
+    "type": "object"
+   },
+   "S3CatalogTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoDataQuality": {
+      "$ref": "#/components/schemas/AutoDataQuality"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/CatalogSchemaChangePolicy"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Table",
+     "Database"
+    ],
+    "type": "object"
+   },
+   "S3CsvSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "$ref": "#/components/schemas/S3DirectSourceAdditionalOptions"
+     },
+     "CompressionType": {
+      "enum": [
+       "gzip",
+       "bzip2"
+      ],
+      "type": "string"
+     },
+     "Escaper": {
+      "type": "string"
+     },
+     "Exclusions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "GroupFiles": {
+      "type": "string"
+     },
+     "GroupSize": {
+      "type": "string"
+     },
+     "MaxBand": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "MaxFilesInBand": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Multiline": {
+      "type": "boolean"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OptimizePerformance": {
+      "type": "boolean"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Paths": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "QuoteChar": {
+      "enum": [
+       "quote",
+       "quillemet",
+       "single_quote",
+       "disabled"
+      ],
+      "type": "string"
+     },
+     "Recurse": {
+      "type": "boolean"
+     },
+     "Separator": {
+      "enum": [
+       "comma",
+       "ctrla",
+       "pipe",
+       "semicolon",
+       "tab"
+      ],
+      "type": "string"
+     },
+     "SkipFirst": {
+      "type": "boolean"
+     },
+     "WithHeader": {
+      "type": "boolean"
+     },
+     "WriteHeader": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "Name",
+     "Paths",
+     "Separator",
+     "QuoteChar"
+    ],
+    "type": "object"
+   },
+   "S3DeltaCatalogTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AutoDataQuality": {
+      "$ref": "#/components/schemas/AutoDataQuality"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/CatalogSchemaChangePolicy"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Table",
+     "Database"
+    ],
+    "type": "object"
+   },
+   "S3DeltaDirectTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AutoDataQuality": {
+      "$ref": "#/components/schemas/AutoDataQuality"
+     },
+     "Compression": {
+      "enum": [
+       "uncompressed",
+       "snappy"
+      ],
+      "type": "string"
+     },
+     "Format": {
+      "enum": [
+       "json",
+       "csv",
+       "avro",
+       "orc",
+       "parquet",
+       "hudi",
+       "delta",
+       "iceberg",
+       "hyper",
+       "xml"
+      ],
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "NumberTargetPartitions": {
+      "type": "string"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "Path": {
+      "type": "string"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/DirectSchemaChangePolicy"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Path",
+     "Compression",
+     "Format"
+    ],
+    "type": "object"
+   },
+   "S3DeltaSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalDeltaOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AdditionalOptions": {
+      "$ref": "#/components/schemas/S3DirectSourceAdditionalOptions"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Paths": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Paths"
+    ],
+    "type": "object"
+   },
+   "S3DirectSourceAdditionalOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "BoundedFiles": {
+      "type": "integer"
+     },
+     "BoundedSize": {
+      "type": "integer"
+     },
+     "EnableSamplePath": {
+      "type": "boolean"
+     },
+     "SamplePath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3DirectTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoDataQuality": {
+      "$ref": "#/components/schemas/AutoDataQuality"
+     },
+     "Compression": {
+      "type": "string"
+     },
+     "Format": {
+      "enum": [
+       "json",
+       "csv",
+       "avro",
+       "orc",
+       "parquet",
+       "hudi",
+       "delta",
+       "iceberg",
+       "hyper",
+       "xml"
+      ],
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "NumberTargetPartitions": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "Path": {
+      "type": "string"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/DirectSchemaChangePolicy"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Path",
+     "Format"
+    ],
+    "type": "object"
+   },
+   "S3ExcelSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "$ref": "#/components/schemas/S3DirectSourceAdditionalOptions"
+     },
+     "CompressionType": {
+      "enum": [
+       "snappy",
+       "lzo",
+       "gzip",
+       "brotli",
+       "lz4",
+       "uncompressed",
+       "none"
+      ],
+      "type": "string"
+     },
+     "Exclusions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "GroupFiles": {
+      "type": "string"
+     },
+     "GroupSize": {
+      "type": "string"
+     },
+     "MaxBand": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "MaxFilesInBand": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "NumberRows": {
+      "type": "integer"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Paths": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Recurse": {
+      "type": "boolean"
+     },
+     "SkipFooter": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Name",
+     "Paths"
+    ],
+    "type": "object"
+   },
+   "S3GlueParquetTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoDataQuality": {
+      "$ref": "#/components/schemas/AutoDataQuality"
+     },
+     "Compression": {
+      "enum": [
+       "snappy",
+       "lzo",
+       "gzip",
+       "brotli",
+       "lz4",
+       "uncompressed",
+       "none"
+      ],
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "NumberTargetPartitions": {
+      "type": "string"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "Path": {
+      "type": "string"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/DirectSchemaChangePolicy"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Path"
+    ],
+    "type": "object"
+   },
+   "S3HudiCatalogTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AutoDataQuality": {
+      "$ref": "#/components/schemas/AutoDataQuality"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/CatalogSchemaChangePolicy"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Table",
+     "Database",
+     "AdditionalOptions"
+    ],
+    "type": "object"
+   },
+   "S3HudiDirectTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AutoDataQuality": {
+      "$ref": "#/components/schemas/AutoDataQuality"
+     },
+     "Compression": {
+      "enum": [
+       "gzip",
+       "lzo",
+       "uncompressed",
+       "snappy"
+      ],
+      "type": "string"
+     },
+     "Format": {
+      "enum": [
+       "json",
+       "csv",
+       "avro",
+       "orc",
+       "parquet",
+       "hudi",
+       "delta",
+       "iceberg",
+       "hyper",
+       "xml"
+      ],
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "NumberTargetPartitions": {
+      "type": "string"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "Path": {
+      "type": "string"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/DirectSchemaChangePolicy"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Path",
+     "Compression",
+     "Format",
+     "AdditionalOptions"
+    ],
+    "type": "object"
+   },
+   "S3HudiSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalHudiOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AdditionalOptions": {
+      "$ref": "#/components/schemas/S3DirectSourceAdditionalOptions"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Paths": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Paths"
+    ],
+    "type": "object"
+   },
+   "S3HyperDirectTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoDataQuality": {
+      "$ref": "#/components/schemas/AutoDataQuality"
+     },
+     "Compression": {
+      "enum": [
+       "uncompressed"
+      ],
+      "type": "string"
+     },
+     "Format": {
+      "enum": [
+       "json",
+       "csv",
+       "avro",
+       "orc",
+       "parquet",
+       "hudi",
+       "delta",
+       "iceberg",
+       "hyper",
+       "xml"
+      ],
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "Path": {
+      "type": "string"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/DirectSchemaChangePolicy"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Path"
+    ],
+    "type": "object"
+   },
+   "S3IcebergCatalogTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AutoDataQuality": {
+      "$ref": "#/components/schemas/AutoDataQuality"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/CatalogSchemaChangePolicy"
+     },
+     "Table": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Table",
+     "Database"
+    ],
+    "type": "object"
+   },
+   "S3IcebergDirectTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AutoDataQuality": {
+      "$ref": "#/components/schemas/AutoDataQuality"
+     },
+     "Compression": {
+      "enum": [
+       "gzip",
+       "lzo",
+       "uncompressed",
+       "snappy"
+      ],
+      "type": "string"
+     },
+     "Format": {
+      "enum": [
+       "json",
+       "csv",
+       "avro",
+       "orc",
+       "parquet",
+       "hudi",
+       "delta",
+       "iceberg",
+       "hyper",
+       "xml"
+      ],
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "NumberTargetPartitions": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "PartitionKeys": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     },
+     "Path": {
+      "type": "string"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/DirectSchemaChangePolicy"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Path",
+     "Format",
+     "Compression"
+    ],
+    "type": "object"
+   },
+   "S3JsonSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "$ref": "#/components/schemas/S3DirectSourceAdditionalOptions"
+     },
+     "CompressionType": {
+      "enum": [
+       "gzip",
+       "bzip2"
+      ],
+      "type": "string"
+     },
+     "Exclusions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "GroupFiles": {
+      "type": "string"
+     },
+     "GroupSize": {
+      "type": "string"
+     },
+     "JsonPath": {
+      "type": "string"
+     },
+     "MaxBand": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "MaxFilesInBand": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Multiline": {
+      "type": "boolean"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Paths": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Recurse": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "Name",
+     "Paths"
+    ],
+    "type": "object"
+   },
+   "S3ParquetSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "$ref": "#/components/schemas/S3DirectSourceAdditionalOptions"
+     },
+     "CompressionType": {
+      "enum": [
+       "snappy",
+       "lzo",
+       "gzip",
+       "brotli",
+       "lz4",
+       "uncompressed",
+       "none"
+      ],
+      "type": "string"
+     },
+     "Exclusions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "GroupFiles": {
+      "type": "string"
+     },
+     "GroupSize": {
+      "type": "string"
+     },
+     "MaxBand": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "MaxFilesInBand": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "Paths": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Recurse": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "Name",
+     "Paths"
+    ],
+    "type": "object"
+   },
+   "S3SourceAdditionalOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "BoundedFiles": {
+      "type": "integer"
+     },
+     "BoundedSize": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "S3Target": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "type": "string"
+     },
+     "DlqEventQueueArn": {
+      "type": "string"
+     },
+     "EventQueueArn": {
+      "type": "string"
+     },
+     "Exclusions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Path": {
+      "type": "string"
+     },
+     "SampleSize": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Schedule": {
+    "additionalProperties": false,
+    "properties": {
+     "ScheduleExpression": {
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "SCHEDULED",
+       "NOT_SCHEDULED",
+       "TRANSITIONING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SchemaChangePolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "DeleteBehavior": {
+      "enum": [
+       "LOG",
+       "DELETE_FROM_DATABASE",
+       "DEPRECATE_IN_DATABASE"
+      ],
+      "type": "string"
+     },
+     "UpdateBehavior": {
+      "enum": [
+       "LOG",
+       "UPDATE_IN_DATABASE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SchemaId": {
+    "additionalProperties": false,
+    "properties": {
+     "RegistryName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SchemaArn": {
+      "maxLength": 10240,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SchemaName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SchemaReference": {
+    "additionalProperties": false,
+    "properties": {
+     "SchemaId": {
+      "$ref": "#/components/schemas/SchemaId"
+     },
+     "SchemaVersionId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "SchemaVersionNumber": {
+      "maximum": 100000,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "SelectFields": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Paths": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Paths"
+    ],
+    "type": "object"
+   },
+   "SelectFromCollection": {
+    "additionalProperties": false,
+    "properties": {
+     "Index": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Index"
+    ],
+    "type": "object"
+   },
+   "SerDeInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Parameters": {
+      "additionalProperties": {
+       "maxLength": 512000,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "SerializationLibrary": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SkewedInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "SkewedColumnNames": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SkewedColumnValueLocationMaps": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "SkewedColumnValues": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SnowflakeNodeData": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "type": "string"
+     },
+     "AdditionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AutoPushdown": {
+      "type": "boolean"
+     },
+     "Connection": {
+      "$ref": "#/components/schemas/Option"
+     },
+     "Database": {
+      "type": "string"
+     },
+     "IamRole": {
+      "$ref": "#/components/schemas/Option"
+     },
+     "MergeAction": {
+      "type": "string"
+     },
+     "MergeClause": {
+      "type": "string"
+     },
+     "MergeWhenMatched": {
+      "type": "string"
+     },
+     "MergeWhenNotMatched": {
+      "type": "string"
+     },
+     "PostAction": {
+      "type": "string"
+     },
+     "PreAction": {
+      "type": "string"
+     },
+     "SampleQuery": {
+      "type": "string"
+     },
+     "Schema": {
+      "type": "string"
+     },
+     "SelectedColumns": {
+      "items": {
+       "$ref": "#/components/schemas/Option"
+      },
+      "type": "array"
+     },
+     "SourceType": {
+      "type": "string"
+     },
+     "StagingTable": {
+      "type": "string"
+     },
+     "Table": {
+      "type": "string"
+     },
+     "TableSchema": {
+      "items": {
+       "$ref": "#/components/schemas/Option"
+      },
+      "type": "array"
+     },
+     "TempDir": {
+      "type": "string"
+     },
+     "Upsert": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "SnowflakeSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Data": {
+      "$ref": "#/components/schemas/SnowflakeNodeData"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Data"
+    ],
+    "type": "object"
+   },
+   "SnowflakeTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "Data": {
+      "$ref": "#/components/schemas/SnowflakeNodeData"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Data"
+    ],
+    "type": "object"
+   },
+   "SourceControlDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "AuthStrategy": {
+      "enum": [
+       "PERSONAL_ACCESS_TOKEN",
+       "AWS_SECRETS_MANAGER"
+      ],
+      "type": "string"
+     },
+     "AuthToken": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Branch": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Folder": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LastCommitId": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Owner": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Provider": {
+      "enum": [
+       "GITHUB",
+       "GITLAB",
+       "BITBUCKET",
+       "AWS_CODE_COMMIT"
+      ],
+      "type": "string"
+     },
+     "Repository": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SparkConnectorSource": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "ConnectionName": {
+      "type": "string"
+     },
+     "ConnectionType": {
+      "type": "string"
+     },
+     "ConnectorName": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "ConnectionName",
+     "ConnectorName",
+     "ConnectionType"
+    ],
+    "type": "object"
+   },
+   "SparkConnectorTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "ConnectionName": {
+      "type": "string"
+     },
+     "ConnectionType": {
+      "type": "string"
+     },
+     "ConnectorName": {
+      "type": "string"
+     },
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "ConnectionName",
+     "ConnectorName",
+     "ConnectionType"
+    ],
+    "type": "object"
+   },
+   "SparkSQL": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "OutputSchemas": {
+      "items": {
+       "$ref": "#/components/schemas/GlueSchema"
+      },
+      "type": "array"
+     },
+     "SqlAliases": {
+      "items": {
+       "$ref": "#/components/schemas/SqlAlias"
+      },
+      "type": "array"
+     },
+     "SqlQuery": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "SqlQuery",
+     "SqlAliases"
+    ],
+    "type": "object"
+   },
+   "Spigot": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Path": {
+      "type": "string"
+     },
+     "Prob": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     },
+     "Topk": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Path"
+    ],
+    "type": "object"
+   },
+   "SplitFields": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Paths": {
+      "items": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "Paths"
+    ],
+    "type": "object"
+   },
+   "SqlAlias": {
+    "additionalProperties": false,
+    "properties": {
+     "Alias": {
+      "type": "string"
+     },
+     "From": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "From",
+     "Alias"
+    ],
+    "type": "object"
+   },
+   "StatusDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "RequestedChange": {
+      "$ref": "#/components/schemas/Table"
+     },
+     "ViewValidations": {
+      "items": {
+       "$ref": "#/components/schemas/ViewValidation"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "StorageDescriptor": {
+    "additionalProperties": false,
+    "properties": {
+     "AdditionalLocations": {
+      "items": {
+       "maxLength": 2056,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "BucketColumns": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Columns": {
+      "items": {
+       "$ref": "#/components/schemas/Column"
+      },
+      "type": "array"
+     },
+     "Compressed": {
+      "type": "boolean"
+     },
+     "InputFormat": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "Location": {
+      "maxLength": 2056,
+      "type": "string"
+     },
+     "NumberOfBuckets": {
+      "type": "integer"
+     },
+     "OutputFormat": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "Parameters": {
+      "additionalProperties": {
+       "maxLength": 512000,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "SchemaReference": {
+      "$ref": "#/components/schemas/SchemaReference"
+     },
+     "SerdeInfo": {
+      "$ref": "#/components/schemas/SerDeInfo"
+     },
+     "SkewedInfo": {
+      "$ref": "#/components/schemas/SkewedInfo"
+     },
+     "SortColumns": {
+      "items": {
+       "$ref": "#/components/schemas/Order"
+      },
+      "type": "array"
+     },
+     "StoredAsSubDirectories": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "StreamingDataPreviewOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "PollingTime": {
+      "minimum": 10,
+      "type": "integer"
+     },
+     "RecordPollingLimit": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Table": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "CreatedBy": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "FederatedTable": {
+      "$ref": "#/components/schemas/FederatedTable"
+     },
+     "IsMaterializedView": {
+      "type": "boolean"
+     },
+     "IsMultiDialectView": {
+      "type": "boolean"
+     },
+     "IsRegisteredWithLakeFormation": {
+      "type": "boolean"
+     },
+     "LastAccessTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LastAnalyzedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Owner": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Parameters": {
+      "additionalProperties": {
+       "maxLength": 512000,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "PartitionKeys": {
+      "items": {
+       "$ref": "#/components/schemas/Column"
+      },
+      "type": "array"
+     },
+     "Retention": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Status": {
+      "$ref": "#/components/schemas/TableStatus"
+     },
+     "StorageDescriptor": {
+      "$ref": "#/components/schemas/StorageDescriptor"
+     },
+     "TableType": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "TargetTable": {
+      "$ref": "#/components/schemas/TableIdentifier"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "VersionId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ViewDefinition": {
+      "$ref": "#/components/schemas/ViewDefinition"
+     },
+     "ViewExpandedText": {
+      "maxLength": 409600,
+      "type": "string"
+     },
+     "ViewOriginalText": {
+      "maxLength": 409600,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "TableIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Region": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TableInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "LastAccessTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LastAnalyzedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Owner": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Parameters": {
+      "additionalProperties": {
+       "maxLength": 512000,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "PartitionKeys": {
+      "items": {
+       "$ref": "#/components/schemas/Column"
+      },
+      "type": "array"
+     },
+     "Retention": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "StorageDescriptor": {
+      "$ref": "#/components/schemas/StorageDescriptor"
+     },
+     "TableType": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "TargetTable": {
+      "$ref": "#/components/schemas/TableIdentifier"
+     },
+     "ViewDefinition": {
+      "$ref": "#/components/schemas/ViewDefinitionInput"
+     },
+     "ViewExpandedText": {
+      "maxLength": 409600,
+      "type": "string"
+     },
+     "ViewOriginalText": {
+      "maxLength": 409600,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "TableStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "enum": [
+       "UPDATE",
+       "CREATE"
+      ],
+      "type": "string"
+     },
+     "Details": {
+      "$ref": "#/components/schemas/StatusDetails"
+     },
+     "Error": {
+      "$ref": "#/components/schemas/ErrorDetail"
+     },
+     "RequestTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "RequestedBy": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "QUEUED",
+       "IN_PROGRESS",
+       "SUCCESS",
+       "STOPPED",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "UpdatedBy": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 10240,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagsToAdd": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "TagsToAdd"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "TransformConfigParameter": {
+    "additionalProperties": false,
+    "properties": {
+     "IsOptional": {
+      "type": "boolean"
+     },
+     "ListType": {
+      "enum": [
+       "str",
+       "int",
+       "float",
+       "complex",
+       "bool",
+       "list",
+       "null"
+      ],
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "str",
+       "int",
+       "float",
+       "complex",
+       "bool",
+       "list",
+       "null"
+      ],
+      "type": "string"
+     },
+     "ValidationMessage": {
+      "type": "string"
+     },
+     "ValidationRule": {
+      "type": "string"
+     },
+     "Value": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Type"
+    ],
+    "type": "object"
+   },
+   "Union": {
+    "additionalProperties": false,
+    "properties": {
+     "Inputs": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "UnionType": {
+      "enum": [
+       "ALL",
+       "DISTINCT"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Inputs",
+     "UnionType"
+    ],
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 10240,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagsToRemove": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "TagsToRemove"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateCrawlerRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Classifiers": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Configuration": {
+      "type": "string"
+     },
+     "CrawlerSecurityConfiguration": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "LakeFormationConfiguration": {
+      "$ref": "#/components/schemas/LakeFormationConfiguration"
+     },
+     "LineageConfiguration": {
+      "$ref": "#/components/schemas/LineageConfiguration"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RecrawlPolicy": {
+      "$ref": "#/components/schemas/RecrawlPolicy"
+     },
+     "Role": {
+      "type": "string"
+     },
+     "Schedule": {
+      "type": "string"
+     },
+     "SchemaChangePolicy": {
+      "$ref": "#/components/schemas/SchemaChangePolicy"
+     },
+     "TablePrefix": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Targets": {
+      "$ref": "#/components/schemas/CrawlerTargets"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "UpdateCrawlerResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateDatabaseRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseInput": {
+      "$ref": "#/components/schemas/DatabaseInput"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "DatabaseInput"
+    ],
+    "type": "object"
+   },
+   "UpdateDatabaseResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateIcebergInput": {
+    "additionalProperties": false,
+    "properties": {
+     "UpdateIcebergTableInput": {
+      "$ref": "#/components/schemas/UpdateIcebergTableInput"
+     }
+    },
+    "required": [
+     "UpdateIcebergTableInput"
+    ],
+    "type": "object"
+   },
+   "UpdateIcebergTableInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Updates": {
+      "items": {
+       "$ref": "#/components/schemas/IcebergTableUpdate"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Updates"
+    ],
+    "type": "object"
+   },
+   "UpdateJobRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "JobName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "JobUpdate": {
+      "$ref": "#/components/schemas/JobUpdate"
+     }
+    },
+    "required": [
+     "JobName",
+     "JobUpdate"
+    ],
+    "type": "object"
+   },
+   "UpdateJobResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "JobName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateOpenTableFormatInput": {
+    "additionalProperties": false,
+    "properties": {
+     "UpdateIcebergInput": {
+      "$ref": "#/components/schemas/UpdateIcebergInput"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateTableRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Force": {
+      "type": "boolean"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SkipArchive": {
+      "type": "boolean"
+     },
+     "TableInput": {
+      "$ref": "#/components/schemas/TableInput"
+     },
+     "TransactionId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "UpdateOpenTableFormatInput": {
+      "$ref": "#/components/schemas/UpdateOpenTableFormatInput"
+     },
+     "VersionId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ViewUpdateAction": {
+      "enum": [
+       "ADD",
+       "REPLACE",
+       "ADD_OR_REPLACE",
+       "DROP"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseName"
+    ],
+    "type": "object"
+   },
+   "UpdateTableResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpsertRedshiftTargetOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "type": "string"
+     },
+     "TableLocation": {
+      "type": "string"
+     },
+     "UpsertKeys": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ViewDefinition": {
+    "additionalProperties": false,
+    "properties": {
+     "Definer": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "IsProtected": {
+      "type": "boolean"
+     },
+     "LastRefreshType": {
+      "enum": [
+       "FULL",
+       "INCREMENTAL"
+      ],
+      "type": "string"
+     },
+     "RefreshSeconds": {
+      "type": "integer"
+     },
+     "Representations": {
+      "items": {
+       "$ref": "#/components/schemas/ViewRepresentation"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     },
+     "SubObjectVersionIds": {
+      "items": {
+       "minimum": -1,
+       "type": "integer"
+      },
+      "maxItems": 250,
+      "minItems": 0,
+      "type": "array"
+     },
+     "SubObjects": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "ViewVersionId": {
+      "minimum": -1,
+      "type": "integer"
+     },
+     "ViewVersionToken": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ViewDefinitionInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Definer": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "IsProtected": {
+      "type": "boolean"
+     },
+     "LastRefreshType": {
+      "enum": [
+       "FULL",
+       "INCREMENTAL"
+      ],
+      "type": "string"
+     },
+     "RefreshSeconds": {
+      "type": "integer"
+     },
+     "Representations": {
+      "items": {
+       "$ref": "#/components/schemas/ViewRepresentationInput"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "SubObjectVersionIds": {
+      "items": {
+       "minimum": -1,
+       "type": "integer"
+      },
+      "maxItems": 250,
+      "minItems": 0,
+      "type": "array"
+     },
+     "SubObjects": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "ViewVersionId": {
+      "minimum": -1,
+      "type": "integer"
+     },
+     "ViewVersionToken": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ViewRepresentation": {
+    "additionalProperties": false,
+    "properties": {
+     "Dialect": {
+      "enum": [
+       "REDSHIFT",
+       "ATHENA",
+       "SPARK"
+      ],
+      "type": "string"
+     },
+     "DialectVersion": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IsStale": {
+      "type": "boolean"
+     },
+     "ValidationConnection": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ViewExpandedText": {
+      "maxLength": 409600,
+      "type": "string"
+     },
+     "ViewOriginalText": {
+      "maxLength": 409600,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ViewRepresentationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Dialect": {
+      "enum": [
+       "REDSHIFT",
+       "ATHENA",
+       "SPARK"
+      ],
+      "type": "string"
+     },
+     "DialectVersion": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ValidationConnection": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ViewExpandedText": {
+      "maxLength": 409600,
+      "type": "string"
+     },
+     "ViewOriginalText": {
+      "maxLength": 409600,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ViewValidation": {
+    "additionalProperties": false,
+    "properties": {
+     "Dialect": {
+      "enum": [
+       "REDSHIFT",
+       "ATHENA",
+       "SPARK"
+      ],
+      "type": "string"
+     },
+     "DialectVersion": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Error": {
+      "$ref": "#/components/schemas/ErrorDetail"
+     },
+     "State": {
+      "enum": [
+       "QUEUED",
+       "IN_PROGRESS",
+       "SUCCESS",
+       "STOPPED",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "UpdateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ViewValidationText": {
+      "maxLength": 409600,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Glue API (2017-03-31). Every other official operation returns HTTP 501 UnknownOperationException. Data Catalog databases and tables, job definitions and crawler definitions are stored metadata: no job run, crawl, schedule, trigger, partition, statistics, Lake Formation permission or data access is performed, and StartJobRun, StartCrawler and other run APIs return UnknownOperationException with HTTP 501. Names are not folded to lowercase, so database and table names with uppercase letters are refused. Resource links (TargetDatabase, TargetTable), federation, default Lake Formation permissions, multi-dialect views, transactions, Iceberg inputs, crawler schedules and job source control are refused. Updates change only the supplied members instead of replacing the whole definition, renames are refused, and table versions are not kept. Deleting a database deletes its tables. DeleteJob of a missing job fails instead of succeeding. Referenced roles, S3 locations, scripts, connections, classifiers, security configurations and crawler target databases are stored without checking that they exist; tags are accepted for every stored Glue resource.",
+  "title": "AWS Glue (simulator catalog)",
+  "version": "2017-03-31"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "glueJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AWSGlue.CreateCrawler",
+        "AWSGlue.CreateDatabase",
+        "AWSGlue.CreateJob",
+        "AWSGlue.CreateTable",
+        "AWSGlue.DeleteCrawler",
+        "AWSGlue.DeleteDatabase",
+        "AWSGlue.DeleteJob",
+        "AWSGlue.DeleteTable",
+        "AWSGlue.GetCrawler",
+        "AWSGlue.GetCrawlers",
+        "AWSGlue.GetDatabase",
+        "AWSGlue.GetDatabases",
+        "AWSGlue.GetJob",
+        "AWSGlue.GetJobs",
+        "AWSGlue.GetTable",
+        "AWSGlue.GetTables",
+        "AWSGlue.GetTags",
+        "AWSGlue.ListCrawlers",
+        "AWSGlue.ListJobs",
+        "AWSGlue.TagResource",
+        "AWSGlue.UntagResource",
+        "AWSGlue.UpdateCrawler",
+        "AWSGlue.UpdateDatabase",
+        "AWSGlue.UpdateJob",
+        "AWSGlue.UpdateTable"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateCrawler": {
+         "summary": "X-Amz-Target: AWSGlue.CreateCrawler",
+         "value": {}
+        },
+        "CreateDatabase": {
+         "summary": "X-Amz-Target: AWSGlue.CreateDatabase",
+         "value": {}
+        },
+        "CreateJob": {
+         "summary": "X-Amz-Target: AWSGlue.CreateJob",
+         "value": {}
+        },
+        "CreateTable": {
+         "summary": "X-Amz-Target: AWSGlue.CreateTable",
+         "value": {}
+        },
+        "DeleteCrawler": {
+         "summary": "X-Amz-Target: AWSGlue.DeleteCrawler",
+         "value": {}
+        },
+        "DeleteDatabase": {
+         "summary": "X-Amz-Target: AWSGlue.DeleteDatabase",
+         "value": {}
+        },
+        "DeleteJob": {
+         "summary": "X-Amz-Target: AWSGlue.DeleteJob",
+         "value": {}
+        },
+        "DeleteTable": {
+         "summary": "X-Amz-Target: AWSGlue.DeleteTable",
+         "value": {}
+        },
+        "GetCrawler": {
+         "summary": "X-Amz-Target: AWSGlue.GetCrawler",
+         "value": {}
+        },
+        "GetCrawlers": {
+         "summary": "X-Amz-Target: AWSGlue.GetCrawlers",
+         "value": {}
+        },
+        "GetDatabase": {
+         "summary": "X-Amz-Target: AWSGlue.GetDatabase",
+         "value": {}
+        },
+        "GetDatabases": {
+         "summary": "X-Amz-Target: AWSGlue.GetDatabases",
+         "value": {}
+        },
+        "GetJob": {
+         "summary": "X-Amz-Target: AWSGlue.GetJob",
+         "value": {}
+        },
+        "GetJobs": {
+         "summary": "X-Amz-Target: AWSGlue.GetJobs",
+         "value": {}
+        },
+        "GetTable": {
+         "summary": "X-Amz-Target: AWSGlue.GetTable",
+         "value": {}
+        },
+        "GetTables": {
+         "summary": "X-Amz-Target: AWSGlue.GetTables",
+         "value": {}
+        },
+        "GetTags": {
+         "summary": "X-Amz-Target: AWSGlue.GetTags",
+         "value": {}
+        },
+        "ListCrawlers": {
+         "summary": "X-Amz-Target: AWSGlue.ListCrawlers",
+         "value": {}
+        },
+        "ListJobs": {
+         "summary": "X-Amz-Target: AWSGlue.ListJobs",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: AWSGlue.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: AWSGlue.UntagResource",
+         "value": {}
+        },
+        "UpdateCrawler": {
+         "summary": "X-Amz-Target: AWSGlue.UpdateCrawler",
+         "value": {}
+        },
+        "UpdateDatabase": {
+         "summary": "X-Amz-Target: AWSGlue.UpdateDatabase",
+         "value": {}
+        },
+        "UpdateJob": {
+         "summary": "X-Amz-Target: AWSGlue.UpdateJob",
+         "value": {}
+        },
+        "UpdateTable": {
+         "summary": "X-Amz-Target: AWSGlue.UpdateTable",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS Glue JSON 1.1 operations",
+    "tags": [
+     "AWS Glue"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Glue API (2017-03-31). Every other official operation returns HTTP 501 UnknownOperationException. Data Catalog databases and tables, job definitions and crawler definitions are stored metadata: no job run, crawl, schedule, trigger, partition, statistics, Lake Formation permission or data access is performed, and StartJobRun, StartCrawler and other run APIs return UnknownOperationException with HTTP 501. Names are not folded to lowercase, so database and table names with uppercase letters are refused. Resource links (TargetDatabase, TargetTable), federation, default Lake Formation permissions, multi-dialect views, transactions, Iceberg inputs, crawler schedules and job source control are refused. Updates change only the supplied members instead of replacing the whole definition, renames are refused, and table versions are not kept. Deleting a database deletes its tables. DeleteJob of a missing job fails instead of succeeding. Referenced roles, S3 locations, scripts, connections, classifiers, security configurations and crawler target databases are stored without checking that they exist; tags are accepted for every stored Glue resource.",
+   "name": "AWS Glue"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/glue/2017-03-31/service-2.json",
+  "sha256": "892d65e7bd03ba11a6038203a5914e142b30c082361a5bc5b70e7b85ebf3eb8a",
+  "license": "Apache-2.0"
+ }
+}

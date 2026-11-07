@@ -1,5 +1,54 @@
 # Development roster
 
+## Current integration snapshot: catalog backlog, 2026-11-07
+
+Root integrates the open backlog on branch `claude/adoring-noether-7fvwju`
+(PR #439, 112 AWS services). The user authorized implementing and merging it.
+Parallel local branches, merged by root only:
+
+| Scope | Branch | Status |
+|---|---|---|
+| AWS catalog round 3 (59 services) | `catalog-r3-integration` | Integration on top of PR #439 in progress |
+| AWS Query/EC2/REST-XML protocols and five services | `catalog-query` | Done locally; merged after round 3 |
+| AWS Query/EC2 services (RDS family, ElastiCache, Redshift, VPC, EBS, VPN, PrivateLink) | `catalog-qdb`, `catalog-qnet` | In progress |
+| AWS services needing engine features (Network Firewall, SWF, Application Auto Scaling, Organizations, Keyspaces and others) | `catalog-gaps` | In progress |
+| Google Cloud discovery catalog (about 47 APIs) | `gcp-wip` | Integration in progress |
+| Azure Resource Manager catalog (#316) | `azure-arm` | In progress |
+| Sakura Server, Switch/NIC and Object Storage (#423) | `sakura-iaas` | In progress |
+
+Native work owned elsewhere is not touched: S3 multipart (#51), the unpublished
+Route 53 (#241) and EC2 network interface (#57) implementations, and Firestore
+documents (#338). Products that cannot be served are recorded in the
+[coverage assessment](coverage-assessment.md).
+
+
+## Current integration snapshot: login and published catalog, 2026-11-06
+
+PR [#437](https://github.com/susumutomita/TenkaCloudSimulator/pull/437) is being
+integrated with published main `b81496f73e31be6150fc237f4641d6369446cc38`
+(catalog PR #438). The catalog's Go code, model data, tests and notices are kept;
+the login input-capture fix and its original browser assertions are also kept.
+The combined inventory is **53 models / 429 controls / 482 executions**.
+
+| Owner / handoff | Exclusive scope and observed status |
+|---|---|
+| root | Merge coordination, applicability record, final commits and serialized execution; combined validation is pending |
+| lp_quality | Registry and formal-gate/test union resolved; source handoff complete |
+| formal_review | Independent model/policy union review complete; no combined runtime acceptance claimed |
+| docs_merge_b8 | Four documentation conflicts recovered and verified; source handoff complete |
+| assets_merge_b8 | Merged-source console rebuilt in local commit `5219eb1`; 1353 inputs and unchanged original package notices verified; combined CI remains pending |
+| catalog_compat_b8 | Read-only routing/authentication intersection review complete; Go and catalog fixtures kept byte-identical to incoming main |
+| ci_watch_b8 | Exact-SHA monitoring for prior login `8149cac` and incoming main; these results do not validate the combined tree |
+
+These are ownership and handoff entries, not a claim that seven workers are
+currently running. The ceiling remains seven including root. Completed reviewers
+can take the next independent task; heavy checks use one explicit local runtime
+lane. The prior login's 102 focused checks and all eleven hosted checks passed,
+but its base was `03060d4`. Actual Dia/1Password behavior remains unverified.
+The new combined HEAD must pass its own quality, browser and formal gates.
+
+The following catalog and IAM sections retain their original dated evidence.
+
 ## Current integration snapshot: AWS service catalog, 2026-11-06
 
 Root integrates the model-driven AWS catalog on branch

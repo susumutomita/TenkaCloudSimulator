@@ -1,0 +1,1160 @@
+{
+ "components": {
+  "schemas": {
+   "ActionDeclaration": {
+    "additionalProperties": false,
+    "properties": {
+     "actionTypeId": {
+      "$ref": "#/components/schemas/ActionTypeId"
+     },
+     "commands": {
+      "items": {
+       "maxLength": 1000,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     },
+     "configuration": {
+      "additionalProperties": {
+       "maxLength": 1000,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "environmentVariables": {
+      "items": {
+       "$ref": "#/components/schemas/EnvironmentVariable"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "inputArtifacts": {
+      "items": {
+       "$ref": "#/components/schemas/InputArtifact"
+      },
+      "type": "array"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "namespace": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "outputArtifacts": {
+      "items": {
+       "$ref": "#/components/schemas/OutputArtifact"
+      },
+      "type": "array"
+     },
+     "outputVariables": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 15,
+      "minItems": 1,
+      "type": "array"
+     },
+     "region": {
+      "maxLength": 30,
+      "minLength": 4,
+      "type": "string"
+     },
+     "roleArn": {
+      "maxLength": 1024,
+      "type": "string"
+     },
+     "runOrder": {
+      "maximum": 999,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "timeoutInMinutes": {
+      "maximum": 86400,
+      "minimum": 5,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "name",
+     "actionTypeId"
+    ],
+    "type": "object"
+   },
+   "ActionTypeId": {
+    "additionalProperties": false,
+    "properties": {
+     "category": {
+      "enum": [
+       "Source",
+       "Build",
+       "Deploy",
+       "Test",
+       "Invoke",
+       "Approval",
+       "Compute"
+      ],
+      "type": "string"
+     },
+     "owner": {
+      "enum": [
+       "AWS",
+       "ThirdParty",
+       "Custom"
+      ],
+      "type": "string"
+     },
+     "provider": {
+      "maxLength": 35,
+      "minLength": 1,
+      "type": "string"
+     },
+     "version": {
+      "maxLength": 9,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "category",
+     "owner",
+     "provider",
+     "version"
+    ],
+    "type": "object"
+   },
+   "ArtifactStore": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionKey": {
+      "$ref": "#/components/schemas/EncryptionKey"
+     },
+     "location": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "S3"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "location"
+    ],
+    "type": "object"
+   },
+   "BeforeEntryConditions": {
+    "additionalProperties": false,
+    "properties": {
+     "conditions": {
+      "items": {
+       "$ref": "#/components/schemas/Condition"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "conditions"
+    ],
+    "type": "object"
+   },
+   "BlockerDeclaration": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "Schedule"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "type"
+    ],
+    "type": "object"
+   },
+   "Condition": {
+    "additionalProperties": false,
+    "properties": {
+     "result": {
+      "enum": [
+       "ROLLBACK",
+       "FAIL",
+       "RETRY",
+       "SKIP"
+      ],
+      "type": "string"
+     },
+     "rules": {
+      "items": {
+       "$ref": "#/components/schemas/RuleDeclaration"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CreatePipelineInput": {
+    "additionalProperties": false,
+    "properties": {
+     "pipeline": {
+      "$ref": "#/components/schemas/PipelineDeclaration"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "pipeline"
+    ],
+    "type": "object"
+   },
+   "CreatePipelineOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "pipeline": {
+      "$ref": "#/components/schemas/PipelineDeclaration"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DeletePipelineInput": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "EncryptionKey": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "maxLength": 400,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "KMS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "type"
+    ],
+    "type": "object"
+   },
+   "EnvironmentVariable": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "PLAINTEXT",
+       "SECRETS_MANAGER"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "value"
+    ],
+    "type": "object"
+   },
+   "FailureConditions": {
+    "additionalProperties": false,
+    "properties": {
+     "conditions": {
+      "items": {
+       "$ref": "#/components/schemas/Condition"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "result": {
+      "enum": [
+       "ROLLBACK",
+       "FAIL",
+       "RETRY",
+       "SKIP"
+      ],
+      "type": "string"
+     },
+     "retryConfiguration": {
+      "$ref": "#/components/schemas/RetryConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "GetPipelineInput": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "version": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "GetPipelineOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "metadata": {
+      "$ref": "#/components/schemas/PipelineMetadata"
+     },
+     "pipeline": {
+      "$ref": "#/components/schemas/PipelineDeclaration"
+     }
+    },
+    "type": "object"
+   },
+   "GitBranchFilterCriteria": {
+    "additionalProperties": false,
+    "properties": {
+     "excludes": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "type": "array"
+     },
+     "includes": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GitConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "pullRequest": {
+      "items": {
+       "$ref": "#/components/schemas/GitPullRequestFilter"
+      },
+      "maxItems": 3,
+      "minItems": 1,
+      "type": "array"
+     },
+     "push": {
+      "items": {
+       "$ref": "#/components/schemas/GitPushFilter"
+      },
+      "maxItems": 3,
+      "minItems": 1,
+      "type": "array"
+     },
+     "sourceActionName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "sourceActionName"
+    ],
+    "type": "object"
+   },
+   "GitFilePathFilterCriteria": {
+    "additionalProperties": false,
+    "properties": {
+     "excludes": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "type": "array"
+     },
+     "includes": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GitPullRequestFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "branches": {
+      "$ref": "#/components/schemas/GitBranchFilterCriteria"
+     },
+     "events": {
+      "items": {
+       "enum": [
+        "OPEN",
+        "UPDATED",
+        "CLOSED"
+       ],
+       "type": "string"
+      },
+      "maxItems": 3,
+      "minItems": 1,
+      "type": "array"
+     },
+     "filePaths": {
+      "$ref": "#/components/schemas/GitFilePathFilterCriteria"
+     }
+    },
+    "type": "object"
+   },
+   "GitPushFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "branches": {
+      "$ref": "#/components/schemas/GitBranchFilterCriteria"
+     },
+     "filePaths": {
+      "$ref": "#/components/schemas/GitFilePathFilterCriteria"
+     },
+     "tags": {
+      "$ref": "#/components/schemas/GitTagFilterCriteria"
+     }
+    },
+    "type": "object"
+   },
+   "GitTagFilterCriteria": {
+    "additionalProperties": false,
+    "properties": {
+     "excludes": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "type": "array"
+     },
+     "includes": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "InputArtifact": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "ListPipelinesInput": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListPipelinesOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "pipelines": {
+      "items": {
+       "$ref": "#/components/schemas/PipelineSummary"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "resourceArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "resourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "OutputArtifact": {
+    "additionalProperties": false,
+    "properties": {
+     "files": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "PipelineDeclaration": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactStore": {
+      "$ref": "#/components/schemas/ArtifactStore"
+     },
+     "artifactStores": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/ArtifactStore"
+      },
+      "type": "object"
+     },
+     "executionMode": {
+      "enum": [
+       "QUEUED",
+       "SUPERSEDED",
+       "PARALLEL"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "pipelineType": {
+      "enum": [
+       "V1",
+       "V2"
+      ],
+      "type": "string"
+     },
+     "roleArn": {
+      "maxLength": 1024,
+      "type": "string"
+     },
+     "stages": {
+      "items": {
+       "$ref": "#/components/schemas/StageDeclaration"
+      },
+      "type": "array"
+     },
+     "triggers": {
+      "items": {
+       "$ref": "#/components/schemas/PipelineTriggerDeclaration"
+      },
+      "maxItems": 50,
+      "type": "array"
+     },
+     "variables": {
+      "items": {
+       "$ref": "#/components/schemas/PipelineVariableDeclaration"
+      },
+      "maxItems": 50,
+      "type": "array"
+     },
+     "version": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "name",
+     "roleArn",
+     "stages"
+    ],
+    "type": "object"
+   },
+   "PipelineMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "created": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "pipelineArn": {
+      "type": "string"
+     },
+     "pollingDisabledAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "updated": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "PipelineSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "created": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "executionMode": {
+      "enum": [
+       "QUEUED",
+       "SUPERSEDED",
+       "PARALLEL"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "pipelineType": {
+      "enum": [
+       "V1",
+       "V2"
+      ],
+      "type": "string"
+     },
+     "updated": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "version": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "PipelineTriggerDeclaration": {
+    "additionalProperties": false,
+    "properties": {
+     "gitConfiguration": {
+      "$ref": "#/components/schemas/GitConfiguration"
+     },
+     "providerType": {
+      "enum": [
+       "CodeStarSourceConnection"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "providerType",
+     "gitConfiguration"
+    ],
+    "type": "object"
+   },
+   "PipelineVariableDeclaration": {
+    "additionalProperties": false,
+    "properties": {
+     "defaultValue": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 200,
+      "minLength": 0,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "RetryConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "retryMode": {
+      "enum": [
+       "FAILED_ACTIONS",
+       "ALL_ACTIONS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RuleDeclaration": {
+    "additionalProperties": false,
+    "properties": {
+     "commands": {
+      "items": {
+       "maxLength": 1000,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     },
+     "configuration": {
+      "additionalProperties": {
+       "maxLength": 10000,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "inputArtifacts": {
+      "items": {
+       "$ref": "#/components/schemas/InputArtifact"
+      },
+      "type": "array"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "region": {
+      "maxLength": 30,
+      "minLength": 4,
+      "type": "string"
+     },
+     "roleArn": {
+      "maxLength": 1024,
+      "type": "string"
+     },
+     "ruleTypeId": {
+      "$ref": "#/components/schemas/RuleTypeId"
+     },
+     "timeoutInMinutes": {
+      "maximum": 86400,
+      "minimum": 5,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "name",
+     "ruleTypeId"
+    ],
+    "type": "object"
+   },
+   "RuleTypeId": {
+    "additionalProperties": false,
+    "properties": {
+     "category": {
+      "enum": [
+       "Rule"
+      ],
+      "type": "string"
+     },
+     "owner": {
+      "enum": [
+       "AWS"
+      ],
+      "type": "string"
+     },
+     "provider": {
+      "maxLength": 35,
+      "minLength": 1,
+      "type": "string"
+     },
+     "version": {
+      "maxLength": 9,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "category",
+     "provider"
+    ],
+    "type": "object"
+   },
+   "StageDeclaration": {
+    "additionalProperties": false,
+    "properties": {
+     "actions": {
+      "items": {
+       "$ref": "#/components/schemas/ActionDeclaration"
+      },
+      "type": "array"
+     },
+     "beforeEntry": {
+      "$ref": "#/components/schemas/BeforeEntryConditions"
+     },
+     "blockers": {
+      "items": {
+       "$ref": "#/components/schemas/BlockerDeclaration"
+      },
+      "type": "array"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "onFailure": {
+      "$ref": "#/components/schemas/FailureConditions"
+     },
+     "onSuccess": {
+      "$ref": "#/components/schemas/SuccessConditions"
+     }
+    },
+    "required": [
+     "name",
+     "actions"
+    ],
+    "type": "object"
+   },
+   "SuccessConditions": {
+    "additionalProperties": false,
+    "properties": {
+     "conditions": {
+      "items": {
+       "$ref": "#/components/schemas/Condition"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "conditions"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "value"
+    ],
+    "type": "object"
+   },
+   "TagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "type": "string"
+     },
+     "tagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS CodePipeline API (2015-07-09). Every other official operation returns HTTP 501 UnknownOperationException. Pipelines are stored declarations at version 1 after the documented structural checks: at least two stages, source actions only and always in the first stage, unique stage and action names, and exactly one artifact store setting. Action providers, roles and artifact buckets are stored without contacting them; GetPipeline returns no metadata. Only AWS-owned actions are accepted. Pipeline executions, approvals, stage transitions, jobs, webhooks, custom action types and UpdatePipeline return UnknownOperationException with HTTP 501.",
+  "title": "AWS CodePipeline (simulator catalog)",
+  "version": "2015-07-09"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "codepipelineJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "CodePipeline_20150709.CreatePipeline",
+        "CodePipeline_20150709.DeletePipeline",
+        "CodePipeline_20150709.GetPipeline",
+        "CodePipeline_20150709.ListPipelines",
+        "CodePipeline_20150709.ListTagsForResource",
+        "CodePipeline_20150709.TagResource",
+        "CodePipeline_20150709.UntagResource"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreatePipeline": {
+         "summary": "X-Amz-Target: CodePipeline_20150709.CreatePipeline",
+         "value": {}
+        },
+        "DeletePipeline": {
+         "summary": "X-Amz-Target: CodePipeline_20150709.DeletePipeline",
+         "value": {}
+        },
+        "GetPipeline": {
+         "summary": "X-Amz-Target: CodePipeline_20150709.GetPipeline",
+         "value": {}
+        },
+        "ListPipelines": {
+         "summary": "X-Amz-Target: CodePipeline_20150709.ListPipelines",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: CodePipeline_20150709.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: CodePipeline_20150709.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: CodePipeline_20150709.UntagResource",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS CodePipeline JSON 1.1 operations",
+    "tags": [
+     "AWS CodePipeline"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS CodePipeline API (2015-07-09). Every other official operation returns HTTP 501 UnknownOperationException. Pipelines are stored declarations at version 1 after the documented structural checks: at least two stages, source actions only and always in the first stage, unique stage and action names, and exactly one artifact store setting. Action providers, roles and artifact buckets are stored without contacting them; GetPipeline returns no metadata. Only AWS-owned actions are accepted. Pipeline executions, approvals, stage transitions, jobs, webhooks, custom action types and UpdatePipeline return UnknownOperationException with HTTP 501.",
+   "name": "AWS CodePipeline"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/codepipeline/2015-07-09/service-2.json",
+  "sha256": "d703e508f2d317b31d37aad6fbcf762c83b3481cd02b0a7f49399ac1b3677351",
+  "license": "Apache-2.0"
+ }
+}

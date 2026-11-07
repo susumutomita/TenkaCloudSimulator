@@ -1,0 +1,26 @@
+{
+ "client": "efs",
+ "steps": [
+  {"op": "create_file_system", "args": {"CreationToken": "fixture-efs", "PerformanceMode": "generalPurpose", "Encrypted": true, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"fs": "FileSystemId", "arn": "FileSystemArn"}, "expect": {"LifeCycleState": "available", "NumberOfMountTargets": 0, "SizeInBytes.Value": 0, "ThroughputMode": "bursting"}},
+  {"op": "describe_file_systems", "args": {"FileSystemId": "${fs}"}, "expect": {"FileSystems#count": 1, "FileSystems[0].FileSystemArn": "${arn}", "FileSystems[0].Encrypted": true, "FileSystems[0].Tags": [{"Key": "team", "Value": "a"}]}},
+  {"op": "update_file_system", "args": {"FileSystemId": "${fs}", "ThroughputMode": "provisioned", "ProvisionedThroughputInMibps": 64}, "expect": {"ThroughputMode": "provisioned", "ProvisionedThroughputInMibps": 64.0}},
+  {"op": "describe_account_preferences", "args": {}, "expect": {"ResourceIdPreference.ResourceIdType": "LONG_ID"}},
+  {"op": "put_account_preferences", "args": {"ResourceIdType": "LONG_ID"}, "expect": {"ResourceIdPreference.Resources": ["FILE_SYSTEM", "MOUNT_TARGET"]}},
+  {"op": "put_account_preferences", "args": {"ResourceIdType": "SHORT_ID"}, "error": "BadRequest"},
+  {"op": "tag_resource", "args": {"ResourceId": "${arn}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "untag_resource", "args": {"ResourceId": "${arn}", "TagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceId": "${arn}"}, "expect": {"Tags": [{"Key": "team", "Value": "a"}]}},
+  {"op": "create_mount_target", "args": {"FileSystemId": "${fs}", "SubnetId": "subnet-0a1b2c3d"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "delete_file_system", "args": {"FileSystemId": "fs-0123456789abcdef0"}, "error": "FileSystemNotFound"}
+ ],
+ "isolation": [
+  {"op": "describe_file_systems", "args": {}, "expect": {"FileSystems#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_file_systems", "args": {}, "expect": {"FileSystems[0].FileSystemId": "${fs}", "FileSystems[0].ThroughputMode": "provisioned"}}
+ ],
+ "cleanup": [
+  {"op": "delete_file_system", "args": {"FileSystemId": "${fs}"}},
+  {"op": "describe_file_systems", "args": {}, "expect": {"FileSystems#count": 0}}
+ ]
+}

@@ -5717,16 +5717,135 @@
     "internal/aws/catalog/describe.go",
     "internal/aws/catalog/engine.go",
     "internal/aws/catalog/model.go",
+    "internal/aws/catalog/models/account.json",
+    "internal/aws/catalog/models/acm-pca.json",
+    "internal/aws/catalog/models/acm.json",
+    "internal/aws/catalog/models/amp.json",
     "internal/aws/catalog/models/amplify.json",
+    "internal/aws/catalog/models/appconfig.json",
+    "internal/aws/catalog/models/appfabric.json",
+    "internal/aws/catalog/models/appmesh.json",
+    "internal/aws/catalog/models/apprunner.json",
+    "internal/aws/catalog/models/appstream.json",
+    "internal/aws/catalog/models/appsync.json",
+    "internal/aws/catalog/models/athena.json",
+    "internal/aws/catalog/models/auditmanager.json",
+    "internal/aws/catalog/models/backup.json",
+    "internal/aws/catalog/models/bedrock-agentcore-control.json",
+    "internal/aws/catalog/models/bedrock.json",
+    "internal/aws/catalog/models/billingconductor.json",
+    "internal/aws/catalog/models/budgets.json",
+    "internal/aws/catalog/models/chatbot.json",
+    "internal/aws/catalog/models/cloud9.json",
+    "internal/aws/catalog/models/clouddirectory.json",
+    "internal/aws/catalog/models/cloudtrail.json",
+    "internal/aws/catalog/models/codeartifact.json",
+    "internal/aws/catalog/models/codebuild.json",
+    "internal/aws/catalog/models/codecommit.json",
     "internal/aws/catalog/models/codeconnections.json",
+    "internal/aws/catalog/models/codedeploy.json",
+    "internal/aws/catalog/models/codepipeline.json",
+    "internal/aws/catalog/models/comprehend.json",
+    "internal/aws/catalog/models/config.json",
+    "internal/aws/catalog/models/cur.json",
+    "internal/aws/catalog/models/dataexchange.json",
+    "internal/aws/catalog/models/detective.json",
+    "internal/aws/catalog/models/devicefarm.json",
+    "internal/aws/catalog/models/dlm.json",
+    "internal/aws/catalog/models/dsql.json",
     "internal/aws/catalog/models/ecr.json",
+    "internal/aws/catalog/models/ecs.json",
+    "internal/aws/catalog/models/efs.json",
+    "internal/aws/catalog/models/eks.json",
+    "internal/aws/catalog/models/entityresolution.json",
+    "internal/aws/catalog/models/events.json",
+    "internal/aws/catalog/models/firehose.json",
+    "internal/aws/catalog/models/fis.json",
+    "internal/aws/catalog/models/fms.json",
+    "internal/aws/catalog/models/fsx.json",
+    "internal/aws/catalog/models/gamelift.json",
+    "internal/aws/catalog/models/gameliftstreams.json",
+    "internal/aws/catalog/models/glacier.json",
+    "internal/aws/catalog/models/globalaccelerator.json",
+    "internal/aws/catalog/models/glue.json",
+    "internal/aws/catalog/models/greengrassv2.json",
+    "internal/aws/catalog/models/guardduty.json",
+    "internal/aws/catalog/models/imagebuilder.json",
+    "internal/aws/catalog/models/inspector2.json",
+    "internal/aws/catalog/models/iot.json",
+    "internal/aws/catalog/models/iotfleetwise.json",
+    "internal/aws/catalog/models/iotsitewise.json",
+    "internal/aws/catalog/models/iottwinmaker.json",
+    "internal/aws/catalog/models/iotwireless.json",
+    "internal/aws/catalog/models/kafka.json",
+    "internal/aws/catalog/models/kendra.json",
+    "internal/aws/catalog/models/kinesis.json",
+    "internal/aws/catalog/models/lexv2-models.json",
+    "internal/aws/catalog/models/license-manager.json",
+    "internal/aws/catalog/models/location.json",
+    "internal/aws/catalog/models/macie2.json",
+    "internal/aws/catalog/models/managedblockchain.json",
+    "internal/aws/catalog/models/memorydb.json",
+    "internal/aws/catalog/models/mq.json",
+    "internal/aws/catalog/models/mwaa.json",
+    "internal/aws/catalog/models/networkmanager.json",
+    "internal/aws/catalog/models/notifications.json",
+    "internal/aws/catalog/models/odb.json",
+    "internal/aws/catalog/models/opensearch.json",
+    "internal/aws/catalog/models/payment-cryptography.json",
+    "internal/aws/catalog/models/pinpoint-sms-voice-v2.json",
+    "internal/aws/catalog/models/pinpoint.json",
+    "internal/aws/catalog/models/polly.json",
+    "internal/aws/catalog/models/proton.json",
+    "internal/aws/catalog/models/ram.json",
+    "internal/aws/catalog/models/rekognition.json",
+    "internal/aws/catalog/models/resiliencehub.json",
+    "internal/aws/catalog/models/resource-explorer-2.json",
+    "internal/aws/catalog/models/resource-groups.json",
+    "internal/aws/catalog/models/route53-recovery-control-config.json",
+    "internal/aws/catalog/models/rtbfabric.json",
+    "internal/aws/catalog/models/sagemaker.json",
+    "internal/aws/catalog/models/security-ir.json",
+    "internal/aws/catalog/models/securityhub.json",
+    "internal/aws/catalog/models/securitylake.json",
+    "internal/aws/catalog/models/servicecatalog.json",
+    "internal/aws/catalog/models/servicediscovery.json",
+    "internal/aws/catalog/models/sesv2.json",
+    "internal/aws/catalog/models/shield.json",
+    "internal/aws/catalog/models/signer.json",
+    "internal/aws/catalog/models/ssm-incidents.json",
+    "internal/aws/catalog/models/sso-admin.json",
     "internal/aws/catalog/models/stepfunctions.json",
+    "internal/aws/catalog/models/storagegateway.json",
+    "internal/aws/catalog/models/textract.json",
+    "internal/aws/catalog/models/timestream-write.json",
+    "internal/aws/catalog/models/tnb.json",
+    "internal/aws/catalog/models/transcribe.json",
+    "internal/aws/catalog/models/translate.json",
+    "internal/aws/catalog/models/verifiedpermissions.json",
+    "internal/aws/catalog/models/vpc-lattice.json",
+    "internal/aws/catalog/models/wellarchitected.json",
+    "internal/aws/catalog/models/workspaces-thin-client.json",
+    "internal/aws/catalog/models/workspaces-web.json",
+    "internal/aws/catalog/models/workspaces.json",
+    "internal/aws/catalog/models/xray.json",
     "internal/aws/catalog/openapi.go",
     "internal/aws/catalog/protocol.go",
     "internal/aws/catalog/selection.json",
     "internal/aws/catalog/semantics.go",
     "internal/aws/catalog/services.go",
+    "internal/aws/catalog/services_analytics.go",
+    "internal/aws/catalog/services_compute.go",
+    "internal/aws/catalog/services_data.go",
     "internal/aws/catalog/services_developer.go",
+    "internal/aws/catalog/services_edge.go",
+    "internal/aws/catalog/services_integration.go",
+    "internal/aws/catalog/services_management.go",
+    "internal/aws/catalog/services_ml.go",
+    "internal/aws/catalog/services_network.go",
+    "internal/aws/catalog/services_ops.go",
+    "internal/aws/catalog/services_security.go",
+    "internal/aws/catalog/services_security2.go",
     "internal/aws/catalog/spec.go",
     "internal/aws/catalog/store.go",
     "internal/aws/catalog/value.go",
@@ -5960,6 +6079,475 @@
       }
      ],
      "expect_invariant": "FailureVisible"
+    }
+   ]
+  },
+  {
+   "id": "LoginInputIntent",
+   "model": "formal/LoginInputIntent.tla",
+   "config": "formal/LoginInputIntent.cfg",
+   "bounds": "18 explicitly scheduled interaction scenarios, two opaque nonempty labels plus Empty, revision0..3 without wrap, one outstanding paste/file read/request; at most2 recorded POST attempts and6 events per scenario. Terminal plans stutter; unfinished plans cannot stutter.",
+   "properties": [
+    "TypeOK",
+    "NoEmptyPOST",
+    "NoPOSTWhileBlocked",
+    "StaleFileCompletionFrame",
+    "SubmissionSelectionExact",
+    "AdoptedValueExact",
+    "IntentInvalidatesAsync",
+    "LocaleIntentFrame"
+   ],
+   "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification.",
+   "source_scope": [
+    "tools/console/src/login.jsx",
+    "test/console/login-native-input.test.mjs",
+    "test/e2e/login_paste.py",
+    "test/e2e/login_token_file.py",
+    "internal/server/web/app.js"
+   ],
+   "mutants": [
+    {
+     "id": "NonemptyDOMUsesControlledState",
+     "edits": [
+      {
+       "old": "ELSE IF s.connected THEN s.dom ELSE s.token\nSync(s)",
+       "new": "ELSE IF s.connected /\\ s.dom = \"empty\" THEN s.dom ELSE s.token\nSync(s)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SubmissionSelectionExact"
+    },
+    {
+     "id": "EmptyDOMReusesOldCredential",
+     "edits": [
+      {
+       "old": "ELSE IF s.connected THEN s.dom ELSE s.token\nSync(s)",
+       "new": "ELSE IF s.connected /\\ s.dom # \"empty\" THEN s.dom ELSE s.token\nSync(s)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoEmptyPOST"
+    },
+    {
+     "id": "FlushDoesNotAdoptNativeValue",
+     "edits": [
+      {
+       "old": "ELSE IF s.connected /\\ s.dom # s.token THEN Adopt(s,Selected(s))\n           ELSE [s EXCEPT !.pasteRev = 0]",
+       "new": "ELSE IF s.connected /\\ s.dom # s.token THEN [s EXCEPT !.pasteRev = 0]\n           ELSE [s EXCEPT !.pasteRev = 0]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdoptedValueExact"
+    },
+    {
+     "id": "NativeAdoptionSkipsNewIntent",
+     "edits": [
+      {
+       "old": "Sync(s) == IF s.connected /\\ s.dom # s.token THEN Adopt(s,s.dom) ELSE s",
+       "new": "Sync(s) == IF s.connected /\\ s.dom # s.token THEN [s EXCEPT !.token = s.dom] ELSE s",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IntentInvalidatesAsync"
+    },
+    {
+     "id": "FileCompletionIgnoresRevision",
+     "edits": [
+      {
+       "old": "FileEligible(s) == s.alive /\\ s.jobRev # 0 /\\ s.jobRev = s.rev /\\ s.fileCurrent = s.jobRev",
+       "new": "FileEligible(s) == s.alive /\\ s.jobRev # 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StaleFileCompletionFrame"
+    },
+    {
+     "id": "OldPasteSurvivesNewIntent",
+     "edits": [
+      {
+       "old": "!.pasteRev = 0, \\* NewIntentPasteCancel",
+       "new": "!.pasteRev = s.pasteRev, \\* NewIntentPasteCancel",
+       "count": 1
+      },
+      {
+       "old": "ActivePaste(s) == s.pasteRev # 0 /\\ s.pasteRev = s.rev /\\ s.pasteConnected",
+       "new": "ActivePaste(s) == s.pasteRev # 0 /\\ s.pasteConnected",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IntentInvalidatesAsync"
+    },
+    {
+     "id": "SubmitIgnoresBusy",
+     "edits": [
+      {
+       "old": "\nReady(s) == ~s.busy /\\ s.fileCurrent = 0",
+       "new": "\nReady(s) == s.fileCurrent = 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoPOSTWhileBlocked"
+    },
+    {
+     "id": "SubmitIgnoresFileGate",
+     "edits": [
+      {
+       "old": "\nReady(s) == ~s.busy /\\ s.fileCurrent = 0",
+       "new": "\nReady(s) == ~s.busy",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoPOSTWhileBlocked"
+    },
+    {
+     "id": "LocaleClearsIntent",
+     "edits": [
+      {
+       "old": "Locale(s) == [s EXCEPT !.locale = IF @ = \"en\" THEN \"ja\" ELSE \"en\", !.dom = s.token]",
+       "new": "Locale(s) == [s EXCEPT !.locale = IF @ = \"en\" THEN \"ja\" ELSE \"en\", !.dom = s.token, !.token = \"empty\"]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LocaleIntentFrame"
+    },
+    {
+     "id": "UnmountedFileCompletionPublishes",
+     "edits": [
+      {
+       "old": "FileEligible(s) == s.alive /\\ s.jobRev # 0 /\\ s.jobRev = s.rev /\\ s.fileCurrent = s.jobRev",
+       "new": "FileEligible(s) == s.jobRev # 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StaleFileCompletionFrame"
+    },
+    {
+     "id": "CurrentFileErrorDiscarded",
+     "edits": [
+      {
+       "old": "ELSE [s EXCEPT !.jobRev = 0, !.fileCurrent = 0, !.fileState = \"idle\", !.error = TRUE]",
+       "new": "ELSE [s EXCEPT !.jobRev = 0, !.fileCurrent = 0, !.fileState = \"idle\", !.error = FALSE]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdoptedValueExact"
+    },
+    {
+     "id": "LocaleInvalidatesCurrentFile",
+     "edits": [
+      {
+       "old": "Locale(s) == [s EXCEPT !.locale = IF @ = \"en\" THEN \"ja\" ELSE \"en\", !.dom = s.token]",
+       "new": "Locale(s) == [s EXCEPT !.locale = IF @ = \"en\" THEN \"ja\" ELSE \"en\", !.dom = s.token, !.fileCurrent = 0]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LocaleIntentFrame"
+    },
+    {
+     "id": "FocusSkipsNativeAdoption",
+     "edits": [
+      {
+       "old": "Focus(s) == LET adopted == Sync(s) IN [adopted EXCEPT !.dom = adopted.token]",
+       "new": "Focus(s) == LET adopted == s IN [adopted EXCEPT !.dom = adopted.token]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdoptedValueExact"
+    },
+    {
+     "id": "KeyDownSkipsNativeAdoption",
+     "edits": [
+      {
+       "old": "KeyDown(s) == LET adopted == Sync(s) IN [adopted EXCEPT !.dom = adopted.token]",
+       "new": "KeyDown(s) == LET adopted == s IN [adopted EXCEPT !.dom = adopted.token]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdoptedValueExact"
+    }
+   ]
+  },
+  {
+   "id": "SNSLifecycle",
+   "model": "formal/SNSLifecycle.tla",
+   "config": "formal/SNSLifecycle.cfg",
+   "bounds": "2 topic names,2 subscription IDs,2 message IDs;1 stored message,2 abstract bytes,1 delivery row; sizes1..3; Boolean write acknowledgements; no arbitrary SQL execution.",
+   "properties": [
+    "TypeOK",
+    "NoOrphans",
+    "MessageCountBounded",
+    "ByteBudgetBounded",
+    "DeliveryBudgetBounded",
+    "DurableAck",
+    "PublishRecipientsExact",
+    "PeerFrame",
+    "NoDanglingDeliveredMessage",
+    "DeleteAckEmpty",
+    "DeleteRetryAcknowledged"
+   ],
+   "limits": "Atomic state transitions assume transaction rollback and model validated existing state. Captured post-operation ACK and frozen-delete ownership, globally bounded count/abstract byte/delivery budgets and target/peer frames only. Not SQL/driver/crash/Go refinement, UUID allocation, schema migration, UTF-8 byte calculation, quotas at real cardinality, IAM or outbound delivery. Delivery audit may outlive Unsubscribe, but not its stored message or topic. Ignored/vanishing/late-reinsert native SQLite faults and two-host SDK checks are separate executable obligations.",
+   "source_scope": [
+    "internal/aws/sns_store.go",
+    "internal/aws/sns_storage_regression_test.go",
+    "internal/aws/sns_test.go",
+    "internal/server/sns_test.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "MissingTopicGuard",
+     "edits": [
+      {
+       "old": "ParentExists(t) == t \\in live",
+       "new": "ParentExists(t) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOrphans"
+    },
+    {
+     "id": "IgnoreWriteAcknowledgement",
+     "edits": [
+      {
+       "old": "Committed(writeOK) == writeOK",
+       "new": "Committed(writeOK) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DurableAck"
+    },
+    {
+     "id": "IgnoreMessageCount",
+     "edits": [
+      {
+       "old": "CountFits == Cardinality(Stored) < MaxMessages",
+       "new": "CountFits == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "MessageCountBounded"
+    },
+    {
+     "id": "IgnoreByteBudget",
+     "edits": [
+      {
+       "old": "BytesFit(n) == ByteSum(Stored) + n <= MaxBytes",
+       "new": "BytesFit(n) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ByteBudgetBounded"
+    },
+    {
+     "id": "IgnoreDeliveryBudget",
+     "edits": [
+      {
+       "old": "DeliveryFits(t) == Cardinality(deliveries) + Cardinality({s \\in Subs : subOwner[s] = t}) <= MaxDeliveries",
+       "new": "DeliveryFits(t) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeliveryBudgetBounded"
+    },
+    {
+     "id": "KeepDeletedMessages",
+     "edits": [
+      {
+       "old": "ClearMsgs(t) == [m \\in Messages |-> IF msgOwner[m] = t THEN None ELSE msgOwner[m]]",
+       "new": "ClearMsgs(t) == msgOwner",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOrphans"
+    },
+    {
+     "id": "KeepDeletedDeliveries",
+     "edits": [
+      {
+       "old": "ClearDeliveries(t) == {d \\in deliveries : msgOwner[d[1]] # t /\\ subOwner[d[2]] # t}",
+       "new": "ClearDeliveries(t) == deliveries",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoDanglingDeliveredMessage"
+    },
+    {
+     "id": "AcknowledgeWithoutCleanup",
+     "edits": [
+      {
+       "old": "remove == ok /\\ w IN",
+       "new": "remove == FALSE IN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DurableAck"
+    },
+    {
+     "id": "DeletePeerSubscriptions",
+     "edits": [
+      {
+       "old": "ClearSubs(t) == [s \\in Subs |-> IF subOwner[s] = t THEN None ELSE subOwner[s]]",
+       "new": "ClearSubs(t) == [s \\in Subs |-> None]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PeerFrame"
+    },
+    {
+     "id": "OmitDeliveryRows",
+     "edits": [
+      {
+       "old": "deliveries \\cup {<<m,s>> : s \\in {k \\in Subs : subOwner[k] = t}}",
+       "new": "deliveries",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PublishRecipientsExact"
+    },
+    {
+     "id": "RejectAbsentDelete",
+     "edits": [
+      {
+       "old": "Delete(t,w) == LET ok == Committed(w)",
+       "new": "Delete(t,w) == LET ok == ParentExists(t) /\\ Committed(w)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeleteRetryAcknowledged"
+    }
+   ]
+  },
+  {
+   "id": "SNSAdmission",
+   "model": "formal/SNSAdmission.tla",
+   "config": "formal/SNSAdmission.cfg",
+   "bounds": "1536 request combinations:6 operation classes x8Boolean admission witnesses; request captured once, one dispatch step and terminal stuttering; no constraints prune combinations.",
+   "properties": [
+    "TypeOK",
+    "NoUnauthorizedEffect",
+    "NoFIFOPublish",
+    "NoRegionMismatch",
+    "NoSuccessOnRefusal",
+    "NoRejectedMutation"
+   ],
+   "limits": "Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence.",
+   "source_scope": [
+    "internal/aws/sns.go",
+    "internal/aws/sns_admission_regression_test.go",
+    "internal/aws/ssm.go",
+    "internal/aws/s3.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "IgnoreDuplicateFields",
+     "edits": [
+      {
+       "old": "Single(r) == r.single",
+       "new": "Single(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "IgnoreAttributeAdmission",
+     "edits": [
+      {
+       "old": "Attributes(r) == r.attrs",
+       "new": "Attributes(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "IgnoreValueAdmission",
+     "edits": [
+      {
+       "old": "Value(r) == r.value",
+       "new": "Value(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "IgnoreSigningScope",
+     "edits": [
+      {
+       "old": "Scope(r) == r.scope",
+       "new": "Scope(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "IgnoreRegionBinding",
+     "edits": [
+      {
+       "old": "Region(r) == r.region",
+       "new": "Region(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoRegionMismatch"
+    },
+    {
+     "id": "PermitFIFOPublication",
+     "edits": [
+      {
+       "old": "FIFO(r) == r.op # \"Publish\" \\/ ~r.fifo",
+       "new": "FIFO(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoFIFOPublish"
+    },
+    {
+     "id": "BypassAuthorization",
+     "edits": [
+      {
+       "old": "Authorized(r) == r.authorized",
+       "new": "Authorized(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoUnauthorizedEffect"
+    },
+    {
+     "id": "IgnoreInitialization",
+     "edits": [
+      {
+       "old": "Initialized(r) == r.initialized",
+       "new": "Initialized(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "AcceptUnknownOperation",
+     "edits": [
+      {
+       "old": "Supported(r) == r.op # \"Unknown\"",
+       "new": "Supported(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoSuccessOnRefusal"
+    },
+    {
+     "id": "MutateAfterRejection",
+     "edits": [
+      {
+       "old": "mutated' = (accepted /\\ request.op \\in Writes)",
+       "new": "mutated' = (request.op \\in Writes)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoRejectedMutation"
     }
    ]
   }

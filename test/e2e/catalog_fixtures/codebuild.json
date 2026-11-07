@@ -1,0 +1,28 @@
+{
+ "client": "codebuild",
+ "steps": [
+  {"op": "create_project", "args": {"name": "fixture-build", "source": {"type": "S3", "location": "fixture-bucket/source.zip"}, "artifacts": {"type": "NO_ARTIFACTS"}, "environment": {"type": "LINUX_CONTAINER", "image": "aws/codebuild/standard:7.0", "computeType": "BUILD_GENERAL1_SMALL"}, "serviceRole": "arn:aws:iam::000000000000:role/fixture-codebuild", "tags": [{"key": "team", "value": "a"}]}, "save": {"project": "project.arn"}, "expect": {"project.timeoutInMinutes": 60, "project.arn": "arn:aws:codebuild:us-east-1:000000000000:project/fixture-build", "project.tags[0].key": "team"}},
+  {"op": "batch_get_projects", "args": {"names": ["fixture-build"]}, "expect": {"projects#count": 1, "projects[0].environment.computeType": "BUILD_GENERAL1_SMALL"}},
+  {"op": "list_projects", "args": {}, "expect": {"projects": ["fixture-build"]}},
+  {"op": "update_project", "args": {"name": "fixture-build", "description": "updated", "timeoutInMinutes": 30}, "expect": {"project.timeoutInMinutes": 30, "project.description": "updated"}},
+  {"op": "create_project", "args": {"name": "fixture-build", "source": {"type": "NO_SOURCE", "buildspec": "version: 0.2"}, "artifacts": {"type": "NO_ARTIFACTS"}, "environment": {"type": "LINUX_CONTAINER", "image": "aws/codebuild/standard:7.0", "computeType": "BUILD_GENERAL1_SMALL"}, "serviceRole": "arn:aws:iam::000000000000:role/fixture-codebuild"}, "error": "ResourceAlreadyExistsException"},
+  {"op": "create_report_group", "args": {"name": "fixture-reports", "type": "TEST", "exportConfig": {"exportConfigType": "NO_EXPORT"}}, "save": {"reports": "reportGroup.arn"}, "expect": {"reportGroup.status": "ACTIVE"}},
+  {"op": "batch_get_report_groups", "args": {"reportGroupArns": ["${reports}"]}, "expect": {"reportGroups[0].name": "fixture-reports"}},
+  {"op": "list_report_groups", "args": {}, "expect": {"reportGroups": ["${reports}"]}},
+  {"op": "update_report_group", "args": {"arn": "${reports}", "exportConfig": {"exportConfigType": "S3", "s3Destination": {"bucket": "fixture-bucket", "packaging": "NONE"}}}, "expect": {"reportGroup.exportConfig.exportConfigType": "S3"}},
+  {"op": "start_build", "args": {"projectName": "fixture-build"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "update_project", "args": {"name": "missing", "description": "x"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_projects", "args": {}, "expect": {"projects#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "batch_get_projects", "args": {"names": ["fixture-build"]}, "expect": {"projects[0].description": "updated"}}
+ ],
+ "cleanup": [
+  {"op": "delete_project", "args": {"name": "fixture-build"}},
+  {"op": "delete_report_group", "args": {"arn": "${reports}", "deleteReports": true}},
+  {"op": "list_projects", "args": {}, "expect": {"projects#count": 0}},
+  {"op": "list_report_groups", "args": {}, "expect": {"reportGroups#count": 0}}
+ ]
+}

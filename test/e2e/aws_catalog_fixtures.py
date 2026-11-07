@@ -41,6 +41,9 @@ def lookup(value, path):
 
 def run_steps(team, fixture, steps, saved, called, token=None):
     client = team.client(fixture['client'], token)
+    if fixture.get('inject_host_prefix') is False:
+        # Official host prefixes (for example MWAA "api.") cannot address loopback.
+        client.meta.config.inject_host_prefix = False
     for step in steps:
         args = substitute(step.get('args', {}), saved)
         operation = client.meta.method_to_api_mapping[step['op']]
@@ -72,7 +75,8 @@ def main(selected=None):
         a.start()
         b.start()
         try:
-            services = {s['model']: s for s in a.control('GET', '/_simulator/v1/capabilities')['services']['catalog']['services']}
+            descriptors = a.control('GET', '/_simulator/v1/capabilities')['services']['catalog']['descriptors']
+            services = {s['model']: s for s in a.control('GET', descriptors)['services']}
             a.control('PUT', '/_simulator/v1/iam/principals/catalog-nobody/policy',
                       {'Version': '2012-10-17', 'Statement': [{'Effect': 'Allow', 'Action': 'sts:GetCallerIdentity', 'Resource': '*'}]})
             nobody = a.control('POST', '/_simulator/v1/access', {'Principal': 'catalog-nobody'})['AccessToken']

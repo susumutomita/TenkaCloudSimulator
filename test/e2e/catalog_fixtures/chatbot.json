@@ -1,0 +1,34 @@
+{
+ "client": "chatbot",
+ "steps": [
+  {"op": "create_chime_webhook_configuration", "args": {"ConfigurationName": "fixture-webhook", "WebhookDescription": "Fixture room", "WebhookUrl": "https://hooks.chime.aws/incomingwebhooks/fixture?token=abc", "SnsTopicArns": ["arn:aws:sns:us-east-1:000000000000:fixture-alerts"], "IamRoleArn": "arn:aws:iam::000000000000:role/fixture-chatbot", "Tags": [{"TagKey": "team", "TagValue": "a"}]}, "save": {"webhook": "WebhookConfiguration.ChatConfigurationArn"}, "expect": {"WebhookConfiguration.ChatConfigurationArn": "arn:aws:chatbot::000000000000:chat-configuration/chime-webhook/fixture-webhook", "WebhookConfiguration.State": "ENABLED"}},
+  {"op": "describe_chime_webhook_configurations", "args": {}, "expect": {"WebhookConfigurations#count": 1}},
+  {"op": "update_chime_webhook_configuration", "args": {"ChatConfigurationArn": "${webhook}", "LoggingLevel": "INFO"}, "expect": {"WebhookConfiguration.LoggingLevel": "INFO"}},
+  {"op": "create_custom_action", "args": {"ActionName": "fixture-restart", "Definition": {"CommandText": "lambda invoke --function-name restart"}}, "save": {"action": "CustomActionArn"}, "expect": {"CustomActionArn": "arn:aws:chatbot::000000000000:custom-action/fixture-restart"}},
+  {"op": "get_custom_action", "args": {"CustomActionArn": "${action}"}, "expect": {"CustomAction.Definition.CommandText": "lambda invoke --function-name restart"}},
+  {"op": "list_custom_actions", "args": {}, "expect": {"CustomActions": ["${action}"]}},
+  {"op": "update_custom_action", "args": {"CustomActionArn": "${action}", "Definition": {"CommandText": "lambda invoke --function-name restart-v2"}, "AliasName": "restart"}},
+  {"op": "get_account_preferences", "args": {}},
+  {"op": "update_account_preferences", "args": {"UserAuthorizationRequired": true}, "expect": {"AccountPreferences.UserAuthorizationRequired": true}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${webhook}", "Tags": [{"TagKey": "k", "TagValue": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${webhook}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${webhook}"}, "expect": {"Tags": [{"TagKey": "k", "TagValue": "v"}]}},
+  {"op": "create_slack_channel_configuration", "args": {"SlackTeamId": "T012345", "SlackChannelId": "C012345", "IamRoleArn": "arn:aws:iam::000000000000:role/fixture-chatbot", "ConfigurationName": "slack"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_custom_action", "args": {"CustomActionArn": "arn:aws:chatbot::000000000000:custom-action/missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "describe_chime_webhook_configurations", "args": {}, "expect": {"WebhookConfigurations#count": 0}},
+  {"op": "list_custom_actions", "args": {}, "expect": {"CustomActions#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_chime_webhook_configurations", "args": {"ChatConfigurationArn": "${webhook}"}, "expect": {"WebhookConfigurations[0].LoggingLevel": "INFO"}},
+  {"op": "get_custom_action", "args": {"CustomActionArn": "${action}"}, "expect": {"CustomAction.AliasName": "restart"}},
+  {"op": "get_account_preferences", "args": {}, "expect": {"AccountPreferences.UserAuthorizationRequired": true}}
+ ],
+ "cleanup": [
+  {"op": "delete_chime_webhook_configuration", "args": {"ChatConfigurationArn": "${webhook}"}},
+  {"op": "delete_custom_action", "args": {"CustomActionArn": "${action}"}},
+  {"op": "describe_chime_webhook_configurations", "args": {}, "expect": {"WebhookConfigurations#count": 0}},
+  {"op": "list_custom_actions", "args": {}, "expect": {"CustomActions#count": 0}}
+ ]
+}

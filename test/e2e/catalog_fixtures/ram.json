@@ -1,0 +1,164 @@
+{
+ "client": "ram",
+ "steps": [
+  {
+   "op": "create_resource_share",
+   "args": {
+    "name": "fixture-share",
+    "allowExternalPrincipals": false,
+    "tags": [
+     {
+      "key": "team",
+      "value": "a"
+     }
+    ]
+   },
+   "save": {
+    "share": "resourceShare.resourceShareArn"
+   },
+   "expect": {
+    "resourceShare.status": "ACTIVE",
+    "resourceShare.owningAccountId": "000000000000"
+   }
+  },
+  {
+   "op": "get_resource_shares",
+   "args": {
+    "resourceOwner": "SELF"
+   },
+   "expect": {
+    "resourceShares#count": 1,
+    "resourceShares[0].allowExternalPrincipals": false,
+    "resourceShares[0].tags[0].key": "team"
+   }
+  },
+  {
+   "op": "get_resource_shares",
+   "args": {
+    "resourceOwner": "OTHER-ACCOUNTS"
+   },
+   "expect": {
+    "resourceShares#count": 0
+   }
+  },
+  {
+   "op": "update_resource_share",
+   "args": {
+    "resourceShareArn": "${share}",
+    "name": "fixture-share-2"
+   },
+   "expect": {
+    "resourceShare.name": "fixture-share-2"
+   }
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "resourceShareArn": "${share}",
+    "tags": [
+     {
+      "key": "k",
+      "value": "v"
+     }
+    ]
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "resourceShareArn": "${share}",
+    "tagKeys": [
+     "team"
+    ]
+   }
+  },
+  {
+   "op": "get_resource_shares",
+   "args": {
+    "resourceOwner": "SELF",
+    "resourceShareArns": [
+     "${share}"
+    ]
+   },
+   "expect": {
+    "resourceShares#count": 1,
+    "resourceShares[0].tags[0].key": "k"
+   }
+  },
+  {
+   "op": "create_resource_share",
+   "args": {
+    "name": "external",
+    "principals": [
+     "111111111111"
+    ]
+   },
+   "error": "InvalidParameterException",
+   "status": 400
+  },
+  {
+   "op": "associate_resource_share",
+   "args": {
+    "resourceShareArn": "${share}",
+    "principals": [
+     "111111111111"
+    ]
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "update_resource_share",
+   "args": {
+    "resourceShareArn": "arn:aws:ram:us-east-1:000000000000:resource-share/00000000-0000-0000-0000-000000000000",
+    "name": "missing"
+   },
+   "error": "UnknownResourceException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "get_resource_shares",
+   "args": {
+    "resourceOwner": "SELF"
+   },
+   "expect": {
+    "resourceShares#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_resource_shares",
+   "args": {
+    "resourceOwner": "SELF",
+    "resourceShareArns": [
+     "${share}"
+    ]
+   },
+   "expect": {
+    "resourceShares[0].name": "fixture-share-2"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_resource_share",
+   "args": {
+    "resourceShareArn": "${share}"
+   },
+   "expect": {
+    "returnValue": true
+   }
+  },
+  {
+   "op": "get_resource_shares",
+   "args": {
+    "resourceOwner": "SELF"
+   },
+   "expect": {
+    "resourceShares#count": 0
+   }
+  }
+ ]
+}

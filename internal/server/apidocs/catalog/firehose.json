@@ -1,0 +1,3188 @@
+{
+ "components": {
+  "schemas": {
+   "AmazonOpenSearchServerlessBufferingHints": {
+    "additionalProperties": false,
+    "properties": {
+     "IntervalInSeconds": {
+      "maximum": 900,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "SizeInMBs": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "AmazonOpenSearchServerlessDestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "BufferingHints": {
+      "$ref": "#/components/schemas/AmazonOpenSearchServerlessBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "CollectionEndpoint": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IndexName": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/AmazonOpenSearchServerlessRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDocumentsOnly",
+       "AllDocuments"
+      ],
+      "type": "string"
+     },
+     "S3Configuration": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     },
+     "VpcConfiguration": {
+      "$ref": "#/components/schemas/VpcConfiguration"
+     }
+    },
+    "required": [
+     "RoleARN",
+     "IndexName",
+     "S3Configuration"
+    ],
+    "type": "object"
+   },
+   "AmazonOpenSearchServerlessDestinationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "BufferingHints": {
+      "$ref": "#/components/schemas/AmazonOpenSearchServerlessBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "CollectionEndpoint": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IndexName": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/AmazonOpenSearchServerlessRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDocumentsOnly",
+       "AllDocuments"
+      ],
+      "type": "string"
+     },
+     "S3DestinationDescription": {
+      "$ref": "#/components/schemas/S3DestinationDescription"
+     },
+     "VpcConfigurationDescription": {
+      "$ref": "#/components/schemas/VpcConfigurationDescription"
+     }
+    },
+    "type": "object"
+   },
+   "AmazonOpenSearchServerlessRetryOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DurationInSeconds": {
+      "maximum": 7200,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "AmazonopensearchserviceBufferingHints": {
+    "additionalProperties": false,
+    "properties": {
+     "IntervalInSeconds": {
+      "maximum": 900,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "SizeInMBs": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "AmazonopensearchserviceDestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "BufferingHints": {
+      "$ref": "#/components/schemas/AmazonopensearchserviceBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "ClusterEndpoint": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DocumentIdOptions": {
+      "$ref": "#/components/schemas/DocumentIdOptions"
+     },
+     "DomainARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IndexName": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IndexRotationPeriod": {
+      "enum": [
+       "NoRotation",
+       "OneHour",
+       "OneDay",
+       "OneWeek",
+       "OneMonth"
+      ],
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/AmazonopensearchserviceRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDocumentsOnly",
+       "AllDocuments"
+      ],
+      "type": "string"
+     },
+     "S3Configuration": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     },
+     "TypeName": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "VpcConfiguration": {
+      "$ref": "#/components/schemas/VpcConfiguration"
+     }
+    },
+    "required": [
+     "RoleARN",
+     "IndexName",
+     "S3Configuration"
+    ],
+    "type": "object"
+   },
+   "AmazonopensearchserviceDestinationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "BufferingHints": {
+      "$ref": "#/components/schemas/AmazonopensearchserviceBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "ClusterEndpoint": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DocumentIdOptions": {
+      "$ref": "#/components/schemas/DocumentIdOptions"
+     },
+     "DomainARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IndexName": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IndexRotationPeriod": {
+      "enum": [
+       "NoRotation",
+       "OneHour",
+       "OneDay",
+       "OneWeek",
+       "OneMonth"
+      ],
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/AmazonopensearchserviceRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDocumentsOnly",
+       "AllDocuments"
+      ],
+      "type": "string"
+     },
+     "S3DestinationDescription": {
+      "$ref": "#/components/schemas/S3DestinationDescription"
+     },
+     "TypeName": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "VpcConfigurationDescription": {
+      "$ref": "#/components/schemas/VpcConfigurationDescription"
+     }
+    },
+    "type": "object"
+   },
+   "AmazonopensearchserviceRetryOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DurationInSeconds": {
+      "maximum": 7200,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "AuthenticationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Connectivity": {
+      "enum": [
+       "PUBLIC",
+       "PRIVATE"
+      ],
+      "type": "string"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "RoleARN",
+     "Connectivity"
+    ],
+    "type": "object"
+   },
+   "BufferingHints": {
+    "additionalProperties": false,
+    "properties": {
+     "IntervalInSeconds": {
+      "maximum": 900,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "SizeInMBs": {
+      "maximum": 128,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "CatalogConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "WarehouseLocation": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CloudWatchLoggingOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "LogGroupName": {
+      "maxLength": 512,
+      "minLength": 0,
+      "type": "string"
+     },
+     "LogStreamName": {
+      "maxLength": 512,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CopyCommand": {
+    "additionalProperties": false,
+    "properties": {
+     "CopyOptions": {
+      "maxLength": 10240,
+      "minLength": 0,
+      "type": "string"
+     },
+     "DataTableColumns": {
+      "maxLength": 10240,
+      "minLength": 0,
+      "type": "string"
+     },
+     "DataTableName": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DataTableName"
+    ],
+    "type": "object"
+   },
+   "CreateDeliveryStreamInput": {
+    "additionalProperties": false,
+    "properties": {
+     "AmazonOpenSearchServerlessDestinationConfiguration": {
+      "$ref": "#/components/schemas/AmazonOpenSearchServerlessDestinationConfiguration"
+     },
+     "AmazonopensearchserviceDestinationConfiguration": {
+      "$ref": "#/components/schemas/AmazonopensearchserviceDestinationConfiguration"
+     },
+     "DatabaseSourceConfiguration": {
+      "$ref": "#/components/schemas/DatabaseSourceConfiguration"
+     },
+     "DeliveryStreamEncryptionConfigurationInput": {
+      "$ref": "#/components/schemas/DeliveryStreamEncryptionConfigurationInput"
+     },
+     "DeliveryStreamName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DeliveryStreamType": {
+      "enum": [
+       "DirectPut",
+       "KinesisStreamAsSource",
+       "MSKAsSource",
+       "DatabaseAsSource"
+      ],
+      "type": "string"
+     },
+     "DirectPutSourceConfiguration": {
+      "$ref": "#/components/schemas/DirectPutSourceConfiguration"
+     },
+     "ElasticsearchDestinationConfiguration": {
+      "$ref": "#/components/schemas/ElasticsearchDestinationConfiguration"
+     },
+     "ExtendedS3DestinationConfiguration": {
+      "$ref": "#/components/schemas/ExtendedS3DestinationConfiguration"
+     },
+     "HttpEndpointDestinationConfiguration": {
+      "$ref": "#/components/schemas/HttpEndpointDestinationConfiguration"
+     },
+     "IcebergDestinationConfiguration": {
+      "$ref": "#/components/schemas/IcebergDestinationConfiguration"
+     },
+     "KinesisStreamSourceConfiguration": {
+      "$ref": "#/components/schemas/KinesisStreamSourceConfiguration"
+     },
+     "MSKSourceConfiguration": {
+      "$ref": "#/components/schemas/MSKSourceConfiguration"
+     },
+     "RedshiftDestinationConfiguration": {
+      "$ref": "#/components/schemas/RedshiftDestinationConfiguration"
+     },
+     "S3DestinationConfiguration": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     },
+     "SnowflakeDestinationConfiguration": {
+      "$ref": "#/components/schemas/SnowflakeDestinationConfiguration"
+     },
+     "SplunkDestinationConfiguration": {
+      "$ref": "#/components/schemas/SplunkDestinationConfiguration"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "DeliveryStreamName"
+    ],
+    "type": "object"
+   },
+   "CreateDeliveryStreamOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "DeliveryStreamARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DataFormatConversionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "InputFormatConfiguration": {
+      "$ref": "#/components/schemas/InputFormatConfiguration"
+     },
+     "OutputFormatConfiguration": {
+      "$ref": "#/components/schemas/OutputFormatConfiguration"
+     },
+     "SchemaConfiguration": {
+      "$ref": "#/components/schemas/SchemaConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseColumnList": {
+    "additionalProperties": false,
+    "properties": {
+     "Exclude": {
+      "items": {
+       "maxLength": 194,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Include": {
+      "items": {
+       "maxLength": 194,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseList": {
+    "additionalProperties": false,
+    "properties": {
+     "Exclude": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Include": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseSnapshotInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "FailureDescription": {
+      "$ref": "#/components/schemas/FailureDescription"
+     },
+     "Id": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RequestTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "RequestedBy": {
+      "enum": [
+       "USER",
+       "FIREHOSE"
+      ],
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "IN_PROGRESS",
+       "COMPLETE",
+       "SUSPENDED"
+      ],
+      "type": "string"
+     },
+     "Table": {
+      "maxLength": 129,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Id",
+     "Table",
+     "RequestTimestamp",
+     "RequestedBy",
+     "Status"
+    ],
+    "type": "object"
+   },
+   "DatabaseSourceAuthenticationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "SecretsManagerConfiguration": {
+      "$ref": "#/components/schemas/SecretsManagerConfiguration"
+     }
+    },
+    "required": [
+     "SecretsManagerConfiguration"
+    ],
+    "type": "object"
+   },
+   "DatabaseSourceConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Columns": {
+      "$ref": "#/components/schemas/DatabaseColumnList"
+     },
+     "DatabaseSourceAuthenticationConfiguration": {
+      "$ref": "#/components/schemas/DatabaseSourceAuthenticationConfiguration"
+     },
+     "DatabaseSourceVPCConfiguration": {
+      "$ref": "#/components/schemas/DatabaseSourceVPCConfiguration"
+     },
+     "Databases": {
+      "$ref": "#/components/schemas/DatabaseList"
+     },
+     "Endpoint": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Port": {
+      "maximum": 65535,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "SSLMode": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "SnapshotWatermarkTable": {
+      "maxLength": 129,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SurrogateKeys": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Tables": {
+      "$ref": "#/components/schemas/DatabaseTableList"
+     },
+     "Type": {
+      "enum": [
+       "MySQL",
+       "PostgreSQL"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type",
+     "Endpoint",
+     "Port",
+     "Databases",
+     "Tables",
+     "SnapshotWatermarkTable",
+     "DatabaseSourceAuthenticationConfiguration",
+     "DatabaseSourceVPCConfiguration"
+    ],
+    "type": "object"
+   },
+   "DatabaseSourceDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "Columns": {
+      "$ref": "#/components/schemas/DatabaseColumnList"
+     },
+     "DatabaseSourceAuthenticationConfiguration": {
+      "$ref": "#/components/schemas/DatabaseSourceAuthenticationConfiguration"
+     },
+     "DatabaseSourceVPCConfiguration": {
+      "$ref": "#/components/schemas/DatabaseSourceVPCConfiguration"
+     },
+     "Databases": {
+      "$ref": "#/components/schemas/DatabaseList"
+     },
+     "Endpoint": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Port": {
+      "maximum": 65535,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "SSLMode": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "SnapshotInfo": {
+      "items": {
+       "$ref": "#/components/schemas/DatabaseSnapshotInfo"
+      },
+      "type": "array"
+     },
+     "SnapshotWatermarkTable": {
+      "maxLength": 129,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SurrogateKeys": {
+      "items": {
+       "maxLength": 194,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Tables": {
+      "$ref": "#/components/schemas/DatabaseTableList"
+     },
+     "Type": {
+      "enum": [
+       "MySQL",
+       "PostgreSQL"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseSourceVPCConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "VpcEndpointServiceName": {
+      "maxLength": 255,
+      "minLength": 47,
+      "type": "string"
+     }
+    },
+    "required": [
+     "VpcEndpointServiceName"
+    ],
+    "type": "object"
+   },
+   "DatabaseTableList": {
+    "additionalProperties": false,
+    "properties": {
+     "Exclude": {
+      "items": {
+       "maxLength": 129,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Include": {
+      "items": {
+       "maxLength": 129,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteDeliveryStreamInput": {
+    "additionalProperties": false,
+    "properties": {
+     "AllowForceDelete": {
+      "type": "boolean"
+     },
+     "DeliveryStreamName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DeliveryStreamName"
+    ],
+    "type": "object"
+   },
+   "DeleteDeliveryStreamOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeliveryStreamDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "CreateTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DeliveryStreamARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DeliveryStreamEncryptionConfiguration": {
+      "$ref": "#/components/schemas/DeliveryStreamEncryptionConfiguration"
+     },
+     "DeliveryStreamName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DeliveryStreamStatus": {
+      "enum": [
+       "CREATING",
+       "CREATING_FAILED",
+       "DELETING",
+       "DELETING_FAILED",
+       "ACTIVE"
+      ],
+      "type": "string"
+     },
+     "DeliveryStreamType": {
+      "enum": [
+       "DirectPut",
+       "KinesisStreamAsSource",
+       "MSKAsSource",
+       "DatabaseAsSource"
+      ],
+      "type": "string"
+     },
+     "Destinations": {
+      "items": {
+       "$ref": "#/components/schemas/DestinationDescription"
+      },
+      "type": "array"
+     },
+     "FailureDescription": {
+      "$ref": "#/components/schemas/FailureDescription"
+     },
+     "HasMoreDestinations": {
+      "type": "boolean"
+     },
+     "LastUpdateTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Source": {
+      "$ref": "#/components/schemas/SourceDescription"
+     },
+     "VersionId": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DeliveryStreamName",
+     "DeliveryStreamARN",
+     "DeliveryStreamStatus",
+     "DeliveryStreamType",
+     "VersionId",
+     "Destinations",
+     "HasMoreDestinations"
+    ],
+    "type": "object"
+   },
+   "DeliveryStreamEncryptionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "FailureDescription": {
+      "$ref": "#/components/schemas/FailureDescription"
+     },
+     "KeyARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "KeyType": {
+      "enum": [
+       "AWS_OWNED_CMK",
+       "CUSTOMER_MANAGED_CMK"
+      ],
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "ENABLED",
+       "ENABLING",
+       "ENABLING_FAILED",
+       "DISABLED",
+       "DISABLING",
+       "DISABLING_FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeliveryStreamEncryptionConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "KeyARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "KeyType": {
+      "enum": [
+       "AWS_OWNED_CMK",
+       "CUSTOMER_MANAGED_CMK"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "KeyType"
+    ],
+    "type": "object"
+   },
+   "DescribeDeliveryStreamInput": {
+    "additionalProperties": false,
+    "properties": {
+     "DeliveryStreamName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ExclusiveStartDestinationId": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Limit": {
+      "maximum": 10000,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "DeliveryStreamName"
+    ],
+    "type": "object"
+   },
+   "DescribeDeliveryStreamOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "DeliveryStreamDescription": {
+      "$ref": "#/components/schemas/DeliveryStreamDescription"
+     }
+    },
+    "required": [
+     "DeliveryStreamDescription"
+    ],
+    "type": "object"
+   },
+   "Deserializer": {
+    "additionalProperties": false,
+    "properties": {
+     "HiveJsonSerDe": {
+      "$ref": "#/components/schemas/HiveJsonSerDe"
+     },
+     "OpenXJsonSerDe": {
+      "$ref": "#/components/schemas/OpenXJsonSerDe"
+     }
+    },
+    "type": "object"
+   },
+   "DestinationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "AmazonOpenSearchServerlessDestinationDescription": {
+      "$ref": "#/components/schemas/AmazonOpenSearchServerlessDestinationDescription"
+     },
+     "AmazonopensearchserviceDestinationDescription": {
+      "$ref": "#/components/schemas/AmazonopensearchserviceDestinationDescription"
+     },
+     "DestinationId": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ElasticsearchDestinationDescription": {
+      "$ref": "#/components/schemas/ElasticsearchDestinationDescription"
+     },
+     "ExtendedS3DestinationDescription": {
+      "$ref": "#/components/schemas/ExtendedS3DestinationDescription"
+     },
+     "HttpEndpointDestinationDescription": {
+      "$ref": "#/components/schemas/HttpEndpointDestinationDescription"
+     },
+     "IcebergDestinationDescription": {
+      "$ref": "#/components/schemas/IcebergDestinationDescription"
+     },
+     "RedshiftDestinationDescription": {
+      "$ref": "#/components/schemas/RedshiftDestinationDescription"
+     },
+     "S3DestinationDescription": {
+      "$ref": "#/components/schemas/S3DestinationDescription"
+     },
+     "SnowflakeDestinationDescription": {
+      "$ref": "#/components/schemas/SnowflakeDestinationDescription"
+     },
+     "SplunkDestinationDescription": {
+      "$ref": "#/components/schemas/SplunkDestinationDescription"
+     }
+    },
+    "required": [
+     "DestinationId"
+    ],
+    "type": "object"
+   },
+   "DestinationTableConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "DestinationDatabaseName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DestinationTableName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PartitionSpec": {
+      "$ref": "#/components/schemas/PartitionSpec"
+     },
+     "S3ErrorOutputPrefix": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "UniqueKeys": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "DestinationTableName",
+     "DestinationDatabaseName"
+    ],
+    "type": "object"
+   },
+   "DirectPutSourceConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "ThroughputHintInMBs": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "ThroughputHintInMBs"
+    ],
+    "type": "object"
+   },
+   "DirectPutSourceDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "ThroughputHintInMBs": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DocumentIdOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DefaultDocumentIdFormat": {
+      "enum": [
+       "FIREHOSE_DEFAULT",
+       "NO_DOCUMENT_ID"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "DefaultDocumentIdFormat"
+    ],
+    "type": "object"
+   },
+   "DynamicPartitioningConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/RetryOptions"
+     }
+    },
+    "type": "object"
+   },
+   "ElasticsearchBufferingHints": {
+    "additionalProperties": false,
+    "properties": {
+     "IntervalInSeconds": {
+      "maximum": 900,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "SizeInMBs": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ElasticsearchDestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "BufferingHints": {
+      "$ref": "#/components/schemas/ElasticsearchBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "ClusterEndpoint": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DocumentIdOptions": {
+      "$ref": "#/components/schemas/DocumentIdOptions"
+     },
+     "DomainARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IndexName": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IndexRotationPeriod": {
+      "enum": [
+       "NoRotation",
+       "OneHour",
+       "OneDay",
+       "OneWeek",
+       "OneMonth"
+      ],
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/ElasticsearchRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDocumentsOnly",
+       "AllDocuments"
+      ],
+      "type": "string"
+     },
+     "S3Configuration": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     },
+     "TypeName": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "VpcConfiguration": {
+      "$ref": "#/components/schemas/VpcConfiguration"
+     }
+    },
+    "required": [
+     "RoleARN",
+     "IndexName",
+     "S3Configuration"
+    ],
+    "type": "object"
+   },
+   "ElasticsearchDestinationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "BufferingHints": {
+      "$ref": "#/components/schemas/ElasticsearchBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "ClusterEndpoint": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DocumentIdOptions": {
+      "$ref": "#/components/schemas/DocumentIdOptions"
+     },
+     "DomainARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IndexName": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IndexRotationPeriod": {
+      "enum": [
+       "NoRotation",
+       "OneHour",
+       "OneDay",
+       "OneWeek",
+       "OneMonth"
+      ],
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/ElasticsearchRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDocumentsOnly",
+       "AllDocuments"
+      ],
+      "type": "string"
+     },
+     "S3DestinationDescription": {
+      "$ref": "#/components/schemas/S3DestinationDescription"
+     },
+     "TypeName": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "VpcConfigurationDescription": {
+      "$ref": "#/components/schemas/VpcConfigurationDescription"
+     }
+    },
+    "type": "object"
+   },
+   "ElasticsearchRetryOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DurationInSeconds": {
+      "maximum": 7200,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "KMSEncryptionConfig": {
+      "$ref": "#/components/schemas/KMSEncryptionConfig"
+     },
+     "NoEncryptionConfig": {
+      "enum": [
+       "NoEncryption"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExtendedS3DestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "BucketARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "BufferingHints": {
+      "$ref": "#/components/schemas/BufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "CompressionFormat": {
+      "enum": [
+       "UNCOMPRESSED",
+       "GZIP",
+       "ZIP",
+       "Snappy",
+       "HADOOP_SNAPPY"
+      ],
+      "type": "string"
+     },
+     "CustomTimeZone": {
+      "maxLength": 50,
+      "minLength": 0,
+      "type": "string"
+     },
+     "DataFormatConversionConfiguration": {
+      "$ref": "#/components/schemas/DataFormatConversionConfiguration"
+     },
+     "DynamicPartitioningConfiguration": {
+      "$ref": "#/components/schemas/DynamicPartitioningConfiguration"
+     },
+     "EncryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "ErrorOutputPrefix": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "FileExtension": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Prefix": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupConfiguration": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "RoleARN",
+     "BucketARN"
+    ],
+    "type": "object"
+   },
+   "ExtendedS3DestinationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "BucketARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "BufferingHints": {
+      "$ref": "#/components/schemas/BufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "CompressionFormat": {
+      "enum": [
+       "UNCOMPRESSED",
+       "GZIP",
+       "ZIP",
+       "Snappy",
+       "HADOOP_SNAPPY"
+      ],
+      "type": "string"
+     },
+     "CustomTimeZone": {
+      "maxLength": 50,
+      "minLength": 0,
+      "type": "string"
+     },
+     "DataFormatConversionConfiguration": {
+      "$ref": "#/components/schemas/DataFormatConversionConfiguration"
+     },
+     "DynamicPartitioningConfiguration": {
+      "$ref": "#/components/schemas/DynamicPartitioningConfiguration"
+     },
+     "EncryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "ErrorOutputPrefix": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "FileExtension": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Prefix": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupDescription": {
+      "$ref": "#/components/schemas/S3DestinationDescription"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "RoleARN",
+     "BucketARN",
+     "BufferingHints",
+     "CompressionFormat",
+     "EncryptionConfiguration"
+    ],
+    "type": "object"
+   },
+   "FailureDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "Details": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "VPC_ENDPOINT_SERVICE_NAME_NOT_FOUND",
+       "VPC_INTERFACE_ENDPOINT_SERVICE_ACCESS_DENIED",
+       "RETIRE_KMS_GRANT_FAILED",
+       "CREATE_KMS_GRANT_FAILED",
+       "KMS_ACCESS_DENIED",
+       "DISABLED_KMS_KEY",
+       "INVALID_KMS_KEY",
+       "KMS_KEY_NOT_FOUND",
+       "KMS_OPT_IN_REQUIRED",
+       "CREATE_ENI_FAILED",
+       "DELETE_ENI_FAILED",
+       "SUBNET_NOT_FOUND",
+       "SECURITY_GROUP_NOT_FOUND",
+       "ENI_ACCESS_DENIED",
+       "SUBNET_ACCESS_DENIED",
+       "SECURITY_GROUP_ACCESS_DENIED",
+       "UNKNOWN_ERROR"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type",
+     "Details"
+    ],
+    "type": "object"
+   },
+   "HiveJsonSerDe": {
+    "additionalProperties": false,
+    "properties": {
+     "TimestampFormats": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "HttpEndpointBufferingHints": {
+    "additionalProperties": false,
+    "properties": {
+     "IntervalInSeconds": {
+      "maximum": 900,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "SizeInMBs": {
+      "maximum": 64,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "HttpEndpointCommonAttribute": {
+    "additionalProperties": false,
+    "properties": {
+     "AttributeName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AttributeValue": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AttributeName",
+     "AttributeValue"
+    ],
+    "type": "object"
+   },
+   "HttpEndpointConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessKey": {
+      "maxLength": 4096,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Url": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Url"
+    ],
+    "type": "object"
+   },
+   "HttpEndpointDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Url": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HttpEndpointDestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "BufferingHints": {
+      "$ref": "#/components/schemas/HttpEndpointBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "EndpointConfiguration": {
+      "$ref": "#/components/schemas/HttpEndpointConfiguration"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RequestConfiguration": {
+      "$ref": "#/components/schemas/HttpEndpointRequestConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/HttpEndpointRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDataOnly",
+       "AllData"
+      ],
+      "type": "string"
+     },
+     "S3Configuration": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     },
+     "SecretsManagerConfiguration": {
+      "$ref": "#/components/schemas/SecretsManagerConfiguration"
+     }
+    },
+    "required": [
+     "EndpointConfiguration",
+     "S3Configuration"
+    ],
+    "type": "object"
+   },
+   "HttpEndpointDestinationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "BufferingHints": {
+      "$ref": "#/components/schemas/HttpEndpointBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "EndpointConfiguration": {
+      "$ref": "#/components/schemas/HttpEndpointDescription"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RequestConfiguration": {
+      "$ref": "#/components/schemas/HttpEndpointRequestConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/HttpEndpointRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDataOnly",
+       "AllData"
+      ],
+      "type": "string"
+     },
+     "S3DestinationDescription": {
+      "$ref": "#/components/schemas/S3DestinationDescription"
+     },
+     "SecretsManagerConfiguration": {
+      "$ref": "#/components/schemas/SecretsManagerConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "HttpEndpointRequestConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CommonAttributes": {
+      "items": {
+       "$ref": "#/components/schemas/HttpEndpointCommonAttribute"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     },
+     "ContentEncoding": {
+      "enum": [
+       "NONE",
+       "GZIP"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HttpEndpointRetryOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DurationInSeconds": {
+      "maximum": 7200,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "IcebergDestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AppendOnly": {
+      "type": "boolean"
+     },
+     "BufferingHints": {
+      "$ref": "#/components/schemas/BufferingHints"
+     },
+     "CatalogConfiguration": {
+      "$ref": "#/components/schemas/CatalogConfiguration"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "DestinationTableConfigurationList": {
+      "items": {
+       "$ref": "#/components/schemas/DestinationTableConfiguration"
+      },
+      "type": "array"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/RetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDataOnly",
+       "AllData"
+      ],
+      "type": "string"
+     },
+     "S3Configuration": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     },
+     "SchemaEvolutionConfiguration": {
+      "$ref": "#/components/schemas/SchemaEvolutionConfiguration"
+     },
+     "TableCreationConfiguration": {
+      "$ref": "#/components/schemas/TableCreationConfiguration"
+     }
+    },
+    "required": [
+     "RoleARN",
+     "CatalogConfiguration",
+     "S3Configuration"
+    ],
+    "type": "object"
+   },
+   "IcebergDestinationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "AppendOnly": {
+      "type": "boolean"
+     },
+     "BufferingHints": {
+      "$ref": "#/components/schemas/BufferingHints"
+     },
+     "CatalogConfiguration": {
+      "$ref": "#/components/schemas/CatalogConfiguration"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "DestinationTableConfigurationList": {
+      "items": {
+       "$ref": "#/components/schemas/DestinationTableConfiguration"
+      },
+      "type": "array"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/RetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDataOnly",
+       "AllData"
+      ],
+      "type": "string"
+     },
+     "S3DestinationDescription": {
+      "$ref": "#/components/schemas/S3DestinationDescription"
+     },
+     "SchemaEvolutionConfiguration": {
+      "$ref": "#/components/schemas/SchemaEvolutionConfiguration"
+     },
+     "TableCreationConfiguration": {
+      "$ref": "#/components/schemas/TableCreationConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "InputFormatConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Deserializer": {
+      "$ref": "#/components/schemas/Deserializer"
+     }
+    },
+    "type": "object"
+   },
+   "KMSEncryptionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "AWSKMSKeyARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AWSKMSKeyARN"
+    ],
+    "type": "object"
+   },
+   "KinesisStreamSourceConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "KinesisStreamARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "KinesisStreamARN",
+     "RoleARN"
+    ],
+    "type": "object"
+   },
+   "KinesisStreamSourceDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "DeliveryStartTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "KinesisStreamARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListDeliveryStreamsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "DeliveryStreamType": {
+      "enum": [
+       "DirectPut",
+       "KinesisStreamAsSource",
+       "MSKAsSource",
+       "DatabaseAsSource"
+      ],
+      "type": "string"
+     },
+     "ExclusiveStartDeliveryStreamName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Limit": {
+      "maximum": 10000,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ListDeliveryStreamsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "DeliveryStreamNames": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "HasMoreDeliveryStreams": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "DeliveryStreamNames",
+     "HasMoreDeliveryStreams"
+    ],
+    "type": "object"
+   },
+   "MSKSourceConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AuthenticationConfiguration": {
+      "$ref": "#/components/schemas/AuthenticationConfiguration"
+     },
+     "MSKClusterARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ReadFromTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "TopicName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "MSKClusterARN",
+     "TopicName",
+     "AuthenticationConfiguration"
+    ],
+    "type": "object"
+   },
+   "MSKSourceDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "AuthenticationConfiguration": {
+      "$ref": "#/components/schemas/AuthenticationConfiguration"
+     },
+     "DeliveryStartTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "MSKClusterARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ReadFromTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "TopicName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OpenXJsonSerDe": {
+    "additionalProperties": false,
+    "properties": {
+     "CaseInsensitive": {
+      "type": "boolean"
+     },
+     "ColumnToJsonKeyMappings": {
+      "additionalProperties": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "ConvertDotsInJsonKeysToUnderscores": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "OrcSerDe": {
+    "additionalProperties": false,
+    "properties": {
+     "BlockSizeBytes": {
+      "minimum": 67108864,
+      "type": "integer"
+     },
+     "BloomFilterColumns": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "BloomFilterFalsePositiveProbability": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     },
+     "Compression": {
+      "enum": [
+       "NONE",
+       "ZLIB",
+       "SNAPPY"
+      ],
+      "type": "string"
+     },
+     "DictionaryKeyThreshold": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     },
+     "EnablePadding": {
+      "type": "boolean"
+     },
+     "FormatVersion": {
+      "enum": [
+       "V0_11",
+       "V0_12"
+      ],
+      "type": "string"
+     },
+     "PaddingTolerance": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     },
+     "RowIndexStride": {
+      "minimum": 1000,
+      "type": "integer"
+     },
+     "StripeSizeBytes": {
+      "minimum": 8388608,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "OutputFormatConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Serializer": {
+      "$ref": "#/components/schemas/Serializer"
+     }
+    },
+    "type": "object"
+   },
+   "ParquetSerDe": {
+    "additionalProperties": false,
+    "properties": {
+     "BlockSizeBytes": {
+      "minimum": 67108864,
+      "type": "integer"
+     },
+     "Compression": {
+      "enum": [
+       "UNCOMPRESSED",
+       "GZIP",
+       "SNAPPY"
+      ],
+      "type": "string"
+     },
+     "EnableDictionaryCompression": {
+      "type": "boolean"
+     },
+     "MaxPaddingBytes": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "PageSizeBytes": {
+      "minimum": 65536,
+      "type": "integer"
+     },
+     "WriterVersion": {
+      "enum": [
+       "V1",
+       "V2"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PartitionField": {
+    "additionalProperties": false,
+    "properties": {
+     "SourceName": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "SourceName"
+    ],
+    "type": "object"
+   },
+   "PartitionSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "Identity": {
+      "items": {
+       "$ref": "#/components/schemas/PartitionField"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ProcessingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "Processors": {
+      "items": {
+       "$ref": "#/components/schemas/Processor"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Processor": {
+    "additionalProperties": false,
+    "properties": {
+     "Parameters": {
+      "items": {
+       "$ref": "#/components/schemas/ProcessorParameter"
+      },
+      "type": "array"
+     },
+     "Type": {
+      "enum": [
+       "RecordDeAggregation",
+       "Decompression",
+       "CloudWatchLogProcessing",
+       "Lambda",
+       "MetadataExtraction",
+       "AppendDelimiterToRecord"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type"
+    ],
+    "type": "object"
+   },
+   "ProcessorParameter": {
+    "additionalProperties": false,
+    "properties": {
+     "ParameterName": {
+      "enum": [
+       "LambdaArn",
+       "NumberOfRetries",
+       "MetadataExtractionQuery",
+       "JsonParsingEngine",
+       "RoleArn",
+       "BufferSizeInMBs",
+       "BufferIntervalInSeconds",
+       "SubRecordType",
+       "Delimiter",
+       "CompressionFormat",
+       "DataMessageExtraction"
+      ],
+      "type": "string"
+     },
+     "ParameterValue": {
+      "maxLength": 5120,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ParameterName",
+     "ParameterValue"
+    ],
+    "type": "object"
+   },
+   "RedshiftDestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "ClusterJDBCURL": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CopyCommand": {
+      "$ref": "#/components/schemas/CopyCommand"
+     },
+     "Password": {
+      "maxLength": 512,
+      "minLength": 6,
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/RedshiftRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupConfiguration": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "S3Configuration": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     },
+     "SecretsManagerConfiguration": {
+      "$ref": "#/components/schemas/SecretsManagerConfiguration"
+     },
+     "Username": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "RoleARN",
+     "ClusterJDBCURL",
+     "CopyCommand",
+     "S3Configuration"
+    ],
+    "type": "object"
+   },
+   "RedshiftDestinationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "ClusterJDBCURL": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CopyCommand": {
+      "$ref": "#/components/schemas/CopyCommand"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/RedshiftRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupDescription": {
+      "$ref": "#/components/schemas/S3DestinationDescription"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "S3DestinationDescription": {
+      "$ref": "#/components/schemas/S3DestinationDescription"
+     },
+     "SecretsManagerConfiguration": {
+      "$ref": "#/components/schemas/SecretsManagerConfiguration"
+     },
+     "Username": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "RoleARN",
+     "ClusterJDBCURL",
+     "CopyCommand",
+     "S3DestinationDescription"
+    ],
+    "type": "object"
+   },
+   "RedshiftRetryOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DurationInSeconds": {
+      "maximum": 7200,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "RetryOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DurationInSeconds": {
+      "maximum": 7200,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "S3DestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "BucketARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "BufferingHints": {
+      "$ref": "#/components/schemas/BufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "CompressionFormat": {
+      "enum": [
+       "UNCOMPRESSED",
+       "GZIP",
+       "ZIP",
+       "Snappy",
+       "HADOOP_SNAPPY"
+      ],
+      "type": "string"
+     },
+     "EncryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "ErrorOutputPrefix": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Prefix": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "RoleARN",
+     "BucketARN"
+    ],
+    "type": "object"
+   },
+   "S3DestinationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "BucketARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "BufferingHints": {
+      "$ref": "#/components/schemas/BufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "CompressionFormat": {
+      "enum": [
+       "UNCOMPRESSED",
+       "GZIP",
+       "ZIP",
+       "Snappy",
+       "HADOOP_SNAPPY"
+      ],
+      "type": "string"
+     },
+     "EncryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "ErrorOutputPrefix": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Prefix": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "RoleARN",
+     "BucketARN",
+     "BufferingHints",
+     "CompressionFormat",
+     "EncryptionConfiguration"
+    ],
+    "type": "object"
+   },
+   "SchemaConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatabaseName": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Region": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RoleARN": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TableName": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "VersionId": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SchemaEvolutionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "Enabled"
+    ],
+    "type": "object"
+   },
+   "SecretsManagerConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SecretARN": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Enabled"
+    ],
+    "type": "object"
+   },
+   "Serializer": {
+    "additionalProperties": false,
+    "properties": {
+     "OrcSerDe": {
+      "$ref": "#/components/schemas/OrcSerDe"
+     },
+     "ParquetSerDe": {
+      "$ref": "#/components/schemas/ParquetSerDe"
+     }
+    },
+    "type": "object"
+   },
+   "SnowflakeBufferingHints": {
+    "additionalProperties": false,
+    "properties": {
+     "IntervalInSeconds": {
+      "maximum": 900,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "SizeInMBs": {
+      "maximum": 128,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "SnowflakeDestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AccountUrl": {
+      "maxLength": 2048,
+      "minLength": 24,
+      "type": "string"
+     },
+     "BufferingHints": {
+      "$ref": "#/components/schemas/SnowflakeBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "ContentColumnName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DataLoadingOption": {
+      "enum": [
+       "JSON_MAPPING",
+       "VARIANT_CONTENT_MAPPING",
+       "VARIANT_CONTENT_AND_METADATA_MAPPING"
+      ],
+      "type": "string"
+     },
+     "Database": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "KeyPassphrase": {
+      "maxLength": 255,
+      "minLength": 7,
+      "type": "string"
+     },
+     "MetaDataColumnName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PrivateKey": {
+      "maxLength": 4096,
+      "minLength": 256,
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/SnowflakeRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDataOnly",
+       "AllData"
+      ],
+      "type": "string"
+     },
+     "S3Configuration": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     },
+     "Schema": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SecretsManagerConfiguration": {
+      "$ref": "#/components/schemas/SecretsManagerConfiguration"
+     },
+     "SnowflakeRoleConfiguration": {
+      "$ref": "#/components/schemas/SnowflakeRoleConfiguration"
+     },
+     "SnowflakeVpcConfiguration": {
+      "$ref": "#/components/schemas/SnowflakeVpcConfiguration"
+     },
+     "Table": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "User": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AccountUrl",
+     "Database",
+     "Schema",
+     "Table",
+     "RoleARN",
+     "S3Configuration"
+    ],
+    "type": "object"
+   },
+   "SnowflakeDestinationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "AccountUrl": {
+      "maxLength": 2048,
+      "minLength": 24,
+      "type": "string"
+     },
+     "BufferingHints": {
+      "$ref": "#/components/schemas/SnowflakeBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "ContentColumnName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DataLoadingOption": {
+      "enum": [
+       "JSON_MAPPING",
+       "VARIANT_CONTENT_MAPPING",
+       "VARIANT_CONTENT_AND_METADATA_MAPPING"
+      ],
+      "type": "string"
+     },
+     "Database": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "MetaDataColumnName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/SnowflakeRetryOptions"
+     },
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedDataOnly",
+       "AllData"
+      ],
+      "type": "string"
+     },
+     "S3DestinationDescription": {
+      "$ref": "#/components/schemas/S3DestinationDescription"
+     },
+     "Schema": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SecretsManagerConfiguration": {
+      "$ref": "#/components/schemas/SecretsManagerConfiguration"
+     },
+     "SnowflakeRoleConfiguration": {
+      "$ref": "#/components/schemas/SnowflakeRoleConfiguration"
+     },
+     "SnowflakeVpcConfiguration": {
+      "$ref": "#/components/schemas/SnowflakeVpcConfiguration"
+     },
+     "Table": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "User": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SnowflakeRetryOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DurationInSeconds": {
+      "maximum": 7200,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "SnowflakeRoleConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "SnowflakeRole": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SnowflakeVpcConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "PrivateLinkVpceId": {
+      "maxLength": 255,
+      "minLength": 47,
+      "type": "string"
+     }
+    },
+    "required": [
+     "PrivateLinkVpceId"
+    ],
+    "type": "object"
+   },
+   "SourceDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseSourceDescription": {
+      "$ref": "#/components/schemas/DatabaseSourceDescription"
+     },
+     "DirectPutSourceDescription": {
+      "$ref": "#/components/schemas/DirectPutSourceDescription"
+     },
+     "KinesisStreamSourceDescription": {
+      "$ref": "#/components/schemas/KinesisStreamSourceDescription"
+     },
+     "MSKSourceDescription": {
+      "$ref": "#/components/schemas/MSKSourceDescription"
+     }
+    },
+    "type": "object"
+   },
+   "SplunkBufferingHints": {
+    "additionalProperties": false,
+    "properties": {
+     "IntervalInSeconds": {
+      "maximum": 60,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "SizeInMBs": {
+      "maximum": 5,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "SplunkDestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "BufferingHints": {
+      "$ref": "#/components/schemas/SplunkBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "HECAcknowledgmentTimeoutInSeconds": {
+      "maximum": 600,
+      "minimum": 180,
+      "type": "integer"
+     },
+     "HECEndpoint": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "HECEndpointType": {
+      "enum": [
+       "Raw",
+       "Event"
+      ],
+      "type": "string"
+     },
+     "HECToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/SplunkRetryOptions"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedEventsOnly",
+       "AllEvents"
+      ],
+      "type": "string"
+     },
+     "S3Configuration": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     },
+     "SecretsManagerConfiguration": {
+      "$ref": "#/components/schemas/SecretsManagerConfiguration"
+     }
+    },
+    "required": [
+     "HECEndpoint",
+     "HECEndpointType",
+     "S3Configuration"
+    ],
+    "type": "object"
+   },
+   "SplunkDestinationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "BufferingHints": {
+      "$ref": "#/components/schemas/SplunkBufferingHints"
+     },
+     "CloudWatchLoggingOptions": {
+      "$ref": "#/components/schemas/CloudWatchLoggingOptions"
+     },
+     "HECAcknowledgmentTimeoutInSeconds": {
+      "maximum": 600,
+      "minimum": 180,
+      "type": "integer"
+     },
+     "HECEndpoint": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "HECEndpointType": {
+      "enum": [
+       "Raw",
+       "Event"
+      ],
+      "type": "string"
+     },
+     "HECToken": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ProcessingConfiguration": {
+      "$ref": "#/components/schemas/ProcessingConfiguration"
+     },
+     "RetryOptions": {
+      "$ref": "#/components/schemas/SplunkRetryOptions"
+     },
+     "S3BackupMode": {
+      "enum": [
+       "FailedEventsOnly",
+       "AllEvents"
+      ],
+      "type": "string"
+     },
+     "S3DestinationDescription": {
+      "$ref": "#/components/schemas/S3DestinationDescription"
+     },
+     "SecretsManagerConfiguration": {
+      "$ref": "#/components/schemas/SecretsManagerConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "SplunkRetryOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DurationInSeconds": {
+      "maximum": 7200,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "StartDeliveryStreamEncryptionInput": {
+    "additionalProperties": false,
+    "properties": {
+     "DeliveryStreamEncryptionConfigurationInput": {
+      "$ref": "#/components/schemas/DeliveryStreamEncryptionConfigurationInput"
+     },
+     "DeliveryStreamName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DeliveryStreamName"
+    ],
+    "type": "object"
+   },
+   "StartDeliveryStreamEncryptionOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "StopDeliveryStreamEncryptionInput": {
+    "additionalProperties": false,
+    "properties": {
+     "DeliveryStreamName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DeliveryStreamName"
+    ],
+    "type": "object"
+   },
+   "StopDeliveryStreamEncryptionOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "TableCreationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "Enabled"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "VpcConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SecurityGroupIds": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "SubnetIds": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "SubnetIds",
+     "RoleARN",
+     "SecurityGroupIds"
+    ],
+    "type": "object"
+   },
+   "VpcConfigurationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "RoleARN": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SecurityGroupIds": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "SubnetIds": {
+      "items": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "type": "array"
+     },
+     "VpcId": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "SubnetIds",
+     "RoleARN",
+     "SecurityGroupIds",
+     "VpcId"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Kinesis Firehose API (2015-08-04). Every other official operation returns HTTP 501 UnknownOperationException. Firehose streams are configuration records that stay CREATING: no record is accepted, buffered, transformed or delivered, and PutRecord, PutRecordBatch and UpdateDestination return UnknownOperationException with HTTP 501. Only DirectPut streams with one Amazon S3 destination (ExtendedS3DestinationConfiguration) are supported; buffering defaults to 5 MiB and 300 seconds, compression to UNCOMPRESSED and encryption to NoEncryption. Lambda processing, S3 backup, format conversion, dynamic partitioning, Kinesis, MSK and database sources and every other destination are refused, so no Redshift password, Splunk token, HTTP endpoint key or Snowflake private key is stored. The bucket and role are not checked or written. Server-side encryption becomes ENABLED or DISABLED immediately and keys are not checked with KMS. Tags are refused because TagDeliveryStream, UntagDeliveryStream and ListTagsForDeliveryStream address streams by name, which the catalog tagging model does not support. ListDeliveryStreams returns every stream in one page and refuses Limit.",
+  "title": "Amazon Data Firehose (simulator catalog)",
+  "version": "2015-08-04"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "firehoseJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "Firehose_20150804.CreateDeliveryStream",
+        "Firehose_20150804.DeleteDeliveryStream",
+        "Firehose_20150804.DescribeDeliveryStream",
+        "Firehose_20150804.ListDeliveryStreams",
+        "Firehose_20150804.StartDeliveryStreamEncryption",
+        "Firehose_20150804.StopDeliveryStreamEncryption"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateDeliveryStream": {
+         "summary": "X-Amz-Target: Firehose_20150804.CreateDeliveryStream",
+         "value": {}
+        },
+        "DeleteDeliveryStream": {
+         "summary": "X-Amz-Target: Firehose_20150804.DeleteDeliveryStream",
+         "value": {}
+        },
+        "DescribeDeliveryStream": {
+         "summary": "X-Amz-Target: Firehose_20150804.DescribeDeliveryStream",
+         "value": {}
+        },
+        "ListDeliveryStreams": {
+         "summary": "X-Amz-Target: Firehose_20150804.ListDeliveryStreams",
+         "value": {}
+        },
+        "StartDeliveryStreamEncryption": {
+         "summary": "X-Amz-Target: Firehose_20150804.StartDeliveryStreamEncryption",
+         "value": {}
+        },
+        "StopDeliveryStreamEncryption": {
+         "summary": "X-Amz-Target: Firehose_20150804.StopDeliveryStreamEncryption",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon Data Firehose JSON 1.1 operations",
+    "tags": [
+     "Amazon Data Firehose"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Kinesis Firehose API (2015-08-04). Every other official operation returns HTTP 501 UnknownOperationException. Firehose streams are configuration records that stay CREATING: no record is accepted, buffered, transformed or delivered, and PutRecord, PutRecordBatch and UpdateDestination return UnknownOperationException with HTTP 501. Only DirectPut streams with one Amazon S3 destination (ExtendedS3DestinationConfiguration) are supported; buffering defaults to 5 MiB and 300 seconds, compression to UNCOMPRESSED and encryption to NoEncryption. Lambda processing, S3 backup, format conversion, dynamic partitioning, Kinesis, MSK and database sources and every other destination are refused, so no Redshift password, Splunk token, HTTP endpoint key or Snowflake private key is stored. The bucket and role are not checked or written. Server-side encryption becomes ENABLED or DISABLED immediately and keys are not checked with KMS. Tags are refused because TagDeliveryStream, UntagDeliveryStream and ListTagsForDeliveryStream address streams by name, which the catalog tagging model does not support. ListDeliveryStreams returns every stream in one page and refuses Limit.",
+   "name": "Amazon Data Firehose"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/firehose/2015-08-04/service-2.json",
+  "sha256": "321bc39f3b895f46dd68d875d150d15505550568a7835efe007eb30036b84a40",
+  "license": "Apache-2.0"
+ }
+}

@@ -74,12 +74,12 @@ func (d *decoder) decode(shapeName string, raw any, at string, depth int) (any, 
 			return d.document(raw, at, depth)
 		}
 		out := make(map[string]any, len(object))
-		for name, value := range object {
-			member, known := shape.Members[name]
+		for wire, value := range object {
+			name, known := shape.memberForWire(wire)
 			if !known {
-				return nil, invalid("Unknown member %s.%s is not part of the official input shape.", at, name)
+				return nil, invalid("Unknown member %s.%s is not part of the official input shape.", at, wire)
 			}
-			converted, err := d.decode(member.Shape, value, at+"."+name, depth+1)
+			converted, err := d.decode(shape.Members[name].Shape, value, at+"."+name, depth+1)
 			if err != nil {
 				return nil, err
 			}
@@ -368,7 +368,7 @@ func (e *encoder) project(shapeName string, value any, depth int) (any, bool) {
 		for name, member := range shape.Members {
 			if item, present := object[name]; present {
 				if converted, ok := e.project(member.Shape, item, depth+1); ok {
-					out[name] = converted
+					out[member.wire(name)] = converted
 				}
 			}
 		}

@@ -1,0 +1,1303 @@
+{
+ "components": {
+  "schemas": {
+   "RuleGroupsNamespaceDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "data": {
+      "contentEncoding": "base64",
+      "type": "string"
+     },
+     "modifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "$ref": "#/components/schemas/RuleGroupsNamespaceStatus"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "arn",
+     "name",
+     "status",
+     "data",
+     "createdAt",
+     "modifiedAt"
+    ],
+    "type": "object"
+   },
+   "RuleGroupsNamespaceStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "statusCode": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "CREATION_FAILED",
+       "UPDATE_FAILED"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "statusCode"
+    ],
+    "type": "object"
+   },
+   "RuleGroupsNamespaceSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "modifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "$ref": "#/components/schemas/RuleGroupsNamespaceStatus"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "arn",
+     "name",
+     "status",
+     "createdAt",
+     "modifiedAt"
+    ],
+    "type": "object"
+   },
+   "WorkspaceDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "alias": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "kmsKeyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "prometheusEndpoint": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "$ref": "#/components/schemas/WorkspaceStatus"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "workspaceId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "workspaceId",
+     "arn",
+     "status",
+     "createdAt"
+    ],
+    "type": "object"
+   },
+   "WorkspaceStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "statusCode": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "CREATION_FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "statusCode"
+    ],
+    "type": "object"
+   },
+   "WorkspaceSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "alias": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "kmsKeyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "status": {
+      "$ref": "#/components/schemas/WorkspaceStatus"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "workspaceId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "workspaceId",
+     "arn",
+     "status",
+     "createdAt"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Prometheus Service API (2020-08-01). Every other official operation returns HTTP 501 UnknownOperationException. Workspaces and rule groups namespaces are ACTIVE metadata without a prometheusEndpoint: no remote write, ingestion, PromQL query, recording or alerting rule evaluation is performed, and kmsKeyArn is stored without encryption or key checks. Rules files are stored as supplied after a check for a top-level groups key; deleting a workspace deletes its rule groups namespaces. Aliases are stored exactly as supplied, and the alias and name prefix filters of the list operations are refused. Alert manager definitions, scrapers, anomaly detectors, logging, resource policies and workspace configuration return UnknownOperationException with HTTP 501.",
+  "title": "Amazon Managed Service for Prometheus (simulator catalog)",
+  "version": "2020-08-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "ampUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   },
+   "get": {
+    "operationId": "ampListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   },
+   "post": {
+    "operationId": "ampTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   }
+  },
+  "/workspaces": {
+   "get": {
+    "operationId": "ampListWorkspaces",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "alias",
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 1000,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "workspaces": {
+           "items": {
+            "$ref": "#/components/schemas/WorkspaceSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListWorkspaces",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   },
+   "post": {
+    "operationId": "ampCreateWorkspace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "alias": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "kmsKeyArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "kmsKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "status": {
+           "$ref": "#/components/schemas/WorkspaceStatus"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "workspaceId": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateWorkspace",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   }
+  },
+  "/workspaces/{workspaceId}": {
+   "delete": {
+    "operationId": "ampDeleteWorkspace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clientToken",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteWorkspace",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   },
+   "get": {
+    "operationId": "ampDescribeWorkspace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "workspace": {
+           "$ref": "#/components/schemas/WorkspaceDescription"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeWorkspace",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   }
+  },
+  "/workspaces/{workspaceId}/alias": {
+   "post": {
+    "operationId": "ampUpdateWorkspaceAlias",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "alias": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateWorkspaceAlias",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   }
+  },
+  "/workspaces/{workspaceId}/rulegroupsnamespaces": {
+   "get": {
+    "operationId": "ampListRuleGroupsNamespaces",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "name",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 1000,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "ruleGroupsNamespaces": {
+           "items": {
+            "$ref": "#/components/schemas/RuleGroupsNamespaceSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListRuleGroupsNamespaces",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   },
+   "post": {
+    "operationId": "ampCreateRuleGroupsNamespace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "data": {
+          "contentEncoding": "base64",
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "data",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "$ref": "#/components/schemas/RuleGroupsNamespaceStatus"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateRuleGroupsNamespace",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   }
+  },
+  "/workspaces/{workspaceId}/rulegroupsnamespaces/{name}": {
+   "delete": {
+    "operationId": "ampDeleteRuleGroupsNamespace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clientToken",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteRuleGroupsNamespace",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   },
+   "get": {
+    "operationId": "ampDescribeRuleGroupsNamespace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ruleGroupsNamespace": {
+           "$ref": "#/components/schemas/RuleGroupsNamespaceDescription"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeRuleGroupsNamespace",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   },
+   "put": {
+    "operationId": "ampPutRuleGroupsNamespace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aps"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "data": {
+          "contentEncoding": "base64",
+          "type": "string"
+         }
+        },
+        "required": [
+         "data"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "$ref": "#/components/schemas/RuleGroupsNamespaceStatus"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "PutRuleGroupsNamespace",
+    "tags": [
+     "Amazon Managed Service for Prometheus"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Prometheus Service API (2020-08-01). Every other official operation returns HTTP 501 UnknownOperationException. Workspaces and rule groups namespaces are ACTIVE metadata without a prometheusEndpoint: no remote write, ingestion, PromQL query, recording or alerting rule evaluation is performed, and kmsKeyArn is stored without encryption or key checks. Rules files are stored as supplied after a check for a top-level groups key; deleting a workspace deletes its rule groups namespaces. Aliases are stored exactly as supplied, and the alias and name prefix filters of the list operations are refused. Alert manager definitions, scrapers, anomaly detectors, logging, resource policies and workspace configuration return UnknownOperationException with HTTP 501.",
+   "name": "Amazon Managed Service for Prometheus"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/amp/2020-08-01/service-2.json",
+  "sha256": "dbd67f6706322549dba20d5cf54e641e1f35555fb51468a6907944a3d747fc1a",
+  "license": "Apache-2.0"
+ }
+}

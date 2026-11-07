@@ -1,0 +1,25 @@
+{
+ "client": "firehose",
+ "steps": [
+  {"op": "create_delivery_stream", "args": {"DeliveryStreamName": "fixture-stream", "DeliveryStreamType": "DirectPut", "ExtendedS3DestinationConfiguration": {"RoleARN": "arn:aws:iam::000000000000:role/firehose", "BucketARN": "arn:aws:s3:::fixture-bucket", "Prefix": "logs/"}}, "save": {"arn": "DeliveryStreamARN"}},
+  {"op": "describe_delivery_stream", "args": {"DeliveryStreamName": "fixture-stream"}, "expect": {"DeliveryStreamDescription.DeliveryStreamARN": "${arn}", "DeliveryStreamDescription.DeliveryStreamStatus": "CREATING", "DeliveryStreamDescription.Destinations[0].ExtendedS3DestinationDescription.BufferingHints.SizeInMBs": 5, "DeliveryStreamDescription.Destinations[0].ExtendedS3DestinationDescription.CompressionFormat": "UNCOMPRESSED", "DeliveryStreamDescription.DeliveryStreamEncryptionConfiguration.Status": "DISABLED"}},
+  {"op": "list_delivery_streams", "args": {"DeliveryStreamType": "DirectPut"}, "expect": {"DeliveryStreamNames": ["fixture-stream"], "HasMoreDeliveryStreams": false}},
+  {"op": "start_delivery_stream_encryption", "args": {"DeliveryStreamName": "fixture-stream", "DeliveryStreamEncryptionConfigurationInput": {"KeyType": "AWS_OWNED_CMK"}}},
+  {"op": "describe_delivery_stream", "args": {"DeliveryStreamName": "fixture-stream"}, "expect": {"DeliveryStreamDescription.DeliveryStreamEncryptionConfiguration.Status": "ENABLED", "DeliveryStreamDescription.DeliveryStreamEncryptionConfiguration.KeyType": "AWS_OWNED_CMK"}},
+  {"op": "create_delivery_stream", "args": {"DeliveryStreamName": "fixture-redshift", "RedshiftDestinationConfiguration": {"RoleARN": "arn:aws:iam::000000000000:role/firehose", "ClusterJDBCURL": "jdbc:redshift://example:5439/db", "CopyCommand": {"DataTableName": "t"}, "Username": "admin", "Password": "secret-password", "S3Configuration": {"RoleARN": "arn:aws:iam::000000000000:role/firehose", "BucketARN": "arn:aws:s3:::fixture-bucket"}}}, "error": "InvalidArgumentException"},
+  {"op": "put_record", "args": {"DeliveryStreamName": "fixture-stream", "Record": {"Data": "aGVsbG8="}}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_delivery_stream", "args": {"DeliveryStreamName": "missing-stream"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_delivery_streams", "args": {}, "expect": {"DeliveryStreamNames#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_delivery_stream", "args": {"DeliveryStreamName": "fixture-stream"}, "expect": {"DeliveryStreamDescription.Destinations[0].ExtendedS3DestinationDescription.Prefix": "logs/"}}
+ ],
+ "cleanup": [
+  {"op": "stop_delivery_stream_encryption", "args": {"DeliveryStreamName": "fixture-stream"}},
+  {"op": "describe_delivery_stream", "args": {"DeliveryStreamName": "fixture-stream"}, "expect": {"DeliveryStreamDescription.DeliveryStreamEncryptionConfiguration.Status": "DISABLED"}},
+  {"op": "delete_delivery_stream", "args": {"DeliveryStreamName": "fixture-stream"}},
+  {"op": "list_delivery_streams", "args": {}, "expect": {"DeliveryStreamNames#count": 0}}
+ ]
+}

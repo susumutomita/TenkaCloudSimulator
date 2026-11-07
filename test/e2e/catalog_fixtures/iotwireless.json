@@ -1,0 +1,233 @@
+{
+ "client": "iotwireless",
+ "steps": [
+  {
+   "op": "create_destination",
+   "args": {
+    "Name": "uplinks",
+    "ExpressionType": "RuleName",
+    "Expression": "ProcessUplinks",
+    "RoleArn": "arn:aws:iam::000000000000:role/iotwireless-destination",
+    "Tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ]
+   },
+   "save": {
+    "destination": "Arn"
+   },
+   "expect": {
+    "Arn": "arn:aws:iotwireless:us-east-1:000000000000:Destination/uplinks"
+   }
+  },
+  {
+   "op": "get_destination",
+   "args": {
+    "Name": "uplinks"
+   },
+   "expect": {
+    "Expression": "ProcessUplinks",
+    "ExpressionType": "RuleName"
+   }
+  },
+  {
+   "op": "list_destinations",
+   "args": {},
+   "expect": {
+    "DestinationList#count": 1
+   }
+  },
+  {
+   "op": "update_destination",
+   "args": {
+    "Name": "uplinks",
+    "Description": "LoRaWAN uplinks"
+   }
+  },
+  {
+   "op": "create_device_profile",
+   "args": {
+    "Name": "class-a",
+    "LoRaWAN": {
+     "MacVersion": "1.0.3",
+     "RegParamsRevision": "RP002-1.0.1",
+     "RfRegion": "US915",
+     "SupportsJoin": true
+    }
+   },
+   "save": {
+    "deviceProfile": "Id"
+   }
+  },
+  {
+   "op": "get_device_profile",
+   "args": {
+    "Id": "${deviceProfile}"
+   },
+   "expect": {
+    "LoRaWAN.RfRegion": "US915",
+    "Name": "class-a"
+   }
+  },
+  {
+   "op": "list_device_profiles",
+   "args": {},
+   "expect": {
+    "DeviceProfileList#count": 1
+   }
+  },
+  {
+   "op": "create_device_profile",
+   "args": {
+    "Name": "sidewalk",
+    "Sidewalk": {}
+   },
+   "error": "ValidationException"
+  },
+  {
+   "op": "create_service_profile",
+   "args": {
+    "Name": "default",
+    "LoRaWAN": {
+     "AddGwMetadata": true
+    }
+   },
+   "save": {
+    "serviceProfile": "Id"
+   }
+  },
+  {
+   "op": "get_service_profile",
+   "args": {
+    "Id": "${serviceProfile}"
+   },
+   "expect": {
+    "LoRaWAN.AddGwMetadata": true
+   }
+  },
+  {
+   "op": "list_service_profiles",
+   "args": {},
+   "expect": {
+    "ServiceProfileList#count": 1
+   }
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "ResourceArn": "${destination}",
+    "Tags": [
+     {
+      "Key": "stage",
+      "Value": "dev"
+     }
+    ]
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "ResourceArn": "${destination}",
+    "TagKeys": [
+     "stage"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "ResourceArn": "${destination}"
+   },
+   "expect": {
+    "Tags#count": 1,
+    "Tags[0].Key": "team"
+   }
+  },
+  {
+   "op": "create_wireless_device",
+   "args": {
+    "Type": "LoRaWAN",
+    "DestinationName": "uplinks"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "get_destination",
+   "args": {
+    "Name": "missing"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_destinations",
+   "args": {},
+   "expect": {
+    "DestinationList#count": 0
+   }
+  },
+  {
+   "op": "list_device_profiles",
+   "args": {},
+   "expect": {
+    "DeviceProfileList#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_destination",
+   "args": {
+    "Name": "uplinks"
+   },
+   "expect": {
+    "Description": "LoRaWAN uplinks"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_destination",
+   "args": {
+    "Name": "uplinks"
+   }
+  },
+  {
+   "op": "delete_device_profile",
+   "args": {
+    "Id": "${deviceProfile}"
+   }
+  },
+  {
+   "op": "delete_service_profile",
+   "args": {
+    "Id": "${serviceProfile}"
+   }
+  },
+  {
+   "op": "list_destinations",
+   "args": {},
+   "expect": {
+    "DestinationList#count": 0
+   }
+  },
+  {
+   "op": "list_device_profiles",
+   "args": {},
+   "expect": {
+    "DeviceProfileList#count": 0
+   }
+  },
+  {
+   "op": "list_service_profiles",
+   "args": {},
+   "expect": {
+    "ServiceProfileList#count": 0
+   }
+  }
+ ]
+}

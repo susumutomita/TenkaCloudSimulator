@@ -1,0 +1,21 @@
+{
+ "client": "pinpoint",
+ "steps": [
+  {"op": "create_app", "args": {"CreateApplicationRequest": {"Name": "storefront"}}, "save": {"app": "ApplicationResponse.Id", "arn": "ApplicationResponse.Arn"}, "expect": {"ApplicationResponse.Name": "storefront"}},
+  {"op": "get_app", "args": {"ApplicationId": "${app}"}, "expect": {"ApplicationResponse.Arn": "${arn}", "ApplicationResponse.Name": "storefront"}},
+  {"op": "get_apps", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "update_gcm_channel", "args": {"ApplicationId": "${app}", "GCMChannelRequest": {"ApiKey": "dummy", "Enabled": true}}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_app", "args": {"ApplicationId": "0123456789abcdef0123456789abcdef"}, "error": "NotFoundException"},
+  {"op": "create_app", "args": {"CreateApplicationRequest": {"Name": "tagged", "tags": {"team": "a"}}}, "error": "BadRequestException"}
+ ],
+ "isolation": [
+  {"op": "get_app", "args": {"ApplicationId": "0123456789abcdef0123456789abcdef"}, "error": "NotFoundException"}
+ ],
+ "after_restart": [
+  {"op": "get_app", "args": {"ApplicationId": "${app}"}, "expect": {"ApplicationResponse.Id": "${app}"}}
+ ],
+ "cleanup": [
+  {"op": "delete_app", "args": {"ApplicationId": "${app}"}, "expect": {"ApplicationResponse.Id": "${app}"}},
+  {"op": "get_app", "args": {"ApplicationId": "${app}"}, "error": "NotFoundException"}
+ ]
+}
