@@ -172,7 +172,9 @@ export default function GCPCatalogView({request, catalog}) {
     if (removed && alive.current) { await load(); if (alive.current) setNotice(t('Resource deleted.', 'リソースを削除しました。')); }
   }
   async function inspect(item) {
-    const epoch = fresh(); setError('');
+    // Opening a resource supersedes a list request still in flight, whose
+    // finally block will no longer clear the loading state.
+    const epoch = fresh(); setError(''); setLoading(false);
     if (!collection.methods.get) { setDetail(item); return; }
     try { const value = await call(resourceURL(api, collection.methods.get, itemName(collection, listMethod, listScope, item))); if (valid(epoch)) setDetail(unwrap(value)); }
     catch (e) { if (valid(epoch)) setError(e.message); }
