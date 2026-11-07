@@ -84,7 +84,7 @@ Pinned sources:
 | #369 | Spectrum Access System | Alpha only; device registration and signing are regulated real-world actions. |
 | #360 | Media CDN | `networkservices` offers only IAM policy methods for edge cache services, origins and keysets. |
 | #334 | Cloud Storage for Firebase | `addFirebase` links an existing Cloud Storage bucket from another provider; the default bucket provisions a real bucket. |
-| #383 | Cloud Source Repositories | Discovery documents end of sales from 2024-06-17 (existing customers only). |
+| #383 | Cloud Source Repositories | The `sourcerepo.v1` discovery document states end of sales from 2024-06-17: only projects that enabled the API before then can use it. |
 | #346 | Dedicated Interconnect | `compute.v1` `interconnects.insert` orders physical links (`requestedLinkCount`) at an interconnect location. Partner Interconnect attachments (#347) are served. |
 | #348 | Cross-Cloud Interconnect | The same `interconnects.insert` orders physical links to another cloud provider. |
 | #349 | Cross-Site Interconnect | `compute.v1` `wireGroups` group the physical wires between interconnect locations. |
