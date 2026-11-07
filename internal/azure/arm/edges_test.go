@@ -28,6 +28,8 @@ func TestRoutingVersionsAndUnboundOperations(t *testing.T) {
 	expect(t, h.do("GET", rg+"/providers/Microsoft.KeyVault/vaults/x?api-version=", nil), 400, "MissingApiVersionParameter")
 	expect(t, h.do("GET", rg+"/providers/Microsoft.KeyVault/vaults/x?api-version=2026-05-15&api-version=2026-05-15", nil), 400, "InvalidApiVersionParameter")
 	expect(t, h.do("GET", rg+"/providers/Microsoft.KeyVault/vaults/x?api-version=2025-05-01", nil), 400, "InvalidApiVersionParameter")
+	// Resource group routes have no namespace literal but are not generic.
+	expect(t, h.do("GET", "/subscriptions/"+sub+"/resourcegroups/rg1?api-version=2015-01-01", nil), 400, "InvalidApiVersionParameter")
 	unbound := expect(t, h.do("POST", "/subscriptions/"+sub+"/providers/Microsoft.KeyVault/checkNameAvailability"+kvAPI, map[string]any{"name": "x"}), 501, "NotImplemented")
 	if !strings.Contains(unbound.raw, "Vaults_CheckNameAvailability") {
 		t.Fatalf("501 names the official operation: %s", unbound.raw)

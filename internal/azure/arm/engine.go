@@ -46,8 +46,8 @@ type route struct {
 	segments []segment
 	literals int
 	bound    *bound
-	// generic routes, such as Resources_GetById, name no namespace literal;
-	// they apply only to requests that carry their own api-version.
+	// generic routes, such as Resources_GetById, can match other providers'
+	// paths; they apply only to requests that carry their own api-version.
 	generic bool
 }
 
@@ -231,10 +231,12 @@ func (e *Engine) add(p *Provider, model *Model) error {
 	for _, id := range ids {
 		r := model.Routes[id]
 		segments, literals := parseTemplate(r.Path, r.Multi)
-		generic := true
-		for _, seg := range segments {
-			if strings.EqualFold(seg.literal, p.Namespace) {
-				generic = false
+		// A route is generic when a multi-segment variable or a variable
+		// namespace after "providers" can stand for another provider's path.
+		generic := false
+		for i, seg := range segments {
+			if seg.multi || strings.EqualFold(seg.literal, "providers") && i+1 < len(segments) && segments[i+1].name != "" {
+				generic = true
 			}
 		}
 		e.routes = append(e.routes, &route{id: id, provider: bp, method: r.Method, segments: segments, literals: literals, bound: bp.ops[id], generic: generic})
