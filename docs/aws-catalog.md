@@ -28,6 +28,8 @@ Application Auto Scaling, Amazon Cognito, AWS Network Firewall, AWS Control
 Tower, AWS Launch Wizard, Amazon Keyspaces and Amazon Comprehend Medical.
 Services that use the Query, EC2 or REST-XML protocols are not served by the
 catalog yet.
+Products assessed as not servable at all, with evidence, are listed in the
+[coverage assessment](coverage-assessment.md).
 
 ## Routing and authorization
 
