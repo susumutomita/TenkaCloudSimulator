@@ -468,12 +468,12 @@ var glacier = &Service{
 			ARN: "arn:{partition}:glacier:{region}:{account}:policies/data-retrieval", NameMember: "Rules"},
 	},
 	Ops: []Op{
-		{Name: "CreateVault", Kind: Put, Resource: "vault", Lookup: "vaultName", Accept: []string{"accountId"}, Check: glacierVaultName},
-		{Name: "DescribeVault", Kind: Read, Resource: "vault", Lookup: "vaultName", Accept: []string{"accountId"}, Check: glacierAccount},
-		{Name: "ListVaults", Kind: List, Resource: "vault", Accept: []string{"accountId"}, Check: glacierListVaults},
-		{Name: "DeleteVault", Kind: Delete, Resource: "vault", Lookup: "vaultName", Accept: []string{"accountId"}, Check: glacierAccount},
-		{Name: "GetDataRetrievalPolicy", Kind: Read, Resource: "dataRetrievalPolicy", Accept: []string{"accountId"}, Check: glacierAccount},
-		{Name: "SetDataRetrievalPolicy", Kind: Put, Resource: "dataRetrievalPolicy", From: "Policy", Accept: []string{"accountId"}, Check: glacierRetrievalPolicy},
+		{Name: "CreateVault", Kind: Put, Resource: "vault", Lookup: "vaultName", Accept: []string{"accountId"}, Fixed: glacierCaller, Check: glacierVaultName},
+		{Name: "DescribeVault", Kind: Read, Resource: "vault", Lookup: "vaultName", Accept: []string{"accountId"}, Fixed: glacierCaller, Check: glacierAccount},
+		{Name: "ListVaults", Kind: List, Resource: "vault", Accept: []string{"accountId"}, Fixed: glacierCaller, Check: glacierListVaults},
+		{Name: "DeleteVault", Kind: Delete, Resource: "vault", Lookup: "vaultName", Accept: []string{"accountId"}, Fixed: glacierCaller, Check: glacierAccount},
+		{Name: "GetDataRetrievalPolicy", Kind: Read, Resource: "dataRetrievalPolicy", Accept: []string{"accountId"}, Fixed: glacierCaller, Check: glacierAccount},
+		{Name: "SetDataRetrievalPolicy", Kind: Put, Resource: "dataRetrievalPolicy", From: "Policy", Accept: []string{"accountId"}, Fixed: glacierCaller, Check: glacierRetrievalPolicy},
 	},
 	Bounds: []string{
 		"Vaults are empty configuration records: no archive is uploaded, stored, inventoried or retrieved, NumberOfArchives and SizeInBytes stay zero, and UploadArchive, InitiateJob, multipart upload and provisioned capacity APIs return UnknownOperationException with HTTP 501.",
@@ -481,6 +481,10 @@ var glacier = &Service{
 		"Vault tags, access policies, notifications and Vault Lock are not implemented. Before SetDataRetrievalPolicy, GetDataRetrievalPolicy returns a policy without rules instead of the account default, and the stored policy limits no retrieval.",
 	},
 }
+
+// glacierCaller is the documented accountId "-", which names the caller's
+// own account; first-party clients send it with every Glacier request.
+var glacierCaller = map[string]any{"accountId": "-"}
 
 var glacierVaultPattern = regexp.MustCompile(`^[a-zA-Z0-9_.-]{1,255}$`)
 

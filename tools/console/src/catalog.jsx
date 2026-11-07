@@ -77,10 +77,12 @@ export default function CatalogView({region,request,catalog,onSaving}){
    .catch(e=>{if(live){setServices([]);setDescriptorError(e.message)}});
   return ()=>{live=false};
  },[catalog?.descriptors]);
- // Fixed members are the selection the bounded model serves; every request
- // of the operation sends them, as SDK clients must.
+ // Fixed members are the selection the bounded model serves, and required
+ // account members name the simulator account; every request of the
+ // operation sends them, as SDK clients must.
  async function call(op,input){
-  const {path,options}=buildCatalogRequest(service,op,{...(op.fixed||{}),...input},region);
+  const account=Object.fromEntries((op.members||[]).filter(m=>m.required&&(service.accountMembers||[]).includes(m.name)).map(m=>[m.name,service.account]));
+  const {path,options}=buildCatalogRequest(service,op,{...account,...(op.fixed||{}),...input},region);
   const response=await request(path,options);const text=await response.text();return text?JSON.parse(text):{};
  }
  // List rows carry the list's own serialized identity keys, which may differ
@@ -161,7 +163,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
   catch(e){if(alive.current)setError(e.message)}finally{if(alive.current){setBusy(false);onSaving(false)}}
   if(removed&&alive.current){await load();if(alive.current)setNotice(t('Resource deleted.','リソースを削除しました。'))}
  }
- const skipped=op=>new Set([op?.parent,'tags','Tags','ClientToken','clientToken','ClientRequestToken','clientRequestToken'].filter(Boolean));
+ // Fixed and account members are filled by call(), so the form omits them.
+ const skipped=op=>new Set([op?.parent,'tags','Tags','ClientToken','clientToken','ClientRequestToken','clientRequestToken',...Object.keys(op?.fixed||{}),...(service?.accountMembers||[])].filter(Boolean));
  const createOp=resource?.operations.create;
  const fields=useMemo(()=>formMembers(createOp,skipped(createOp)),[createOp]);
  if(descriptorError)return <Alert type="error">{descriptorError}</Alert>;
