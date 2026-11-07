@@ -237,3 +237,41 @@ func TestPricingRuleUpdatesValidateTheMergedRule(t *testing.T) {
 	expect(t, h.rest("billingconductor", "PUT", "/update-pricing-rule", map[string]any{"Arn": arn, "Type": "DISCOUNT"}), 400, "ValidationException")
 	expect(t, h.rest("billingconductor", "PUT", "/update-pricing-rule", map[string]any{"Arn": arn, "Type": "DISCOUNT", "ModifierPercentage": 5}), 200, "")
 }
+
+// Budget updates keep one limit representation in the stored budget.
+func TestBudgetUpdatesKeepOneLimitRepresentation(t *testing.T) {
+	h := newHarness(t, budgets)
+	budget := map[string]any{"BudgetName": "monthly", "BudgetType": "COST", "TimeUnit": "MONTHLY", "BudgetLimit": map[string]any{"Amount": "100", "Unit": "USD"}}
+	expect(t, h.json1("budgets", "CreateBudget", map[string]any{"AccountId": "000000000000", "Budget": budget}), 200, "")
+	planned := map[string]any{"BudgetName": "monthly", "BudgetType": "COST", "TimeUnit": "MONTHLY",
+		"PlannedBudgetLimits": map[string]any{"1798761600": map[string]any{"Amount": "120", "Unit": "USD"}}}
+	expect(t, h.json1("budgets", "UpdateBudget", map[string]any{"AccountId": "000000000000", "NewBudget": planned}), 200, "")
+	stored := h.json1("budgets", "DescribeBudget", map[string]any{"AccountId": "000000000000", "BudgetName": "monthly"}).body["Budget"].(map[string]any)
+	if _, stale := stored["BudgetLimit"]; stale || stored["PlannedBudgetLimits"] == nil {
+		t.Fatalf("budget kept both limits: %v", stored)
+	}
+}
+
+// A partial MWAA update cannot raise MinWorkers above the stored MaxWorkers.
+func TestAirflowUpdatesValidateMergedCapacity(t *testing.T) {
+	h := newHarness(t, mwaa)
+	expect(t, h.rest("mwaa", "PUT", "/environments/etl", map[string]any{"ExecutionRoleArn": "arn:aws:iam::000000000000:role/mwaa-execution",
+		"SourceBucketArn": "arn:aws:s3:::fixture-dags", "DagS3Path": "dags", "NetworkConfiguration": map[string]any{"SubnetIds": []any{"subnet-0a", "subnet-0b"}, "SecurityGroupIds": []any{"sg-0a"}},
+		"MaxWorkers": 5, "MinWorkers": 1}), 200, "")
+	expect(t, h.rest("mwaa", "PATCH", "/environments/etl", map[string]any{"MinWorkers": 6}), 400, "ValidationException")
+	expect(t, h.rest("mwaa", "PATCH", "/environments/etl", map[string]any{"MinWorkers": 4}), 200, "")
+}
+
+func TestNumberReadsRequestAndStoredValues(t *testing.T) {
+	for _, v := range []any{int64(3), 3.0, json.Number("3")} {
+		if n, ok := Number(v); !ok || n != 3 {
+			t.Fatalf("%T %v", v, v)
+		}
+	}
+	if _, ok := Number("3"); ok {
+		t.Fatal("text is not a number")
+	}
+	if _, ok := Number(json.Number("x")); ok {
+		t.Fatal("a malformed number is not a number")
+	}
+}

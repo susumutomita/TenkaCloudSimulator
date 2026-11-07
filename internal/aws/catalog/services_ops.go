@@ -406,7 +406,7 @@ var budgets = &Service{
 		{Name: "CreateBudget", Action: "ModifyBudget", Kind: Create, Resource: "budget", From: "Budget", Check: budgetDefinition},
 		{Name: "DescribeBudget", Action: "ViewBudget", Kind: Read, Resource: "budget", Lookup: "BudgetName", Accept: []string{"ShowFilterExpression"}},
 		{Name: "DescribeBudgets", Action: "ViewBudget", Kind: List, Resource: "budget", Accept: []string{"ShowFilterExpression"}},
-		{Name: "UpdateBudget", Action: "ModifyBudget", Kind: Update, Resource: "budget", From: "NewBudget", Lookup: "NewBudget.BudgetName", Check: budgetDefinition, Touch: []string{"LastUpdatedTime"},
+		{Name: "UpdateBudget", Action: "ModifyBudget", Kind: Update, Resource: "budget", From: "NewBudget", Lookup: "NewBudget.BudgetName", Check: budgetDefinition, Merged: budgetMerged, Touch: []string{"LastUpdatedTime"},
 			Fields: []string{"BudgetName", "BudgetLimit", "PlannedBudgetLimits", "CostFilters", "CostTypes", "TimeUnit", "TimePeriod", "BudgetType", "Metrics"}},
 		{Name: "DeleteBudget", Action: "ModifyBudget", Kind: Delete, Resource: "budget", Lookup: "BudgetName"},
 		{Name: "TagResource", Kind: Tag, Lookup: "ResourceARN"},
@@ -442,6 +442,24 @@ func budgetDefinition(input map[string]any) error {
 		return Failure("InvalidParameterException", "Specify BudgetLimit or PlannedBudgetLimits, not both.")
 	}
 	if kind := budget["BudgetType"]; (kind == "COST" || kind == "USAGE") && !limit && !planned {
+		return Failure("InvalidParameterException", "Cost and usage budgets need BudgetLimit or PlannedBudgetLimits.")
+	}
+	return nil
+}
+
+// budgetMerged keeps one limit representation: a supplied BudgetLimit or
+// PlannedBudgetLimits replaces the other, and a cost or usage budget must
+// keep one of them.
+func budgetMerged(document, supplied map[string]any) error {
+	if _, ok := supplied["PlannedBudgetLimits"]; ok {
+		delete(document, "BudgetLimit")
+	}
+	if _, ok := supplied["BudgetLimit"]; ok {
+		delete(document, "PlannedBudgetLimits")
+	}
+	_, limit := document["BudgetLimit"]
+	_, planned := document["PlannedBudgetLimits"]
+	if kind := document["BudgetType"]; (kind == "COST" || kind == "USAGE") && !limit && !planned {
 		return Failure("InvalidParameterException", "Cost and usage budgets need BudgetLimit or PlannedBudgetLimits.")
 	}
 	return nil
@@ -496,7 +514,7 @@ func pricingRuleScope(input map[string]any) error {
 // pricingRuleMerged keeps an updated rule consistent with its type: a type
 // change drops the other type's configuration, and the resulting rule must
 // carry its own (Tiering for TIERING, ModifierPercentage otherwise).
-func pricingRuleMerged(document map[string]any) error {
+func pricingRuleMerged(document, _ map[string]any) error {
 	if document["Type"] == "TIERING" {
 		delete(document, "ModifierPercentage")
 	} else {

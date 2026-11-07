@@ -1,5 +1,7 @@
 package catalog
 
+import "encoding/json"
+
 // Kind is the reviewed semantic role of one implemented official operation.
 type Kind string
 
@@ -26,10 +28,10 @@ const (
 type Op struct {
 	Name string
 	// Merged runs on the merged stored document of an update before it is
-	// committed. It may normalize the document (for example drop settings a
-	// type transition makes inapplicable) and refuses invalid combinations
-	// that a Check on the request alone cannot see.
-	Merged func(document map[string]any) error
+	// committed, with the members the request supplied. It may normalize the
+	// document (for example drop settings a transition makes inapplicable)
+	// and refuses invalid combinations a Check on the request cannot see.
+	Merged func(document, supplied map[string]any) error
 	// Action is the documented IAM action when it differs from the
 	// operation name (for example budgets:ModifyBudget for CreateBudget).
 	Action    string
@@ -151,4 +153,20 @@ func (s *Service) resource(kind string) *Resource {
 		}
 	}
 	return nil
+}
+
+// Number reads a numeric member as a request decodes it (int64, float64)
+// or as a stored document holds it (json.Number), so Check and Merged
+// hooks compare request and stored values alike.
+func Number(value any) (float64, bool) {
+	switch v := value.(type) {
+	case int64:
+		return float64(v), true
+	case float64:
+		return v, true
+	case json.Number:
+		n, err := v.Float64()
+		return n, err == nil
+	}
+	return 0, false
 }

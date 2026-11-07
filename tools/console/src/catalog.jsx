@@ -100,7 +100,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
   const list=parentResource?.operations.list;if(!list)return '';
   const page=await call(list,{});if(!valid(epoch))return '';
   const rows=listRows(list,page);setParents(rows);
-  const pk=rowKeys(parentResource);const keep=rows.some(r=>(r[pk.id]||r[pk.name])===preferred)?preferred:(rows[0]?.[pk.id]||rows[0]?.[pk.name]||'');
+  // A parent row may carry only an ARN (Cloud Directory schema ARNs).
+  const pk=rowKeys(parentResource),pid=r=>r?.[pk.id]||r?.[pk.name]||r?.[pk.arn]||'';const keep=rows.some(r=>pid(r)===preferred)?preferred:pid(rows[0]);
   setParent(keep);return keep;
  }
  // A selection passes its parent explicitly: the state update is not yet
@@ -170,7 +171,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
    {notice&&<Alert type="success" dismissible onDismiss={()=>setNotice('')}>{notice}</Alert>}
    <Tabs activeTabId={resource.kind} onChange={e=>{if(!busy){setKind(e.detail.activeTabId);setParent('')}}} tabs={service.resources.map(r=>({id:r.kind,label:r.kind}))}/>
    {parentResource&&<FormField label={parentResource.kind}><Select selectedOption={parent?{value:parent,label:parent}:null} placeholder={t('Create a parent resource first','先に親リソースを作成してください')} disabled={busy||!parents.length}
-     onChange={e=>{const chosen=e.detail.selectedOption.value;setParent(chosen);load('',chosen)}} options={parents.map(p=>{const pk=rowKeys(parentResource);const v=p[pk.id]||p[pk.name];return {value:v,label:p[pk.name]||v}})}/></FormField>}
+     onChange={e=>{const chosen=e.detail.selectedOption.value;setParent(chosen);load('',chosen)}} options={parents.map(p=>{const pk=rowKeys(parentResource);const v=p[pk.id]||p[pk.name]||p[pk.arn];return {value:v,label:p[pk.name]||v}})}/></FormField>}
    {mode==='detail'?<Container header={<Header variant="h2" actions={<Button onClick={()=>load()}>{t('Back to list','一覧に戻る')}</Button>}>{t('Details','詳細')}</Header>}>
      {loading?<Box>{t('Loading','読み込み中')}</Box>:detail?<SpaceBetween size="m"><KeyValuePairs columns={2} items={Object.entries(detail).filter(([,v])=>isScalar(v)).map(([k,v])=>({label:k,value:display(v)}))}/>
       {Object.entries(detail).filter(([,v])=>!isScalar(v)).map(([k,v])=><FormField key={k} label={k}><pre className="catalog-json">{JSON.stringify(v,null,2)}</pre></FormField>)}

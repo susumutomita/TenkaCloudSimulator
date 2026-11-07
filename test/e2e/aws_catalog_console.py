@@ -145,6 +145,16 @@ def run():
                 expect(page.get_by_text('GLUE', exact=True).first).to_be_visible()
                 page.get_by_role('button', name='Back to list').click()
                 queries.delete_data_catalog(Name='sdk_catalog')
+                # ARN-only parents: Cloud Directory facets live under schema ARNs.
+                directory = team.client('clouddirectory')
+                schema = directory.create_schema(Name='sdk_org')['SchemaArn']
+                directory.create_facet(SchemaArn=schema, Name='person', ObjectType='LEAF_NODE', FacetStyle='DYNAMIC')
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^Amazon Cloud Directory')).click()
+                page.get_by_role('tab', name='facet').click()
+                expect(page.get_by_role('link', name='person')).to_be_visible()
+                directory.delete_facet(SchemaArn=schema, Name='person')
+                directory.delete_schema(SchemaArn=schema)
                 # A REST-JSON parent and child through the same generic view.
                 page.get_by_role('button', name=re.compile('^Catalog service')).click()
                 page.get_by_role('option', name=re.compile('^AWS Amplify')).click()

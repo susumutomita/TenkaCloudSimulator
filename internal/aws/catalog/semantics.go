@@ -723,7 +723,7 @@ func (q *request) update() (map[string]any, error) {
 		r.Document[key] = q.generated(value, r, parent)
 	}
 	if q.op.Merged != nil {
-		if err := q.op.Merged(r.Document); err != nil {
+		if err := q.op.Merged(r.Document, members); err != nil {
 			return nil, err
 		}
 	}

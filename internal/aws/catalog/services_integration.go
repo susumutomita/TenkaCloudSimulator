@@ -252,7 +252,7 @@ var mwaa = &Service{
 		{Name: "CreateEnvironment", Kind: Create, Resource: "environment", Check: airflowCapacity},
 		{Name: "GetEnvironment", Kind: Read, Resource: "environment", Lookup: "Name"},
 		{Name: "ListEnvironments", Kind: List, Resource: "environment", ListValue: "Name"},
-		{Name: "UpdateEnvironment", Kind: Update, Resource: "environment", Lookup: "Name", Check: airflowCapacity,
+		{Name: "UpdateEnvironment", Kind: Update, Resource: "environment", Lookup: "Name", Check: airflowCapacity, Merged: func(document, _ map[string]any) error { return airflowCapacity(document) },
 			Fields: []string{"ExecutionRoleArn", "AirflowConfigurationOptions", "AirflowVersion", "DagS3Path", "EnvironmentClass", "LoggingConfiguration",
 				"MaxWorkers", "MinWorkers", "MaxWebservers", "MinWebservers", "PluginsS3Path", "PluginsS3ObjectVersion", "RequirementsS3Path",
 				"RequirementsS3ObjectVersion", "Schedulers", "SourceBucketArn", "StartupScriptS3Path", "StartupScriptS3ObjectVersion",
@@ -272,8 +272,8 @@ var mwaa = &Service{
 // airflowCapacity rejects inverted worker or web server ranges in one request.
 func airflowCapacity(input map[string]any) error {
 	for _, pair := range [][2]string{{"MinWorkers", "MaxWorkers"}, {"MinWebservers", "MaxWebservers"}} {
-		low, lowOK := input[pair[0]].(int64)
-		high, highOK := input[pair[1]].(int64)
+		low, lowOK := Number(input[pair[0]])
+		high, highOK := Number(input[pair[1]])
 		if lowOK && highOK && low > high {
 			return Failure("ValidationException", pair[0]+" must not exceed "+pair[1]+".")
 		}
