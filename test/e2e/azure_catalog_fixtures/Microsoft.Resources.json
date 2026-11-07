@@ -1,0 +1,186 @@
+{
+ "namespace": "Microsoft.Resources",
+ "client": "resources",
+ "steps": [
+  {
+   "call": "resource_groups.create_or_update",
+   "args": {
+    "resource_group_name": "fixture-group",
+    "parameters": {
+     "location": "japaneast",
+     "tags": {
+      "team": "a"
+     }
+    }
+   },
+   "save": {
+    "group": "id"
+   },
+   "expect": {
+    "properties.provisioning_state": "Succeeded",
+    "location": "japaneast"
+   }
+  },
+  {
+   "call": "resource_groups.check_existence",
+   "args": {
+    "resource_group_name": "fixture-group"
+   },
+   "expect": {
+    "#value": true
+   }
+  },
+  {
+   "call": "resource_groups.check_existence",
+   "args": {
+    "resource_group_name": "missing-group"
+   },
+   "expect": {
+    "#value": false
+   }
+  },
+  {
+   "call": "resource_groups.get",
+   "args": {
+    "resource_group_name": "Fixture-Group"
+   },
+   "expect": {
+    "name": "fixture-group",
+    "tags.team": "a"
+   }
+  },
+  {
+   "call": "resource_groups.update",
+   "args": {
+    "resource_group_name": "fixture-group",
+    "parameters": {
+     "tags": {
+      "team": "a",
+      "stage": "patched"
+     }
+    }
+   },
+   "expect": {
+    "tags.stage": "patched"
+   }
+  },
+  {
+   "call": "resource_groups.create_or_update",
+   "args": {
+    "resource_group_name": "fixture-paged",
+    "parameters": {
+     "location": "eastus"
+    }
+   }
+  },
+  {
+   "call": "resource_groups.list",
+   "args": {
+    "top": 1
+   },
+   "expect": {
+    "#count": 3
+   }
+  },
+  {
+   "call": "resource_groups.create_or_update",
+   "args": {
+    "resource_group_name": "fixture-group",
+    "parameters": {
+     "location": "westeurope"
+    }
+   },
+   "error": "InvalidResourceGroupLocation",
+   "status": 409
+  },
+  {
+   "call": "resource_groups.create_or_update",
+   "args": {
+    "resource_group_name": "bad.",
+    "parameters": {
+     "location": "eastus"
+    }
+   },
+   "error": "InvalidResourceName",
+   "status": 400
+  },
+  {
+   "call": "resource_groups.create_or_update",
+   "args": {
+    "resource_group_name": "far-away",
+    "parameters": {
+     "location": "marsnorth"
+    }
+   },
+   "error": "LocationNotAvailableForResourceType",
+   "status": 400
+  },
+  {
+   "call": "resource_groups.get",
+   "args": {
+    "resource_group_name": "missing-group"
+   },
+   "error": "ResourceGroupNotFound",
+   "status": 404
+  }
+ ],
+ "probe": {
+  "call": "resource_groups.get",
+  "args": {
+   "resource_group_name": "fixture-group"
+  }
+ },
+ "unbound": {
+  "call": "resource_groups.begin_export_template",
+  "args": {
+   "resource_group_name": "fixture-group",
+   "parameters": {
+    "resources": [
+     "*"
+    ]
+   }
+  }
+ },
+ "isolation": [
+  {
+   "call": "resource_groups.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "resource_groups.get",
+   "args": {
+    "resource_group_name": "fixture-group"
+   },
+   "expect": {
+    "tags.stage": "patched"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "resource_groups.begin_delete",
+   "args": {
+    "resource_group_name": "fixture-group"
+   }
+  },
+  {
+   "call": "resource_groups.begin_delete",
+   "args": {
+    "resource_group_name": "fixture-paged"
+   }
+  },
+  {
+   "call": "resource_groups.check_existence",
+   "args": {
+    "resource_group_name": "fixture-group"
+   },
+   "expect": {
+    "#value": false
+   }
+  }
+ ]
+}
