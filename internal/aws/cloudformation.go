@@ -25,6 +25,8 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
+var stackCreateName = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-]{0,127}$`)
+
 type StackStore struct{ db *sql.DB }
 type StackResource struct {
 	LogicalID, Type, PhysicalID string
@@ -40,6 +42,7 @@ type StackRecord struct {
 	Outputs                   map[string]string
 	Resources                 []StackResource
 	Parameters                map[string]string
+	ResolvedParameters        map[string]string `json:",omitempty"`
 }
 
 func NewStackStore(db *sql.DB) (*StackStore, error) {
@@ -418,10 +421,14 @@ func resourceOrder(resources map[string]any) ([]string, error) {
 }
 
 func compileStack(region, name, body string, parameters map[string]string, capabilities string) (StackRecord, error) {
+	return compileStackWithParameters(region, name, body, parameters, capabilities, nil)
+}
+
+func compileStackWithParameters(region, name, body string, parameters map[string]string, capabilities string, resolveParameters stackParameterResolver) (StackRecord, error) {
 	fail := func(message string) (StackRecord, error) {
 		return StackRecord{}, ssmFailure{"ValidationError", message}
 	}
-	if !regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-]{0,127}$`).MatchString(name) || len(body) == 0 || len(body) > 51200 {
+	if !stackCreateName.MatchString(name) || len(body) == 0 || len(body) > 51200 {
 		return fail("Use a valid stack name and TemplateBody of 1–51200 bytes.")
 	}
 	var node yaml.Node
@@ -475,6 +482,23 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 	for key, value := range values {
 		refs[key] = value
 		record.Parameters[key] = value
+	}
+	requested := stackSSMRequests(definitions, values)
+	if len(requested) != 0 {
+		if resolveParameters == nil {
+			return fail("SSM value parameters require local Parameter Store resolution.")
+		}
+		record.ResolvedParameters, e = resolveParameters(id, requested)
+		if e != nil {
+			return StackRecord{}, e
+		}
+		for key := range requested {
+			value, ok := record.ResolvedParameters[key]
+			if !ok {
+				return fail("Missing resolved SSM parameter.")
+			}
+			refs[key] = value
+		}
 	}
 	conditionDefinitions := object(template["Conditions"])
 	if _, exists := template["Conditions"]; exists && conditionDefinitions == nil {
@@ -1124,6 +1148,10 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 	name := form.Get("StackName")
 	switch action {
 	case "CreateStack":
+		if !stackCreateName.MatchString(name) {
+			fail("Use a valid stack name.")
+			return
+		}
 		parameters := map[string]string{}
 		for i := 1; i <= 100; i++ {
 			key := form.Get(fmt.Sprintf("Parameters.member.%d.ParameterKey", i))
@@ -1135,38 +1163,48 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 				parameters[key] = form.Get(fmt.Sprintf("Parameters.member.%d.ParameterValue", i))
 			}
 		}
-		record, err := compileStack(region, name, form.Get("TemplateBody"), parameters, form.Get("Capabilities.member.1"))
-		record.Tags = map[string]string{}
+		tags := map[string]string{}
 		for i := 1; i <= 50; i++ {
 			key := form.Get(fmt.Sprintf("Tags.member.%d.Key", i))
 			if key != "" {
-				if _, exists := record.Tags[key]; exists {
+				if _, exists := tags[key]; exists {
 					fail("Duplicate tag key.")
 					return
 				}
-				record.Tags[key] = form.Get(fmt.Sprintf("Tags.member.%d.Value", i))
+				tags[key] = form.Get(fmt.Sprintf("Tags.member.%d.Value", i))
 			}
 		}
-		if err == nil {
-			record.ClientToken = form.Get("ClientRequestToken")
-			input, _ := json.Marshal([]any{form.Get("TemplateBody"), parameters, record.Tags, form.Get("Capabilities.member.1")})
-			digest := sha256.Sum256(input)
-			record.RequestHash = hex.EncodeToString(digest[:])
-			if record.ClientToken != "" {
-				existing, e := g.Stacks.Records(region, name)
-				if e == nil && len(existing) == 1 && existing[0].ClientToken == record.ClientToken {
-					if existing[0].RequestHash != record.RequestHash {
-						fail("ClientRequestToken was reused with a different request.")
-						return
-					}
-					if err = authorize(existing[0].ID); err != nil {
-						cfnError(w, err)
-						return
-					}
-					cfnResponse(w, action, "<StackId>"+xmlText(existing[0].ID)+"</StackId>")
+		input, _ := json.Marshal([]any{form.Get("TemplateBody"), parameters, tags, form.Get("Capabilities.member.1")})
+		digest := sha256.Sum256(input)
+		requestHash := hex.EncodeToString(digest[:])
+		clientToken := form.Get("ClientRequestToken")
+		// Replay the saved request before consulting mutable Parameter Store.
+		// Stack authorization is still required; no saved values are returned here.
+		if clientToken != "" {
+			existing, e := g.Stacks.Records(region, name)
+			if e == nil && len(existing) == 1 && existing[0].ClientToken == clientToken {
+				if err = authorize(existing[0].ID); err != nil {
+					cfnError(w, err)
 					return
 				}
+				if existing[0].RequestHash != requestHash {
+					fail("ClientRequestToken was reused with a different request.")
+					return
+				}
+				cfnResponse(w, action, "<StackId>"+xmlText(existing[0].ID)+"</StackId>")
+				return
 			}
+		}
+		record, err := compileStackWithParameters(region, name, form.Get("TemplateBody"), parameters, form.Get("Capabilities.member.1"),
+			func(stackID string, keys map[string]string) (map[string]string, error) {
+				// Authorize the actual generated ARN before reading source values.
+				if e := authorize(stackID); e != nil {
+					return nil, e
+				}
+				return g.Stacks.resolveSSMParameters(r.Context(), region, keys, authorizeAction)
+			})
+		if err == nil {
+			record.Tags, record.ClientToken, record.RequestHash = tags, clientToken, requestHash
 			if err = authorize(record.ID); err == nil {
 				err = stackResourcePermissions(record, false, authorizeAction)
 				if err == nil {
@@ -1223,7 +1261,7 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 			for k, v := range record.Tags {
 				out.WriteString("<member><Key>" + xmlText(k) + "</Key><Value>" + xmlText(v) + "</Value></member>")
 			}
-			out.WriteString("</Tags></member>")
+			out.WriteString("</Tags>" + stackSSMParametersXML(record) + "</member>")
 		}
 		out.WriteString("</Stacks>")
 		cfnResponse(w, action, out.String())

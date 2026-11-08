@@ -1,5 +1,22 @@
 # Development roster
 
+## CloudFormation local SSM parameter values, 2026-11-08
+
+Issue #54: `feat/battle-backlog-20261108`, base `0d0abe6eff9a219f5503ea7cc3c3ba612df4ae24`.
+Compiler owner owns CloudFormation parameter resolution, native/SDK tests and docs.
+An independent formal worker owns only the new SSM snapshot/admission model, its
+registry entry and correspondence document. S3 #440, EC2/Route53, UI, dispatch
+and dependencies remain excluded. One heavy runtime lane is reserved for the
+compiler owner; model checks coordinate before using it.
+
+The proposed subset resolves String and EC2 Image ID carriers only from local
+Standard String values, with caller GetParameters permission and preserved input
+keys/resolved values. No public AWS lookup, AMI existence, EC2 execution or full
+Battle success follows. Implementation and focused native/race checks are complete. Independent review
+found and repaired replay-name validation and exact-ARN preflight regressions.
+The scoped finite model passed its baseline and 15 controls. Full current-source
+quality/E2E/formal and hosted CI remain pending; no merge is claimed.
+
 ## Standalone release pipeline, 2026-11-08
 
 [Draft PR #444](https://github.com/susumutomita/TenkaCloudSimulator/pull/444)
