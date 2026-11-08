@@ -34,7 +34,7 @@ class ManifestTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.directory = Path(self.temporary.name)
-        self.info = {'source_commit': COMMIT, 'version': 'v0.1.0',
+        self.info = {'source_commit': COMMIT, 'version': 'v0.1.0', 'host_protocol': 1,
                      'source_repository': 'https://github.com/susumutomita/TenkaCloudSimulator',
                      'toolchain': 'go version go1.26.10 linux/amd64',
                      'cgo_enabled': False, 'build_flags': FLAGS,
@@ -105,7 +105,8 @@ class ManifestTests(unittest.TestCase):
                            ('toolchain', 'go version go1.25.0 linux/amd64'),
                            ('targets', ['linux/amd64']), ('cgo_enabled', True),
                            ('source_repository', 'https://example.invalid/fork'),
-                           ('build_flags', ['-race'])]:
+                           ('build_flags', ['-race']), ('host_protocol', 2),
+                           ('host_protocol', True), ('host_protocol', '1')]:
             with self.subTest(key=key):
                 old = self.info[key]
                 self.info[key] = value
@@ -113,6 +114,12 @@ class ManifestTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.check()
                 self.info[key] = old
+
+    def test_missing_host_protocol_refused(self):
+        del self.info['host_protocol']
+        self.refresh()
+        with self.assertRaises(ValueError):
+            self.check()
 
 
 class TagTests(unittest.TestCase):
@@ -201,6 +208,7 @@ else:
         self.invoke()
         info = verify.verify(self.output, self.commit, 'v0.1.0')
         self.assertEqual(info['build_flags'], FLAGS)
+        self.assertEqual(info['host_protocol'], 1)
         for target in verify.TARGETS:
             self.assertEqual((self.output / ('tenkacloud-simulator_' + target)).read_text(),
                              'committed' + target.replace('_', ''))

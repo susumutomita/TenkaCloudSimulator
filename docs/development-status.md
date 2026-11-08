@@ -6,7 +6,9 @@
 owns release workflows/build and verification scripts, regression hooks, release
 documentation and exact applicability. It now normally integrates main
 `4ab99d4902571c75862aa642052cd94a1e4f5b61`; runtime service/UI bytes are unchanged
-from that main. The integrated source requires new exact-HEAD CI before merge.
+from that main. The integrated source requires new exact-HEAD CI before merge. BUILDINFO now
+declares launcher/token-control `host_protocol: 1` for host-local release locks;
+this is not a database downgrade guarantee and does not pin host source hashes.
 
 Pre-integration `be3bfc7` passed 15 release regressions, 27 applicability tests,
 76 formal-policy controls, both hosted coverage gates, full CI/browser/platform

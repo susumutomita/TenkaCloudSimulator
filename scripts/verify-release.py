@@ -35,6 +35,8 @@ def verify(directory, commit, version=None):
         raise ValueError('release source commit does not match the selected source')
     if version is not None and info['version'] != version:
         raise ValueError('release version does not match the selected tag')
+    if type(info.get('host_protocol')) is not int or info['host_protocol'] != 1:
+        raise ValueError('unsupported launcher/token-control host protocol')
     if info['source_repository'] != 'https://github.com/susumutomita/TenkaCloudSimulator':
         raise ValueError('unexpected source repository')
     if info['build_flags'] != ['-mod=readonly', '-trimpath', '-buildvcs=false', '-ldflags=-s -w']:

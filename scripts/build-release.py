@@ -59,7 +59,7 @@ def main():
                            cwd=source, check=True, env={**env, 'GOOS': target, 'GOARCH': arch})
             print(name, flush=True)
     (output / 'BUILDINFO.json').write_text(json.dumps({
-        'version': args.version, 'source_commit': commit,
+        'version': args.version, 'source_commit': commit, 'host_protocol': 1,
         'source_repository': 'https://github.com/susumutomita/TenkaCloudSimulator',
         'toolchain': toolchain, 'cgo_enabled': False,
         'build_flags': ['-mod=readonly', '-trimpath', '-buildvcs=false', '-ldflags=-s -w'],

@@ -22,11 +22,29 @@ Each release contains these uncompressed executable files:
 - `SHA256SUMS` (SHA-256, two spaces, basename; includes all four binaries and BUILDINFO)
 - `BUILDINFO.json` (full source commit, version, toolchain and build options)
 
-Consumers pin a release tag, fetch the matching binary and checksum file from
-that release, verify SHA-256 before execution, and apply executable permissions.
+Consumers resolve a compatible stable release, fetch its checksum file and
+matching binary, verify SHA-256 before execution, and apply executable permissions.
+A host may retain the selected version/checksums in its local lock and update it
+explicitly; simulator releases do not require host-source version/hash changes.
 Checksums detect corruption, not a compromised publisher. No artifact here is
 signed or notarized. Darwin execution and Gatekeeper behavior require actual
 Mac testing; cross-compilation does not validate them.
+
+## Host compatibility contract
+
+BUILDINFO declares integer `host_protocol: 1`. It describes the launcher contract:
+`--listen`, `--state` and `--token-file`, numeric loopback/local token authority,
+health/capability control APIs used by the host, and graceful SIGTERM shutdown.
+An incompatible launcher/control-API change must bump this protocol; a release
+version change alone does not require a bump. Hosts reject unknown protocols
+before running a downloaded binary, then still perform their live capability
+preflight. This metadata declaration is not proof of full service compatibility.
+
+This protocol does not guarantee SQLite downgrade or rollback compatibility.
+Hosts must not silently execute an older binary after a newer binary has touched
+persistent state. The same-release checksum manifest detects corruption or
+mismatches, not a compromised publisher replacing both binary and manifest;
+locally locked hashes detect later same-version replacement.
 
 ## Prepare from a fixed source
 
