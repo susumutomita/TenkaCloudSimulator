@@ -874,7 +874,8 @@ REQUIRED_MUTANTS = {'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureE
  'LoginInputIntent': {'FileCompletionIgnoresRevision', 'NonemptyDOMUsesControlledState', 'UnmountedFileCompletionPublishes', 'LocaleClearsIntent', 'LocaleInvalidatesCurrentFile', 'SubmitIgnoresBusy', 'CurrentFileErrorDiscarded', 'FlushDoesNotAdoptNativeValue', 'NativeAdoptionSkipsNewIntent', 'EmptyDOMReusesOldCredential', 'OldPasteSurvivesNewIntent', 'SubmitIgnoresFileGate', 'FocusSkipsNativeAdoption', 'KeyDownSkipsNativeAdoption'}}
 REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation.go',
                            'internal/aws/cloudformation_conditions.go',
-                           'internal/aws/cloudformation_conditions_link.go'},
+                           'internal/aws/cloudformation_conditions_link.go',
+                           'internal/aws/cloudformation_intrinsics.go'},
  'CFNConditionMemoDepth': {'internal/aws/cloudformation_conditions.go'},
  'CFNFinalCleanupACK': {'internal/aws/cloudformation.go',
                         'internal/aws/cloudformation_cleanup_ack_test.go'},
