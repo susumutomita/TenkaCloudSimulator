@@ -31,15 +31,35 @@ with running(authenticated=True) as (endpoint,operator), sync_playwright() as p:
  browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),args=['--no-sandbox'])
  context=browser.new_context(viewport={'width':1440,'height':1000});page=context.new_page();errors=[];requests=[]
  page.on('pageerror',lambda error:errors.append(str(error)))
- page.on('request',lambda request:requests.append((request.method,request.url,request.post_data)))
+ page.on('request',lambda request:requests.append((request.method,request.url,request.post_data,request.headers.get('x-amz-target',''))))
+ def audit_state(label):
+  for width in (1440,390):
+   page.set_viewport_size({'width':width,'height':1000});assert_reflow(page)
+   page.evaluate(axe);audit=page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})")
+   assert not audit['violations'],[v['id'] for v in audit['violations']]
+   page.screenshot(path=str(REPORTS/(label+'-'+str(width)+'.png')),full_page=True)
+  page.set_viewport_size({'width':1440,'height':1000})
  code=handoff()
  # Different local site, genuine document navigation, no credential in referrer.
  page.goto(endpoint.replace('127.0.0.1','localhost')+'/_simulator/login')
  page.evaluate('(url)=>location.assign(url)',endpoint+'/_simulator/login#handoff='+code)
+ expect(page.get_by_role('heading',name='Console Home',exact=True)).to_be_visible()
+ expect(page.get_by_label('Value',exact=True)).to_have_count(0)
+ assert not any(request[1]==endpoint+'/' for request in requests),'home issued a resource API request'
+ assert 'local-practice-value' not in page.content()
+ audit_state('participant-console-home')
+ page.get_by_role('button',name='Services',exact=True).click()
+ expect(page.get_by_role('menuitem',name='S3',exact=True)).to_have_count(0)
+ page.get_by_role('menuitem',name='Systems Manager',exact=True).click()
+ expect(page.get_by_role('link',name=name,exact=True)).to_be_visible()
+ expect(page.get_by_label('Value',exact=True)).to_have_count(0)
+ assert not any(request[1]==endpoint+'/' for request in requests),'list fetched parameter value'
+ audit_state('participant-ssm-list')
+ page.get_by_role('link',name=name,exact=True).click()
  expect(page.get_by_label('Value',exact=True)).to_have_value('local-practice-value')
  assert 'handoff=' not in page.url
  assert not any('handoff=' in request[1] for request in requests),'fragment leaked into HTTP'
- assert not any('DescribeParameters' in (request[2] or '') for request in requests)
+ assert not any('DescribeParameters' in request[3] for request in requests)
  for width in (1440,390):
   page.set_viewport_size({'width':width,'height':1000});assert_reflow(page)
   # Use the same audit instrumentation as console_logout; keep the site CSP intact.
@@ -47,11 +67,34 @@ with running(authenticated=True) as (endpoint,operator), sync_playwright() as p:
   assert not audit['violations'],[v['id'] for v in audit['violations']]
   page.screenshot(path=str(REPORTS/('console-handoff-'+str(width)+'.png')),full_page=True)
  page.set_viewport_size({'width':1440,'height':1000})
+ # Refresh must read the unchanged detail route, not wait for a hashchange.
+ ssm.put_parameter(Name=name,Value='updated-outside-console',Type='String',Overwrite=True)
+ page.get_by_role('button',name='Refresh parameter',exact=True).click()
+ expect(page.get_by_label('Value',exact=True)).to_have_value('updated-outside-console')
+ ssm.put_parameter(Name=name,Value='local-practice-value',Type='String',Overwrite=True)
  # Reload and list/detail use only the bound parameter, despite broad role grants.
  page.reload();expect(page.get_by_label('Value',exact=True)).to_have_value('local-practice-value')
+ before=len(requests)
+ page.get_by_role('link',name='Console Home',exact=True).click()
+ expect(page.get_by_role('heading',name='Console Home',exact=True)).to_be_visible()
+ expect(page.get_by_label('Value',exact=True)).to_have_count(0)
+ assert not any(request[1]==endpoint+'/' for request in requests[before:]),'breadcrumb called a service API'
+ page.go_back();expect(page.get_by_label('Value',exact=True)).to_have_value('local-practice-value')
+ page.go_forward();expect(page.get_by_role('heading',name='Console Home',exact=True)).to_be_visible()
+ # The initial home is preserved by reload and every fresh sign-in.
+ page.reload();expect(page.get_by_role('heading',name='Console Home',exact=True)).to_be_visible()
+ page.goto(endpoint+'/_simulator/login#handoff='+handoff())
+ expect(page.get_by_role('heading',name='Console Home',exact=True)).to_be_visible()
  page.goto(endpoint+'/_simulator/console/#/ssm')
  page.get_by_role('link',name=name,exact=True).click();expect(page.get_by_label('Value',exact=True)).to_have_value('local-practice-value')
  assert 'must-not-appear' not in page.content()
+ # The reference uses the same bounded browser session. Static docs are not
+ # an API grant; do not mistake this document-load check for a Scalar Send test.
+ page.get_by_role('link',name='API reference',exact=True).click()
+ expect(page.get_by_role('heading',name='TenkaCloud Simulator API',exact=True)).to_be_visible(timeout=15000)
+ assert 'local-practice-value' not in page.content()
+ assert context.request.post(endpoint+'/',data=json.dumps({'Name':name}),headers={'Content-Type':'application/x-amz-json-1.1','X-Amz-Target':'AmazonSSM.GetParameter'}).json()['Parameter']['Value']=='local-practice-value'
+ page.go_back();expect(page.get_by_label('Value',exact=True)).to_have_value('local-practice-value')
  def native(op,parameter):
   return page.evaluate("async({op,parameter})=>{const r=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-amz-json-1.1','X-Amz-Target':'AmazonSSM.'+op},body:JSON.stringify(op==='PutParameter'?{Name:parameter,Value:'changed',Type:'String',Overwrite:true}:{Name:parameter})});return r.status}",{'op':op,'parameter':parameter})
  assert native('GetParameter',other)==403
@@ -74,4 +117,4 @@ with running(authenticated=True) as (endpoint,operator), sync_playwright() as p:
  ssm.delete_parameter(Name=name);ssm.delete_parameter(Name=other)
  assert not errors,errors
  browser.close()
- print(json.dumps({'participantSTSHandoffGUI':True,'fragmentErased':True,'ownParameterListDetailRefresh':True,'crossResourceDenied':True,'enumerationDenied':True,'readonlyDenied':True,'allowedWrite':True,'replayDenied':True,'roleDeletionRevokesBrowser':True,'axeWidths':[1440,390],'browserErrors':0,'scope':'Simulator GUI; host answer submission tested separately'}))
+ print(json.dumps({'participantSTSHandoffGUI':True,'fragmentErased':True,'homeAndListDoNotReadValues':True,'manualNavigationAndHistory':True,'embeddedReferenceLoaded':True,'ownParameterListDetailRefresh':True,'crossResourceDenied':True,'enumerationDenied':True,'readonlyDenied':True,'allowedWrite':True,'replayDenied':True,'roleDeletionRevokesBrowser':True,'axeWidths':[1440,390],'browserErrors':0,'scope':'Simulator GUI; host answer submission tested separately'}))

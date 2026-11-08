@@ -19,7 +19,7 @@ with running() as endpoint,sync_playwright() as p:
   page.evaluate(axe);result=page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})")
   results.append({'step':name,'violations':result['violations'],'incomplete':result['incomplete'],'passes':len(result['passes'])})
   print(name,[(v['id'],len(v['nodes'])) for v in result['violations']],flush=True)
- page.goto(endpoint+'/_simulator/console/');expect(page.get_by_role('heading',name='No buckets yet',exact=True)).to_be_visible();capture('01-empty')
+ page.goto(endpoint+'/_simulator/console/#/s3');expect(page.get_by_role('heading',name='No buckets yet',exact=True)).to_be_visible();capture('01-empty')
  primary=page.get_by_role('button',name='Create bucket',exact=True).first;primary.focus();page.keyboard.press('Enter');expect(page.get_by_label('Bucket name',exact=True)).to_be_focused();capture('02-create-form')
  name=page.get_by_label('Bucket name',exact=True);name.fill('UPPER_CASE');submit(page);expect(page.locator('[id^=form-error-]')).to_contain_text('DNS-compatible');assert sdk(endpoint).list_buckets()['Buckets']==[]
  name.fill('audit-practice');submit(page);page.get_by_role('link',name='audit-practice',exact=True).click();expect(page.get_by_role('tab',name='Objects',exact=True)).to_be_visible();capture('03-bucket-detail')

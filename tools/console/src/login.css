@@ -1,0 +1,103 @@
+/* TenkaCloud login presentation, aligned with packages/web-kit's
+   ConsoleAuthShell (ink/paper, Summit mark, type scale and split layout).
+   The scope deliberately excludes every authenticated provider console.
+   No remote fonts, images, decorative live data or additional auth requests. */
+.tc-simulator-login {
+  --tc-ink: #1d1d1f;
+  --tc-secondary: #424245;
+  --tc-muted: #6e6e73;
+  --tc-line: #d2d2d7;
+  --tc-line-soft: #e8e8ed;
+  --tc-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  min-height: 100vh;
+  min-height: 100svh;
+  color: var(--tc-ink);
+  background: #fff;
+  font: 14px/1.5 Inter, "Noto Sans JP", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.tc-simulator-login *, .tc-simulator-login *::before, .tc-simulator-login *::after { box-sizing: border-box; }
+.tc-simulator-login button { font: inherit; }
+.tc-simulator-login button:focus-visible { outline: 3px solid #1d1d1f; outline-offset: 4px; }
+.tc-login-stage { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: var(--tc-ink); color: #fff; padding: 44px 48px; }
+.tc-login-stage::before { content: ""; position: absolute; right: -140px; bottom: -180px; width: 640px; height: 640px; background: radial-gradient(closest-side, #ffffff0d, transparent 70%); pointer-events: none; }
+.tc-login-brand { display: flex; align-items: center; flex-wrap: wrap; gap: 11px; font-size: 20px; font-weight: 500; letter-spacing: -.02em; }
+.tc-login-brand > svg { flex: none; }
+.tc-login-brand-sub { color: #b1b1b4; }
+.tc-login-product { margin-left: 10px; border: 1px solid #ffffff38; border-radius: 999px; padding: 3px 9px; color: #b1b1b4; font: 10px/1.5 var(--tc-mono); letter-spacing: .12em; text-transform: uppercase; }
+.tc-login-stage-center { margin-block: auto; max-width: 460px; padding-block: 64px; }
+.tc-login-eyebrow { margin: 0 0 22px; color: #a3a3a7; font: 12px/1.5 var(--tc-mono); letter-spacing: .14em; }
+.tc-login-stage h2 { margin: 0 0 18px; font-size: clamp(32px, 3.4vw, 44px); font-weight: 600; letter-spacing: -.03em; line-height: 1.25; text-wrap: balance; }
+.tc-login-stage h2 em { display: block; color: #a3a3a7; font-style: normal; }
+.tc-login-lede { max-width: 420px; margin: 0; color: #bdbdc0; font-size: 16px; line-height: 1.7; }
+.tc-login-environment { margin-top: 38px; max-width: 420px; border: 1px solid #ffffff26; border-radius: 14px; overflow: hidden; background: #ffffff0b; }
+.tc-login-environment-title { padding: 12px 16px; border-bottom: 1px solid #ffffff1a; color: #b1b1b4; font: 11px/1.5 var(--tc-mono); letter-spacing: .08em; }
+.tc-login-environment dl { margin: 0; }
+.tc-login-environment dl > div { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 18px; padding: 13px 16px; }
+.tc-login-environment dl > div + div { border-top: 1px solid #ffffff12; }
+.tc-login-environment dt { color: #b1b1b4; font-size: 12px; }
+.tc-login-environment dd { margin: 0; color: #eeeef0; font: 12px/1.5 var(--tc-mono); }
+.tc-login-stage-foot { position: relative; margin: 0; color: #a3a3a7; font-size: 12px; }
+.tc-login-panel { display: flex; flex-direction: column; min-width: 0; padding: 44px 48px; }
+.tc-login-topbar { display: flex; justify-content: flex-end; }
+.tc-login-language { display: inline-flex; gap: 2px; border: 1px solid var(--tc-line); border-radius: 999px; padding: 4px; }
+.tc-login-language button { min-width: 42px; min-height: 32px; padding: 4px 11px; border: 0; border-radius: 999px; color: var(--tc-muted); background: transparent; font-size: 12px; cursor: pointer; }
+.tc-login-language button[aria-pressed="true"] { color: #fff; background: var(--tc-ink); font-weight: 500; }
+.tc-login-language button:disabled { cursor: default; }
+.tc-login-language button:hover:not([aria-pressed="true"]) { background: #f5f5f7; color: var(--tc-ink); }
+.tc-login-form-wrap { margin: auto; width: 100%; max-width: 420px; padding: 36px 0 28px; }
+.tc-login-kicker { margin: 0 0 14px; color: var(--tc-muted); font: 11.5px/1.5 var(--tc-mono); letter-spacing: .12em; }
+.tc-login-form-wrap h1 { margin: 0 0 12px; font-size: 26px; font-weight: 600; line-height: 1.35; letter-spacing: -.025em; text-wrap: balance; }
+.tc-login-subtitle { margin: 0 0 28px; color: var(--tc-secondary); font-size: 14px; line-height: 1.6; }
+.tc-login-field { margin-bottom: 22px; }
+.tc-login-field input { font-family: inherit !important; }
+.tc-login-field > label, .tc-login-file-label { display: block; margin-bottom: 9px; font-size: 13px; font-weight: 600; }
+.tc-login-help { margin: 9px 0 0; color: var(--tc-muted); font-size: 12px; line-height: 1.6; }
+.tc-login-file { margin-bottom: 24px; }
+.tc-login-file fieldset { min-width: 0; border: 0; padding: 0; margin: 0; }
+/* FileInput retains its official native chooser and focus handling. Scope these
+   visual overrides to its public button element, never Cloudscape hash names. */
+.tc-login-file button { min-height: 42px; border: 1px solid var(--tc-line) !important; border-radius: 10px !important; color: var(--tc-ink) !important; background: #fff !important; font-family: inherit !important; font-size: 13px !important; font-weight: 500 !important; padding: 9px 14px !important; }
+.tc-login-file button:hover { background: #f5f5f7 !important; border-color: var(--tc-muted) !important; }
+.tc-login-file fieldset:disabled button { opacity: .55; cursor: not-allowed; }
+.tc-login-file fieldset:focus-within { border-radius: 10px; outline: 3px solid var(--tc-ink); outline-offset: 3px; }
+.tc-login-file-status { color: var(--tc-secondary); font-size: 12px; line-height: 1.6; }
+.tc-login-file-status:not(:empty) { margin-top: 10px; }
+.tc-login-error { display: flex; align-items: flex-start; gap: 9px; margin: 0 0 16px; padding: 12px 14px; border: 1px solid #ecc9c6; border-radius: 10px; background: #fff6f5; color: #ac2119; font-size: 13px; }
+.tc-login-error > span { flex: none; display: grid; place-items: center; width: 17px; height: 17px; margin-top: 2px; border-radius: 50%; background: #ac2119; color: #fff; font-size: 11px; font-weight: 700; }
+.tc-login-error p { margin: 0; overflow-wrap: anywhere; }
+.tc-login-submit { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 54px; padding: 14px 18px; border: 1px solid transparent; border-radius: 12px; background: var(--tc-ink); color: #fff; font-size: 15px !important; font-weight: 500 !important; cursor: pointer; }
+.tc-login-submit:hover:not(:disabled) { background: #353538; }
+.tc-login-submit:active:not(:disabled) { transform: translateY(1px); }
+.tc-login-submit:disabled { background: #67676b; cursor: not-allowed; }
+.tc-login-spinner { width: 16px; height: 16px; border: 2px solid #ffffff66; border-top-color: #fff; border-radius: 50%; animation: tc-login-spin .7s linear infinite; }
+.tc-login-progress { color: var(--tc-muted); font-size: 12px; text-align: center; }
+.tc-login-progress:not(:empty) { margin-top: 8px; }
+.tc-login-note { display: flex; align-items: flex-start; gap: 10px; margin-top: 24px; }
+.tc-login-note svg { flex: none; margin-top: 2px; color: var(--tc-muted); }
+.tc-login-note p { margin: 0; color: var(--tc-secondary); font-size: 12px; line-height: 1.6; }
+.tc-login-footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 28px; border-top: 1px solid var(--tc-line-soft); padding-top: 18px; color: var(--tc-muted); font-size: 11.5px; }
+@keyframes tc-login-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .tc-simulator-login *, .tc-simulator-login *::before, .tc-simulator-login *::after { animation: none !important; transition: none !important; } }
+@media (max-width: 900px) {
+  .tc-simulator-login { grid-template-columns: 1fr; }
+  .tc-login-stage { padding: 28px 26px 32px; }
+  .tc-login-stage-center { margin: 28px 0 0; padding: 0; max-width: 620px; }
+  .tc-login-stage h2 { font-size: clamp(28px, 6vw, 36px); }
+  .tc-login-lede { max-width: 620px; font-size: 14px; }
+  .tc-login-environment, .tc-login-stage-foot { display: none; }
+  .tc-login-panel { padding: 24px 26px 32px; }
+  .tc-login-form-wrap { max-width: 520px; padding: 20px 0 0; }
+}
+@media (max-width: 380px) {
+  .tc-login-stage, .tc-login-panel { padding-inline: 20px; }
+  .tc-login-brand { gap: 8px; font-size: 18px; }
+  .tc-login-product { margin-left: 0; font-size: 9px; }
+  .tc-login-form-wrap h1 { font-size: 24px; }
+}
+@media (forced-colors: active) {
+  .tc-login-submit { border-color: ButtonText; }
+  .tc-login-language button[aria-pressed="true"] { outline: 2px solid Highlight; }
+}

@@ -1,48 +1,150 @@
 /* Long resource identifiers must wrap inside official Cloudscape components. */
 .resource-identifier { overflow-wrap: anywhere; word-break: break-word; }
 
-/* Neutral simulator controls; provider-specific console chrome lives below. */
-.cloud-global-nav { box-sizing: border-box; position: relative; z-index: 1001; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 16px; background: #17212e; color: #fff; font: 14px/1.4 system-ui, sans-serif; }
-.cloud-global-nav * { box-sizing: border-box; }
+/* Simulator chrome is separate from the provider consoles and their authority. */
+#navigation { position: relative; z-index: 1001; }
+#navigation * { box-sizing: border-box; }
+.cloud-global-nav { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 16px; background: #17212e; color: #fff; font: 14px/1.4 'Open Sans', sans-serif; }
 .cloud-global-brand { color: #fff; font-weight: 700; text-decoration: none; margin-right: 6px; }
 .cloud-global-nav button, .cloud-global-nav select, .cloud-global-nav summary { font: inherit; color: #fff; background: #26384a; border: 1px solid #71849a; border-radius: 5px; padding: 6px 10px; cursor: pointer; }
-.cloud-global-nav button:disabled, .cloud-global-nav select:disabled { cursor: not-allowed; opacity: .6; }
-.cloud-global-nav :is(button, select, input, summary, a):focus-visible { outline: 3px solid #80c9ff; outline-offset: 2px; }
+#navigation button:disabled, #navigation select:disabled { cursor: not-allowed; opacity: .6; }
+#navigation :is(button, select, input, summary, a):focus-visible { outline: 3px solid #80c9ff; outline-offset: 2px; }
 .cloud-provider-choices { display: flex; gap: 4px; }
 .cloud-provider-choices button[aria-pressed="true"] { background: #fff; color: #132438; border-color: #fff; font-weight: 700; }
 .cloud-catalog-control { position: relative; }
-.cloud-service-panel { position: absolute; z-index: 2; top: calc(100% + 8px); left: 0; width: min(390px, calc(100vw - 32px)); max-height: calc(100vh - 120px); overflow: auto; background: #fff; color: #17212e; padding: 16px; border: 1px solid #71849a; border-radius: 6px; box-shadow: 0 6px 20px #0004; }
+.cloud-service-panel { position: fixed; z-index: 1010; width: min(390px, calc(100vw - 24px)); overflow: auto; background: #fff; color: #17212e; padding: 16px; border: 1px solid #71849a; border-radius: 6px; box-shadow: 0 6px 20px #0004; font: 14px/1.5 'Open Sans', sans-serif; }
 .cloud-service-panel label { display: block; font-weight: 600; }
 .cloud-service-panel input { width: 100%; margin: 8px 0; padding: 8px; color: #17212e; border: 1px solid #68798c; border-radius: 4px; font: inherit; }
-.cloud-service-panel button { display: block; width: 100%; color: #17212e; background: #fff; text-align: left; border: 0; padding: 9px; }
+.cloud-service-panel button { display: block; width: 100%; color: #17212e; background: #fff; text-align: left; border: 0; border-radius: 4px; padding: 9px; font: inherit; cursor: pointer; }
 .cloud-service-panel button:hover { background: #eef6ff; }
 .cloud-current-service { float: right; font-size: 12px; color: #42576b; margin-left: 10px; }
 .cloud-language, .cloud-region { display: flex; align-items: center; gap: 5px; }
 .cloud-language { margin-left: auto; }
 .cloud-session { position: relative; }
-.cloud-session > div { position: absolute; top: calc(100% + 8px); right: 0; min-width: 230px; padding: 12px; background: #fff; color: #17212e; border: 1px solid #71849a; border-radius: 6px; }
+.cloud-session > div { position: absolute; z-index: 1005; top: calc(100% + 8px); right: 0; min-width: 230px; padding: 12px; background: #fff; color: #17212e; border: 1px solid #71849a; border-radius: 6px; }
 .cloud-session button { color: #17212e; background: #fff; display: block; width: 100%; margin: 4px 0; text-align: left; }
 .cloud-api-reference { color: #b9e0ff; }
 .cloud-provider-notice { margin: 16px; }
+.cloud-session-error { background: #fff2f0; color: #721c13; border: 1px solid #d37b70; border-radius: 4px; padding: 8px; }
+
+/* Real console references: dark unified navigation, independent search and service flyout. */
+.aws-console-top-navigation { position: relative; z-index: 1002; }
+.aws-global-search { display: flex; align-items: center; width: 100%; min-width: 0; gap: 16px; }
+.aws-services-trigger { flex: 0 0 34px; width: 34px; height: 34px; border: 0; border-radius: 4px; color: #d5dbdb; background: transparent; cursor: pointer; display: grid; place-items: center; }
+.aws-services-trigger:hover, .aws-services-trigger[aria-expanded="true"] { color: #42b4ff; background: #273644; }
+.aws-services-grid { display: grid; grid-template-columns: repeat(3, 4px); gap: 3px; }
+.aws-services-grid i { width: 4px; height: 4px; background: currentColor; border-radius: .5px; }
+.aws-global-search-field { display: flex; flex: 1; min-width: 0; align-items: center; border: 1px solid #7d8998; border-radius: 8px; background: #0f141c; color: #d5dbdb; }
+.aws-global-search-field:focus-within { outline: 2px solid #80c9ff; outline-offset: 2px; }
+.aws-global-search-field > svg { flex: 0 0 20px; width: 20px; height: 20px; margin-left: 10px; fill: none; stroke: currentColor; stroke-width: 2; }
+.aws-global-search-field input { min-width: 0; flex: 1; width: 100%; height: 34px; border: 0; border-radius: 8px; background: transparent; color: #fff; padding: 6px 10px; font: 14px/1.4 'Open Sans', sans-serif; }
+.aws-global-search-field input::placeholder { color: #c0c4ca; }
+#navigation .aws-global-search-field input:focus-visible { outline: none; }
+.aws-mobile-search-row { padding: 8px 16px; background: #161e2d; border-top: 1px solid #414d5c; }
+.aws-secondary-bar { display: flex; align-items: stretch; background: #161e2d; border-top: 1px solid #414d5c; }
+.aws-service-shortcuts { display: flex; flex: 1; min-width: 0; overflow-x: auto; align-items: center; gap: 4px; padding: 5px 12px; scrollbar-width: thin; scrollbar-color: #627080 #161e2d; }
+.aws-service-shortcuts button { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; white-space: nowrap; border: 0; border-radius: 4px; background: transparent; color: #e7e9ec; padding: 5px 7px; font: 13px/1.4 'Open Sans', sans-serif; cursor: pointer; }
+.aws-service-shortcuts button:hover, .aws-service-shortcuts button[aria-current="page"] { background: #293849; color: #fff; }
+.cloud-global-nav--aws { flex: 0 0 auto; background: #161e2d; border-left: 1px solid #414d5c; padding: 5px 12px; gap: 10px; font-size: 12px; }
+.cloud-global-nav--aws .cloud-provider-choices { gap: 1px; }
+.cloud-global-nav--aws .cloud-provider-choices button { border-color: transparent; background: transparent; padding: 5px; font-size: 11px; }
+.cloud-global-nav--aws .cloud-provider-choices button[aria-pressed="true"] { background: #354354; color: #fff; }
+.cloud-global-nav--aws .cloud-language { font-size: 0; }
+.cloud-global-nav--aws .cloud-language select { padding: 4px; font-size: 12px; background: #161e2d; border-color: #5f6b7a; }
+.cloud-service-panel--aws { display: grid; grid-template-columns: 205px minmax(0, 1fr); padding: 0; width: min(720px, calc(100vw - 24px)); overflow: hidden; background: #1b2530; color: #e7e9ec; border: 1px solid #53606e; border-radius: 0 0 8px 8px; }
+.cloud-service-panel--aws button { background: transparent; color: #e7e9ec; }
+.cloud-service-panel--aws button:hover { color: #42b4ff; background: #253443; }
+.aws-service-categories { padding: 16px; border-right: 1px solid #414d5c; overflow-y: auto; }
+.aws-service-categories button { padding: 10px 12px; font-size: 14px; }
+.aws-service-categories button[aria-current="true"] { color: #42b4ff; font-weight: 700; }
+.aws-service-category-divider { border-top: 1px solid #414d5c; margin: 14px 8px; }
+.aws-service-results { min-width: 0; overflow-y: auto; }
+.aws-service-results > p { padding: 0 28px; }
+.aws-service-panel-heading { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #414d5c; background: #1b2530; }
+.aws-service-panel-heading h2 { font-size: 18px; margin: 0; font-weight: 700; }
+.cloud-service-panel .aws-service-close { width: 32px; height: 32px; flex: 0 0 32px; padding: 0; font-size: 28px; line-height: 1; text-align: center; }
+.aws-service-results [role="menu"] { padding: 12px 24px 20px; }
+.cloud-service-panel .aws-service-entry { padding: 12px 4px; border-radius: 0; }
+.aws-service-entry strong { display: block; font-size: 16px; line-height: 1.5; }
+.aws-service-entry small { display: block; font-size: 13px; line-height: 1.5; margin-top: 3px; color: #c4c8ce; }
+.aws-service-entry .cloud-current-service { float: none; display: block; color: #80c9ff; margin: 4px 0 0; }
+
+/* Original service glyphs, not AWS brand artwork. */
+.console-service-icon { display: inline-grid; place-items: center; flex: 0 0 28px; width: 28px; height: 28px; color: #fff; background: #6b40b4; }
+.console-service-icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.console-service-icon--green { background: #387d16; }
+.console-service-icon--pink { background: #c20b61; }
+.console-service-icon--orange { background: #c75c00; }
+.console-service-icon--red { background: #cc2435; }
+.console-service-icon--purple { background: #7043c1; }
+.console-service-icon--blue { background: #3e4ebd; }
+.aws-service-shortcuts .console-service-icon { width: 22px; height: 22px; flex-basis: 22px; border-radius: 3px; }
+.aws-service-shortcuts .console-service-icon svg { width: 18px; height: 18px; }
+
+/* Neutral home: capability links, never resource values or invented cloud metrics. */
+.console-home { max-width: 1520px; margin: 0 auto; }
+.console-home-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.console-home-grid > div { min-width: 0; }
+.console-home-grid > div > div { height: 100%; }
+.console-home-services { grid-column: span 2; }
+.console-home-start, .console-home-limits { grid-column: span 2; }
+.console-home-service-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; }
+.console-home-service { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 13px 0; border-bottom: 1px solid #d5d8dc; }
+.console-home-service a { overflow-wrap: anywhere; }
+.console-home-service:nth-last-child(-n+2) { border-bottom: 0; }
+.console-home h3 { font-size: 16px; margin: 0 0 8px; line-height: 1.5; }
+.console-home p { margin: 0 0 14px; line-height: 1.65; }
+.console-home-guide { display: flex; gap: 14px; }
+.console-home-guide-icon { font-size: 36px; line-height: 1.3; color: #697585; }
+.console-home-guide + .console-home-guide { padding-top: 16px; border-top: 1px solid #d5d8dc; }
+.console-home-facts { margin: 0; }
+.console-home-facts > div { padding: 16px 0; border-bottom: 1px solid #d5d8dc; }
+.console-home-facts > div:first-child { padding-top: 0; }
+.console-home-facts > div:last-child { border-bottom: 0; }
+.console-home-facts dt { font-size: 14px; color: #414d5c; margin-bottom: 8px; }
+.console-home-facts dd { margin: 0; font-size: 16px; overflow-wrap: anywhere; }
+.console-home-start-grid { display: grid; gap: 16px; }
+.console-home-start-grid > div + div { border-top: 1px solid #d5d8dc; padding-top: 16px; }
+
+@media (max-width: 1100px) {
+  .console-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .console-home-start, .console-home-limits { grid-column: span 1; }
+  .aws-secondary-bar { flex-wrap: wrap; }
+  .aws-service-shortcuts { flex-basis: 100%; order: 2; border-top: 1px solid #414d5c; }
+  .cloud-global-nav--aws { width: 100%; border-left: 0; }
+}
 @media (max-width: 720px) {
-  .cloud-global-nav { padding: 10px 12px; gap: 8px; }
+  .cloud-global-nav { padding: 8px 12px; gap: 8px; }
   .cloud-global-brand { flex-basis: 100%; }
-  .cloud-provider-choices { flex: 1; }
-  .cloud-provider-choices button { flex: 1; padding-inline: 8px; }
+  .cloud-provider-choices { flex: 1 0 100%; min-width: 0; flex-wrap: wrap; }
+  .cloud-provider-choices button { flex: 1; padding-inline: 6px; }
   .cloud-catalog-control { position: static; }
-  .cloud-service-panel { top: 100%; left: 12px; }
   .cloud-language { margin-left: 0; }
   .cloud-global-nav label { font-size: 12px; }
   .cloud-region { flex: 1; }
   .cloud-region select { min-width: 0; max-width: 160px; }
   .cloud-session > div { position: fixed; top: auto; left: 12px; right: 12px; min-width: 0; }
+  .cloud-global-nav--aws .cloud-provider-choices { flex-basis: 100%; }
+  .cloud-global-nav--aws .cloud-language { margin-left: auto; font-size: 12px; }
+  .cloud-global-nav--aws .cloud-provider-choices button { font-size: 12px; }
+  .aws-mobile-search-row { padding: 8px 12px; }
+  .aws-global-search { gap: 10px; }
+  .cloud-service-panel--aws { grid-template-columns: minmax(112px, 32%) minmax(0, 1fr); }
+  .aws-service-categories { padding: 8px 4px; }
+  .aws-service-categories button { font-size: 12px; padding: 9px 8px; overflow-wrap: anywhere; }
+  .aws-service-panel-heading { padding: 12px; }
+  .aws-service-panel-heading h2 { font-size: 16px; }
+  .aws-service-results [role="menu"] { padding: 8px 12px; }
+  .aws-service-entry strong { font-size: 14px; }
+  .aws-service-entry small { font-size: 12px; }
+  .console-home-grid { display: flex; flex-direction: column; gap: 16px; }
+  .console-home-service-list { column-gap: 16px; }
+  .console-home-service { gap: 8px; }
 }
-
-.cloud-session-error { flex-basis: 100%; background: #fff2f0; color: #721c13; border: 1px solid #d37b70; border-radius: 4px; padding: 8px; }
-
-/* The official compact Utilities drawer uses z-index 1001. Its parent must
-   remain above the additional simulator control bar, including on mobile. */
-.aws-console-top-navigation { position: relative; z-index: 1002; }
+@media (max-width: 420px) {
+  .console-home-service-list { grid-template-columns: minmax(0, 1fr); }
+  .console-home-service:nth-last-child(2) { border-bottom: 1px solid #d5d8dc; }
+}
 
 /* Catalog descriptions keep official JSON members readable without wrapping AWS identifiers. */
 .catalog-json { margin: 0; max-height: 24rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.875rem; }

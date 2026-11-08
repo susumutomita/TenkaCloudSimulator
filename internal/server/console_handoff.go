@@ -86,7 +86,9 @@ func (a *Access) issueConsoleHandoff(w http.ResponseWriter, r *http.Request) {
 	if identity.Expires.Before(expires) {
 		expires = identity.Expires
 	}
-	destination := "/_simulator/console/#/ssm?" + url.Values{"region": {input.Region}, "parameter": {input.ParameterName}}.Encode()
+	// Sign-in starts at the neutral console home. The scoped resource remains
+	// discoverable, but its value is read only after explicit user navigation.
+	destination := "/_simulator/console/#/home?" + url.Values{"region": {input.Region}}.Encode()
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	a.pruneConsoleSessions(now)
@@ -198,7 +200,9 @@ func (a *Access) consoleBrowserRequest(r *http.Request, token string) (*http.Req
 	}
 	// Native STS credentials have a deliberately bounded service surface. Browser
 	// redemption cannot widen it to legacy identity APIs or other cloud providers.
-	allowed := r.Method == "GET" && (r.URL.Path == "/_simulator/v1/capabilities" || strings.HasPrefix(r.URL.Path, "/_simulator/console/"))
+	// The embedded reference is static documentation, not an API grant. Its
+	// same-origin request client still passes through the scoped native checks.
+	allowed := r.Method == "GET" && (r.URL.Path == "/_simulator/v1/capabilities" || strings.HasPrefix(r.URL.Path, "/_simulator/console/") || strings.HasPrefix(r.URL.Path, "/_simulator/docs/"))
 	nativeHeaders := r.Header.Get("Authorization") == "" && r.Header.Get("X-Amz-Security-Token") == "" && (r.Header.Get("X-Simulator-Service") == "" || r.Header.Get("X-Simulator-Service") == "ssm")
 	for _, name := range []string{"Content-Type", "X-Amz-Target", "X-Simulator-Service", "X-Simulator-Region", "X-Simulator-Principal"} {
 		nativeHeaders = nativeHeaders && len(r.Header.Values(name)) <= 1

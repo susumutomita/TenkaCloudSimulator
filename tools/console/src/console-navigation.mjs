@@ -1,6 +1,6 @@
 // Console discovery only: this catalog never grants API or exercise authority.
 export const PROVIDERS = Object.freeze([
-  {id: 'aws', label: 'AWS', defaultService: 's3'},
+  {id: 'aws', label: 'AWS', defaultService: 'home'},
   {id: 'gcp', label: 'Google Cloud', defaultService: 'gcp-storage'},
   {id: 'azure', label: 'Azure', defaultService: 'azure-blob'},
   {id: 'sakura', label: 'Sakura Cloud', defaultService: 'sakura-disks'},
@@ -25,7 +25,7 @@ export const SERVICES = Object.freeze([
   {id: 'sakura-disks', provider: 'sakura', label: 'Disks', route: '/sakura-disks', keywords: 'sakura cloud disk configuration storage さくらのクラウド さくら ディスク 構成 ストレージ'},
 ]);
 export function serviceDescriptor(id) { return SERVICES.find(service => service.id === id); }
-export function providerForService(id) { return serviceDescriptor(id)?.provider ?? null; }
+export function providerForService(id) { return id === 'home' ? 'aws' : serviceDescriptor(id)?.provider ?? null; }
 // Discovery only; server-side trusted Actor/owner checks remain authoritative.
 // No environment/project/owner is inferred from client headers or AWS regions.
 export function sakuraConfiguration(capabilities) {
@@ -42,8 +42,12 @@ export function sakuraConfiguration(capabilities) {
   return {endpoint: scope.endpoint, zone: match[1]};
 }
 export function serviceAvailable(id, capabilities) {
+  if (id === 'home') return !!capabilities;
   const service = serviceDescriptor(id);
   if (!service || !capabilities) return false;
+  // A participant handoff only exposes its bound SSM scope. This presentation
+  // restriction never replaces the server's exact-resource authorization.
+  if (capabilities.consoleScope && id !== 'ssm') return false;
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
   if (service.provider === 'sakura') return sakuraConfiguration(capabilities) !== null;
   if (service.id === 'gcp-catalog') return Array.isArray(capabilities.gcpCatalog?.apis) && capabilities.gcpCatalog.apis.length > 0;
@@ -70,10 +74,10 @@ export function servicesForProvider(provider, capabilities, query = '') {
     && searchText(service, capabilities).includes(search));
 }
 export function serviceFromHash(hash) {
-  if (!hash || hash === '#' || hash === '#/') return 's3';
+  if (!hash || hash === '#' || hash === '#/') return 'home';
   const first = /^#\/([^/?]+)(?:[/?]|$)/.exec(hash)?.[1];
   const aliases = {secrets: 'secretsmanager', parameters: 'ssm', stacks: 'cfn', functions: 'lambda', roles: 'iam'};
   const id = aliases[first] ?? first;
-  return serviceDescriptor(id) ? id : null;
+  return id === 'home' || serviceDescriptor(id) ? id : null;
 }
-export function hashForService(id) { return serviceDescriptor(id)?.route ?? null; }
+export function hashForService(id) { return id === 'home' ? '/home' : serviceDescriptor(id)?.route ?? null; }
