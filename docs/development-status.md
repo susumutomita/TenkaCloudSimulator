@@ -63,6 +63,39 @@ and draft-first publication without replacing existing tags/assets. Ambient Go
 configuration and observed tag drift are refused. Windows remains compile-only.
 No tag or public release has been created. Signing/notarization, Gatekeeper and
 repository tag protections remain outside the verified scope.
+## Participant console handoff, 2026-11-08
+
+In progress: dedicated branch `feat/participant-console-handoff`, integrated
+with public main `74985ee93a1ab38c9b1101ffdd3a2c8c3430e01b`. The integration
+owner retains STS browser binding, the exact signed handoff endpoint, fragment
+redemption, capability discovery, tests and the separate ConsoleHandoff finite
+model. Other service PRs and release workflows remain outside this change.
+
+Historical native checks and the isolated macOS host GUI-to-100-point rehearsal
+are recorded in [console sessions](console-sessions.md). Independent review
+repaired a leading-slash parameter alias gap and unsupported capability metadata.
+The new 59th finite model preserves the prior 58 registry entries; its baseline,
+twenty required controls and all 78 formal-policy tests pass. The final integrated
+native source passed `make before-commit` with race coverage of 95.60%, vet,
+assets, module verification and build. Exact-commit browser/formal gates,
+publication and merge remain pending. No release or current-head GUI pass is
+implied by historical evidence.
+
+The PR #446 audit follow-up owns only `test/e2e/console_handoff.py`, this roster
+and their exact applicability entries, starting from
+`3395abbf2a22c80b2128a36d2f4a3e0c507e7532` in the same dedicated branch/worktree.
+The hosted browser reached the bound parameter, then correctly rejected the
+test's inline script tag under the Console CSP. The fix uses the existing
+Playwright audit evaluation pattern without changing the site's CSP, runtime
+or assets. Both 1440/390 accessibility audits and all subsequent scope, write,
+replay and revocation assertions remain required. Native `make before-commit`
+and fresh exact-head browser/formal checks are required for this follow-up;
+the previous source's successful native/formal checks are historical evidence.
+The next hosted run passed both accessibility audits but found the denied-write
+text in both the visible form error and Cloudscape's hidden live-region copy.
+The same owner scopes error/success assertions to their respective Alerts;
+the visible denial, successful write and later authorization checks stay intact.
+
 
 ## CloudFormation Battle intrinsic prerequisite: 2026-11-08
 

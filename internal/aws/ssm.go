@@ -207,6 +207,12 @@ func (g *Gateway) serveSSM(w http.ResponseWriter, r *http.Request) {
 		invalid("Use a parameter name of up to 1011 characters and at most 15 path levels; labels/versions/ARN selectors are not supported.")
 		return
 	}
+	// IAM ARNs normalize a leading slash, but storage keys retain it. A bound
+	// browser must match the exact named parameter, not another key with the same ARN.
+	if boundary, scoped := r.Context().Value(consoleParameterBoundaryKey{}).(consoleParameterBoundary); scoped && (input.Name != boundary.name || region != boundary.region || (op != "GetParameter" && op != "PutParameter")) {
+		ssmError(w, ssmFailure{"AccessDeniedException", "Request outside console session scope."})
+		return
+	}
 	principal := r.Header.Get("X-Simulator-Principal")
 	if principal == "" {
 		principal = core.Administrator

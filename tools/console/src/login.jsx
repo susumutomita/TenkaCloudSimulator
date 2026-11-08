@@ -15,12 +15,31 @@ import { useLocale } from './i18n.jsx';
 // The file parser is deliberately one token line, not a command/JSON extractor.
 const maxTokenFileBytes=512,tokenPattern=/^[A-Za-z0-9_-]{32,256}$/;
 
+// Capture once during module startup and erase before rendering or network I/O.
+const initialHandoff=location.pathname==='/_simulator/login'?new URLSearchParams(location.hash.slice(1)).get('handoff'):null;
+if(initialHandoff!==null)history.replaceState(null,'',location.pathname);
+
 export default function Login(){
   const {locale,setLocale,t}=useLocale();
   const [token,setToken]=useState(''),[error,setError]=useState(null),[busy,setBusy]=useState(false),[fileState,setFileState]=useState('');
   const tokenInput=useRef(null);
   const inputRevision=useRef(0),pendingPaste=useRef(null),pasteTimer=useRef(null),fileRevision=useRef(null),alive=useRef(true),submitting=useRef(false);
   function showError(en,ja){setError({en,ja})}
+  useEffect(()=>{
+    if(initialHandoff===null)return;
+    submitting.current=true;setBusy(true);
+    (async()=>{
+      try{
+        if(!/^[a-f0-9]{64}$/.test(initialHandoff))throw Error('handoff');
+        const response=await fetch('/_simulator/login',{method:'POST',credentials:'same-origin',headers:{Accept:'application/json'},body:new URLSearchParams({handoff:initialHandoff})});
+        if(!response.ok)throw Error('handoff');
+        const result=await response.json();
+        if(typeof result.Destination!=='string'||!result.Destination.startsWith('/_simulator/console/#/ssm?'))throw Error('destination');
+        location.replace(result.Destination);
+      }catch{showError('This console link expired or could not be used. Return to TenkaCloud and open a new console link.','コンソールリンクを使用できません。TenkaCloudに戻り、新しいリンクを開いてください。');submitting.current=false;setBusy(false)}
+    })();
+  },[]);
+
   function clearPendingPaste(){clearTimeout(pasteTimer.current);pasteTimer.current=null;pendingPaste.current=null}
   useEffect(()=>{alive.current=true;return()=>{alive.current=false;inputRevision.current++;fileRevision.current=null;clearPendingPaste()}},[]);
   function newIntent(){inputRevision.current++;clearPendingPaste();fileRevision.current=null;setFileState('');return inputRevision.current}

@@ -1,20 +1,453 @@
 {
   "version": 1,
-  "base_sha": "835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152",
+  "base_sha": "74985ee93a1ab38c9b1101ffdd3a2c8c3430e01b",
   "changes": [
     {
-      "path": "docs/development-status.md",
-      "sha256": "8fdb6c40284f8b51dfaa0b613fa92f95e68144a175b4e9a6860f31410507991b",
+      "path": "README.md",
+      "sha256": "d7b443207ebb78d55d4b609aa823d0335aef7a435f082335d00931b3d98c869b",
       "disposition": "documentation",
-      "reason": "Integrates dated service evidence with public main 835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152. Preserves newer roster/history, records verified PR445 merge evidence and current bounded multi-cloud/SSM contracts, and distinguishes the November 4 snapshot. No runtime, UI assets, dependencies, model/config, workflow or security-setting changes; test references are not additional execution claims.",
+      "reason": "Documents participant Console scope, actual historical verification, independent-review fixes and bounded-model limitations. No runtime authority is created by documentation.",
       "models": []
     },
     {
-      "path": "docs/service-verification.md",
-      "sha256": "73c33eb710068a3ec59ef4089828de903c55fc5b36823f26c874f9982de45e9b",
+      "path": "docs/console-handoff-formal.md",
+      "sha256": "a942a1a21980081e9ac24b2f97175cbf7980da29adc05c0c947def409603b242",
       "disposition": "documentation",
-      "reason": "Integrates dated service evidence with public main 835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152. Preserves newer roster/history, records verified PR445 merge evidence and current bounded multi-cloud/SSM contracts, and distinguishes the November 4 snapshot. No runtime, UI assets, dependencies, model/config, workflow or security-setting changes; test references are not additional execution claims.",
+      "reason": "Documents participant Console scope, actual historical verification, independent-review fixes and bounded-model limitations. No runtime authority is created by documentation.",
       "models": []
+    },
+    {
+      "path": "docs/console-sessions.md",
+      "sha256": "832ed9b78d6440923470e7ca50b270b8ce4f737fff5e730b6320cf87c6c39356",
+      "disposition": "documentation",
+      "reason": "Documents participant Console scope, actual historical verification, independent-review fixes and bounded-model limitations. No runtime authority is created by documentation.",
+      "models": []
+    },
+    {
+      "path": "docs/development-status.md",
+      "sha256": "1da4754510179bd9a8ee7d54c94a0985c0386249d50965b25d60fb0965ac4f02",
+      "disposition": "documentation",
+      "reason": "Documents participant Console scope, actual historical verification, independent-review fixes and bounded-model limitations. No runtime authority is created by documentation.",
+      "models": []
+    },
+    {
+      "path": "formal/ConsoleHandoff.cfg",
+      "sha256": "2e7f8df1bf2f0b34b899c8234073124433c51b2d43bd034d68ccba07b555edd1",
+      "disposition": "modeled",
+      "reason": "New bounded handoff state machine checks participant-only issuance, one-use consumption, parent-capped deadlines, fresh generation/policy authority, literal parameter and region/action boundaries, selected logout and unrelated/SDK authority preservation. Go handlers enforce these contracts; tests and capabilities are correspondence inputs, not code executed by TLC.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+        }
+      ]
+    },
+    {
+      "path": "formal/ConsoleHandoff.tla",
+      "sha256": "a9c811b1cfcb7688e2ff939311322d8a5374bd7ccccd29d546d5d4586d89fecf",
+      "disposition": "modeled",
+      "reason": "New bounded handoff state machine checks participant-only issuance, one-use consumption, parent-capped deadlines, fresh generation/policy authority, literal parameter and region/action boundaries, selected logout and unrelated/SDK authority preservation. Go handlers enforce these contracts; tests and capabilities are correspondence inputs, not code executed by TLC.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "77e44982e4b23807cd69952cd950bd7add58071933bad05cb795539ffecaf452",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the additional ConsoleHandoff model, exact source scope, required invariants and twenty mutation controls, with regression coverage. Preserves all fifty-eight existing model entries and their gates; no workflow or threshold changes.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "1273e0d7353ab0afbbaa38ffa4b0e1d177f03bb3e85c08d069c00a210c63b3be",
+      "disposition": "modeled",
+      "reason": "New bounded handoff state machine checks participant-only issuance, one-use consumption, parent-capped deadlines, fresh generation/policy authority, literal parameter and region/action boundaries, selected logout and unrelated/SDK authority preservation. Go handlers enforce these contracts; tests and capabilities are correspondence inputs, not code executed by TLC. Preserves native STS generation/expiry/policy checks while adding the exact signed handoff route and a browser binding that cannot mint native sessions. Existing STS admission/use guard abstraction covers retained authority obligations; the separate ConsoleHandoff model covers the new redemption lifecycle.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+        },
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "TypeOK",
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite abstract guard/state correspondence only. Assumes coherent generation-and-policy authorization snapshot at use; SQL single-statement snapshots, Go concurrency, parser details, cryptographic SigV4, HTTP dispatch, real time, cross-process isolation and randomness require independent implementation tests. No liveness or Go refinement proof. Restart clears issued state; symbolic token slots may be reused after restart, not evidence of real credential uniqueness. Scoped baseline plus eight config-guard variants previously passed; source-edit registry variants need fresh exact-HEAD gate evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sts_credentials.go",
+      "sha256": "d810dc405816e22f838f8f7bcef519b04ae231238a7b5369aa5df6347e85fcee",
+      "disposition": "modeled",
+      "reason": "New bounded handoff state machine checks participant-only issuance, one-use consumption, parent-capped deadlines, fresh generation/policy authority, literal parameter and region/action boundaries, selected logout and unrelated/SDK authority preservation. Go handlers enforce these contracts; tests and capabilities are correspondence inputs, not code executed by TLC. Preserves native STS generation/expiry/policy checks while adding the exact signed handoff route and a browser binding that cannot mint native sessions. Existing STS admission/use guard abstraction covers retained authority obligations; the separate ConsoleHandoff model covers the new redemption lifecycle.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+        },
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "TypeOK",
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite abstract guard/state correspondence only. Assumes coherent generation-and-policy authorization snapshot at use; SQL single-statement snapshots, Go concurrency, parser details, cryptographic SigV4, HTTP dispatch, real time, cross-process isolation and randomness require independent implementation tests. No liveness or Go refinement proof. Restart clears issued state; symbolic token slots may be reused after restart, not evidence of real credential uniqueness. Scoped baseline plus eight config-guard variants previously passed; source-edit registry variants need fresh exact-HEAD gate evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sts_credentials_test.go",
+      "sha256": "9a35521114c17917fd009030fb3968dfbfa411f85a57c864a55884b9194dacb7",
+      "disposition": "modeled",
+      "reason": "New bounded handoff state machine checks participant-only issuance, one-use consumption, parent-capped deadlines, fresh generation/policy authority, literal parameter and region/action boundaries, selected logout and unrelated/SDK authority preservation. Go handlers enforce these contracts; tests and capabilities are correspondence inputs, not code executed by TLC.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sts_signature.go",
+      "sha256": "175d8b7fd60586d043f25e21debf2eb23b5cdf334cf3533d5be24fb219a971a5",
+      "disposition": "modeled",
+      "reason": "Preserves native STS generation/expiry/policy checks while adding the exact signed handoff route and a browser binding that cannot mint native sessions. Existing STS admission/use guard abstraction covers retained authority obligations; the separate ConsoleHandoff model covers the new redemption lifecycle.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "TypeOK",
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite abstract guard/state correspondence only. Assumes coherent generation-and-policy authorization snapshot at use; SQL single-statement snapshots, Go concurrency, parser details, cryptographic SigV4, HTTP dispatch, real time, cross-process isolation and randomness require independent implementation tests. No liveness or Go refinement proof. Restart clears issued state; symbolic token slots may be reused after restart, not evidence of real credential uniqueness. Scoped baseline plus eight config-guard variants previously passed; source-edit registry variants need fresh exact-HEAD gate evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/access.go",
+      "sha256": "961e1cc45ed9c901a7dddc681b02a199f2773500b09ecc7a8793ca10e55ef4b9",
+      "disposition": "modeled",
+      "reason": "New bounded handoff state machine checks participant-only issuance, one-use consumption, parent-capped deadlines, fresh generation/policy authority, literal parameter and region/action boundaries, selected logout and unrelated/SDK authority preservation. Go handlers enforce these contracts; tests and capabilities are correspondence inputs, not code executed by TLC. Retains browser-cookie/SDK separation, selected logout, parent expiry and unrelated-session preservation while composing separate STS-bound browser sessions. The legacy model covers the retained browser subset, not the added STS binding or UI implementation. Preserves native STS generation/expiry/policy checks while adding the exact signed handoff route and a browser binding that cannot mint native sessions. Existing STS admission/use guard abstraction covers retained authority obligations; the separate ConsoleHandoff model covers the new redemption lifecycle.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+        },
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "TypeOK",
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        },
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "TypeOK",
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite abstract guard/state correspondence only. Assumes coherent generation-and-policy authorization snapshot at use; SQL single-statement snapshots, Go concurrency, parser details, cryptographic SigV4, HTTP dispatch, real time, cross-process isolation and randomness require independent implementation tests. No liveness or Go refinement proof. Restart clears issued state; symbolic token slots may be reused after restart, not evidence of real credential uniqueness. Scoped baseline plus eight config-guard variants previously passed; source-edit registry variants need fresh exact-HEAD gate evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/console_handoff.go",
+      "sha256": "e329d4d7db4a27886802d374e2c00d8f77231dba32826c3be5aa403149edb255",
+      "disposition": "modeled",
+      "reason": "New bounded handoff state machine checks participant-only issuance, one-use consumption, parent-capped deadlines, fresh generation/policy authority, literal parameter and region/action boundaries, selected logout and unrelated/SDK authority preservation. Go handlers enforce these contracts; tests and capabilities are correspondence inputs, not code executed by TLC.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/console_handoff_test.go",
+      "sha256": "381ec3193a304ac0c7cfd8317cf71dd4adba4aae4ec8ea8bf456b88b5cc9f1ca",
+      "disposition": "modeled",
+      "reason": "New bounded handoff state machine checks participant-only issuance, one-use consumption, parent-capped deadlines, fresh generation/policy authority, literal parameter and region/action boundaries, selected logout and unrelated/SDK authority preservation. Go handlers enforce these contracts; tests and capabilities are correspondence inputs, not code executed by TLC.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "a3ae153217c14b1ab981fee2efccc66b040eb6d8cded4cd94c5d6577041edc13",
+      "disposition": "modeled",
+      "reason": "New bounded handoff state machine checks participant-only issuance, one-use consumption, parent-capped deadlines, fresh generation/policy authority, literal parameter and region/action boundaries, selected logout and unrelated/SDK authority preservation. Go handlers enforce these contracts; tests and capabilities are correspondence inputs, not code executed by TLC.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "a02c153619e400530c7de6472f9c5deeff1aaa79f61df6ae67cea1421bed5df8",
+      "disposition": "modeled",
+      "reason": "Retains the token/file/paste login intent behavior while adding a separate one-time handoff redemption entry. The existing model covers retained login-input invariants only; the handoff model and native/actual-browser tests separately cover the new path. Generated bundle is a correspondence artifact, not executable model evidence.",
+      "models": [
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "TypeOK",
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "cc274f1e4d87ab1351ae3b34bf20829623fcb575a8e83b4c6d8e3e866c389664",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the additional ConsoleHandoff model, exact source scope, required invariants and twenty mutation controls, with regression coverage. Preserves all fifty-eight existing model entries and their gates; no workflow or threshold changes.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "68723b13145d2bb6e1a0d77f93002e6c818f2cc5b0c77e7a949f0efd5de5e8d5",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the additional ConsoleHandoff model, exact source scope, required invariants and twenty mutation controls, with regression coverage. Preserves all fifty-eight existing model entries and their gates; no workflow or threshold changes.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "9e64eff9a6053f128d8a8ebd9ac447e99cb97a4621e176e8f036116608a891f5",
+      "disposition": "test-support",
+      "reason": "Registers and exercises actual participant handoff and GUI acceptance against local native services. Tests do not replace authorization checks or establish formal refinement.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/console_handoff.py",
+      "sha256": "85118f1355b0dffd276c563a48a301978527ede5f0f2c49d3eefa481337bad1b",
+      "disposition": "test-support",
+      "reason": "Exercises actual participant handoff and GUI acceptance against local native services. Accessibility instrumentation preserves the site CSP; error/success assertions target the visible Cloudscape Alerts rather than duplicated hidden live-region text. Both widths and all scope/write/replay/revocation assertions remain. Tests do not replace authorization checks or establish formal refinement.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "2b706a05eccc7f06a0945a9b0750eace2590970acea9e2a151996143910d9b6a",
+      "disposition": "presentation",
+      "reason": "Adds or rebuilds local Console handoff presentation/navigation metadata. Native auth and exact parameter scope remain server-enforced; UI appearance or hidden controls are not an authority boundary.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "1c181324b120100128c49d7ee95b407b9663244a8a0520e18603c608983855e6",
+      "disposition": "presentation",
+      "reason": "Adds or rebuilds local Console handoff presentation/navigation metadata. Native auth and exact parameter scope remain server-enforced; UI appearance or hidden controls are not an authority boundary.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "a2f50f91fb53a6e21cff0e94ab88913f5f9a2bf8ca7e8e3ad048b0ca0433e279",
+      "disposition": "presentation",
+      "reason": "Adds or rebuilds local Console handoff presentation/navigation metadata. Native auth and exact parameter scope remain server-enforced; UI appearance or hidden controls are not an authority boundary.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/login.jsx",
+      "sha256": "1953c7bdae854906de450876663de49bc3c54f4db0af8b57f59e33414360bca5",
+      "disposition": "modeled",
+      "reason": "Retains browser-cookie/SDK separation, selected logout, parent expiry and unrelated-session preservation while composing separate STS-bound browser sessions. The legacy model covers the retained browser subset, not the added STS binding or UI implementation. Retains the token/file/paste login intent behavior while adding a separate one-time handoff redemption entry. The existing model covers retained login-input invariants only; the handoff model and native/actual-browser tests separately cover the new path. Generated bundle is a correspondence artifact, not executable model evidence.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "TypeOK",
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        },
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "TypeOK",
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "cf0bc8c0ccbe466d9c3a13ecd8764d459d92722dc80d53d5b8e40472393ed41a",
+      "disposition": "modeled",
+      "reason": "Retains browser-cookie/SDK separation, selected logout, parent expiry and unrelated-session preservation while composing separate STS-bound browser sessions. The legacy model covers the retained browser subset, not the added STS binding or UI implementation.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "TypeOK",
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        }
+      ]
     }
   ]
 }

@@ -71,13 +71,18 @@ func sdkHMAC(key []byte, value string) []byte {
 
 func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time.Time) error {
 	fail := func() error { return fmt.Errorf("local SigV4 signature verification failed") }
-	if secret == "" || r.URL.Path != "/" || r.URL.RawPath != "" || r.URL.User != nil {
+	handoff := r.URL.Path == "/_simulator/v1/console-handoffs" && s.service == "sts"
+	if secret == "" || (r.URL.Path != "/" && !handoff) || r.URL.RawPath != "" || r.URL.User != nil {
 		return fail()
 	}
 	if r.Method != "POST" {
 		return fail()
 	}
-	if s.service == "ssm" {
+	if handoff {
+		if r.Header.Get("Content-Type") != "application/json" || r.Header.Get("X-Amz-Target") != "" {
+			return fail()
+		}
+	} else if s.service == "ssm" {
 		if !strings.HasPrefix(r.Header.Get("X-Amz-Target"), "AmazonSSM.") || r.Header.Get("Content-Type") != "application/x-amz-json-1.1" {
 			return fail()
 		}
@@ -152,9 +157,9 @@ func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time
 	if supplied := r.Header.Get("X-Amz-Content-Sha256"); supplied != "" && supplied != payloadHash {
 		return fail()
 	}
-	// Only root POST/GET control-plane requests without query parameters are in
-	// scope. Canonical escaping remains explicit rather than accepting raw paths.
-	path := (&url.URL{Path: "/"}).EscapedPath()
+	// Only root control-plane POSTs and the exact STS console-handoff POST
+	// are in scope. Canonical escaping stays explicit; raw paths are refused.
+	path := (&url.URL{Path: r.URL.Path}).EscapedPath()
 	request := r.Method + "\n" + path + "\n\n" + canonical.String() + "\n" + s.headers + "\n" + payloadHash
 	digest := sha256.Sum256([]byte(request))
 	toSign := "AWS4-HMAC-SHA256\n" + stamp + "\n" + s.scope + "\n" + hex.EncodeToString(digest[:])

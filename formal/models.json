@@ -7145,6 +7145,258 @@
      "expect_invariant": "NoFailedWrites"
     }
    ]
+  },
+  {
+   "id": "ConsoleHandoff",
+   "model": "formal/ConsoleHandoff.tla",
+   "config": "formal/ConsoleHandoff.cfg",
+   "bounds": "One opaque handoff, two redemption attempts, one bound browser and one unrelated live browser; time0..3, parent expiry2, handoff TTL1, browser TTL1 or3, two role generations, policy Boolean, two parameters/regions, Get/Put/Delete actions.",
+   "properties": [
+    "TypeOK",
+    "OperatorRefused",
+    "ParentLifetimeBound",
+    "OneTimeRedemption",
+    "AttemptConsumesCode",
+    "RedeemRequiresFreshParent",
+    "UseRequiresFreshAuthority",
+    "ExactDestination",
+    "LogoutRejectsReplay",
+    "UnrelatedSessionsPreserved",
+    "SDKAuthorityPreserved"
+   ],
+   "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes.",
+   "source_scope": [
+    "internal/server/console_handoff.go",
+    "internal/server/access.go",
+    "internal/aws/sts_credentials.go",
+    "internal/server/console_handoff_test.go",
+    "internal/aws/sts_credentials_test.go",
+    "internal/aws/sts_roles.go",
+    "internal/server/server.go",
+    "internal/aws/ssm.go"
+   ],
+   "mutants": [
+    {
+     "id": "AllowOperator",
+     "edits": [
+      {
+       "old": "who = \"participant\" (* ParticipantOnly *)",
+       "new": "TRUE (* ParticipantOnly *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OperatorRefused"
+    },
+    {
+     "id": "ExtendHandoff",
+     "edits": [
+      {
+       "old": "Min(now + 1, 2) (* HandoffBound *)",
+       "new": "now + 3 (* HandoffBound *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ParentLifetimeBound"
+    },
+    {
+     "id": "ExtendBrowser",
+     "edits": [
+      {
+       "old": "Min(now + ttl, 2) ELSE browserDeadline",
+       "new": "now + 3 ELSE browserDeadline",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ParentLifetimeBound"
+    },
+    {
+     "id": "ReuseCode",
+     "edits": [
+      {
+       "old": "available' = FALSE (* ConsumeEveryAttempt *)",
+       "new": "available' = available (* ConsumeEveryAttempt *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttemptConsumesCode"
+    },
+    {
+     "id": "IgnoreConsumedCode",
+     "edits": [
+      {
+       "old": "ok == available /\\",
+       "new": "ok == TRUE /\\",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OneTimeRedemption"
+    },
+    {
+     "id": "SkipRedeemExpiry",
+     "edits": [
+      {
+       "old": "now < handoffDeadline (* RedeemExpiry *)",
+       "new": "TRUE (* RedeemExpiry *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RedeemRequiresFreshParent"
+    },
+    {
+     "id": "SkipRedeemParent",
+     "edits": [
+      {
+       "old": "LiveParent (* RedeemParent *)",
+       "new": "TRUE (* RedeemParent *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RedeemRequiresFreshParent"
+    },
+    {
+     "id": "SkipCookie",
+     "edits": [
+      {
+       "old": "\"self\" \\in active (* CookieLive *)",
+       "new": "TRUE (* CookieLive *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresFreshAuthority"
+    },
+    {
+     "id": "SkipBrowserExpiry",
+     "edits": [
+      {
+       "old": "now < browserDeadline (* BrowserExpiry *)",
+       "new": "TRUE (* BrowserExpiry *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresFreshAuthority"
+    },
+    {
+     "id": "SkipUseParent",
+     "edits": [
+      {
+       "old": "LiveParent (* UseParent *)",
+       "new": "TRUE (* UseParent *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresFreshAuthority"
+    },
+    {
+     "id": "CachePolicy",
+     "edits": [
+      {
+       "old": "permission (* FreshPolicy *)",
+       "new": "TRUE (* FreshPolicy *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresFreshAuthority"
+    },
+    {
+     "id": "SkipParameter",
+     "edits": [
+      {
+       "old": "p = \"own\" (* ExactParameter *)",
+       "new": "TRUE (* ExactParameter *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDestination"
+    },
+    {
+     "id": "SkipRegion",
+     "edits": [
+      {
+       "old": "r = \"east\" (* ExactRegion *)",
+       "new": "TRUE (* ExactRegion *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDestination"
+    },
+    {
+     "id": "SkipAction",
+     "edits": [
+      {
+       "old": "a \\in {\"Get\",\"Put\"} (* ExactAction *)",
+       "new": "TRUE (* ExactAction *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDestination"
+    },
+    {
+     "id": "KeepLoggedOutCookie",
+     "edits": [
+      {
+       "old": "active \\ {\"self\"} (* LocalRevocation *)",
+       "new": "active (* LocalRevocation *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LogoutRejectsReplay"
+    },
+    {
+     "id": "RevokePeer",
+     "edits": [
+      {
+       "old": "active \\ {\"self\"} (* LocalRevocation *)",
+       "new": "{} (* LocalRevocation *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UnrelatedSessionsPreserved"
+    },
+    {
+     "id": "RevokeSDK",
+     "edits": [
+      {
+       "old": "sdk' = sdk (* SDKFrame *)",
+       "new": "sdk' = {} (* SDKFrame *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SDKAuthorityPreserved"
+    },
+    {
+     "id": "GrantBrowserSDK",
+     "edits": [
+      {
+       "old": "sdk' = sdk (* SDKFrame *)",
+       "new": "sdk' = sdk \\cup {\"browser\"} (* SDKFrame *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SDKAuthorityPreserved"
+    },
+    {
+     "id": "SkipUseGeneration",
+     "edits": [
+      {
+       "old": "LiveParent (* UseParent *)",
+       "new": "(parent /\\ now < 2)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresFreshAuthority"
+    },
+    {
+     "id": "SkipRedeemGeneration",
+     "edits": [
+      {
+       "old": "LiveParent (* RedeemParent *)",
+       "new": "(parent /\\ now < 2)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RedeemRequiresFreshParent"
+    }
+   ]
   }
  ]
 }
