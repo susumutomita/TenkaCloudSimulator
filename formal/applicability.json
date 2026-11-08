@@ -1,89 +1,253 @@
 {
   "version": 1,
-  "base_sha": "4ab99d4902571c75862aa642052cd94a1e4f5b61",
+  "base_sha": "0d0abe6eff9a219f5503ea7cc3c3ba612df4ae24",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "a4b27bd84e498ff6fb1cc9e9c28fc1d3ecd38cd4055bcc7a3d6af0372290c82f",
-      "disposition": "formal-infrastructure",
-      "reason": "Preserves full existing validation gates and adds release validation dependency or exact validation-tool classification/regressions; no model registry or property is removed.",
+      "path": "README.ja.md",
+      "sha256": "30e7d8cbf66a0e4fb53323a88c6b9c257c2a05540c9bfd8ee54923e6af08f60d",
+      "disposition": "documentation",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
       "models": []
     },
     {
-      "path": ".github/workflows/formal.yml",
-      "sha256": "092100cd8f83a48b91ab8744d91ad6167630ddd5f52ddfa71a6aa8749065aa38",
-      "disposition": "formal-infrastructure",
-      "reason": "Preserves full existing validation gates and adds release validation dependency or exact validation-tool classification/regressions; no model registry or property is removed.",
+      "path": "README.md",
+      "sha256": "7c551af6aa292fce3292d4b6bacdba90bcda6a38db0dcb669d8135e697204fd7",
+      "disposition": "documentation",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
       "models": []
     },
     {
-      "path": ".github/workflows/release.yml",
-      "sha256": "7ec4ddd1d3dc318888fcdc107596e40a928a13f6fc9c7925661d51689e3a34bc",
-      "disposition": "formal-infrastructure",
-      "reason": "Preserves full existing validation gates and adds release validation dependency or exact validation-tool classification/regressions; no model registry or property is removed.",
+      "path": "docs/cloudformation-intrinsics.md",
+      "sha256": "10d1f1b643fa6bbbf78176690877614fde6ae1f9fa2d88264a11fa2778073453",
+      "disposition": "documentation",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
+      "models": []
+    },
+    {
+      "path": "docs/cloudformation-rest.md",
+      "sha256": "ba619d9db427576e36387a7746001903d6f35b563fe0f28e7ec06dc8c3ece86c",
+      "disposition": "documentation",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
+      "models": []
+    },
+    {
+      "path": "docs/cloudformation-ssm-parameters.md",
+      "sha256": "7be6635d51215c599c037180e90b53c286eadea58e660e8d5d0578850c3c6297",
+      "disposition": "documentation",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "8c08bc63d6afcb12c782d5b3dd5ffc3ab477c11def5c3205c3447e741e10ae74",
+      "disposition": "documentation",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
       "models": []
     },
     {
       "path": "docs/development-status.md",
-      "sha256": "224a11ab7b5f04142584321e90f4c6825d9d5e32a3395ead2ae0f97ed6627bac",
+      "sha256": "3f773ab6d0e057b9864b701242a5db852ff1c04c1282a5fb82acc50a9ed52c8a",
       "disposition": "documentation",
-      "reason": "Documents standalone release packaging, validated scope and remaining publication/native platform obligations; does not change runtime semantics.",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
       "models": []
     },
     {
-      "path": "docs/releases.md",
-      "sha256": "85e8a827a91996811b8977dcaaaaee5873702489d102f8b075699ee7e341a8bd",
+      "path": "docs/formal-cfn-parameter-snapshot.md",
+      "sha256": "451c21940bced8bef2b1736d40900b8a6f1e333d9338241d2333cfe46d186911",
       "disposition": "documentation",
-      "reason": "Documents standalone release packaging, validated scope and remaining publication/native platform obligations; does not change runtime semantics.",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
       "models": []
     },
     {
-      "path": "scripts/build-release.py",
-      "sha256": "158bff7eb3821c1348b4288e685bdafeb6c28c957b2a46ccd5be20011644f0ad",
-      "disposition": "validation-tooling",
-      "reason": "Builds or validates immutable-source release candidates, checksum manifests and tag/source identity; does not add simulator runtime behavior or claim implementation refinement.",
-      "models": []
+      "path": "formal/CFNParameterSnapshot.cfg",
+      "sha256": "2717c63a3166740845460a65f4ce03e8c62c45d03395a82dedc47304181f84c9",
+      "disposition": "modeled",
+      "reason": "Preserves the local SSM key/value snapshot, validates all source permissions before reads, and requires admission/replay boundaries before native publication.",
+      "models": [
+        {
+          "id": "CFNParameterSnapshot",
+          "properties": [
+            "TypeOK",
+            "ValidateBeforeRead",
+            "AuthorizeEveryKeyBeforeRead",
+            "OneAtomicSnapshot",
+            "NoFailedWrites",
+            "NoEarlyWrites",
+            "AdmissionExact",
+            "ValidInputsPublish",
+            "KeysPreserved",
+            "SnapshotFrozen",
+            "RefsUseResolvedValues",
+            "ConditionsUseResolvedValues",
+            "CompletePublication",
+            "ReplayNoSourceRead",
+            "ReplayIdentityExact",
+            "ReplayPreservesStack"
+          ],
+          "limits": "Abstract admission, atomic capture, immutable publication and replay only; no SQL/IAM/Go refinement, concrete constraints, AMI validity, VM execution, secret/list/version/cross-account resolution or liveness proof."
+        }
+      ]
     },
     {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "9f6df1ec7de75722de885157e4d657c5f8adb2a883db63aa9221d35887f39dcb",
+      "path": "formal/CFNParameterSnapshot.tla",
+      "sha256": "43fb5abdee3946eb5751c438967e23738808a81496cee5978e81a750584713d1",
+      "disposition": "modeled",
+      "reason": "Preserves the local SSM key/value snapshot, validates all source permissions before reads, and requires admission/replay boundaries before native publication.",
+      "models": [
+        {
+          "id": "CFNParameterSnapshot",
+          "properties": [
+            "TypeOK",
+            "ValidateBeforeRead",
+            "AuthorizeEveryKeyBeforeRead",
+            "OneAtomicSnapshot",
+            "NoFailedWrites",
+            "NoEarlyWrites",
+            "AdmissionExact",
+            "ValidInputsPublish",
+            "KeysPreserved",
+            "SnapshotFrozen",
+            "RefsUseResolvedValues",
+            "ConditionsUseResolvedValues",
+            "CompletePublication",
+            "ReplayNoSourceRead",
+            "ReplayIdentityExact",
+            "ReplayPreservesStack"
+          ],
+          "limits": "Abstract admission, atomic capture, immutable publication and replay only; no SQL/IAM/Go refinement, concrete constraints, AMI validity, VM execution, secret/list/version/cross-account resolution or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "dbc8068bc8d866810fc8f4b445d4ba3df782292c90e25d5675bb87b0cef4d8da",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves full existing validation gates and adds release validation dependency or exact validation-tool classification/regressions; no model registry or property is removed.",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "3741a0a3ed9f8d7034ee720d47a7be82f7f6e153cf6c72f1d00e5405dc2972e6",
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "cf40eea4dbdda3527468cd192b0866d830ed2e047cccb1838c9e67700680df2b",
+      "disposition": "modeled",
+      "reason": "Preserves the local SSM key/value snapshot, validates all source permissions before reads, and requires admission/replay boundaries before native publication.",
+      "models": [
+        {
+          "id": "CFNParameterSnapshot",
+          "properties": [
+            "TypeOK",
+            "ValidateBeforeRead",
+            "AuthorizeEveryKeyBeforeRead",
+            "OneAtomicSnapshot",
+            "NoFailedWrites",
+            "NoEarlyWrites",
+            "AdmissionExact",
+            "ValidInputsPublish",
+            "KeysPreserved",
+            "SnapshotFrozen",
+            "RefsUseResolvedValues",
+            "ConditionsUseResolvedValues",
+            "CompletePublication",
+            "ReplayNoSourceRead",
+            "ReplayIdentityExact",
+            "ReplayPreservesStack"
+          ],
+          "limits": "Abstract admission, atomic capture, immutable publication and replay only; no SQL/IAM/Go refinement, concrete constraints, AMI validity, VM execution, secret/list/version/cross-account resolution or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_conditions.go",
+      "sha256": "6d3d722bcdd3842e6d29a7ce803c0c0906eb19299d3873d98b1a64744968c6c1",
+      "disposition": "modeled",
+      "reason": "Preserves the local SSM key/value snapshot, validates all source permissions before reads, and requires admission/replay boundaries before native publication.",
+      "models": [
+        {
+          "id": "CFNParameterSnapshot",
+          "properties": [
+            "TypeOK",
+            "ValidateBeforeRead",
+            "AuthorizeEveryKeyBeforeRead",
+            "OneAtomicSnapshot",
+            "NoFailedWrites",
+            "NoEarlyWrites",
+            "AdmissionExact",
+            "ValidInputsPublish",
+            "KeysPreserved",
+            "SnapshotFrozen",
+            "RefsUseResolvedValues",
+            "ConditionsUseResolvedValues",
+            "CompletePublication",
+            "ReplayNoSourceRead",
+            "ReplayIdentityExact",
+            "ReplayPreservesStack"
+          ],
+          "limits": "Abstract admission, atomic capture, immutable publication and replay only; no SQL/IAM/Go refinement, concrete constraints, AMI validity, VM execution, secret/list/version/cross-account resolution or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_ssm_parameters.go",
+      "sha256": "3e0230dcf684f1fb285a40dcd5a44d2ea78d43af9f63aea0af9e0582ddeaec76",
+      "disposition": "modeled",
+      "reason": "Preserves the local SSM key/value snapshot, validates all source permissions before reads, and requires admission/replay boundaries before native publication.",
+      "models": [
+        {
+          "id": "CFNParameterSnapshot",
+          "properties": [
+            "TypeOK",
+            "ValidateBeforeRead",
+            "AuthorizeEveryKeyBeforeRead",
+            "OneAtomicSnapshot",
+            "NoFailedWrites",
+            "NoEarlyWrites",
+            "AdmissionExact",
+            "ValidInputsPublish",
+            "KeysPreserved",
+            "SnapshotFrozen",
+            "RefsUseResolvedValues",
+            "ConditionsUseResolvedValues",
+            "CompletePublication",
+            "ReplayNoSourceRead",
+            "ReplayIdentityExact",
+            "ReplayPreservesStack"
+          ],
+          "limits": "Abstract admission, atomic capture, immutable publication and replay only; no SQL/IAM/Go refinement, concrete constraints, AMI validity, VM execution, secret/list/version/cross-account resolution or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_ssm_parameters_test.go",
+      "sha256": "aeb7217c2509e4ff78b96c352e25b90299c9bffb35088605c6b9b1223209ecfd",
+      "disposition": "test-support",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "a1f7c75bb0136b230a176abd99a794a08fb2861c31f4b09bdc1c1ea7cbbf407b",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves full existing validation gates and adds release validation dependency or exact validation-tool classification/regressions; no model registry or property is removed.",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
       "models": []
     },
     {
-      "path": "scripts/verify-release-tag.py",
-      "sha256": "07309d5ae591b3f5e7bc8c80383354638a7a9df73b7f4de4f68060857b0337f0",
-      "disposition": "validation-tooling",
-      "reason": "Builds or validates immutable-source release candidates, checksum manifests and tag/source identity; does not add simulator runtime behavior or claim implementation refinement.",
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "185b2415a67a1bf89e1936ffb158a2b6b6bcd961b9b88904b62a12416cc96e3e",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
       "models": []
     },
     {
-      "path": "scripts/verify-release.py",
-      "sha256": "17ddda4ddd67c5d9fcc57b336020d11c63e66948416b6461794e829d76ce8f2f",
-      "disposition": "validation-tooling",
-      "reason": "Builds or validates immutable-source release candidates, checksum manifests and tag/source identity; does not add simulator runtime behavior or claim implementation refinement.",
-      "models": []
-    },
-    {
-      "path": "test/ci/release_pipeline.py",
-      "sha256": "3557b410f91c6dbdd6ff5384bb2f7dadf289e595817e8bd1b33bb81c1afcc03b",
+      "path": "test/e2e/check.py",
+      "sha256": "77df99478b42f96b107256f5e65e252874c712850cbecddd05aa48a6ae11a713",
       "disposition": "test-support",
-      "reason": "Exercises release packaging/refusal and actual native startup/authentication/embedded assets/restart/shutdown; no runtime production behavior is changed.",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
       "models": []
     },
     {
-      "path": "test/ci/release_smoke.py",
-      "sha256": "f714c36adba53399dd82013c95d8fb98dbf4c979d6b62e4a45323e3ea6aa3d95",
+      "path": "test/e2e/cloudformation_ssm_parameters.py",
+      "sha256": "634bbd82d70d41180e8d912c96a9f1d5adf58464c48963deb0b8613a11b8957b",
       "disposition": "test-support",
-      "reason": "Exercises release packaging/refusal and actual native startup/authentication/embedded assets/restart/shutdown; no runtime production behavior is changed.",
+      "reason": "Adds bounded SSM parameter snapshot tests, protected finite-model inventory or documented compatibility boundaries without removing existing gates.",
       "models": []
     }
   ]
