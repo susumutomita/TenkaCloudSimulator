@@ -7147,6 +7147,84 @@
    ]
   },
   {
+   "id": "S3MultipartState",
+   "model": "formal/S3MultipartState.tla",
+   "config": "formal/S3MultipartState.cfg",
+   "bounds": "Two upload/key scopes, two part slots, part charges 0..2, object charge 0..2, shared budget 3; latest refusal captures target active membership, both part charges and previous object charge.",
+   "properties": [
+    "TypeOK",
+    "Budget",
+    "NoOrphans",
+    "Cleanup",
+    "RefusalAtomic"
+   ],
+   "limits": "Finite atomic transaction abstraction only; does not execute Go/SQLite/HTTP/React, prove refinement, MD5 integrity, IAM parsing, version selection, ordering/minimum sizes, timestamps, random IDs, OS isolation, or real AWS parity. Scope labels abstract bucket/key/upload binding. Actual Go fault, SDK, persistence and browser tests cover those boundaries.",
+   "source_scope": [
+    "internal/aws/s3_multipart.go",
+    "internal/aws/s3_multipart_http.go",
+    "internal/aws/s3_versions.go",
+    "internal/aws/s3.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "OmitPartBudget",
+     "edits": [
+      {
+       "old": "GuardBudget == TRUE",
+       "new": "GuardBudget == FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "Budget"
+    },
+    {
+     "id": "OmitUploadParent",
+     "edits": [
+      {
+       "old": "GuardParent == TRUE",
+       "new": "GuardParent == FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOrphans"
+    },
+    {
+     "id": "RetainCompletedParts",
+     "edits": [
+      {
+       "old": "ReleaseParts == TRUE",
+       "new": "ReleaseParts == FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOrphans"
+    },
+    {
+     "id": "PartialFailure",
+     "edits": [
+      {
+       "old": "AtomicFailure == TRUE",
+       "new": "AtomicFailure == FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RefusalAtomic"
+    },
+    {
+     "id": "OmitUploadBinding",
+     "edits": [
+      {
+       "old": "GuardScope == TRUE",
+       "new": "GuardScope == FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RefusalAtomic"
+    }
+   ]
+  },
+  {
    "id": "ConsoleHandoff",
    "model": "formal/ConsoleHandoff.tla",
    "config": "formal/ConsoleHandoff.cfg",

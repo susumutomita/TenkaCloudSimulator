@@ -149,7 +149,7 @@ func TestProtocolFailuresAndBoundaries(t *testing.T) {
 		{"GET", "/", "", 403, map[string]string{"Sec-Fetch-Site": "cross-site"}},
 		{"GET", "/missing?list-type=2", "", 404, nil},
 		{"GET", "/missing?versioning", "", 404, nil},
-		{"GET", "/missing/key?uploadId=abc", "", 501, nil},
+		{"GET", "/missing/key?uploadId=abc", "", 400, nil},
 	} {
 		status(t, s, tc.method, tc.path, tc.body, tc.want, tc.headers)
 	}
@@ -186,7 +186,7 @@ func TestEveryAdvertisedOperationHasWireCoverage(t *testing.T) {
 	if err := json.Unmarshal(status(t, s, "GET", "/_simulator/v1/capabilities", "", 200, nil), &manifest); err != nil {
 		t.Fatal(err)
 	}
-	expected := "ListBuckets,CreateBucket,HeadBucket,GetBucketLocation,DeleteBucket,ListObjectsV2,PutObject,GetObject,HeadObject,DeleteObject,GetBucketVersioning,PutBucketVersioning,ListObjectVersions,GetPublicAccessBlock,PutPublicAccessBlock,DeletePublicAccessBlock,GetBucketTagging,PutBucketTagging,DeleteBucketTagging"
+	expected := "ListBuckets,CreateBucket,HeadBucket,GetBucketLocation,DeleteBucket,ListObjectsV2,PutObject,GetObject,HeadObject,DeleteObject,GetBucketVersioning,PutBucketVersioning,ListObjectVersions,GetPublicAccessBlock,PutPublicAccessBlock,DeletePublicAccessBlock,GetBucketTagging,PutBucketTagging,DeleteBucketTagging,CreateMultipartUpload,UploadPart,ListParts,ListMultipartUploads,CompleteMultipartUpload,AbortMultipartUpload"
 	if strings.Join(manifest.Operations, ",") != expected {
 		t.Fatal("Update lifecycle conformance when capabilities change")
 	}

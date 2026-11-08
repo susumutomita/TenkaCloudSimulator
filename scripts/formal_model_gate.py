@@ -10,7 +10,7 @@ import tempfile
 import time
 from pathlib import Path
 
-BASE_MODELS = {'AzureBlobState',
+BASE_MODELS = {'S3MultipartState', 'AzureBlobState',
  'CatalogConsoleEpoch',
  'CatalogResourceLifecycle',
  'AzurePropertiesEpoch',
@@ -61,7 +61,7 @@ BASE_MODELS = {'AzureBlobState',
  'StackOwnership',
  'StartupTokenVisibility',
  'LandingTopologyState', 'LandingAccessAdmission', 'LoginInputIntent'}
-BASE_INVARIANTS = {'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'ReloadOnlyAfterAck', 'OnlyCurrentReplies', 'FailureVisible', 'SingleWriter'},
+BASE_INVARIANTS = {'S3MultipartState': {'TypeOK', 'Budget', 'NoOrphans', 'Cleanup', 'RefusalAtomic'}, 'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'ReloadOnlyAfterAck', 'OnlyCurrentReplies', 'FailureVisible', 'SingleWriter'},
  'CatalogResourceLifecycle': {'PeerFrame', 'QuotaBound', 'FailureFrame', 'FreshIDs', 'TokenOnce', 'GenerationAdvances', 'ChildGuard', 'StaleWriteRejected', 'AuthorizationFirst', 'TokenBinding', 'UniqueNames', 'TypeOK', 'ReplayNoDuplicate'},
  'AzureBlobState': {'BudgetBounded',
                     'ConditionEnforced',
@@ -476,7 +476,7 @@ BASE_INVARIANTS = {'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'R
                           'UnsupportedCanvasHidden'},
  'LoginInputIntent': {'LocaleIntentFrame', 'NoEmptyPOST', 'IntentInvalidatesAsync', 'TypeOK', 'SubmissionSelectionExact', 'NoPOSTWhileBlocked', 'StaleFileCompletionFrame', 'AdoptedValueExact'}}
 # Established controls require an explicit gate-policy change before retirement.
-REQUIRED_MUTANTS = {'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureError', 'ReloadAfterFailedWrite', 'AcceptAfterUnmount', 'AllowConcurrentWrites'},
+REQUIRED_MUTANTS = {'S3MultipartState': {'OmitPartBudget', 'OmitUploadParent', 'RetainCompletedParts', 'PartialFailure', 'OmitUploadBinding'}, 'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureError', 'ReloadAfterFailedWrite', 'AcceptAfterUnmount', 'AllowConcurrentWrites'},
  'CatalogResourceLifecycle': {'AllowDuplicateNames', 'ReplayCommits', 'IgnoreGeneration', 'TokenToFutureID', 'UpdateKeepsGeneration', 'ReplayCreatesRow', 'WritePeerScope', 'ReuseDeletedID', 'IgnoreQuota', 'DeleteParentWithChildren', 'FaultCommits', 'DeniedCommits'},
  'AzureBlobState': {'ContainerDeleteErasesPeer',
                     'ContainerDeleteLeavesBlobs',

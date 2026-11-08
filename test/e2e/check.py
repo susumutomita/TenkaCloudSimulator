@@ -71,6 +71,10 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_s3_multipart_served_reference_examples(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart_docs.py'))],check=True,timeout=120)
+ def test_s3_multipart_native_persistence_and_console(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart.py'))],check=True)
  def test_sts_native_sdk_original_hello_world(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('sts_sdk.py'))],check=True,timeout=180)
  def test_sns_native_admission_persistence_and_isolation(self):

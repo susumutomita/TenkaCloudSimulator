@@ -1,5 +1,39 @@
 # Development roster
 
+## S3 multipart and GUI main integration, 2026-11-08
+
+Claimed by the PR440 integration worker on `integrate/pr440-gui-20261108`
+in `/workspace/scratch/5da5816d240c/simulator-pr440-merge`: normal merge of
+published PR440 `31df6fc66ff4a742334dc6cc8d4ceaafcc439a9f` with GUI main
+`d968be38dd2ed933e1e756b219ef2b0d26f665b0`. Owns conflict resolution,
+console bundle regeneration, registry union and exact applicability only.
+Preserves GUI handoff/auth/SSM behavior and the multipart cache-header fix.
+The combined inventory is 60 models and 514 controls (574 executions).
+Full native/race, coverage, assets, formal and automatic browser gates are
+pending for this integration; prior receipts below remain historical.
+No workflows, dependency locks, releases or unrelated service work are changed.
+Heavy checks are serialized in the integration worker's reserved CPU lane;
+local browser execution is unavailable and must not be claimed as verified.
+
+## S3 multipart PR440 integration, 2026-11-08
+
+Status: in progress on `integrate/pr440-docs-20261108`, integrating the
+published source `0937c5c958334cea6696c32c7b021d43838cf566` with documentation-only
+main `74985ee93a1ab38c9b1101ffdd3a2c8c3430e01b`. Runtime, embedded console,
+models, dependency locks and workflows are unchanged by this integration.
+The integration owner owns this roster and the exact applicability record;
+GUI console-handoff and WAF work remain separate and merges are serialized.
+
+The published source includes the browser multipart cache-header fix. Its
+identical local source tree passed full `make before-commit`, including all
+race packages, assets, dependency verification, build and 95.61% full-module
+statement coverage. Exact applicability and 27 applicability regressions passed.
+Published-source Formal validation, Japanese console acceptance, CodeQL and
+GitGuardian passed; aggregate CI was still running when this entry was written.
+These results apply to the named source, not this new documentation integration.
+The registered inventory is 59 finite models and 494 controls; these bounded
+models are not proofs of concrete implementation or complete cloud compatibility.
+
 ## Service evidence documentation integration, 2026-11-08
 
 PR [#327](https://github.com/susumutomita/TenkaCloudSimulator/pull/327) is being

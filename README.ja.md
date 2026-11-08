@@ -50,7 +50,7 @@ make build
 
 | サービス | 実装済みの操作・状態 | 主な未対応 |
 | --- | --- | --- |
-| [S3](docs/s3.md) | bucket作成・一覧・存在確認・region取得・削除、object PUT/GET/HEAD/DELETE・ListObjectsV2、bucket versioning・ListObjectVersions、public access block・tags | multipart、ACL、一般bucket policy、暗号化設定。path-styleのみ |
+| [S3](docs/s3.md) | bucket/object、versioning、public access block、tags、[multipart 6操作とpartの管理画面](docs/s3-multipart.md) | multipart copy/checksum拡張、ACL、一般bucket policy、暗号化設定、lifecycle、replication。path-style、完成objectは8 MiBまで |
 | [SNS](docs/sns.md) | Topic／購読／ローカルPublish記録の9 Query/XML操作。SQLite保存・native SDK・有限quota | 外部配信・SQS連携・コンソール・CFN・FIFO Publishなし。ローカル即時確認 |
 | [SQS](docs/sqs.md) | Cloudscape操作画面とStandard queue JSON 1.0 API 9操作：CreateQueue、GetQueueUrl、ListQueues、GetQueueAttributes、DeleteQueue、SendMessage、ReceiveMessage、DeleteMessage、ChangeMessageVisibility | CloudFormation、function SDK bridge、Challenge連携、FIFO、batch、DLQ、SNS連携 |
 | [CloudWatch Logs](docs/cloudwatch-logs.md) | ロググループ／ストリームの作成・一覧、グループ削除、PutLogEvents・GetLogEvents。7 APIと同一状態の操作画面 | メトリクス、アラーム、保持期間、Lambda自動配送、CFN、Insights |
@@ -200,3 +200,7 @@ API資料ではクラウドを分け、Sakura Cloudの任意有効化するDisk�
 「資料のみの追補」「実行コード等が同一」はその過去の版の説明であり、現在のLP実装を指しません。
 当時のhosted検査の留保もその版に属します。現在の全505実行の成功や、ホスト採点・SQL/Go refinement・
 秘匿出力・全リソース物理削除の証明へ読み替えないでください。
+
+## S3 multipart統合、2026-11-08
+
+現在mainの全モデル・制御を保持し、S3MultipartStateと5制御を追加します。統合版の全検証は別途必須で、以前の実行記録は過去の版に属します。[multipartの範囲と制限](docs/s3-multipart.md)。

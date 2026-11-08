@@ -95,7 +95,7 @@ adapter, or Challenge integration.
 
 | Service | Implemented subset | Main exclusions |
 | --- | --- | --- |
-| [S3](docs/s3.md) | Bucket create/list/head/location/delete; object PUT/GET/HEAD/DELETE and ListObjectsV2; versioning and ListObjectVersions; public access block and tags | Multipart uploads, ACLs, general bucket policies, encryption settings; path-style addressing only |
+| [S3](docs/s3.md) | Bucket/object operations, version history, public access block, tags, and [six multipart APIs with a native Management view](docs/s3-multipart.md) | Multipart copy/checksum extensions, ACLs, general bucket policy, encryption, lifecycle and replication; path-style and 8 MiB completed objects only |
 | [SNS](docs/sns.md) | Nine Query/XML operations for Standard-topic metadata, subscriptions and bounded local publish/delivery records; native SDK support | No outbound delivery, SQS adapter, console, CloudFormation or FIFO publication; local immediate confirmation |
 | [SQS](docs/sqs.md) | Standard queues, a Cloudscape console, and 9 JSON 1.0 operations: CreateQueue, GetQueueUrl, ListQueues, GetQueueAttributes, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility | FIFO, batches, DLQ, SNS integration, CloudFormation, function SDK bridge, Challenge integration |
 | [CloudWatch Logs](docs/cloudwatch-logs.md) | Log groups/streams, group deletion, PutLogEvents/GetLogEvents; 7 APIs and a console sharing their state | Metrics, alarms, retention settings, automatic Lambda delivery, CloudFormation, Logs Insights |
@@ -334,3 +334,7 @@ modules, Cloudscape, Scalar, CPython/WASI and other bundled components ship at
 `/_simulator/licenses/` and must be preserved on redistribution. This is not an
 official AWS service and does not use AWS logos. See the
 [design and handoff guides](docs/handoff/README.md).
+
+## S3 multipart integration, 2026-11-08
+
+This revision adds the S3MultipartState model and five controls while preserving every model and control from current main. Full validation of the integrated revision remains required; earlier execution receipts are historical. See [multipart scope and limits](docs/s3-multipart.md).

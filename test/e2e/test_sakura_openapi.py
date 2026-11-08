@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/disk'
 ITEM = COLLECTION + '/{diskId}'
 NEW_IDS = {'SakuraListDisks','SakuraCreateDisk','SakuraGetDisk','SakuraUpdateDisk','SakuraDeleteDisk'}
+MULTIPART_IDS = {'S3MultipartUpload'}
 OLD_IDS = {'AddPermission', 'AzureCreateContainer', 'AzureDeleteBlob', 'AzureDeleteContainer', 'AzureGetBlob', 'AzureGetBlobProperties', 'AzureGetContainerProperties', 'AzureListBlobs', 'AzureListContainers', 'AzurePutBlob', 'Capabilities', 'CreateBucket', 'CreateDeployment', 'CreateFunction', 'CreateResource', 'CreateRestApi', 'CreateStage', 'DeleteBucket', 'DeleteFunction', 'DeleteIdentityPolicy', 'DeleteObject', 'DeleteResource', 'DeleteRestApi', 'DeleteStage', 'GCPCreateBucket', 'GCPDeleteBucket', 'GCPDeleteObject', 'GCPDownloadObject', 'GCPGetBucket', 'GCPGetObject', 'GCPListBuckets', 'GCPListObjects', 'GCPUploadObject', 'GetDeployment', 'GetFunctionConfiguration', 'GetIdentityPolicy', 'GetMethod', 'GetObject', 'GetPolicy', 'GetResource', 'GetResources', 'GetRestApi', 'GetRestApis', 'GetStage', 'HeadBucket', 'HeadObject', 'IAMRoleQueryOperation', 'Invoke', 'InvokeLocalRESTProxyGet', 'InvokeLocalRESTProxyPost', 'ListBuckets', 'ListFunctions', 'ListObjectsV2OrGetBucketLocation', 'ListPrincipals', 'PutIdentityPolicy', 'PutIntegration', 'PutMethod', 'PutObject', 'RemovePermission', 'UpdateFunctionCode', 'awsRegionalOperation'}
 METHODS = {'get','post','put','delete','head','patch','options'}
 JSON11 = 'application/x-amz-json-1.1'
@@ -30,11 +31,12 @@ def operations(spec):
 
 
 def preserved(spec):
-    # Exact incoming main e8efc54 projections include the four KMS alias templates.
-    # These independent pinned baseline hashes exclude only Sakura additions.
+    # Exact main d166f56 projections plus reviewed bounded S3 multipart queries,
+    # descriptions, regional/auth headers and object POST. Components stay exact.
+    # The independent paths digest excludes only the two existing Sakura paths.
     original_paths = {path:value for path,value in spec['paths'].items() if path not in (COLLECTION,ITEM)}
     assert len(original_paths)==34
-    assert digest(original_paths)=='23edfc382b16d935340335e33c96b578a6919381e7ae1bfed7df05d0601f31c6', 'Existing paths/operations/response examples changed'
+    assert digest(original_paths)=='0c8897292b83b7ca6d5acde890139c5817729b248dea27dfc0934d9faa35fa5b', 'Existing paths/operations/response examples changed'
     original = copy.deepcopy(spec['components'])
     original.pop('securitySchemes',None)
     for group in ('schemas','parameters'):
@@ -44,7 +46,7 @@ def preserved(spec):
     assert len(media['examples'])==28
     assert digest(media)=='b96fff5512a8e196907d650263e61c839c1275ca2ea4415991361021852d13a2', 'Shared JSON1.1 schema/templates changed'
     ids=[op['operationId'] for _,_,op in operations(spec)]
-    assert len(ids)==66 and len(set(ids))==66 and set(ids)==OLD_IDS|NEW_IDS
+    assert len(ids)==67 and len(set(ids))==67 and set(ids)==OLD_IDS|NEW_IDS|MULTIPART_IDS
 
 
 def native_shape(spec):
@@ -84,7 +86,7 @@ class SakuraReference(unittest.TestCase):
     def setUpClass(cls):
         cls.spec=json.loads((ROOT/'internal/server/apidocs/openapi.json').read_text())
 
-    def test_all_existing_operations_components_and_24_templates_are_exact(self):
+    def test_all_existing_operations_components_and_28_templates_are_exact(self):
         preserved(self.spec)
 
     def test_five_native_routes_scope_auth_and_nonform_query(self):
@@ -152,6 +154,18 @@ class SakuraReference(unittest.TestCase):
         broken=copy.deepcopy(self.spec)
         broken['paths'][ITEM]['delete']['requestBody']={'content':{}}
         with self.assertRaises(AssertionError):native_shape(broken)
+
+    def test_multipart_extension_cannot_hide_unreviewed_native_changes(self):
+        for change in (
+            lambda paths: paths['/{bucket}/{key}'].pop('post'),
+            lambda paths: paths['/{bucket}/{key}']['post'].update(tags=['S3']),
+            lambda paths: paths['/{bucket}']['get']['parameters'].append({'name':'unexpected','in':'query','schema':{'type':'string'}}),
+            lambda paths: paths['/{bucket}/{key}']['get']['responses'].update({'200':{'description':'fake static success'}}),
+            lambda paths: next(p for p in paths['/{bucket}/{key}']['post']['parameters'] if p.get('name')=='X-Simulator-Region')['schema'].update(default='eu-west-1'),
+        ):
+            broken=copy.deepcopy(self.spec)
+            change(broken['paths'])
+            with self.assertRaises(AssertionError):preserved(broken)
 
 
 if __name__=='__main__':unittest.main()
