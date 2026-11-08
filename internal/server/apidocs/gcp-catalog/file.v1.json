@@ -1,0 +1,1949 @@
+{
+ "components": {
+  "schemas": {
+   "Backup": {
+    "additionalProperties": false,
+    "properties": {
+     "capacityGb": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "downloadBytes": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "fileSystemProtocol": {
+      "enum": [
+       "FILE_PROTOCOL_UNSPECIFIED",
+       "NFS_V3",
+       "NFS_V4_1"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "kmsKey": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "sourceFileShare": {
+      "type": "string"
+     },
+     "sourceInstance": {
+      "type": "string"
+     },
+     "sourceInstanceTier": {
+      "enum": [
+       "TIER_UNSPECIFIED",
+       "STANDARD",
+       "PREMIUM",
+       "BASIC_HDD",
+       "BASIC_SSD",
+       "HIGH_SCALE_SSD",
+       "ENTERPRISE",
+       "ZONAL",
+       "REGIONAL"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "FINALIZING",
+       "READY",
+       "DELETING",
+       "INVALID"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "storageBytes": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "DirectoryServicesConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "ldap": {
+      "$ref": "#/components/schemas/LdapConfig"
+     }
+    },
+    "type": "object"
+   },
+   "FileShareConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "capacityGb": {
+      "format": "int64",
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "nfsExportOptions": {
+      "items": {
+       "$ref": "#/components/schemas/NfsExportOptions"
+      },
+      "type": "array"
+     },
+     "sourceBackup": {
+      "type": "string"
+     },
+     "sourceBackupdrBackup": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FixedIOPS": {
+    "additionalProperties": false,
+    "properties": {
+     "maxIops": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IOPSPerTB": {
+    "additionalProperties": false,
+    "properties": {
+     "maxIopsPerTb": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Instance": {
+    "additionalProperties": false,
+    "properties": {
+     "capacityStepSizeGb": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "customPerformanceSupported": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "deletionProtectionEnabled": {
+      "type": "boolean"
+     },
+     "deletionProtectionReason": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "directoryServices": {
+      "$ref": "#/components/schemas/DirectoryServicesConfig"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "fileShares": {
+      "items": {
+       "$ref": "#/components/schemas/FileShareConfig"
+      },
+      "type": "array"
+     },
+     "kmsKeyName": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "maxCapacityGb": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "minCapacityGb": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "networks": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkConfig"
+      },
+      "type": "array"
+     },
+     "performanceConfig": {
+      "$ref": "#/components/schemas/PerformanceConfig"
+     },
+     "performanceLimits": {
+      "$ref": "#/components/schemas/PerformanceLimits"
+     },
+     "protocol": {
+      "enum": [
+       "FILE_PROTOCOL_UNSPECIFIED",
+       "NFS_V3",
+       "NFS_V4_1"
+      ],
+      "type": "string"
+     },
+     "replication": {
+      "$ref": "#/components/schemas/Replication"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "READY",
+       "REPAIRING",
+       "DELETING",
+       "ERROR",
+       "RESTORING",
+       "SUSPENDED",
+       "SUSPENDING",
+       "RESUMING",
+       "REVERTING",
+       "PROMOTING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "statusMessage": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "suspensionReasons": {
+      "items": {
+       "enum": [
+        "SUSPENSION_REASON_UNSPECIFIED",
+        "KMS_KEY_ISSUE"
+       ],
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "tier": {
+      "enum": [
+       "TIER_UNSPECIFIED",
+       "STANDARD",
+       "PREMIUM",
+       "BASIC_HDD",
+       "BASIC_SSD",
+       "HIGH_SCALE_SSD",
+       "ENTERPRISE",
+       "ZONAL",
+       "REGIONAL"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LdapConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "domain": {
+      "type": "string"
+     },
+     "groupsOu": {
+      "type": "string"
+     },
+     "servers": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "usersOu": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListBackupsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "backups": {
+      "items": {
+       "$ref": "#/components/schemas/Backup"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListInstancesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "instances": {
+      "items": {
+       "$ref": "#/components/schemas/Instance"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListSnapshotsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "snapshots": {
+      "items": {
+       "$ref": "#/components/schemas/Snapshot"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "connectMode": {
+      "enum": [
+       "CONNECT_MODE_UNSPECIFIED",
+       "DIRECT_PEERING",
+       "PRIVATE_SERVICE_ACCESS",
+       "PRIVATE_SERVICE_CONNECT"
+      ],
+      "type": "string"
+     },
+     "ipAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "modes": {
+      "items": {
+       "enum": [
+        "ADDRESS_MODE_UNSPECIFIED",
+        "MODE_IPV4",
+        "MODE_IPV6"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "network": {
+      "type": "string"
+     },
+     "pscConfig": {
+      "$ref": "#/components/schemas/PscConfig"
+     },
+     "reservedIpRange": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NfsExportOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "accessMode": {
+      "enum": [
+       "ACCESS_MODE_UNSPECIFIED",
+       "READ_ONLY",
+       "READ_WRITE"
+      ],
+      "type": "string"
+     },
+     "anonGid": {
+      "format": "int64",
+      "type": "string"
+     },
+     "anonUid": {
+      "format": "int64",
+      "type": "string"
+     },
+     "ipRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "network": {
+      "type": "string"
+     },
+     "squashMode": {
+      "enum": [
+       "SQUASH_MODE_UNSPECIFIED",
+       "NO_ROOT_SQUASH",
+       "ROOT_SQUASH"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PerformanceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "fixedIops": {
+      "$ref": "#/components/schemas/FixedIOPS"
+     },
+     "iopsPerTb": {
+      "$ref": "#/components/schemas/IOPSPerTB"
+     }
+    },
+    "type": "object"
+   },
+   "PerformanceLimits": {
+    "additionalProperties": false,
+    "properties": {
+     "maxIops": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "maxReadIops": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "maxReadThroughputBps": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "maxWriteIops": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "maxWriteThroughputBps": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PscConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "endpointProject": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ReplicaConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "lastActiveSyncTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "peerInstance": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "READY",
+       "REMOVING",
+       "FAILED",
+       "PROMOTING",
+       "PAUSING",
+       "PAUSED",
+       "RESUMING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "stateReasons": {
+      "items": {
+       "enum": [
+        "STATE_REASON_UNSPECIFIED",
+        "PEER_INSTANCE_UNREACHABLE",
+        "REMOVE_FAILED",
+        "PAUSE_FAILED",
+        "RESUME_FAILED"
+       ],
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "stateUpdateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Replication": {
+    "additionalProperties": false,
+    "properties": {
+     "replicas": {
+      "items": {
+       "$ref": "#/components/schemas/ReplicaConfig"
+      },
+      "type": "array"
+     },
+     "role": {
+      "enum": [
+       "ROLE_UNSPECIFIED",
+       "ACTIVE",
+       "STANDBY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Snapshot": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "filesystemUsedBytes": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "READY",
+       "DELETING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Cloud Filestore API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Instances, snapshots and backups are configuration metadata: no NFS server, file share, network address or file data exists, and every resource reports READY immediately. A backup must name an existing instance as sourceInstance but captures no data; restore, revert and replica methods remain unimplemented, and file shares restored from backups, replication and tag bindings are refused. Long-running operations complete synchronously. Deletion protection blocks delete, and an instance with snapshots is deleted only with force=true.",
+  "title": "Filestore (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/backups": {
+   "get": {
+    "operationId": "file.projects.locations.backups.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListBackupsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backups.list",
+    "tags": [
+     "Filestore"
+    ]
+   },
+   "post": {
+    "operationId": "file.projects.locations.backups.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "backupId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Backup"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backups.create",
+    "tags": [
+     "Filestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/backups/{backupsId}": {
+   "delete": {
+    "operationId": "file.projects.locations.backups.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backups.delete",
+    "tags": [
+     "Filestore"
+    ]
+   },
+   "get": {
+    "operationId": "file.projects.locations.backups.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Backup"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backups.get",
+    "tags": [
+     "Filestore"
+    ]
+   },
+   "patch": {
+    "operationId": "file.projects.locations.backups.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Backup"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backups.patch",
+    "tags": [
+     "Filestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/instances": {
+   "get": {
+    "operationId": "file.projects.locations.instances.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListInstancesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.list",
+    "tags": [
+     "Filestore"
+    ]
+   },
+   "post": {
+    "operationId": "file.projects.locations.instances.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "instanceId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Instance"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.create",
+    "tags": [
+     "Filestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}": {
+   "delete": {
+    "operationId": "file.projects.locations.instances.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.delete",
+    "tags": [
+     "Filestore"
+    ]
+   },
+   "get": {
+    "operationId": "file.projects.locations.instances.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Instance"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.get",
+    "tags": [
+     "Filestore"
+    ]
+   },
+   "patch": {
+    "operationId": "file.projects.locations.instances.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Instance"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.patch",
+    "tags": [
+     "Filestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}/snapshots": {
+   "get": {
+    "operationId": "file.projects.locations.instances.snapshots.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListSnapshotsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.snapshots.list",
+    "tags": [
+     "Filestore"
+    ]
+   },
+   "post": {
+    "operationId": "file.projects.locations.instances.snapshots.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "snapshotId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Snapshot"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.snapshots.create",
+    "tags": [
+     "Filestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}/snapshots/{snapshotsId}": {
+   "delete": {
+    "operationId": "file.projects.locations.instances.snapshots.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "snapshotsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.snapshots.delete",
+    "tags": [
+     "Filestore"
+    ]
+   },
+   "get": {
+    "operationId": "file.projects.locations.instances.snapshots.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "snapshotsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Snapshot"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.snapshots.get",
+    "tags": [
+     "Filestore"
+    ]
+   },
+   "patch": {
+    "operationId": "file.projects.locations.instances.snapshots.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "instancesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "snapshotsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Snapshot"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.instances.snapshots.patch",
+    "tags": [
+     "Filestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "file.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Filestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "file.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Filestore"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/file"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Cloud Filestore API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Instances, snapshots and backups are configuration metadata: no NFS server, file share, network address or file data exists, and every resource reports READY immediately. A backup must name an existing instance as sourceInstance but captures no data; restore, revert and replica methods remain unimplemented, and file shares restored from backups, replication and tag bindings are refused. Long-running operations complete synchronously. Deletion protection blocks delete, and an instance with snapshots is deleted only with force=true.",
+   "name": "Filestore"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/file.v1.json",
+  "sha256": "222398383c10e2f4f524103ccfea30c11d0cd3a48d898bcfce253014c896dd3f",
+  "license": "Apache-2.0",
+  "revision": "20260710"
+ }
+}

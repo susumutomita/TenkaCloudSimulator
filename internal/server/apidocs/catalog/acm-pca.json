@@ -1,0 +1,852 @@
+{
+ "components": {
+  "schemas": {
+   "ASN1Subject": {
+    "additionalProperties": false,
+    "properties": {
+     "CommonName": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Country": {
+      "maxLength": 2,
+      "minLength": 2,
+      "type": "string"
+     },
+     "CustomAttributes": {
+      "items": {
+       "$ref": "#/components/schemas/CustomAttribute"
+      },
+      "maxItems": 150,
+      "minItems": 1,
+      "type": "array"
+     },
+     "DistinguishedNameQualifier": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "GenerationQualifier": {
+      "maxLength": 3,
+      "minLength": 0,
+      "type": "string"
+     },
+     "GivenName": {
+      "maxLength": 16,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Initials": {
+      "maxLength": 5,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Locality": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Organization": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "OrganizationalUnit": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Pseudonym": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SerialNumber": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "State": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Surname": {
+      "maxLength": 40,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Title": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AccessDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessLocation": {
+      "$ref": "#/components/schemas/GeneralName"
+     },
+     "AccessMethod": {
+      "$ref": "#/components/schemas/AccessMethod"
+     }
+    },
+    "required": [
+     "AccessMethod",
+     "AccessLocation"
+    ],
+    "type": "object"
+   },
+   "AccessMethod": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessMethodType": {
+      "enum": [
+       "CA_REPOSITORY",
+       "RESOURCE_PKI_MANIFEST",
+       "RESOURCE_PKI_NOTIFY"
+      ],
+      "type": "string"
+     },
+     "CustomObjectIdentifier": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CertificateAuthority": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 200,
+      "minLength": 5,
+      "type": "string"
+     },
+     "CertificateAuthorityConfiguration": {
+      "$ref": "#/components/schemas/CertificateAuthorityConfiguration"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "FailureReason": {
+      "enum": [
+       "REQUEST_TIMED_OUT",
+       "UNSUPPORTED_ALGORITHM",
+       "OTHER"
+      ],
+      "type": "string"
+     },
+     "KeyStorageSecurityStandard": {
+      "enum": [
+       "FIPS_140_2_LEVEL_2_OR_HIGHER",
+       "FIPS_140_2_LEVEL_3_OR_HIGHER",
+       "CCPC_LEVEL_1_OR_HIGHER"
+      ],
+      "type": "string"
+     },
+     "LastStateChangeAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "NotAfter": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "NotBefore": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "OwnerAccount": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "RestorableUntil": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "RevocationConfiguration": {
+      "$ref": "#/components/schemas/RevocationConfiguration"
+     },
+     "Serial": {
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "CREATING",
+       "PENDING_CERTIFICATE",
+       "ACTIVE",
+       "DELETED",
+       "DISABLED",
+       "EXPIRED",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "ROOT",
+       "SUBORDINATE"
+      ],
+      "type": "string"
+     },
+     "UsageMode": {
+      "enum": [
+       "GENERAL_PURPOSE",
+       "SHORT_LIVED_CERTIFICATE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CertificateAuthorityConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CsrExtensions": {
+      "$ref": "#/components/schemas/CsrExtensions"
+     },
+     "KeyAlgorithm": {
+      "enum": [
+       "RSA_2048",
+       "RSA_3072",
+       "RSA_4096",
+       "EC_prime256v1",
+       "EC_secp384r1",
+       "EC_secp521r1",
+       "ML_DSA_44",
+       "ML_DSA_65",
+       "ML_DSA_87",
+       "SM2"
+      ],
+      "type": "string"
+     },
+     "SigningAlgorithm": {
+      "enum": [
+       "SHA256WITHECDSA",
+       "SHA384WITHECDSA",
+       "SHA512WITHECDSA",
+       "SHA256WITHRSA",
+       "SHA384WITHRSA",
+       "SHA512WITHRSA",
+       "SM3WITHSM2",
+       "ML_DSA_44",
+       "ML_DSA_65",
+       "ML_DSA_87"
+      ],
+      "type": "string"
+     },
+     "Subject": {
+      "$ref": "#/components/schemas/ASN1Subject"
+     }
+    },
+    "required": [
+     "KeyAlgorithm",
+     "SigningAlgorithm",
+     "Subject"
+    ],
+    "type": "object"
+   },
+   "CreateCertificateAuthorityRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateAuthorityConfiguration": {
+      "$ref": "#/components/schemas/CertificateAuthorityConfiguration"
+     },
+     "CertificateAuthorityType": {
+      "enum": [
+       "ROOT",
+       "SUBORDINATE"
+      ],
+      "type": "string"
+     },
+     "IdempotencyToken": {
+      "maxLength": 36,
+      "minLength": 1,
+      "type": "string"
+     },
+     "KeyStorageSecurityStandard": {
+      "enum": [
+       "FIPS_140_2_LEVEL_2_OR_HIGHER",
+       "FIPS_140_2_LEVEL_3_OR_HIGHER",
+       "CCPC_LEVEL_1_OR_HIGHER"
+      ],
+      "type": "string"
+     },
+     "RevocationConfiguration": {
+      "$ref": "#/components/schemas/RevocationConfiguration"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     },
+     "UsageMode": {
+      "enum": [
+       "GENERAL_PURPOSE",
+       "SHORT_LIVED_CERTIFICATE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "CertificateAuthorityConfiguration",
+     "CertificateAuthorityType"
+    ],
+    "type": "object"
+   },
+   "CreateCertificateAuthorityResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateAuthorityArn": {
+      "maxLength": 200,
+      "minLength": 5,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CrlConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CrlDistributionPointExtensionConfiguration": {
+      "$ref": "#/components/schemas/CrlDistributionPointExtensionConfiguration"
+     },
+     "CrlType": {
+      "enum": [
+       "COMPLETE",
+       "PARTITIONED"
+      ],
+      "type": "string"
+     },
+     "CustomCname": {
+      "maxLength": 253,
+      "minLength": 0,
+      "type": "string"
+     },
+     "CustomPath": {
+      "maxLength": 253,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "ExpirationInDays": {
+      "maximum": 5000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "S3BucketName": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "S3ObjectAcl": {
+      "enum": [
+       "PUBLIC_READ",
+       "BUCKET_OWNER_FULL_CONTROL"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Enabled"
+    ],
+    "type": "object"
+   },
+   "CrlDistributionPointExtensionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "OmitExtension": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "OmitExtension"
+    ],
+    "type": "object"
+   },
+   "CsrExtensions": {
+    "additionalProperties": false,
+    "properties": {
+     "KeyUsage": {
+      "$ref": "#/components/schemas/KeyUsage"
+     },
+     "SubjectInformationAccess": {
+      "items": {
+       "$ref": "#/components/schemas/AccessDescription"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CustomAttribute": {
+    "additionalProperties": false,
+    "properties": {
+     "ObjectIdentifier": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ObjectIdentifier",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "DeleteCertificateAuthorityRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateAuthorityArn": {
+      "maxLength": 200,
+      "minLength": 5,
+      "type": "string"
+     },
+     "PermanentDeletionTimeInDays": {
+      "maximum": 30,
+      "minimum": 7,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "CertificateAuthorityArn"
+    ],
+    "type": "object"
+   },
+   "DescribeCertificateAuthorityRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateAuthorityArn": {
+      "maxLength": 200,
+      "minLength": 5,
+      "type": "string"
+     }
+    },
+    "required": [
+     "CertificateAuthorityArn"
+    ],
+    "type": "object"
+   },
+   "DescribeCertificateAuthorityResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateAuthority": {
+      "$ref": "#/components/schemas/CertificateAuthority"
+     }
+    },
+    "type": "object"
+   },
+   "EdiPartyName": {
+    "additionalProperties": false,
+    "properties": {
+     "NameAssigner": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PartyName": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "PartyName"
+    ],
+    "type": "object"
+   },
+   "GeneralName": {
+    "additionalProperties": false,
+    "properties": {
+     "DirectoryName": {
+      "$ref": "#/components/schemas/ASN1Subject"
+     },
+     "DnsName": {
+      "maxLength": 253,
+      "minLength": 0,
+      "type": "string"
+     },
+     "EdiPartyName": {
+      "$ref": "#/components/schemas/EdiPartyName"
+     },
+     "IpAddress": {
+      "maxLength": 39,
+      "minLength": 0,
+      "type": "string"
+     },
+     "OtherName": {
+      "$ref": "#/components/schemas/OtherName"
+     },
+     "RegisteredId": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Rfc822Name": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "UniformResourceIdentifier": {
+      "maxLength": 253,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "KeyUsage": {
+    "additionalProperties": false,
+    "properties": {
+     "CRLSign": {
+      "type": "boolean"
+     },
+     "DataEncipherment": {
+      "type": "boolean"
+     },
+     "DecipherOnly": {
+      "type": "boolean"
+     },
+     "DigitalSignature": {
+      "type": "boolean"
+     },
+     "EncipherOnly": {
+      "type": "boolean"
+     },
+     "KeyAgreement": {
+      "type": "boolean"
+     },
+     "KeyCertSign": {
+      "type": "boolean"
+     },
+     "KeyEncipherment": {
+      "type": "boolean"
+     },
+     "NonRepudiation": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ListCertificateAuthoritiesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 43739,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ResourceOwner": {
+      "enum": [
+       "SELF",
+       "OTHER_ACCOUNTS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListCertificateAuthoritiesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateAuthorities": {
+      "items": {
+       "$ref": "#/components/schemas/CertificateAuthority"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 43739,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateAuthorityArn": {
+      "maxLength": 200,
+      "minLength": 5,
+      "type": "string"
+     },
+     "MaxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 43739,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "CertificateAuthorityArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 43739,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "OcspConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "OcspCustomCname": {
+      "maxLength": 253,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Enabled"
+    ],
+    "type": "object"
+   },
+   "OtherName": {
+    "additionalProperties": false,
+    "properties": {
+     "TypeId": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "TypeId",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "RevocationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CrlConfiguration": {
+      "$ref": "#/components/schemas/CrlConfiguration"
+     },
+     "OcspConfiguration": {
+      "$ref": "#/components/schemas/OcspConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "TagCertificateAuthorityRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateAuthorityArn": {
+      "maxLength": 200,
+      "minLength": 5,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "CertificateAuthorityArn",
+     "Tags"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Certificate Manager Private Certificate Authority API (2017-08-22). Every other official operation returns HTTP 501 UnknownOperationException. Certificate authorities are configuration metadata that stay PENDING_CERTIFICATE: no key pair, CSR, CA certificate, CRL, OCSP response or audit report is generated, and nothing is written to S3. IssueCertificate, GetCertificate, GetCertificateAuthorityCsr, ImportCertificateAuthorityCertificate, RevokeCertificate, UpdateCertificateAuthority, RestoreCertificateAuthority, permissions and policies return UnknownOperationException with HTTP 501. DeleteCertificateAuthority removes the authority immediately instead of keeping a restorable DELETED state; PermanentDeletionTimeInDays and IdempotencyToken are refused. ListCertificateAuthorities returns no authorities for ResourceOwner OTHER_ACCOUNTS. UntagCertificateAuthority is not implemented because its key/value removal list has no catalog tag binding.",
+  "title": "AWS Certificate Manager Private Certificate Authority (simulator catalog)",
+  "version": "2017-08-22"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "acm-pcaJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "ACMPrivateCA.CreateCertificateAuthority",
+        "ACMPrivateCA.DeleteCertificateAuthority",
+        "ACMPrivateCA.DescribeCertificateAuthority",
+        "ACMPrivateCA.ListCertificateAuthorities",
+        "ACMPrivateCA.ListTags",
+        "ACMPrivateCA.TagCertificateAuthority"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateCertificateAuthority": {
+         "summary": "X-Amz-Target: ACMPrivateCA.CreateCertificateAuthority",
+         "value": {}
+        },
+        "DeleteCertificateAuthority": {
+         "summary": "X-Amz-Target: ACMPrivateCA.DeleteCertificateAuthority",
+         "value": {}
+        },
+        "DescribeCertificateAuthority": {
+         "summary": "X-Amz-Target: ACMPrivateCA.DescribeCertificateAuthority",
+         "value": {}
+        },
+        "ListCertificateAuthorities": {
+         "summary": "X-Amz-Target: ACMPrivateCA.ListCertificateAuthorities",
+         "value": {}
+        },
+        "ListTags": {
+         "summary": "X-Amz-Target: ACMPrivateCA.ListTags",
+         "value": {}
+        },
+        "TagCertificateAuthority": {
+         "summary": "X-Amz-Target: ACMPrivateCA.TagCertificateAuthority",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS Certificate Manager Private Certificate Authority JSON 1.1 operations",
+    "tags": [
+     "AWS Certificate Manager Private Certificate Authority"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Certificate Manager Private Certificate Authority API (2017-08-22). Every other official operation returns HTTP 501 UnknownOperationException. Certificate authorities are configuration metadata that stay PENDING_CERTIFICATE: no key pair, CSR, CA certificate, CRL, OCSP response or audit report is generated, and nothing is written to S3. IssueCertificate, GetCertificate, GetCertificateAuthorityCsr, ImportCertificateAuthorityCertificate, RevokeCertificate, UpdateCertificateAuthority, RestoreCertificateAuthority, permissions and policies return UnknownOperationException with HTTP 501. DeleteCertificateAuthority removes the authority immediately instead of keeping a restorable DELETED state; PermanentDeletionTimeInDays and IdempotencyToken are refused. ListCertificateAuthorities returns no authorities for ResourceOwner OTHER_ACCOUNTS. UntagCertificateAuthority is not implemented because its key/value removal list has no catalog tag binding.",
+   "name": "AWS Certificate Manager Private Certificate Authority"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/acm-pca/2017-08-22/service-2.json",
+  "sha256": "2b54e9196b0b37606b34c7d13656a23320753b13d0996d56b34d0ee0a797637b",
+  "license": "Apache-2.0"
+ }
+}

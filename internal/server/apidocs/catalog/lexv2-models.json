@@ -1,0 +1,2268 @@
+{
+ "components": {
+  "schemas": {
+   "BedrockGuardrailConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "identifier": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "identifier",
+     "version"
+    ],
+    "type": "object"
+   },
+   "BedrockModelSpecification": {
+    "additionalProperties": false,
+    "properties": {
+     "customPrompt": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "guardrail": {
+      "$ref": "#/components/schemas/BedrockGuardrailConfiguration"
+     },
+     "modelArn": {
+      "type": "string"
+     },
+     "traceStatus": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "modelArn"
+    ],
+    "type": "object"
+   },
+   "BotFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "enum": [
+       "BotName",
+       "BotType"
+      ],
+      "type": "string"
+     },
+     "operator": {
+      "enum": [
+       "CO",
+       "EQ",
+       "NE"
+      ],
+      "type": "string"
+     },
+     "values": {
+      "items": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name",
+     "values",
+     "operator"
+    ],
+    "type": "object"
+   },
+   "BotLocaleFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "enum": [
+       "BotLocaleName"
+      ],
+      "type": "string"
+     },
+     "operator": {
+      "enum": [
+       "CO",
+       "EQ"
+      ],
+      "type": "string"
+     },
+     "values": {
+      "items": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name",
+     "values",
+     "operator"
+    ],
+    "type": "object"
+   },
+   "BotLocaleHistoryEvent": {
+    "additionalProperties": false,
+    "properties": {
+     "event": {
+      "type": "string"
+     },
+     "eventDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "event",
+     "eventDate"
+    ],
+    "type": "object"
+   },
+   "BotLocaleSortBy": {
+    "additionalProperties": false,
+    "properties": {
+     "attribute": {
+      "enum": [
+       "BotLocaleName"
+      ],
+      "type": "string"
+     },
+     "order": {
+      "enum": [
+       "Ascending",
+       "Descending"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "attribute",
+     "order"
+    ],
+    "type": "object"
+   },
+   "BotLocaleSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "botLocaleStatus": {
+      "enum": [
+       "Creating",
+       "Building",
+       "Built",
+       "ReadyExpressTesting",
+       "Failed",
+       "Deleting",
+       "NotBuilt",
+       "Importing",
+       "Processing"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 2000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "lastBuildSubmittedDateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastUpdatedDateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "localeId": {
+      "type": "string"
+     },
+     "localeName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BotMember": {
+    "additionalProperties": false,
+    "properties": {
+     "botMemberAliasId": {
+      "maxLength": 10,
+      "minLength": 10,
+      "type": "string"
+     },
+     "botMemberAliasName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "botMemberId": {
+      "maxLength": 10,
+      "minLength": 10,
+      "type": "string"
+     },
+     "botMemberName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "botMemberVersion": {
+      "maxLength": 5,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "botMemberId",
+     "botMemberName",
+     "botMemberAliasId",
+     "botMemberAliasName",
+     "botMemberVersion"
+    ],
+    "type": "object"
+   },
+   "BotSortBy": {
+    "additionalProperties": false,
+    "properties": {
+     "attribute": {
+      "enum": [
+       "BotName"
+      ],
+      "type": "string"
+     },
+     "order": {
+      "enum": [
+       "Ascending",
+       "Descending"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "attribute",
+     "order"
+    ],
+    "type": "object"
+   },
+   "BotSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "botId": {
+      "maxLength": 10,
+      "minLength": 10,
+      "type": "string"
+     },
+     "botName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "botStatus": {
+      "enum": [
+       "Creating",
+       "Available",
+       "Inactive",
+       "Deleting",
+       "Failed",
+       "Versioning",
+       "Importing",
+       "Updating"
+      ],
+      "type": "string"
+     },
+     "botType": {
+      "enum": [
+       "Bot",
+       "BotNetwork"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 2000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "lastUpdatedDateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "latestBotVersion": {
+      "maxLength": 5,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BuildtimeSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "descriptiveBotBuilder": {
+      "$ref": "#/components/schemas/DescriptiveBotBuilderSpecification"
+     },
+     "sampleUtteranceGeneration": {
+      "$ref": "#/components/schemas/SampleUtteranceGenerationSpecification"
+     }
+    },
+    "type": "object"
+   },
+   "DataPrivacy": {
+    "additionalProperties": false,
+    "properties": {
+     "childDirected": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "childDirected"
+    ],
+    "type": "object"
+   },
+   "DeepgramSpeechModelConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "apiTokenSecretArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "modelId": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "apiTokenSecretArn"
+    ],
+    "type": "object"
+   },
+   "DescriptiveBotBuilderSpecification": {
+    "additionalProperties": false,
+    "properties": {
+     "bedrockModelSpecification": {
+      "$ref": "#/components/schemas/BedrockModelSpecification"
+     },
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "ErrorLogSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "GenerativeAISettings": {
+    "additionalProperties": false,
+    "properties": {
+     "buildtimeSettings": {
+      "$ref": "#/components/schemas/BuildtimeSettings"
+     },
+     "runtimeSettings": {
+      "$ref": "#/components/schemas/RuntimeSettings"
+     }
+    },
+    "type": "object"
+   },
+   "IntentDisambiguationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "customDisambiguationMessage": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "maxDisambiguationIntents": {
+      "maximum": 5,
+      "minimum": 2,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "NluImprovementSpecification": {
+    "additionalProperties": false,
+    "properties": {
+     "assistedNluMode": {
+      "enum": [
+       "Primary",
+       "Fallback"
+      ],
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "intentDisambiguationSettings": {
+      "$ref": "#/components/schemas/IntentDisambiguationSettings"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "RuntimeSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "nluImprovement": {
+      "$ref": "#/components/schemas/NluImprovementSpecification"
+     },
+     "slotResolutionImprovement": {
+      "$ref": "#/components/schemas/SlotResolutionImprovementSpecification"
+     }
+    },
+    "type": "object"
+   },
+   "SampleUtteranceGenerationSpecification": {
+    "additionalProperties": false,
+    "properties": {
+     "bedrockModelSpecification": {
+      "$ref": "#/components/schemas/BedrockModelSpecification"
+     },
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "SlotResolutionImprovementSpecification": {
+    "additionalProperties": false,
+    "properties": {
+     "bedrockModelSpecification": {
+      "$ref": "#/components/schemas/BedrockModelSpecification"
+     },
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "SpeechFoundationModel": {
+    "additionalProperties": false,
+    "properties": {
+     "modelArn": {
+      "type": "string"
+     },
+     "voiceId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "modelArn"
+    ],
+    "type": "object"
+   },
+   "SpeechModelConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "deepgramConfig": {
+      "$ref": "#/components/schemas/DeepgramSpeechModelConfig"
+     }
+    },
+    "type": "object"
+   },
+   "SpeechRecognitionSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "speechModelConfig": {
+      "$ref": "#/components/schemas/SpeechModelConfig"
+     },
+     "speechModelPreference": {
+      "enum": [
+       "Standard",
+       "Neural",
+       "Deepgram"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UnifiedSpeechSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "speechFoundationModel": {
+      "$ref": "#/components/schemas/SpeechFoundationModel"
+     }
+    },
+    "required": [
+     "speechFoundationModel"
+    ],
+    "type": "object"
+   },
+   "VoiceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "engine": {
+      "enum": [
+       "standard",
+       "neural",
+       "long-form",
+       "generative"
+      ],
+      "type": "string"
+     },
+     "voiceId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "voiceId"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Lex Model Building V2 API (2020-08-07). Every other official operation returns HTTP 501 UnknownOperationException. Bots are stored Available DRAFT configuration with botTags: no conversation is ever recognized or fulfilled, the role and error log settings are not used, and no TestBotAlias is created, so testBotAliasTags is refused (the CreateBot response repeats botTags in testBotAliasTags). Bot networks (botType BotNetwork and botMembers) are refused. UpdateBot replaces the bot settings, clearing an omitted description and error log settings; a renamed bot keeps its original name reserved for uniqueness. Deleting a bot also deletes its locales; ListBots refuses sortBy and filters. Bot locales exist only in the DRAFT version and stay NotBuilt; DescribeBotLocale and ListBotLocales report another version as missing. localeId must have the language_REGION form and is not checked against the locales Amazon Lex supports; localeName, intent and slot type counts are not reported. Locale operations are authorized on arn:aws:lex:region:account:bot/botId/DRAFT/localeId. Building, versions, aliases, intents, slots, slot types, custom vocabularies, imports, exports, recommendations, test sets, analytics, resource policies and replicas return UnknownOperationException with HTTP 501.",
+  "title": "Amazon Lex Model Building V2 (simulator catalog)",
+  "version": "2020-08-07"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/bots/": {
+   "post": {
+    "operationId": "lexv2-modelsListBots",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "filters": {
+          "items": {
+           "$ref": "#/components/schemas/BotFilter"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "type": "array"
+         },
+         "maxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "type": "string"
+         },
+         "sortBy": {
+          "$ref": "#/components/schemas/BotSortBy"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "botSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/BotSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListBots",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   },
+   "put": {
+    "operationId": "lexv2-modelsCreateBot",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "botMembers": {
+          "items": {
+           "$ref": "#/components/schemas/BotMember"
+          },
+          "maxItems": 10,
+          "minItems": 0,
+          "type": "array"
+         },
+         "botName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "botTags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "botType": {
+          "enum": [
+           "Bot",
+           "BotNetwork"
+          ],
+          "type": "string"
+         },
+         "dataPrivacy": {
+          "$ref": "#/components/schemas/DataPrivacy"
+         },
+         "description": {
+          "maxLength": 2000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "errorLogSettings": {
+          "$ref": "#/components/schemas/ErrorLogSettings"
+         },
+         "idleSessionTTLInSeconds": {
+          "maximum": 86400,
+          "minimum": 60,
+          "type": "integer"
+         },
+         "roleArn": {
+          "maxLength": 2048,
+          "minLength": 32,
+          "type": "string"
+         },
+         "testBotAliasTags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "botName",
+         "dataPrivacy",
+         "idleSessionTTLInSeconds",
+         "roleArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botMembers": {
+           "items": {
+            "$ref": "#/components/schemas/BotMember"
+           },
+           "maxItems": 10,
+           "minItems": 0,
+           "type": "array"
+          },
+          "botName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "botStatus": {
+           "enum": [
+            "Creating",
+            "Available",
+            "Inactive",
+            "Deleting",
+            "Failed",
+            "Versioning",
+            "Importing",
+            "Updating"
+           ],
+           "type": "string"
+          },
+          "botTags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "botType": {
+           "enum": [
+            "Bot",
+            "BotNetwork"
+           ],
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "dataPrivacy": {
+           "$ref": "#/components/schemas/DataPrivacy"
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "errorLogSettings": {
+           "$ref": "#/components/schemas/ErrorLogSettings"
+          },
+          "idleSessionTTLInSeconds": {
+           "maximum": 86400,
+           "minimum": 60,
+           "type": "integer"
+          },
+          "roleArn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          },
+          "testBotAliasTags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateBot",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   }
+  },
+  "/bots/{botId}/": {
+   "delete": {
+    "operationId": "lexv2-modelsDeleteBot",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botId",
+      "required": true,
+      "schema": {
+       "maxLength": 10,
+       "minLength": 10,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "skipResourceInUseCheck",
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botStatus": {
+           "enum": [
+            "Creating",
+            "Available",
+            "Inactive",
+            "Deleting",
+            "Failed",
+            "Versioning",
+            "Importing",
+            "Updating"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteBot",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   },
+   "get": {
+    "operationId": "lexv2-modelsDescribeBot",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botId",
+      "required": true,
+      "schema": {
+       "maxLength": 10,
+       "minLength": 10,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botMembers": {
+           "items": {
+            "$ref": "#/components/schemas/BotMember"
+           },
+           "maxItems": 10,
+           "minItems": 0,
+           "type": "array"
+          },
+          "botName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "botStatus": {
+           "enum": [
+            "Creating",
+            "Available",
+            "Inactive",
+            "Deleting",
+            "Failed",
+            "Versioning",
+            "Importing",
+            "Updating"
+           ],
+           "type": "string"
+          },
+          "botType": {
+           "enum": [
+            "Bot",
+            "BotNetwork"
+           ],
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "dataPrivacy": {
+           "$ref": "#/components/schemas/DataPrivacy"
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "errorLogSettings": {
+           "$ref": "#/components/schemas/ErrorLogSettings"
+          },
+          "failureReasons": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "idleSessionTTLInSeconds": {
+           "maximum": 86400,
+           "minimum": 60,
+           "type": "integer"
+          },
+          "lastUpdatedDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "roleArn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeBot",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   },
+   "put": {
+    "operationId": "lexv2-modelsUpdateBot",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botId",
+      "required": true,
+      "schema": {
+       "maxLength": 10,
+       "minLength": 10,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "botMembers": {
+          "items": {
+           "$ref": "#/components/schemas/BotMember"
+          },
+          "maxItems": 10,
+          "minItems": 0,
+          "type": "array"
+         },
+         "botName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "botType": {
+          "enum": [
+           "Bot",
+           "BotNetwork"
+          ],
+          "type": "string"
+         },
+         "dataPrivacy": {
+          "$ref": "#/components/schemas/DataPrivacy"
+         },
+         "description": {
+          "maxLength": 2000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "errorLogSettings": {
+          "$ref": "#/components/schemas/ErrorLogSettings"
+         },
+         "idleSessionTTLInSeconds": {
+          "maximum": 86400,
+          "minimum": 60,
+          "type": "integer"
+         },
+         "roleArn": {
+          "maxLength": 2048,
+          "minLength": 32,
+          "type": "string"
+         }
+        },
+        "required": [
+         "botName",
+         "dataPrivacy",
+         "idleSessionTTLInSeconds",
+         "roleArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botMembers": {
+           "items": {
+            "$ref": "#/components/schemas/BotMember"
+           },
+           "maxItems": 10,
+           "minItems": 0,
+           "type": "array"
+          },
+          "botName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "botStatus": {
+           "enum": [
+            "Creating",
+            "Available",
+            "Inactive",
+            "Deleting",
+            "Failed",
+            "Versioning",
+            "Importing",
+            "Updating"
+           ],
+           "type": "string"
+          },
+          "botType": {
+           "enum": [
+            "Bot",
+            "BotNetwork"
+           ],
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "dataPrivacy": {
+           "$ref": "#/components/schemas/DataPrivacy"
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "errorLogSettings": {
+           "$ref": "#/components/schemas/ErrorLogSettings"
+          },
+          "idleSessionTTLInSeconds": {
+           "maximum": 86400,
+           "minimum": 60,
+           "type": "integer"
+          },
+          "lastUpdatedDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "roleArn": {
+           "maxLength": 2048,
+           "minLength": 32,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateBot",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   }
+  },
+  "/bots/{botId}/botversions/{botVersion}/botlocales/": {
+   "post": {
+    "operationId": "lexv2-modelsListBotLocales",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botId",
+      "required": true,
+      "schema": {
+       "maxLength": 10,
+       "minLength": 10,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botVersion",
+      "required": true,
+      "schema": {
+       "maxLength": 5,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "filters": {
+          "items": {
+           "$ref": "#/components/schemas/BotLocaleFilter"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+         },
+         "maxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "type": "string"
+         },
+         "sortBy": {
+          "$ref": "#/components/schemas/BotLocaleSortBy"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botLocaleSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/BotLocaleSummary"
+           },
+           "type": "array"
+          },
+          "botVersion": {
+           "maxLength": 5,
+           "minLength": 1,
+           "type": "string"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListBotLocales",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   },
+   "put": {
+    "operationId": "lexv2-modelsCreateBotLocale",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botId",
+      "required": true,
+      "schema": {
+       "maxLength": 10,
+       "minLength": 10,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botVersion",
+      "required": true,
+      "schema": {
+       "maxLength": 5,
+       "minLength": 5,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 2000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "generativeAISettings": {
+          "$ref": "#/components/schemas/GenerativeAISettings"
+         },
+         "localeId": {
+          "type": "string"
+         },
+         "nluIntentConfidenceThreshold": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+         },
+         "speechDetectionSensitivity": {
+          "enum": [
+           "Default",
+           "HighNoiseTolerance",
+           "MaximumNoiseTolerance"
+          ],
+          "type": "string"
+         },
+         "speechRecognitionSettings": {
+          "$ref": "#/components/schemas/SpeechRecognitionSettings"
+         },
+         "unifiedSpeechSettings": {
+          "$ref": "#/components/schemas/UnifiedSpeechSettings"
+         },
+         "voiceSettings": {
+          "$ref": "#/components/schemas/VoiceSettings"
+         }
+        },
+        "required": [
+         "localeId",
+         "nluIntentConfidenceThreshold"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botLocaleStatus": {
+           "enum": [
+            "Creating",
+            "Building",
+            "Built",
+            "ReadyExpressTesting",
+            "Failed",
+            "Deleting",
+            "NotBuilt",
+            "Importing",
+            "Processing"
+           ],
+           "type": "string"
+          },
+          "botVersion": {
+           "maxLength": 5,
+           "minLength": 5,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "generativeAISettings": {
+           "$ref": "#/components/schemas/GenerativeAISettings"
+          },
+          "localeId": {
+           "type": "string"
+          },
+          "localeName": {
+           "type": "string"
+          },
+          "nluIntentConfidenceThreshold": {
+           "maximum": 1,
+           "minimum": 0,
+           "type": "number"
+          },
+          "speechDetectionSensitivity": {
+           "enum": [
+            "Default",
+            "HighNoiseTolerance",
+            "MaximumNoiseTolerance"
+           ],
+           "type": "string"
+          },
+          "speechRecognitionSettings": {
+           "$ref": "#/components/schemas/SpeechRecognitionSettings"
+          },
+          "unifiedSpeechSettings": {
+           "$ref": "#/components/schemas/UnifiedSpeechSettings"
+          },
+          "voiceSettings": {
+           "$ref": "#/components/schemas/VoiceSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateBotLocale",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   }
+  },
+  "/bots/{botId}/botversions/{botVersion}/botlocales/{localeId}/": {
+   "delete": {
+    "operationId": "lexv2-modelsDeleteBotLocale",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botId",
+      "required": true,
+      "schema": {
+       "maxLength": 10,
+       "minLength": 10,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botVersion",
+      "required": true,
+      "schema": {
+       "maxLength": 5,
+       "minLength": 5,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "localeId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botLocaleStatus": {
+           "enum": [
+            "Creating",
+            "Building",
+            "Built",
+            "ReadyExpressTesting",
+            "Failed",
+            "Deleting",
+            "NotBuilt",
+            "Importing",
+            "Processing"
+           ],
+           "type": "string"
+          },
+          "botVersion": {
+           "maxLength": 5,
+           "minLength": 5,
+           "type": "string"
+          },
+          "localeId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteBotLocale",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   },
+   "get": {
+    "operationId": "lexv2-modelsDescribeBotLocale",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botId",
+      "required": true,
+      "schema": {
+       "maxLength": 10,
+       "minLength": 10,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botVersion",
+      "required": true,
+      "schema": {
+       "maxLength": 5,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "localeId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botLocaleHistoryEvents": {
+           "items": {
+            "$ref": "#/components/schemas/BotLocaleHistoryEvent"
+           },
+           "type": "array"
+          },
+          "botLocaleStatus": {
+           "enum": [
+            "Creating",
+            "Building",
+            "Built",
+            "ReadyExpressTesting",
+            "Failed",
+            "Deleting",
+            "NotBuilt",
+            "Importing",
+            "Processing"
+           ],
+           "type": "string"
+          },
+          "botVersion": {
+           "maxLength": 5,
+           "minLength": 1,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "failureReasons": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "generativeAISettings": {
+           "$ref": "#/components/schemas/GenerativeAISettings"
+          },
+          "intentsCount": {
+           "type": "integer"
+          },
+          "lastBuildSubmittedDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "lastUpdatedDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "localeId": {
+           "type": "string"
+          },
+          "localeName": {
+           "type": "string"
+          },
+          "nluIntentConfidenceThreshold": {
+           "maximum": 1,
+           "minimum": 0,
+           "type": "number"
+          },
+          "recommendedActions": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "slotTypesCount": {
+           "type": "integer"
+          },
+          "speechDetectionSensitivity": {
+           "enum": [
+            "Default",
+            "HighNoiseTolerance",
+            "MaximumNoiseTolerance"
+           ],
+           "type": "string"
+          },
+          "speechRecognitionSettings": {
+           "$ref": "#/components/schemas/SpeechRecognitionSettings"
+          },
+          "unifiedSpeechSettings": {
+           "$ref": "#/components/schemas/UnifiedSpeechSettings"
+          },
+          "voiceSettings": {
+           "$ref": "#/components/schemas/VoiceSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeBotLocale",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   },
+   "put": {
+    "operationId": "lexv2-modelsUpdateBotLocale",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botId",
+      "required": true,
+      "schema": {
+       "maxLength": 10,
+       "minLength": 10,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "botVersion",
+      "required": true,
+      "schema": {
+       "maxLength": 5,
+       "minLength": 5,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "localeId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 2000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "generativeAISettings": {
+          "$ref": "#/components/schemas/GenerativeAISettings"
+         },
+         "nluIntentConfidenceThreshold": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+         },
+         "speechDetectionSensitivity": {
+          "enum": [
+           "Default",
+           "HighNoiseTolerance",
+           "MaximumNoiseTolerance"
+          ],
+          "type": "string"
+         },
+         "speechRecognitionSettings": {
+          "$ref": "#/components/schemas/SpeechRecognitionSettings"
+         },
+         "unifiedSpeechSettings": {
+          "$ref": "#/components/schemas/UnifiedSpeechSettings"
+         },
+         "voiceSettings": {
+          "$ref": "#/components/schemas/VoiceSettings"
+         }
+        },
+        "required": [
+         "nluIntentConfidenceThreshold"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "botId": {
+           "maxLength": 10,
+           "minLength": 10,
+           "type": "string"
+          },
+          "botLocaleStatus": {
+           "enum": [
+            "Creating",
+            "Building",
+            "Built",
+            "ReadyExpressTesting",
+            "Failed",
+            "Deleting",
+            "NotBuilt",
+            "Importing",
+            "Processing"
+           ],
+           "type": "string"
+          },
+          "botVersion": {
+           "maxLength": 5,
+           "minLength": 5,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 2000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "failureReasons": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "generativeAISettings": {
+           "$ref": "#/components/schemas/GenerativeAISettings"
+          },
+          "lastUpdatedDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "localeId": {
+           "type": "string"
+          },
+          "localeName": {
+           "type": "string"
+          },
+          "nluIntentConfidenceThreshold": {
+           "maximum": 1,
+           "minimum": 0,
+           "type": "number"
+          },
+          "recommendedActions": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "speechDetectionSensitivity": {
+           "enum": [
+            "Default",
+            "HighNoiseTolerance",
+            "MaximumNoiseTolerance"
+           ],
+           "type": "string"
+          },
+          "speechRecognitionSettings": {
+           "$ref": "#/components/schemas/SpeechRecognitionSettings"
+          },
+          "unifiedSpeechSettings": {
+           "$ref": "#/components/schemas/UnifiedSpeechSettings"
+          },
+          "voiceSettings": {
+           "$ref": "#/components/schemas/VoiceSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateBotLocale",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   }
+  },
+  "/tags/{resourceARN}": {
+   "delete": {
+    "operationId": "lexv2-modelsUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceARN",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   },
+   "get": {
+    "operationId": "lexv2-modelsListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceARN",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   },
+   "post": {
+    "operationId": "lexv2-modelsTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lex"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceARN",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Lex Model Building V2"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Lex Model Building V2 API (2020-08-07). Every other official operation returns HTTP 501 UnknownOperationException. Bots are stored Available DRAFT configuration with botTags: no conversation is ever recognized or fulfilled, the role and error log settings are not used, and no TestBotAlias is created, so testBotAliasTags is refused (the CreateBot response repeats botTags in testBotAliasTags). Bot networks (botType BotNetwork and botMembers) are refused. UpdateBot replaces the bot settings, clearing an omitted description and error log settings; a renamed bot keeps its original name reserved for uniqueness. Deleting a bot also deletes its locales; ListBots refuses sortBy and filters. Bot locales exist only in the DRAFT version and stay NotBuilt; DescribeBotLocale and ListBotLocales report another version as missing. localeId must have the language_REGION form and is not checked against the locales Amazon Lex supports; localeName, intent and slot type counts are not reported. Locale operations are authorized on arn:aws:lex:region:account:bot/botId/DRAFT/localeId. Building, versions, aliases, intents, slots, slot types, custom vocabularies, imports, exports, recommendations, test sets, analytics, resource policies and replicas return UnknownOperationException with HTTP 501.",
+   "name": "Amazon Lex Model Building V2"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/lexv2-models/2020-08-07/service-2.json",
+  "sha256": "72165e86cf671ac4b9da6702994f1c1c38b83745ad370f71079003756cb9fe3b",
+  "license": "Apache-2.0"
+ }
+}

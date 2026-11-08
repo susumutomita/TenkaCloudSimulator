@@ -1,0 +1,31 @@
+{
+ "client": "shield",
+ "steps": [
+  {"op": "create_protection", "args": {"Name": "fixture-cdn", "ResourceArn": "arn:aws:cloudfront::000000000000:distribution/EFIXTURE123", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"protection": "ProtectionId"}},
+  {"op": "describe_protection", "args": {"ProtectionId": "${protection}"}, "save": {"protectionArn": "Protection.ProtectionArn"}, "expect": {"Protection.Name": "fixture-cdn", "Protection.Id": "${protection}", "Protection.ProtectionArn": "arn:aws:shield::000000000000:protection/${protection}"}},
+  {"op": "list_protections", "args": {}, "expect": {"Protections#count": 1}},
+  {"op": "create_protection_group", "args": {"ProtectionGroupId": "fixture-group", "Aggregation": "SUM", "Pattern": "ARBITRARY", "Members": ["arn:aws:cloudfront::000000000000:distribution/EFIXTURE123"]}},
+  {"op": "describe_protection_group", "args": {"ProtectionGroupId": "fixture-group"}, "expect": {"ProtectionGroup.Pattern": "ARBITRARY", "ProtectionGroup.ProtectionGroupArn": "arn:aws:shield::000000000000:protection-group/fixture-group"}},
+  {"op": "list_protection_groups", "args": {}, "expect": {"ProtectionGroups#count": 1}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${protectionArn}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${protectionArn}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${protectionArn}"}, "expect": {"Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "create_protection", "args": {"Name": "again", "ResourceArn": "arn:aws:cloudfront::000000000000:distribution/EFIXTURE123"}, "error": "ResourceAlreadyExistsException"},
+  {"op": "create_protection", "args": {"Name": "bucket", "ResourceArn": "arn:aws:s3:::fixture-bucket"}, "error": "InvalidResourceException"},
+  {"op": "create_protection_group", "args": {"ProtectionGroupId": "bad-group", "Aggregation": "SUM", "Pattern": "ALL", "Members": ["arn:aws:cloudfront::000000000000:distribution/EFIXTURE123"]}, "error": "InvalidParameterException"},
+  {"op": "update_protection_group", "args": {"ProtectionGroupId": "fixture-group", "Aggregation": "MAX", "Pattern": "ALL"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_protection_group", "args": {"ProtectionGroupId": "missing"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_protections", "args": {}, "expect": {"Protections#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_protection", "args": {"ProtectionId": "${protection}"}, "expect": {"Protection.ResourceArn": "arn:aws:cloudfront::000000000000:distribution/EFIXTURE123"}},
+  {"op": "describe_protection_group", "args": {"ProtectionGroupId": "fixture-group"}, "expect": {"ProtectionGroup.Aggregation": "SUM"}}
+ ],
+ "cleanup": [
+  {"op": "delete_protection_group", "args": {"ProtectionGroupId": "fixture-group"}},
+  {"op": "delete_protection", "args": {"ProtectionId": "${protection}"}},
+  {"op": "list_protections", "args": {}, "expect": {"Protections#count": 0}}
+ ]
+}

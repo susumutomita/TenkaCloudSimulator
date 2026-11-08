@@ -1,0 +1,21 @@
+{
+ "client": "cur",
+ "steps": [
+  {"op": "put_report_definition", "args": {"ReportDefinition": {"ReportName": "fixture-daily", "TimeUnit": "DAILY", "Format": "textORcsv", "Compression": "GZIP", "AdditionalSchemaElements": ["RESOURCES"], "S3Bucket": "fixture-reports", "S3Prefix": "cur", "S3Region": "us-east-1", "AdditionalArtifacts": ["QUICKSIGHT"]}, "Tags": [{"Key": "team", "Value": "a"}]}},
+  {"op": "describe_report_definitions", "args": {}, "expect": {"ReportDefinitions#count": 1, "ReportDefinitions[0].S3Bucket": "fixture-reports"}},
+  {"op": "modify_report_definition", "args": {"ReportName": "fixture-daily", "ReportDefinition": {"ReportName": "fixture-daily", "TimeUnit": "HOURLY", "Format": "textORcsv", "Compression": "ZIP", "AdditionalSchemaElements": ["RESOURCES"], "S3Bucket": "fixture-reports", "S3Prefix": "cur", "S3Region": "us-east-1"}}},
+  {"op": "put_report_definition", "args": {"ReportDefinition": {"ReportName": "fixture-parquet", "TimeUnit": "DAILY", "Format": "Parquet", "Compression": "ZIP", "AdditionalSchemaElements": [], "S3Bucket": "fixture-reports", "S3Prefix": "cur", "S3Region": "us-east-1"}}, "error": "ValidationException", "status": 400},
+  {"op": "list_tags_for_resource", "args": {"ReportName": "fixture-daily"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "delete_report_definition", "args": {"ReportName": "missing"}, "error": "ValidationException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "describe_report_definitions", "args": {}, "expect": {"ReportDefinitions#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_report_definitions", "args": {}, "expect": {"ReportDefinitions[0].TimeUnit": "HOURLY", "ReportDefinitions[0].Compression": "ZIP"}}
+ ],
+ "cleanup": [
+  {"op": "delete_report_definition", "args": {"ReportName": "fixture-daily"}},
+  {"op": "describe_report_definitions", "args": {}, "expect": {"ReportDefinitions#count": 0}}
+ ]
+}

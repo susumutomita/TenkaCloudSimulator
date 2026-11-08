@@ -1,0 +1,723 @@
+{
+ "components": {
+  "schemas": {
+   "CreateDatabaseRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseName": {
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "DatabaseName"
+    ],
+    "type": "object"
+   },
+   "CreateDatabaseResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "$ref": "#/components/schemas/Database"
+     }
+    },
+    "type": "object"
+   },
+   "CreateTableRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseName": {
+      "type": "string"
+     },
+     "MagneticStoreWriteProperties": {
+      "$ref": "#/components/schemas/MagneticStoreWriteProperties"
+     },
+     "RetentionProperties": {
+      "$ref": "#/components/schemas/RetentionProperties"
+     },
+     "Schema": {
+      "$ref": "#/components/schemas/Schema"
+     },
+     "TableName": {
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "DatabaseName",
+     "TableName"
+    ],
+    "type": "object"
+   },
+   "CreateTableResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Table": {
+      "$ref": "#/components/schemas/Table"
+     }
+    },
+    "type": "object"
+   },
+   "Database": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LastUpdatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "TableCount": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteDatabaseRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseName"
+    ],
+    "type": "object"
+   },
+   "DeleteTableRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseName": {
+      "type": "string"
+     },
+     "TableName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseName",
+     "TableName"
+    ],
+    "type": "object"
+   },
+   "DescribeDatabaseRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseName"
+    ],
+    "type": "object"
+   },
+   "DescribeDatabaseResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "$ref": "#/components/schemas/Database"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeTableRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseName": {
+      "type": "string"
+     },
+     "TableName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseName",
+     "TableName"
+    ],
+    "type": "object"
+   },
+   "DescribeTableResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Table": {
+      "$ref": "#/components/schemas/Table"
+     }
+    },
+    "type": "object"
+   },
+   "ListDatabasesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 20,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListDatabasesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Databases": {
+      "items": {
+       "$ref": "#/components/schemas/Database"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTablesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseName": {
+      "type": "string"
+     },
+     "MaxResults": {
+      "maximum": 20,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTablesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "type": "string"
+     },
+     "Tables": {
+      "items": {
+       "$ref": "#/components/schemas/Table"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceARN"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MagneticStoreRejectedDataLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "S3Configuration": {
+      "$ref": "#/components/schemas/S3Configuration"
+     }
+    },
+    "type": "object"
+   },
+   "MagneticStoreWriteProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "EnableMagneticStoreWrites": {
+      "type": "boolean"
+     },
+     "MagneticStoreRejectedDataLocation": {
+      "$ref": "#/components/schemas/MagneticStoreRejectedDataLocation"
+     }
+    },
+    "required": [
+     "EnableMagneticStoreWrites"
+    ],
+    "type": "object"
+   },
+   "PartitionKey": {
+    "additionalProperties": false,
+    "properties": {
+     "EnforcementInRecord": {
+      "enum": [
+       "REQUIRED",
+       "OPTIONAL"
+      ],
+      "type": "string"
+     },
+     "Name": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "DIMENSION",
+       "MEASURE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type"
+    ],
+    "type": "object"
+   },
+   "RetentionProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "MagneticStoreRetentionPeriodInDays": {
+      "maximum": 73000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "MemoryStoreRetentionPeriodInHours": {
+      "maximum": 8766,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "MemoryStoreRetentionPeriodInHours",
+     "MagneticStoreRetentionPeriodInDays"
+    ],
+    "type": "object"
+   },
+   "S3Configuration": {
+    "additionalProperties": false,
+    "properties": {
+     "BucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "EncryptionOption": {
+      "enum": [
+       "SSE_S3",
+       "SSE_KMS"
+      ],
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ObjectKeyPrefix": {
+      "maxLength": 928,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Schema": {
+    "additionalProperties": false,
+    "properties": {
+     "CompositePartitionKey": {
+      "items": {
+       "$ref": "#/components/schemas/PartitionKey"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Table": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "LastUpdatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "MagneticStoreWriteProperties": {
+      "$ref": "#/components/schemas/MagneticStoreWriteProperties"
+     },
+     "RetentionProperties": {
+      "$ref": "#/components/schemas/RetentionProperties"
+     },
+     "Schema": {
+      "$ref": "#/components/schemas/Schema"
+     },
+     "TableName": {
+      "type": "string"
+     },
+     "TableStatus": {
+      "enum": [
+       "ACTIVE",
+       "DELETING",
+       "RESTORING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceARN",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceARN",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateDatabaseRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseName": {
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseName",
+     "KmsKeyId"
+    ],
+    "type": "object"
+   },
+   "UpdateDatabaseResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Database": {
+      "$ref": "#/components/schemas/Database"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateTableRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseName": {
+      "type": "string"
+     },
+     "MagneticStoreWriteProperties": {
+      "$ref": "#/components/schemas/MagneticStoreWriteProperties"
+     },
+     "RetentionProperties": {
+      "$ref": "#/components/schemas/RetentionProperties"
+     },
+     "Schema": {
+      "$ref": "#/components/schemas/Schema"
+     },
+     "TableName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatabaseName",
+     "TableName"
+    ],
+    "type": "object"
+   },
+   "UpdateTableResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Table": {
+      "$ref": "#/components/schemas/Table"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Timestream Write API (2018-11-01). Every other official operation returns HTTP 501 UnknownOperationException. Databases and tables are stored configuration: no record is written, stored, tiered or queried, and WriteRecords, DescribeEndpoints and the batch load APIs return UnknownOperationException with HTTP 501. SDK clients reach the simulator through an explicit endpoint URL, which disables endpoint discovery. Tables keep the documented default retention of 6 hours in the memory store and 73000 days in the magnetic store unless RetentionProperties is given; magnetic store rejected-data locations in S3 are stored but never written. KMS keys are stored without contacting KMS, and the Timestream managed key is not reported when KmsKeyId is omitted. Database TableCount is not reported. A database with tables cannot be deleted, and ListTables requires DatabaseName instead of listing every table of the Region.",
+  "title": "Amazon Timestream for LiveAnalytics (simulator catalog)",
+  "version": "2018-11-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "timestream-writeJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "Timestream_20181101.CreateDatabase",
+        "Timestream_20181101.CreateTable",
+        "Timestream_20181101.DeleteDatabase",
+        "Timestream_20181101.DeleteTable",
+        "Timestream_20181101.DescribeDatabase",
+        "Timestream_20181101.DescribeTable",
+        "Timestream_20181101.ListDatabases",
+        "Timestream_20181101.ListTables",
+        "Timestream_20181101.ListTagsForResource",
+        "Timestream_20181101.TagResource",
+        "Timestream_20181101.UntagResource",
+        "Timestream_20181101.UpdateDatabase",
+        "Timestream_20181101.UpdateTable"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.0": {
+       "examples": {
+        "CreateDatabase": {
+         "summary": "X-Amz-Target: Timestream_20181101.CreateDatabase",
+         "value": {}
+        },
+        "CreateTable": {
+         "summary": "X-Amz-Target: Timestream_20181101.CreateTable",
+         "value": {}
+        },
+        "DeleteDatabase": {
+         "summary": "X-Amz-Target: Timestream_20181101.DeleteDatabase",
+         "value": {}
+        },
+        "DeleteTable": {
+         "summary": "X-Amz-Target: Timestream_20181101.DeleteTable",
+         "value": {}
+        },
+        "DescribeDatabase": {
+         "summary": "X-Amz-Target: Timestream_20181101.DescribeDatabase",
+         "value": {}
+        },
+        "DescribeTable": {
+         "summary": "X-Amz-Target: Timestream_20181101.DescribeTable",
+         "value": {}
+        },
+        "ListDatabases": {
+         "summary": "X-Amz-Target: Timestream_20181101.ListDatabases",
+         "value": {}
+        },
+        "ListTables": {
+         "summary": "X-Amz-Target: Timestream_20181101.ListTables",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: Timestream_20181101.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: Timestream_20181101.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: Timestream_20181101.UntagResource",
+         "value": {}
+        },
+        "UpdateDatabase": {
+         "summary": "X-Amz-Target: Timestream_20181101.UpdateDatabase",
+         "value": {}
+        },
+        "UpdateTable": {
+         "summary": "X-Amz-Target: Timestream_20181101.UpdateTable",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.0": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon Timestream for LiveAnalytics JSON 1.0 operations",
+    "tags": [
+     "Amazon Timestream for LiveAnalytics"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Timestream Write API (2018-11-01). Every other official operation returns HTTP 501 UnknownOperationException. Databases and tables are stored configuration: no record is written, stored, tiered or queried, and WriteRecords, DescribeEndpoints and the batch load APIs return UnknownOperationException with HTTP 501. SDK clients reach the simulator through an explicit endpoint URL, which disables endpoint discovery. Tables keep the documented default retention of 6 hours in the memory store and 73000 days in the magnetic store unless RetentionProperties is given; magnetic store rejected-data locations in S3 are stored but never written. KMS keys are stored without contacting KMS, and the Timestream managed key is not reported when KmsKeyId is omitted. Database TableCount is not reported. A database with tables cannot be deleted, and ListTables requires DatabaseName instead of listing every table of the Region.",
+   "name": "Amazon Timestream for LiveAnalytics"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/timestream-write/2018-11-01/service-2.json",
+  "sha256": "dd983b115020b1d63c6a1a327176a54274caae0ceaca0503fc3cfd32d180b5ea",
+  "license": "Apache-2.0"
+ }
+}

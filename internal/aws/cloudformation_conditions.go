@@ -94,8 +94,12 @@ func stackParameterValues(definitions map[string]any, supplied map[string]string
 			return fail(name, "definition must be an object")
 		}
 		kind, ok := d["Type"].(string)
-		if !ok || kind != "String" && kind != "Number" {
-			return fail(name, "only String and Number are supported")
+		ssmValue := stackSSMValueType(kind)
+		if !ok || kind != "String" && kind != "Number" && !ssmValue {
+			return fail(name, "only String, Number and the documented local SSM value types are supported")
+		}
+		if ssmValue {
+			kind = "String" // Constraints apply to the SSM key, never its value.
 		}
 		for field, v := range d {
 			switch field {
@@ -105,7 +109,7 @@ func stackParameterValues(definitions map[string]any, supplied map[string]string
 					return fail(name, "invalid description")
 				}
 			case "NoEcho":
-				if _, ok := v.(bool); !ok {
+				if _, ok := v.(bool); !ok || ssmValue && v == true {
 					return fail(name, "NoEcho must be Boolean")
 				}
 			case "AllowedPattern":
@@ -181,6 +185,9 @@ func stackParameterValues(definitions map[string]any, supplied map[string]string
 			}
 		}
 		validate := func(text string) error {
+			if ssmValue && !stackSSMKey(text) {
+				return fmt.Errorf("SSM parameter requires an unversioned local name")
+			}
 			if len(text) > 51200 {
 				return fmt.Errorf("value exceeds local byte limit")
 			}
@@ -432,6 +439,11 @@ func stackSelectConditional(value any, conditions map[string]bool) (any, bool, e
 							return fmt.Errorf("only bounded scalar Sub supported")
 						}
 						return nil
+					case "Fn::Select", "Fn::GetAZs", "Fn::Base64":
+						if err := stackValueIntrinsicShape(key, x[key]); err != nil {
+							return err
+						}
+						return check(x[key], depth+1, false)
 					case "Fn::GetAtt":
 						if name, ok := x[key].(string); ok && len(name) <= 51200 && strings.Count(name, ".") == 1 {
 							left, right, _ := strings.Cut(name, ".")

@@ -151,9 +151,10 @@ def run():
                 page.get_by_role('button', name='Open sandbox', exact=True).click()
                 page.get_by_role('link', name=bucket, exact=True).click()
                 page.get_by_role('tab', name='Management', exact=True).click()
-                # Cloudscape joins the group and row labels. Selection is
-                # confirmed only after the real ListParts response arrives.
-                resumed_row = page.get_by_role('radio', name='Multipart uploads Select upload sdk-resume', exact=True)
+                # Cloudscape places the group label on the selection-column header;
+                # its single-selection radio uses only itemSelectionLabel.
+                # Confirm selection after the real ListParts response arrives.
+                resumed_row = page.get_by_role('radio', name='Select upload sdk-resume', exact=True)
                 resumed_row.click()
                 expect(resumed_row).to_be_checked()
                 expect(page.get_by_text('15 B', exact=True)).to_be_visible()

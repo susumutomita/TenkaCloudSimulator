@@ -1,0 +1,4973 @@
+{
+ "components": {
+  "schemas": {
+   "AccessMode": {
+    "enum": [
+     "Default",
+     "Restricted"
+    ],
+    "type": "string"
+   },
+   "AddressSpace": {
+    "properties": {
+     "addressPrefixes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ipamPoolPrefixAllocations": {
+      "items": {
+       "$ref": "#/components/schemas/IpamPoolPrefixAllocation"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationGatewayBackendAddress": {
+    "properties": {
+     "fqdn": {
+      "type": "string"
+     },
+     "ipAddress": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationGatewayBackendAddressPool": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ApplicationGatewayBackendAddressPoolPropertiesFormat"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationGatewayBackendAddressPoolPropertiesFormat": {
+    "properties": {
+     "backendAddresses": {
+      "items": {
+       "$ref": "#/components/schemas/ApplicationGatewayBackendAddress"
+      },
+      "type": "array"
+     },
+     "backendIPConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkInterfaceIPConfiguration"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationGatewayIPConfiguration": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ApplicationGatewayIPConfigurationPropertiesFormat"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationGatewayIPConfigurationPropertiesFormat": {
+    "properties": {
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "subnet": {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationSecurityGroup": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ApplicationSecurityGroupPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationSecurityGroupPropertiesFormat": {
+    "properties": {
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "resourceGuid": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ApprovalReference": {
+    "properties": {
+     "privateEndpointId": {
+      "format": "arm-id",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BackendAddressPool": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResourceModel"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/BackendAddressPoolPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "BackendAddressPoolPropertiesFormat": {
+    "properties": {
+     "backendIPConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkInterfaceIPConfiguration"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "drainPeriodInSeconds": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "inboundNatRules": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "loadBalancerBackendAddresses": {
+      "items": {
+       "$ref": "#/components/schemas/LoadBalancerBackendAddress"
+      },
+      "type": "array"
+     },
+     "loadBalancingRules": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "location": {
+      "type": "string"
+     },
+     "outboundRule": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/SubResource"
+       }
+      ],
+      "readOnly": true
+     },
+     "outboundRules": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "syncMode": {
+      "$ref": "#/components/schemas/SyncMode"
+     },
+     "tunnelInterfaces": {
+      "items": {
+       "$ref": "#/components/schemas/GatewayLoadBalancerTunnelInterface"
+      },
+      "type": "array"
+     },
+     "virtualNetwork": {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    },
+    "type": "object"
+   },
+   "CustomDnsConfigPropertiesFormat": {
+    "properties": {
+     "fqdn": {
+      "type": "string"
+     },
+     "ipAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DdosFrontendIpConfigurationSettings": {
+    "properties": {
+     "ddosCustomPolicy": {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    },
+    "type": "object"
+   },
+   "DdosSettings": {
+    "properties": {
+     "ddosCustomPolicy": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "ddosProtectionPlan": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "protectionMode": {
+      "$ref": "#/components/schemas/DdosSettingsProtectionMode"
+     }
+    },
+    "type": "object"
+   },
+   "DdosSettingsProtectionMode": {
+    "enum": [
+     "VirtualNetworkInherited",
+     "Enabled",
+     "Disabled"
+    ],
+    "type": "string"
+   },
+   "Delegation": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ServiceDelegationPropertiesFormat"
+     },
+     "type": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteOptions": {
+    "enum": [
+     "Delete",
+     "Detach"
+    ],
+    "type": "string"
+   },
+   "DhcpOptions": {
+    "properties": {
+     "dnsServers": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DisablePeeringRoute": {
+    "enum": [
+     "None",
+     "All"
+    ],
+    "type": "string"
+   },
+   "ExtendedLocation": {
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "type": {
+      "$ref": "#/components/schemas/ExtendedLocationTypes"
+     }
+    },
+    "type": "object"
+   },
+   "ExtendedLocationTypes": {
+    "enum": [
+     "EdgeZone"
+    ],
+    "type": "string"
+   },
+   "FlowLog": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "identity": {
+      "$ref": "#/components/schemas/ManagedServiceIdentity"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/FlowLogPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "FlowLogFormatParameters": {
+    "properties": {
+     "type": {
+      "$ref": "#/components/schemas/FlowLogFormatType"
+     },
+     "version": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "FlowLogFormatType": {
+    "enum": [
+     "JSON"
+    ],
+    "type": "string"
+   },
+   "FlowLogPropertiesFormat": {
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "enabledFilteringCriteria": {
+      "type": "string"
+     },
+     "flowAnalyticsConfiguration": {
+      "$ref": "#/components/schemas/TrafficAnalyticsProperties"
+     },
+     "format": {
+      "$ref": "#/components/schemas/FlowLogFormatParameters"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "recordTypes": {
+      "type": "string"
+     },
+     "retentionPolicy": {
+      "$ref": "#/components/schemas/RetentionPolicyParameters"
+     },
+     "storageId": {
+      "type": "string"
+     },
+     "targetResourceGuid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "targetResourceId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "storageId",
+     "targetResourceId"
+    ],
+    "type": "object"
+   },
+   "FrontendIPConfiguration": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResourceModel"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/FrontendIPConfigurationPropertiesFormat"
+     },
+     "zones": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "FrontendIPConfigurationPropertiesFormat": {
+    "properties": {
+     "ddosSettings": {
+      "$ref": "#/components/schemas/DdosFrontendIpConfigurationSettings"
+     },
+     "enableConnectionTracking": {
+      "type": "boolean"
+     },
+     "gatewayLoadBalancer": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "inboundNatPools": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "inboundNatRules": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "loadBalancingRules": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "outboundRules": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "privateIPAddress": {
+      "type": "string"
+     },
+     "privateIPAddressVersion": {
+      "$ref": "#/components/schemas/IPVersion"
+     },
+     "privateIPAllocationMethod": {
+      "$ref": "#/components/schemas/IPAllocationMethod"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "publicIPAddress": {
+      "$ref": "#/components/schemas/PublicIPAddress"
+     },
+     "publicIPPrefix": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "subnet": {
+      "$ref": "#/components/schemas/Subnet"
+     }
+    },
+    "type": "object"
+   },
+   "GatewayLoadBalancerTunnelInterface": {
+    "properties": {
+     "identifier": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "protocol": {
+      "$ref": "#/components/schemas/GatewayLoadBalancerTunnelProtocol"
+     },
+     "type": {
+      "$ref": "#/components/schemas/GatewayLoadBalancerTunnelInterfaceType"
+     }
+    },
+    "type": "object"
+   },
+   "GatewayLoadBalancerTunnelInterfaceType": {
+    "enum": [
+     "None",
+     "Internal",
+     "External"
+    ],
+    "type": "string"
+   },
+   "GatewayLoadBalancerTunnelProtocol": {
+    "enum": [
+     "None",
+     "Native",
+     "VXLAN"
+    ],
+    "type": "string"
+   },
+   "IPAllocationMethod": {
+    "enum": [
+     "Static",
+     "Dynamic"
+    ],
+    "type": "string"
+   },
+   "IPConfiguration": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/IPConfigurationPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "IPConfigurationProfile": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/IPConfigurationProfilePropertiesFormat"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IPConfigurationProfilePropertiesFormat": {
+    "properties": {
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "subnet": {
+      "$ref": "#/components/schemas/Subnet"
+     }
+    },
+    "type": "object"
+   },
+   "IPConfigurationPropertiesFormat": {
+    "properties": {
+     "privateIPAddress": {
+      "type": "string"
+     },
+     "privateIPAllocationMethod": {
+      "$ref": "#/components/schemas/IPAllocationMethod"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "publicIPAddress": {
+      "$ref": "#/components/schemas/PublicIPAddress"
+     },
+     "subnet": {
+      "$ref": "#/components/schemas/Subnet"
+     }
+    },
+    "type": "object"
+   },
+   "IPVersion": {
+    "enum": [
+     "IPv4",
+     "IPv6"
+    ],
+    "type": "string"
+   },
+   "InboundNatRule": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResourceModel"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/InboundNatRulePropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "InboundNatRulePropertiesFormat": {
+    "properties": {
+     "backendAddressPool": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "backendIPConfiguration": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/NetworkInterfaceIPConfiguration"
+       }
+      ],
+      "readOnly": true
+     },
+     "backendPort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "enableFloatingIP": {
+      "type": "boolean"
+     },
+     "enableTcpReset": {
+      "type": "boolean"
+     },
+     "frontendIPConfiguration": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "frontendPort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "frontendPortRangeEnd": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "frontendPortRangeStart": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "idleTimeoutInMinutes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "protocol": {
+      "$ref": "#/components/schemas/TransportProtocol"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "type": "object"
+   },
+   "IpTag": {
+    "properties": {
+     "firstPartyServiceTagId": {
+      "format": "arm-id",
+      "type": "string"
+     },
+     "ipTagType": {
+      "type": "string"
+     },
+     "tag": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IpamPoolPrefixAllocation": {
+    "properties": {
+     "allocatedAddressPrefixes": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "numberOfIpAddresses": {
+      "type": "string"
+     },
+     "pool": {
+      "$ref": "#/components/schemas/IpamPoolPrefixAllocationPool"
+     }
+    },
+    "type": "object"
+   },
+   "IpamPoolPrefixAllocationPool": {
+    "properties": {
+     "id": {
+      "format": "arm-id",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LoadBalancerBackendAddress": {
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/LoadBalancerBackendAddressPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "LoadBalancerBackendAddressAdminState": {
+    "enum": [
+     "None",
+     "Up",
+     "Down"
+    ],
+    "type": "string"
+   },
+   "LoadBalancerBackendAddressPropertiesFormat": {
+    "properties": {
+     "adminState": {
+      "$ref": "#/components/schemas/LoadBalancerBackendAddressAdminState"
+     },
+     "inboundNatRulesPortMapping": {
+      "items": {
+       "$ref": "#/components/schemas/NatRulePortMapping"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "ipAddress": {
+      "type": "string"
+     },
+     "loadBalancerFrontendIPConfiguration": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "networkInterfaceIPConfiguration": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/SubResource"
+       }
+      ],
+      "readOnly": true
+     },
+     "subnet": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "virtualNetwork": {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    },
+    "type": "object"
+   },
+   "ManagedServiceIdentity": {
+    "properties": {
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tenantId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "$ref": "#/components/schemas/ResourceIdentityType"
+     },
+     "userAssignedIdentities": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/ManagedServiceIdentityUserAssignedIdentities"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ManagedServiceIdentityUserAssignedIdentities": {
+    "properties": {
+     "clientId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Nat64State": {
+    "enum": [
+     "None",
+     "Enabled",
+     "Disabled"
+    ],
+    "type": "string"
+   },
+   "NatGateway": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/NatGatewayPropertiesFormat"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/NatGatewaySku"
+     },
+     "zones": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "NatGatewayPropertiesFormat": {
+    "properties": {
+     "idleTimeoutInMinutes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nat64": {
+      "$ref": "#/components/schemas/Nat64State"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "publicIpAddresses": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "type": "array"
+     },
+     "publicIpAddressesV6": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "type": "array"
+     },
+     "publicIpPrefixes": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "type": "array"
+     },
+     "publicIpPrefixesV6": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "type": "array"
+     },
+     "resourceGuid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "serviceGateway": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "sourceVirtualNetwork": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "subnets": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "NatGatewaySku": {
+    "properties": {
+     "name": {
+      "$ref": "#/components/schemas/NatGatewaySkuName"
+     }
+    },
+    "type": "object"
+   },
+   "NatGatewaySkuName": {
+    "enum": [
+     "Standard",
+     "StandardV2"
+    ],
+    "type": "string"
+   },
+   "NatRulePortMapping": {
+    "properties": {
+     "backendPort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "frontendPort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "inboundNatRuleName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkInterface": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "extendedLocation": {
+      "$ref": "#/components/schemas/ExtendedLocation"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/NetworkInterfacePropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkInterfaceAuxiliaryMode": {
+    "enum": [
+     "None",
+     "MaxConnections",
+     "Floating",
+     "AcceleratedConnections"
+    ],
+    "type": "string"
+   },
+   "NetworkInterfaceAuxiliarySku": {
+    "enum": [
+     "None",
+     "A1",
+     "A2",
+     "A4",
+     "A8"
+    ],
+    "type": "string"
+   },
+   "NetworkInterfaceDnsSettings": {
+    "properties": {
+     "appliedDnsServers": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "dnsServers": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "internalDnsNameLabel": {
+      "type": "string"
+     },
+     "internalDomainNameSuffix": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "internalFqdn": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkInterfaceIPConfiguration": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResourceModel"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/NetworkInterfaceIPConfigurationPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkInterfaceIPConfigurationPrivateLinkConnectionProperties": {
+    "properties": {
+     "fqdns": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "groupId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "requiredMemberName": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkInterfaceIPConfigurationPropertiesFormat": {
+    "properties": {
+     "applicationGatewayBackendAddressPools": {
+      "items": {
+       "$ref": "#/components/schemas/ApplicationGatewayBackendAddressPool"
+      },
+      "type": "array"
+     },
+     "applicationSecurityGroups": {
+      "items": {
+       "$ref": "#/components/schemas/ApplicationSecurityGroup"
+      },
+      "type": "array"
+     },
+     "gatewayLoadBalancer": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "loadBalancerBackendAddressPools": {
+      "items": {
+       "$ref": "#/components/schemas/BackendAddressPool"
+      },
+      "type": "array"
+     },
+     "loadBalancerInboundNatRules": {
+      "items": {
+       "$ref": "#/components/schemas/InboundNatRule"
+      },
+      "type": "array"
+     },
+     "primary": {
+      "type": "boolean"
+     },
+     "privateIPAddress": {
+      "type": "string"
+     },
+     "privateIPAddressPrefixLength": {
+      "format": "int32",
+      "maximum": 128,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "privateIPAddressVersion": {
+      "$ref": "#/components/schemas/IPVersion"
+     },
+     "privateIPAllocationMethod": {
+      "$ref": "#/components/schemas/IPAllocationMethod"
+     },
+     "privateLinkConnectionProperties": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/NetworkInterfaceIPConfigurationPrivateLinkConnectionProperties"
+       }
+      ],
+      "readOnly": true
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "publicIPAddress": {
+      "$ref": "#/components/schemas/PublicIPAddress"
+     },
+     "subnet": {
+      "$ref": "#/components/schemas/Subnet"
+     },
+     "virtualNetworkTaps": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualNetworkTap"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkInterfaceMigrationPhase": {
+    "enum": [
+     "None",
+     "Prepare",
+     "Commit",
+     "Abort",
+     "Committed"
+    ],
+    "type": "string"
+   },
+   "NetworkInterfaceNicType": {
+    "enum": [
+     "Standard",
+     "Elastic"
+    ],
+    "type": "string"
+   },
+   "NetworkInterfacePropertiesFormat": {
+    "properties": {
+     "auxiliaryMode": {
+      "$ref": "#/components/schemas/NetworkInterfaceAuxiliaryMode"
+     },
+     "auxiliarySku": {
+      "$ref": "#/components/schemas/NetworkInterfaceAuxiliarySku"
+     },
+     "defaultOutboundConnectivityEnabled": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "disableTcpStateTracking": {
+      "type": "boolean"
+     },
+     "dnsSettings": {
+      "$ref": "#/components/schemas/NetworkInterfaceDnsSettings"
+     },
+     "dscpConfiguration": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/SubResource"
+       }
+      ],
+      "readOnly": true
+     },
+     "enableAcceleratedNetworking": {
+      "type": "boolean"
+     },
+     "enableIPForwarding": {
+      "type": "boolean"
+     },
+     "hostedWorkloads": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "ipConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkInterfaceIPConfiguration"
+      },
+      "type": "array"
+     },
+     "macAddress": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "migrationPhase": {
+      "$ref": "#/components/schemas/NetworkInterfaceMigrationPhase"
+     },
+     "networkSecurityGroup": {
+      "$ref": "#/components/schemas/NetworkSecurityGroup"
+     },
+     "nicType": {
+      "$ref": "#/components/schemas/NetworkInterfaceNicType"
+     },
+     "primary": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "privateEndpoint": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/PrivateEndpoint"
+       }
+      ],
+      "readOnly": true
+     },
+     "privateLinkService": {
+      "$ref": "#/components/schemas/PrivateLinkService"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "resourceGuid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tapConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkInterfaceTapConfiguration"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "virtualMachine": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/SubResource"
+       }
+      ],
+      "readOnly": true
+     },
+     "vnetEncryptionSupported": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "workloadType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkInterfaceTapConfiguration": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResourceModel"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/NetworkInterfaceTapConfigurationPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkInterfaceTapConfigurationPropertiesFormat": {
+    "properties": {
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "virtualNetworkTap": {
+      "$ref": "#/components/schemas/VirtualNetworkTap"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkSecurityGroup": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/NetworkSecurityGroupPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkSecurityGroupListResult": {
+    "properties": {
+     "nextLink": {
+      "format": "uri",
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkSecurityGroup"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "value"
+    ],
+    "type": "object"
+   },
+   "NetworkSecurityGroupPropertiesFormat": {
+    "properties": {
+     "defaultSecurityRules": {
+      "items": {
+       "$ref": "#/components/schemas/SecurityRule"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "flowLogs": {
+      "items": {
+       "$ref": "#/components/schemas/FlowLog"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "flushConnection": {
+      "type": "boolean"
+     },
+     "networkInterfaces": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkInterface"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "resourceGuid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "securityRules": {
+      "items": {
+       "$ref": "#/components/schemas/SecurityRule"
+      },
+      "type": "array"
+     },
+     "subnets": {
+      "items": {
+       "$ref": "#/components/schemas/Subnet"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpoint": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "extendedLocation": {
+      "$ref": "#/components/schemas/ExtendedLocation"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/PrivateEndpointProperties"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointBillingSku": {
+    "enum": [
+     "PayAsYouGo",
+     "Fixed"
+    ],
+    "type": "string"
+   },
+   "PrivateEndpointConnection": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResourceModel"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/PrivateEndpointConnectionProperties"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointConnectionProperties": {
+    "properties": {
+     "linkIdentifier": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "privateEndpoint": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/PrivateEndpoint"
+       }
+      ],
+      "readOnly": true
+     },
+     "privateEndpointLocation": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "privateLinkServiceConnectionState": {
+      "$ref": "#/components/schemas/PrivateLinkServiceConnectionState"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointIPConfiguration": {
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/PrivateEndpointIPConfigurationProperties"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointIPConfigurationProperties": {
+    "properties": {
+     "groupId": {
+      "type": "string"
+     },
+     "memberName": {
+      "type": "string"
+     },
+     "privateIPAddress": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointProperties": {
+    "properties": {
+     "applicationSecurityGroups": {
+      "items": {
+       "$ref": "#/components/schemas/ApplicationSecurityGroup"
+      },
+      "type": "array"
+     },
+     "billingSku": {
+      "$ref": "#/components/schemas/PrivateEndpointBillingSku"
+     },
+     "customDnsConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/CustomDnsConfigPropertiesFormat"
+      },
+      "type": "array"
+     },
+     "customNetworkInterfaceName": {
+      "type": "string"
+     },
+     "ipConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateEndpointIPConfiguration"
+      },
+      "type": "array"
+     },
+     "ipVersionType": {
+      "enum": [
+       "IPv4",
+       "IPv6",
+       "DualStack"
+      ],
+      "type": "string"
+     },
+     "manualPrivateLinkServiceConnections": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateLinkServiceConnection"
+      },
+      "type": "array"
+     },
+     "networkInterfaces": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkInterface"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "privateLinkServiceConnections": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateLinkServiceConnection"
+      },
+      "type": "array"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "subnet": {
+      "$ref": "#/components/schemas/Subnet"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointVNetPolicies": {
+    "enum": [
+     "Disabled",
+     "Basic"
+    ],
+    "type": "string"
+   },
+   "PrivateLinkService": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "extendedLocation": {
+      "$ref": "#/components/schemas/ExtendedLocation"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/PrivateLinkServiceProperties"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateLinkServiceConnection": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/PrivateLinkServiceConnectionProperties"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateLinkServiceConnectionProperties": {
+    "properties": {
+     "approvalReference": {
+      "$ref": "#/components/schemas/ApprovalReference"
+     },
+     "groupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "privateLinkServiceConnectionState": {
+      "$ref": "#/components/schemas/PrivateLinkServiceConnectionState"
+     },
+     "privateLinkServiceId": {
+      "type": "string"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "requestMessage": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateLinkServiceConnectionState": {
+    "properties": {
+     "actionsRequired": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "status": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateLinkServiceIpConfiguration": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/PrivateLinkServiceIpConfigurationProperties"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateLinkServiceIpConfigurationProperties": {
+    "properties": {
+     "primary": {
+      "type": "boolean"
+     },
+     "privateIPAddress": {
+      "type": "string"
+     },
+     "privateIPAddressVersion": {
+      "$ref": "#/components/schemas/IPVersion"
+     },
+     "privateIPAllocationMethod": {
+      "$ref": "#/components/schemas/IPAllocationMethod"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "subnet": {
+      "$ref": "#/components/schemas/Subnet"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateLinkServiceProperties": {
+    "properties": {
+     "accessMode": {
+      "$ref": "#/components/schemas/AccessMode"
+     },
+     "alias": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "autoApproval": {
+      "$ref": "#/components/schemas/PrivateLinkServicePropertiesAutoApproval"
+     },
+     "destinationIPAddress": {
+      "type": "string"
+     },
+     "enableProxyProtocol": {
+      "type": "boolean"
+     },
+     "fqdns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ipConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateLinkServiceIpConfiguration"
+      },
+      "type": "array"
+     },
+     "loadBalancerFrontendIpConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/FrontendIPConfiguration"
+      },
+      "type": "array"
+     },
+     "networkInterfaces": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkInterface"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "privateEndpointConnections": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateEndpointConnection"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "visibility": {
+      "$ref": "#/components/schemas/PrivateLinkServicePropertiesVisibility"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateLinkServicePropertiesAutoApproval": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/ResourceSet"
+     }
+    ],
+    "type": "object"
+   },
+   "PrivateLinkServicePropertiesVisibility": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/ResourceSet"
+     }
+    ],
+    "type": "object"
+   },
+   "ProvisioningState": {
+    "enum": [
+     "Failed",
+     "Succeeded",
+     "Canceled",
+     "Creating",
+     "Updating",
+     "Deleting"
+    ],
+    "type": "string"
+   },
+   "PublicIPAddress": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "extendedLocation": {
+      "$ref": "#/components/schemas/ExtendedLocation"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/PublicIPAddressPropertiesFormat"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/PublicIPAddressSku"
+     },
+     "zones": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PublicIPAddressDnsSettings": {
+    "properties": {
+     "domainNameLabel": {
+      "type": "string"
+     },
+     "domainNameLabelScope": {
+      "$ref": "#/components/schemas/PublicIpAddressDnsSettingsDomainNameLabelScope"
+     },
+     "fqdn": {
+      "type": "string"
+     },
+     "reverseFqdn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PublicIPAddressListResult": {
+    "properties": {
+     "nextLink": {
+      "format": "uri",
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/PublicIPAddress"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "value"
+    ],
+    "type": "object"
+   },
+   "PublicIPAddressMigrationPhase": {
+    "enum": [
+     "None",
+     "Prepare",
+     "Commit",
+     "Abort",
+     "Committed"
+    ],
+    "type": "string"
+   },
+   "PublicIPAddressPropertiesFormat": {
+    "properties": {
+     "ddosSettings": {
+      "$ref": "#/components/schemas/DdosSettings"
+     },
+     "deleteOption": {
+      "$ref": "#/components/schemas/DeleteOptions"
+     },
+     "dnsSettings": {
+      "$ref": "#/components/schemas/PublicIPAddressDnsSettings"
+     },
+     "idleTimeoutInMinutes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "ipAddress": {
+      "type": "string"
+     },
+     "ipConfiguration": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/IPConfiguration"
+       }
+      ],
+      "readOnly": true
+     },
+     "ipTags": {
+      "items": {
+       "$ref": "#/components/schemas/IpTag"
+      },
+      "type": "array"
+     },
+     "linkedPublicIPAddress": {
+      "$ref": "#/components/schemas/PublicIPAddress"
+     },
+     "migrationPhase": {
+      "$ref": "#/components/schemas/PublicIPAddressMigrationPhase"
+     },
+     "natGateway": {
+      "$ref": "#/components/schemas/NatGateway"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "publicIPAddressVersion": {
+      "$ref": "#/components/schemas/IPVersion"
+     },
+     "publicIPAllocationMethod": {
+      "$ref": "#/components/schemas/IPAllocationMethod"
+     },
+     "publicIPPrefix": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "resourceGuid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "servicePublicIPAddress": {
+      "$ref": "#/components/schemas/PublicIPAddress"
+     },
+     "upgradedToV2": {
+      "readOnly": true,
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "PublicIPAddressSku": {
+    "properties": {
+     "name": {
+      "$ref": "#/components/schemas/PublicIPAddressSkuName"
+     },
+     "tier": {
+      "$ref": "#/components/schemas/PublicIPAddressSkuTier"
+     }
+    },
+    "type": "object"
+   },
+   "PublicIPAddressSkuName": {
+    "enum": [
+     "Basic",
+     "Standard",
+     "StandardV2"
+    ],
+    "type": "string"
+   },
+   "PublicIPAddressSkuTier": {
+    "enum": [
+     "Regional",
+     "Global"
+    ],
+    "type": "string"
+   },
+   "PublicIpAddressDnsSettingsDomainNameLabelScope": {
+    "enum": [
+     "TenantReuse",
+     "SubscriptionReuse",
+     "ResourceGroupReuse",
+     "NoReuse"
+    ],
+    "type": "string"
+   },
+   "Resource": {
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "location": {
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceIdentityType": {
+    "enum": [
+     "SystemAssigned",
+     "UserAssigned",
+     "SystemAssigned, UserAssigned",
+     "None"
+    ],
+    "type": "string"
+   },
+   "ResourceNavigationLink": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ResourceNavigationLinkFormat"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceNavigationLinkFormat": {
+    "properties": {
+     "link": {
+      "type": "string"
+     },
+     "linkedResourceType": {
+      "type": "string"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "type": "object"
+   },
+   "ResourceSet": {
+    "properties": {
+     "subscriptions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RetentionPolicyParameters": {
+    "properties": {
+     "days": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Route": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResourceModel"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/RoutePropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "RouteNextHopEcmp": {
+    "properties": {
+     "nextHopIpAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 2,
+      "type": "array"
+     }
+    },
+    "required": [
+     "nextHopIpAddresses"
+    ],
+    "type": "object"
+   },
+   "RouteNextHopType": {
+    "enum": [
+     "VirtualNetworkGateway",
+     "VnetLocal",
+     "Internet",
+     "VirtualAppliance",
+     "VirtualApplianceEcmp",
+     "None"
+    ],
+    "type": "string"
+   },
+   "RoutePropertiesFormat": {
+    "properties": {
+     "addressPrefix": {
+      "type": "string"
+     },
+     "hasBgpOverride": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "nextHop": {
+      "$ref": "#/components/schemas/RouteNextHopEcmp"
+     },
+     "nextHopIpAddress": {
+      "type": "string"
+     },
+     "nextHopType": {
+      "$ref": "#/components/schemas/RouteNextHopType"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "required": [
+     "nextHopType"
+    ],
+    "type": "object"
+   },
+   "RouteTable": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/RouteTablePropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "RouteTablePropertiesFormat": {
+    "properties": {
+     "disableBgpRoutePropagation": {
+      "type": "boolean"
+     },
+     "disablePeeringRoute": {
+      "$ref": "#/components/schemas/DisablePeeringRoute"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "resourceGuid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "routes": {
+      "items": {
+       "$ref": "#/components/schemas/Route"
+      },
+      "type": "array"
+     },
+     "subnets": {
+      "items": {
+       "$ref": "#/components/schemas/Subnet"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SecurityRule": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResourceModel"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/SecurityRulePropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "SecurityRuleAccess": {
+    "enum": [
+     "Allow",
+     "Deny"
+    ],
+    "type": "string"
+   },
+   "SecurityRuleDirection": {
+    "enum": [
+     "Inbound",
+     "Outbound"
+    ],
+    "type": "string"
+   },
+   "SecurityRulePropertiesFormat": {
+    "properties": {
+     "access": {
+      "$ref": "#/components/schemas/SecurityRuleAccess"
+     },
+     "description": {
+      "type": "string"
+     },
+     "destinationAddressPrefix": {
+      "type": "string"
+     },
+     "destinationAddressPrefixes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "destinationApplicationSecurityGroups": {
+      "items": {
+       "$ref": "#/components/schemas/ApplicationSecurityGroup"
+      },
+      "type": "array"
+     },
+     "destinationPortRange": {
+      "type": "string"
+     },
+     "destinationPortRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "direction": {
+      "$ref": "#/components/schemas/SecurityRuleDirection"
+     },
+     "priority": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "protocol": {
+      "$ref": "#/components/schemas/SecurityRuleProtocol"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "sourceAddressPrefix": {
+      "type": "string"
+     },
+     "sourceAddressPrefixes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "sourceApplicationSecurityGroups": {
+      "items": {
+       "$ref": "#/components/schemas/ApplicationSecurityGroup"
+      },
+      "type": "array"
+     },
+     "sourcePortRange": {
+      "type": "string"
+     },
+     "sourcePortRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "access",
+     "direction",
+     "priority",
+     "protocol"
+    ],
+    "type": "object"
+   },
+   "SecurityRuleProtocol": {
+    "enum": [
+     "Tcp",
+     "Udp",
+     "Icmp",
+     "Esp",
+     "*",
+     "Ah"
+    ],
+    "type": "string"
+   },
+   "ServiceAssociationLink": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ServiceAssociationLinkPropertiesFormat"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceAssociationLinkPropertiesFormat": {
+    "properties": {
+     "allowDelete": {
+      "type": "boolean"
+     },
+     "link": {
+      "type": "string"
+     },
+     "linkedResourceType": {
+      "type": "string"
+     },
+     "locations": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "type": "object"
+   },
+   "ServiceDelegationPropertiesFormat": {
+    "properties": {
+     "actions": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "serviceName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceEndpointPolicy": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "kind": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ServiceEndpointPolicyPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceEndpointPolicyDefinition": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResourceModel"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ServiceEndpointPolicyDefinitionPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceEndpointPolicyDefinitionPropertiesFormat": {
+    "properties": {
+     "description": {
+      "type": "string"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "service": {
+      "type": "string"
+     },
+     "serviceResources": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceEndpointPolicyPropertiesFormat": {
+    "properties": {
+     "contextualServiceEndpointPolicies": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "resourceGuid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "serviceAlias": {
+      "type": "string"
+     },
+     "serviceEndpointPolicyDefinitions": {
+      "items": {
+       "$ref": "#/components/schemas/ServiceEndpointPolicyDefinition"
+      },
+      "type": "array"
+     },
+     "subnets": {
+      "items": {
+       "$ref": "#/components/schemas/Subnet"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceEndpointPropertiesFormat": {
+    "properties": {
+     "locations": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "networkIdentifier": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "service": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SharingScope": {
+    "enum": [
+     "Tenant",
+     "DelegatedServices"
+    ],
+    "type": "string"
+   },
+   "SubResource": {
+    "properties": {
+     "id": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SubResourceModel": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResource"
+     }
+    ],
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Subnet": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResourceModel"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/SubnetPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "SubnetListResult": {
+    "properties": {
+     "nextLink": {
+      "format": "uri",
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/Subnet"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "value"
+    ],
+    "type": "object"
+   },
+   "SubnetPropertiesFormat": {
+    "properties": {
+     "addressPrefix": {
+      "type": "string"
+     },
+     "addressPrefixes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "applicationGatewayIPConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/ApplicationGatewayIPConfiguration"
+      },
+      "type": "array"
+     },
+     "defaultOutboundAccess": {
+      "type": "boolean"
+     },
+     "delegations": {
+      "items": {
+       "$ref": "#/components/schemas/Delegation"
+      },
+      "type": "array"
+     },
+     "ipAllocations": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "type": "array"
+     },
+     "ipConfigurationProfiles": {
+      "items": {
+       "$ref": "#/components/schemas/IPConfigurationProfile"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "ipConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/IPConfiguration"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "ipamPoolPrefixAllocations": {
+      "items": {
+       "$ref": "#/components/schemas/IpamPoolPrefixAllocation"
+      },
+      "type": "array"
+     },
+     "natGateway": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "networkSecurityGroup": {
+      "$ref": "#/components/schemas/NetworkSecurityGroup"
+     },
+     "privateEndpointNetworkPolicies": {
+      "enum": [
+       "Enabled",
+       "Disabled",
+       "NetworkSecurityGroupEnabled",
+       "RouteTableEnabled"
+      ],
+      "type": "string"
+     },
+     "privateEndpoints": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateEndpoint"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "privateLinkServiceNetworkPolicies": {
+      "enum": [
+       "Enabled",
+       "Disabled"
+      ],
+      "type": "string"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "purpose": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "resourceNavigationLinks": {
+      "items": {
+       "$ref": "#/components/schemas/ResourceNavigationLink"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "routeTable": {
+      "$ref": "#/components/schemas/RouteTable"
+     },
+     "serviceAssociationLinks": {
+      "items": {
+       "$ref": "#/components/schemas/ServiceAssociationLink"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "serviceEndpointPolicies": {
+      "items": {
+       "$ref": "#/components/schemas/ServiceEndpointPolicy"
+      },
+      "type": "array"
+     },
+     "serviceEndpoints": {
+      "items": {
+       "$ref": "#/components/schemas/ServiceEndpointPropertiesFormat"
+      },
+      "type": "array"
+     },
+     "serviceGateway": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "sharingScope": {
+      "$ref": "#/components/schemas/SharingScope"
+     }
+    },
+    "type": "object"
+   },
+   "SyncMode": {
+    "enum": [
+     "Automatic",
+     "Manual"
+    ],
+    "type": "string"
+   },
+   "TagsObject": {
+    "properties": {
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "TrafficAnalyticsConfigurationProperties": {
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "trafficAnalyticsInterval": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "workspaceId": {
+      "type": "string"
+     },
+     "workspaceRegion": {
+      "type": "string"
+     },
+     "workspaceResourceId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TrafficAnalyticsProperties": {
+    "properties": {
+     "networkWatcherFlowAnalyticsConfiguration": {
+      "$ref": "#/components/schemas/TrafficAnalyticsConfigurationProperties"
+     }
+    },
+    "type": "object"
+   },
+   "TransportProtocol": {
+    "enum": [
+     "Udp",
+     "Tcp",
+     "All",
+     "Quic"
+    ],
+    "type": "string"
+   },
+   "VirtualNetwork": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "extendedLocation": {
+      "$ref": "#/components/schemas/ExtendedLocation"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/VirtualNetworkPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualNetworkBgpCommunities": {
+    "properties": {
+     "regionalCommunity": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "virtualNetworkCommunity": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "virtualNetworkCommunity"
+    ],
+    "type": "object"
+   },
+   "VirtualNetworkEncryption": {
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "enforcement": {
+      "$ref": "#/components/schemas/VirtualNetworkEncryptionEnforcement"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "VirtualNetworkEncryptionEnforcement": {
+    "enum": [
+     "DropUnencrypted",
+     "AllowUnencrypted"
+    ],
+    "type": "string"
+   },
+   "VirtualNetworkListResult": {
+    "properties": {
+     "nextLink": {
+      "format": "uri",
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualNetwork"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "value"
+    ],
+    "type": "object"
+   },
+   "VirtualNetworkPeering": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/SubResourceModel"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/VirtualNetworkPeeringPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualNetworkPeeringLevel": {
+    "enum": [
+     "FullyInSync",
+     "RemoteNotInSync",
+     "LocalNotInSync",
+     "LocalAndRemoteNotInSync"
+    ],
+    "type": "string"
+   },
+   "VirtualNetworkPeeringPropertiesFormat": {
+    "properties": {
+     "allowForwardedTraffic": {
+      "type": "boolean"
+     },
+     "allowGatewayTransit": {
+      "type": "boolean"
+     },
+     "allowVirtualNetworkAccess": {
+      "type": "boolean"
+     },
+     "doNotVerifyRemoteGateways": {
+      "type": "boolean"
+     },
+     "enableOnlyIPv6Peering": {
+      "type": "boolean"
+     },
+     "localAddressSpace": {
+      "$ref": "#/components/schemas/AddressSpace"
+     },
+     "localSubnetNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "localVirtualNetworkAddressSpace": {
+      "$ref": "#/components/schemas/AddressSpace"
+     },
+     "peerCompleteVnets": {
+      "type": "boolean"
+     },
+     "peeringState": {
+      "$ref": "#/components/schemas/VirtualNetworkPeeringState"
+     },
+     "peeringSyncLevel": {
+      "$ref": "#/components/schemas/VirtualNetworkPeeringLevel"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "remoteAddressSpace": {
+      "$ref": "#/components/schemas/AddressSpace"
+     },
+     "remoteBgpCommunities": {
+      "$ref": "#/components/schemas/VirtualNetworkBgpCommunities"
+     },
+     "remoteSubnetNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "remoteVirtualNetwork": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "remoteVirtualNetworkAddressSpace": {
+      "$ref": "#/components/schemas/AddressSpace"
+     },
+     "remoteVirtualNetworkEncryption": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/VirtualNetworkEncryption"
+       }
+      ],
+      "readOnly": true
+     },
+     "resourceGuid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "useRemoteGateways": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualNetworkPeeringState": {
+    "enum": [
+     "Initiated",
+     "Connected",
+     "Disconnected"
+    ],
+    "type": "string"
+   },
+   "VirtualNetworkPropertiesFormat": {
+    "properties": {
+     "addressSpace": {
+      "$ref": "#/components/schemas/AddressSpace"
+     },
+     "bgpCommunities": {
+      "$ref": "#/components/schemas/VirtualNetworkBgpCommunities"
+     },
+     "ddosProtectionPlan": {
+      "$ref": "#/components/schemas/SubResource"
+     },
+     "defaultPublicNatGateway": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/SubResource"
+       }
+      ],
+      "readOnly": true
+     },
+     "dhcpOptions": {
+      "$ref": "#/components/schemas/DhcpOptions"
+     },
+     "enableDdosProtection": {
+      "type": "boolean"
+     },
+     "enableVmProtection": {
+      "type": "boolean"
+     },
+     "encryption": {
+      "$ref": "#/components/schemas/VirtualNetworkEncryption"
+     },
+     "flowLogs": {
+      "items": {
+       "$ref": "#/components/schemas/FlowLog"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "flowTimeoutInMinutes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "ipAllocations": {
+      "items": {
+       "$ref": "#/components/schemas/SubResource"
+      },
+      "type": "array"
+     },
+     "privateEndpointVNetPolicies": {
+      "$ref": "#/components/schemas/PrivateEndpointVNetPolicies"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "resourceGuid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "subnets": {
+      "items": {
+       "$ref": "#/components/schemas/Subnet"
+      },
+      "type": "array"
+     },
+     "summarizedGatewayPrefixes": {
+      "$ref": "#/components/schemas/AddressSpace"
+     },
+     "virtualNetworkPeerings": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualNetworkPeering"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualNetworkTap": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/VirtualNetworkTapPropertiesFormat"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualNetworkTapPropertiesFormat": {
+    "properties": {
+     "destinationLoadBalancerFrontEndIPConfiguration": {
+      "$ref": "#/components/schemas/FrontendIPConfiguration"
+     },
+     "destinationNetworkInterfaceIPConfiguration": {
+      "$ref": "#/components/schemas/NetworkInterfaceIPConfiguration"
+     },
+     "destinationPort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "networkInterfaceTapConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkInterfaceTapConfiguration"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "resourceGuid": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Microsoft.Network api-version 2026-03-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Address metadata only: no packet is routed, filtered or translated and no public address is allocated (properties.ipAddress stays absent). Virtual networks need at least one valid, non-overlapping CIDR prefix; subnets must lie inside it and must not overlap one another. Subnets are separate child resources and are not embedded in the virtual network document. Security rules are stored inline in their network security group with unique names and priorities; default rules, effective rules, flow logs and $expand are not simulated. A network security group referenced by a subnet cannot be deleted; peering, gateways, NAT, route tables and every other Microsoft.Network operation are not implemented (HTTP 501).",
+  "title": "Virtual networking (Microsoft.Network, simulator catalog)",
+  "version": "2026-03-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/subscriptions/{subscriptionId}/providers/Microsoft.Network/networkSecurityGroups": {
+   "get": {
+    "operationId": "NetworkSecurityGroups_ListAll",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NetworkSecurityGroupListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "NetworkSecurityGroups_ListAll",
+    "tags": [
+     "Virtual networking"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/providers/Microsoft.Network/publicIPAddresses": {
+   "get": {
+    "operationId": "PublicIPAddresses_ListAll",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PublicIPAddressListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "PublicIPAddresses_ListAll",
+    "tags": [
+     "Virtual networking"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/providers/Microsoft.Network/virtualNetworks": {
+   "get": {
+    "operationId": "VirtualNetworks_ListAll",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/VirtualNetworkListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "VirtualNetworks_ListAll",
+    "tags": [
+     "Virtual networking"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups": {
+   "get": {
+    "operationId": "NetworkSecurityGroups_List",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NetworkSecurityGroupListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "NetworkSecurityGroups_List",
+    "tags": [
+     "Virtual networking"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}": {
+   "delete": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "NetworkSecurityGroups_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "networkSecurityGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "NetworkSecurityGroups_Delete",
+    "tags": [
+     "Virtual networking"
+    ]
+   },
+   "get": {
+    "operationId": "NetworkSecurityGroups_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "networkSecurityGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NetworkSecurityGroup"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "NetworkSecurityGroups_Get",
+    "tags": [
+     "Virtual networking"
+    ]
+   },
+   "patch": {
+    "operationId": "NetworkSecurityGroups_UpdateTags",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "networkSecurityGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TagsObject"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NetworkSecurityGroup"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "NetworkSecurityGroups_UpdateTags",
+    "tags": [
+     "Virtual networking"
+    ]
+   },
+   "put": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "NetworkSecurityGroups_CreateOrUpdate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "networkSecurityGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/NetworkSecurityGroup"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NetworkSecurityGroup"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NetworkSecurityGroup"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "NetworkSecurityGroups_CreateOrUpdate",
+    "tags": [
+     "Virtual networking"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses": {
+   "get": {
+    "operationId": "PublicIPAddresses_List",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PublicIPAddressListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "PublicIPAddresses_List",
+    "tags": [
+     "Virtual networking"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}": {
+   "delete": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "PublicIPAddresses_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "publicIpAddressName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "PublicIPAddresses_Delete",
+    "tags": [
+     "Virtual networking"
+    ]
+   },
+   "get": {
+    "operationId": "PublicIPAddresses_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "publicIpAddressName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PublicIPAddress"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "PublicIPAddresses_Get",
+    "tags": [
+     "Virtual networking"
+    ]
+   },
+   "patch": {
+    "operationId": "PublicIPAddresses_UpdateTags",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "publicIpAddressName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TagsObject"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PublicIPAddress"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "PublicIPAddresses_UpdateTags",
+    "tags": [
+     "Virtual networking"
+    ]
+   },
+   "put": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "PublicIPAddresses_CreateOrUpdate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "publicIpAddressName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PublicIPAddress"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PublicIPAddress"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PublicIPAddress"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "PublicIPAddresses_CreateOrUpdate",
+    "tags": [
+     "Virtual networking"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks": {
+   "get": {
+    "operationId": "VirtualNetworks_List",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/VirtualNetworkListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "VirtualNetworks_List",
+    "tags": [
+     "Virtual networking"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}": {
+   "delete": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "VirtualNetworks_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualNetworkName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "VirtualNetworks_Delete",
+    "tags": [
+     "Virtual networking"
+    ]
+   },
+   "get": {
+    "operationId": "VirtualNetworks_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualNetworkName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/VirtualNetwork"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "VirtualNetworks_Get",
+    "tags": [
+     "Virtual networking"
+    ]
+   },
+   "patch": {
+    "operationId": "VirtualNetworks_UpdateTags",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualNetworkName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TagsObject"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/VirtualNetwork"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "VirtualNetworks_UpdateTags",
+    "tags": [
+     "Virtual networking"
+    ]
+   },
+   "put": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "VirtualNetworks_CreateOrUpdate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualNetworkName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/VirtualNetwork"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/VirtualNetwork"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/VirtualNetwork"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "VirtualNetworks_CreateOrUpdate",
+    "tags": [
+     "Virtual networking"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/subnets": {
+   "get": {
+    "operationId": "Subnets_List",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualNetworkName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SubnetListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Subnets_List",
+    "tags": [
+     "Virtual networking"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/subnets/{subnetName}": {
+   "delete": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "Subnets_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualNetworkName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subnetName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Subnets_Delete",
+    "tags": [
+     "Virtual networking"
+    ]
+   },
+   "get": {
+    "operationId": "Subnets_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualNetworkName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subnetName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Subnet"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Subnets_Get",
+    "tags": [
+     "Virtual networking"
+    ]
+   },
+   "put": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "Subnets_CreateOrUpdate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-01",
+       "enum": [
+        "2026-03-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualNetworkName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subnetName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Subnet"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Subnet"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Subnet"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Subnets_CreateOrUpdate",
+    "tags": [
+     "Virtual networking"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/azure-arm"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Microsoft.Network api-version 2026-03-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Address metadata only: no packet is routed, filtered or translated and no public address is allocated (properties.ipAddress stays absent). Virtual networks need at least one valid, non-overlapping CIDR prefix; subnets must lie inside it and must not overlap one another. Subnets are separate child resources and are not embedded in the virtual network document. Security rules are stored inline in their network security group with unique names and priorities; default rules, effective rules, flow logs and $expand are not simulated. A network security group referenced by a subnet cannot be deleted; peering, gateways, NAT, route tables and every other Microsoft.Network operation are not implemented (HTTP 501).",
+   "name": "Virtual networking"
+  }
+ ],
+ "x-simulator-source": {
+  "repository": "github.com/Azure/azure-rest-api-specs",
+  "commit": "8254fa29b6360b48084554122a7c49f6c4237d84",
+  "license": "MIT",
+  "files": [
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/applicationGateway.json",
+    "sha256": "6038be148094e25b27a0c3357cac5984140a6696255e1696c5d6fdeb208af5cc"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/authenticationPolicy.json",
+    "sha256": "27e291320f9e0b108b3d6df3df5427f7b367e013fd772ba37607d9d3b7abc9e9"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/azureWebCategory.json",
+    "sha256": "ba90295ec3cc792c395ec3bb3af77b8cc2ca173c09f33a7f15b2ec0e2ccef2c9"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/common.json",
+    "sha256": "af181cf1d801ad5a4b28f2805a419271849c44a81ad546159b397ee13cd87252"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/expressRoute.json",
+    "sha256": "13e9f54b30c0e60f1b468dfe2580a58f63108c44e393dff5b58aa83fdd60eedd"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/firewall.json",
+    "sha256": "15eb16f4e2674d36b1c5a6f13abc6f304d4667925c23a34d2cfbc15634671002"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/firewallPolicy.json",
+    "sha256": "790498d38100437ac0c75e2a0f8569f573706ef27c2a29756d85e6179ea346a9"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/firstPartyServiceTag.json",
+    "sha256": "4ecba3be8ee424ecc9c30f7dc2417779fd7d729ae2f54cf1e45832852de59114"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/interconnectGroup.json",
+    "sha256": "b9a84a2534ec8ef39e7cff51562f2de361d2a74b23bdad00e8c7e10869901875"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/loadBalancer.json",
+    "sha256": "b90c4fa94b6636d67ddd918e80bf184e85d7ff2c6370e0967723a4cbcda0d055"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/networkGateway.json",
+    "sha256": "97a5dbb82e00b2253f23924a13b2588da94de4399094e928b0e2a6919056210e"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/networkManager.json",
+    "sha256": "d98cba8814da18858b0a7c1384795381dc0e063c51e26ed202821c083e302025"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/networkSecurityPerimeter.json",
+    "sha256": "c98fda7689f6c0afddb83c84e96cb6783d3abb185237613ae6f9ff678006a9a3"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/networkWatcher.json",
+    "sha256": "fe8119afc5b4aa0e3926bf4d3f2d74e0a166483056bbe5685fcafffd524f3dcb"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/networkingOperations.json",
+    "sha256": "f1b58bb1ee319c35df87cd9e14060f43ccf561d44bb066f62cfcdc08aee438f2"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/serviceGateway.json",
+    "sha256": "14255a31e8b20c3e7a81e6a8096c9306ec380cfcfd959d088f4919f8cbc199b3"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/virtualNetwork.json",
+    "sha256": "0bfb316d7cbbecc06ae43c2cf57ed134d456e5b12607f9eab61c1a798d6452c5"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/virtualNetworkAppliance.json",
+    "sha256": "9e651d9ad7741cab2a11b5e9d6a271214ae21722aafe038221375a76fc1b5cac"
+   },
+   {
+    "path": "specification/network/resource-manager/Microsoft.Network/Network/stable/2026-03-01/virtualWan.json",
+    "sha256": "e24a6aac67c705d137b8938bb7b39588cb55009028d923ac51a235970cf2a346"
+   }
+  ]
+ }
+}

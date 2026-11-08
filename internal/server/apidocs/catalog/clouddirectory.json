@@ -1,0 +1,804 @@
+{
+ "components": {
+  "schemas": {
+   "Facet": {
+    "additionalProperties": false,
+    "properties": {
+     "FacetStyle": {
+      "enum": [
+       "STATIC",
+       "DYNAMIC"
+      ],
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ObjectType": {
+      "enum": [
+       "NODE",
+       "LEAF_NODE",
+       "POLICY",
+       "INDEX"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FacetAttribute": {
+    "additionalProperties": false,
+    "properties": {
+     "AttributeDefinition": {
+      "$ref": "#/components/schemas/FacetAttributeDefinition"
+     },
+     "AttributeReference": {
+      "$ref": "#/components/schemas/FacetAttributeReference"
+     },
+     "Name": {
+      "maxLength": 230,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RequiredBehavior": {
+      "enum": [
+       "REQUIRED_ALWAYS",
+       "NOT_REQUIRED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "FacetAttributeDefinition": {
+    "additionalProperties": false,
+    "properties": {
+     "DefaultValue": {
+      "$ref": "#/components/schemas/TypedAttributeValue"
+     },
+     "IsImmutable": {
+      "type": "boolean"
+     },
+     "Rules": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/Rule"
+      },
+      "type": "object"
+     },
+     "Type": {
+      "enum": [
+       "STRING",
+       "BINARY",
+       "BOOLEAN",
+       "NUMBER",
+       "DATETIME",
+       "VARIANT"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type"
+    ],
+    "type": "object"
+   },
+   "FacetAttributeReference": {
+    "additionalProperties": false,
+    "properties": {
+     "TargetAttributeName": {
+      "maxLength": 230,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TargetFacetName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "TargetFacetName",
+     "TargetAttributeName"
+    ],
+    "type": "object"
+   },
+   "FacetAttributeUpdate": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "enum": [
+       "CREATE_OR_UPDATE",
+       "DELETE"
+      ],
+      "type": "string"
+     },
+     "Attribute": {
+      "$ref": "#/components/schemas/FacetAttribute"
+     }
+    },
+    "type": "object"
+   },
+   "Rule": {
+    "additionalProperties": false,
+    "properties": {
+     "Parameters": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Type": {
+      "enum": [
+       "BINARY_LENGTH",
+       "NUMBER_COMPARISON",
+       "STRING_FROM_SET",
+       "STRING_LENGTH"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TypedAttributeValue": {
+    "additionalProperties": false,
+    "properties": {
+     "BinaryValue": {
+      "contentEncoding": "base64",
+      "type": "string"
+     },
+     "BooleanValue": {
+      "type": "boolean"
+     },
+     "DatetimeValue": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "NumberValue": {
+      "type": "string"
+     },
+     "StringValue": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon CloudDirectory API (2017-01-11). Every other official operation returns HTTP 501 UnknownOperationException. Development schemas and their facets are configuration metadata: schemas are never published, applied or upgraded and no directory is created, so no object, link, index or policy exists. Facets are stored without attributes: Attributes and AttributeUpdates are refused and UpdateFacet changes ObjectType only. Deleting a development schema deletes its facets. Facet operations are authorized against the schema ARN followed by /facet/\u003cfacet name\u003e rather than the schema ARN alone, and a missing facet is reported as ResourceNotFoundException rather than FacetNotFoundException. GetSchemaAsJson, PutSchemaFromJson, UpdateSchema, published, applied and managed schemas, typed link facets, directories, objects, indexes, policies, batch operations and tagging (which applies to directories only) return UnknownOperationException with HTTP 501.",
+  "title": "Amazon Cloud Directory (simulator catalog)",
+  "version": "2017-01-11"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/amazonclouddirectory/2017-01-11/facet": {
+   "post": {
+    "operationId": "clouddirectoryGetFacet",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "clouddirectory"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "x-amz-data-partition",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Facet": {
+           "$ref": "#/components/schemas/Facet"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetFacet",
+    "tags": [
+     "Amazon Cloud Directory"
+    ]
+   },
+   "put": {
+    "operationId": "clouddirectoryUpdateFacet",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "clouddirectory"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "x-amz-data-partition",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AttributeUpdates": {
+          "items": {
+           "$ref": "#/components/schemas/FacetAttributeUpdate"
+          },
+          "type": "array"
+         },
+         "Name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ObjectType": {
+          "enum": [
+           "NODE",
+           "LEAF_NODE",
+           "POLICY",
+           "INDEX"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateFacet",
+    "tags": [
+     "Amazon Cloud Directory"
+    ]
+   }
+  },
+  "/amazonclouddirectory/2017-01-11/facet/create": {
+   "put": {
+    "operationId": "clouddirectoryCreateFacet",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "clouddirectory"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "x-amz-data-partition",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Attributes": {
+          "items": {
+           "$ref": "#/components/schemas/FacetAttribute"
+          },
+          "type": "array"
+         },
+         "FacetStyle": {
+          "enum": [
+           "STATIC",
+           "DYNAMIC"
+          ],
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ObjectType": {
+          "enum": [
+           "NODE",
+           "LEAF_NODE",
+           "POLICY",
+           "INDEX"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateFacet",
+    "tags": [
+     "Amazon Cloud Directory"
+    ]
+   }
+  },
+  "/amazonclouddirectory/2017-01-11/facet/delete": {
+   "put": {
+    "operationId": "clouddirectoryDeleteFacet",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "clouddirectory"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "x-amz-data-partition",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteFacet",
+    "tags": [
+     "Amazon Cloud Directory"
+    ]
+   }
+  },
+  "/amazonclouddirectory/2017-01-11/facet/list": {
+   "post": {
+    "operationId": "clouddirectoryListFacetNames",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "clouddirectory"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "x-amz-data-partition",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "FacetNames": {
+           "items": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListFacetNames",
+    "tags": [
+     "Amazon Cloud Directory"
+    ]
+   }
+  },
+  "/amazonclouddirectory/2017-01-11/schema": {
+   "put": {
+    "operationId": "clouddirectoryDeleteSchema",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "clouddirectory"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "x-amz-data-partition",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "SchemaArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSchema",
+    "tags": [
+     "Amazon Cloud Directory"
+    ]
+   }
+  },
+  "/amazonclouddirectory/2017-01-11/schema/create": {
+   "put": {
+    "operationId": "clouddirectoryCreateSchema",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "clouddirectory"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Name": {
+          "maxLength": 32,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "SchemaArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSchema",
+    "tags": [
+     "Amazon Cloud Directory"
+    ]
+   }
+  },
+  "/amazonclouddirectory/2017-01-11/schema/development": {
+   "post": {
+    "operationId": "clouddirectoryListDevelopmentSchemaArns",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "clouddirectory"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "SchemaArns": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListDevelopmentSchemaArns",
+    "tags": [
+     "Amazon Cloud Directory"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon CloudDirectory API (2017-01-11). Every other official operation returns HTTP 501 UnknownOperationException. Development schemas and their facets are configuration metadata: schemas are never published, applied or upgraded and no directory is created, so no object, link, index or policy exists. Facets are stored without attributes: Attributes and AttributeUpdates are refused and UpdateFacet changes ObjectType only. Deleting a development schema deletes its facets. Facet operations are authorized against the schema ARN followed by /facet/\u003cfacet name\u003e rather than the schema ARN alone, and a missing facet is reported as ResourceNotFoundException rather than FacetNotFoundException. GetSchemaAsJson, PutSchemaFromJson, UpdateSchema, published, applied and managed schemas, typed link facets, directories, objects, indexes, policies, batch operations and tagging (which applies to directories only) return UnknownOperationException with HTTP 501.",
+   "name": "Amazon Cloud Directory"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/clouddirectory/2017-01-11/service-2.json",
+  "sha256": "914010da9579edd22961d88b73d7417f0515a5a30d0e81d1f2c90eb6000df6e6",
+  "license": "Apache-2.0"
+ }
+}

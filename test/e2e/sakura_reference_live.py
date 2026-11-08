@@ -19,6 +19,7 @@ import urllib.request
 def run(root, binary, reports, browser=False):
     sys.path.insert(0, str(root/'test/e2e'))
     from sakura_cli import CLI, BASE, BASIC, create, frame
+    from test_openapi_parameters import NATIVE_OPERATION_IDS
     reports.mkdir(parents=True, exist_ok=True)
     statuses, executed = [], []
     owned = []
@@ -37,7 +38,10 @@ def run(root, binary, reports, browser=False):
             spec=json.loads(raw)
         assert spec==json.loads((root/'internal/server/apidocs/openapi.json').read_text()), 'served candidate spec differs'
         operations={op['operationId']:(path,method,op) for path,item in spec['paths'].items() for method,op in item.items() if isinstance(op,dict) and 'operationId' in op}
-        assert len(operations)==66
+        # Preserve the independently declared operation set, including the
+        # additive S3 multipart POST; do not infer the expected count from itself.
+        assert set(operations) == NATIVE_OPERATION_IDS
+        assert len(operations) == 67
         names={'SakuraListDisks','SakuraCreateDisk','SakuraGetDisk','SakuraUpdateDisk','SakuraDeleteDisk'}
         assert names<=set(operations)
         templates={name:copy.deepcopy(operations[name][2].get('requestBody',{}).get('content',{}).get('application/json',{}).get('examples',{})) for name in names}

@@ -1,0 +1,35 @@
+{
+ "api": "servicedirectory.v1",
+ "steps": [
+  {"call": "projects.locations.namespaces.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "namespaceId": "fixture"}, "body": {"labels": {"team": "a"}}, "save": {"r0": "name"}},
+  {"call": "projects.locations.namespaces.get", "args": {"name": "${r0}"}},
+  {"call": "projects.locations.namespaces.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"namespaces#count": 1}},
+  {"call": "projects.locations.namespaces.patch", "args": {"name": "${r0}", "updateMask": "labels"}, "body": {"labels": {"team": "b"}}},
+  {"call": "projects.locations.namespaces.services.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1/namespaces/fixture", "serviceId": "web"}, "body": {"annotations": {"owner": "a"}}, "save": {"r1": "name"}},
+  {"call": "projects.locations.namespaces.services.get", "args": {"name": "${r1}"}},
+  {"call": "projects.locations.namespaces.services.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1/namespaces/fixture"}, "expect": {"services#count": 1}},
+  {"call": "projects.locations.namespaces.services.patch", "args": {"name": "${r1}", "updateMask": "annotations"}, "body": {"annotations": {"owner": "b"}}},
+  {"call": "projects.locations.namespaces.services.endpoints.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1/namespaces/fixture/services/web", "endpointId": "primary"}, "body": {"address": "10.0.0.10", "port": 443, "network": "projects/100000000001/locations/global/networks/default"}, "save": {"r2": "name"}},
+  {"call": "projects.locations.namespaces.services.endpoints.get", "args": {"name": "${r2}"}},
+  {"call": "projects.locations.namespaces.services.endpoints.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1/namespaces/fixture/services/web"}, "expect": {"endpoints#count": 1}},
+  {"call": "projects.locations.namespaces.services.endpoints.patch", "args": {"name": "${r2}", "updateMask": "port"}, "body": {"port": 8443}},
+  {"call": "projects.locations.namespaces.services.endpoints.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1/namespaces/fixture/services/web", "endpointId": "bad"}, "error": "INVALID_ARGUMENT", "status": 400, "body": {"address": "10.0.0.10:443"}},
+  {"call": "projects.locations.namespaces.services.resolve", "args": {"name": "projects/tenkacloud-local/locations/us-central1/namespaces/fixture/services/web", "body": {}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.namespaces.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/namespaces/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.namespaces.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.namespaces.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"namespaces#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.namespaces.get", "args": {"name": "${r0}"}, "expect": {"labels": {"team": "b"}}},
+  {"call": "projects.locations.namespaces.services.get", "args": {"name": "${r1}"}, "expect": {"annotations": {"owner": "b"}}},
+  {"call": "projects.locations.namespaces.services.endpoints.get", "args": {"name": "${r2}"}, "expect": {"port": 8443}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.namespaces.services.endpoints.delete", "args": {"name": "${r2}"}},
+  {"call": "projects.locations.namespaces.services.delete", "args": {"name": "${r1}"}},
+  {"call": "projects.locations.namespaces.delete", "args": {"name": "${r0}"}},
+  {"call": "projects.locations.namespaces.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"namespaces#count": 0}}
+ ]
+}

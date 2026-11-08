@@ -33,6 +33,7 @@ type browserSession struct {
 // Access instance and database must be assigned to each team by the host.
 type Access struct {
 	next     http.Handler
+	sdk      *sdkAuthority
 	operator [32]byte
 	cookie   string
 	remote   bool
@@ -47,7 +48,7 @@ func NewAccess(next http.Handler, operatorToken string, allowRemote bool) (*Acce
 		return nil, fmt.Errorf("operator token must contain 32–256 URL-safe characters")
 	}
 	sum := sha256.Sum256([]byte(operatorToken))
-	return &Access{next: next, operator: sum, cookie: "tcsim_" + hex.EncodeToString(sum[:6]), remote: allowRemote, sessions: map[[32]byte]accessSession{}, browsers: map[[32]byte]browserSession{}, now: time.Now}, nil
+	return &Access{next: next, sdk: newSDKAuthority(operatorToken), operator: sum, cookie: "tcsim_" + hex.EncodeToString(sum[:6]), remote: allowRemote, sessions: map[[32]byte]accessSession{}, browsers: map[[32]byte]browserSession{}, now: time.Now}, nil
 }
 func (a *Access) credential(token string) (accessSession, bool) {
 	sum := sha256.Sum256([]byte(token))
@@ -126,6 +127,12 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Header.Get("Sec-Fetch-Site") == "cross-site" {
 		http.Error(w, "Cross-site request rejected", 403)
+		return
+	}
+	// Public product information is an exact asset allowlist. Host/origin checks
+	// above still apply; API paths and console authentication remain protected.
+	if isLandingPath(r.URL.Path) {
+		a.next.ServeHTTP(w, r)
 		return
 	}
 	if r.URL.Path == "/_simulator/logout" {
@@ -219,7 +226,12 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("X-Simulator-Token")
 	var principal string
 	var ok bool
-	if token != "" {
+	if request, identity, attempted := a.sdkAuthentication(w, r); attempted {
+		if identity == "" {
+			return
+		}
+		r, principal, ok = request, identity, true
+	} else if token != "" {
 		principal, ok = a.identity(token)
 	} else {
 		if cookie, e := r.Cookie(a.cookie); e == nil {
@@ -238,6 +250,9 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// contract; the legacy control/AWS response remains unchanged.
 		if strings.HasPrefix(r.URL.Path, provider.Prefix+"gcp/") {
 			_, _ = fmt.Fprint(w, `{"error":{"code":401,"message":"A valid simulator access token is required","status":"UNAUTHENTICATED"}}`)
+		} else if strings.HasPrefix(r.URL.Path, provider.Prefix+"azure-arm/") {
+			// Azure management clients parse the ARM error envelope.
+			_, _ = fmt.Fprint(w, `{"error":{"code":"AuthenticationFailed","message":"A valid simulator access token is required"}}`)
 		} else {
 			_, _ = fmt.Fprint(w, `{"error":"A valid simulator access token is required"}`)
 		}

@@ -146,7 +146,7 @@ func TestSakuraServerDefaultDisabledPreservesLegacyProviderSet(t *testing.T) {
 	defer closeState()
 	caps := sakuraServerRequest(t, h, "GET", "/_simulator/v1/capabilities", "", false, 200)
 	sakuraAssertPeerCapabilities(t, caps)
-	if !reflect.DeepEqual(caps["providers"], []any{"aws", "azure", "gcp"}) {
+	if !reflect.DeepEqual(caps["providers"], []any{"aws", "azure", "azure-arm", "gcp"}) {
 		t.Fatal("default provider set changed")
 	}
 	if _, ok := caps["sakura"]; ok {
@@ -192,7 +192,7 @@ func TestSakuraServerOptInUsesRegistryAuthenticationAndCopiedScope(t *testing.T)
 	}
 	caps := sakuraServerRequest(t, access, "GET", "/_simulator/v1/capabilities", "", true, 200)
 	sakuraAssertPeerCapabilities(t, caps)
-	if !reflect.DeepEqual(caps["providers"], []any{"aws", "azure", "gcp", "sakura"}) {
+	if !reflect.DeepEqual(caps["providers"], []any{"aws", "azure", "azure-arm", "gcp", "sakura"}) {
 		t.Fatal("optional registry missing provider")
 	}
 	capability := caps["sakura"].(map[string]any)

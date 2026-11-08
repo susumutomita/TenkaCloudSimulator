@@ -1,0 +1,1052 @@
+{
+ "components": {
+  "schemas": {
+   "AptRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "customRepository": {
+      "$ref": "#/components/schemas/GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigAptRepositoryCustomRepository"
+     },
+     "publicRepository": {
+      "$ref": "#/components/schemas/GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigAptRepositoryPublicRepository"
+     }
+    },
+    "type": "object"
+   },
+   "CleanupPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "ACTION_UNSPECIFIED",
+       "DELETE",
+       "KEEP"
+      ],
+      "type": "string"
+     },
+     "condition": {
+      "$ref": "#/components/schemas/CleanupPolicyCondition"
+     },
+     "id": {
+      "type": "string"
+     },
+     "mostRecentVersions": {
+      "$ref": "#/components/schemas/CleanupPolicyMostRecentVersions"
+     }
+    },
+    "type": "object"
+   },
+   "CleanupPolicyCondition": {
+    "additionalProperties": false,
+    "properties": {
+     "newerThan": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "olderThan": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "packageNamePrefixes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "tagPrefixes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "tagState": {
+      "enum": [
+       "TAG_STATE_UNSPECIFIED",
+       "TAGGED",
+       "UNTAGGED",
+       "ANY"
+      ],
+      "type": "string"
+     },
+     "versionNamePrefixes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CleanupPolicyMostRecentVersions": {
+    "additionalProperties": false,
+    "properties": {
+     "keepCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "packageNamePrefixes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CommonRemoteRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DockerRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "customRepository": {
+      "$ref": "#/components/schemas/GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigDockerRepositoryCustomRepository"
+     },
+     "publicRepository": {
+      "enum": [
+       "PUBLIC_REPOSITORY_UNSPECIFIED",
+       "DOCKER_HUB"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DockerRepositoryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "immutableTags": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigAptRepositoryCustomRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigAptRepositoryPublicRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "repositoryBase": {
+      "enum": [
+       "REPOSITORY_BASE_UNSPECIFIED",
+       "DEBIAN",
+       "UBUNTU",
+       "DEBIAN_SNAPSHOT"
+      ],
+      "type": "string"
+     },
+     "repositoryPath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigDockerRepositoryCustomRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigMavenRepositoryCustomRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigNpmRepositoryCustomRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigPythonRepositoryCustomRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigYumRepositoryCustomRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigYumRepositoryPublicRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "repositoryBase": {
+      "enum": [
+       "REPOSITORY_BASE_UNSPECIFIED",
+       "CENTOS",
+       "CENTOS_DEBUG",
+       "CENTOS_VAULT",
+       "CENTOS_STREAM",
+       "ROCKY",
+       "EPEL"
+      ],
+      "type": "string"
+     },
+     "repositoryPath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListRepositoriesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "repositories": {
+      "items": {
+       "$ref": "#/components/schemas/Repository"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MavenRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "customRepository": {
+      "$ref": "#/components/schemas/GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigMavenRepositoryCustomRepository"
+     },
+     "publicRepository": {
+      "enum": [
+       "PUBLIC_REPOSITORY_UNSPECIFIED",
+       "MAVEN_CENTRAL"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MavenRepositoryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "allowSnapshotOverwrites": {
+      "type": "boolean"
+     },
+     "versionPolicy": {
+      "enum": [
+       "VERSION_POLICY_UNSPECIFIED",
+       "RELEASE",
+       "SNAPSHOT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NoCacheFetching": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "NpmRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "customRepository": {
+      "$ref": "#/components/schemas/GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigNpmRepositoryCustomRepository"
+     },
+     "publicRepository": {
+      "enum": [
+       "PUBLIC_REPOSITORY_UNSPECIFIED",
+       "NPMJS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PlatformLogsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "loggingState": {
+      "enum": [
+       "LOGGING_STATE_UNSPECIFIED",
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "severityLevel": {
+      "enum": [
+       "SEVERITY_LEVEL_UNSPECIFIED",
+       "DEBUG",
+       "INFO",
+       "NOTICE",
+       "WARNING",
+       "ERROR",
+       "CRITICAL",
+       "ALERT",
+       "EMERGENCY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PythonRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "customRepository": {
+      "$ref": "#/components/schemas/GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigPythonRepositoryCustomRepository"
+     },
+     "publicRepository": {
+      "enum": [
+       "PUBLIC_REPOSITORY_UNSPECIFIED",
+       "PYPI"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RemoteRepositoryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "aptRepository": {
+      "$ref": "#/components/schemas/AptRepository"
+     },
+     "commonRepository": {
+      "$ref": "#/components/schemas/CommonRemoteRepository"
+     },
+     "description": {
+      "type": "string"
+     },
+     "disableUpstreamValidation": {
+      "type": "boolean"
+     },
+     "dockerRepository": {
+      "$ref": "#/components/schemas/DockerRepository"
+     },
+     "mavenRepository": {
+      "$ref": "#/components/schemas/MavenRepository"
+     },
+     "noCache": {
+      "$ref": "#/components/schemas/NoCacheFetching"
+     },
+     "npmRepository": {
+      "$ref": "#/components/schemas/NpmRepository"
+     },
+     "pythonRepository": {
+      "$ref": "#/components/schemas/PythonRepository"
+     },
+     "upstreamCredentials": {
+      "$ref": "#/components/schemas/UpstreamCredentials"
+     },
+     "yumRepository": {
+      "$ref": "#/components/schemas/YumRepository"
+     }
+    },
+    "type": "object"
+   },
+   "Repository": {
+    "additionalProperties": false,
+    "properties": {
+     "cleanupPolicies": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/CleanupPolicy"
+      },
+      "type": "object"
+     },
+     "cleanupPolicyDryRun": {
+      "type": "boolean"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "disallowUnspecifiedMode": {
+      "type": "boolean"
+     },
+     "dockerConfig": {
+      "$ref": "#/components/schemas/DockerRepositoryConfig"
+     },
+     "format": {
+      "enum": [
+       "FORMAT_UNSPECIFIED",
+       "DOCKER",
+       "MAVEN",
+       "NPM",
+       "APT",
+       "YUM",
+       "GOOGET",
+       "PYTHON",
+       "KFP",
+       "GO",
+       "GENERIC",
+       "RUBY"
+      ],
+      "type": "string"
+     },
+     "kmsKeyName": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "mavenConfig": {
+      "$ref": "#/components/schemas/MavenRepositoryConfig"
+     },
+     "mode": {
+      "enum": [
+       "MODE_UNSPECIFIED",
+       "STANDARD_REPOSITORY",
+       "VIRTUAL_REPOSITORY",
+       "REMOTE_REPOSITORY",
+       "AOSS_REPOSITORY",
+       "ASSURED_OSS_REPOSITORY"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "platformLogsConfig": {
+      "$ref": "#/components/schemas/PlatformLogsConfig"
+     },
+     "registryUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "remoteRepositoryConfig": {
+      "$ref": "#/components/schemas/RemoteRepositoryConfig"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "sizeBytes": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "virtualRepositoryConfig": {
+      "$ref": "#/components/schemas/VirtualRepositoryConfig"
+     },
+     "vulnerabilityScanningConfig": {
+      "$ref": "#/components/schemas/VulnerabilityScanningConfig"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpstreamCredentials": {
+    "additionalProperties": false,
+    "properties": {
+     "usernamePasswordCredentials": {
+      "$ref": "#/components/schemas/UsernamePasswordCredentials"
+     }
+    },
+    "type": "object"
+   },
+   "UpstreamPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "priority": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "repository": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UsernamePasswordCredentials": {
+    "additionalProperties": false,
+    "properties": {
+     "passwordSecretVersion": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualRepositoryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "upstreamPolicies": {
+      "items": {
+       "$ref": "#/components/schemas/UpstreamPolicy"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "VulnerabilityScanningConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enablementConfig": {
+      "enum": [
+       "ENABLEMENT_CONFIG_UNSPECIFIED",
+       "INHERITED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "enablementState": {
+      "enum": [
+       "ENABLEMENT_STATE_UNSPECIFIED",
+       "SCANNING_UNSUPPORTED",
+       "SCANNING_DISABLED",
+       "SCANNING_ACTIVE"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "enablementStateReason": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "lastEnableTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "YumRepository": {
+    "additionalProperties": false,
+    "properties": {
+     "customRepository": {
+      "$ref": "#/components/schemas/GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigYumRepositoryCustomRepository"
+     },
+     "publicRepository": {
+      "$ref": "#/components/schemas/GoogleDevtoolsArtifactregistryV1RemoteRepositoryConfigYumRepositoryPublicRepository"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Artifact Registry API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Repositories are configuration metadata: no package, image, file, version or tag is stored, no registry endpoint (registryUri) is served and sizeBytes stays 0. Remote and virtual repositories never contact an upstream. Upstream credentials must be Secret Manager version names, which are stored as references and never resolved. Cleanup policies and vulnerability scanning settings are stored but never run. Mode, format, KMS key, remote and virtual configuration cannot be updated. Long-running operations complete synchronously.",
+  "title": "Artifact Registry (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "artifactregistry.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Artifact Registry"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/repositories": {
+   "get": {
+    "operationId": "artifactregistry.projects.locations.repositories.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListRepositoriesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.list",
+    "tags": [
+     "Artifact Registry"
+    ]
+   },
+   "post": {
+    "operationId": "artifactregistry.projects.locations.repositories.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "repositoryId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Repository"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.create",
+    "tags": [
+     "Artifact Registry"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/repositories/{repositoriesId}": {
+   "delete": {
+    "operationId": "artifactregistry.projects.locations.repositories.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.delete",
+    "tags": [
+     "Artifact Registry"
+    ]
+   },
+   "get": {
+    "operationId": "artifactregistry.projects.locations.repositories.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Repository"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.get",
+    "tags": [
+     "Artifact Registry"
+    ]
+   },
+   "patch": {
+    "operationId": "artifactregistry.projects.locations.repositories.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "repositoriesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Repository"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Repository"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.repositories.patch",
+    "tags": [
+     "Artifact Registry"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/artifactregistry"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Artifact Registry API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Repositories are configuration metadata: no package, image, file, version or tag is stored, no registry endpoint (registryUri) is served and sizeBytes stays 0. Remote and virtual repositories never contact an upstream. Upstream credentials must be Secret Manager version names, which are stored as references and never resolved. Cleanup policies and vulnerability scanning settings are stored but never run. Mode, format, KMS key, remote and virtual configuration cannot be updated. Long-running operations complete synchronously.",
+   "name": "Artifact Registry"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/artifactregistry.v1.json",
+  "sha256": "0b7fffb8d90f4542207e4a06b1a30be2b20be122176030cb8721c409ebeb67d2",
+  "license": "Apache-2.0",
+  "revision": "20260702"
+ }
+}

@@ -92,6 +92,11 @@ statements, missing owned state and immutable deployment behavior.
 
 ## Parameters and conditions
 
+[Local SSM value parameters](cloudformation-ssm-parameters.md) additionally resolve
+String and EC2 Image ID carriers from existing local String values with explicit
+source permission and immutable saved key/value snapshots. No public AWS lookup
+or EC2 execution is implied.
+
 The local compiler accepts String and Number parameters with bounded defaults,
 AllowedValues, String AllowedPattern/MinLength/MaxLength, and Number MinValue/
 MaxValue. Every definition and default is checked, even when a supplied value
@@ -112,7 +117,8 @@ value; direct `AWS::NoValue` arms remove a map property or list member. Both arm
 must have supported syntax and known Ref/GetAtt/Sub symbols. Only selected active
 links may require active resources. Disabled declarations still undergo resource
 kind/attribute/property validation and do not authorize unsupported types. This
-is a pure compile step before native state mutation; it adds no UpdateStack,
+is validation before native state mutation (SSM-backed parameters read a local
+authorized snapshot); it adds no UpdateStack,
 custom resources, new resource types or host problem-specific behavior.
 
 The exact original catalog fixture is retained at
@@ -150,11 +156,43 @@ stack record and resource properties. DescribeStacks does not expose a Parameter
 list or raw template; explicit outputs can contain parameter-derived values and
 are operator-only. AWS NoEcho itself also excludes Outputs from masking; see the
 [official parameter documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html).
-Participant tokens are host-issued local role-bound credentials, not STS; native
-CFN rejects their stack-output reads. CFN roles retain the legacy aggregate model,
+Legacy participant tokens are host-issued local role-bound credentials, not STS;
+native CFN rejects their stack-output reads. Separately, bounded native STS
+sessions use SigV4 and the actual assumed role policy; the original Hello World
+viewer role has no stack-output or event-history permission. CFN roles retain the
+legacy aggregate model,
 so native IAM GetRole/ListRoles do not expose them. Trust and allowed
 ManagedPolicyArns metadata do not grant AWS sign-in, federation, managed-policy
 or external-account authority. Host coordination, private-output filtering and
 actual crypto-battle scoring remain outside this simulator acceptance.
 
 A separate candidate check now verifies every selected SSM parameter (region/name) and S3 bucket (global name) is absent at the very end of the same deletion transaction, after all resource, ownership and stack cleanup writes. It detects ignored physical DELETEs and late reinsertion, rolling back on failure. Existing missing-resource and nonempty-bucket behavior is preserved. This does not change the standalone native S3 DeleteBucket API or promise acknowledgement checks for other resource types. The 196 native/scoped model receipts are historical inputs; the current combined 429-case formal suite passed at `c298972`; 61 E2E/start checks subsequently passed at docs-only `414c902`; exact-head hosted CI for this publication candidate remains pending.
+
+## Native deployment event history
+
+`DescribeStackEvents` requires a stack name or exact stack ID. It returns up to
+100 events newest-first, with a generation- and region-bound `NextToken` for
+older events. A live stack name resolves to its current generation. Deleted
+stacks require their exact ARN; the latest 100 deleted generations are retained
+globally in addition to all live generations.
+
+Create/delete stack and resource transitions are written in the same SQLite
+transaction as the actual operation. These are local synchronous transitions,
+not AWS asynchronous lifecycle emulation. Failed operations return their API
+error and roll back event writes. Existing pre-upgrade stacks do not acquire
+invented create history; deleting one can begin its actual recorded history.
+
+Events expose timestamps, IDs, resource types and statuses, never resource
+properties, parameter/output values, client request tokens or free-form failure
+reasons. `cloudformation:DescribeStackEvents` is evaluated for the exact stack
+ARN. Legacy exercise participants remain blocked from host event history; native
+SDK assumed roles use their actual role permission snapshot. The original
+hello-world viewer role does not have this permission. The host may present a
+separate authorized, sanitized per-team projection.
+
+## Bounded value intrinsics
+
+`Select`, synthetic local `GetAZs`, `Base64` and scalar `Sub` literal escapes are
+available in properties and outputs. See the [operand limits, local-zone contract
+and original Battle acceptance boundary](cloudformation-intrinsics.md). This adds
+no EC2, Session Manager, guest execution or full Battle support.

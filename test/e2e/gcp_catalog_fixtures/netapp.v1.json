@@ -1,0 +1,48 @@
+{
+ "api": "netapp.v1",
+ "steps": [
+  {"call": "projects.locations.storagePools.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "storagePoolId": "fixture"}, "body": {"capacityGib": "2048", "network": "projects/tenkacloud-local/global/networks/default", "serviceLevel": "PREMIUM", "labels": {"team": "a"}}, "save": {"op": "name", "pool": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op}"}, "expect": {"response.state": "READY"}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.storagePools.get", "args": {"name": "${pool}"}, "expect": {"serviceLevel": "PREMIUM"}},
+  {"call": "projects.locations.storagePools.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"storagePools#count": 1}},
+  {"call": "projects.locations.storagePools.patch", "args": {"name": "${pool}", "updateMask": "description"}, "body": {"description": "Fixture"}},
+  {"call": "projects.locations.volumes.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "volumeId": "data"}, "body": {"capacityGib": "100", "protocols": ["NFSV3"], "shareName": "data", "storagePool": "${pool}"}, "save": {"volume": "response.name"}},
+  {"call": "projects.locations.volumes.get", "args": {"name": "${volume}"}, "expect": {"storagePool": "${pool}"}},
+  {"call": "projects.locations.volumes.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"volumes#count": 1}},
+  {"call": "projects.locations.volumes.patch", "args": {"name": "${volume}", "updateMask": "capacityGib"}, "body": {"capacityGib": "200"}},
+  {"call": "projects.locations.volumes.snapshots.create", "args": {"parent": "${volume}", "snapshotId": "snap"}, "body": {"description": "first"}, "save": {"snapshot": "response.name"}},
+  {"call": "projects.locations.volumes.snapshots.get", "args": {"name": "${snapshot}"}, "expect": {"state": "READY"}},
+  {"call": "projects.locations.volumes.snapshots.list", "args": {"parent": "${volume}"}, "expect": {"snapshots#count": 1}},
+  {"call": "projects.locations.volumes.snapshots.patch", "args": {"name": "${snapshot}", "updateMask": "description"}, "body": {"description": "renamed"}},
+  {"call": "projects.locations.backupVaults.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "backupVaultId": "vault"}, "body": {"description": "vault"}, "save": {"vault": "response.name"}},
+  {"call": "projects.locations.backupVaults.get", "args": {"name": "${vault}"}, "expect": {"state": "READY"}},
+  {"call": "projects.locations.backupVaults.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"backupVaults#count": 1}},
+  {"call": "projects.locations.backupVaults.patch", "args": {"name": "${vault}", "updateMask": "labels"}, "body": {"labels": {"tier": "gold"}}},
+  {"call": "projects.locations.backupPolicies.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "backupPolicyId": "daily"}, "body": {"dailyBackupLimit": 2, "enabled": true}, "save": {"policy": "response.name"}},
+  {"call": "projects.locations.backupPolicies.get", "args": {"name": "${policy}"}, "expect": {"dailyBackupLimit": 2}},
+  {"call": "projects.locations.backupPolicies.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"backupPolicies#count": 1}},
+  {"call": "projects.locations.backupPolicies.patch", "args": {"name": "${policy}", "updateMask": "enabled"}, "body": {"enabled": false}},
+  {"call": "projects.locations.volumes.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "volumeId": "orphan"}, "body": {"capacityGib": "1", "protocols": ["NFSV3"], "shareName": "o", "storagePool": "projects/tenkacloud-local/locations/us-central1/storagePools/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.volumes.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "volumeId": "restored"}, "body": {"capacityGib": "1", "protocols": ["NFSV3"], "shareName": "r", "storagePool": "${pool}", "restoreParameters": {"sourceSnapshot": "${snapshot}"}}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.storagePools.delete", "args": {"name": "${pool}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.locations.volumes.revert", "args": {"name": "${volume}", "body": {"snapshotId": "snap"}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.storagePools.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.storagePools.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"storagePools#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.volumes.get", "args": {"name": "${volume}"}, "expect": {"capacityGib": "200"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.volumes.delete", "args": {"name": "${volume}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.locations.volumes.snapshots.delete", "args": {"name": "${snapshot}"}},
+  {"call": "projects.locations.volumes.delete", "args": {"name": "${volume}"}},
+  {"call": "projects.locations.storagePools.delete", "args": {"name": "${pool}"}},
+  {"call": "projects.locations.backupVaults.delete", "args": {"name": "${vault}"}},
+  {"call": "projects.locations.backupPolicies.delete", "args": {"name": "${policy}"}},
+  {"call": "projects.locations.storagePools.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"storagePools#count": 0}},
+  {"call": "projects.locations.volumes.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"volumes#count": 0}}
+ ]
+}

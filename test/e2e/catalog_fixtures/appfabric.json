@@ -1,0 +1,29 @@
+{
+ "client": "appfabric",
+ "steps": [
+  {"op": "create_app_bundle", "args": {"tags": [{"key": "team", "value": "a"}]}, "save": {"bundle": "appBundle.arn"}},
+  {"op": "get_app_bundle", "args": {"appBundleIdentifier": "${bundle}"}, "expect": {"appBundle.arn": "${bundle}"}},
+  {"op": "list_app_bundles", "args": {}, "expect": {"appBundleSummaryList#count": 1, "appBundleSummaryList[0].arn": "${bundle}"}},
+  {"op": "create_ingestion", "args": {"appBundleIdentifier": "${bundle}", "app": "OKTA", "tenantId": "example.okta.com", "ingestionType": "auditLog"}, "save": {"ingestion": "ingestion.arn"}, "expect": {"ingestion.state": "disabled", "ingestion.appBundleArn": "${bundle}"}},
+  {"op": "get_ingestion", "args": {"appBundleIdentifier": "${bundle}", "ingestionIdentifier": "${ingestion}"}, "expect": {"ingestion.app": "OKTA", "ingestion.tenantId": "example.okta.com"}},
+  {"op": "list_ingestions", "args": {"appBundleIdentifier": "${bundle}"}, "expect": {"ingestions#count": 1, "ingestions[0].state": "disabled"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${ingestion}", "tags": [{"key": "stage", "value": "dev"}]}},
+  {"op": "untag_resource", "args": {"resourceArn": "${ingestion}", "tagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${bundle}"}, "expect": {"tags#count": 1, "tags[0].key": "team"}},
+  {"op": "start_ingestion", "args": {"appBundleIdentifier": "${bundle}", "ingestionIdentifier": "${ingestion}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "delete_app_bundle", "args": {"appBundleIdentifier": "${bundle}"}, "error": "ConflictException"},
+  {"op": "get_ingestion", "args": {"appBundleIdentifier": "${bundle}", "ingestionIdentifier": "00000000-0000-4000-8000-000000000000"}, "error": "ResourceNotFoundException"},
+  {"op": "create_app_bundle", "args": {"customerManagedKeyIdentifier": "00000000-0000-4000-8000-000000000000"}, "error": "ValidationException"}
+ ],
+ "isolation": [
+  {"op": "list_app_bundles", "args": {}, "expect": {"appBundleSummaryList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_ingestion", "args": {"appBundleIdentifier": "${bundle}", "ingestionIdentifier": "${ingestion}"}, "expect": {"ingestion.arn": "${ingestion}"}}
+ ],
+ "cleanup": [
+  {"op": "delete_ingestion", "args": {"appBundleIdentifier": "${bundle}", "ingestionIdentifier": "${ingestion}"}},
+  {"op": "delete_app_bundle", "args": {"appBundleIdentifier": "${bundle}"}},
+  {"op": "list_app_bundles", "args": {}, "expect": {"appBundleSummaryList#count": 0}}
+ ]
+}

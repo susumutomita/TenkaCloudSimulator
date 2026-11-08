@@ -1,0 +1,2081 @@
+{
+ "components": {
+  "schemas": {
+   "BigQueryOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "usePartitionedTables": {
+      "type": "boolean"
+     },
+     "usesTimestampColumnPartitioning": {
+      "readOnly": true,
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "BucketOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "explicitBuckets": {
+      "$ref": "#/components/schemas/Explicit"
+     },
+     "exponentialBuckets": {
+      "$ref": "#/components/schemas/Exponential"
+     },
+     "linearBuckets": {
+      "$ref": "#/components/schemas/Linear"
+     }
+    },
+    "type": "object"
+   },
+   "CmekSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKeyName": {
+      "type": "string"
+     },
+     "kmsKeyVersionName": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "serviceAccountId": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Empty": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Explicit": {
+    "additionalProperties": false,
+    "properties": {
+     "bounds": {
+      "items": {
+       "format": "double",
+       "type": "number"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Exponential": {
+    "additionalProperties": false,
+    "properties": {
+     "growthFactor": {
+      "format": "double",
+      "type": "number"
+     },
+     "numFiniteBuckets": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "scale": {
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "IndexConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "fieldPath": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "INDEX_TYPE_UNSPECIFIED",
+       "INDEX_TYPE_STRING",
+       "INDEX_TYPE_INTEGER"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LabelDescriptor": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "type": "string"
+     },
+     "key": {
+      "type": "string"
+     },
+     "valueType": {
+      "enum": [
+       "STRING",
+       "BOOL",
+       "INT64"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Linear": {
+    "additionalProperties": false,
+    "properties": {
+     "numFiniteBuckets": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "offset": {
+      "format": "double",
+      "type": "number"
+     },
+     "width": {
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "ListBucketsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "buckets": {
+      "items": {
+       "$ref": "#/components/schemas/LogBucket"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListExclusionsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "exclusions": {
+      "items": {
+       "$ref": "#/components/schemas/LogExclusion"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListLogMetricsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "metrics": {
+      "items": {
+       "$ref": "#/components/schemas/LogMetric"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListSinksResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "sinks": {
+      "items": {
+       "$ref": "#/components/schemas/LogSink"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListViewsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "views": {
+      "items": {
+       "$ref": "#/components/schemas/LogView"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LogBucket": {
+    "additionalProperties": false,
+    "properties": {
+     "analyticsEnabled": {
+      "type": "boolean"
+     },
+     "cmekSettings": {
+      "$ref": "#/components/schemas/CmekSettings"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "indexConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/IndexConfig"
+      },
+      "type": "array"
+     },
+     "lifecycleState": {
+      "enum": [
+       "LIFECYCLE_STATE_UNSPECIFIED",
+       "ACTIVE",
+       "DELETE_REQUESTED",
+       "UPDATING",
+       "CREATING",
+       "FAILED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "locked": {
+      "type": "boolean"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "restrictedFields": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "retentionDays": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LogExclusion": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "disabled": {
+      "type": "boolean"
+     },
+     "filter": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LogMetric": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "type": "string"
+     },
+     "bucketOptions": {
+      "$ref": "#/components/schemas/BucketOptions"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "disabled": {
+      "type": "boolean"
+     },
+     "filter": {
+      "type": "string"
+     },
+     "labelExtractors": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "metricDescriptor": {
+      "$ref": "#/components/schemas/MetricDescriptor"
+     },
+     "name": {
+      "type": "string"
+     },
+     "resourceName": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "valueExtractor": {
+      "type": "string"
+     },
+     "version": {
+      "enum": [
+       "V2",
+       "V1"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LogSink": {
+    "additionalProperties": false,
+    "properties": {
+     "bigqueryOptions": {
+      "$ref": "#/components/schemas/BigQueryOptions"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "destination": {
+      "type": "string"
+     },
+     "disabled": {
+      "type": "boolean"
+     },
+     "exclusions": {
+      "items": {
+       "$ref": "#/components/schemas/LogExclusion"
+      },
+      "type": "array"
+     },
+     "filter": {
+      "type": "string"
+     },
+     "includeChildren": {
+      "type": "boolean"
+     },
+     "interceptChildren": {
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "outputVersionFormat": {
+      "enum": [
+       "VERSION_FORMAT_UNSPECIFIED",
+       "V2",
+       "V1"
+      ],
+      "type": "string"
+     },
+     "resourceName": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "writerIdentity": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LogView": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "filter": {
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MetricDescriptor": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "labels": {
+      "items": {
+       "$ref": "#/components/schemas/LabelDescriptor"
+      },
+      "type": "array"
+     },
+     "launchStage": {
+      "enum": [
+       "LAUNCH_STAGE_UNSPECIFIED",
+       "UNIMPLEMENTED",
+       "PRELAUNCH",
+       "EARLY_ACCESS",
+       "ALPHA",
+       "BETA",
+       "GA",
+       "DEPRECATED"
+      ],
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/MetricDescriptorMetadata"
+     },
+     "metricKind": {
+      "enum": [
+       "METRIC_KIND_UNSPECIFIED",
+       "GAUGE",
+       "DELTA",
+       "CUMULATIVE"
+      ],
+      "type": "string"
+     },
+     "monitoredResourceTypes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "name": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     },
+     "unit": {
+      "type": "string"
+     },
+     "valueType": {
+      "enum": [
+       "VALUE_TYPE_UNSPECIFIED",
+       "BOOL",
+       "INT64",
+       "DOUBLE",
+       "STRING",
+       "DISTRIBUTION",
+       "MONEY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MetricDescriptorMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "ingestDelay": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "launchStage": {
+      "enum": [
+       "LAUNCH_STAGE_UNSPECIFIED",
+       "UNIMPLEMENTED",
+       "PRELAUNCH",
+       "EARLY_ACCESS",
+       "ALPHA",
+       "BETA",
+       "GA",
+       "DEPRECATED"
+      ],
+      "type": "string"
+     },
+     "samplePeriod": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "timeSeriesResourceHierarchyLevel": {
+      "items": {
+       "enum": [
+        "TIME_SERIES_RESOURCE_HIERARCHY_LEVEL_UNSPECIFIED",
+        "PROJECT",
+        "ORGANIZATION",
+        "FOLDER"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Cloud Logging API (v2) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Sinks, exclusions, log-based metrics, log buckets and log views are configuration metadata only: no log entry is written, stored, read, routed, excluded, counted or exported, and entries, logs and tail methods are not implemented. Sinks receive no writerIdentity; uniqueWriterIdentity and customWriterIdentity create or use no service account. Filters and destinations are recorded as given and not evaluated or resolved. Log-based metrics support create, get, list and delete; metrics.update and metric names with '/' hierarchy are not implemented. The project's _Default and _Required sinks and buckets are not pre-created. Locking a bucket is refused. Deleted buckets are removed immediately rather than kept 7 days in DELETE_REQUESTED, undelete and asynchronous bucket methods are not implemented, and a bucket with views cannot be deleted. Folder, organization and billing-account parents are not implemented.",
+  "title": "Cloud Logging (simulator catalog)",
+  "version": "v2"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v2/projects/{projectsId}/exclusions": {
+   "get": {
+    "operationId": "logging.projects.exclusions.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListExclusionsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.exclusions.list",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "post": {
+    "operationId": "logging.projects.exclusions.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LogExclusion"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogExclusion"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.exclusions.create",
+    "tags": [
+     "Cloud Logging"
+    ]
+   }
+  },
+  "/v2/projects/{projectsId}/exclusions/{exclusionsId}": {
+   "delete": {
+    "operationId": "logging.projects.exclusions.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "exclusionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.exclusions.delete",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "get": {
+    "operationId": "logging.projects.exclusions.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "exclusionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogExclusion"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.exclusions.get",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "patch": {
+    "operationId": "logging.projects.exclusions.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "exclusionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LogExclusion"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogExclusion"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.exclusions.patch",
+    "tags": [
+     "Cloud Logging"
+    ]
+   }
+  },
+  "/v2/projects/{projectsId}/locations/{locationsId}/buckets": {
+   "get": {
+    "operationId": "logging.projects.locations.buckets.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListBucketsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.buckets.list",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "post": {
+    "operationId": "logging.projects.locations.buckets.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "bucketId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LogBucket"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogBucket"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.buckets.create",
+    "tags": [
+     "Cloud Logging"
+    ]
+   }
+  },
+  "/v2/projects/{projectsId}/locations/{locationsId}/buckets/{bucketsId}": {
+   "delete": {
+    "operationId": "logging.projects.locations.buckets.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "bucketsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.buckets.delete",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "get": {
+    "operationId": "logging.projects.locations.buckets.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "bucketsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogBucket"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.buckets.get",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "patch": {
+    "operationId": "logging.projects.locations.buckets.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "bucketsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LogBucket"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogBucket"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.buckets.patch",
+    "tags": [
+     "Cloud Logging"
+    ]
+   }
+  },
+  "/v2/projects/{projectsId}/locations/{locationsId}/buckets/{bucketsId}/views": {
+   "get": {
+    "operationId": "logging.projects.locations.buckets.views.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "bucketsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListViewsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.buckets.views.list",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "post": {
+    "operationId": "logging.projects.locations.buckets.views.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "bucketsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "viewId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LogView"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogView"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.buckets.views.create",
+    "tags": [
+     "Cloud Logging"
+    ]
+   }
+  },
+  "/v2/projects/{projectsId}/locations/{locationsId}/buckets/{bucketsId}/views/{viewsId}": {
+   "delete": {
+    "operationId": "logging.projects.locations.buckets.views.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "bucketsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "viewsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.buckets.views.delete",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "get": {
+    "operationId": "logging.projects.locations.buckets.views.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "bucketsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "viewsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogView"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.buckets.views.get",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "patch": {
+    "operationId": "logging.projects.locations.buckets.views.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "bucketsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "viewsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LogView"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogView"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.buckets.views.patch",
+    "tags": [
+     "Cloud Logging"
+    ]
+   }
+  },
+  "/v2/projects/{projectsId}/metrics": {
+   "get": {
+    "operationId": "logging.projects.metrics.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListLogMetricsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.metrics.list",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "post": {
+    "operationId": "logging.projects.metrics.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LogMetric"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogMetric"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.metrics.create",
+    "tags": [
+     "Cloud Logging"
+    ]
+   }
+  },
+  "/v2/projects/{projectsId}/metrics/{metricsId}": {
+   "delete": {
+    "operationId": "logging.projects.metrics.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "metricsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.metrics.delete",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "get": {
+    "operationId": "logging.projects.metrics.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "metricsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogMetric"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.metrics.get",
+    "tags": [
+     "Cloud Logging"
+    ]
+   }
+  },
+  "/v2/projects/{projectsId}/sinks": {
+   "get": {
+    "operationId": "logging.projects.sinks.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListSinksResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.sinks.list",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "post": {
+    "operationId": "logging.projects.sinks.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "customWriterIdentity",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "uniqueWriterIdentity",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LogSink"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogSink"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.sinks.create",
+    "tags": [
+     "Cloud Logging"
+    ]
+   }
+  },
+  "/v2/projects/{projectsId}/sinks/{sinksId}": {
+   "delete": {
+    "operationId": "logging.projects.sinks.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sinksId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.sinks.delete",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "get": {
+    "operationId": "logging.projects.sinks.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sinksId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogSink"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.sinks.get",
+    "tags": [
+     "Cloud Logging"
+    ]
+   },
+   "patch": {
+    "operationId": "logging.projects.sinks.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sinksId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "customWriterIdentity",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "uniqueWriterIdentity",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LogSink"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LogSink"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.sinks.patch",
+    "tags": [
+     "Cloud Logging"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/logging"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Cloud Logging API (v2) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Sinks, exclusions, log-based metrics, log buckets and log views are configuration metadata only: no log entry is written, stored, read, routed, excluded, counted or exported, and entries, logs and tail methods are not implemented. Sinks receive no writerIdentity; uniqueWriterIdentity and customWriterIdentity create or use no service account. Filters and destinations are recorded as given and not evaluated or resolved. Log-based metrics support create, get, list and delete; metrics.update and metric names with '/' hierarchy are not implemented. The project's _Default and _Required sinks and buckets are not pre-created. Locking a bucket is refused. Deleted buckets are removed immediately rather than kept 7 days in DELETE_REQUESTED, undelete and asynchronous bucket methods are not implemented, and a bucket with views cannot be deleted. Folder, organization and billing-account parents are not implemented.",
+   "name": "Cloud Logging"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/logging.v2.json",
+  "sha256": "a4f7df3a3a4ce3c055fcf57f1fdce221d936a3ce7be423baec4c34274479a44d",
+  "license": "Apache-2.0",
+  "revision": "20260706"
+ }
+}

@@ -122,3 +122,39 @@ test('DynamoDB is a capability-gated AWS console with English/Japanese table nav
   assert.equal(serviceFromHash('#/dynamodb-fake'),null);
   assert.equal(JSON.stringify(capabilities),before);
 });
+
+test('the catalog route is capability-gated and its service titles are searchable',()=>{
+  const catalog={services:[{model:'ecr',title:'Amazon Elastic Container Registry',serviceId:'ECR'},{model:'amplify',title:'AWS Amplify',serviceId:'Amplify'}]};
+  const enabled={...capabilities,services:{...capabilities.services,catalog}};
+  assert.equal(serviceAvailable('catalog',capabilities),false);
+  assert.equal(serviceAvailable('catalog',enabled),true);
+  assert.equal(servicesForProvider('aws',enabled).length,12);
+  assert.deepEqual(servicesForProvider('aws',enabled,'container registry').map(s=>s.id),['catalog']);
+  assert.deepEqual(servicesForProvider('aws',enabled,'amplify').map(s=>s.id),['catalog']);
+  assert.deepEqual(servicesForProvider('aws',enabled,'カタログ').map(s=>s.id),['catalog']);
+  assert.deepEqual(servicesForProvider('gcp',enabled,'amplify'),[]);
+  assert.deepEqual(servicesForProvider('aws',{...capabilities,services:{...capabilities.services,catalog:{services:'x'}}},'amplify'),[]);
+  assert.equal(serviceFromHash('#/catalog'),'catalog');
+  assert.equal(hashForService('catalog'),'/catalog');
+});
+
+test('the Azure Resource Manager route is capability-gated and its resource types are searchable',()=>{
+  const azureCatalog={descriptors:'/_simulator/v1/catalog/azure',providers:[{namespace:'Microsoft.KeyVault',title:'Key Vault',types:[{type:'Microsoft.KeyVault/vaults',title:'Key vaults'}]},{namespace:'Microsoft.Network',title:'Virtual networking',types:[{type:'Microsoft.Network/virtualNetworks',title:'Virtual networks'}]}]};
+  const enabled={...capabilities,azureCatalog};
+  const before=JSON.stringify(enabled);
+  assert.equal(serviceAvailable('azure-arm',capabilities),false);
+  assert.equal(serviceAvailable('azure-arm',enabled),true);
+  assert.equal(serviceAvailable('azure-arm',{...capabilities,azureCatalog:{providers:[]}}),false);
+  assert.equal(serviceAvailable('azure-arm',{...capabilities,azureCatalog:{providers:azureCatalog.providers}}),false);
+  assert.deepEqual(servicesForProvider('azure',enabled).map(s=>s.id),['azure-blob','azure-arm']);
+  assert.deepEqual(servicesForProvider('azure',enabled,'key vault').map(s=>s.id),['azure-arm']);
+  assert.deepEqual(servicesForProvider('azure',enabled,'virtual networks').map(s=>s.id),['azure-arm']);
+  assert.deepEqual(servicesForProvider('azure',enabled,'リソース グループ').map(s=>s.id),['azure-arm']);
+  assert.deepEqual(servicesForProvider('azure',enabled,'ストレージ').map(s=>s.id),['azure-blob']);
+  assert.deepEqual(servicesForProvider('aws',enabled,'key vault'),[]);
+  assert.deepEqual(servicesForProvider('azure',{...enabled,azureCatalog:{...azureCatalog,providers:[{title:'x',namespace:'y',types:'bad'}]}},'key vault'),[]);
+  assert.equal(serviceFromHash('#/azure-arm'),'azure-arm');
+  assert.equal(hashForService('azure-arm'),'/azure-arm');
+  assert.equal(providerForService('azure-arm'),'azure');
+  assert.equal(JSON.stringify(enabled),before);
+});

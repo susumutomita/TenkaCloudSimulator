@@ -1,0 +1,33 @@
+{
+ "client": "transcribe",
+ "steps": [
+  {"op": "create_vocabulary", "args": {"VocabularyName": "fixture-vocabulary", "LanguageCode": "en-US", "Phrases": ["TenkaCloud"], "Tags": [{"Key": "team", "Value": "a"}]}, "expect": {"VocabularyState": "READY", "LanguageCode": "en-US"}},
+  {"op": "get_vocabulary", "args": {"VocabularyName": "fixture-vocabulary"}, "expect": {"VocabularyState": "READY", "VocabularyName": "fixture-vocabulary"}},
+  {"op": "list_vocabularies", "args": {"StateEquals": "READY"}, "expect": {"Vocabularies#count": 1, "Vocabularies[0].VocabularyName": "fixture-vocabulary"}},
+  {"op": "update_vocabulary", "args": {"VocabularyName": "fixture-vocabulary", "LanguageCode": "en-GB", "Phrases": ["TenkaCloud", "Simulator"]}, "expect": {"LanguageCode": "en-GB"}},
+  {"op": "create_vocabulary_filter", "args": {"VocabularyFilterName": "fixture-filter", "LanguageCode": "en-US", "Words": ["darn"], "Tags": [{"Key": "team", "Value": "a"}]}, "expect": {"VocabularyFilterName": "fixture-filter"}},
+  {"op": "get_vocabulary_filter", "args": {"VocabularyFilterName": "fixture-filter"}, "expect": {"LanguageCode": "en-US"}},
+  {"op": "list_vocabulary_filters", "args": {}, "expect": {"VocabularyFilters#count": 1}},
+  {"op": "update_vocabulary_filter", "args": {"VocabularyFilterName": "fixture-filter", "Words": ["darn", "heck"]}, "expect": {"VocabularyFilterName": "fixture-filter"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "arn:aws:transcribe:us-east-1:000000000000:vocabulary/fixture-vocabulary", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "arn:aws:transcribe:us-east-1:000000000000:vocabulary/fixture-vocabulary", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "arn:aws:transcribe:us-east-1:000000000000:vocabulary-filter/fixture-filter"}, "expect": {"Tags#count": 1, "Tags[0].Key": "team"}},
+  {"op": "create_vocabulary", "args": {"VocabularyName": "file-vocabulary", "LanguageCode": "en-US", "VocabularyFileUri": "s3://fixture-bucket/terms.txt"}, "error": "BadRequestException", "status": 400},
+  {"op": "list_transcription_jobs", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_vocabulary", "args": {"VocabularyName": "missing-vocabulary"}, "error": "NotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "list_vocabularies", "args": {}, "expect": {"Vocabularies#count": 0}},
+  {"op": "list_vocabulary_filters", "args": {}, "expect": {"VocabularyFilters#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_vocabulary", "args": {"VocabularyName": "fixture-vocabulary"}, "expect": {"LanguageCode": "en-GB"}},
+  {"op": "get_vocabulary_filter", "args": {"VocabularyFilterName": "fixture-filter"}, "expect": {"VocabularyFilterName": "fixture-filter"}}
+ ],
+ "cleanup": [
+  {"op": "delete_vocabulary_filter", "args": {"VocabularyFilterName": "fixture-filter"}},
+  {"op": "delete_vocabulary", "args": {"VocabularyName": "fixture-vocabulary"}},
+  {"op": "list_vocabularies", "args": {}, "expect": {"Vocabularies#count": 0}},
+  {"op": "list_vocabulary_filters", "args": {}, "expect": {"VocabularyFilters#count": 0}}
+ ]
+}

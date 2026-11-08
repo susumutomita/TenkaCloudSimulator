@@ -1,0 +1,555 @@
+{
+ "components": {
+  "schemas": {
+   "CreatePolicyStoreInput": {
+    "additionalProperties": false,
+    "properties": {
+     "clientToken": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "deletionProtection": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 150,
+      "minLength": 0,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "validationSettings": {
+      "$ref": "#/components/schemas/ValidationSettings"
+     }
+    },
+    "required": [
+     "validationSettings"
+    ],
+    "type": "object"
+   },
+   "CreatePolicyStoreOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2500,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastUpdatedDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "policyStoreId": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "policyStoreId",
+     "arn",
+     "createdDate",
+     "lastUpdatedDate"
+    ],
+    "type": "object"
+   },
+   "DeletePolicyStoreInput": {
+    "additionalProperties": false,
+    "properties": {
+     "policyStoreId": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "policyStoreId"
+    ],
+    "type": "object"
+   },
+   "DeletePolicyStoreOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GetPolicyStoreInput": {
+    "additionalProperties": false,
+    "properties": {
+     "policyStoreId": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "policyStoreId"
+    ],
+    "type": "object"
+   },
+   "GetPolicyStoreOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2500,
+      "minLength": 1,
+      "type": "string"
+     },
+     "cedarVersion": {
+      "enum": [
+       "CEDAR_2",
+       "CEDAR_4"
+      ],
+      "type": "string"
+     },
+     "createdDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "deletionProtection": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 150,
+      "minLength": 0,
+      "type": "string"
+     },
+     "lastUpdatedDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "policyStoreId": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "validationSettings": {
+      "$ref": "#/components/schemas/ValidationSettings"
+     }
+    },
+    "required": [
+     "policyStoreId",
+     "arn",
+     "validationSettings",
+     "createdDate",
+     "lastUpdatedDate"
+    ],
+    "type": "object"
+   },
+   "ListPolicyStoresInput": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "maxLength": 8000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListPolicyStoresOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "maxLength": 8000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "policyStores": {
+      "items": {
+       "$ref": "#/components/schemas/PolicyStoreItem"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "policyStores"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "resourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PolicyStoreItem": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2500,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 150,
+      "minLength": 0,
+      "type": "string"
+     },
+     "lastUpdatedDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "policyStoreId": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "policyStoreId",
+     "arn",
+     "createdDate"
+    ],
+    "type": "object"
+   },
+   "TagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdatePolicyStoreInput": {
+    "additionalProperties": false,
+    "properties": {
+     "deletionProtection": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 150,
+      "minLength": 0,
+      "type": "string"
+     },
+     "policyStoreId": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "validationSettings": {
+      "$ref": "#/components/schemas/ValidationSettings"
+     }
+    },
+    "required": [
+     "policyStoreId",
+     "validationSettings"
+    ],
+    "type": "object"
+   },
+   "UpdatePolicyStoreOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2500,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastUpdatedDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "policyStoreId": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "policyStoreId",
+     "arn",
+     "createdDate",
+     "lastUpdatedDate"
+    ],
+    "type": "object"
+   },
+   "ValidationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "mode": {
+      "enum": [
+       "OFF",
+       "STRICT"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "mode"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Verified Permissions API (2021-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Policy stores are configuration metadata: no Cedar policy, template, schema or identity source is stored and no authorization request is evaluated. IsAuthorized, IsAuthorizedWithToken, their batch forms, policies, policy templates, schemas and identity sources return UnknownOperationException with HTTP 501. deletionProtection ENABLED is refused; GetPolicyStore always includes tags, and deleting a missing policy store returns ResourceNotFoundException instead of succeeding.",
+  "title": "Amazon Verified Permissions (simulator catalog)",
+  "version": "2021-12-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "verifiedpermissionsJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "VerifiedPermissions.CreatePolicyStore",
+        "VerifiedPermissions.DeletePolicyStore",
+        "VerifiedPermissions.GetPolicyStore",
+        "VerifiedPermissions.ListPolicyStores",
+        "VerifiedPermissions.ListTagsForResource",
+        "VerifiedPermissions.TagResource",
+        "VerifiedPermissions.UntagResource",
+        "VerifiedPermissions.UpdatePolicyStore"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.0": {
+       "examples": {
+        "CreatePolicyStore": {
+         "summary": "X-Amz-Target: VerifiedPermissions.CreatePolicyStore",
+         "value": {}
+        },
+        "DeletePolicyStore": {
+         "summary": "X-Amz-Target: VerifiedPermissions.DeletePolicyStore",
+         "value": {}
+        },
+        "GetPolicyStore": {
+         "summary": "X-Amz-Target: VerifiedPermissions.GetPolicyStore",
+         "value": {}
+        },
+        "ListPolicyStores": {
+         "summary": "X-Amz-Target: VerifiedPermissions.ListPolicyStores",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: VerifiedPermissions.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: VerifiedPermissions.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: VerifiedPermissions.UntagResource",
+         "value": {}
+        },
+        "UpdatePolicyStore": {
+         "summary": "X-Amz-Target: VerifiedPermissions.UpdatePolicyStore",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.0": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon Verified Permissions JSON 1.0 operations",
+    "tags": [
+     "Amazon Verified Permissions"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Verified Permissions API (2021-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Policy stores are configuration metadata: no Cedar policy, template, schema or identity source is stored and no authorization request is evaluated. IsAuthorized, IsAuthorizedWithToken, their batch forms, policies, policy templates, schemas and identity sources return UnknownOperationException with HTTP 501. deletionProtection ENABLED is refused; GetPolicyStore always includes tags, and deleting a missing policy store returns ResourceNotFoundException instead of succeeding.",
+   "name": "Amazon Verified Permissions"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/verifiedpermissions/2021-12-01/service-2.json",
+  "sha256": "7d4414241f8955af03b546efb2656536621ae8bdc8e6a39d0c763dcc3cc535a1",
+  "license": "Apache-2.0"
+ }
+}

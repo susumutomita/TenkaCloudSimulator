@@ -1,0 +1,462 @@
+{
+ "components": {
+  "schemas": {
+   "DataRetrievalPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "Rules": {
+      "items": {
+       "$ref": "#/components/schemas/DataRetrievalRule"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DataRetrievalRule": {
+    "additionalProperties": false,
+    "properties": {
+     "BytesPerHour": {
+      "type": "integer"
+     },
+     "Strategy": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeVaultOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "CreationDate": {
+      "type": "string"
+     },
+     "LastInventoryDate": {
+      "type": "string"
+     },
+     "NumberOfArchives": {
+      "type": "integer"
+     },
+     "SizeInBytes": {
+      "type": "integer"
+     },
+     "VaultARN": {
+      "type": "string"
+     },
+     "VaultName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Glacier API (2012-06-01). Every other official operation returns HTTP 501 UnknownOperationException. Vaults are empty configuration records: no archive is uploaded, stored, inventoried or retrieved, NumberOfArchives and SizeInBytes stay zero, and UploadArchive, InitiateJob, multipart upload and provisioned capacity APIs return UnknownOperationException with HTTP 501. accountId must be - or the simulator account. CreateVault is idempotent for an existing vault. ListVaults returns vaults in creation order rather than ASCII order, up to 100 per page, and its limit member is refused. Vault tags, access policies, notifications and Vault Lock are not implemented. Before SetDataRetrievalPolicy, GetDataRetrievalPolicy returns a policy without rules instead of the account default, and the stored policy limits no retrieval.",
+  "title": "Amazon S3 Glacier (simulator catalog)",
+  "version": "2012-06-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/{accountId}/policies/data-retrieval": {
+   "get": {
+    "operationId": "glacierGetDataRetrievalPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "glacier"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Policy": {
+           "$ref": "#/components/schemas/DataRetrievalPolicy"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetDataRetrievalPolicy",
+    "tags": [
+     "Amazon S3 Glacier"
+    ]
+   },
+   "put": {
+    "operationId": "glacierSetDataRetrievalPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "glacier"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Policy": {
+          "$ref": "#/components/schemas/DataRetrievalPolicy"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "SetDataRetrievalPolicy",
+    "tags": [
+     "Amazon S3 Glacier"
+    ]
+   }
+  },
+  "/{accountId}/vaults": {
+   "get": {
+    "operationId": "glacierListVaults",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "glacier"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "marker",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Marker": {
+           "type": "string"
+          },
+          "VaultList": {
+           "items": {
+            "$ref": "#/components/schemas/DescribeVaultOutput"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListVaults",
+    "tags": [
+     "Amazon S3 Glacier"
+    ]
+   }
+  },
+  "/{accountId}/vaults/{vaultName}": {
+   "delete": {
+    "operationId": "glacierDeleteVault",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "glacier"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "vaultName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteVault",
+    "tags": [
+     "Amazon S3 Glacier"
+    ]
+   },
+   "get": {
+    "operationId": "glacierDescribeVault",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "glacier"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "vaultName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CreationDate": {
+           "type": "string"
+          },
+          "LastInventoryDate": {
+           "type": "string"
+          },
+          "NumberOfArchives": {
+           "type": "integer"
+          },
+          "SizeInBytes": {
+           "type": "integer"
+          },
+          "VaultARN": {
+           "type": "string"
+          },
+          "VaultName": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeVault",
+    "tags": [
+     "Amazon S3 Glacier"
+    ]
+   },
+   "put": {
+    "operationId": "glacierCreateVault",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "glacier"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "vaultName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateVault",
+    "tags": [
+     "Amazon S3 Glacier"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Glacier API (2012-06-01). Every other official operation returns HTTP 501 UnknownOperationException. Vaults are empty configuration records: no archive is uploaded, stored, inventoried or retrieved, NumberOfArchives and SizeInBytes stay zero, and UploadArchive, InitiateJob, multipart upload and provisioned capacity APIs return UnknownOperationException with HTTP 501. accountId must be - or the simulator account. CreateVault is idempotent for an existing vault. ListVaults returns vaults in creation order rather than ASCII order, up to 100 per page, and its limit member is refused. Vault tags, access policies, notifications and Vault Lock are not implemented. Before SetDataRetrievalPolicy, GetDataRetrievalPolicy returns a policy without rules instead of the account default, and the stored policy limits no retrieval.",
+   "name": "Amazon S3 Glacier"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/glacier/2012-06-01/service-2.json",
+  "sha256": "6646a2060a007eacd6cc47aa19f6502f67dbe50d321e041c60990890710bdcf5",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,24 @@
+{
+ "client": "comprehend",
+ "steps": [
+  {"op": "create_flywheel", "args": {"FlywheelName": "fixture-flywheel", "DataAccessRoleArn": "arn:aws:iam::000000000000:role/fixture-comprehend", "DataLakeS3Uri": "s3://fixture-lake/flywheel", "ModelType": "DOCUMENT_CLASSIFIER", "TaskConfig": {"LanguageCode": "en", "DocumentClassificationConfig": {"Mode": "MULTI_CLASS", "Labels": ["billing", "support"]}}, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"flywheel": "FlywheelArn"}, "expect": {"FlywheelArn": "arn:aws:comprehend:us-east-1:000000000000:flywheel/fixture-flywheel"}},
+  {"op": "describe_flywheel", "args": {"FlywheelArn": "${flywheel}"}, "expect": {"FlywheelProperties.Status": "ACTIVE", "FlywheelProperties.ModelType": "DOCUMENT_CLASSIFIER", "FlywheelProperties.TaskConfig.DocumentClassificationConfig.Labels#count": 2}},
+  {"op": "update_flywheel", "args": {"FlywheelArn": "${flywheel}", "DataAccessRoleArn": "arn:aws:iam::000000000000:role/fixture-comprehend-2"}, "expect": {"FlywheelProperties.DataAccessRoleArn": "arn:aws:iam::000000000000:role/fixture-comprehend-2"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${flywheel}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${flywheel}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${flywheel}"}, "expect": {"Tags#count": 1, "Tags[0].Key": "team"}},
+  {"op": "create_flywheel", "args": {"FlywheelName": "trained-flywheel", "DataAccessRoleArn": "arn:aws:iam::000000000000:role/fixture-comprehend", "DataLakeS3Uri": "s3://fixture-lake/trained", "ActiveModelArn": "arn:aws:comprehend:us-east-1:000000000000:document-classifier/fixture"}, "error": "InvalidRequestException", "status": 400},
+  {"op": "detect_sentiment", "args": {"Text": "Hello", "LanguageCode": "en"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_flywheel", "args": {"FlywheelArn": "arn:aws:comprehend:us-east-1:000000000000:flywheel/missing-flywheel"}, "error": "ResourceNotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "describe_flywheel", "args": {"FlywheelArn": "arn:aws:comprehend:us-east-1:000000000000:flywheel/fixture-flywheel"}, "error": "ResourceNotFoundException", "status": 400}
+ ],
+ "after_restart": [
+  {"op": "describe_flywheel", "args": {"FlywheelArn": "${flywheel}"}, "expect": {"FlywheelProperties.DataAccessRoleArn": "arn:aws:iam::000000000000:role/fixture-comprehend-2"}}
+ ],
+ "cleanup": [
+  {"op": "delete_flywheel", "args": {"FlywheelArn": "${flywheel}"}},
+  {"op": "describe_flywheel", "args": {"FlywheelArn": "${flywheel}"}, "error": "ResourceNotFoundException", "status": 400}
+ ]
+}

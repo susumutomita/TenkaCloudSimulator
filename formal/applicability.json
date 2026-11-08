@@ -1,24 +1,24 @@
 {
   "version": 1,
-  "base_sha": "d166f569772de7f45d98e31e9971eeb33b903763",
+  "base_sha": "835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "c167b15685fa4f91c5a7a2c014e3d70e62b7f0c6d3c88452120ac9748d00bc9c",
+      "sha256": "d4c0d3e60e2ae88b440bf5d5909d2b02b52c5e297af642809665afff862c9915",
       "disposition": "documentation",
       "reason": "Document the bounded multipart increment, current ownership and local/CI evidence limits while preserving current provider and dated acceptance history.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "7d4f217479d75ef00e599b36564cbed7651e1833bb5bac37d6b73ef2253106b7",
+      "sha256": "192eaac1463585466c54f997d83ad29f92a672090833cd6d80efc82e56978ae2",
       "disposition": "documentation",
       "reason": "Document the bounded multipart increment, current ownership and local/CI evidence limits while preserving current provider and dated acceptance history.",
       "models": []
     },
     {
       "path": "docs/development-status.md",
-      "sha256": "33ba68b78de56840f21cf844b5a38df6de904b3d19907e48c1e8a8422fbc647a",
+      "sha256": "69206faa966c39d1cc7bf45f522d4f0878b9a1d0a81ab1480273585062f7b41e",
       "disposition": "documentation",
       "reason": "Document the bounded multipart increment, current ownership and local/CI evidence limits while preserving current provider and dated acceptance history.",
       "models": []
@@ -39,7 +39,7 @@
     },
     {
       "path": "formal/README.md",
-      "sha256": "54ddab02e47d72e1a0cc65e68ba354d018727493bc925429d4c1ec5d5d239369",
+      "sha256": "2c76dd75ac71877ee728812bc2d48dafcd600f6402f3e7575fc5e986eb1589a3",
       "disposition": "documentation",
       "reason": "Document the bounded multipart increment, current ownership and local/CI evidence limits while preserving current provider and dated acceptance history.",
       "models": []
@@ -48,7 +48,7 @@
       "path": "formal/S3MultipartState.cfg",
       "sha256": "a71f1ff8ffc526c60e55b8877d717d2bea843990cf1cc934567d13cd31b33991",
       "disposition": "modeled",
-      "reason": "Multipart adds scoped uploads/parts and acknowledged atomic completion through existing S3 version/current/quota transactions. Shared server/CFN/provider changes are additive and preserve their independently bounded obligations. Models do not execute Go/SQL/HTTP/UI; native and CI acceptance remains separate.",
+      "reason": "Preserve existing main obligations while adding bounded multipart storage, dispatch, management and acceptance. Shared paths retain unrelated provider, authentication and lifecycle behavior. Models are abstractions, not proofs of concrete Go/SQL/HTTP/React correctness; native and browser validation remains required.",
       "models": [
         {
           "id": "S3MultipartState",
@@ -66,7 +66,7 @@
       "path": "formal/S3MultipartState.tla",
       "sha256": "bbd39d2c7908c3a3a1676343744360bb282c36e021fea1685bcc956f7aa90616",
       "disposition": "modeled",
-      "reason": "Multipart adds scoped uploads/parts and acknowledged atomic completion through existing S3 version/current/quota transactions. Shared server/CFN/provider changes are additive and preserve their independently bounded obligations. Models do not execute Go/SQL/HTTP/UI; native and CI acceptance remains separate.",
+      "reason": "Preserve existing main obligations while adding bounded multipart storage, dispatch, management and acceptance. Shared paths retain unrelated provider, authentication and lifecycle behavior. Models are abstractions, not proofs of concrete Go/SQL/HTTP/React correctness; native and browser validation remains required.",
       "models": [
         {
           "id": "S3MultipartState",
@@ -82,16 +82,16 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "d258d6600c57a692ffded7c84bf068bfce44e55ee889a65335778d6b762fe3ed",
+      "sha256": "226def69a6e5bf8d077d6c318b8b11e899a027620e8b1fb7b3b9285fcb290763",
       "disposition": "formal-infrastructure",
       "reason": "Add S3MultipartState and five required targeted controls to current main48 models/381 controls, preserving every prior invariant/bound and both90%floors.",
       "models": []
     },
     {
       "path": "internal/aws/cloudformation.go",
-      "sha256": "deb04ef3f70986527e5a57561bcaa599458261e494fc0862e38bfc597ddc5277",
+      "sha256": "62a2273f50013e16f05367d5465664a6e24d6059d0610a2a8fc87922745a4103",
       "disposition": "modeled",
-      "reason": "Multipart adds scoped uploads/parts and acknowledged atomic completion through existing S3 version/current/quota transactions. Shared server/CFN/provider changes are additive and preserve their independently bounded obligations. Models do not execute Go/SQL/HTTP/UI; native and CI acceptance remains separate.",
+      "reason": "Preserve existing main obligations while adding bounded multipart storage, dispatch, management and acceptance. Shared paths retain unrelated provider, authentication and lifecycle behavior. Models are abstractions, not proofs of concrete Go/SQL/HTTP/React correctness; native and browser validation remains required.",
       "models": [
         {
           "id": "StackOwnership",
@@ -138,14 +138,64 @@
             "PendingFrameUnchanged"
           ],
           "limits": "Onlyend-of-Tx selectedSSM/S3physicalabsence+rollback/peerframe contract. ActualSQLhandler effects abstracted bydeliveredrowbits withIGNORE/reinsert/lateclaim/latestack/crosscleanup faults. Independentfinalpredicate readsactualworkingrows, notackflag. earlyOK usedonlymutant torepresentwrongearlycheck. NoSQL/Go/auth/parser/fullCFNrefinement or otherresourceACKproof. Success doesnotimplyfinalstack/claimACK (separatemodel)."
+        },
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite abstract guard/state correspondence only. Assumes coherent generation-and-policy authorization snapshot at use; SQL single-statement snapshots, Go concurrency, parser details, cryptographic SigV4, HTTP dispatch, real time, cross-process isolation and randomness require independent implementation tests. No liveness or Go refinement proof. Restart clears issued state; symbolic token slots may be reused after restart, not evidence of real credential uniqueness. Scoped baseline plus eight config-guard variants previously passed; source-edit registry variants need fresh exact-HEAD gate evidence."
+        },
+        {
+          "id": "CFNEventHistory",
+          "properties": [
+            "PendingFrameUnchanged",
+            "FailureAtomic",
+            "LivePeerPreserved",
+            "EventParentExists",
+            "RetentionBound",
+            "LatestDeletedRetained",
+            "SuccessfulLifecycleExact",
+            "HistoryTracksLatest",
+            "CleanupAfterAllWrites",
+            "ReadSnapshotUnchanged",
+            "NoUnauthorizedDisclosure",
+            "ResolvedGenerationExact",
+            "CursorScoped",
+            "PageExact",
+            "NextCursorExact"
+          ],
+          "limits": "Finite event/history/transaction and snapshot-page correspondence only, not all reachable SQL histories. Assumes coherent read snapshot, unique opaque IDs, FK behavior, resource-handler effects and supplied IAM verdict. No SQL/Go/HTTP/XML/parser/cryptographic/concurrency/crash/restart refinement, event-payload privacy, actual100-row/100-generation quota proof, AWS asynchronous lifecycle or liveness proof. Existing final cleanup models remain unchanged; native ignored-write/late-reinsert/rollback/SDK tests are independent obligations."
+        },
+        {
+          "id": "CFNParameterSnapshot",
+          "properties": [
+            "ValidateBeforeRead",
+            "AuthorizeEveryKeyBeforeRead",
+            "OneAtomicSnapshot",
+            "NoFailedWrites",
+            "NoEarlyWrites",
+            "AdmissionExact",
+            "ValidInputsPublish",
+            "KeysPreserved",
+            "SnapshotFrozen",
+            "RefsUseResolvedValues",
+            "ConditionsUseResolvedValues",
+            "CompletePublication",
+            "ReplayNoSourceRead",
+            "ReplayIdentityExact",
+            "ReplayPreservesStack"
+          ],
+          "limits": "Abstract admission, atomic capture, immutable publication and replay only; no SQL/IAM/Go refinement, concrete constraints, AMI validity, VM execution, secret/list/version/cross-account resolution or liveness proof."
         }
       ]
     },
     {
       "path": "internal/aws/s3.go",
-      "sha256": "5b2c5aebca8ca9f8ba646a2cfb1f9431bb6feb82e5fba29e0715a5b5c2a71bb4",
+      "sha256": "da1e0b4498bb15dcb885ab71da13c46aa498faaf9fb7f38ae34c9837458c415c",
       "disposition": "modeled",
-      "reason": "Multipart adds scoped uploads/parts and acknowledged atomic completion through existing S3 version/current/quota transactions. Shared server/CFN/provider changes are additive and preserve their independently bounded obligations. Models do not execute Go/SQL/HTTP/UI; native and CI acceptance remains separate.",
+      "reason": "Preserve existing main obligations while adding bounded multipart storage, dispatch, management and acceptance. Shared paths retain unrelated provider, authentication and lifecycle behavior. Models are abstractions, not proofs of concrete Go/SQL/HTTP/React correctness; native and browser validation remains required.",
       "models": [
         {
           "id": "ObjectStore",
@@ -232,6 +282,35 @@
           "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Targeted finite-model receipts are separate from exact-HEAD whole-registry merge checking and actual Go/native/integration execution."
         },
         {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Atomic catalog store projection only, shared by the AWS catalog and the Google API catalog (configured project owner as authorization, etag as generation, requestId as client token, force as cascade): authorization-before-commit, typed refusal frames, quota, optional name uniqueness, fresh identifiers, generation-guarded update/delete, child reference integrity with refuse or cascade deletion, and client-token replay. Official shape validation, wire projection, pagination tokens, tag maps, ARN formatting, SQL/locking/crash behavior, JSON encoding and Go refinement are verified by native tests, not this model. A three-step bound is not an API cap."
+        },
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence."
+        },
+        {
           "id": "S3MultipartState",
           "properties": [
             "Budget",
@@ -247,7 +326,7 @@
       "path": "internal/aws/s3_multipart.go",
       "sha256": "af5cf06dc8a7a320b65e5c08d68726053d7bb8b69418a3074d8fcffdad5b0b97",
       "disposition": "modeled",
-      "reason": "Multipart adds scoped uploads/parts and acknowledged atomic completion through existing S3 version/current/quota transactions. Shared server/CFN/provider changes are additive and preserve their independently bounded obligations. Models do not execute Go/SQL/HTTP/UI; native and CI acceptance remains separate.",
+      "reason": "Preserve existing main obligations while adding bounded multipart storage, dispatch, management and acceptance. Shared paths retain unrelated provider, authentication and lifecycle behavior. Models are abstractions, not proofs of concrete Go/SQL/HTTP/React correctness; native and browser validation remains required.",
       "models": [
         {
           "id": "S3MultipartState",
@@ -272,7 +351,7 @@
       "path": "internal/aws/s3_multipart_http.go",
       "sha256": "90772e1ea23a477b3a5fbafa6b8df4a02d80b663f982ca854b38f13c2537a954",
       "disposition": "modeled",
-      "reason": "Multipart adds scoped uploads/parts and acknowledged atomic completion through existing S3 version/current/quota transactions. Shared server/CFN/provider changes are additive and preserve their independently bounded obligations. Models do not execute Go/SQL/HTTP/UI; native and CI acceptance remains separate.",
+      "reason": "Preserve existing main obligations while adding bounded multipart storage, dispatch, management and acceptance. Shared paths retain unrelated provider, authentication and lifecycle behavior. Models are abstractions, not proofs of concrete Go/SQL/HTTP/React correctness; native and browser validation remains required.",
       "models": [
         {
           "id": "S3MultipartState",
@@ -304,7 +383,7 @@
       "path": "internal/aws/s3_versions.go",
       "sha256": "027aab1e5910e5e1e5a9a0506ae01749945703245dabfdf5807f4fa6796044f4",
       "disposition": "modeled",
-      "reason": "Multipart adds scoped uploads/parts and acknowledged atomic completion through existing S3 version/current/quota transactions. Shared server/CFN/provider changes are additive and preserve their independently bounded obligations. Models do not execute Go/SQL/HTTP/UI; native and CI acceptance remains separate.",
+      "reason": "Preserve existing main obligations while adding bounded multipart storage, dispatch, management and acceptance. Shared paths retain unrelated provider, authentication and lifecycle behavior. Models are abstractions, not proofs of concrete Go/SQL/HTTP/React correctness; native and browser validation remains required.",
       "models": [
         {
           "id": "S3Versions",
@@ -342,9 +421,9 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "120b6aafaeab70bb955475de8b924f4abae7ec0ef8436c721b96addea3c45168",
+      "sha256": "a0db4e53d9c7c33dec0041f19ef680ef4f0ffce6a13095c6ebe154851738fe69",
       "disposition": "modeled",
-      "reason": "Multipart adds scoped uploads/parts and acknowledged atomic completion through existing S3 version/current/quota transactions. Shared server/CFN/provider changes are additive and preserve their independently bounded obligations. Models do not execute Go/SQL/HTTP/UI; native and CI acceptance remains separate.",
+      "reason": "Preserve existing main obligations while adding bounded multipart storage, dispatch, management and acceptance. Shared paths retain unrelated provider, authentication and lifecycle behavior. Models are abstractions, not proofs of concrete Go/SQL/HTTP/React correctness; native and browser validation remains required.",
       "models": [
         {
           "id": "SQSLifecycle",
@@ -471,6 +550,61 @@
           "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded."
         },
         {
+          "id": "LandingAccessAdmission",
+          "properties": [
+            "ExternalBoundary",
+            "PublicResponse",
+            "TokenBoundary",
+            "UnknownNeverStatic"
+          ],
+          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
+        },
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Atomic catalog store projection only, shared by the AWS catalog and the Google API catalog (configured project owner as authorization, etag as generation, requestId as client token, force as cascade): authorization-before-commit, typed refusal frames, quota, optional name uniqueness, fresh identifiers, generation-guarded update/delete, child reference integrity with refuse or cascade deletion, and client-token replay. Official shape validation, wire projection, pagination tokens, tag maps, ARN formatting, SQL/locking/crash behavior, JSON encoding and Go refinement are verified by native tests, not this model. A three-step bound is not an API cap."
+        },
+        {
+          "id": "SNSLifecycle",
+          "properties": [
+            "NoOrphans",
+            "MessageCountBounded",
+            "ByteBudgetBounded",
+            "DeliveryBudgetBounded",
+            "DurableAck",
+            "PublishRecipientsExact",
+            "PeerFrame",
+            "NoDanglingDeliveredMessage",
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
+          ],
+          "limits": "Atomic state transitions assume transaction rollback and model validated existing state. Captured post-operation ACK and frozen-delete ownership, globally bounded count/abstract byte/delivery budgets and target/peer frames only. Not SQL/driver/crash/Go refinement, UUID allocation, schema migration, UTF-8 byte calculation, quotas at real cardinality, IAM or outbound delivery. Delivery audit may outlive Unsubscribe, but not its stored message or topic. Ignored/vanishing/late-reinsert native SQLite faults and two-host SDK checks are separate executable obligations."
+        },
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence."
+        },
+        {
           "id": "S3MultipartState",
           "properties": [
             "Budget",
@@ -491,9 +625,9 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "b28469e0877fe8c77721b1f314289bf25f093289ac80ea204361498c5e4aa2cf",
+      "sha256": "06637b31a599873b529f3132b198a7c27adf5168e35ff88cd72ee7f2a837ebd0",
       "disposition": "modeled",
-      "reason": "Multipart adds scoped uploads/parts and acknowledged atomic completion through existing S3 version/current/quota transactions. Shared server/CFN/provider changes are additive and preserve their independently bounded obligations. Models do not execute Go/SQL/HTTP/UI; native and CI acceptance remains separate.",
+      "reason": "Preserve existing main obligations while adding bounded multipart storage, dispatch, management and acceptance. Shared paths retain unrelated provider, authentication and lifecycle behavior. Models are abstractions, not proofs of concrete Go/SQL/HTTP/React correctness; native and browser validation remains required.",
       "models": [
         {
           "id": "SecretsRevealEpoch",
@@ -572,6 +706,30 @@
             "LocalePreservesIntent"
           ],
           "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        },
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model."
+        },
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
         }
       ]
     },
@@ -584,14 +742,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "dd2eff00a4acc87841b5fea87d5227e6266a669722875de89e83e928ddebb3b1",
+      "sha256": "e4b080e4f04b8a54674f7c02c24530feb9b004b748508ad670b8f5dd863f4634",
       "disposition": "formal-infrastructure",
       "reason": "Add S3MultipartState and five required targeted controls to current main48 models/381 controls, preserving every prior invariant/bound and both90%floors.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "12431b0b2b16af059531d70f68f10ca5908a1ddfeefa25aed193df66eeb234de",
+      "sha256": "28cf722e2e21c1279bfe2eb19fcc98083218f2258891197b56634df32030a475",
       "disposition": "formal-infrastructure",
       "reason": "Add S3MultipartState and five required targeted controls to current main48 models/381 controls, preserving every prior invariant/bound and both90%floors.",
       "models": []
@@ -612,7 +770,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "0abfd3ac6155fdcbcc4a0fbfb9a05d5476d2522c6e50f71932d3a158fd978077",
+      "sha256": "cf2f81a3212ee2a81323ac7b5de4af05c78c80ad179f106073b36c634cba417f",
       "disposition": "test-support",
       "reason": "Preserve main native flows and exact inventories, adding precisely multipart method/headers/queries; test SQL faults, real scoped persistence, SDK/UI and served templates. Narrow provenance detector exception recognizes only the reviewed single operation literal and preserves the original pinned guard bytes plus all negative controls.",
       "models": []
@@ -633,7 +791,7 @@
     },
     {
       "path": "test/e2e/s3_multipart.py",
-      "sha256": "79ec04dd7d2770e9b2c9b0a2f36161ec06769f567b76a693e68450323fb76acb",
+      "sha256": "79262848afa73d945bbed0e3f6e84e4a5b06e8cfbd98e063120fa5b110e82154",
       "disposition": "test-support",
       "reason": "Preserve main native flows and exact inventories, adding precisely multipart method/headers/queries; test SQL faults, real scoped persistence, SDK/UI and served templates. Narrow provenance detector exception recognizes only the reviewed single operation literal and preserves the original pinned guard bytes plus all negative controls.",
       "models": []
@@ -644,6 +802,13 @@
       "disposition": "test-support",
       "reason": "Preserve main native flows and exact inventories, adding precisely multipart method/headers/queries; test SQL faults, real scoped persistence, SDK/UI and served templates. Narrow provenance detector exception recognizes only the reviewed single operation literal and preserves the original pinned guard bytes plus all negative controls.",
       "models": []
+    },
+    {
+      "path": "test/e2e/sakura_reference_live.py",
+      "disposition": "test-support",
+      "reason": "Repair exact additive multipart acceptance compatibility without weakening an operation, response, identity, accessibility or state-preservation assertion.",
+      "models": [],
+      "sha256": "b267c4cbafedff623117df2a52584a6c28ef28ba624334a6edddddadb6d5b8aa"
     },
     {
       "path": "test/e2e/scalar_s3_docs.py",
@@ -682,23 +847,23 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "8f195bf11fde0c3584b59c3ad6cc4a5230decbb7153abf242578cd2f4ce0a912",
+      "sha256": "eaec7f8ad79be6c93413af928616883fb021a32a01f9713840cf568ce860a7dc",
       "disposition": "presentation",
       "reason": "Add multipart native management/reference and deterministic embedded build, preserving every current provider, native identifier, original license and notice. Actual async/browser acceptance remains required.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "1ee70e51fd7567ad2086409a593d4875fde49dfcebf56ce1db2a83a71b6316da",
+      "sha256": "7e99676499683699ef78ef2d217210b0699ab44733dd67ed0dd6cc47e9b3537b",
       "disposition": "presentation",
       "reason": "Add multipart native management/reference and deterministic embedded build, preserving every current provider, native identifier, original license and notice. Actual async/browser acceptance remains required.",
       "models": []
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "656098c2f2404cd6a033b28a573423a56a31f84b6204f2b160420d835aecf57a",
+      "sha256": "0a02d3c6e1f177a0c7521c56863dcb3036eec129a6d7765e42e05db0021994d6",
       "disposition": "modeled",
-      "reason": "Multipart adds scoped uploads/parts and acknowledged atomic completion through existing S3 version/current/quota transactions. Shared server/CFN/provider changes are additive and preserve their independently bounded obligations. Models do not execute Go/SQL/HTTP/UI; native and CI acceptance remains separate.",
+      "reason": "Preserve existing main obligations while adding bounded multipart storage, dispatch, management and acceptance. Shared paths retain unrelated provider, authentication and lifecycle behavior. Models are abstractions, not proofs of concrete Go/SQL/HTTP/React correctness; native and browser validation remains required.",
       "models": [
         {
           "id": "BrowserSessions",
@@ -790,6 +955,17 @@
             "LocalePreservesIntent"
           ],
           "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        },
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model."
         }
       ]
     },

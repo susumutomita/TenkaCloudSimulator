@@ -1,0 +1,26 @@
+{
+ "api": "ids.v1",
+ "steps": [
+  {"call": "projects.locations.endpoints.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1-a", "endpointId": "fixture"}, "body": {"network": "projects/tenkacloud-local/global/networks/default", "severity": "HIGH", "threatExceptions": ["1001"]}, "save": {"op0": "name", "r0": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op0}"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1-a"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.endpoints.get", "args": {"name": "${r0}"}},
+  {"call": "projects.locations.endpoints.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1-a"}, "expect": {"endpoints#count": 1}},
+  {"call": "projects.locations.endpoints.patch", "args": {"name": "${r0}", "updateMask": "trafficLogs"}, "body": {"trafficLogs": true}},
+  {"call": "projects.locations.endpoints.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1-a", "endpointId": "nosev"}, "error": "INVALID_ARGUMENT", "status": 400, "body": {"network": "projects/tenkacloud-local/global/networks/default"}},
+  {"call": "projects.locations.endpoints.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "endpointId": "regional"}, "error": "INVALID_ARGUMENT", "status": 400, "body": {"network": "projects/tenkacloud-local/global/networks/default", "severity": "LOW"}},
+  {"call": "projects.locations.operations.cancel", "args": {"name": "projects/tenkacloud-local/locations/us-central1-a/operations/operation-x", "body": {}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.endpoints.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1-a/endpoints/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.endpoints.list", "args": {"parent": "projects/other-project/locations/us-central1-a"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.endpoints.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1-a"}, "expect": {"endpoints#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.endpoints.get", "args": {"name": "${r0}"}, "expect": {"trafficLogs": true}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.endpoints.delete", "args": {"name": "${r0}"}},
+  {"call": "projects.locations.endpoints.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1-a"}, "expect": {"endpoints#count": 0}}
+ ]
+}

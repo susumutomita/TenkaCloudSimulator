@@ -1,0 +1,432 @@
+{
+ "components": {
+  "schemas": {
+   "BudgetDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "BudgetName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreatePortfolioInput": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceptLanguage": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "DisplayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IdempotencyToken": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProviderName": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 20,
+      "type": "array"
+     }
+    },
+    "required": [
+     "DisplayName",
+     "ProviderName",
+     "IdempotencyToken"
+    ],
+    "type": "object"
+   },
+   "CreatePortfolioOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "PortfolioDetail": {
+      "$ref": "#/components/schemas/PortfolioDetail"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DeletePortfolioInput": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceptLanguage": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "Id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Id"
+    ],
+    "type": "object"
+   },
+   "DeletePortfolioOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DescribePortfolioInput": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceptLanguage": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "Id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Id"
+    ],
+    "type": "object"
+   },
+   "DescribePortfolioOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Budgets": {
+      "items": {
+       "$ref": "#/components/schemas/BudgetDetail"
+      },
+      "type": "array"
+     },
+     "PortfolioDetail": {
+      "$ref": "#/components/schemas/PortfolioDetail"
+     },
+     "TagOptions": {
+      "items": {
+       "$ref": "#/components/schemas/TagOptionDetail"
+      },
+      "type": "array"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListPortfoliosInput": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceptLanguage": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "PageSize": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "PageToken": {
+      "maxLength": 2024,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListPortfoliosOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "NextPageToken": {
+      "maxLength": 2024,
+      "type": "string"
+     },
+     "PortfolioDetails": {
+      "items": {
+       "$ref": "#/components/schemas/PortfolioDetail"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PortfolioDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "ARN": {
+      "maxLength": 150,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "DisplayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProviderName": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagOptionDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "Active": {
+      "type": "boolean"
+     },
+     "Id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Owner": {
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdatePortfolioInput": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceptLanguage": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "AddTags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 20,
+      "type": "array"
+     },
+     "Description": {
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "DisplayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProviderName": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RemoveTags": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Id"
+    ],
+    "type": "object"
+   },
+   "UpdatePortfolioOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "PortfolioDetail": {
+      "$ref": "#/components/schemas/PortfolioDetail"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Service Catalog API (2015-12-10). Every other official operation returns HTTP 501 UnknownOperationException. Portfolios are stored metadata: products, provisioning artifacts, launches, provisioned products, constraints, principal and product associations, sharing, TagOptions and budgets are not implemented and return UnknownOperationException with HTTP 501. Tags are set only at creation; UpdatePortfolio refuses AddTags and RemoveTags, and AcceptLanguage is accepted only as en.",
+  "title": "AWS Service Catalog (simulator catalog)",
+  "version": "2015-12-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "servicecatalogJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AWS242ServiceCatalogService.CreatePortfolio",
+        "AWS242ServiceCatalogService.DeletePortfolio",
+        "AWS242ServiceCatalogService.DescribePortfolio",
+        "AWS242ServiceCatalogService.ListPortfolios",
+        "AWS242ServiceCatalogService.UpdatePortfolio"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreatePortfolio": {
+         "summary": "X-Amz-Target: AWS242ServiceCatalogService.CreatePortfolio",
+         "value": {}
+        },
+        "DeletePortfolio": {
+         "summary": "X-Amz-Target: AWS242ServiceCatalogService.DeletePortfolio",
+         "value": {}
+        },
+        "DescribePortfolio": {
+         "summary": "X-Amz-Target: AWS242ServiceCatalogService.DescribePortfolio",
+         "value": {}
+        },
+        "ListPortfolios": {
+         "summary": "X-Amz-Target: AWS242ServiceCatalogService.ListPortfolios",
+         "value": {}
+        },
+        "UpdatePortfolio": {
+         "summary": "X-Amz-Target: AWS242ServiceCatalogService.UpdatePortfolio",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS Service Catalog JSON 1.1 operations",
+    "tags": [
+     "AWS Service Catalog"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Service Catalog API (2015-12-10). Every other official operation returns HTTP 501 UnknownOperationException. Portfolios are stored metadata: products, provisioning artifacts, launches, provisioned products, constraints, principal and product associations, sharing, TagOptions and budgets are not implemented and return UnknownOperationException with HTTP 501. Tags are set only at creation; UpdatePortfolio refuses AddTags and RemoveTags, and AcceptLanguage is accepted only as en.",
+   "name": "AWS Service Catalog"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/servicecatalog/2015-12-10/service-2.json",
+  "sha256": "d7a545ba933809a43b8c60761e4c6115d3150f15246526bdc107d551832e3dcd",
+  "license": "Apache-2.0"
+ }
+}

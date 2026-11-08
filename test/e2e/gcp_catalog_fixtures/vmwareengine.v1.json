@@ -1,0 +1,236 @@
+{
+ "api": "vmwareengine.v1",
+ "steps": [
+  {
+   "call": "projects.locations.vmwareEngineNetworks.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/global",
+    "vmwareEngineNetworkId": "fixture-net"
+   },
+   "body": {
+    "type": "STANDARD",
+    "description": "Fixture"
+   },
+   "save": {
+    "op_network": "name",
+    "network": "response.name"
+   },
+   "expect": {
+    "done": true,
+    "response.state": "ACTIVE"
+   }
+  },
+  {
+   "call": "projects.locations.vmwareEngineNetworks.get",
+   "args": {
+    "name": "${network}"
+   },
+   "expect": {
+    "type": "STANDARD"
+   }
+  },
+  {
+   "call": "projects.locations.vmwareEngineNetworks.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/global"
+   },
+   "expect": {
+    "vmwareEngineNetworks#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.vmwareEngineNetworks.patch",
+   "args": {
+    "name": "${network}",
+    "updateMask": "description"
+   },
+   "body": {
+    "description": "Patched"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.vmwareEngineNetworks.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "vmwareEngineNetworkId": "us-central1-default"
+   },
+   "body": {
+    "type": "LEGACY"
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.networkPolicies.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "networkPolicyId": "fixture-edge"
+   },
+   "body": {
+    "vmwareEngineNetwork": "${network}",
+    "edgeServicesCidr": "192.168.0.0/26",
+    "internetAccess": {
+     "enabled": true
+    }
+   },
+   "save": {
+    "op_policy": "name",
+    "policy": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.networkPolicies.get",
+   "args": {
+    "name": "${policy}"
+   },
+   "expect": {
+    "edgeServicesCidr": "192.168.0.0/26"
+   }
+  },
+  {
+   "call": "projects.locations.networkPolicies.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "networkPolicies#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.networkPolicies.patch",
+   "args": {
+    "name": "${policy}",
+    "updateMask": "edgeServicesCidr"
+   },
+   "body": {
+    "edgeServicesCidr": "10.10.0.0/26"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.networkPolicies.patch",
+   "args": {
+    "name": "${policy}",
+    "updateMask": "edgeServicesCidr"
+   },
+   "body": {
+    "edgeServicesCidr": "8.8.8.0/26"
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.privateClouds.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1-a",
+    "privateCloudId": "pc",
+    "body": {}
+   },
+   "error": "UNIMPLEMENTED",
+   "status": 501
+  },
+  {
+   "call": "projects.locations.operations.get",
+   "args": {
+    "name": "${op_policy}"
+   },
+   "expect": {
+    "response.edgeServicesCidr": "192.168.0.0/26"
+   }
+  },
+  {
+   "call": "projects.locations.operations.list",
+   "args": {
+    "name": "projects/tenkacloud-local/locations/global"
+   },
+   "expect": {
+    "operations#count": 2
+   }
+  },
+  {
+   "call": "projects.locations.vmwareEngineNetworks.list",
+   "args": {
+    "parent": "projects/other-project/locations/global"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.locations.vmwareEngineNetworks.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/global"
+   },
+   "expect": {
+    "vmwareEngineNetworks#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.locations.vmwareEngineNetworks.get",
+   "args": {
+    "name": "${network}"
+   },
+   "expect": {
+    "description": "Patched"
+   }
+  },
+  {
+   "call": "projects.locations.networkPolicies.get",
+   "args": {
+    "name": "${policy}"
+   },
+   "expect": {
+    "edgeServicesCidr": "10.10.0.0/26"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.locations.networkPolicies.delete",
+   "args": {
+    "name": "${policy}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.vmwareEngineNetworks.delete",
+   "args": {
+    "name": "${network}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.vmwareEngineNetworks.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/global"
+   },
+   "expect": {
+    "vmwareEngineNetworks#count": 0
+   }
+  },
+  {
+   "call": "projects.locations.networkPolicies.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "networkPolicies#count": 0
+   }
+  }
+ ]
+}

@@ -7,9 +7,12 @@ import shutil
 import stat
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 BASE_MODELS = {'S3MultipartState', 'AzureBlobState',
+ 'CatalogConsoleEpoch',
+ 'CatalogResourceLifecycle',
  'AzurePropertiesEpoch',
  'AzurePropertiesTarget',
  'BlobRange',
@@ -56,9 +59,11 @@ BASE_MODELS = {'S3MultipartState', 'AzureBlobState',
  'SecretsRevealEpoch',
  'SecretsVersionLifecycle',
  'StackOwnership',
- 'StartupTokenVisibility'}
-BASE_INVARIANTS = {
-    'S3MultipartState': {'TypeOK','Budget','NoOrphans','Cleanup','RefusalAtomic'},'AzureBlobState': {'BudgetBounded',
+ 'StartupTokenVisibility',
+ 'LandingTopologyState', 'LandingAccessAdmission', 'LoginInputIntent'}
+BASE_INVARIANTS = {'S3MultipartState': {'TypeOK', 'Budget', 'NoOrphans', 'Cleanup', 'RefusalAtomic'}, 'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'ReloadOnlyAfterAck', 'OnlyCurrentReplies', 'FailureVisible', 'SingleWriter'},
+ 'CatalogResourceLifecycle': {'PeerFrame', 'QuotaBound', 'FailureFrame', 'FreshIDs', 'TokenOnce', 'GenerationAdvances', 'ChildGuard', 'StaleWriteRejected', 'AuthorizationFirst', 'TokenBinding', 'UniqueNames', 'TypeOK', 'ReplayNoDuplicate'},
+ 'AzureBlobState': {'BudgetBounded',
                     'ConditionEnforced',
                     'FailureAtomic',
                     'FreshWriteIdentity',
@@ -451,10 +456,29 @@ BASE_INVARIANTS = {
                             'FileIdentityFrozen',
                             'HistoryVisibility',
                             'InvalidFileNeverEmits',
-                            'TypeOK'}}
+                            'TypeOK'},
+ 'LandingAccessAdmission': {'ExternalBoundary',
+                            'PublicResponse',
+                            'TokenBoundary',
+                            'TypeOK',
+                            'UnknownNeverStatic'},
+ 'LandingTopologyState': {'CanonicalHTMLAvailable',
+                          'DOMSelectionAgrees',
+                          'InitialFragmentSelection',
+                          'InvalidInputPreservesSelection',
+                          'MountUsesLatestSelection',
+                          'NodeClickSelectsExact',
+                          'PaintUsesLatestSelection',
+                          'ProviderSelectsDefault',
+                          'RetiredCallbackNoEffect',
+                          'RetiredCanvasHidden',
+                          'TypeOK',
+                          'UnsupportedCanvasHidden'},
+ 'LoginInputIntent': {'LocaleIntentFrame', 'NoEmptyPOST', 'IntentInvalidatesAsync', 'TypeOK', 'SubmissionSelectionExact', 'NoPOSTWhileBlocked', 'StaleFileCompletionFrame', 'AdoptedValueExact'}}
 # Established controls require an explicit gate-policy change before retirement.
-REQUIRED_MUTANTS = {
-    'S3MultipartState': {'OmitPartBudget','OmitUploadParent','RetainCompletedParts','PartialFailure','OmitUploadBinding'},'AzureBlobState': {'ContainerDeleteErasesPeer',
+REQUIRED_MUTANTS = {'S3MultipartState': {'OmitPartBudget', 'OmitUploadParent', 'RetainCompletedParts', 'PartialFailure', 'OmitUploadBinding'}, 'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureError', 'ReloadAfterFailedWrite', 'AcceptAfterUnmount', 'AllowConcurrentWrites'},
+ 'CatalogResourceLifecycle': {'AllowDuplicateNames', 'ReplayCommits', 'IgnoreGeneration', 'TokenToFutureID', 'UpdateKeepsGeneration', 'ReplayCreatesRow', 'WritePeerScope', 'ReuseDeletedID', 'IgnoreQuota', 'DeleteParentWithChildren', 'FaultCommits', 'DeniedCommits'},
+ 'AzureBlobState': {'ContainerDeleteErasesPeer',
                     'ContainerDeleteLeavesBlobs',
                     'FailedPutCommits',
                     'IgnoreAccountOwner',
@@ -829,10 +853,29 @@ REQUIRED_MUTANTS = {
                              'RetainDeletedVersions',
                              'RetainPreviousLabelOnPromote'},
  'StackOwnership': {'ReclaimDriftedResource'},
- 'StartupTokenVisibility': {'OmittedCIGuard', 'OverwriteExistingToken', 'OmittedTTYGuard'}}
+ 'StartupTokenVisibility': {'OmittedCIGuard', 'OverwriteExistingToken', 'OmittedTTYGuard'},
+ 'LandingAccessAdmission': {'IgnoreHostBoundary',
+                            'IgnoreOriginBoundary',
+                            'MakeEveryPathPublic',
+                            'RequireTokenForProductInformation',
+                            'ServeNonReadMethod',
+                            'ServeUnknownResource'},
+ 'LandingTopologyState': {'AcceptInvalidSelection',
+                          'ClickSelectsDifferentNode',
+                          'DrawInitialSelection',
+                          'HideCanonicalHTMLOnRetire',
+                          'LatePaintMutatesSurface',
+                          'LeaveRetiredCanvasVisible',
+                          'MountCapturesInitialSelection',
+                          'ResetInitialFragmentSelectionOnMount',
+                          'RevealUnsupportedCanvas',
+                          'WrongDetailProjection',
+                          'WrongProviderDefault'},
+ 'LoginInputIntent': {'FileCompletionIgnoresRevision', 'NonemptyDOMUsesControlledState', 'UnmountedFileCompletionPublishes', 'LocaleClearsIntent', 'LocaleInvalidatesCurrentFile', 'SubmitIgnoresBusy', 'CurrentFileErrorDiscarded', 'FlushDoesNotAdoptNativeValue', 'NativeAdoptionSkipsNewIntent', 'EmptyDOMReusesOldCredential', 'OldPasteSurvivesNewIntent', 'SubmitIgnoresFileGate', 'FocusSkipsNativeAdoption', 'KeyDownSkipsNativeAdoption'}}
 REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation.go',
                            'internal/aws/cloudformation_conditions.go',
-                           'internal/aws/cloudformation_conditions_link.go'},
+                           'internal/aws/cloudformation_conditions_link.go',
+                           'internal/aws/cloudformation_intrinsics.go'},
  'CFNConditionMemoDepth': {'internal/aws/cloudformation_conditions.go'},
  'CFNFinalCleanupACK': {'internal/aws/cloudformation.go',
                         'internal/aws/cloudformation_cleanup_ack_test.go'},
@@ -861,7 +904,163 @@ REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation
  'SecretVersionListing': {'internal/aws/secret_http.go',
                           'internal/aws/secrets_manager_versions.go',
                           'internal/aws/secrets_manager_versions_http_test.go',
-                          'internal/aws/secrets_manager_versions_test.go'}}
+                          'internal/aws/secrets_manager_versions_test.go'},
+ 'LandingAccessAdmission': {'internal/server/access.go',
+                            'internal/server/landing.go',
+                            'internal/server/server.go'},
+ 'LandingTopologyState': {'internal/server/landing/landing.mjs',
+                          'internal/server/landing/topology-canvas.mjs',
+                          'internal/server/landing/topology-data.mjs'},
+ 'LoginInputIntent': {'tools/console/src/login.jsx', 'test/e2e/login_paste.py', 'test/console/login-native-input.test.mjs', 'internal/server/web/app.js', 'test/e2e/login_token_file.py'}}
+# SNS obligations are fixed policy, not inferred from a mutable registry.
+BASE_MODELS.update({'SNSLifecycle', 'SNSAdmission'})
+BASE_INVARIANTS.update({'SNSAdmission': {'NoFIFOPublish',
+                  'NoRegionMismatch',
+                  'NoRejectedMutation',
+                  'NoSuccessOnRefusal',
+                  'NoUnauthorizedEffect',
+                  'TypeOK'},
+ 'SNSLifecycle': {'DeleteRetryAcknowledged', 'ByteBudgetBounded',
+                  'DeleteAckEmpty',
+                  'DeliveryBudgetBounded',
+                  'DurableAck',
+                  'MessageCountBounded',
+                  'NoDanglingDeliveredMessage',
+                  'NoOrphans',
+                  'PeerFrame',
+                  'PublishRecipientsExact',
+                  'TypeOK'}})
+REQUIRED_MUTANTS.update({'SNSAdmission': {'AcceptUnknownOperation',
+                  'BypassAuthorization',
+                  'IgnoreAttributeAdmission',
+                  'IgnoreDuplicateFields',
+                  'IgnoreInitialization',
+                  'IgnoreRegionBinding',
+                  'IgnoreSigningScope',
+                  'IgnoreValueAdmission',
+                  'MutateAfterRejection',
+                  'PermitFIFOPublication'},
+ 'SNSLifecycle': {'RejectAbsentDelete', 'AcknowledgeWithoutCleanup',
+                  'DeletePeerSubscriptions',
+                  'IgnoreByteBudget',
+                  'IgnoreDeliveryBudget',
+                  'IgnoreMessageCount',
+                  'IgnoreWriteAcknowledgement',
+                  'KeepDeletedDeliveries',
+                  'KeepDeletedMessages',
+                  'MissingTopicGuard',
+                  'OmitDeliveryRows'}})
+REQUIRED_SOURCE_SCOPES.update({'SNSAdmission': {'internal/aws/s3.go',
+                  'internal/aws/sns.go',
+                  'internal/aws/sns_admission_regression_test.go',
+                  'internal/aws/ssm.go',
+                  'internal/server/server.go'},
+ 'SNSLifecycle': {'internal/aws/sns_storage_regression_test.go',
+                  'internal/aws/sns_store.go',
+                  'internal/aws/sns_test.go',
+                  'internal/server/server.go',
+                  'internal/server/sns_test.go'}})
+
+# STS guard lifecycle requirements. Existing service requirements stay intact.
+BASE_MODELS.add('STSSessionLifecycle')
+BASE_INVARIANTS['STSSessionLifecycle'] = {'UseRequiresAllGuards', 'IssueRequiresAllGuards', 'TypeOK'}
+REQUIRED_MUTANTS['STSSessionLifecycle'] = {'SkipChain',
+ 'SkipExpiry',
+ 'SkipExternal',
+ 'SkipGeneration',
+ 'SkipPermission',
+ 'SkipSignature',
+ 'SkipTenant',
+ 'SkipTrust'}
+REQUIRED_SOURCE_SCOPES['STSSessionLifecycle'] = {'internal/aws/cloudformation.go',
+ 'internal/aws/iam_managed_query.go',
+ 'internal/aws/iam_query.go',
+ 'internal/aws/iam_roles.go',
+ 'internal/aws/ssm.go',
+ 'internal/aws/sts.go',
+ 'internal/aws/sts_credentials.go',
+ 'internal/aws/sts_roles.go',
+ 'internal/aws/sts_signature.go',
+ 'internal/server/access.go',
+ 'internal/server/access_sdk.go'}
+
+
+# Synchronous local CloudFormation event/history requirements.
+BASE_MODELS.add('CFNEventHistory')
+BASE_INVARIANTS['CFNEventHistory'] = {'CleanupAfterAllWrites',
+ 'CursorScoped',
+ 'EventParentExists',
+ 'FailureAtomic',
+ 'HistoryTracksLatest',
+ 'LatestDeletedRetained',
+ 'LivePeerPreserved',
+ 'NextCursorExact',
+ 'NoUnauthorizedDisclosure',
+ 'PageExact',
+ 'PendingFrameUnchanged',
+ 'ReadSnapshotUnchanged',
+ 'ResolvedGenerationExact',
+ 'RetentionBound',
+ 'SuccessfulLifecycleExact',
+ 'TypeOK'}
+REQUIRED_MUTANTS['CFNEventHistory'] = {'AcknowledgeBeforeFinalWrites',
+ 'IgnoreCursorBound',
+ 'LeaveOrphanEvents',
+ 'PruneLiveHistory',
+ 'PublishFailedTransaction',
+ 'PublishPending',
+ 'ResolveDeletedByName',
+ 'ReturnFirstRowCursor',
+ 'ReversePageOrder',
+ 'SkipAuthorization',
+ 'SkipCursorGeneration',
+ 'SkipDeletedCountACK',
+ 'SkipEventWriteACK',
+ 'SkipHistoryWriteACK',
+ 'SkipRegion',
+ 'SkipSelectedHistoryACK'}
+REQUIRED_SOURCE_SCOPES['CFNEventHistory'] = {'internal/aws/cloudformation.go',
+ 'internal/aws/cloudformation_events.go',
+ 'internal/aws/cloudformation_events_cleanup_order_test.go',
+ 'internal/aws/cloudformation_events_test.go'}
+
+# Bounded local CloudFormation SSM snapshot requirements.
+BASE_MODELS.add('CFNParameterSnapshot')
+BASE_INVARIANTS['CFNParameterSnapshot'] = {'AdmissionExact',
+ 'AuthorizeEveryKeyBeforeRead',
+ 'CompletePublication',
+ 'ConditionsUseResolvedValues',
+ 'KeysPreserved',
+ 'NoEarlyWrites',
+ 'NoFailedWrites',
+ 'OneAtomicSnapshot',
+ 'RefsUseResolvedValues',
+ 'ReplayIdentityExact',
+ 'ReplayNoSourceRead',
+ 'ReplayPreservesStack',
+ 'SnapshotFrozen',
+ 'TypeOK',
+ 'ValidInputsPublish',
+ 'ValidateBeforeRead'}
+REQUIRED_MUTANTS['CFNParameterSnapshot'] = {'AcceptMismatchedToken',
+ 'AcceptNonStringSource',
+ 'AuthorizeOnlyFirstKey',
+ 'ConditionsUseKeys',
+ 'LeakWritesOnReadFailure',
+ 'OmitEvents',
+ 'RefreshAtCommit',
+ 'RefsUseKeys',
+ 'ReplayReadsAgain',
+ 'SkipInputValidation',
+ 'SkipPlanValidation',
+ 'SkipReplayAuthorization',
+ 'StoreValuesAsKeys',
+ 'TearSnapshot',
+ 'ValidateResolvedValueAsKey'}
+REQUIRED_SOURCE_SCOPES['CFNParameterSnapshot'] = {'internal/aws/cloudformation.go',
+ 'internal/aws/cloudformation_conditions.go',
+ 'internal/aws/cloudformation_ssm_parameters.go'}
+
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a
@@ -1093,9 +1292,43 @@ def run_suite(root, jar, reports, registry_path='formal/models.json', timeout=60
                     tla.write_text(candidate)
                     cfg.write_text(config)
                     command = [java, '-cp', str(pinned_jar), 'tlc2.TLC', '-workers', '1', '-metadir', str(temp / (name + '-states')), '-config', str(cfg), str(tla)]
+                    started = time.monotonic()
                     try:
                         result = subprocess.run(command, capture_output=True, text=True, timeout=timeout, check=False, cwd=temp)
                     except (OSError, subprocess.TimeoutExpired) as error:
+                        # TimeoutExpired can retain bytes even with text=True.
+                        # Keep exact partial streams separately; never log the
+                        # exception message/command/environment as diagnostics.
+                        failure = {'model': model['id'], 'case': name, 'success': False,
+                                   'exception_type': type(error).__name__,
+                                   'exit_code': None,
+                                   'exit_code_status': 'unavailable_from_process_exception',
+                                   'errno': getattr(error, 'errno', None),
+                                   'timeout_seconds': getattr(error, 'timeout', None),
+                                   'deadline_seconds': timeout,
+                                   'elapsed_seconds': time.monotonic() - started,
+                                   'model_sha256': digest(candidate.encode()),
+                                   'config_sha256': digest(config.encode())}
+                        evidence['failure'] = failure
+                        for channel in ('stdout', 'stderr'):
+                            output = getattr(error, channel, None)
+                            raw = output if isinstance(output, bytes) else output.encode('utf-8', errors='surrogatepass') if isinstance(output, str) else b''
+                            filename = name + '.failure.' + channel + '.bin'
+                            stream = {'path': filename, 'sha256': digest(raw),
+                                      'bytes': len(raw), 'available': output is not None,
+                                      'source_type': type(output).__name__, 'retained': False}
+                            failure[channel] = stream
+                            try:
+                                (reports / filename).write_bytes(raw)
+                                stream['retained'] = True
+                            except OSError as diagnostic_error:
+                                stream['write_error_type'] = type(diagnostic_error).__name__
+                                stream['write_errno'] = diagnostic_error.errno
+                        try:
+                            (reports / (name + '.failure.json')).write_text(json.dumps(failure, indent=2) + '\n')
+                        except OSError as diagnostic_error:
+                            failure['metadata_write_error_type'] = type(diagnostic_error).__name__
+                            failure['metadata_write_errno'] = diagnostic_error.errno
                         raise GateError('TLC could not finish: ' + name) from error
                     text = result.stdout + result.stderr
                     (reports / (name + '.txt')).write_text(text)

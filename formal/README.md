@@ -1,11 +1,43 @@
 # Finite state models
 
-Current registry: 48 models / 381 literal-protected controls
-(429 required executions). All incoming main44 model objects, TLA/CFG bytes, properties
-and347 controls are preserved. Sakura metadata/admission/startup add35 controls;
-SakuraDisksViewEpoch adds17 more for request scope/sequence, stale frames,
-ACK/form exit, read-only retry and locale continuity. These four scoped baselines
-and52 controls passed separately. The combined immutable 429-case gate passed at `c298972` (48 baselines and 381 named controls). The docs-only `414c902` subsequently passed all 61 E2E/start checks; exact-head hosted CI for the publication candidate remains pending. Registration alone and source review do not substitute for actual execution.
+STS/event integration inventory: **57 models / 474 literal-protected controls
+(531 required executions)**. The 55 public-base model entries are preserved
+unchanged. STSSessionLifecycle adds eight guard-removal controls for issuance and
+generation-bound session use. CFNEventHistory adds sixteen controls for local
+transactional event/history publication, retention and generation-scoped reads.
+Neither is cryptographic, SQL/Go refinement or full cloud-behavior proof.
+Exact-HEAD whole-gate validation for this candidate is pending. See the
+[event model scope](../docs/formal-cfn-event-history.md). Main's 52/415 inventory is preserved: the previous
+50/398 plus CatalogResourceLifecycle (twelve controls) and CatalogConsoleEpoch
+(five). LoginInputIntent adds one baseline and fourteen controls. SNSAdmission/SNSLifecycle
+add two finite admission/local-record models and twenty-one controls, not Go/SQL refinement. The two landing
+models retain their 17 controls added to the older 48/381 inventory. Required
+inventory and exact source bindings live in `models.json` and the protected
+policy in `scripts/formal_model_gate.py`.
+
+Historical `28d37d1` checked 13 input cases/73 distinct states before focus capture.
+Scoped `5b270e9` checked 14 cases: 77 distinct states, 94 generated, empty queue,
+and all 13 declared noninitial counterexamples. The focus control failed at state
+3 under a controlled-reset assumption, not an established cause of the hosted
+login failure. This is not a combined 482-case or browser proof.
+Scoped keyboard source `7bd15bf` subsequently checked 15 cases: 83 distinct
+baseline states (101 generated, empty queue) and all 14 required noninitial
+counterexamples. The keyboard control first violated `AdoptedValueExact` at
+state 5. The controlled reset remains an explicit assumption; the original
+empty-error/no-POST browser assertions are independent required checks.
+Any 463-execution or 102-pure-test receipt at `8149cac` applies to the pre-merge
+base, not this new 505-execution inventory.
+See [input correspondence](../docs/login-token-file.md#bounded-input-intent-model)
+and the [dated failed login CI](../docs/login-token-file.md#dated-validation-and-current-candidate).
+
+Historical evidence: the complete 48-baseline/381-control gate (429 executions)
+passed at `c298972`. Its documentation-only successor `414c902` passed all 61
+E2E/start checks; its then-pending hosted checks concern that revision, not the
+current landing implementation. The four Sakura models retain their separate
+35 metadata/admission/startup and 17 view controls, including stale frames,
+ACK/form exit, read-only retry and locale continuity. Their scoped results are
+not additional counts on top of the current inventory. Registration and source
+review do not substitute for execution of the exact revision.
 The initial Startup enumeration failure and UI wrong-first-invariant attempt
 remain recorded. The UI retains its original15 faults and adds two targeted
 publication controls; all14 UI properties and bounds remain unchanged.
@@ -18,6 +50,45 @@ the earlier four-request exploration timed out and is not claimed.
 Registration is source evidence, not itself evidence of successful execution. Dated receipts below
 refer to their recorded inputs; later revisions require their own checks. These
 finite models do not prove Go/SQL/HTTP/UI refinement or complete cloud compatibility.
+
+## Bounded service catalog
+
+`CatalogResourceLifecycle` checks two service/region scopes, IDs 1..3, three
+names, quota two, two child slots, one client token and three steps. Its twelve
+controls cover the abstract authorization/commit, allocation, generation, child
+reference and replay boundaries. Official shape and wire validation, pagination,
+tags, ARNs, SQL/locking/crashes and Go refinement are outside this finite model.
+
+`CatalogConsoleEpoch` checks two services, epochs 0..3, one mounted view and
+unmount, with five controls for accepted view state and write sequencing. Native
+requests, DOM rendering, keyboard focus, accessibility, form conversion and React
+scheduling remain independent test obligations. The
+[service catalog](../docs/aws-catalog.md) implements bounded configuration
+metadata for CodeConnections, Step Functions, ECR and Amplify; this is not workload
+execution, image storage, hosting, OAuth or all-service AWS compatibility.
+
+## Landing admission and selection
+
+`LandingAccessAdmission` checks ten literal paths, three methods and trusted
+host/origin/authentication verdicts through one request/response transition:
+five invariants and six controls. It describes the exact five public read-only
+landing assets; it does not verify the middleware, token/session logic, URL
+decoding, ServeMux behavior or actual HTTP implementation.
+
+`LandingTopologyState` checks nine nodes/three providers, a known initial node or
+Absent fragment result, two selection inputs and two paint callbacks, one mount
+and one retirement: twelve invariants and eleven controls. Explicit completion
+stutters only after the bounded inputs are exhausted. URL parsing/history,
+native focus/Tab behavior, DOM/layout/SVG geometry, canvas drawing and JavaScript
+refinement remain independent browser/native obligations; there is no liveness
+claim or fake browser support branch.
+
+On 2026-11-06, scoped 19-case checking passed at `4382ec4`; that revision's full
+448-case attempt failed at DynamoDBAdmission. The eight actual landing browser
+cases at `fad3b8a` passed on Chromium 154, including six strict accessibility
+audits. These are dated, separate results. Chromium 154 lacks the current
+HTML-in-Canvas API, so native Chrome 157 drawing and other engines are unverified.
+No successful combined 505-case or later exact-head acceptance is claimed here.
 
 CFNConditionAdmission adds fourteen invariants and fourteen semantic controls over
 234 immutable inputs. Its isolated `f69fb46` SANY/baseline/control run passed
@@ -44,18 +115,20 @@ Its exact `cca79267` source passed scoped SANY, baseline and nine named-invarian
 counterexamples (10,608 states, 4,116 initial configurations); the old-cache
 mutation has a concrete over-depth witness. This finite three-name/bound2-or3
 check is not a Go/unbounded-depth/SQL/parser proof. The native32/33 regressions
-remain separate; the earlier 365-case source preparation is historical; the current 429-case gate passed at `c298972`.
+remain separate; the earlier 365-case source preparation and the successful
+429-case gate at `c298972` are historical.
 
 
-CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/S3 SQLite-row absence after all cleanup writes, rollback and peer frames. Its 196 scoped source run passed 8 SANY and 8 TLC phases; the canonical CFG formatting passed a fresh 16-phase SANY/TLC run at `c298972`. It does not prove native S3 deletion, other resource handlers, cloud hardware, SQL/Go refinement or host scoring. The combined current 429-execution gate passed at `c298972`; the later docs-only `414c902` passed all 61 E2E/start checks. Exact-head hosted gates for this publication candidate remain pending.
+CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/S3 SQLite-row absence after all cleanup writes, rollback and peer frames. Its 196 scoped source run passed 8 SANY and 8 TLC phases; the canonical CFG formatting passed a fresh 16-phase SANY/TLC run at `c298972`. It does not prove native S3 deletion, other resource handlers, cloud hardware, SQL/Go refinement or host scoring. The historical combined 429-execution gate passed at `c298972`; its later documentation-only successor `414c902` passed all 61 E2E/start checks. Those receipts and hosted-check reservations belong to those revisions, not the current landing runtime.
 
 ## Aggregate CI execution capacity
 
 The required `Formal validation` job reserves 30 minutes for checkout, the gate
 negative controls, exact-blob applicability and the complete serial registry.
 Each TLC case retains its 60-second default deadline and existing per-model
-settings; all 429 baseline/counterexample runs and failure requirements
-remain mandatory. This is an aggregate execution budget, not a model-bound,
+settings; all 531 combined baseline/counterexample runs and failure requirements
+remain mandatory: the preserved 505 public-base checks, nine STS checks and
+seventeen event/history checks. This is an aggregate execution budget, not a model-bound,
 acceptance, permission or per-case timeout change.
 
 The earlier 15-minute job on `8bb8a3d` ended cancelled after roughly 15 minutes;
@@ -67,8 +140,10 @@ historical scoped receipt does not replace it.
 
 Legacy integration sections below retain historical counts and status statements
 for traceability. Their word “current” refers to the recorded integration, not
-today's registry. The authoritative current inventory is the 48/381 registry
-above; proof claims always require evidence for the exact revision.
+today's registry. The combined catalog/login inventory above requires 53 models /
+429 controls (482 executions), with the new exact-HEAD whole gate pending. Historical
+48/381 results retain their recorded revision; source-specific landing and login
+results do not substitute for combined acceptance.
 
 `ObjectStore.tla` models two buckets and two keys, shared object ownership, create/put/delete transitions, and an abstract identity decision `allow /\ ~deny`. `ObjectStore.cfg` checks type correctness, no orphan objects, no unauthorized mutation, and explicit-deny precedence.
 

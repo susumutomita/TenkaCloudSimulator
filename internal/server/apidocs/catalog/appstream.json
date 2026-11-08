@@ -1,0 +1,1214 @@
+{
+ "components": {
+  "schemas": {
+   "AccessEndpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "EndpointType": {
+      "enum": [
+       "STREAMING"
+      ],
+      "type": "string"
+     },
+     "VpceId": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "EndpointType"
+    ],
+    "type": "object"
+   },
+   "AppBlock": {
+    "additionalProperties": false,
+    "properties": {
+     "AppBlockErrors": {
+      "items": {
+       "$ref": "#/components/schemas/ErrorDetails"
+      },
+      "type": "array"
+     },
+     "Arn": {
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "DisplayName": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "PackagingType": {
+      "enum": [
+       "CUSTOM",
+       "APPSTREAM2"
+      ],
+      "type": "string"
+     },
+     "PostSetupScriptDetails": {
+      "$ref": "#/components/schemas/ScriptDetails"
+     },
+     "SetupScriptDetails": {
+      "$ref": "#/components/schemas/ScriptDetails"
+     },
+     "SourceS3Location": {
+      "$ref": "#/components/schemas/S3Location"
+     },
+     "State": {
+      "enum": [
+       "INACTIVE",
+       "ACTIVE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Arn"
+    ],
+    "type": "object"
+   },
+   "Application": {
+    "additionalProperties": false,
+    "properties": {
+     "AppBlockArn": {
+      "type": "string"
+     },
+     "Arn": {
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "DisplayName": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "IconS3Location": {
+      "$ref": "#/components/schemas/S3Location"
+     },
+     "IconURL": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "InstanceFamilies": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "LaunchParameters": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "LaunchPath": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Metadata": {
+      "additionalProperties": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Name": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Platforms": {
+      "items": {
+       "enum": [
+        "WINDOWS",
+        "WINDOWS_SERVER_2016",
+        "WINDOWS_SERVER_2019",
+        "WINDOWS_SERVER_2022",
+        "AMAZON_LINUX2",
+        "RHEL8",
+        "ROCKY_LINUX8"
+       ],
+       "type": "string"
+      },
+      "maxItems": 4,
+      "type": "array"
+     },
+     "WorkingDirectory": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "SettingsGroup": {
+      "maxLength": 100,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Enabled"
+    ],
+    "type": "object"
+   },
+   "ApplicationSettingsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "S3BucketName": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "SettingsGroup": {
+      "maxLength": 100,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateAppBlockRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "DisplayName": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PackagingType": {
+      "enum": [
+       "CUSTOM",
+       "APPSTREAM2"
+      ],
+      "type": "string"
+     },
+     "PostSetupScriptDetails": {
+      "$ref": "#/components/schemas/ScriptDetails"
+     },
+     "SetupScriptDetails": {
+      "$ref": "#/components/schemas/ScriptDetails"
+     },
+     "SourceS3Location": {
+      "$ref": "#/components/schemas/S3Location"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "Name",
+     "SourceS3Location"
+    ],
+    "type": "object"
+   },
+   "CreateAppBlockResult": {
+    "additionalProperties": false,
+    "properties": {
+     "AppBlock": {
+      "$ref": "#/components/schemas/AppBlock"
+     }
+    },
+    "type": "object"
+   },
+   "CreateApplicationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AppBlockArn": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "DisplayName": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "IconS3Location": {
+      "$ref": "#/components/schemas/S3Location"
+     },
+     "InstanceFamilies": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "LaunchParameters": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "LaunchPath": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Platforms": {
+      "items": {
+       "enum": [
+        "WINDOWS",
+        "WINDOWS_SERVER_2016",
+        "WINDOWS_SERVER_2019",
+        "WINDOWS_SERVER_2022",
+        "AMAZON_LINUX2",
+        "RHEL8",
+        "ROCKY_LINUX8"
+       ],
+       "type": "string"
+      },
+      "maxItems": 4,
+      "type": "array"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "WorkingDirectory": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "IconS3Location",
+     "LaunchPath",
+     "Platforms",
+     "InstanceFamilies",
+     "AppBlockArn"
+    ],
+    "type": "object"
+   },
+   "CreateApplicationResult": {
+    "additionalProperties": false,
+    "properties": {
+     "Application": {
+      "$ref": "#/components/schemas/Application"
+     }
+    },
+    "type": "object"
+   },
+   "CreateStackRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessEndpoints": {
+      "items": {
+       "$ref": "#/components/schemas/AccessEndpoint"
+      },
+      "maxItems": 4,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ApplicationSettings": {
+      "$ref": "#/components/schemas/ApplicationSettings"
+     },
+     "Description": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "DisplayName": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "EmbedHostDomains": {
+      "items": {
+       "maxLength": 128,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "type": "array"
+     },
+     "FeedbackURL": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "RedirectURL": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "StorageConnectors": {
+      "items": {
+       "$ref": "#/components/schemas/StorageConnector"
+      },
+      "type": "array"
+     },
+     "StreamingExperienceSettings": {
+      "$ref": "#/components/schemas/StreamingExperienceSettings"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "UserSettings": {
+      "items": {
+       "$ref": "#/components/schemas/UserSetting"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "CreateStackResult": {
+    "additionalProperties": false,
+    "properties": {
+     "Stack": {
+      "$ref": "#/components/schemas/Stack"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteAppBlockRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DeleteAppBlockResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteApplicationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DeleteApplicationResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteStackRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DeleteStackResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DescribeAppBlocksRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Arns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "MaxResults": {
+      "type": "integer"
+     },
+     "NextToken": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeAppBlocksResult": {
+    "additionalProperties": false,
+    "properties": {
+     "AppBlocks": {
+      "items": {
+       "$ref": "#/components/schemas/AppBlock"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeApplicationsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Arns": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "MaxResults": {
+      "type": "integer"
+     },
+     "NextToken": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeApplicationsResult": {
+    "additionalProperties": false,
+    "properties": {
+     "Applications": {
+      "items": {
+       "$ref": "#/components/schemas/Application"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeStacksRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Names": {
+      "items": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeStacksResult": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Stacks": {
+      "items": {
+       "$ref": "#/components/schemas/Stack"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ErrorDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "ErrorCode": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "ErrorMessage": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "S3Location": {
+    "additionalProperties": false,
+    "properties": {
+     "S3Bucket": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "S3Key": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "S3Bucket"
+    ],
+    "type": "object"
+   },
+   "ScriptDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "ExecutableParameters": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "ExecutablePath": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "ScriptS3Location": {
+      "$ref": "#/components/schemas/S3Location"
+     },
+     "TimeoutInSeconds": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "ScriptS3Location",
+     "ExecutablePath",
+     "TimeoutInSeconds"
+    ],
+    "type": "object"
+   },
+   "Stack": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessEndpoints": {
+      "items": {
+       "$ref": "#/components/schemas/AccessEndpoint"
+      },
+      "maxItems": 4,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ApplicationSettings": {
+      "$ref": "#/components/schemas/ApplicationSettingsResponse"
+     },
+     "Arn": {
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "DisplayName": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "EmbedHostDomains": {
+      "items": {
+       "maxLength": 128,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "type": "array"
+     },
+     "FeedbackURL": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "Name": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "RedirectURL": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "StackErrors": {
+      "items": {
+       "$ref": "#/components/schemas/StackError"
+      },
+      "type": "array"
+     },
+     "StorageConnectors": {
+      "items": {
+       "$ref": "#/components/schemas/StorageConnector"
+      },
+      "type": "array"
+     },
+     "StreamingExperienceSettings": {
+      "$ref": "#/components/schemas/StreamingExperienceSettings"
+     },
+     "UserSettings": {
+      "items": {
+       "$ref": "#/components/schemas/UserSetting"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "StackError": {
+    "additionalProperties": false,
+    "properties": {
+     "ErrorCode": {
+      "enum": [
+       "STORAGE_CONNECTOR_ERROR",
+       "INTERNAL_SERVICE_ERROR"
+      ],
+      "type": "string"
+     },
+     "ErrorMessage": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StorageConnector": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectorType": {
+      "enum": [
+       "HOMEFOLDERS",
+       "GOOGLE_DRIVE",
+       "ONE_DRIVE"
+      ],
+      "type": "string"
+     },
+     "Domains": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "type": "array"
+     },
+     "DomainsRequireAdminConsent": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "type": "array"
+     },
+     "ResourceIdentifier": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConnectorType"
+    ],
+    "type": "object"
+   },
+   "StreamingExperienceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "PreferredProtocol": {
+      "enum": [
+       "TCP",
+       "UDP"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateApplicationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AppBlockArn": {
+      "type": "string"
+     },
+     "AttributesToDelete": {
+      "items": {
+       "enum": [
+        "LAUNCH_PARAMETERS",
+        "WORKING_DIRECTORY"
+       ],
+       "type": "string"
+      },
+      "maxItems": 2,
+      "type": "array"
+     },
+     "Description": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "DisplayName": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "IconS3Location": {
+      "$ref": "#/components/schemas/S3Location"
+     },
+     "LaunchParameters": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "LaunchPath": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "WorkingDirectory": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "UpdateApplicationResult": {
+    "additionalProperties": false,
+    "properties": {
+     "Application": {
+      "$ref": "#/components/schemas/Application"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateStackRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessEndpoints": {
+      "items": {
+       "$ref": "#/components/schemas/AccessEndpoint"
+      },
+      "maxItems": 4,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ApplicationSettings": {
+      "$ref": "#/components/schemas/ApplicationSettings"
+     },
+     "AttributesToDelete": {
+      "items": {
+       "enum": [
+        "STORAGE_CONNECTORS",
+        "STORAGE_CONNECTOR_HOMEFOLDERS",
+        "STORAGE_CONNECTOR_GOOGLE_DRIVE",
+        "STORAGE_CONNECTOR_ONE_DRIVE",
+        "REDIRECT_URL",
+        "FEEDBACK_URL",
+        "THEME_NAME",
+        "USER_SETTINGS",
+        "EMBED_HOST_DOMAINS",
+        "IAM_ROLE_ARN",
+        "ACCESS_ENDPOINTS",
+        "STREAMING_EXPERIENCE_SETTINGS"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "DeleteStorageConnectors": {
+      "type": "boolean"
+     },
+     "Description": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "DisplayName": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "EmbedHostDomains": {
+      "items": {
+       "maxLength": 128,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "type": "array"
+     },
+     "FeedbackURL": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "Name": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "RedirectURL": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "StorageConnectors": {
+      "items": {
+       "$ref": "#/components/schemas/StorageConnector"
+      },
+      "type": "array"
+     },
+     "StreamingExperienceSettings": {
+      "$ref": "#/components/schemas/StreamingExperienceSettings"
+     },
+     "UserSettings": {
+      "items": {
+       "$ref": "#/components/schemas/UserSetting"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "UpdateStackResult": {
+    "additionalProperties": false,
+    "properties": {
+     "Stack": {
+      "$ref": "#/components/schemas/Stack"
+     }
+    },
+    "type": "object"
+   },
+   "UserSetting": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "enum": [
+       "CLIPBOARD_COPY_FROM_LOCAL_DEVICE",
+       "CLIPBOARD_COPY_TO_LOCAL_DEVICE",
+       "FILE_UPLOAD",
+       "FILE_DOWNLOAD",
+       "PRINTING_TO_LOCAL_DEVICE",
+       "DOMAIN_PASSWORD_SIGNIN",
+       "DOMAIN_SMART_CARD_SIGNIN",
+       "AUTO_TIME_ZONE_REDIRECTION"
+      ],
+      "type": "string"
+     },
+     "MaximumLength": {
+      "type": "integer"
+     },
+     "Permission": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Permission"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon AppStream API (2016-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Stacks, app blocks and applications are configuration metadata: no fleet, image, image builder, app block builder, streaming instance, streaming URL, user or session exists. CreateFleet, CreateImageBuilder, CreateStreamingURL, AssociateFleet and the other provisioning and streaming APIs return UnknownOperationException with HTTP 501. App blocks stay INACTIVE and no virtual hard disk, setup script or icon is read from Amazon S3; CUSTOM app blocks require SetupScriptDetails and applications report no IconURL. Storage connectors, access endpoints, embed host domains and application settings are stored without creating buckets, endpoints or identity provider links. UpdateStack DeleteStorageConnectors and AttributesToDelete, and UpdateApplication AttributesToDelete, are refused. Applications must reference a live app block, but deleting an app block does not check the applications that reference it. Entitlements, directory configurations (which hold service account passwords), themes and usage report subscriptions return HTTP 501.",
+  "title": "Amazon WorkSpaces Applications (simulator catalog)",
+  "version": "2016-12-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "appstreamJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "PhotonAdminProxyService.CreateAppBlock",
+        "PhotonAdminProxyService.CreateApplication",
+        "PhotonAdminProxyService.CreateStack",
+        "PhotonAdminProxyService.DeleteAppBlock",
+        "PhotonAdminProxyService.DeleteApplication",
+        "PhotonAdminProxyService.DeleteStack",
+        "PhotonAdminProxyService.DescribeAppBlocks",
+        "PhotonAdminProxyService.DescribeApplications",
+        "PhotonAdminProxyService.DescribeStacks",
+        "PhotonAdminProxyService.ListTagsForResource",
+        "PhotonAdminProxyService.TagResource",
+        "PhotonAdminProxyService.UntagResource",
+        "PhotonAdminProxyService.UpdateApplication",
+        "PhotonAdminProxyService.UpdateStack"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateAppBlock": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.CreateAppBlock",
+         "value": {}
+        },
+        "CreateApplication": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.CreateApplication",
+         "value": {}
+        },
+        "CreateStack": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.CreateStack",
+         "value": {}
+        },
+        "DeleteAppBlock": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.DeleteAppBlock",
+         "value": {}
+        },
+        "DeleteApplication": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.DeleteApplication",
+         "value": {}
+        },
+        "DeleteStack": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.DeleteStack",
+         "value": {}
+        },
+        "DescribeAppBlocks": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.DescribeAppBlocks",
+         "value": {}
+        },
+        "DescribeApplications": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.DescribeApplications",
+         "value": {}
+        },
+        "DescribeStacks": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.DescribeStacks",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.UntagResource",
+         "value": {}
+        },
+        "UpdateApplication": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.UpdateApplication",
+         "value": {}
+        },
+        "UpdateStack": {
+         "summary": "X-Amz-Target: PhotonAdminProxyService.UpdateStack",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon WorkSpaces Applications JSON 1.1 operations",
+    "tags": [
+     "Amazon WorkSpaces Applications"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon AppStream API (2016-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Stacks, app blocks and applications are configuration metadata: no fleet, image, image builder, app block builder, streaming instance, streaming URL, user or session exists. CreateFleet, CreateImageBuilder, CreateStreamingURL, AssociateFleet and the other provisioning and streaming APIs return UnknownOperationException with HTTP 501. App blocks stay INACTIVE and no virtual hard disk, setup script or icon is read from Amazon S3; CUSTOM app blocks require SetupScriptDetails and applications report no IconURL. Storage connectors, access endpoints, embed host domains and application settings are stored without creating buckets, endpoints or identity provider links. UpdateStack DeleteStorageConnectors and AttributesToDelete, and UpdateApplication AttributesToDelete, are refused. Applications must reference a live app block, but deleting an app block does not check the applications that reference it. Entitlements, directory configurations (which hold service account passwords), themes and usage report subscriptions return HTTP 501.",
+   "name": "Amazon WorkSpaces Applications"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/appstream/2016-12-01/service-2.json",
+  "sha256": "fc03b58ca329c807ed7522a38e358ca6b9d4235d00f1820a701e20cf946cecb8",
+  "license": "Apache-2.0"
+ }
+}

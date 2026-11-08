@@ -1,0 +1,175 @@
+{
+ "namespace": "Microsoft.KeyVault",
+ "client": "keyvault",
+ "steps": [
+  {
+   "call": "vaults.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "vault_name": "fixture-vault",
+    "parameters": {
+     "location": "eastus",
+     "properties": {
+      "tenantId": "${tenant}",
+      "sku": {
+       "family": "A",
+       "name": "standard"
+      },
+      "accessPolicies": []
+     }
+    }
+   },
+   "save": {
+    "vault": "id"
+   },
+   "expect": {
+    "properties.provisioning_state": "Succeeded",
+    "properties.tenant_id": "${tenant}"
+   }
+  },
+  {
+   "call": "vaults.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "vault_name": "fixture-vault"
+   },
+   "expect": {
+    "properties.sku.name": "standard"
+   }
+  },
+  {
+   "call": "vaults.update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "vault_name": "fixture-vault",
+    "parameters": {
+     "tags": {
+      "team": "a"
+     },
+     "properties": {
+      "enableRbacAuthorization": true
+     }
+    }
+   },
+   "expect": {
+    "tags.team": "a",
+    "properties.enable_rbac_authorization": true
+   }
+  },
+  {
+   "call": "vaults.list_by_resource_group",
+   "args": {
+    "resource_group_name": "${rg}",
+    "top": 1
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "vaults.list_by_subscription",
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "vaults.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "vault_name": "other-tenant",
+    "parameters": {
+     "location": "eastus",
+     "properties": {
+      "tenantId": "11111111-1111-4111-8111-111111111111",
+      "sku": {
+       "family": "A",
+       "name": "standard"
+      }
+     }
+    }
+   },
+   "error": "InvalidRequestContent",
+   "status": 400
+  },
+  {
+   "call": "vaults.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "vault_name": "recovered",
+    "parameters": {
+     "location": "eastus",
+     "properties": {
+      "tenantId": "${tenant}",
+      "createMode": "recover",
+      "sku": {
+       "family": "A",
+       "name": "standard"
+      }
+     }
+    }
+   },
+   "error": "InvalidRequestContent",
+   "status": 400
+  },
+  {
+   "call": "vaults.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "vault_name": "missing-vault"
+   },
+   "error": "ResourceNotFound",
+   "status": 404
+  }
+ ],
+ "probe": {
+  "call": "vaults.get",
+  "args": {
+   "resource_group_name": "${rg}",
+   "vault_name": "fixture-vault"
+  }
+ },
+ "unbound": {
+  "call": "vaults.check_name_availability",
+  "args": {
+   "vault_name": {
+    "name": "fixture-vault",
+    "type": "Microsoft.KeyVault/vaults"
+   }
+  }
+ },
+ "isolation": [
+  {
+   "call": "vaults.list_by_subscription",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "vaults.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "vault_name": "fixture-vault"
+   },
+   "expect": {
+    "tags.team": "a"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "vaults.delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "vault_name": "fixture-vault"
+   }
+  },
+  {
+   "call": "vaults.list_by_subscription",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ]
+}

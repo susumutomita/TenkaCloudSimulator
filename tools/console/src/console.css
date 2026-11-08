@@ -43,3 +43,6 @@
 /* The official compact Utilities drawer uses z-index 1001. Its parent must
    remain above the additional simulator control bar, including on mobile. */
 .aws-console-top-navigation { position: relative; z-index: 1002; }
+
+/* Catalog descriptions keep official JSON members readable without wrapping AWS identifiers. */
+.catalog-json { margin: 0; max-height: 24rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.875rem; }

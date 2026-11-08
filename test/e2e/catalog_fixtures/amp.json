@@ -1,0 +1,32 @@
+{
+ "client": "amp",
+ "steps": [
+  {"op": "create_workspace", "args": {"alias": "fixture", "tags": {"team": "a"}}, "save": {"ws": "workspaceId", "wsArn": "arn"}, "expect": {"status.statusCode": "ACTIVE", "tags": {"team": "a"}}},
+  {"op": "describe_workspace", "args": {"workspaceId": "${ws}"}, "expect": {"workspace.alias": "fixture", "workspace.arn": "${wsArn}"}},
+  {"op": "list_workspaces", "args": {}, "expect": {"workspaces#count": 1, "workspaces[0].workspaceId": "${ws}"}},
+  {"op": "update_workspace_alias", "args": {"workspaceId": "${ws}", "alias": "renamed"}},
+  {"op": "create_rule_groups_namespace", "args": {"workspaceId": "${ws}", "name": "fixture-rules", "data": "groups:\n  - name: fixture\n    rules:\n      - record: job:up:sum\n        expr: sum by (job) (up)\n"}, "save": {"rules": "arn"}, "expect": {"status.statusCode": "ACTIVE", "name": "fixture-rules"}},
+  {"op": "describe_rule_groups_namespace", "args": {"workspaceId": "${ws}", "name": "fixture-rules"}, "expect": {"ruleGroupsNamespace.arn": "${rules}"}},
+  {"op": "list_rule_groups_namespaces", "args": {"workspaceId": "${ws}"}, "expect": {"ruleGroupsNamespaces#count": 1}},
+  {"op": "put_rule_groups_namespace", "args": {"workspaceId": "${ws}", "name": "fixture-rules", "data": "{\"groups\": []}"}, "expect": {"arn": "${rules}"}},
+  {"op": "create_rule_groups_namespace", "args": {"workspaceId": "${ws}", "name": "broken", "data": "rules: []\n"}, "error": "ValidationException"},
+  {"op": "list_workspaces", "args": {"alias": "fix"}, "error": "ValidationException"},
+  {"op": "tag_resource", "args": {"resourceArn": "${wsArn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${wsArn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${wsArn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "describe_alert_manager_definition", "args": {"workspaceId": "${ws}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_workspace", "args": {"workspaceId": "ws-missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_workspaces", "args": {}, "expect": {"workspaces#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_workspace", "args": {"workspaceId": "${ws}"}, "expect": {"workspace.alias": "renamed"}},
+  {"op": "describe_rule_groups_namespace", "args": {"workspaceId": "${ws}", "name": "fixture-rules"}, "expect": {"ruleGroupsNamespace.name": "fixture-rules"}}
+ ],
+ "cleanup": [
+  {"op": "delete_rule_groups_namespace", "args": {"workspaceId": "${ws}", "name": "fixture-rules"}},
+  {"op": "delete_workspace", "args": {"workspaceId": "${ws}"}},
+  {"op": "list_workspaces", "args": {}, "expect": {"workspaces#count": 0}}
+ ]
+}

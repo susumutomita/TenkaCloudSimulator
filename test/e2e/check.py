@@ -75,6 +75,19 @@ class Conformance(unittest.TestCase):
   subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart_docs.py'))],check=True,timeout=120)
  def test_s3_multipart_native_persistence_and_console(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart.py'))],check=True)
+ def test_sts_native_sdk_original_hello_world(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('sts_sdk.py'))],check=True,timeout=180)
+ def test_sns_native_admission_persistence_and_isolation(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name("sns_admission.py"))], check=True, timeout=180)
+
+ def test_landing_topology_html_fallback_keyboard_and_public_navigation(self):
+  from landing_topology import run_landing_topology
+  # The fixture owns fresh dummy credentials for readiness only. The helper
+  # receives no token, browser authentication, native API state or user keys.
+  with running(authenticated=True) as (endpoint,_):
+   result=run_landing_topology(endpoint,REPORTS/'landing-topology')
+  self.assertEqual(result['cases'],8)
+  self.assertEqual(result['strictAxeStates'],6)
  def test_sakura_reference_real_examples_and_scalar_send(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('sakura_reference_live.py')), '--root', str(Path(__file__).resolve().parents[2]), '--binary', str(BINARY), '--reports', str(REPORTS/'sakura-reference-live'), '--browser'], check=True, timeout=180)
  def test_sakura_disk_console_real_native_state_and_scope(self):
@@ -318,6 +331,8 @@ def handler(event,context):
   subprocess.run([sys.executable,str(Path(__file__).with_name('test_crossprovider_official_storage.py'))],check=True,timeout=30)
  def test_official_storage_sdks_two_teams_restart_and_conditions(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('crossprovider_official_storage.py')),'--binary',str(BINARY),'--provider','both'],check=True,timeout=300)
+ def test_cloudformation_local_ssm_parameter_snapshot(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_ssm_parameters.py'))],check=True,timeout=120)
  def test_cloudformation_rest_native_sdk_lifecycle(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_rest.py'))],check=True)
  def test_sqs_native_sdk_two_teams_restart_retention_and_cleanup(self):
@@ -617,6 +632,27 @@ def handler(event,context):
 
  def test_cloudformation_original_crypto_template_native_sdk_lifecycle(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('cloudformation_crypto.py'))], check=True, timeout=180)
+
+ def test_aws_catalog_native_sdk_two_teams_policy_restart_and_cleanup(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog.py'))], check=True, timeout=240)
+
+ def test_aws_catalog_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_console.py'))], check=True, timeout=300)
+
+ def test_aws_catalog_fixture_lifecycles_cover_every_bound_operation(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_fixtures.py'))], check=True, timeout=900)
+
+ def test_gcp_catalog_discovery_client_two_teams_owner_restart_and_cleanup(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_fixtures.py'))], check=True, timeout=600)
+
+ def test_gcp_catalog_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_console.py'))], check=True, timeout=300)
+
+ def test_azure_catalog_official_sdks_two_teams_owner_restart_and_cleanup(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('azure_catalog_fixtures.py'))], check=True, timeout=600)
+
+ def test_azure_catalog_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('azure_catalog_console.py'))], check=True, timeout=300)
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

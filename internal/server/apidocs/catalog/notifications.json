@@ -1,0 +1,739 @@
+{
+ "components": {
+  "schemas": {
+   "NotificationConfigurationStructure": {
+    "additionalProperties": false,
+    "properties": {
+     "aggregationDuration": {
+      "enum": [
+       "LONG",
+       "SHORT",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "PARTIALLY_ACTIVE",
+       "INACTIVE",
+       "DELETING"
+      ],
+      "type": "string"
+     },
+     "subtype": {
+      "enum": [
+       "ACCOUNT",
+       "ADMIN_MANAGED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "name",
+     "description",
+     "status",
+     "creationTime"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS User Notifications API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Notification configurations are stored metadata that stay INACTIVE: no event is matched, aggregated or delivered and no console, email, chat or mobile channel is contacted. Event rules, channel associations, managed notifications, notification events, notification hubs, organization access and organizational units return UnknownOperationException with HTTP 501; ListNotificationConfigurations filters by status and subtype only.",
+  "title": "AWS User Notifications (simulator catalog)",
+  "version": "2018-05-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/notification-configurations": {
+   "get": {
+    "operationId": "notificationsListNotificationConfigurations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "notifications"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "channelArn",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "eventRuleSource",
+      "schema": {
+       "maxLength": 36,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 4096,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "status",
+      "schema": {
+       "enum": [
+        "ACTIVE",
+        "PARTIALLY_ACTIVE",
+        "INACTIVE",
+        "DELETING"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "subtype",
+      "schema": {
+       "enum": [
+        "ACCOUNT",
+        "ADMIN_MANAGED"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 4096,
+           "minLength": 1,
+           "type": "string"
+          },
+          "notificationConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/NotificationConfigurationStructure"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListNotificationConfigurations",
+    "tags": [
+     "AWS User Notifications"
+    ]
+   },
+   "post": {
+    "operationId": "notificationsCreateNotificationConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "notifications"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "aggregationDuration": {
+          "enum": [
+           "LONG",
+           "SHORT",
+           "NONE"
+          ],
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "description",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "PARTIALLY_ACTIVE",
+            "INACTIVE",
+            "DELETING"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateNotificationConfiguration",
+    "tags": [
+     "AWS User Notifications"
+    ]
+   }
+  },
+  "/notification-configurations/{arn}": {
+   "delete": {
+    "operationId": "notificationsDeleteNotificationConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "notifications"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteNotificationConfiguration",
+    "tags": [
+     "AWS User Notifications"
+    ]
+   },
+   "get": {
+    "operationId": "notificationsGetNotificationConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "notifications"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "aggregationDuration": {
+           "enum": [
+            "LONG",
+            "SHORT",
+            "NONE"
+           ],
+           "type": "string"
+          },
+          "arn": {
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "PARTIALLY_ACTIVE",
+            "INACTIVE",
+            "DELETING"
+           ],
+           "type": "string"
+          },
+          "subtype": {
+           "enum": [
+            "ACCOUNT",
+            "ADMIN_MANAGED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetNotificationConfiguration",
+    "tags": [
+     "AWS User Notifications"
+    ]
+   },
+   "put": {
+    "operationId": "notificationsUpdateNotificationConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "notifications"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "aggregationDuration": {
+          "enum": [
+           "LONG",
+           "SHORT",
+           "NONE"
+          ],
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateNotificationConfiguration",
+    "tags": [
+     "AWS User Notifications"
+    ]
+   }
+  },
+  "/tags/{arn}": {
+   "delete": {
+    "operationId": "notificationsUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "notifications"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS User Notifications"
+    ]
+   },
+   "get": {
+    "operationId": "notificationsListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "notifications"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS User Notifications"
+    ]
+   },
+   "post": {
+    "operationId": "notificationsTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "notifications"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS User Notifications"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS User Notifications API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Notification configurations are stored metadata that stay INACTIVE: no event is matched, aggregated or delivered and no console, email, chat or mobile channel is contacted. Event rules, channel associations, managed notifications, notification events, notification hubs, organization access and organizational units return UnknownOperationException with HTTP 501; ListNotificationConfigurations filters by status and subtype only.",
+   "name": "AWS User Notifications"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/notifications/2018-05-10/service-2.json",
+  "sha256": "556f0c4b675b7fab6acfbe8886ccf7681c63067f376d2ec7eb340b9b9831fe6e",
+  "license": "Apache-2.0"
+ }
+}

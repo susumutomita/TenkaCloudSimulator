@@ -1,0 +1,847 @@
+{
+ "components": {
+  "schemas": {
+   "CreateEnvironmentTemplateInput": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "encryptionKey": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "provisioning": {
+      "enum": [
+       "CUSTOMER_MANAGED"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "CreateEnvironmentTemplateOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "environmentTemplate": {
+      "$ref": "#/components/schemas/EnvironmentTemplate"
+     }
+    },
+    "required": [
+     "environmentTemplate"
+    ],
+    "type": "object"
+   },
+   "CreateServiceTemplateInput": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "encryptionKey": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "pipelineProvisioning": {
+      "enum": [
+       "CUSTOMER_MANAGED"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "CreateServiceTemplateOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "serviceTemplate": {
+      "$ref": "#/components/schemas/ServiceTemplate"
+     }
+    },
+    "required": [
+     "serviceTemplate"
+    ],
+    "type": "object"
+   },
+   "DeleteEnvironmentTemplateInput": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "DeleteEnvironmentTemplateOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "environmentTemplate": {
+      "$ref": "#/components/schemas/EnvironmentTemplate"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteServiceTemplateInput": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "DeleteServiceTemplateOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "serviceTemplate": {
+      "$ref": "#/components/schemas/ServiceTemplate"
+     }
+    },
+    "type": "object"
+   },
+   "EnvironmentTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "encryptionKey": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "provisioning": {
+      "enum": [
+       "CUSTOMER_MANAGED"
+      ],
+      "type": "string"
+     },
+     "recommendedVersion": {
+      "maxLength": 10,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "createdAt",
+     "lastModifiedAt",
+     "name"
+    ],
+    "type": "object"
+   },
+   "EnvironmentTemplateSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "provisioning": {
+      "enum": [
+       "CUSTOMER_MANAGED"
+      ],
+      "type": "string"
+     },
+     "recommendedVersion": {
+      "maxLength": 10,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "createdAt",
+     "lastModifiedAt",
+     "name"
+    ],
+    "type": "object"
+   },
+   "GetEnvironmentTemplateInput": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "GetEnvironmentTemplateOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "environmentTemplate": {
+      "$ref": "#/components/schemas/EnvironmentTemplate"
+     }
+    },
+    "required": [
+     "environmentTemplate"
+    ],
+    "type": "object"
+   },
+   "GetServiceTemplateInput": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "GetServiceTemplateOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "serviceTemplate": {
+      "$ref": "#/components/schemas/ServiceTemplate"
+     }
+    },
+    "required": [
+     "serviceTemplate"
+    ],
+    "type": "object"
+   },
+   "ListEnvironmentTemplatesInput": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListEnvironmentTemplatesOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "templates": {
+      "items": {
+       "$ref": "#/components/schemas/EnvironmentTemplateSummary"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "templates"
+    ],
+    "type": "object"
+   },
+   "ListServiceTemplatesInput": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListServiceTemplatesOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "templates": {
+      "items": {
+       "$ref": "#/components/schemas/ServiceTemplateSummary"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "templates"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "type": "string"
+     },
+     "resourceArn": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "resourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "tags"
+    ],
+    "type": "object"
+   },
+   "ServiceTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "encryptionKey": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "pipelineProvisioning": {
+      "enum": [
+       "CUSTOMER_MANAGED"
+      ],
+      "type": "string"
+     },
+     "recommendedVersion": {
+      "maxLength": 10,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "createdAt",
+     "lastModifiedAt",
+     "name"
+    ],
+    "type": "object"
+   },
+   "ServiceTemplateSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "pipelineProvisioning": {
+      "enum": [
+       "CUSTOMER_MANAGED"
+      ],
+      "type": "string"
+     },
+     "recommendedVersion": {
+      "maxLength": 10,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "createdAt",
+     "lastModifiedAt",
+     "name"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "value"
+    ],
+    "type": "object"
+   },
+   "TagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateEnvironmentTemplateInput": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "UpdateEnvironmentTemplateOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "environmentTemplate": {
+      "$ref": "#/components/schemas/EnvironmentTemplate"
+     }
+    },
+    "required": [
+     "environmentTemplate"
+    ],
+    "type": "object"
+   },
+   "UpdateServiceTemplateInput": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "UpdateServiceTemplateOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "serviceTemplate": {
+      "$ref": "#/components/schemas/ServiceTemplate"
+     }
+    },
+    "required": [
+     "serviceTemplate"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Proton API (2020-07-20). Every other official operation returns HTTP 501 UnknownOperationException. Environment and service templates are stored metadata without versions, so recommendedVersion is never set; no template bundle is read from Amazon S3 or a repository and the encryption key is not used. Template versions, environments, services, service instances, pipelines, components, repositories, sync configurations, deployments and account settings return UnknownOperationException with HTTP 501, so nothing is provisioned or deployed. ListTagsForResource returns every tag in one page and refuses maxResults and nextToken.",
+  "title": "AWS Proton (simulator catalog)",
+  "version": "2020-07-20"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "protonJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AwsProton20200720.CreateEnvironmentTemplate",
+        "AwsProton20200720.CreateServiceTemplate",
+        "AwsProton20200720.DeleteEnvironmentTemplate",
+        "AwsProton20200720.DeleteServiceTemplate",
+        "AwsProton20200720.GetEnvironmentTemplate",
+        "AwsProton20200720.GetServiceTemplate",
+        "AwsProton20200720.ListEnvironmentTemplates",
+        "AwsProton20200720.ListServiceTemplates",
+        "AwsProton20200720.ListTagsForResource",
+        "AwsProton20200720.TagResource",
+        "AwsProton20200720.UntagResource",
+        "AwsProton20200720.UpdateEnvironmentTemplate",
+        "AwsProton20200720.UpdateServiceTemplate"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.0": {
+       "examples": {
+        "CreateEnvironmentTemplate": {
+         "summary": "X-Amz-Target: AwsProton20200720.CreateEnvironmentTemplate",
+         "value": {}
+        },
+        "CreateServiceTemplate": {
+         "summary": "X-Amz-Target: AwsProton20200720.CreateServiceTemplate",
+         "value": {}
+        },
+        "DeleteEnvironmentTemplate": {
+         "summary": "X-Amz-Target: AwsProton20200720.DeleteEnvironmentTemplate",
+         "value": {}
+        },
+        "DeleteServiceTemplate": {
+         "summary": "X-Amz-Target: AwsProton20200720.DeleteServiceTemplate",
+         "value": {}
+        },
+        "GetEnvironmentTemplate": {
+         "summary": "X-Amz-Target: AwsProton20200720.GetEnvironmentTemplate",
+         "value": {}
+        },
+        "GetServiceTemplate": {
+         "summary": "X-Amz-Target: AwsProton20200720.GetServiceTemplate",
+         "value": {}
+        },
+        "ListEnvironmentTemplates": {
+         "summary": "X-Amz-Target: AwsProton20200720.ListEnvironmentTemplates",
+         "value": {}
+        },
+        "ListServiceTemplates": {
+         "summary": "X-Amz-Target: AwsProton20200720.ListServiceTemplates",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: AwsProton20200720.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: AwsProton20200720.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: AwsProton20200720.UntagResource",
+         "value": {}
+        },
+        "UpdateEnvironmentTemplate": {
+         "summary": "X-Amz-Target: AwsProton20200720.UpdateEnvironmentTemplate",
+         "value": {}
+        },
+        "UpdateServiceTemplate": {
+         "summary": "X-Amz-Target: AwsProton20200720.UpdateServiceTemplate",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.0": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS Proton JSON 1.0 operations",
+    "tags": [
+     "AWS Proton"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Proton API (2020-07-20). Every other official operation returns HTTP 501 UnknownOperationException. Environment and service templates are stored metadata without versions, so recommendedVersion is never set; no template bundle is read from Amazon S3 or a repository and the encryption key is not used. Template versions, environments, services, service instances, pipelines, components, repositories, sync configurations, deployments and account settings return UnknownOperationException with HTTP 501, so nothing is provisioned or deployed. ListTagsForResource returns every tag in one page and refuses maxResults and nextToken.",
+   "name": "AWS Proton"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/proton/2020-07-20/service-2.json",
+  "sha256": "d9b8b7d81e4dd1e25dabe569b1716a40e1696c6b60d17a2bdd9df597d497b457",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,1569 @@
+{
+ "components": {
+  "schemas": {
+   "Empty": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1BackupSchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "dailyRecurrence": {
+      "$ref": "#/components/schemas/GoogleFirestoreAdminV1DailyRecurrence"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "retention": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "weeklyRecurrence": {
+      "$ref": "#/components/schemas/GoogleFirestoreAdminV1WeeklyRecurrence"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1BackupSource": {
+    "additionalProperties": false,
+    "properties": {
+     "backup": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1CmekConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "activeKeyVersion": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "kmsKeyName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1DailyRecurrence": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1Database": {
+    "additionalProperties": false,
+    "properties": {
+     "appEngineIntegrationMode": {
+      "enum": [
+       "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED",
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "cmekConfig": {
+      "$ref": "#/components/schemas/GoogleFirestoreAdminV1CmekConfig"
+     },
+     "concurrencyMode": {
+      "enum": [
+       "CONCURRENCY_MODE_UNSPECIFIED",
+       "OPTIMISTIC",
+       "PESSIMISTIC",
+       "OPTIMISTIC_WITH_ENTITY_GROUPS"
+      ],
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "databaseEdition": {
+      "enum": [
+       "DATABASE_EDITION_UNSPECIFIED",
+       "STANDARD",
+       "ENTERPRISE"
+      ],
+      "type": "string"
+     },
+     "deleteProtectionState": {
+      "enum": [
+       "DELETE_PROTECTION_STATE_UNSPECIFIED",
+       "DELETE_PROTECTION_DISABLED",
+       "DELETE_PROTECTION_ENABLED"
+      ],
+      "type": "string"
+     },
+     "deleteTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "earliestVersionTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "firestoreDataAccessMode": {
+      "enum": [
+       "DATA_ACCESS_MODE_UNSPECIFIED",
+       "DATA_ACCESS_MODE_ENABLED",
+       "DATA_ACCESS_MODE_DISABLED"
+      ],
+      "type": "string"
+     },
+     "freeTier": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "keyPrefix": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "locationId": {
+      "type": "string"
+     },
+     "mongodbCompatibleDataAccessMode": {
+      "enum": [
+       "DATA_ACCESS_MODE_UNSPECIFIED",
+       "DATA_ACCESS_MODE_ENABLED",
+       "DATA_ACCESS_MODE_DISABLED"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "pointInTimeRecoveryEnablement": {
+      "enum": [
+       "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED",
+       "POINT_IN_TIME_RECOVERY_ENABLED",
+       "POINT_IN_TIME_RECOVERY_DISABLED"
+      ],
+      "type": "string"
+     },
+     "previousId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "realtimeUpdatesMode": {
+      "enum": [
+       "REALTIME_UPDATES_MODE_UNSPECIFIED",
+       "REALTIME_UPDATES_MODE_ENABLED",
+       "REALTIME_UPDATES_MODE_DISABLED"
+      ],
+      "type": "string"
+     },
+     "sourceInfo": {
+      "$ref": "#/components/schemas/GoogleFirestoreAdminV1SourceInfo"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": {
+      "enum": [
+       "DATABASE_TYPE_UNSPECIFIED",
+       "FIRESTORE_NATIVE",
+       "DATASTORE_MODE"
+      ],
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "versionRetentionPeriod": {
+      "format": "google-duration",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1FlatIndex": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1Index": {
+    "additionalProperties": false,
+    "properties": {
+     "apiScope": {
+      "enum": [
+       "ANY_API",
+       "DATASTORE_MODE_API",
+       "MONGODB_COMPATIBLE_API"
+      ],
+      "type": "string"
+     },
+     "density": {
+      "enum": [
+       "DENSITY_UNSPECIFIED",
+       "SPARSE_ALL",
+       "SPARSE_ANY",
+       "DENSE"
+      ],
+      "type": "string"
+     },
+     "fields": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleFirestoreAdminV1IndexField"
+      },
+      "type": "array"
+     },
+     "multikey": {
+      "type": "boolean"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "queryScope": {
+      "enum": [
+       "QUERY_SCOPE_UNSPECIFIED",
+       "COLLECTION",
+       "COLLECTION_GROUP",
+       "COLLECTION_RECURSIVE"
+      ],
+      "type": "string"
+     },
+     "searchIndexOptions": {
+      "$ref": "#/components/schemas/GoogleFirestoreAdminV1SearchIndexOptions"
+     },
+     "shardCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "READY",
+       "NEEDS_REPAIR"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "unique": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1IndexField": {
+    "additionalProperties": false,
+    "properties": {
+     "arrayConfig": {
+      "enum": [
+       "ARRAY_CONFIG_UNSPECIFIED",
+       "CONTAINS"
+      ],
+      "type": "string"
+     },
+     "fieldPath": {
+      "type": "string"
+     },
+     "order": {
+      "enum": [
+       "ORDER_UNSPECIFIED",
+       "ASCENDING",
+       "DESCENDING"
+      ],
+      "type": "string"
+     },
+     "searchConfig": {
+      "$ref": "#/components/schemas/GoogleFirestoreAdminV1SearchConfig"
+     },
+     "vectorConfig": {
+      "$ref": "#/components/schemas/GoogleFirestoreAdminV1VectorConfig"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1ListBackupSchedulesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "backupSchedules": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleFirestoreAdminV1BackupSchedule"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1ListDatabasesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "databases": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleFirestoreAdminV1Database"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1ListIndexesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "indexes": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleFirestoreAdminV1Index"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1SearchConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "geoSpec": {
+      "$ref": "#/components/schemas/GoogleFirestoreAdminV1SearchGeoSpec"
+     },
+     "textSpec": {
+      "$ref": "#/components/schemas/GoogleFirestoreAdminV1SearchTextSpec"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1SearchGeoSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "geoJsonIndexingDisabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1SearchIndexOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "textLanguage": {
+      "type": "string"
+     },
+     "textLanguageOverrideFieldPath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1SearchTextIndexSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "indexType": {
+      "enum": [
+       "TEXT_INDEX_TYPE_UNSPECIFIED",
+       "TOKENIZED"
+      ],
+      "type": "string"
+     },
+     "matchType": {
+      "enum": [
+       "TEXT_MATCH_TYPE_UNSPECIFIED",
+       "MATCH_GLOBALLY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1SearchTextSpec": {
+    "additionalProperties": false,
+    "properties": {
+     "indexSpecs": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleFirestoreAdminV1SearchTextIndexSpec"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1SourceInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "backup": {
+      "$ref": "#/components/schemas/GoogleFirestoreAdminV1BackupSource"
+     },
+     "operation": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1VectorConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "dimension": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "flat": {
+      "$ref": "#/components/schemas/GoogleFirestoreAdminV1FlatIndex"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleFirestoreAdminV1WeeklyRecurrence": {
+    "additionalProperties": false,
+    "properties": {
+     "day": {
+      "enum": [
+       "DAY_OF_WEEK_UNSPECIFIED",
+       "MONDAY",
+       "TUESDAY",
+       "WEDNESDAY",
+       "THURSDAY",
+       "FRIDAY",
+       "SATURDAY",
+       "SUNDAY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleLongrunningListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleLongrunningOperation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleLongrunningOperation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Cloud Firestore API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Databases, backup schedules and composite indexes are configuration metadata: no document store, query engine, index build or backup exists, and indexes report READY immediately without duplicate-definition checks; collection group IDs are limited to 100 letters, digits, underscores, hyphens and dots. The documents, export, import, clone, restore, field and user credential methods remain unimplemented. Deleting a database removes its backup schedules and indexes immediately and keeps no deleted database for showDeleted; deletion protection blocks delete. Tag bindings are refused. Operations complete synchronously under projects/{project}/databases/{database}/operations.",
+  "title": "Firestore (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/databases": {
+   "get": {
+    "operationId": "firestore.projects.databases.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "showDeleted",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleFirestoreAdminV1ListDatabasesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.list",
+    "tags": [
+     "Firestore"
+    ]
+   },
+   "post": {
+    "operationId": "firestore.projects.databases.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "databaseId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleFirestoreAdminV1Database"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.create",
+    "tags": [
+     "Firestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/databases/{databasesId}": {
+   "delete": {
+    "operationId": "firestore.projects.databases.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.delete",
+    "tags": [
+     "Firestore"
+    ]
+   },
+   "get": {
+    "operationId": "firestore.projects.databases.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleFirestoreAdminV1Database"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.get",
+    "tags": [
+     "Firestore"
+    ]
+   },
+   "patch": {
+    "operationId": "firestore.projects.databases.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleFirestoreAdminV1Database"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.patch",
+    "tags": [
+     "Firestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/databases/{databasesId}/backupSchedules": {
+   "get": {
+    "operationId": "firestore.projects.databases.backupSchedules.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleFirestoreAdminV1ListBackupSchedulesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.backupSchedules.list",
+    "tags": [
+     "Firestore"
+    ]
+   },
+   "post": {
+    "operationId": "firestore.projects.databases.backupSchedules.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleFirestoreAdminV1BackupSchedule"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleFirestoreAdminV1BackupSchedule"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.backupSchedules.create",
+    "tags": [
+     "Firestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/databases/{databasesId}/backupSchedules/{backupSchedulesId}": {
+   "delete": {
+    "operationId": "firestore.projects.databases.backupSchedules.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupSchedulesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.backupSchedules.delete",
+    "tags": [
+     "Firestore"
+    ]
+   },
+   "get": {
+    "operationId": "firestore.projects.databases.backupSchedules.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupSchedulesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleFirestoreAdminV1BackupSchedule"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.backupSchedules.get",
+    "tags": [
+     "Firestore"
+    ]
+   },
+   "patch": {
+    "operationId": "firestore.projects.databases.backupSchedules.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupSchedulesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleFirestoreAdminV1BackupSchedule"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleFirestoreAdminV1BackupSchedule"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.backupSchedules.patch",
+    "tags": [
+     "Firestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/databases/{databasesId}/collectionGroups/{collectionGroupsId}/indexes": {
+   "get": {
+    "operationId": "firestore.projects.databases.collectionGroups.indexes.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "collectionGroupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleFirestoreAdminV1ListIndexesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.collectionGroups.indexes.list",
+    "tags": [
+     "Firestore"
+    ]
+   },
+   "post": {
+    "operationId": "firestore.projects.databases.collectionGroups.indexes.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "collectionGroupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GoogleFirestoreAdminV1Index"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.collectionGroups.indexes.create",
+    "tags": [
+     "Firestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/databases/{databasesId}/collectionGroups/{collectionGroupsId}/indexes/{indexesId}": {
+   "delete": {
+    "operationId": "firestore.projects.databases.collectionGroups.indexes.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "collectionGroupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "indexesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.collectionGroups.indexes.delete",
+    "tags": [
+     "Firestore"
+    ]
+   },
+   "get": {
+    "operationId": "firestore.projects.databases.collectionGroups.indexes.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "collectionGroupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "indexesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleFirestoreAdminV1Index"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.collectionGroups.indexes.get",
+    "tags": [
+     "Firestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/databases/{databasesId}/operations": {
+   "get": {
+    "operationId": "firestore.projects.databases.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.operations.list",
+    "tags": [
+     "Firestore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/databases/{databasesId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "firestore.projects.databases.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "databasesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.databases.operations.get",
+    "tags": [
+     "Firestore"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/firestore"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Cloud Firestore API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Databases, backup schedules and composite indexes are configuration metadata: no document store, query engine, index build or backup exists, and indexes report READY immediately without duplicate-definition checks; collection group IDs are limited to 100 letters, digits, underscores, hyphens and dots. The documents, export, import, clone, restore, field and user credential methods remain unimplemented. Deleting a database removes its backup schedules and indexes immediately and keeps no deleted database for showDeleted; deletion protection blocks delete. Tag bindings are refused. Operations complete synchronously under projects/{project}/databases/{database}/operations.",
+   "name": "Firestore"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/firestore.v1.json",
+  "sha256": "c01d2098e6a5e144564ab7c5bccc81a819c56de0fbf04e5f328727bb69939c54",
+  "license": "Apache-2.0",
+  "revision": "20260706"
+ }
+}

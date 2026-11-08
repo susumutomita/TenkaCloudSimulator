@@ -63,14 +63,16 @@ func stackConditionalLinks(value any, resources map[string]any, refs map[string]
 				return reference(raw.(string), true)
 			}
 			if raw, ok := v["Fn::Sub"]; ok {
-				source := raw.(string)
-				for _, match := range subExpression.FindAllStringSubmatch(source, -1) {
-					if err := reference(match[1], strings.Contains(match[1], ".")); err != nil {
-						return err
-					}
+				parts, err := stackSubParts(raw.(string))
+				if err != nil {
+					return err
 				}
-				if strings.Contains(subExpression.ReplaceAllString(source, ""), "${") {
-					return fmt.Errorf("unterminated substitution")
+				for _, part := range parts {
+					if part.name != "" && !part.escaped {
+						if err := reference(part.name, strings.Contains(part.name, ".")); err != nil {
+							return err
+						}
+					}
 				}
 				return nil
 			}

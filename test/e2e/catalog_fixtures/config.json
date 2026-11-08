@@ -1,0 +1,33 @@
+{
+ "client": "config",
+ "steps": [
+  {"op": "put_stored_query", "args": {"StoredQuery": {"QueryName": "fixture-buckets", "Description": "S3 buckets", "Expression": "SELECT resourceId WHERE resourceType = 'AWS::S3::Bucket'"}, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"query": "QueryArn"}},
+  {"op": "get_stored_query", "args": {"QueryName": "fixture-buckets"}, "expect": {"StoredQuery.QueryArn": "${query}", "StoredQuery.Description": "S3 buckets"}},
+  {"op": "list_stored_queries", "args": {}, "expect": {"StoredQueryMetadata#count": 1, "StoredQueryMetadata[0].QueryName": "fixture-buckets"}},
+  {"op": "put_stored_query", "args": {"StoredQuery": {"QueryName": "fixture-buckets", "Expression": "SELECT resourceId"}}, "error": "ValidationException"},
+  {"op": "put_stored_query", "args": {"StoredQuery": {"QueryName": "no-expression"}}, "error": "ValidationException"},
+  {"op": "put_retention_configuration", "args": {"RetentionPeriodInDays": 365}, "expect": {"RetentionConfiguration.Name": "default", "RetentionConfiguration.RetentionPeriodInDays": 365}},
+  {"op": "put_retention_configuration", "args": {"RetentionPeriodInDays": 400}, "expect": {"RetentionConfiguration.RetentionPeriodInDays": 400}},
+  {"op": "describe_retention_configurations", "args": {"RetentionConfigurationNames": ["default"]}, "expect": {"RetentionConfigurations#count": 1, "RetentionConfigurations[0].RetentionPeriodInDays": 400}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${query}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${query}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${query}"}, "expect": {"Tags#count": 1, "Tags[0].Key": "team"}},
+  {"op": "put_config_rule", "args": {"ConfigRule": {"Source": {"Owner": "AWS", "SourceIdentifier": "S3_BUCKET_VERSIONING_ENABLED"}}}, "error": "UnknownOperationException", "status": 501},
+  {"op": "delete_retention_configuration", "args": {"RetentionConfigurationName": "other"}, "error": "NoSuchRetentionConfigurationException"},
+  {"op": "get_stored_query", "args": {"QueryName": "missing-query"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_stored_queries", "args": {}, "expect": {"StoredQueryMetadata#count": 0}},
+  {"op": "describe_retention_configurations", "args": {}, "expect": {"RetentionConfigurations#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_stored_query", "args": {"QueryName": "fixture-buckets"}, "expect": {"StoredQuery.Expression": "SELECT resourceId WHERE resourceType = 'AWS::S3::Bucket'"}},
+  {"op": "describe_retention_configurations", "args": {}, "expect": {"RetentionConfigurations[0].RetentionPeriodInDays": 400}}
+ ],
+ "cleanup": [
+  {"op": "delete_retention_configuration", "args": {"RetentionConfigurationName": "default"}},
+  {"op": "delete_stored_query", "args": {"QueryName": "fixture-buckets"}},
+  {"op": "list_stored_queries", "args": {}, "expect": {"StoredQueryMetadata#count": 0}},
+  {"op": "describe_retention_configurations", "args": {}, "expect": {"RetentionConfigurations#count": 0}}
+ ]
+}

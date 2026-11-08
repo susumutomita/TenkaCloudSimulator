@@ -1,0 +1,151 @@
+{
+ "namespace": "Microsoft.DocumentDB",
+ "client": "cosmosdb",
+ "steps": [
+  {
+   "call": "database_accounts.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "account_name": "fixture-cosmos",
+    "create_update_parameters": {
+     "location": "eastus",
+     "kind": "GlobalDocumentDB",
+     "properties": {
+      "databaseAccountOfferType": "Standard",
+      "locations": [
+       {
+        "locationName": "eastus",
+        "failoverPriority": 0
+       }
+      ],
+      "consistencyPolicy": {
+       "defaultConsistencyLevel": "Session"
+      },
+      "backupPolicy": {
+       "type": "Periodic",
+       "periodicModeProperties": {
+        "backupIntervalInMinutes": 240
+       }
+      }
+     }
+    }
+   },
+   "expect": {
+    "provisioning_state": "Succeeded",
+    "consistency_policy.default_consistency_level": "Session"
+   }
+  },
+  {
+   "call": "database_accounts.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "account_name": "fixture-cosmos"
+   },
+   "expect": {
+    "backup_policy.type": "Periodic"
+   }
+  },
+  {
+   "call": "database_accounts.begin_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "account_name": "fixture-cosmos",
+    "update_parameters": {
+     "tags": {
+      "team": "a"
+     },
+     "properties": {
+      "consistencyPolicy": {
+       "defaultConsistencyLevel": "Eventual"
+      }
+     }
+    }
+   },
+   "expect": {
+    "consistency_policy.default_consistency_level": "Eventual"
+   }
+  },
+  {
+   "call": "database_accounts.list_by_resource_group",
+   "args": {
+    "resource_group_name": "${rg}"
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "database_accounts.list",
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "database_accounts.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "account_name": "restored",
+    "create_update_parameters": {
+     "location": "eastus",
+     "properties": {
+      "databaseAccountOfferType": "Standard",
+      "createMode": "Restore",
+      "locations": [
+       {
+        "locationName": "eastus",
+        "failoverPriority": 0
+       }
+      ]
+     }
+    }
+   },
+   "error": "InvalidRequestContent",
+   "status": 400
+  }
+ ],
+ "probe": {
+  "call": "database_accounts.list"
+ },
+ "unbound": {
+  "call": "database_accounts.list_keys",
+  "args": {
+   "resource_group_name": "${rg}",
+   "account_name": "fixture-cosmos"
+  }
+ },
+ "isolation": [
+  {
+   "call": "database_accounts.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "database_accounts.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "account_name": "fixture-cosmos"
+   },
+   "expect": {
+    "tags.team": "a"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "database_accounts.begin_delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "account_name": "fixture-cosmos"
+   }
+  },
+  {
+   "call": "database_accounts.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,46 @@
+{
+ "client": "sagemaker",
+ "steps": [
+  {"op": "create_human_task_ui", "args": {"HumanTaskUiName": "fixture-review-ui", "UiTemplate": {"Content": "<crowd-form><crowd-classifier name=\"label\" categories=\"['ok', 'wrong']\" header=\"Review\"></crowd-classifier></crowd-form>"}, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"ui": "HumanTaskUiArn"}, "expect": {"HumanTaskUiArn": "arn:aws:sagemaker:us-east-1:000000000000:human-task-ui/fixture-review-ui"}},
+  {"op": "describe_human_task_ui", "args": {"HumanTaskUiName": "fixture-review-ui"}, "expect": {"HumanTaskUiStatus": "Active", "HumanTaskUiArn": "${ui}"}},
+  {"op": "list_human_task_uis", "args": {}, "expect": {"HumanTaskUiSummaries#count": 1, "HumanTaskUiSummaries[0].HumanTaskUiName": "fixture-review-ui"}},
+  {"op": "create_flow_definition", "args": {"FlowDefinitionName": "fixture-review-flow", "RoleArn": "arn:aws:iam::000000000000:role/fixture-a2i", "OutputConfig": {"S3OutputPath": "s3://fixture-bucket/a2i"}, "HumanLoopConfig": {"WorkteamArn": "arn:aws:sagemaker:us-east-1:000000000000:workteam/private-crowd/fixture", "HumanTaskUiArn": "${ui}", "TaskTitle": "Review", "TaskDescription": "Review the label.", "TaskCount": 1}}, "save": {"flow": "FlowDefinitionArn"}},
+  {"op": "describe_flow_definition", "args": {"FlowDefinitionName": "fixture-review-flow"}, "expect": {"FlowDefinitionStatus": "Active", "HumanLoopConfig.HumanTaskUiArn": "${ui}"}},
+  {"op": "list_flow_definitions", "args": {}, "expect": {"FlowDefinitionSummaries#count": 1, "FlowDefinitionSummaries[0].FlowDefinitionArn": "${flow}"}},
+  {"op": "create_experiment", "args": {"ExperimentName": "fixture-experiment", "DisplayName": "Fixture", "Description": "Baseline"}, "save": {"experiment": "ExperimentArn"}},
+  {"op": "describe_experiment", "args": {"ExperimentName": "fixture-experiment"}, "expect": {"DisplayName": "Fixture", "ExperimentArn": "${experiment}"}},
+  {"op": "list_experiments", "args": {}, "expect": {"ExperimentSummaries#count": 1}},
+  {"op": "update_experiment", "args": {"ExperimentName": "fixture-experiment", "Description": "Tuned"}, "expect": {"ExperimentArn": "${experiment}"}},
+  {"op": "create_notebook_instance_lifecycle_config", "args": {"NotebookInstanceLifecycleConfigName": "fixture-setup", "OnStart": [{"Content": "IyEvYmluL2Jhc2gKZWNobyBzdGFydA=="}]}},
+  {"op": "describe_notebook_instance_lifecycle_config", "args": {"NotebookInstanceLifecycleConfigName": "fixture-setup"}, "expect": {"OnStart[0].Content": "IyEvYmluL2Jhc2gKZWNobyBzdGFydA=="}},
+  {"op": "list_notebook_instance_lifecycle_configs", "args": {}, "expect": {"NotebookInstanceLifecycleConfigs#count": 1}},
+  {"op": "update_notebook_instance_lifecycle_config", "args": {"NotebookInstanceLifecycleConfigName": "fixture-setup", "OnCreate": [{"Content": "IyEvYmluL2Jhc2gKZWNobyBjcmVhdGU="}]}},
+  {"op": "create_code_repository", "args": {"CodeRepositoryName": "fixture-repo", "GitConfig": {"RepositoryUrl": "https://example.com/fixture/repo.git", "Branch": "main"}}},
+  {"op": "describe_code_repository", "args": {"CodeRepositoryName": "fixture-repo"}, "expect": {"GitConfig.Branch": "main"}},
+  {"op": "list_code_repositories", "args": {}, "expect": {"CodeRepositorySummaryList#count": 1}},
+  {"op": "add_tags", "args": {"ResourceArn": "${ui}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "delete_tags", "args": {"ResourceArn": "${ui}", "TagKeys": ["k"]}},
+  {"op": "list_tags", "args": {"ResourceArn": "${ui}"}, "expect": {"Tags#count": 1, "Tags[0].Key": "team"}},
+  {"op": "create_experiment", "args": {"ExperimentName": "Uppercase"}, "error": "ValidationException", "status": 400},
+  {"op": "list_models", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_flow_definition", "args": {"FlowDefinitionName": "missing-flow"}, "error": "ResourceNotFound", "status": 400}
+ ],
+ "isolation": [
+  {"op": "list_human_task_uis", "args": {}, "expect": {"HumanTaskUiSummaries#count": 0}},
+  {"op": "list_experiments", "args": {}, "expect": {"ExperimentSummaries#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_experiment", "args": {"ExperimentName": "fixture-experiment"}, "expect": {"Description": "Tuned"}},
+  {"op": "describe_notebook_instance_lifecycle_config", "args": {"NotebookInstanceLifecycleConfigName": "fixture-setup"}, "expect": {"OnCreate#count": 1}},
+  {"op": "describe_flow_definition", "args": {"FlowDefinitionName": "fixture-review-flow"}, "expect": {"FlowDefinitionArn": "${flow}"}}
+ ],
+ "cleanup": [
+  {"op": "delete_flow_definition", "args": {"FlowDefinitionName": "fixture-review-flow"}},
+  {"op": "delete_human_task_ui", "args": {"HumanTaskUiName": "fixture-review-ui"}},
+  {"op": "delete_experiment", "args": {"ExperimentName": "fixture-experiment"}, "expect": {"ExperimentArn": "${experiment}"}},
+  {"op": "delete_notebook_instance_lifecycle_config", "args": {"NotebookInstanceLifecycleConfigName": "fixture-setup"}},
+  {"op": "delete_code_repository", "args": {"CodeRepositoryName": "fixture-repo"}},
+  {"op": "list_flow_definitions", "args": {}, "expect": {"FlowDefinitionSummaries#count": 0}},
+  {"op": "list_human_task_uis", "args": {}, "expect": {"HumanTaskUiSummaries#count": 0}}
+ ]
+}

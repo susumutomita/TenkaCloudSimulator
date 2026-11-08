@@ -1,17 +1,154 @@
-# S3 multipart active integration — Issue51
-
-Owner: Codex root, branch feat/s3-multipart-51. Normal merge of public main
-`d166f569772de7f45d98e31e9971eeb33b903763` is being resolved. All current providers,
-IAM/CFN state, 48 existing models and 381 controls are retained. Multipart adds six
-native APIs, Management UI, exact67-operation API reference and one bounded model
-with five controls. SQL/native focused tests and model simulation passed; full
-HTTP/browser/BFS/race/dual90/hosted acceptance is pending. Local socket listeners
-are denied by sandbox; public source was read through the connected GitHub API.
-No merge or whole-test success is claimed. Other service owners remain unchanged.
-
----
-
 # Development roster
+
+## S3 multipart PR440 integration, 2026-11-08
+
+Status: in progress. The integration owner uses the dedicated
+`integrate/pr440-main-20261108` branch and `simulator-pr440-merge` checkout.
+Preserve PR440 head `2f13cda` and merge public main `835853a` (CloudFormation SSM snapshots included); do not overwrite
+GUI console-handoff work or CloudFormation SSM parameter work. Owned changes are
+multipart leaf files plus the necessary S3 capabilities, Management navigation,
+generated assets, formal registration and acceptance registration. Current-head
+quality, native SDK/browser, dual coverage and full formal/hosted CI remain
+required before merge. Heavy local tests coordinate with the GUI owner.
+
+Merged-source focused multipart store/SQL/HTTP/IAM race tests passed. Asset,
+notice/provenance and exact OpenAPI detector checks passed; all 57 main models
+and 474 controls remain unchanged, with one multipart model and five controls
+added (58 models, 479 controls). The multipart finite baseline and all five
+required counterexamples passed locally. Old push CI `42313437913` failed in
+two acceptance fixtures: Cloudscape radio labels omit the group header, and
+the Sakura reference still expected 66 operations. The fixtures now assert the
+exact actual row label and independently declared 67-operation inventory; native
+state assertions and accessibility checks remain required. Integrated full Go,
+browser, dual coverage and hosted formal results are pending.
+
+The previous integrated source `7e88b67` passed full Go/race/build with
+95.61% statement coverage. The later SSM parameter main integration preserves
+that feature and requires new exact-HEAD hosted checks.
+
+## CloudFormation local SSM parameter values, 2026-11-08
+
+Issue #54: `feat/battle-backlog-20261108`, base `0d0abe6eff9a219f5503ea7cc3c3ba612df4ae24`.
+Compiler owner owns CloudFormation parameter resolution, native/SDK tests and docs.
+An independent formal worker owns only the new SSM snapshot/admission model, its
+registry entry and correspondence document. S3 #440, EC2/Route53, UI, dispatch
+and dependencies remain excluded. One heavy runtime lane is reserved for the
+compiler owner; model checks coordinate before using it.
+
+The proposed subset resolves String and EC2 Image ID carriers only from local
+Standard String values, with caller GetParameters permission and preserved input
+keys/resolved values. No public AWS lookup, AMI existence, EC2 execution or full
+Battle success follows. Implementation and focused native/race checks are complete. Independent review
+found and repaired replay-name validation and exact-ARN preflight regressions.
+The scoped finite model passed its baseline and 15 controls. Full current-source
+quality/E2E/formal and hosted CI remain pending; no merge is claimed.
+
+## Standalone release pipeline, 2026-11-08
+
+[Draft PR #444](https://github.com/susumutomita/TenkaCloudSimulator/pull/444)
+owns release workflows/build and verification scripts, regression hooks, release
+documentation and exact applicability. It now normally integrates main
+`4ab99d4902571c75862aa642052cd94a1e4f5b61`; runtime service/UI bytes are unchanged
+from that main. The integrated source requires new exact-HEAD CI before merge. BUILDINFO now
+declares launcher/token-control `host_protocol: 1` for host-local release locks;
+this is not a database downgrade guarantee and does not pin host source hashes.
+
+Pre-integration `be3bfc7` passed 15 release regressions, 27 applicability tests,
+76 formal-policy controls, both hosted coverage gates, full CI/browser/platform
+acceptance and named Formal validation. The actual packaged Linux/macOS
+amd64/arm64 binaries each passed native startup/auth/assets/persistence/restart/
+shutdown on its respective GitHub runner. These are historical results, not
+substitutes for the new integrated-source gates. Linux also passed local smoke
+with an empty executable PATH; all four candidate checksums were verified.
+
+Acceptance preserves full CI and formal gates, immutable-source build, complete
+SHA256SUMS/BUILDINFO, four native smoke runners, candidate-only manual runs,
+and draft-first publication without replacing existing tags/assets. Ambient Go
+configuration and observed tag drift are refused. Windows remains compile-only.
+No tag or public release has been created. Signing/notarization, Gatekeeper and
+repository tag protections remain outside the verified scope.
+
+## CloudFormation Battle intrinsic prerequisite: 2026-11-08
+
+[PR #443](https://github.com/susumutomita/TenkaCloudSimulator/pull/443) merged as
+`4ab99d4902571c75862aa642052cd94a1e4f5b61` after exact-head full CI, native SDK/
+browser/platform/audit and Formal validation passed. The resulting main tree
+matches the independently reviewed/tested source. Post-merge full CI did not
+start because GitHub's generated squash body inherited an intermediate skip-CI
+marker; that is not claimed as a new-main pass. The release integration's explicit
+merge message will avoid that marker and requires new-main checks.
+
+The bounded scope is Select/GetAZs/Base64 and escaped scalar Sub, admission of
+all branches, native state/event/permission rollback and cleanup, unchanged
+original Battle fixture, and documentation. GetAZs is one synthetic local zone
+per supported region. EC2, InstanceProfile, SSM-backed AMIs, Linux/AL2023/nginx/
+systemd and Session Manager remain unsupported; the original full Battle stack
+must fail without leaving state. The finite admission abstraction does not prove
+concrete value parsing or full Battle execution.
+
+## Current integration snapshot: catalog backlog, 2026-11-07
+
+Root integrates the open backlog on branch `claude/adoring-noether-7fvwju`
+(PR #439, 112 AWS services). The user authorized implementing and merging it.
+Parallel local branches, merged by root only:
+
+| Scope | Branch | Status |
+|---|---|---|
+| AWS catalog round 3 (59 services) | `catalog-r3-integration` | Integration on top of PR #439 in progress |
+| AWS Query/EC2/REST-XML protocols and five services | `catalog-query` | Done locally; merged after round 3 |
+| AWS Query/EC2 services (RDS family, ElastiCache, Redshift, VPC, EBS, VPN, PrivateLink) | `catalog-qdb`, `catalog-qnet` | In progress |
+| AWS services needing engine features (Network Firewall, SWF, Application Auto Scaling, Organizations, Keyspaces and others) | `catalog-gaps` | In progress |
+| Google Cloud discovery catalog (about 47 APIs) | `gcp-wip` | Integration in progress |
+| Azure Resource Manager catalog (#316) | `azure-arm` | In progress |
+| Sakura Server, Switch/NIC and Object Storage (#423) | `sakura-iaas` | In progress |
+
+Native work owned elsewhere is not touched: S3 multipart (#51), the unpublished
+Route 53 (#241) and EC2 network interface (#57) implementations, and Firestore
+documents (#338). Products that cannot be served are recorded in the
+[coverage assessment](coverage-assessment.md).
+
+
+## Current integration snapshot: login and published catalog, 2026-11-06
+
+PR [#437](https://github.com/susumutomita/TenkaCloudSimulator/pull/437) is being
+integrated with published main `b81496f73e31be6150fc237f4641d6369446cc38`
+(catalog PR #438). The catalog's Go code, model data, tests and notices are kept;
+the login input-capture fix and its original browser assertions are also kept.
+The combined inventory is **53 models / 429 controls / 482 executions**.
+
+| Owner / handoff | Exclusive scope and observed status |
+|---|---|
+| root | Merge coordination, applicability record, final commits and serialized execution; combined validation is pending |
+| lp_quality | Registry and formal-gate/test union resolved; source handoff complete |
+| formal_review | Independent model/policy union review complete; no combined runtime acceptance claimed |
+| docs_merge_b8 | Four documentation conflicts recovered and verified; source handoff complete |
+| assets_merge_b8 | Merged-source console rebuilt in local commit `5219eb1`; 1353 inputs and unchanged original package notices verified; combined CI remains pending |
+| catalog_compat_b8 | Read-only routing/authentication intersection review complete; Go and catalog fixtures kept byte-identical to incoming main |
+| ci_watch_b8 | Exact-SHA monitoring for prior login `8149cac` and incoming main; these results do not validate the combined tree |
+
+These are ownership and handoff entries, not a claim that seven workers are
+currently running. The ceiling remains seven including root. Completed reviewers
+can take the next independent task; heavy checks use one explicit local runtime
+lane. The prior login's 102 focused checks and all eleven hosted checks passed,
+but its base was `03060d4`. Actual Dia/1Password behavior remains unverified.
+The new combined HEAD must pass its own quality, browser and formal gates.
+
+The following catalog and IAM sections retain their original dated evidence.
+
+## Current integration snapshot: AWS service catalog, 2026-11-06
+
+Root integrates the model-driven AWS catalog on branch
+`claude/adoring-noether-7fvwju` from main `03060d44f2c7c6e52aaf8799f4bacf21a22cd6bc`.
+The user authorized implementing and merging the open backlog. This slice adds
+the [catalog engine and four services](aws-catalog.md) (#297, #83, #111, #147);
+later slices add further backlog services to the same engine. No other agent
+writes these files; existing open PRs and their owners are untouched.
+
+| Scope | Status and evidence boundary |
+|---|---|
+| `internal/aws/catalog` engine, specifications and embedded official subsets | Focused package tests, real-binary boto3 two-team flow and console/reference browser flow pass locally |
+| Formal `CatalogResourceLifecycle` | Baseline and all 12 controls produce their expected counterexamples locally |
+| Whole gates | `make before-commit`, `make e2e`, `make formal` and hosted CI are required before merge |
 
 ## Current integration snapshot: IAM53, 2026-11-05
 

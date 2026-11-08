@@ -1,0 +1,210 @@
+{
+ "api": "securesourcemanager.v1",
+ "steps": [
+  {
+   "call": "projects.locations.instances.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "instanceId": "fixture-main"
+   },
+   "body": {
+    "labels": {
+     "team": "a"
+    }
+   },
+   "save": {
+    "op_instance": "name",
+    "instance": "response.name"
+   },
+   "expect": {
+    "done": true,
+    "response.state": "ACTIVE"
+   }
+  },
+  {
+   "call": "projects.locations.instances.get",
+   "args": {
+    "name": "${instance}"
+   },
+   "expect": {
+    "state": "ACTIVE"
+   }
+  },
+  {
+   "call": "projects.locations.instances.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "instances#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.repositories.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "repositoryId": "fixture-app"
+   },
+   "body": {
+    "instance": "${instance}",
+    "description": "App"
+   },
+   "save": {
+    "op_repo": "name",
+    "repo": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.repositories.get",
+   "args": {
+    "name": "${repo}"
+   },
+   "expect": {
+    "instance": "${instance}"
+   }
+  },
+  {
+   "call": "projects.locations.repositories.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "repositories#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.repositories.patch",
+   "args": {
+    "name": "${repo}",
+    "updateMask": "description"
+   },
+   "body": {
+    "description": "Fixture"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.repositories.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "repositoryId": "seeded"
+   },
+   "body": {
+    "instance": "${instance}",
+    "initialConfig": {
+     "readme": "default"
+    }
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.repositories.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "instance": "${instance}"
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.repositories.fetchTree",
+   "args": {
+    "repository": "${repo}"
+   },
+   "error": "UNIMPLEMENTED",
+   "status": 501
+  },
+  {
+   "call": "projects.locations.operations.get",
+   "args": {
+    "name": "${op_repo}"
+   },
+   "expect": {
+    "response.description": "App"
+   }
+  },
+  {
+   "call": "projects.locations.operations.list",
+   "args": {
+    "name": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "operations#count": 3
+   }
+  },
+  {
+   "call": "projects.locations.instances.list",
+   "args": {
+    "parent": "projects/other-project/locations/us-central1"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.locations.instances.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "instances#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.locations.repositories.get",
+   "args": {
+    "name": "${repo}"
+   },
+   "expect": {
+    "description": "Fixture"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.locations.repositories.delete",
+   "args": {
+    "name": "${repo}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.instances.delete",
+   "args": {
+    "name": "${instance}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.instances.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "instances#count": 0
+   }
+  },
+  {
+   "call": "projects.locations.repositories.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "repositories#count": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,39 @@
+{
+ "api": "networkconnectivity.v1",
+ "steps": [
+  {"call": "projects.locations.global.hubs.create", "args": {"parent": "projects/tenkacloud-local/locations/global", "hubId": "fixture"}, "body": {"description": "Fixture hub", "labels": {"team": "a"}}, "save": {"op0": "name", "r0": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op0}"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/global"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.global.hubs.get", "args": {"name": "${r0}"}},
+  {"call": "projects.locations.global.hubs.list", "args": {"parent": "projects/tenkacloud-local/locations/global"}, "expect": {"hubs#count": 1}},
+  {"call": "projects.locations.global.hubs.patch", "args": {"name": "${r0}", "updateMask": "description"}, "body": {"description": "Main hub"}},
+  {"call": "projects.locations.spokes.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "spokeId": "gateway"}, "body": {"hub": "projects/tenkacloud-local/locations/global/hubs/fixture", "gateway": {"capacity": "CAPACITY_1_GBPS", "ipRangeReservations": [{"ipRange": "10.1.0.0/23"}]}}, "save": {"op1": "name", "r1": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op1}"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.spokes.get", "args": {"name": "${r1}"}},
+  {"call": "projects.locations.spokes.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"spokes#count": 1}},
+  {"call": "projects.locations.spokes.patch", "args": {"name": "${r1}", "updateMask": "description"}, "body": {"description": "Gateway spoke"}},
+  {"call": "projects.locations.spokes.gatewayAdvertisedRoutes.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1/spokes/gateway", "gatewayAdvertisedRouteId": "onprem"}, "body": {"ipRange": "10.2.0.0/24", "recipient": "ADVERTISE_TO_HUB", "priority": 100}, "save": {"op2": "name", "r2": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.spokes.gatewayAdvertisedRoutes.get", "args": {"name": "${r2}"}},
+  {"call": "projects.locations.spokes.gatewayAdvertisedRoutes.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1/spokes/gateway"}, "expect": {"gatewayAdvertisedRoutes#count": 1}},
+  {"call": "projects.locations.spokes.gatewayAdvertisedRoutes.patch", "args": {"name": "${r2}", "updateMask": "priority"}, "body": {"priority": 200}},
+  {"call": "projects.locations.spokes.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "spokeId": "unlinked"}, "error": "INVALID_ARGUMENT", "status": 400, "body": {"hub": "projects/tenkacloud-local/locations/global/hubs/fixture"}},
+  {"call": "projects.locations.global.hubs.listSpokes", "args": {"name": "projects/tenkacloud-local/locations/global/hubs/fixture"}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.global.hubs.get", "args": {"name": "projects/tenkacloud-local/locations/global/hubs/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.global.hubs.list", "args": {"parent": "projects/other-project/locations/global"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.global.hubs.list", "args": {"parent": "projects/tenkacloud-local/locations/global"}, "expect": {"hubs#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.global.hubs.get", "args": {"name": "${r0}"}, "expect": {"description": "Main hub"}},
+  {"call": "projects.locations.spokes.get", "args": {"name": "${r1}"}, "expect": {"description": "Gateway spoke"}},
+  {"call": "projects.locations.spokes.gatewayAdvertisedRoutes.get", "args": {"name": "${r2}"}, "expect": {"priority": 200}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.spokes.gatewayAdvertisedRoutes.delete", "args": {"name": "${r2}"}},
+  {"call": "projects.locations.spokes.delete", "args": {"name": "${r1}"}},
+  {"call": "projects.locations.global.hubs.delete", "args": {"name": "${r0}"}},
+  {"call": "projects.locations.global.hubs.list", "args": {"parent": "projects/tenkacloud-local/locations/global"}, "expect": {"hubs#count": 0}}
+ ]
+}

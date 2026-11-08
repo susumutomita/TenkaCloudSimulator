@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"encoding/xml"
@@ -24,6 +25,8 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
+var stackCreateName = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-]{0,127}$`)
+
 type StackStore struct{ db *sql.DB }
 type StackResource struct {
 	LogicalID, Type, PhysicalID string
@@ -39,6 +42,7 @@ type StackRecord struct {
 	Outputs                   map[string]string
 	Resources                 []StackResource
 	Parameters                map[string]string
+	ResolvedParameters        map[string]string `json:",omitempty"`
 }
 
 func NewStackStore(db *sql.DB) (*StackStore, error) {
@@ -52,6 +56,9 @@ func NewStackStore(db *sql.DB) (*StackStore, error) {
 		return nil, err
 	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_cfn_stacks(region TEXT NOT NULL,name TEXT NOT NULL,id TEXT NOT NULL UNIQUE,document TEXT NOT NULL,PRIMARY KEY(region,name)); CREATE TABLE IF NOT EXISTS aws_cfn_ownership(namespace TEXT NOT NULL,kind TEXT NOT NULL,physical_id TEXT NOT NULL,stack_id TEXT NOT NULL REFERENCES aws_cfn_stacks(id) ON DELETE RESTRICT,PRIMARY KEY(namespace,kind,physical_id));`)
+	if err == nil {
+		err = initStackEvents(db)
+	}
 	return &StackStore{db}, err
 }
 func taggedYAML(n *yaml.Node) (any, error) {
@@ -69,9 +76,9 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 		}
 		return stackTaggedYAMLNode(n.Content[0], depth+1, nodes)
 	}
-	if n.Tag == "!Equals" || n.Tag == "!If" {
+	if n.Tag == "!Equals" || n.Tag == "!If" || n.Tag == "!Select" {
 		if n.Kind != yaml.SequenceNode {
-			return nil, fmt.Errorf("condition shorthand requires a sequence")
+			return nil, fmt.Errorf("intrinsic shorthand requires a sequence")
 		}
 		values := []any{}
 		for _, child := range n.Content {
@@ -84,8 +91,28 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 		key := "Fn::Equals"
 		if n.Tag == "!If" {
 			key = "Fn::If"
+		} else if n.Tag == "!Select" {
+			key = "Fn::Select"
 		}
 		return map[string]any{key: values}, nil
+	}
+	if n.Tag == "!Base64" || n.Tag == "!GetAZs" {
+		if n.Kind == yaml.ScalarNode && n.Value == "" && n.Style&(yaml.DoubleQuotedStyle|yaml.SingleQuotedStyle|yaml.LiteralStyle|yaml.FoldedStyle) == 0 {
+			return nil, fmt.Errorf("Base64/GetAZs requires an explicit operand")
+		}
+		if n.Kind != yaml.ScalarNode && n.Kind != yaml.MappingNode {
+			return nil, fmt.Errorf("Base64/GetAZs shorthand requires a scalar or mapping")
+		}
+		copy := *n
+		copy.Tag = "!!str"
+		if n.Kind == yaml.MappingNode {
+			copy.Tag = "!!map"
+		}
+		value, err := stackTaggedYAMLNode(&copy, depth+1, nodes)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]any{"Fn::" + n.Tag[1:]: value}, nil
 	}
 	if strings.HasPrefix(n.Tag, "!") && !strings.HasPrefix(n.Tag, "!!") && n.Kind != yaml.ScalarNode {
 		return nil, fmt.Errorf("intrinsic shorthand must be scalar")
@@ -141,9 +168,24 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 func object(v any) map[string]any { m, _ := v.(map[string]any); return m }
 func stringValue(v any) string    { s, _ := v.(string); return s }
 
-var subExpression = regexp.MustCompile(`\$\{([^}]+)\}`)
-
 func resolve(v any, refs map[string]string, attributes map[string]string) (any, error) {
+	nodes := 0
+	return stackResolveValue(v, refs, attributes, 1, &nodes)
+}
+
+func stackResolveValue(v any, refs, attributes map[string]string, depth int, nodes *int) (result any, err error) {
+	*nodes++
+	if depth > stackConditionalDepth || *nodes > stackConditionalNodes {
+		return nil, fmt.Errorf("resolved value exceeds local depth/node bound")
+	}
+	defer func() {
+		if text, ok := result.(string); ok && len(text) > stackIntrinsicStringBytes {
+			result, err = nil, fmt.Errorf("resolved string exceeds local byte bound")
+		}
+	}()
+	next := func(value any) (any, error) {
+		return stackResolveValue(value, refs, attributes, depth+1, nodes)
+	}
 	switch x := v.(type) {
 	case string:
 		return x, nil
@@ -154,7 +196,7 @@ func resolve(v any, refs map[string]string, attributes map[string]string) (any, 
 	case []any:
 		r := []any{}
 		for _, c := range x {
-			v, e := resolve(c, refs, attributes)
+			v, e := next(c)
 			if e != nil {
 				return nil, e
 			}
@@ -186,29 +228,85 @@ func resolve(v any, refs map[string]string, attributes map[string]string) (any, 
 			if !valid || len(x) != 1 {
 				return nil, fmt.Errorf("only scalar Fn::Sub is supported")
 			}
-			var failed string
-			out := subExpression.ReplaceAllStringFunc(source, func(match string) string {
-				key := match[2 : len(match)-1]
-				if value, ok := refs[key]; ok {
-					return value
-				}
-				if value, ok := attributes[key]; ok {
-					return value
-				}
-				failed = key
-				return ""
-			})
-			if failed != "" {
-				return nil, fmt.Errorf("unknown substitution %s", failed)
+			return stackResolveSub(source, refs, attributes)
+		}
+		for _, key := range []string{"Fn::Select", "Fn::GetAZs", "Fn::Base64"} {
+			raw, ok := x[key]
+			if !ok {
+				continue
 			}
-			return out, nil
+			if len(x) != 1 {
+				return nil, fmt.Errorf("intrinsic must have exactly one key")
+			}
+			if err := stackValueIntrinsicShape(key, raw); err != nil {
+				return nil, err
+			}
+			switch key {
+			case "Fn::Base64":
+				value, err := next(raw)
+				if err != nil {
+					return nil, err
+				}
+				text, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("Base64 input must resolve to a string")
+				}
+				if base64.StdEncoding.EncodedLen(len(text)) > stackIntrinsicStringBytes {
+					return nil, fmt.Errorf("Base64 result exceeds local byte bound")
+				}
+				return base64.StdEncoding.EncodeToString([]byte(text)), nil
+			case "Fn::GetAZs":
+				value, err := next(raw)
+				if err != nil {
+					return nil, err
+				}
+				region, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("GetAZs region must resolve to a string")
+				}
+				if region == "" {
+					region = refs["AWS::Region"]
+				}
+				return localAvailabilityZones(region)
+			case "Fn::Select":
+				args := raw.([]any)
+				// Validate the index before resolving the list, preserving the
+				// lossless numeric carrier without accepting arbitrary numbers
+				// as ordinary template values.
+				indexValue := args[0]
+				if _, isRef := indexValue.(map[string]any); isRef {
+					var err error
+					indexValue, err = next(indexValue)
+					if err != nil {
+						return nil, err
+					}
+				}
+				index, err := stackSelectIndex(indexValue)
+				if err != nil {
+					return nil, err
+				}
+				value, err := next(args[1])
+				if err != nil {
+					return nil, err
+				}
+				list, ok := value.([]any)
+				if !ok || index >= len(list) {
+					return nil, fmt.Errorf("Select requires a list with an in-range index")
+				}
+				for _, item := range list {
+					if item == nil {
+						return nil, fmt.Errorf("Select list cannot contain null")
+					}
+				}
+				return list[index], nil
+			}
 		}
 		r := map[string]any{}
 		for k, c := range x {
 			if strings.HasPrefix(k, "Fn::") {
 				return nil, fmt.Errorf("unsupported intrinsic %s", k)
 			}
-			value, e := resolve(c, refs, attributes)
+			value, e := next(c)
 			if e != nil {
 				return nil, e
 			}
@@ -264,8 +362,12 @@ func resourceOrder(resources map[string]any) ([]string, error) {
 							add(stringValue(item))
 						}
 					case "Fn::Sub":
-						for _, match := range subExpression.FindAllStringSubmatch(stringValue(item), -1) {
-							add(match[1])
+						// The compiler has already validated substitution syntax.
+						parts, _ := stackSubParts(stringValue(item))
+						for _, part := range parts {
+							if part.name != "" && !part.escaped {
+								add(part.name)
+							}
 						}
 					default:
 						walk(item)
@@ -319,10 +421,14 @@ func resourceOrder(resources map[string]any) ([]string, error) {
 }
 
 func compileStack(region, name, body string, parameters map[string]string, capabilities string) (StackRecord, error) {
+	return compileStackWithParameters(region, name, body, parameters, capabilities, nil)
+}
+
+func compileStackWithParameters(region, name, body string, parameters map[string]string, capabilities string, resolveParameters stackParameterResolver) (StackRecord, error) {
 	fail := func(message string) (StackRecord, error) {
 		return StackRecord{}, ssmFailure{"ValidationError", message}
 	}
-	if !regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-]{0,127}$`).MatchString(name) || len(body) == 0 || len(body) > 51200 {
+	if !stackCreateName.MatchString(name) || len(body) == 0 || len(body) > 51200 {
 		return fail("Use a valid stack name and TemplateBody of 1–51200 bytes.")
 	}
 	var node yaml.Node
@@ -376,6 +482,23 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 	for key, value := range values {
 		refs[key] = value
 		record.Parameters[key] = value
+	}
+	requested := stackSSMRequests(definitions, values)
+	if len(requested) != 0 {
+		if resolveParameters == nil {
+			return fail("SSM value parameters require local Parameter Store resolution.")
+		}
+		record.ResolvedParameters, e = resolveParameters(id, requested)
+		if e != nil {
+			return StackRecord{}, e
+		}
+		for key := range requested {
+			value, ok := record.ResolvedParameters[key]
+			if !ok {
+				return fail("Missing resolved SSM parameter.")
+			}
+			refs[key] = value
+		}
 	}
 	conditionDefinitions := object(template["Conditions"])
 	if _, exists := template["Conditions"]; exists && conditionDefinitions == nil {
@@ -622,12 +745,24 @@ func (s *StackStore) Create(record StackRecord) error {
 	if _, err = tx.Exec("INSERT INTO aws_cfn_stacks VALUES(?,?,?,?)", record.Region, record.Name, record.ID, string(document)); err != nil {
 		return ssmFailure{"AlreadyExistsException", "Stack already exists."}
 	}
+	if err = beginStackEvents(tx, record); err != nil {
+		return err
+	}
+	if err = appendStackEvent(tx, record, nil, "CREATE_IN_PROGRESS"); err != nil {
+		return err
+	}
 	for _, r := range record.Resources {
+		if err = appendStackEvent(tx, record, &r, "CREATE_IN_PROGRESS"); err != nil {
+			return err
+		}
 		if stackAPIKind(r.Type) {
 			if err = claimStackAPI(tx, record, r); err != nil {
 				return err
 			}
 			if err = createStackAPI(context.Background(), tx, record, r); err != nil {
+				return err
+			}
+			if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
 				return err
 			}
 			continue
@@ -679,8 +814,14 @@ func (s *StackStore) Create(record StackRecord) error {
 		if err != nil {
 			return ssmFailure{"AlreadyExistsException", "A resource already exists or its creation was rejected."}
 		}
+		if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
+			return err
+		}
 	}
 	if err = saveStackAPIFingerprints(tx, &record); err != nil {
+		return err
+	}
+	if err = finishStackEvents(tx, record, false); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -748,8 +889,17 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 	if err = checkStackAPIFingerprints(tx, records[0]); err != nil {
 		return err
 	}
+	if err = beginStackEvents(tx, records[0]); err != nil {
+		return err
+	}
+	if err = appendStackEvent(tx, records[0], nil, "DELETE_IN_PROGRESS"); err != nil {
+		return err
+	}
 	for i := len(records[0].Resources) - 1; i >= 0; i-- {
 		r := records[0].Resources[i]
+		if err = appendStackEvent(tx, records[0], &r, "DELETE_IN_PROGRESS"); err != nil {
+			return err
+		}
 		namespace := stackResourceNamespace(region, r.Type)
 		var owned int
 		if err = tx.QueryRow("SELECT count(*) FROM aws_cfn_ownership WHERE namespace=? AND kind=? AND physical_id=? AND stack_id=?", namespace, r.Type, r.PhysicalID, records[0].ID).Scan(&owned); err != nil {
@@ -779,6 +929,9 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		if err != nil {
 			return err
 		}
+		if err = appendStackEvent(tx, records[0], &r, "DELETE_COMPLETE"); err != nil {
+			return err
+		}
 	}
 	if _, err = tx.Exec("DELETE FROM aws_cfn_ownership WHERE stack_id=?", records[0].ID); err != nil {
 		return err
@@ -794,6 +947,11 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 	if removed != 1 {
 		return errors.New("stack cleanup did not remove exactly the selected stack")
 	}
+	// Event completion and retention can trigger further writes. Finish them
+	// before the final acknowledgement checks; only commit may follow those.
+	if err = finishStackEvents(tx, records[0], true); err != nil {
+		return err
+	}
 	var remainingStack, remainingClaims int
 	if err = tx.QueryRow("SELECT (SELECT count(*) FROM aws_cfn_stacks WHERE id=?),(SELECT count(*) FROM aws_cfn_ownership WHERE stack_id=?)", records[0].ID, records[0].ID).Scan(&remainingStack, &remainingClaims); err != nil {
 		return err
@@ -802,7 +960,7 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		return errors.New("stack cleanup postcondition failed")
 	}
 	// Verify physical effects after every cleanup write. A trigger on a later
-	// resource/claim/stack deletion must not resurrect an acknowledged resource.
+	// resource/claim/stack/event/history write must not resurrect a resource.
 	for _, resource := range records[0].Resources {
 		var remaining int
 		switch resource.Type {
@@ -893,8 +1051,8 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	action := form.Get("Action")
-	if action != "CreateStack" && action != "DescribeStacks" && action != "DeleteStack" {
-		cfnError(w, ssmFailure{"NotImplemented", "Only CreateStack, DescribeStacks and DeleteStack are supported."})
+	if action != "CreateStack" && action != "DescribeStacks" && action != "DeleteStack" && action != "DescribeStackEvents" {
+		cfnError(w, ssmFailure{"NotImplemented", "Only CreateStack, DescribeStacks, DescribeStackEvents and DeleteStack are supported."})
 		return
 	}
 	if form.Get("Version") != "2010-05-15" {
@@ -935,6 +1093,11 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 				fail("CreateStack-only field.")
 				return
 			}
+		case "NextToken":
+			if action != "DescribeStackEvents" {
+				fail("NextToken is supported only by DescribeStackEvents.")
+				return
+			}
 		case "Action", "Version", "StackName":
 		default:
 			if action != "CreateStack" || !regexp.MustCompile(`^Parameters\.member\.[0-9]+\.(ParameterKey|ParameterValue)$|^Capabilities\.member\.[0-9]+$|^Tags\.member\.[0-9]+\.(Key|Value)$`).MatchString(key) {
@@ -944,7 +1107,8 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// Exercise IAM permission is not permission to read host-private answers.
-	if action == "DescribeStacks" && r.Header.Get("X-Simulator-Access-Role") == "participant" {
+	_, nativeSDK := SDKIdentityFromContext(r.Context())
+	if (action == "DescribeStacks" || action == "DescribeStackEvents") && r.Header.Get("X-Simulator-Access-Role") == "participant" && !nativeSDK {
 		cfnError(w, ssmFailure{"AccessDenied", "Stack outputs are reserved for the host."})
 		return
 	}
@@ -957,7 +1121,10 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 	var policy core.Policy
 	if principal != core.Administrator {
 		var found bool
-		policy, found, err = g.Identities.Policy(principal)
+		policy, found = SDKPolicyFromContext(r.Context())
+		if !found {
+			policy, found, err = g.Identities.Policy(principal)
+		}
 		if err != nil {
 			cfnError(w, err)
 			return
@@ -981,6 +1148,10 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 	name := form.Get("StackName")
 	switch action {
 	case "CreateStack":
+		if !stackCreateName.MatchString(name) {
+			fail("Use a valid stack name.")
+			return
+		}
 		parameters := map[string]string{}
 		for i := 1; i <= 100; i++ {
 			key := form.Get(fmt.Sprintf("Parameters.member.%d.ParameterKey", i))
@@ -992,38 +1163,48 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 				parameters[key] = form.Get(fmt.Sprintf("Parameters.member.%d.ParameterValue", i))
 			}
 		}
-		record, err := compileStack(region, name, form.Get("TemplateBody"), parameters, form.Get("Capabilities.member.1"))
-		record.Tags = map[string]string{}
+		tags := map[string]string{}
 		for i := 1; i <= 50; i++ {
 			key := form.Get(fmt.Sprintf("Tags.member.%d.Key", i))
 			if key != "" {
-				if _, exists := record.Tags[key]; exists {
+				if _, exists := tags[key]; exists {
 					fail("Duplicate tag key.")
 					return
 				}
-				record.Tags[key] = form.Get(fmt.Sprintf("Tags.member.%d.Value", i))
+				tags[key] = form.Get(fmt.Sprintf("Tags.member.%d.Value", i))
 			}
 		}
-		if err == nil {
-			record.ClientToken = form.Get("ClientRequestToken")
-			input, _ := json.Marshal([]any{form.Get("TemplateBody"), parameters, record.Tags, form.Get("Capabilities.member.1")})
-			digest := sha256.Sum256(input)
-			record.RequestHash = hex.EncodeToString(digest[:])
-			if record.ClientToken != "" {
-				existing, e := g.Stacks.Records(region, name)
-				if e == nil && len(existing) == 1 && existing[0].ClientToken == record.ClientToken {
-					if existing[0].RequestHash != record.RequestHash {
-						fail("ClientRequestToken was reused with a different request.")
-						return
-					}
-					if err = authorize(existing[0].ID); err != nil {
-						cfnError(w, err)
-						return
-					}
-					cfnResponse(w, action, "<StackId>"+xmlText(existing[0].ID)+"</StackId>")
+		input, _ := json.Marshal([]any{form.Get("TemplateBody"), parameters, tags, form.Get("Capabilities.member.1")})
+		digest := sha256.Sum256(input)
+		requestHash := hex.EncodeToString(digest[:])
+		clientToken := form.Get("ClientRequestToken")
+		// Replay the saved request before consulting mutable Parameter Store.
+		// Stack authorization is still required; no saved values are returned here.
+		if clientToken != "" {
+			existing, e := g.Stacks.Records(region, name)
+			if e == nil && len(existing) == 1 && existing[0].ClientToken == clientToken {
+				if err = authorize(existing[0].ID); err != nil {
+					cfnError(w, err)
 					return
 				}
+				if existing[0].RequestHash != requestHash {
+					fail("ClientRequestToken was reused with a different request.")
+					return
+				}
+				cfnResponse(w, action, "<StackId>"+xmlText(existing[0].ID)+"</StackId>")
+				return
 			}
+		}
+		record, err := compileStackWithParameters(region, name, form.Get("TemplateBody"), parameters, form.Get("Capabilities.member.1"),
+			func(stackID string, keys map[string]string) (map[string]string, error) {
+				// Authorize the actual generated ARN before reading source values.
+				if e := authorize(stackID); e != nil {
+					return nil, e
+				}
+				return g.Stacks.resolveSSMParameters(r.Context(), region, keys, authorizeAction)
+			})
+		if err == nil {
+			record.Tags, record.ClientToken, record.RequestHash = tags, clientToken, requestHash
 			if err = authorize(record.ID); err == nil {
 				err = stackResourcePermissions(record, false, authorizeAction)
 				if err == nil {
@@ -1036,6 +1217,18 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		cfnResponse(w, action, "<StackId>"+xmlText(record.ID)+"</StackId>")
+	case "DescribeStackEvents":
+		events, token, e := g.Stacks.Events(region, name, form.Get("NextToken"), authorize)
+		if e != nil {
+			cfnError(w, e)
+			return
+		}
+		result, e := stackEventsXML(events, token)
+		if e != nil {
+			cfnError(w, e)
+			return
+		}
+		cfnResponse(w, action, result)
 	case "DescribeStacks":
 		if name == "" {
 			if err = authorize("*"); err != nil {
@@ -1068,7 +1261,7 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 			for k, v := range record.Tags {
 				out.WriteString("<member><Key>" + xmlText(k) + "</Key><Value>" + xmlText(v) + "</Value></member>")
 			}
-			out.WriteString("</Tags></member>")
+			out.WriteString("</Tags>" + stackSSMParametersXML(record) + "</member>")
 		}
 		out.WriteString("</Stacks>")
 		cfnResponse(w, action, out.String())

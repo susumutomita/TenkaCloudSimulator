@@ -40,6 +40,25 @@ source view and Markdown summary for 14 days. Evidence is retained even after a
 failed threshold check; uploading an artifact does not change the failed result.
 Missing evidence cannot make generation or validation succeed.
 
+The existing safe-audit artifact also retains `reports/landing-topology/**` for
+14 days, including after a failed E2E step. These are public landing-page
+screenshots, layout/keyboard observations, pinned asset hashes and strict axe
+findings from eight fresh anonymous desktop/mobile contexts. The helper receives
+only a loopback endpoint, blocks API and external requests, and records no access
+token, cookie value, request header or user resource data. Failure screenshots
+mask editable fields; diagnostic errors retain their types rather than messages.
+This is test evidence, not a release binary or certification of native
+HTML-in-Canvas support. Artifact retention does not make a failed check pass.
+
+The same artifact retains the login test's failure-only native-input reports and
+incomplete-observer statuses for both insertion and native-clear cases, when
+produced. This test starts its own disposable
+instance with a fresh dummy token. Reports contain field-state booleans, bounded
+request/response counts, HTTP status codes and exception types; they contain no
+token value or hash, clipboard content, body, header, cookie or real user file.
+Observer problems are reported separately and never replace the original test
+failure. Diagnostic collection is not a real 1Password or Dia reproduction.
+
 A later near-floor pass does not repair an earlier below-floor result. Add
 meaningful native contract tests for uncovered behavior and verify a new single
 full-module profile without exclusions or a lower floor. The DynamoDB storage
@@ -108,17 +127,18 @@ A required pinned-catalog subset rehearsal runs the unchanged original wp2shell 
 
 ## Formal validation merge check
 
-The standalone `Formal validation` job is proposed as a stable required check;
+The standalone `Formal validation` job provides the stable required check;
 its inventory/applicability contract is documented in
 [formal-validation.md](formal-validation.md). The checker always runs all
 registered models and requires the intended invariant counterexamples. Exact
 base/blob-bound dispositions prevent absent/stale applicability metadata from
 silently passing; unknown implementation paths fail. This validates declared
 bounded correspondence, not Go refinement or authenticated human review.
-A later read-only inspection observed a main ruleset requiring `ci`, without a
-separate required `Formal validation` context. Adding that requirement remains on
-hold under the latest owner instruction; Composio and alternate settings routes
-are not used. No repository settings were changed. A green workflow is distinct
+Read-only inspection on 2026-11-06 observed an active ruleset for `main` requiring
+both `ci` and `Formal validation` from GitHub Actions. Those settings are separate
+from this source change; no repository settings were changed here. A later base
+update still requires integration review and fresh checks. Composio and alternate
+settings routes are not used. A green workflow is distinct
 from verified merge enforcement.
 
 
@@ -139,3 +159,17 @@ Checksum failure is outside the transport retry. Exhaustion or refusal remains
 a failed job; no model run is inferred from another job. The local fixture used
 a 0.2s outer deadline; full 95s expiry, SIGKILL fallback and real CDN availability
 are not established by that fixture. Hosted checks validate the actual runner.
+
+## Browser acquisition budgets
+
+Both browser jobs install the pinned Python test requirements, the complete
+Playwright Chromium system dependencies (including fonts), and the matching
+browser in separate required steps, with budgets of 3, 12 and 5 minutes. The
+focused Japanese job has a 30-minute overall budget for build, acquisition,
+acceptance and evidence upload. The individual maxima do not promise that all
+steps can consume their full budgets simultaneously.
+
+A failed acquisition step fails its job; skipped UI checks do not establish
+acceptance. Browser test deadlines, dependency inputs, Action pins, permissions,
+coverage floors and formal gates are unchanged. No package or browser cache,
+alternate download source, or host-validation bypass is introduced.

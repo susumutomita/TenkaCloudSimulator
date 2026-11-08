@@ -1,0 +1,26 @@
+{
+ "client": "codecommit",
+ "steps": [
+  {"op": "create_repository", "args": {"repositoryName": "fixture-repo", "repositoryDescription": "first", "tags": {"team": "a"}}, "save": {"repo": "repositoryMetadata.Arn", "id": "repositoryMetadata.repositoryId"}, "expect": {"repositoryMetadata.cloneUrlHttp": "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/fixture-repo", "repositoryMetadata.Arn": "arn:aws:codecommit:us-east-1:000000000000:fixture-repo"}},
+  {"op": "get_repository", "args": {"repositoryName": "fixture-repo"}, "expect": {"repositoryMetadata.repositoryDescription": "first", "repositoryMetadata.accountId": "000000000000"}},
+  {"op": "list_repositories", "args": {}, "expect": {"repositories[0].repositoryId": "${id}", "repositories#count": 1}},
+  {"op": "update_repository_description", "args": {"repositoryName": "fixture-repo", "repositoryDescription": "second"}},
+  {"op": "create_repository", "args": {"repositoryName": "fixture-repo"}, "error": "RepositoryNameExistsException"},
+  {"op": "create_repository", "args": {"repositoryName": "fixture.git"}, "error": "InvalidRepositoryNameException"},
+  {"op": "tag_resource", "args": {"resourceArn": "${repo}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${repo}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${repo}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "list_branches", "args": {"repositoryName": "fixture-repo"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "arn:aws:codecommit:us-east-1:000000000000:missing"}, "error": "RepositoryDoesNotExistException"}
+ ],
+ "isolation": [
+  {"op": "list_repositories", "args": {}, "expect": {"repositories#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_repository", "args": {"repositoryName": "fixture-repo"}, "expect": {"repositoryMetadata.repositoryDescription": "second", "repositoryMetadata.repositoryId": "${id}"}}
+ ],
+ "cleanup": [
+  {"op": "delete_repository", "args": {"repositoryName": "fixture-repo"}, "expect": {"repositoryId": "${id}"}},
+  {"op": "list_repositories", "args": {}, "expect": {"repositories#count": 0}}
+ ]
+}

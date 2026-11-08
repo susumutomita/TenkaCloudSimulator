@@ -1,0 +1,2631 @@
+{
+ "components": {
+  "schemas": {
+   "AdditionalAuthenticationProvider": {
+    "additionalProperties": false,
+    "properties": {
+     "authenticationType": {
+      "enum": [
+       "API_KEY",
+       "AWS_IAM",
+       "AMAZON_COGNITO_USER_POOLS",
+       "OPENID_CONNECT",
+       "AWS_LAMBDA"
+      ],
+      "type": "string"
+     },
+     "lambdaAuthorizerConfig": {
+      "$ref": "#/components/schemas/LambdaAuthorizerConfig"
+     },
+     "openIDConnectConfig": {
+      "$ref": "#/components/schemas/OpenIDConnectConfig"
+     },
+     "userPoolConfig": {
+      "$ref": "#/components/schemas/CognitoUserPoolConfig"
+     }
+    },
+    "type": "object"
+   },
+   "Api": {
+    "additionalProperties": false,
+    "properties": {
+     "apiArn": {
+      "type": "string"
+     },
+     "apiId": {
+      "type": "string"
+     },
+     "created": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "dns": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "eventConfig": {
+      "$ref": "#/components/schemas/EventConfig"
+     },
+     "name": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ownerContact": {
+      "maxLength": 250,
+      "minLength": 0,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "wafWebAclArn": {
+      "type": "string"
+     },
+     "xrayEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "AuthMode": {
+    "additionalProperties": false,
+    "properties": {
+     "authType": {
+      "enum": [
+       "API_KEY",
+       "AWS_IAM",
+       "AMAZON_COGNITO_USER_POOLS",
+       "OPENID_CONNECT",
+       "AWS_LAMBDA"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "authType"
+    ],
+    "type": "object"
+   },
+   "AuthProvider": {
+    "additionalProperties": false,
+    "properties": {
+     "authType": {
+      "enum": [
+       "API_KEY",
+       "AWS_IAM",
+       "AMAZON_COGNITO_USER_POOLS",
+       "OPENID_CONNECT",
+       "AWS_LAMBDA"
+      ],
+      "type": "string"
+     },
+     "cognitoConfig": {
+      "$ref": "#/components/schemas/CognitoConfig"
+     },
+     "lambdaAuthorizerConfig": {
+      "$ref": "#/components/schemas/LambdaAuthorizerConfig"
+     },
+     "openIDConnectConfig": {
+      "$ref": "#/components/schemas/OpenIDConnectConfig"
+     }
+    },
+    "required": [
+     "authType"
+    ],
+    "type": "object"
+   },
+   "AuthorizationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authorizationType": {
+      "enum": [
+       "AWS_IAM"
+      ],
+      "type": "string"
+     },
+     "awsIamConfig": {
+      "$ref": "#/components/schemas/AwsIamConfig"
+     }
+    },
+    "required": [
+     "authorizationType"
+    ],
+    "type": "object"
+   },
+   "AwsIamConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "signingRegion": {
+      "type": "string"
+     },
+     "signingServiceName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ChannelNamespace": {
+    "additionalProperties": false,
+    "properties": {
+     "apiId": {
+      "type": "string"
+     },
+     "channelNamespaceArn": {
+      "type": "string"
+     },
+     "codeHandlers": {
+      "maxLength": 32768,
+      "minLength": 1,
+      "type": "string"
+     },
+     "created": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "handlerConfigs": {
+      "$ref": "#/components/schemas/HandlerConfigs"
+     },
+     "lastModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+     },
+     "publishAuthModes": {
+      "items": {
+       "$ref": "#/components/schemas/AuthMode"
+      },
+      "type": "array"
+     },
+     "subscribeAuthModes": {
+      "items": {
+       "$ref": "#/components/schemas/AuthMode"
+      },
+      "type": "array"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "CognitoConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "appIdClientRegex": {
+      "type": "string"
+     },
+     "awsRegion": {
+      "type": "string"
+     },
+     "userPoolId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "userPoolId",
+     "awsRegion"
+    ],
+    "type": "object"
+   },
+   "CognitoUserPoolConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "appIdClientRegex": {
+      "type": "string"
+     },
+     "awsRegion": {
+      "type": "string"
+     },
+     "userPoolId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "userPoolId",
+     "awsRegion"
+    ],
+    "type": "object"
+   },
+   "DataSource": {
+    "additionalProperties": false,
+    "properties": {
+     "dataSourceArn": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "dynamodbConfig": {
+      "$ref": "#/components/schemas/DynamodbDataSourceConfig"
+     },
+     "elasticsearchConfig": {
+      "$ref": "#/components/schemas/ElasticsearchDataSourceConfig"
+     },
+     "eventBridgeConfig": {
+      "$ref": "#/components/schemas/EventBridgeDataSourceConfig"
+     },
+     "httpConfig": {
+      "$ref": "#/components/schemas/HttpDataSourceConfig"
+     },
+     "lambdaConfig": {
+      "$ref": "#/components/schemas/LambdaDataSourceConfig"
+     },
+     "metricsConfig": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 65536,
+      "minLength": 1,
+      "type": "string"
+     },
+     "openSearchServiceConfig": {
+      "$ref": "#/components/schemas/OpenSearchServiceDataSourceConfig"
+     },
+     "relationalDatabaseConfig": {
+      "$ref": "#/components/schemas/RelationalDatabaseDataSourceConfig"
+     },
+     "serviceRoleArn": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "AWS_LAMBDA",
+       "AMAZON_DYNAMODB",
+       "AMAZON_ELASTICSEARCH",
+       "NONE",
+       "HTTP",
+       "RELATIONAL_DATABASE",
+       "AMAZON_OPENSEARCH_SERVICE",
+       "AMAZON_EVENTBRIDGE",
+       "AMAZON_BEDROCK_RUNTIME"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeltaSyncConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "baseTableTTL": {
+      "type": "integer"
+     },
+     "deltaSyncTableName": {
+      "type": "string"
+     },
+     "deltaSyncTableTTL": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DynamodbDataSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "awsRegion": {
+      "type": "string"
+     },
+     "deltaSyncConfig": {
+      "$ref": "#/components/schemas/DeltaSyncConfig"
+     },
+     "tableName": {
+      "type": "string"
+     },
+     "useCallerCredentials": {
+      "type": "boolean"
+     },
+     "versioned": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "tableName",
+     "awsRegion"
+    ],
+    "type": "object"
+   },
+   "ElasticsearchDataSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "awsRegion": {
+      "type": "string"
+     },
+     "endpoint": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "endpoint",
+     "awsRegion"
+    ],
+    "type": "object"
+   },
+   "EnhancedMetricsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "dataSourceLevelMetricsBehavior": {
+      "enum": [
+       "FULL_REQUEST_DATA_SOURCE_METRICS",
+       "PER_DATA_SOURCE_METRICS"
+      ],
+      "type": "string"
+     },
+     "operationLevelMetricsConfig": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "resolverLevelMetricsBehavior": {
+      "enum": [
+       "FULL_REQUEST_RESOLVER_METRICS",
+       "PER_RESOLVER_METRICS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "resolverLevelMetricsBehavior",
+     "dataSourceLevelMetricsBehavior",
+     "operationLevelMetricsConfig"
+    ],
+    "type": "object"
+   },
+   "EventBridgeDataSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "eventBusArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "eventBusArn"
+    ],
+    "type": "object"
+   },
+   "EventConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authProviders": {
+      "items": {
+       "$ref": "#/components/schemas/AuthProvider"
+      },
+      "type": "array"
+     },
+     "connectionAuthModes": {
+      "items": {
+       "$ref": "#/components/schemas/AuthMode"
+      },
+      "type": "array"
+     },
+     "defaultPublishAuthModes": {
+      "items": {
+       "$ref": "#/components/schemas/AuthMode"
+      },
+      "type": "array"
+     },
+     "defaultSubscribeAuthModes": {
+      "items": {
+       "$ref": "#/components/schemas/AuthMode"
+      },
+      "type": "array"
+     },
+     "logConfig": {
+      "$ref": "#/components/schemas/EventLogConfig"
+     }
+    },
+    "required": [
+     "authProviders",
+     "connectionAuthModes",
+     "defaultPublishAuthModes",
+     "defaultSubscribeAuthModes"
+    ],
+    "type": "object"
+   },
+   "EventLogConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchLogsRoleArn": {
+      "type": "string"
+     },
+     "logLevel": {
+      "enum": [
+       "NONE",
+       "ERROR",
+       "ALL",
+       "INFO",
+       "DEBUG"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "logLevel",
+     "cloudWatchLogsRoleArn"
+    ],
+    "type": "object"
+   },
+   "GraphqlApi": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalAuthenticationProviders": {
+      "items": {
+       "$ref": "#/components/schemas/AdditionalAuthenticationProvider"
+      },
+      "type": "array"
+     },
+     "apiId": {
+      "type": "string"
+     },
+     "apiType": {
+      "enum": [
+       "GRAPHQL",
+       "MERGED"
+      ],
+      "type": "string"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "authenticationType": {
+      "enum": [
+       "API_KEY",
+       "AWS_IAM",
+       "AMAZON_COGNITO_USER_POOLS",
+       "OPENID_CONNECT",
+       "AWS_LAMBDA"
+      ],
+      "type": "string"
+     },
+     "dns": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "enhancedMetricsConfig": {
+      "$ref": "#/components/schemas/EnhancedMetricsConfig"
+     },
+     "introspectionConfig": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "lambdaAuthorizerConfig": {
+      "$ref": "#/components/schemas/LambdaAuthorizerConfig"
+     },
+     "logConfig": {
+      "$ref": "#/components/schemas/LogConfig"
+     },
+     "mergedApiExecutionRoleArn": {
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 65536,
+      "minLength": 1,
+      "type": "string"
+     },
+     "openIDConnectConfig": {
+      "$ref": "#/components/schemas/OpenIDConnectConfig"
+     },
+     "owner": {
+      "type": "string"
+     },
+     "ownerContact": {
+      "type": "string"
+     },
+     "queryDepthLimit": {
+      "maximum": 75,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "resolverCountLimit": {
+      "maximum": 10000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "uris": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "userPoolConfig": {
+      "$ref": "#/components/schemas/UserPoolConfig"
+     },
+     "visibility": {
+      "enum": [
+       "GLOBAL",
+       "PRIVATE"
+      ],
+      "type": "string"
+     },
+     "wafWebAclArn": {
+      "type": "string"
+     },
+     "xrayEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "HandlerConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "behavior": {
+      "enum": [
+       "CODE",
+       "DIRECT"
+      ],
+      "type": "string"
+     },
+     "integration": {
+      "$ref": "#/components/schemas/Integration"
+     }
+    },
+    "required": [
+     "behavior",
+     "integration"
+    ],
+    "type": "object"
+   },
+   "HandlerConfigs": {
+    "additionalProperties": false,
+    "properties": {
+     "onPublish": {
+      "$ref": "#/components/schemas/HandlerConfig"
+     },
+     "onSubscribe": {
+      "$ref": "#/components/schemas/HandlerConfig"
+     }
+    },
+    "type": "object"
+   },
+   "HttpDataSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authorizationConfig": {
+      "$ref": "#/components/schemas/AuthorizationConfig"
+     },
+     "endpoint": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Integration": {
+    "additionalProperties": false,
+    "properties": {
+     "dataSourceName": {
+      "type": "string"
+     },
+     "lambdaConfig": {
+      "$ref": "#/components/schemas/LambdaConfig"
+     }
+    },
+    "required": [
+     "dataSourceName"
+    ],
+    "type": "object"
+   },
+   "LambdaAuthorizerConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authorizerResultTtlInSeconds": {
+      "maximum": 3600,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "authorizerUri": {
+      "type": "string"
+     },
+     "identityValidationExpression": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "authorizerUri"
+    ],
+    "type": "object"
+   },
+   "LambdaConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "invokeType": {
+      "enum": [
+       "REQUEST_RESPONSE",
+       "EVENT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LambdaDataSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "lambdaFunctionArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "lambdaFunctionArn"
+    ],
+    "type": "object"
+   },
+   "LogConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchLogsRoleArn": {
+      "type": "string"
+     },
+     "excludeVerboseContent": {
+      "type": "boolean"
+     },
+     "fieldLogLevel": {
+      "enum": [
+       "NONE",
+       "ERROR",
+       "ALL",
+       "INFO",
+       "DEBUG"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "fieldLogLevel",
+     "cloudWatchLogsRoleArn"
+    ],
+    "type": "object"
+   },
+   "OpenIDConnectConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authTTL": {
+      "type": "integer"
+     },
+     "clientId": {
+      "type": "string"
+     },
+     "iatTTL": {
+      "type": "integer"
+     },
+     "issuer": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "issuer"
+    ],
+    "type": "object"
+   },
+   "OpenSearchServiceDataSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "awsRegion": {
+      "type": "string"
+     },
+     "endpoint": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "endpoint",
+     "awsRegion"
+    ],
+    "type": "object"
+   },
+   "RdsHttpEndpointConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "awsRegion": {
+      "type": "string"
+     },
+     "awsSecretStoreArn": {
+      "type": "string"
+     },
+     "databaseName": {
+      "type": "string"
+     },
+     "dbClusterIdentifier": {
+      "type": "string"
+     },
+     "schema": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RelationalDatabaseDataSourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "rdsHttpEndpointConfig": {
+      "$ref": "#/components/schemas/RdsHttpEndpointConfig"
+     },
+     "relationalDatabaseSourceType": {
+      "enum": [
+       "RDS_HTTP_ENDPOINT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UserPoolConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "appIdClientRegex": {
+      "type": "string"
+     },
+     "awsRegion": {
+      "type": "string"
+     },
+     "defaultAction": {
+      "enum": [
+       "ALLOW",
+       "DENY"
+      ],
+      "type": "string"
+     },
+     "userPoolId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "userPoolId",
+     "awsRegion",
+     "defaultAction"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS AppSync API (2017-07-25). Every other official operation returns HTTP 501 UnknownOperationException. GraphQL APIs, data sources, Event APIs and channel namespaces are configuration metadata: no GraphQL, real-time or event endpoint is served (uris and dns are not returned), no query, mutation, subscription, publish or handler code runs, and Cognito user pools, OIDC issuers, Lambda authorizers, roles, log groups and data source targets are stored without contacting or checking them. Schemas, types, resolvers, functions, API keys, caches, custom domain names, environment variables, merged API associations and data source introspection return UnknownOperationException with HTTP 501. Data sources cannot be updated; delete and re-create them. Each authentication type needs its own configuration (user pool, OpenID Connect or Lambda authorizer), merged APIs need mergedApiExecutionRoleArn, and each data source type needs exactly its own configuration. UpdateGraphqlApi changes only the supplied members. Deleting a GraphQL API deletes its data sources, and deleting an Event API deletes its channel namespaces. ListGraphqlApis refuses owner.",
+  "title": "AWS AppSync (simulator catalog)",
+  "version": "2017-07-25"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/apis": {
+   "get": {
+    "operationId": "appsyncListGraphqlApis",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "apiType",
+      "schema": {
+       "enum": [
+        "GRAPHQL",
+        "MERGED"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 25,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 65536,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "owner",
+      "schema": {
+       "enum": [
+        "CURRENT_ACCOUNT",
+        "OTHER_ACCOUNTS"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "graphqlApis": {
+           "items": {
+            "$ref": "#/components/schemas/GraphqlApi"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 65536,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListGraphqlApis",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "post": {
+    "operationId": "appsyncCreateGraphqlApi",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "additionalAuthenticationProviders": {
+          "items": {
+           "$ref": "#/components/schemas/AdditionalAuthenticationProvider"
+          },
+          "type": "array"
+         },
+         "apiType": {
+          "enum": [
+           "GRAPHQL",
+           "MERGED"
+          ],
+          "type": "string"
+         },
+         "authenticationType": {
+          "enum": [
+           "API_KEY",
+           "AWS_IAM",
+           "AMAZON_COGNITO_USER_POOLS",
+           "OPENID_CONNECT",
+           "AWS_LAMBDA"
+          ],
+          "type": "string"
+         },
+         "enhancedMetricsConfig": {
+          "$ref": "#/components/schemas/EnhancedMetricsConfig"
+         },
+         "introspectionConfig": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "lambdaAuthorizerConfig": {
+          "$ref": "#/components/schemas/LambdaAuthorizerConfig"
+         },
+         "logConfig": {
+          "$ref": "#/components/schemas/LogConfig"
+         },
+         "mergedApiExecutionRoleArn": {
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         },
+         "openIDConnectConfig": {
+          "$ref": "#/components/schemas/OpenIDConnectConfig"
+         },
+         "ownerContact": {
+          "type": "string"
+         },
+         "queryDepthLimit": {
+          "maximum": 75,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "resolverCountLimit": {
+          "maximum": 10000,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         },
+         "userPoolConfig": {
+          "$ref": "#/components/schemas/UserPoolConfig"
+         },
+         "visibility": {
+          "enum": [
+           "GLOBAL",
+           "PRIVATE"
+          ],
+          "type": "string"
+         },
+         "xrayEnabled": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "authenticationType",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "graphqlApi": {
+           "$ref": "#/components/schemas/GraphqlApi"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateGraphqlApi",
+    "tags": [
+     "AWS AppSync"
+    ]
+   }
+  },
+  "/v1/apis/{apiId}": {
+   "delete": {
+    "operationId": "appsyncDeleteGraphqlApi",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteGraphqlApi",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "get": {
+    "operationId": "appsyncGetGraphqlApi",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "graphqlApi": {
+           "$ref": "#/components/schemas/GraphqlApi"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetGraphqlApi",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "post": {
+    "operationId": "appsyncUpdateGraphqlApi",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "additionalAuthenticationProviders": {
+          "items": {
+           "$ref": "#/components/schemas/AdditionalAuthenticationProvider"
+          },
+          "type": "array"
+         },
+         "authenticationType": {
+          "enum": [
+           "API_KEY",
+           "AWS_IAM",
+           "AMAZON_COGNITO_USER_POOLS",
+           "OPENID_CONNECT",
+           "AWS_LAMBDA"
+          ],
+          "type": "string"
+         },
+         "enhancedMetricsConfig": {
+          "$ref": "#/components/schemas/EnhancedMetricsConfig"
+         },
+         "introspectionConfig": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "lambdaAuthorizerConfig": {
+          "$ref": "#/components/schemas/LambdaAuthorizerConfig"
+         },
+         "logConfig": {
+          "$ref": "#/components/schemas/LogConfig"
+         },
+         "mergedApiExecutionRoleArn": {
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         },
+         "openIDConnectConfig": {
+          "$ref": "#/components/schemas/OpenIDConnectConfig"
+         },
+         "ownerContact": {
+          "type": "string"
+         },
+         "queryDepthLimit": {
+          "maximum": 75,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "resolverCountLimit": {
+          "maximum": 10000,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "userPoolConfig": {
+          "$ref": "#/components/schemas/UserPoolConfig"
+         },
+         "xrayEnabled": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "authenticationType",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "graphqlApi": {
+           "$ref": "#/components/schemas/GraphqlApi"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateGraphqlApi",
+    "tags": [
+     "AWS AppSync"
+    ]
+   }
+  },
+  "/v1/apis/{apiId}/datasources": {
+   "get": {
+    "operationId": "appsyncListDataSources",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 25,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 65536,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "dataSources": {
+           "items": {
+            "$ref": "#/components/schemas/DataSource"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 65536,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListDataSources",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "post": {
+    "operationId": "appsyncCreateDataSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "type": "string"
+         },
+         "dynamodbConfig": {
+          "$ref": "#/components/schemas/DynamodbDataSourceConfig"
+         },
+         "elasticsearchConfig": {
+          "$ref": "#/components/schemas/ElasticsearchDataSourceConfig"
+         },
+         "eventBridgeConfig": {
+          "$ref": "#/components/schemas/EventBridgeDataSourceConfig"
+         },
+         "httpConfig": {
+          "$ref": "#/components/schemas/HttpDataSourceConfig"
+         },
+         "lambdaConfig": {
+          "$ref": "#/components/schemas/LambdaDataSourceConfig"
+         },
+         "metricsConfig": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 65536,
+          "minLength": 1,
+          "type": "string"
+         },
+         "openSearchServiceConfig": {
+          "$ref": "#/components/schemas/OpenSearchServiceDataSourceConfig"
+         },
+         "relationalDatabaseConfig": {
+          "$ref": "#/components/schemas/RelationalDatabaseDataSourceConfig"
+         },
+         "serviceRoleArn": {
+          "type": "string"
+         },
+         "type": {
+          "enum": [
+           "AWS_LAMBDA",
+           "AMAZON_DYNAMODB",
+           "AMAZON_ELASTICSEARCH",
+           "NONE",
+           "HTTP",
+           "RELATIONAL_DATABASE",
+           "AMAZON_OPENSEARCH_SERVICE",
+           "AMAZON_EVENTBRIDGE",
+           "AMAZON_BEDROCK_RUNTIME"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "name",
+         "type"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "dataSource": {
+           "$ref": "#/components/schemas/DataSource"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateDataSource",
+    "tags": [
+     "AWS AppSync"
+    ]
+   }
+  },
+  "/v1/apis/{apiId}/datasources/{name}": {
+   "delete": {
+    "operationId": "appsyncDeleteDataSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "maxLength": 65536,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteDataSource",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "get": {
+    "operationId": "appsyncGetDataSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "maxLength": 65536,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "dataSource": {
+           "$ref": "#/components/schemas/DataSource"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetDataSource",
+    "tags": [
+     "AWS AppSync"
+    ]
+   }
+  },
+  "/v1/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "appsyncUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 75,
+       "minLength": 70,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "get": {
+    "operationId": "appsyncListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 75,
+       "minLength": 70,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "post": {
+    "operationId": "appsyncTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 75,
+       "minLength": 70,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS AppSync"
+    ]
+   }
+  },
+  "/v2/apis": {
+   "get": {
+    "operationId": "appsyncListApis",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 25,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 65536,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "apis": {
+           "items": {
+            "$ref": "#/components/schemas/Api"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 65536,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListApis",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "post": {
+    "operationId": "appsyncCreateApi",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "eventConfig": {
+          "$ref": "#/components/schemas/EventConfig"
+         },
+         "name": {
+          "maxLength": 50,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ownerContact": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "api": {
+           "$ref": "#/components/schemas/Api"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateApi",
+    "tags": [
+     "AWS AppSync"
+    ]
+   }
+  },
+  "/v2/apis/{apiId}": {
+   "delete": {
+    "operationId": "appsyncDeleteApi",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteApi",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "get": {
+    "operationId": "appsyncGetApi",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "api": {
+           "$ref": "#/components/schemas/Api"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetApi",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "post": {
+    "operationId": "appsyncUpdateApi",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "eventConfig": {
+          "$ref": "#/components/schemas/EventConfig"
+         },
+         "name": {
+          "maxLength": 50,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ownerContact": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "api": {
+           "$ref": "#/components/schemas/Api"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateApi",
+    "tags": [
+     "AWS AppSync"
+    ]
+   }
+  },
+  "/v2/apis/{apiId}/channelNamespaces": {
+   "get": {
+    "operationId": "appsyncListChannelNamespaces",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 25,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 65536,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "channelNamespaces": {
+           "items": {
+            "$ref": "#/components/schemas/ChannelNamespace"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 65536,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListChannelNamespaces",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "post": {
+    "operationId": "appsyncCreateChannelNamespace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "codeHandlers": {
+          "maxLength": 32768,
+          "minLength": 1,
+          "type": "string"
+         },
+         "handlerConfigs": {
+          "$ref": "#/components/schemas/HandlerConfigs"
+         },
+         "name": {
+          "maxLength": 50,
+          "minLength": 1,
+          "type": "string"
+         },
+         "publishAuthModes": {
+          "items": {
+           "$ref": "#/components/schemas/AuthMode"
+          },
+          "type": "array"
+         },
+         "subscribeAuthModes": {
+          "items": {
+           "$ref": "#/components/schemas/AuthMode"
+          },
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "channelNamespace": {
+           "$ref": "#/components/schemas/ChannelNamespace"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateChannelNamespace",
+    "tags": [
+     "AWS AppSync"
+    ]
+   }
+  },
+  "/v2/apis/{apiId}/channelNamespaces/{name}": {
+   "delete": {
+    "operationId": "appsyncDeleteChannelNamespace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteChannelNamespace",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "get": {
+    "operationId": "appsyncGetChannelNamespace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "channelNamespace": {
+           "$ref": "#/components/schemas/ChannelNamespace"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetChannelNamespace",
+    "tags": [
+     "AWS AppSync"
+    ]
+   },
+   "post": {
+    "operationId": "appsyncUpdateChannelNamespace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appsync"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "apiId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "maxLength": 50,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "codeHandlers": {
+          "maxLength": 32768,
+          "minLength": 1,
+          "type": "string"
+         },
+         "handlerConfigs": {
+          "$ref": "#/components/schemas/HandlerConfigs"
+         },
+         "publishAuthModes": {
+          "items": {
+           "$ref": "#/components/schemas/AuthMode"
+          },
+          "type": "array"
+         },
+         "subscribeAuthModes": {
+          "items": {
+           "$ref": "#/components/schemas/AuthMode"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "channelNamespace": {
+           "$ref": "#/components/schemas/ChannelNamespace"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateChannelNamespace",
+    "tags": [
+     "AWS AppSync"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS AppSync API (2017-07-25). Every other official operation returns HTTP 501 UnknownOperationException. GraphQL APIs, data sources, Event APIs and channel namespaces are configuration metadata: no GraphQL, real-time or event endpoint is served (uris and dns are not returned), no query, mutation, subscription, publish or handler code runs, and Cognito user pools, OIDC issuers, Lambda authorizers, roles, log groups and data source targets are stored without contacting or checking them. Schemas, types, resolvers, functions, API keys, caches, custom domain names, environment variables, merged API associations and data source introspection return UnknownOperationException with HTTP 501. Data sources cannot be updated; delete and re-create them. Each authentication type needs its own configuration (user pool, OpenID Connect or Lambda authorizer), merged APIs need mergedApiExecutionRoleArn, and each data source type needs exactly its own configuration. UpdateGraphqlApi changes only the supplied members. Deleting a GraphQL API deletes its data sources, and deleting an Event API deletes its channel namespaces. ListGraphqlApis refuses owner.",
+   "name": "AWS AppSync"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/appsync/2017-07-25/service-2.json",
+  "sha256": "da1e16c385766d8a6ef8f515fc5a835cebf61391c55da4a6e198b5bef10bbc34",
+  "license": "Apache-2.0"
+ }
+}

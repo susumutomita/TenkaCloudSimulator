@@ -1,0 +1,24 @@
+{
+ "api": "memcache.v1",
+ "steps": [
+  {"call": "projects.locations.instances.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "instanceId": "fixture"}, "body": {"nodeCount": 1, "nodeConfig": {"cpuCount": 1, "memorySizeMb": 1024}, "labels": {"team": "a"}}, "save": {"op": "name", "instance": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op}"}, "expect": {"response.state": "READY"}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.instances.get", "args": {"name": "${instance}"}, "expect": {"nodeConfig.memorySizeMb": 1024}},
+  {"call": "projects.locations.instances.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"instances#count": 1}},
+  {"call": "projects.locations.instances.patch", "args": {"name": "${instance}", "updateMask": "displayName"}, "body": {"displayName": "Fixture"}},
+  {"call": "projects.locations.instances.patch", "args": {"name": "${instance}", "updateMask": "nodeCount"}, "body": {"nodeCount": 3}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.instances.updateParameters", "args": {"name": "${instance}", "body": {"updateMask": "params", "parameters": {"params": {"max-item-size": "2097152"}}}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.instances.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.instances.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"instances#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.instances.get", "args": {"name": "${instance}"}, "expect": {"displayName": "Fixture"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.instances.delete", "args": {"name": "${instance}"}},
+  {"call": "projects.locations.instances.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"instances#count": 0}}
+ ]
+}

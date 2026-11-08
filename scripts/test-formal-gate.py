@@ -33,9 +33,142 @@ class FormalGateTests(unittest.TestCase):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, target)
 
+    def test_sts_registry_guards_and_source_scope_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        baseline = json.loads(original)
+        entry = next(m for m in baseline['models'] if m['id'] == 'STSSessionLifecycle')
+        self.assertEqual(set(entry['properties']), {'TypeOK', 'IssueRequiresAllGuards', 'UseRequiresAllGuards'})
+        self.assertEqual({m['id'] for m in entry['mutants']}, {'SkipGeneration', 'SkipExpiry', 'SkipSignature', 'SkipTrust', 'SkipExternal', 'SkipPermission', 'SkipTenant', 'SkipChain'})
+        model_path, config_path = self.root / entry['model'], self.root / entry['config']
+        model_bytes, config_bytes = model_path.read_bytes(), config_path.read_bytes()
+        removed = json.loads(original)
+        removed['models'] = [m for m in removed['models'] if m['id'] != 'STSSessionLifecycle']
+        path.write_text(json.dumps(removed))
+        model_path.unlink(); config_path.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model_path.write_bytes(model_bytes); config_path.write_bytes(config_bytes)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == 'STSSessionLifecycle')
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            path.write_text(json.dumps(changed))
+            config_path.write_text(config_bytes.decode().replace('INVARIANT ' + prop + '\n', ''))
+            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+        config_path.write_bytes(config_bytes)
+        for scope in (entry['source_scope'][1:], entry['source_scope'] + ['internal/core/store.go']):
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == 'STSSessionLifecycle')['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        path.write_text(original)
+        source = model_bytes.decode()
+        for mutant in entry['mutants']:
+            broken = json.loads(json.dumps(mutant))
+            broken['edits'][0]['old'] += 'missing-anchor'
+            with self.subTest(mutant=mutant['id']), self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                apply_mutant(source, entry['id'], broken)
+
+    def test_cfn_event_history_inventory_properties_controls_and_scopes_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'CFNEventHistory')
+        self.assertEqual(set(entry['properties']), {
+            'TypeOK', 'PendingFrameUnchanged', 'FailureAtomic', 'LivePeerPreserved',
+            'EventParentExists', 'RetentionBound', 'LatestDeletedRetained',
+            'SuccessfulLifecycleExact', 'HistoryTracksLatest', 'CleanupAfterAllWrites',
+            'ReadSnapshotUnchanged', 'NoUnauthorizedDisclosure', 'ResolvedGenerationExact',
+            'CursorScoped', 'PageExact', 'NextCursorExact'})
+        self.assertEqual({m['id'] for m in entry['mutants']}, {
+            'PublishPending', 'PublishFailedTransaction', 'SkipEventWriteACK',
+            'SkipHistoryWriteACK', 'SkipDeletedCountACK', 'PruneLiveHistory',
+            'LeaveOrphanEvents', 'SkipSelectedHistoryACK', 'AcknowledgeBeforeFinalWrites',
+            'SkipAuthorization', 'ResolveDeletedByName', 'SkipRegion',
+            'SkipCursorGeneration', 'IgnoreCursorBound', 'ReversePageOrder', 'ReturnFirstRowCursor'})
+        model_path, config_path = self.root / entry['model'], self.root / entry['config']
+        model_bytes, config_bytes = model_path.read_bytes(), config_path.read_bytes()
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(changed))
+        model_path.unlink(); config_path.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model_path.write_bytes(model_bytes); config_path.write_bytes(config_bytes)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            path.write_text(json.dumps(changed))
+            config_path.write_text(config_bytes.decode().replace('INVARIANT ' + prop + '\n', ''))
+            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+        config_path.write_bytes(config_bytes)
+        for control in entry['mutants']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['mutants'] = [m for m in target['mutants'] if m['id'] != control['id']]
+            path.write_text(json.dumps(changed))
+            with self.subTest(control=control['id']), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                load_registry(self.root)
+        for scope in ([p for p in entry['source_scope'] if p != removed] for removed in entry['source_scope']):
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == entry['id'])['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.subTest(scope=scope), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        changed = json.loads(original)
+        next(m for m in changed['models'] if m['id'] == entry['id'])['source_scope'].append('internal/core/store.go')
+        path.write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        path.write_text(original)
+
+    def test_cfn_event_controls_preserve_independent_oracles_and_exact_anchors(self):
+        registry = load_registry(self.root)
+        entry = next(m for m in registry['models'] if m['id'] == 'CFNEventHistory')
+        source = (self.root / entry['model']).read_text()
+        oracle = source[source.index('FrameOK(s) =='):]
+        for control in entry['mutants']:
+            _, mutated = apply_mutant(source, entry['id'], control)
+            self.assertEqual(mutated[mutated.index('FrameOK(s) =='):], oracle)
+            broken = json.loads(json.dumps(control))
+            broken['edits'][0]['old'] += 'missing-anchor'
+            with self.subTest(control=control['id']), self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                apply_mutant(source, entry['id'], broken)
+
+    def test_cfn_parameter_snapshot_required_inventory(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            registry = json.loads(original)
+            entry = next(m for m in registry['models'] if m['id'] == 'CFNParameterSnapshot')
+            for value in list(entry[field]):
+                candidate = json.loads(original)
+                changed = next(m for m in candidate['models'] if m['id'] == 'CFNParameterSnapshot')
+                changed[field].remove(value)
+                path.write_text(json.dumps(candidate))
+                try:
+                    with self.subTest(field=field, value=value), self.assertRaises(GateError):
+                        load_registry(self.root)
+                finally:
+                    path.write_text(original)
+        registry = json.loads(original)
+        registry['models'] = [m for m in registry['models'] if m['id'] != 'CFNParameterSnapshot']
+        path.write_text(json.dumps(registry))
+        try:
+            with self.assertRaises(GateError):
+                load_registry(self.root)
+        finally:
+            path.write_text(original)
+
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'CFNPhysicalResourceACK', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'GCPStorageState', 'IAMManagedPolicies', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'S3MultipartState', 'S3Versions', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMParameterState', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'S3MultipartState', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'SNSAdmission', 'SNSLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'CatalogResourceLifecycle', 'CatalogConsoleEpoch', 'LoginInputIntent', 'STSSessionLifecycle', 'CFNEventHistory'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -201,6 +334,163 @@ class FormalGateTests(unittest.TestCase):
                 with self.assertRaises(GateError):
                     run_suite(self.root, jar, self.root / 'reports')
                 self.assertFalse(json.loads((self.root / 'reports/evidence.json').read_text())['success'])
+
+    def test_timeout_retains_exact_partial_bytes_without_success_or_command(self):
+        jar = self.root / 'fixture.jar'
+        jar.write_bytes(b'controlled diagnostic fixture, not TLC')
+        (self.root / 'formal/tla2tools.sha256').write_text(hashlib.sha256(jar.read_bytes()).hexdigest() + '  tla2tools.jar\n')
+        stdout, stderr = b'partial-progress\x00\xff', b'partial-error\xfe'
+        error = subprocess.TimeoutExpired('PRIVATE_COMMAND_SENTINEL', 60, output=stdout, stderr=stderr)
+        reports = self.root / 'timeout-reports'
+        with patch('formal_model_gate.shutil.which', return_value='/fixture/java'), patch('formal_model_gate.time.monotonic', side_effect=[100.0, 162.5]), patch('formal_model_gate.subprocess.run', side_effect=error) as process:
+            with self.assertRaisesRegex(GateError, 'TLC could not finish: ObjectStore') as raised:
+                run_suite(self.root, jar, reports)
+        self.assertIs(raised.exception.__cause__.__cause__, error)
+        process.assert_called_once()
+        evidence = json.loads((reports / 'evidence.json').read_text())
+        self.assertFalse(evidence['success'])
+        self.assertEqual(evidence['runs'], [])
+        failure = evidence['failure']
+        self.assertFalse(failure['success'])
+        self.assertEqual((failure['exception_type'], failure['errno'], failure['timeout_seconds']), ('TimeoutExpired', None, 60))
+        self.assertEqual((failure['deadline_seconds'], failure['elapsed_seconds']), (60, 62.5))
+        self.assertIsNone(failure['exit_code'])
+        self.assertEqual(failure['exit_code_status'], 'unavailable_from_process_exception')
+        self.assertEqual(process.call_args.kwargs['timeout'], 60)
+        self.assertEqual(json.loads((reports / 'ObjectStore.failure.json').read_text()), failure)
+        for channel, raw in [('stdout', stdout), ('stderr', stderr)]:
+            stream = failure[channel]
+            self.assertEqual((reports / stream['path']).read_bytes(), raw)
+            self.assertEqual(stream['sha256'], hashlib.sha256(raw).hexdigest())
+            self.assertEqual(stream['bytes'], len(raw))
+            self.assertTrue(stream['available'])
+            self.assertEqual(stream['source_type'], 'bytes')
+        self.assertNotIn('PRIVATE_COMMAND_SENTINEL', (reports / 'evidence.json').read_text())
+
+    def test_oserror_retains_errno_and_available_streams_without_message(self):
+        jar = self.root / 'fixture.jar'
+        jar.write_bytes(b'controlled diagnostic fixture, not TLC')
+        (self.root / 'formal/tla2tools.sha256').write_text(hashlib.sha256(jar.read_bytes()).hexdigest() + '  tla2tools.jar\n')
+        error = OSError(28, 'PRIVATE_ERROR_SENTINEL')
+        error.stdout = 'partial unicode progress \u2603'
+        error.stderr = b'partial-oserror\x80'
+        reports = self.root / 'oserror-reports'
+        with patch('formal_model_gate.shutil.which', return_value='/fixture/java'), patch('formal_model_gate.time.monotonic', side_effect=[100.0, 162.5]), patch('formal_model_gate.subprocess.run', side_effect=error) as process:
+            with self.assertRaisesRegex(GateError, 'TLC could not finish: ObjectStore'):
+                run_suite(self.root, jar, reports)
+        process.assert_called_once()
+        evidence = json.loads((reports / 'evidence.json').read_text())
+        self.assertFalse(evidence['success'])
+        self.assertEqual(evidence['runs'], [])
+        failure = evidence['failure']
+        self.assertEqual((failure['exception_type'], failure['errno'], failure['timeout_seconds']), ('OSError', 28, None))
+        self.assertEqual((failure['deadline_seconds'], failure['elapsed_seconds']), (60, 62.5))
+        self.assertIsNone(failure['exit_code'])
+        self.assertEqual(failure['exit_code_status'], 'unavailable_from_process_exception')
+        self.assertEqual(process.call_args.kwargs['timeout'], 60)
+        self.assertEqual((reports / failure['stdout']['path']).read_bytes(), error.stdout.encode())
+        self.assertEqual((reports / failure['stderr']['path']).read_bytes(), error.stderr)
+        self.assertNotIn('PRIVATE_ERROR_SENTINEL', (reports / 'evidence.json').read_text())
+        self.assertFalse(failure['success'])
+
+    def test_diagnostic_write_failure_does_not_mask_primary_process_error(self):
+        jar = self.root / 'fixture.jar'
+        jar.write_bytes(b'controlled diagnostic fixture, not TLC')
+        (self.root / 'formal/tla2tools.sha256').write_text(hashlib.sha256(jar.read_bytes()).hexdigest() + '  tla2tools.jar\n')
+        error = subprocess.TimeoutExpired('PRIVATE_COMMAND_SENTINEL', 60, output=b'partial stdout', stderr=b'partial stderr')
+        original_write = Path.write_bytes
+        def refuse_stdout(path, value):
+            if path.name.endswith('.failure.stdout.bin'):
+                raise OSError(28, 'PRIVATE_DIAGNOSTIC_SENTINEL')
+            return original_write(path, value)
+        reports = self.root / 'write-failure-reports'
+        with patch('formal_model_gate.shutil.which', return_value='/fixture/java'), patch('formal_model_gate.subprocess.run', side_effect=error), patch.object(Path, 'write_bytes', refuse_stdout):
+            with self.assertRaisesRegex(GateError, 'TLC could not finish: ObjectStore') as raised:
+                run_suite(self.root, jar, reports)
+        self.assertIs(raised.exception.__cause__.__cause__, error)
+        evidence = json.loads((reports / 'evidence.json').read_text())
+        self.assertFalse(evidence['success'])
+        self.assertEqual(evidence['runs'], [])
+        failure = evidence['failure']
+        self.assertEqual(failure['exception_type'], 'TimeoutExpired')
+        self.assertFalse(failure['stdout']['retained'])
+        self.assertEqual(failure['stdout']['write_errno'], 28)
+        self.assertTrue(failure['stderr']['retained'])
+        self.assertEqual((reports / failure['stderr']['path']).read_bytes(), b'partial stderr')
+        self.assertNotIn('PRIVATE_DIAGNOSTIC_SENTINEL', (reports / 'evidence.json').read_text())
+
+    def test_diagnostic_metadata_write_failure_keeps_primary_error_in_evidence(self):
+        jar = self.root / 'fixture.jar'
+        jar.write_bytes(b'controlled metadata failure fixture, not TLC')
+        (self.root / 'formal/tla2tools.sha256').write_text(hashlib.sha256(jar.read_bytes()).hexdigest() + '  tla2tools.jar\n')
+        error = FileNotFoundError(2, 'PRIVATE_PROCESS_MESSAGE')
+        original_write = Path.write_text
+        def refuse_metadata(path, value, *args, **kwargs):
+            if path.name.endswith('.failure.json'):
+                raise OSError(28, 'PRIVATE_METADATA_MESSAGE')
+            return original_write(path, value, *args, **kwargs)
+        reports = self.root / 'metadata-failure-reports'
+        with patch('formal_model_gate.shutil.which', return_value='/fixture/java'), patch('formal_model_gate.subprocess.run', side_effect=error), patch('formal_model_gate.time.monotonic', side_effect=[10.0, 10.125]), patch.object(Path, 'write_text', refuse_metadata):
+            with self.assertRaisesRegex(GateError, 'TLC could not finish: ObjectStore') as raised:
+                run_suite(self.root, jar, reports)
+        self.assertIs(raised.exception.__cause__.__cause__, error)
+        evidence = json.loads((reports / 'evidence.json').read_text())
+        failure = evidence['failure']
+        self.assertFalse(evidence['success'])
+        self.assertEqual(evidence['runs'], [])
+        self.assertEqual((failure['exception_type'], failure['errno'], failure['elapsed_seconds']), ('FileNotFoundError', 2, 0.125))
+        self.assertEqual((failure['metadata_write_error_type'], failure['metadata_write_errno']), ('OSError', 28))
+        for channel in ('stdout', 'stderr'):
+            self.assertFalse(failure[channel]['available'])
+            self.assertEqual(failure[channel]['bytes'], 0)
+            self.assertTrue(failure[channel]['retained'])
+        self.assertNotIn('PRIVATE_PROCESS_MESSAGE', (reports / 'evidence.json').read_text())
+        self.assertNotIn('PRIVATE_METADATA_MESSAGE', (reports / 'evidence.json').read_text())
+
+    def test_landing_models_properties_and_exact_sources_cannot_be_removed(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        baseline = json.loads(original)
+        for name in ('LandingAccessAdmission', 'LandingTopologyState'):
+            entry = next(m for m in baseline['models'] if m['id'] == name)
+            model_path = self.root / entry['model']
+            config_path = self.root / entry['config']
+            model_bytes, config_bytes = model_path.read_bytes(), config_path.read_bytes()
+            changed = json.loads(original)
+            changed['models'] = [m for m in changed['models'] if m['id'] != name]
+            path.write_text(json.dumps(changed))
+            model_path.unlink(); config_path.unlink()
+            with self.subTest(model=name, removal='model'), self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            model_path.write_bytes(model_bytes); config_path.write_bytes(config_bytes)
+            for prop in entry['properties']:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == name)
+                target['properties'].remove(prop)
+                target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+                lines = config_bytes.decode().splitlines(keepends=True)
+                removed = 0
+                for index, line in enumerate(lines):
+                    words = line.split()
+                    if words and words[0] in ('INVARIANT', 'INVARIANTS') and prop in words[1:]:
+                        words.remove(prop); removed += 1
+                        lines[index] = ' '.join(words) + '\n' if len(words) > 1 else ''
+                self.assertEqual(removed, 1)
+                changed_config = ''.join(lines)
+                self.assertEqual(set(invariants(changed_config, name)), set(target['properties']))
+                config_path.write_text(changed_config)
+                path.write_text(json.dumps(changed))
+                with self.subTest(model=name, property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+                config_path.write_bytes(config_bytes)
+            for source in entry['source_scope']:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == name)
+                target['source_scope'].remove(source)
+                path.write_text(json.dumps(changed))
+                with self.subTest(model=name, source=source), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+            path.write_text(original)
 
     def test_cfg_view_constraints_and_unknown_keywords_are_not_invariants(self):
         for directive in ('VIEW V', 'CONSTRAINT Bound', 'CONSTRAINTS Bound', 'ACTION_CONSTRAINT Bound', 'ACTION_CONSTRAINTS Bound', 'TYPE T', 'TYPE_CONSTRAINT T', 'SYMMETRY Permutations'):
@@ -503,7 +793,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         registry = json.loads(original)
         self.assertEqual(set(REQUIRED_MUTANTS), BASE_MODELS)
-        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), 386)
+        self.assertEqual(sum(map(len, REQUIRED_MUTANTS.values())), sum(len(m['mutants']) for m in registry['models']))
         self.assertEqual({m['id']: {c['id'] for c in m['mutants']} for m in registry['models']}, REQUIRED_MUTANTS)
         for model in registry['models']:
             for mutant in model['mutants']:
@@ -520,7 +810,7 @@ class FormalGateTests(unittest.TestCase):
     def test_every_required_control_is_protected_against_single_removal(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
-        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), 386)
+        self.assertEqual(sum(len(v) for v in REQUIRED_MUTANTS.values()), sum(len(m['mutants']) for m in json.loads(original)['models']))
         for model_id, controls in REQUIRED_MUTANTS.items():
             for control in controls:
                 with self.subTest(model=model_id, control=control):
@@ -1449,6 +1739,126 @@ class FormalGateTests(unittest.TestCase):
                         validate_result(code, text, expected)
 
 
+
+
+    def test_login_input_required_model_properties_and_exact_scope(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'LoginInputIntent')
+        self.assertEqual(set(entry['source_scope']), {
+            'tools/console/src/login.jsx', 'test/console/login-native-input.test.mjs',
+            'test/e2e/login_paste.py', 'test/e2e/login_token_file.py',
+            'internal/server/web/app.js'})
+        tla, cfg = self.root / entry['model'], self.root / entry['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(changed)); tla.unlink(); cfg.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        tla.write_bytes(source); cfg.write_bytes(config)
+        # Remove each declaration AND its CFG/controls consistently: mandatory
+        # properties must refuse this, not merely an incidental CFG mismatch.
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            lines = config.decode().splitlines()
+            self.assertEqual(lines.count('INVARIANT '+prop), 1)
+            cfg.write_text('\n'.join(line for line in lines if line != 'INVARIANT '+prop)+'\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+        cfg.write_bytes(config)
+        # Every exact path, including the compiled-login artifact, is required.
+        scopes = [[path for path in entry['source_scope'] if path != removed]
+                  for removed in entry['source_scope']]
+        scopes += [entry['source_scope']+['tools/console/src/main.jsx'],
+                   ['tools/console/src/main.jsx']]
+        for scope in scopes:
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == entry['id'])['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.subTest(scope=scope), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        path.write_text(original)
+
+
+    def test_login_input_every_control_and_unambiguous_transition_anchor_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'LoginInputIntent')
+        self.assertEqual(len(entry['mutants']), 14)
+        for control in entry['mutants']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['mutants'] = [m for m in target['mutants'] if m['id'] != control['id']]
+            path.write_text(json.dumps(changed))
+            with self.subTest(control=control['id']), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                load_registry(self.root)
+        # The Ready suffix also occurs in ExpectedReady. Removing the reviewed
+        # leading newline must fail whole-source anchor validation, as caught
+        # during scoped-run preparation; a prefix-only fixture is insufficient.
+        for name in ('SubmitIgnoresBusy', 'SubmitIgnoresFileGate'):
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            control = next(m for m in target['mutants'] if m['id'] == name)
+            control['edits'][0]['old'] = control['edits'][0]['old'].lstrip('\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(control=name), self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                load_registry(self.root)
+        path.write_text(original)
+
+
+    def test_login_focus_control_preserves_independent_adoption_oracle(self):
+        registry = load_registry(self.root)
+        entry = next(m for m in registry['models'] if m['id'] == 'LoginInputIntent')
+        source = (self.root / entry['model']).read_text()
+        control = next(m for m in entry['mutants'] if m['id'] == 'FocusSkipsNativeAdoption')
+        self.assertEqual(control['expect_invariant'], 'AdoptedValueExact')
+        name, mutated = apply_mutant(source, entry['id'], control)
+        self.assertEqual(name, 'LoginInputIntent_FocusSkipsNativeAdoption')
+        self.assertIn('Focus(s) == LET adopted == s IN [adopted EXCEPT !.dom = adopted.token]', mutated)
+        # Mutation must touch the actual focus transition, not its independent
+        # before-state oracle or the unchanged ordinary Sync operation.
+        self.assertIn(' [] e.op = "focus" -> Focus(s)', mutated)
+        self.assertIn(' [] k = "native-focus-submit" -> <<Event("native","A"),Event("focus","empty"),Event("submit","empty")>>', mutated)
+        self.assertIn('Sync(s) == IF s.connected /\\ s.dom # s.token THEN Adopt(s,s.dom) ELSE s', mutated)
+        for before_state_oracle in (
+            '(Op \\in {"sync","focus","keydown"} /\\ Before.connected /\\ Before.dom # Before.token)',
+            'ELSE IF Op \\in {"sync","focus","keydown"} /\\ Before.connected THEN Before.dom',
+            '"edit","sync","focus","keydown","flush","submit","fileok","fileerr"',
+        ):
+            self.assertIn(before_state_oracle, mutated)
+
+
+
+    def test_login_keydown_native_clear_control_preserves_independent_oracles(self):
+        registry = load_registry(self.root)
+        entry = next(m for m in registry['models'] if m['id'] == 'LoginInputIntent')
+        old_controls = {'FlushDoesNotAdoptNativeValue', 'LocaleInvalidatesCurrentFile', 'EmptyDOMReusesOldCredential', 'OldPasteSurvivesNewIntent', 'LocaleClearsIntent', 'FocusSkipsNativeAdoption', 'NonemptyDOMUsesControlledState', 'NativeAdoptionSkipsNewIntent', 'FileCompletionIgnoresRevision', 'SubmitIgnoresFileGate', 'SubmitIgnoresBusy', 'UnmountedFileCompletionPublishes', 'CurrentFileErrorDiscarded'}
+        self.assertEqual({m['id'] for m in entry['mutants']},
+                         old_controls | {'KeyDownSkipsNativeAdoption'})
+        source = (self.root / entry['model']).read_text()
+        control = next(m for m in entry['mutants'] if m['id'] == 'KeyDownSkipsNativeAdoption')
+        self.assertEqual(control['expect_invariant'], 'AdoptedValueExact')
+        name, mutated = apply_mutant(source, entry['id'], control)
+        self.assertEqual(name, 'LoginInputIntent_KeyDownSkipsNativeAdoption')
+        self.assertIn('KeyDown(s) == LET adopted == s IN [adopted EXCEPT !.dom = adopted.token]', mutated)
+        self.assertNotIn('KeyDown(s) == LET adopted == Sync(s)', mutated)
+        self.assertIn(' [] e.op = "keydown" -> KeyDown(s)', mutated)
+        self.assertIn(' [] k = "focused-key-clear-submit" -> <<Event("paste","A"),Event("flush","empty"),Event("native","empty"),Event("keydown","empty"),Event("submit","empty")>>', mutated)
+        # The mutant changes the actual key capture, never the independent
+        # before-state oracle, ordinary input synchronization or focus guard.
+        for unchanged in (
+            'Sync(s) == IF s.connected /\\ s.dom # s.token THEN Adopt(s,s.dom) ELSE s',
+            'Focus(s) == LET adopted == Sync(s) IN [adopted EXCEPT !.dom = adopted.token]',
+            '(Op \\in {"sync","focus","keydown"} /\\ Before.connected /\\ Before.dom # Before.token)',
+            'ELSE IF Op \\in {"sync","focus","keydown"} /\\ Before.connected THEN Before.dom',
+            '"edit","sync","focus","keydown","flush","submit","fileok","fileerr"',
+        ):
+            self.assertIn(unchanged, mutated)
 
 
 if __name__ == '__main__':

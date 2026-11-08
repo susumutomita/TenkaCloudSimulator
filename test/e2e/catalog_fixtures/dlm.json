@@ -1,0 +1,28 @@
+{
+ "client": "dlm",
+ "steps": [
+  {"op": "create_lifecycle_policy", "args": {"ExecutionRoleArn": "arn:aws:iam::000000000000:role/AWSDataLifecycleManagerDefaultRole", "Description": "fixture daily snapshots", "State": "ENABLED", "Tags": {"team": "a"}, "PolicyDetails": {"PolicyType": "EBS_SNAPSHOT_MANAGEMENT", "ResourceTypes": ["VOLUME"], "TargetTags": [{"Key": "backup", "Value": "daily"}], "Schedules": [{"Name": "daily", "CreateRule": {"Interval": 24, "IntervalUnit": "HOURS", "Times": ["03:00"]}, "RetainRule": {"Count": 7}}]}}, "save": {"policy": "PolicyId"}},
+  {"op": "get_lifecycle_policy", "args": {"PolicyId": "${policy}"}, "save": {"arn": "Policy.PolicyArn"}, "expect": {"Policy.State": "ENABLED", "Policy.DefaultPolicy": false, "Policy.Tags": {"team": "a"}, "Policy.PolicyDetails.Schedules[0].RetainRule.Count": 7}},
+  {"op": "get_lifecycle_policies", "args": {}, "expect": {"Policies#count": 1, "Policies[0].PolicyId": "${policy}"}},
+  {"op": "update_lifecycle_policy", "args": {"PolicyId": "${policy}", "State": "DISABLED", "Description": "fixture paused"}},
+  {"op": "get_lifecycle_policies", "args": {"State": "DISABLED"}, "expect": {"Policies#count": 1, "Policies[0].Description": "fixture paused"}},
+  {"op": "get_lifecycle_policies", "args": {"State": "ENABLED"}, "expect": {"Policies#count": 0}},
+  {"op": "get_lifecycle_policies", "args": {"PolicyIds": ["${policy}"]}, "expect": {"Policies#count": 1}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${arn}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${arn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${arn}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "create_lifecycle_policy", "args": {"ExecutionRoleArn": "arn:aws:iam::000000000000:role/AWSDataLifecycleManagerDefaultRole", "Description": "default policy", "State": "ENABLED", "DefaultPolicy": "VOLUME"}, "error": "InvalidRequestException"},
+  {"op": "get_lifecycle_policies", "args": {"ResourceTypes": ["VOLUME"]}, "error": "InvalidRequestException"},
+  {"op": "get_lifecycle_policy", "args": {"PolicyId": "policy-0123456789abcdef0"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "get_lifecycle_policies", "args": {}, "expect": {"Policies#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_lifecycle_policy", "args": {"PolicyId": "${policy}"}, "expect": {"Policy.State": "DISABLED", "Policy.Description": "fixture paused"}}
+ ],
+ "cleanup": [
+  {"op": "delete_lifecycle_policy", "args": {"PolicyId": "${policy}"}},
+  {"op": "get_lifecycle_policies", "args": {}, "expect": {"Policies#count": 0}}
+ ]
+}

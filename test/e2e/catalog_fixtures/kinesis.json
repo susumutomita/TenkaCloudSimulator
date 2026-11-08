@@ -1,0 +1,35 @@
+{
+ "client": "kinesis",
+ "steps": [
+  {"op": "create_stream", "args": {"StreamName": "fixture-clicks", "ShardCount": 2, "Tags": {"team": "a"}}},
+  {"op": "describe_stream_summary", "args": {"StreamName": "fixture-clicks"}, "save": {"stream": "StreamDescriptionSummary.StreamARN"}, "expect": {"StreamDescriptionSummary.StreamStatus": "ACTIVE", "StreamDescriptionSummary.OpenShardCount": 2, "StreamDescriptionSummary.RetentionPeriodHours": 24, "StreamDescriptionSummary.StreamModeDetails.StreamMode": "PROVISIONED"}},
+  {"op": "create_stream", "args": {"StreamName": "fixture-events", "StreamModeDetails": {"StreamMode": "ON_DEMAND"}}},
+  {"op": "create_stream", "args": {"StreamName": "fixture-unsized"}, "error": "InvalidArgumentException"},
+  {"op": "list_streams", "args": {}, "expect": {"StreamNames": ["fixture-clicks", "fixture-events"], "StreamSummaries#count": 2}},
+  {"op": "list_streams", "args": {"Limit": 1}, "expect": {"HasMoreStreams": true, "StreamNames#count": 1}},
+  {"op": "increase_stream_retention_period", "args": {"StreamName": "fixture-clicks", "RetentionPeriodHours": 72}},
+  {"op": "decrease_stream_retention_period", "args": {"StreamARN": "${stream}", "RetentionPeriodHours": 48}},
+  {"op": "increase_stream_retention_period", "args": {"StreamName": "fixture-clicks", "RetentionPeriodHours": 9000}, "error": "InvalidArgumentException"},
+  {"op": "update_stream_mode", "args": {"StreamARN": "${stream}", "StreamModeDetails": {"StreamMode": "ON_DEMAND"}}},
+  {"op": "start_stream_encryption", "args": {"StreamName": "fixture-clicks", "EncryptionType": "KMS", "KeyId": "alias/aws/kinesis"}},
+  {"op": "describe_stream_summary", "args": {"StreamARN": "${stream}"}, "expect": {"StreamDescriptionSummary.EncryptionType": "KMS", "StreamDescriptionSummary.KeyId": "alias/aws/kinesis", "StreamDescriptionSummary.RetentionPeriodHours": 48}},
+  {"op": "stop_stream_encryption", "args": {"StreamName": "fixture-events", "EncryptionType": "KMS", "KeyId": "alias/aws/kinesis"}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${stream}", "Tags": {"cost": "lab"}}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${stream}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${stream}"}, "expect": {"Tags": [{"Key": "cost", "Value": "lab"}]}},
+  {"op": "put_record", "args": {"StreamName": "fixture-clicks", "Data": "aGVsbG8=", "PartitionKey": "k"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_stream_summary", "args": {"StreamName": "fixture-missing"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_streams", "args": {}, "expect": {"StreamNames#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_stream_summary", "args": {"StreamName": "fixture-clicks"}, "expect": {"StreamDescriptionSummary.StreamModeDetails.StreamMode": "ON_DEMAND", "StreamDescriptionSummary.EncryptionType": "KMS"}},
+  {"op": "describe_stream_summary", "args": {"StreamName": "fixture-events"}, "expect": {"StreamDescriptionSummary.EncryptionType": "NONE", "StreamDescriptionSummary.OpenShardCount": 4}}
+ ],
+ "cleanup": [
+  {"op": "delete_stream", "args": {"StreamName": "fixture-clicks", "EnforceConsumerDeletion": true}},
+  {"op": "delete_stream", "args": {"StreamARN": "arn:aws:kinesis:us-east-1:000000000000:stream/fixture-events"}},
+  {"op": "list_streams", "args": {}, "expect": {"StreamNames#count": 0}}
+ ]
+}

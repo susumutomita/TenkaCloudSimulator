@@ -1,0 +1,24 @@
+{
+ "client": "detective",
+ "steps": [
+  {"op": "create_graph", "args": {"Tags": {"team": "a"}}, "save": {"graph": "GraphArn"}},
+  {"op": "list_graphs", "args": {}, "expect": {"GraphList#count": 1, "GraphList[0].Arn": "${graph}"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${graph}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${graph}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${graph}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "create_graph", "args": {}, "error": "ServiceQuotaExceededException"},
+  {"op": "list_investigations", "args": {"GraphArn": "${graph}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "delete_graph", "args": {"GraphArn": "arn:aws:detective:us-east-1:000000000000:graph:00000000000000000000000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_graphs", "args": {}, "expect": {"GraphList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "list_graphs", "args": {}, "expect": {"GraphList[0].Arn": "${graph}"}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${graph}"}, "expect": {"Tags": {"team": "a"}}}
+ ],
+ "cleanup": [
+  {"op": "delete_graph", "args": {"GraphArn": "${graph}"}},
+  {"op": "list_graphs", "args": {}, "expect": {"GraphList#count": 0}}
+ ]
+}

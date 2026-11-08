@@ -1,0 +1,2328 @@
+{
+ "components": {
+  "schemas": {
+   "Application": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Id": {
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConfigurationProfileSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationId": {
+      "type": "string"
+     },
+     "Id": {
+      "type": "string"
+     },
+     "LocationUri": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Type": {
+      "type": "string"
+     },
+     "ValidatorTypes": {
+      "items": {
+       "enum": [
+        "JSON_SCHEMA",
+        "LAMBDA"
+       ],
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DeploymentStrategy": {
+    "additionalProperties": false,
+    "properties": {
+     "DeploymentDurationInMinutes": {
+      "maximum": 1440,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Description": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "FinalBakeTimeInMinutes": {
+      "maximum": 1440,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "GrowthFactor": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "number"
+     },
+     "GrowthType": {
+      "enum": [
+       "LINEAR",
+       "EXPONENTIAL"
+      ],
+      "type": "string"
+     },
+     "Id": {
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ReplicateTo": {
+      "enum": [
+       "NONE",
+       "SSM_DOCUMENT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Environment": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationId": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Id": {
+      "type": "string"
+     },
+     "Monitors": {
+      "items": {
+       "$ref": "#/components/schemas/Monitor"
+      },
+      "maxItems": 5,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "READY_FOR_DEPLOYMENT",
+       "DEPLOYING",
+       "ROLLING_BACK",
+       "ROLLED_BACK",
+       "REVERTED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Monitor": {
+    "additionalProperties": false,
+    "properties": {
+     "AlarmArn": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AlarmRoleArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AlarmArn"
+    ],
+    "type": "object"
+   },
+   "Validator": {
+    "additionalProperties": false,
+    "properties": {
+     "Content": {
+      "maxLength": 32768,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "JSON_SCHEMA",
+       "LAMBDA"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type",
+     "Content"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon AppConfig API (2019-10-09). Every other official operation returns HTTP 501 UnknownOperationException. Applications, environments, configuration profiles and deployment strategies are stored metadata: no configuration is read from its LocationUri, validated, deployed, polled or rolled back, and CloudWatch alarm monitors are never evaluated. Environments stay READY_FOR_DEPLOYMENT; StartDeployment, hosted configuration versions, extensions and account settings return UnknownOperationException with HTTP 501. Predefined AppConfig.* deployment strategies are not listed, ReplicateTo SSM_DOCUMENT is refused, and deleting an application that still has environments or configuration profiles is refused. DeletionProtectionCheck is accepted because no configuration retrieval is ever recorded, so deletion protection never blocks a deletion.",
+  "title": "AWS AppConfig (simulator catalog)",
+  "version": "2019-10-09"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/applications": {
+   "get": {
+    "operationId": "appconfigListApplications",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max_results",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "next_token",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/Application"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListApplications",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "post": {
+    "operationId": "appconfigCreateApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateApplication",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   }
+  },
+  "/applications/{ApplicationId}": {
+   "delete": {
+    "operationId": "appconfigDeleteApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteApplication",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "get": {
+    "operationId": "appconfigGetApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetApplication",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "patch": {
+    "operationId": "appconfigUpdateApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateApplication",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   }
+  },
+  "/applications/{ApplicationId}/configurationprofiles": {
+   "get": {
+    "operationId": "appconfigListConfigurationProfiles",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max_results",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "next_token",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "type",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/ConfigurationProfileSummary"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListConfigurationProfiles",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "post": {
+    "operationId": "appconfigCreateConfigurationProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "KmsKeyIdentifier": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "LocationUri": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "RetrievalRoleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "Type": {
+          "type": "string"
+         },
+         "Validators": {
+          "items": {
+           "$ref": "#/components/schemas/Validator"
+          },
+          "maxItems": 2,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "LocationUri",
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "KmsKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "KmsKeyIdentifier": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "LocationUri": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "RetrievalRoleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "Type": {
+           "type": "string"
+          },
+          "Validators": {
+           "items": {
+            "$ref": "#/components/schemas/Validator"
+           },
+           "maxItems": 2,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateConfigurationProfile",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   }
+  },
+  "/applications/{ApplicationId}/configurationprofiles/{ConfigurationProfileId}": {
+   "delete": {
+    "operationId": "appconfigDeleteConfigurationProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ConfigurationProfileId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "x-amzn-deletion-protection-check",
+      "schema": {
+       "enum": [
+        "ACCOUNT_DEFAULT",
+        "APPLY",
+        "BYPASS"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteConfigurationProfile",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "get": {
+    "operationId": "appconfigGetConfigurationProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ConfigurationProfileId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "KmsKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "KmsKeyIdentifier": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "LocationUri": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "RetrievalRoleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "Type": {
+           "type": "string"
+          },
+          "Validators": {
+           "items": {
+            "$ref": "#/components/schemas/Validator"
+           },
+           "maxItems": 2,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetConfigurationProfile",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "patch": {
+    "operationId": "appconfigUpdateConfigurationProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ConfigurationProfileId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "KmsKeyIdentifier": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "RetrievalRoleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "Validators": {
+          "items": {
+           "$ref": "#/components/schemas/Validator"
+          },
+          "maxItems": 2,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "KmsKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "KmsKeyIdentifier": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "LocationUri": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "RetrievalRoleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "Type": {
+           "type": "string"
+          },
+          "Validators": {
+           "items": {
+            "$ref": "#/components/schemas/Validator"
+           },
+           "maxItems": 2,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateConfigurationProfile",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   }
+  },
+  "/applications/{ApplicationId}/environments": {
+   "get": {
+    "operationId": "appconfigListEnvironments",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max_results",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "next_token",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/Environment"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListEnvironments",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "post": {
+    "operationId": "appconfigCreateEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Monitors": {
+          "items": {
+           "$ref": "#/components/schemas/Monitor"
+          },
+          "maxItems": 5,
+          "minItems": 0,
+          "type": "array"
+         },
+         "Name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Monitors": {
+           "items": {
+            "$ref": "#/components/schemas/Monitor"
+           },
+           "maxItems": 5,
+           "minItems": 0,
+           "type": "array"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "State": {
+           "enum": [
+            "READY_FOR_DEPLOYMENT",
+            "DEPLOYING",
+            "ROLLING_BACK",
+            "ROLLED_BACK",
+            "REVERTED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateEnvironment",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   }
+  },
+  "/applications/{ApplicationId}/environments/{EnvironmentId}": {
+   "delete": {
+    "operationId": "appconfigDeleteEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "x-amzn-deletion-protection-check",
+      "schema": {
+       "enum": [
+        "ACCOUNT_DEFAULT",
+        "APPLY",
+        "BYPASS"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "EnvironmentId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteEnvironment",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "get": {
+    "operationId": "appconfigGetEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "EnvironmentId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Monitors": {
+           "items": {
+            "$ref": "#/components/schemas/Monitor"
+           },
+           "maxItems": 5,
+           "minItems": 0,
+           "type": "array"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "State": {
+           "enum": [
+            "READY_FOR_DEPLOYMENT",
+            "DEPLOYING",
+            "ROLLING_BACK",
+            "ROLLED_BACK",
+            "REVERTED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetEnvironment",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "patch": {
+    "operationId": "appconfigUpdateEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "EnvironmentId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Monitors": {
+          "items": {
+           "$ref": "#/components/schemas/Monitor"
+          },
+          "maxItems": 5,
+          "minItems": 0,
+          "type": "array"
+         },
+         "Name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ApplicationId": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Monitors": {
+           "items": {
+            "$ref": "#/components/schemas/Monitor"
+           },
+           "maxItems": 5,
+           "minItems": 0,
+           "type": "array"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "State": {
+           "enum": [
+            "READY_FOR_DEPLOYMENT",
+            "DEPLOYING",
+            "ROLLING_BACK",
+            "ROLLED_BACK",
+            "REVERTED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateEnvironment",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   }
+  },
+  "/deployementstrategies/{DeploymentStrategyId}": {
+   "delete": {
+    "operationId": "appconfigDeleteDeploymentStrategy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "DeploymentStrategyId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteDeploymentStrategy",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   }
+  },
+  "/deploymentstrategies": {
+   "get": {
+    "operationId": "appconfigListDeploymentStrategies",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max_results",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "next_token",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/DeploymentStrategy"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListDeploymentStrategies",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "post": {
+    "operationId": "appconfigCreateDeploymentStrategy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "DeploymentDurationInMinutes": {
+          "maximum": 1440,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "Description": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "FinalBakeTimeInMinutes": {
+          "maximum": 1440,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "GrowthFactor": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "number"
+         },
+         "GrowthType": {
+          "enum": [
+           "LINEAR",
+           "EXPONENTIAL"
+          ],
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ReplicateTo": {
+          "enum": [
+           "NONE",
+           "SSM_DOCUMENT"
+          ],
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "DeploymentDurationInMinutes",
+         "GrowthFactor",
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DeploymentDurationInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "FinalBakeTimeInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "GrowthFactor": {
+           "maximum": 100,
+           "minimum": 1,
+           "type": "number"
+          },
+          "GrowthType": {
+           "enum": [
+            "LINEAR",
+            "EXPONENTIAL"
+           ],
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ReplicateTo": {
+           "enum": [
+            "NONE",
+            "SSM_DOCUMENT"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateDeploymentStrategy",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   }
+  },
+  "/deploymentstrategies/{DeploymentStrategyId}": {
+   "get": {
+    "operationId": "appconfigGetDeploymentStrategy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "DeploymentStrategyId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DeploymentDurationInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "FinalBakeTimeInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "GrowthFactor": {
+           "maximum": 100,
+           "minimum": 1,
+           "type": "number"
+          },
+          "GrowthType": {
+           "enum": [
+            "LINEAR",
+            "EXPONENTIAL"
+           ],
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ReplicateTo": {
+           "enum": [
+            "NONE",
+            "SSM_DOCUMENT"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetDeploymentStrategy",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "patch": {
+    "operationId": "appconfigUpdateDeploymentStrategy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "DeploymentStrategyId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "DeploymentDurationInMinutes": {
+          "maximum": 1440,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "Description": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "FinalBakeTimeInMinutes": {
+          "maximum": 1440,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "GrowthFactor": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "number"
+         },
+         "GrowthType": {
+          "enum": [
+           "LINEAR",
+           "EXPONENTIAL"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DeploymentDurationInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "Description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "FinalBakeTimeInMinutes": {
+           "maximum": 1440,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "GrowthFactor": {
+           "maximum": 100,
+           "minimum": 1,
+           "type": "number"
+          },
+          "GrowthType": {
+           "enum": [
+            "LINEAR",
+            "EXPONENTIAL"
+           ],
+           "type": "string"
+          },
+          "Id": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ReplicateTo": {
+           "enum": [
+            "NONE",
+            "SSM_DOCUMENT"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateDeploymentStrategy",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   }
+  },
+  "/tags/{ResourceArn}": {
+   "delete": {
+    "operationId": "appconfigUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "get": {
+    "operationId": "appconfigListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   },
+   "post": {
+    "operationId": "appconfigTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appconfig"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS AppConfig"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon AppConfig API (2019-10-09). Every other official operation returns HTTP 501 UnknownOperationException. Applications, environments, configuration profiles and deployment strategies are stored metadata: no configuration is read from its LocationUri, validated, deployed, polled or rolled back, and CloudWatch alarm monitors are never evaluated. Environments stay READY_FOR_DEPLOYMENT; StartDeployment, hosted configuration versions, extensions and account settings return UnknownOperationException with HTTP 501. Predefined AppConfig.* deployment strategies are not listed, ReplicateTo SSM_DOCUMENT is refused, and deleting an application that still has environments or configuration profiles is refused. DeletionProtectionCheck is accepted because no configuration retrieval is ever recorded, so deletion protection never blocks a deletion.",
+   "name": "AWS AppConfig"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/appconfig/2019-10-09/service-2.json",
+  "sha256": "db07fed9a940bbf1200819595ae25b37c7f36b1680683c20473f91da80b4c397",
+  "license": "Apache-2.0"
+ }
+}

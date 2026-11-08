@@ -1,0 +1,36 @@
+{
+ "client": "bedrock",
+ "steps": [
+  {"op": "create_guardrail", "args": {"name": "fixture-guardrail", "blockedInputMessaging": "Blocked input.", "blockedOutputsMessaging": "Blocked output.", "topicPolicyConfig": {"topicsConfig": [{"name": "Investing", "definition": "Investment advice.", "type": "DENY"}]}, "tags": [{"key": "team", "value": "a"}]}, "save": {"guardrail": "guardrailId", "guardrailArn": "guardrailArn"}, "expect": {"version": "DRAFT"}},
+  {"op": "get_guardrail", "args": {"guardrailIdentifier": "${guardrail}"}, "expect": {"status": "READY", "version": "DRAFT", "guardrailArn": "${guardrailArn}", "topicPolicy.topics[0].name": "Investing"}},
+  {"op": "list_guardrails", "args": {}, "expect": {"guardrails#count": 1, "guardrails[0].id": "${guardrail}"}},
+  {"op": "update_guardrail", "args": {"guardrailIdentifier": "${guardrailArn}", "name": "fixture-guardrail", "blockedInputMessaging": "Blocked input.", "blockedOutputsMessaging": "Blocked output.", "contentPolicyConfig": {"filtersConfig": [{"type": "HATE", "inputStrength": "HIGH", "outputStrength": "HIGH"}]}}, "expect": {"version": "DRAFT"}},
+  {"op": "get_guardrail", "args": {"guardrailIdentifier": "${guardrail}", "guardrailVersion": "1"}, "error": "ResourceNotFoundException", "status": 404},
+  {"op": "create_inference_profile", "args": {"inferenceProfileName": "fixture-profile", "modelSource": {"copyFrom": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"}, "tags": [{"key": "team", "value": "a"}]}, "save": {"profile": "inferenceProfileArn"}, "expect": {"status": "ACTIVE"}},
+  {"op": "get_inference_profile", "args": {"inferenceProfileIdentifier": "${profile}"}, "expect": {"type": "APPLICATION", "models[0].modelArn": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"}},
+  {"op": "list_inference_profiles", "args": {"typeEquals": "APPLICATION"}, "expect": {"inferenceProfileSummaries#count": 1}},
+  {"op": "put_model_invocation_logging_configuration", "args": {"loggingConfig": {"s3Config": {"bucketName": "fixture-logs"}, "textDataDeliveryEnabled": true}}},
+  {"op": "get_model_invocation_logging_configuration", "args": {}, "expect": {"loggingConfig.s3Config.bucketName": "fixture-logs"}},
+  {"op": "tag_resource", "args": {"resourceARN": "${guardrailArn}", "tags": [{"key": "k", "value": "v"}]}},
+  {"op": "untag_resource", "args": {"resourceARN": "${guardrailArn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceARN": "${guardrailArn}"}, "expect": {"tags#count": 1, "tags[0].key": "team"}},
+  {"op": "create_guardrail", "args": {"name": "refused-guardrail", "blockedInputMessaging": "Blocked.", "blockedOutputsMessaging": "Blocked.", "kmsKeyId": "alias/guardrails"}, "error": "ValidationException", "status": 400},
+  {"op": "get_foundation_model", "args": {"modelIdentifier": "anthropic.claude-3-haiku-20240307-v1:0"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_guardrail", "args": {"guardrailIdentifier": "missingguard1"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_guardrails", "args": {}, "expect": {"guardrails#count": 0}},
+  {"op": "list_inference_profiles", "args": {"typeEquals": "APPLICATION"}, "expect": {"inferenceProfileSummaries#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_guardrail", "args": {"guardrailIdentifier": "${guardrail}"}, "expect": {"contentPolicy.filters[0].type": "HATE"}},
+  {"op": "get_model_invocation_logging_configuration", "args": {}, "expect": {"loggingConfig.textDataDeliveryEnabled": true}}
+ ],
+ "cleanup": [
+  {"op": "delete_guardrail", "args": {"guardrailIdentifier": "${guardrail}"}},
+  {"op": "delete_inference_profile", "args": {"inferenceProfileIdentifier": "${profile}"}},
+  {"op": "delete_model_invocation_logging_configuration", "args": {}},
+  {"op": "list_guardrails", "args": {}, "expect": {"guardrails#count": 0}},
+  {"op": "list_inference_profiles", "args": {"typeEquals": "APPLICATION"}, "expect": {"inferenceProfileSummaries#count": 0}}
+ ]
+}

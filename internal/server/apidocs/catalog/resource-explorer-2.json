@@ -1,0 +1,1135 @@
+{
+ "components": {
+  "schemas": {
+   "BatchGetViewError": {
+    "additionalProperties": false,
+    "properties": {
+     "ErrorMessage": {
+      "type": "string"
+     },
+     "ViewArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ViewArn",
+     "ErrorMessage"
+    ],
+    "type": "object"
+   },
+   "IncludedProperty": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "Index": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "Region": {
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "LOCAL",
+       "AGGREGATOR"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SearchFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "FilterString": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "FilterString"
+    ],
+    "type": "object"
+   },
+   "View": {
+    "additionalProperties": false,
+    "properties": {
+     "Filters": {
+      "$ref": "#/components/schemas/SearchFilter"
+     },
+     "IncludedProperties": {
+      "items": {
+       "$ref": "#/components/schemas/IncludedProperty"
+      },
+      "type": "array"
+     },
+     "LastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Owner": {
+      "type": "string"
+     },
+     "Scope": {
+      "type": "string"
+     },
+     "ViewArn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Resource Explorer API (2022-07-28). Every other official operation returns HTTP 501 UnknownOperationException. Indexes and views are stored metadata: no resource is discovered, indexed or replicated, and Search, ListResources and ListSupportedResourceTypes return UnknownOperationException with HTTP 501, so no AWS resource inventory is reported. Each Region holds at most one index, ACTIVE immediately; a second CreateIndex is refused with ValidationException, an aggregator index replicates nothing, ListIndexes lists only the requested Region and its Regions member is refused, and DeleteIndex removes the index at once. Views need no index, filter strings are stored without parsing and every view has the account scope, so Scope is refused. GetIndex, default views, managed views, service views and indexes, organization setup and member listings return UnknownOperationException with HTTP 501.",
+  "title": "AWS Resource Explorer (simulator catalog)",
+  "version": "2022-07-28"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/BatchGetView": {
+   "post": {
+    "operationId": "resource-explorer-2BatchGetView",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ViewArns": {
+          "items": {
+           "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Errors": {
+           "items": {
+            "$ref": "#/components/schemas/BatchGetViewError"
+           },
+           "type": "array"
+          },
+          "Views": {
+           "items": {
+            "$ref": "#/components/schemas/View"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "BatchGetView",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   }
+  },
+  "/CreateIndex": {
+   "post": {
+    "operationId": "resource-explorer-2CreateIndex",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ClientToken": {
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "CreatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "State": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "UPDATING"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateIndex",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   }
+  },
+  "/CreateView": {
+   "post": {
+    "operationId": "resource-explorer-2CreateView",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ClientToken": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Filters": {
+          "$ref": "#/components/schemas/SearchFilter"
+         },
+         "IncludedProperties": {
+          "items": {
+           "$ref": "#/components/schemas/IncludedProperty"
+          },
+          "type": "array"
+         },
+         "Scope": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "ViewName": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "ViewName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "View": {
+           "$ref": "#/components/schemas/View"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateView",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   }
+  },
+  "/DeleteIndex": {
+   "post": {
+    "operationId": "resource-explorer-2DeleteIndex",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Arn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "Arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "LastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "State": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "UPDATING"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteIndex",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   }
+  },
+  "/DeleteView": {
+   "post": {
+    "operationId": "resource-explorer-2DeleteView",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ViewArn": {
+          "maxLength": 1011,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "ViewArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ViewArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteView",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   }
+  },
+  "/GetView": {
+   "post": {
+    "operationId": "resource-explorer-2GetView",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ViewArn": {
+          "maxLength": 1011,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "ViewArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "View": {
+           "$ref": "#/components/schemas/View"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetView",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   }
+  },
+  "/ListIndexes": {
+   "post": {
+    "operationId": "resource-explorer-2ListIndexes",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Regions": {
+          "items": {
+           "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 0,
+          "type": "array"
+         },
+         "Type": {
+          "enum": [
+           "LOCAL",
+           "AGGREGATOR"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Indexes": {
+           "items": {
+            "$ref": "#/components/schemas/Index"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListIndexes",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   }
+  },
+  "/ListViews": {
+   "post": {
+    "operationId": "resource-explorer-2ListViews",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "maximum": 50,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "Views": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListViews",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   }
+  },
+  "/UpdateIndexType": {
+   "post": {
+    "operationId": "resource-explorer-2UpdateIndexType",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Arn": {
+          "type": "string"
+         },
+         "Type": {
+          "enum": [
+           "LOCAL",
+           "AGGREGATOR"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "Arn",
+         "Type"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "LastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "State": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "DELETED",
+            "UPDATING"
+           ],
+           "type": "string"
+          },
+          "Type": {
+           "enum": [
+            "LOCAL",
+            "AGGREGATOR"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateIndexType",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   }
+  },
+  "/UpdateView": {
+   "post": {
+    "operationId": "resource-explorer-2UpdateView",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Filters": {
+          "$ref": "#/components/schemas/SearchFilter"
+         },
+         "IncludedProperties": {
+          "items": {
+           "$ref": "#/components/schemas/IncludedProperty"
+          },
+          "type": "array"
+         },
+         "ViewArn": {
+          "maxLength": 1011,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "ViewArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "View": {
+           "$ref": "#/components/schemas/View"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateView",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "resource-explorer-2UntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   },
+   "get": {
+    "operationId": "resource-explorer-2ListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   },
+   "post": {
+    "operationId": "resource-explorer-2TagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-explorer-2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Resource Explorer"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Resource Explorer API (2022-07-28). Every other official operation returns HTTP 501 UnknownOperationException. Indexes and views are stored metadata: no resource is discovered, indexed or replicated, and Search, ListResources and ListSupportedResourceTypes return UnknownOperationException with HTTP 501, so no AWS resource inventory is reported. Each Region holds at most one index, ACTIVE immediately; a second CreateIndex is refused with ValidationException, an aggregator index replicates nothing, ListIndexes lists only the requested Region and its Regions member is refused, and DeleteIndex removes the index at once. Views need no index, filter strings are stored without parsing and every view has the account scope, so Scope is refused. GetIndex, default views, managed views, service views and indexes, organization setup and member listings return UnknownOperationException with HTTP 501.",
+   "name": "AWS Resource Explorer"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/resource-explorer-2/2022-07-28/service-2.json",
+  "sha256": "862ecd1922698c581a202894bd3b70e1a9b0f97a922d44b194fa0281b24bd5c9",
+  "license": "Apache-2.0"
+ }
+}

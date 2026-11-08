@@ -1,0 +1,1225 @@
+{
+ "components": {
+  "schemas": {
+   "AirflowMetadataRetentionPolicyConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "retentionDays": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "retentionMode": {
+      "enum": [
+       "RETENTION_MODE_UNSPECIFIED",
+       "RETENTION_MODE_ENABLED",
+       "RETENTION_MODE_DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AllowedIpRange": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CidrBlock": {
+    "additionalProperties": false,
+    "properties": {
+     "cidrBlock": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CloudDataLineageIntegration": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "DagProcessorResource": {
+    "additionalProperties": false,
+    "properties": {
+     "count": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "cpu": {
+      "format": "float",
+      "type": "number"
+     },
+     "memoryGb": {
+      "format": "float",
+      "type": "number"
+     },
+     "storageGb": {
+      "format": "float",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "DataRetentionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "airflowMetadataRetentionConfig": {
+      "$ref": "#/components/schemas/AirflowMetadataRetentionPolicyConfig"
+     },
+     "taskLogsRetentionConfig": {
+      "$ref": "#/components/schemas/TaskLogsRetentionConfig"
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "machineType": {
+      "type": "string"
+     },
+     "zone": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKeyName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Environment": {
+    "additionalProperties": false,
+    "properties": {
+     "config": {
+      "$ref": "#/components/schemas/EnvironmentConfig"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "RUNNING",
+       "UPDATING",
+       "DELETING",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "storageConfig": {
+      "$ref": "#/components/schemas/StorageConfig"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "uuid": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EnvironmentConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "airflowByoidUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "airflowUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "dagGcsPrefix": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "dataRetentionConfig": {
+      "$ref": "#/components/schemas/DataRetentionConfig"
+     },
+     "databaseConfig": {
+      "$ref": "#/components/schemas/DatabaseConfig"
+     },
+     "encryptionConfig": {
+      "$ref": "#/components/schemas/EncryptionConfig"
+     },
+     "environmentSize": {
+      "enum": [
+       "ENVIRONMENT_SIZE_UNSPECIFIED",
+       "ENVIRONMENT_SIZE_SMALL",
+       "ENVIRONMENT_SIZE_MEDIUM",
+       "ENVIRONMENT_SIZE_LARGE",
+       "ENVIRONMENT_SIZE_EXTRA_LARGE"
+      ],
+      "type": "string"
+     },
+     "gkeCluster": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/MaintenanceWindow"
+     },
+     "masterAuthorizedNetworksConfig": {
+      "$ref": "#/components/schemas/MasterAuthorizedNetworksConfig"
+     },
+     "nodeConfig": {
+      "$ref": "#/components/schemas/NodeConfig"
+     },
+     "nodeCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "privateEnvironmentConfig": {
+      "$ref": "#/components/schemas/PrivateEnvironmentConfig"
+     },
+     "recoveryConfig": {
+      "$ref": "#/components/schemas/RecoveryConfig"
+     },
+     "resilienceMode": {
+      "enum": [
+       "RESILIENCE_MODE_UNSPECIFIED",
+       "HIGH_RESILIENCE"
+      ],
+      "type": "string"
+     },
+     "softwareConfig": {
+      "$ref": "#/components/schemas/SoftwareConfig"
+     },
+     "webServerConfig": {
+      "$ref": "#/components/schemas/WebServerConfig"
+     },
+     "webServerNetworkAccessControl": {
+      "$ref": "#/components/schemas/WebServerNetworkAccessControl"
+     },
+     "workloadsConfig": {
+      "$ref": "#/components/schemas/WorkloadsConfig"
+     }
+    },
+    "type": "object"
+   },
+   "IPAllocationPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterIpv4CidrBlock": {
+      "type": "string"
+     },
+     "clusterSecondaryRangeName": {
+      "type": "string"
+     },
+     "servicesIpv4CidrBlock": {
+      "type": "string"
+     },
+     "servicesSecondaryRangeName": {
+      "type": "string"
+     },
+     "useIpAliases": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ListEnvironmentsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "environments": {
+      "items": {
+       "$ref": "#/components/schemas/Environment"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "endTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "recurrence": {
+      "type": "string"
+     },
+     "startTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MasterAuthorizedNetworksConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "cidrBlocks": {
+      "items": {
+       "$ref": "#/components/schemas/CidrBlock"
+      },
+      "type": "array"
+     },
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "connectionType": {
+      "enum": [
+       "CONNECTION_TYPE_UNSPECIFIED",
+       "VPC_PEERING",
+       "PRIVATE_SERVICE_CONNECT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NodeConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "composerInternalIpv4CidrBlock": {
+      "type": "string"
+     },
+     "composerNetworkAttachment": {
+      "type": "string"
+     },
+     "diskSizeGb": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "enableIpMasqAgent": {
+      "type": "boolean"
+     },
+     "ipAllocationPolicy": {
+      "$ref": "#/components/schemas/IPAllocationPolicy"
+     },
+     "location": {
+      "type": "string"
+     },
+     "machineType": {
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     },
+     "oauthScopes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "serviceAccount": {
+      "type": "string"
+     },
+     "subnetwork": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateClusterConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enablePrivateEndpoint": {
+      "type": "boolean"
+     },
+     "masterIpv4CidrBlock": {
+      "type": "string"
+     },
+     "masterIpv4ReservedRange": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEnvironmentConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudComposerConnectionSubnetwork": {
+      "type": "string"
+     },
+     "cloudComposerNetworkIpv4CidrBlock": {
+      "type": "string"
+     },
+     "cloudComposerNetworkIpv4ReservedRange": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "cloudSqlIpv4CidrBlock": {
+      "type": "string"
+     },
+     "enablePrivateBuildsOnly": {
+      "type": "boolean"
+     },
+     "enablePrivateEnvironment": {
+      "type": "boolean"
+     },
+     "enablePrivatelyUsedPublicIps": {
+      "type": "boolean"
+     },
+     "networkingConfig": {
+      "$ref": "#/components/schemas/NetworkingConfig"
+     },
+     "networkingType": {
+      "enum": [
+       "NETWORKING_TYPE_UNSPECIFIED",
+       "PRIVATE",
+       "PUBLIC"
+      ],
+      "type": "string"
+     },
+     "privateClusterConfig": {
+      "$ref": "#/components/schemas/PrivateClusterConfig"
+     },
+     "webServerIpv4CidrBlock": {
+      "type": "string"
+     },
+     "webServerIpv4ReservedRange": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RecoveryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "scheduledSnapshotsConfig": {
+      "$ref": "#/components/schemas/ScheduledSnapshotsConfig"
+     }
+    },
+    "type": "object"
+   },
+   "ScheduledSnapshotsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "snapshotCreationSchedule": {
+      "type": "string"
+     },
+     "snapshotLocation": {
+      "type": "string"
+     },
+     "timeZone": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SchedulerResource": {
+    "additionalProperties": false,
+    "properties": {
+     "count": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "cpu": {
+      "format": "float",
+      "type": "number"
+     },
+     "memoryGb": {
+      "format": "float",
+      "type": "number"
+     },
+     "storageGb": {
+      "format": "float",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "SoftwareConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "airflowConfigOverrides": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "auditLogsReplicationMode": {
+      "enum": [
+       "AUDIT_LOGS_REPLICATION_MODE_UNSPECIFIED",
+       "AUDIT_LOGS_REPLICATION_DISABLED",
+       "AUDIT_LOGS_REPLICATION_ENABLED"
+      ],
+      "type": "string"
+     },
+     "cloudDataLineageIntegration": {
+      "$ref": "#/components/schemas/CloudDataLineageIntegration"
+     },
+     "envVariables": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "imageVersion": {
+      "type": "string"
+     },
+     "pypiPackages": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "pythonVersion": {
+      "type": "string"
+     },
+     "schedulerCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "webServerPluginsMode": {
+      "enum": [
+       "WEB_SERVER_PLUGINS_MODE_UNSPECIFIED",
+       "PLUGINS_DISABLED",
+       "PLUGINS_ENABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StorageConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TaskLogsRetentionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "storageMode": {
+      "enum": [
+       "TASK_LOGS_STORAGE_MODE_UNSPECIFIED",
+       "CLOUD_LOGGING_AND_CLOUD_STORAGE",
+       "CLOUD_LOGGING_ONLY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TriggererResource": {
+    "additionalProperties": false,
+    "properties": {
+     "count": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "cpu": {
+      "format": "float",
+      "type": "number"
+     },
+     "memoryGb": {
+      "format": "float",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "WebServerConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "machineType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WebServerNetworkAccessControl": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedIpRanges": {
+      "items": {
+       "$ref": "#/components/schemas/AllowedIpRange"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "WebServerResource": {
+    "additionalProperties": false,
+    "properties": {
+     "cpu": {
+      "format": "float",
+      "type": "number"
+     },
+     "memoryGb": {
+      "format": "float",
+      "type": "number"
+     },
+     "storageGb": {
+      "format": "float",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "WorkerResource": {
+    "additionalProperties": false,
+    "properties": {
+     "cpu": {
+      "format": "float",
+      "type": "number"
+     },
+     "maxCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "memoryGb": {
+      "format": "float",
+      "type": "number"
+     },
+     "minCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "storageGb": {
+      "format": "float",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "WorkloadsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "dagProcessor": {
+      "$ref": "#/components/schemas/DagProcessorResource"
+     },
+     "scheduler": {
+      "$ref": "#/components/schemas/SchedulerResource"
+     },
+     "triggerer": {
+      "$ref": "#/components/schemas/TriggererResource"
+     },
+     "webServer": {
+      "$ref": "#/components/schemas/WebServerResource"
+     },
+     "worker": {
+      "$ref": "#/components/schemas/WorkerResource"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Cloud Composer API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Environments are configuration metadata (formerly Cloud Composer): no Airflow scheduler, web server, DAG bucket, GKE cluster or database exists, they report RUNNING immediately and no airflowUri or dagGcsPrefix is assigned. The state field is server-assigned and refused in requests; only labels may be updated, and nested update mask paths such as config.softwareConfig.pypiPackages are refused. Airflow commands, snapshots, upgrade checks, database failover, web server restarts, workloads and user workload config maps and secrets are unimplemented.",
+  "title": "Managed Service for Apache Airflow (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/environments": {
+   "get": {
+    "operationId": "composer.projects.locations.environments.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListEnvironmentsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.environments.list",
+    "tags": [
+     "Managed Service for Apache Airflow"
+    ]
+   },
+   "post": {
+    "operationId": "composer.projects.locations.environments.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Environment"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.environments.create",
+    "tags": [
+     "Managed Service for Apache Airflow"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/environments/{environmentsId}": {
+   "delete": {
+    "operationId": "composer.projects.locations.environments.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "environmentsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.environments.delete",
+    "tags": [
+     "Managed Service for Apache Airflow"
+    ]
+   },
+   "get": {
+    "operationId": "composer.projects.locations.environments.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "environmentsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Environment"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.environments.get",
+    "tags": [
+     "Managed Service for Apache Airflow"
+    ]
+   },
+   "patch": {
+    "operationId": "composer.projects.locations.environments.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "environmentsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Environment"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.environments.patch",
+    "tags": [
+     "Managed Service for Apache Airflow"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "composer.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Managed Service for Apache Airflow"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "composer.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Managed Service for Apache Airflow"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/composer"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Cloud Composer API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Environments are configuration metadata (formerly Cloud Composer): no Airflow scheduler, web server, DAG bucket, GKE cluster or database exists, they report RUNNING immediately and no airflowUri or dagGcsPrefix is assigned. The state field is server-assigned and refused in requests; only labels may be updated, and nested update mask paths such as config.softwareConfig.pypiPackages are refused. Airflow commands, snapshots, upgrade checks, database failover, web server restarts, workloads and user workload config maps and secrets are unimplemented.",
+   "name": "Managed Service for Apache Airflow"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/composer.v1.json",
+  "sha256": "27911abea2480f2d3ccbd34ac3972053be7dc27ef10b5c2ba8bec4d382d0b373",
+  "license": "Apache-2.0",
+  "revision": "20260622"
+ }
+}
