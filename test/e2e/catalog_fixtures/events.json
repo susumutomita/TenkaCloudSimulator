@@ -1,0 +1,48 @@
+{
+ "client": "events",
+ "steps": [
+  {"op": "create_event_bus", "args": {"Name": "orders", "Description": "Order events", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"bus": "EventBusArn"}},
+  {"op": "describe_event_bus", "args": {"Name": "orders"}, "expect": {"Arn": "${bus}", "Description": "Order events"}},
+  {"op": "update_event_bus", "args": {"Name": "orders", "Description": "Paid orders", "LogConfig": {"Level": "ERROR", "IncludeDetail": "NONE"}}, "expect": {"Arn": "${bus}", "LogConfig.Level": "ERROR"}},
+  {"op": "list_event_buses", "args": {}, "expect": {"EventBuses#count": 1, "EventBuses[0].Description": "Paid orders"}},
+  {"op": "put_rule", "args": {"Name": "paid", "EventBusName": "orders", "EventPattern": "{\"source\":[\"shop\"],\"detail\":{\"status\":[\"PAID\"]}}", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"rule": "RuleArn"}},
+  {"op": "describe_rule", "args": {"Name": "paid", "EventBusName": "orders"}, "expect": {"Arn": "${rule}", "State": "ENABLED", "EventBusName": "orders", "CreatedBy": "000000000000"}},
+  {"op": "disable_rule", "args": {"Name": "paid", "EventBusName": "${bus}"}},
+  {"op": "describe_rule", "args": {"Name": "paid", "EventBusName": "orders"}, "expect": {"State": "DISABLED"}},
+  {"op": "enable_rule", "args": {"Name": "paid", "EventBusName": "orders"}},
+  {"op": "put_rule", "args": {"Name": "paid", "EventBusName": "orders", "EventPattern": "{\"source\":[\"shop\"]}", "Description": "Paid orders"}, "expect": {"RuleArn": "${rule}"}},
+  {"op": "list_rules", "args": {"EventBusName": "orders"}, "expect": {"Rules#count": 1, "Rules[0].State": "ENABLED", "Rules[0].Description": "Paid orders"}},
+  {"op": "create_archive", "args": {"ArchiveName": "orders-archive", "EventSourceArn": "${bus}", "RetentionDays": 7}, "save": {"archive": "ArchiveArn"}, "expect": {"State": "ENABLED"}},
+  {"op": "describe_archive", "args": {"ArchiveName": "orders-archive"}, "expect": {"EventSourceArn": "${bus}", "RetentionDays": 7, "EventCount": 0}},
+  {"op": "update_archive", "args": {"ArchiveName": "orders-archive", "Description": "Replay source", "EventPattern": "{\"source\":[\"shop\"]}"}, "expect": {"ArchiveArn": "${archive}"}},
+  {"op": "list_archives", "args": {"EventSourceArn": "${bus}"}, "expect": {"Archives#count": 1, "Archives[0].ArchiveName": "orders-archive"}},
+  {"op": "create_connection", "args": {"Name": "webhook", "AuthorizationType": "API_KEY", "AuthParameters": {"ApiKeyAuthParameters": {"ApiKeyName": "x-api-key", "ApiKeyValue": "dummy-local-only"}}}, "save": {"connection": "ConnectionArn"}, "expect": {"ConnectionState": "AUTHORIZED"}},
+  {"op": "describe_connection", "args": {"Name": "webhook"}, "expect": {"ConnectionArn": "${connection}", "AuthParameters.ApiKeyAuthParameters.ApiKeyName": "x-api-key"}},
+  {"op": "update_connection", "args": {"Name": "webhook", "Description": "Partner webhook"}, "expect": {"ConnectionArn": "${connection}"}},
+  {"op": "list_connections", "args": {"ConnectionState": "AUTHORIZED"}, "expect": {"Connections#count": 1, "Connections[0].Name": "webhook"}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${rule}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${rule}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${rule}"}, "expect": {"Tags#count": 1, "Tags[0].Key": "stage"}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${bus}"}, "expect": {"Tags[0].Key": "team"}},
+  {"op": "put_events", "args": {"Entries": [{"Source": "shop", "DetailType": "Order", "Detail": "{}", "EventBusName": "orders"}]}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_rule", "args": {"Name": "missing", "EventBusName": "orders"}, "error": "ResourceNotFoundException"},
+  {"op": "put_rule", "args": {"Name": "nightly", "EventBusName": "orders", "ScheduleExpression": "rate(1 day)"}, "error": "ValidationException"},
+  {"op": "put_rule", "args": {"Name": "broken", "EventBusName": "orders", "EventPattern": "{\"source\":\"shop\"}"}, "error": "InvalidEventPatternException"},
+  {"op": "delete_event_bus", "args": {"Name": "orders"}, "error": "ConflictException"}
+ ],
+ "isolation": [
+  {"op": "list_event_buses", "args": {}, "expect": {"EventBuses#count": 0}},
+  {"op": "describe_connection", "args": {"Name": "webhook"}, "error": "ResourceNotFoundException"}
+ ],
+ "after_restart": [
+  {"op": "describe_rule", "args": {"Name": "paid", "EventBusName": "orders"}, "expect": {"Description": "Paid orders", "State": "ENABLED"}},
+  {"op": "describe_connection", "args": {"Name": "webhook"}, "expect": {"Description": "Partner webhook"}}
+ ],
+ "cleanup": [
+  {"op": "delete_rule", "args": {"Name": "paid", "EventBusName": "orders"}},
+  {"op": "delete_archive", "args": {"ArchiveName": "orders-archive"}},
+  {"op": "delete_connection", "args": {"Name": "webhook"}, "expect": {"ConnectionState": "DELETING"}},
+  {"op": "delete_event_bus", "args": {"Name": "orders"}},
+  {"op": "list_event_buses", "args": {}, "expect": {"EventBuses#count": 0}}
+ ]
+}

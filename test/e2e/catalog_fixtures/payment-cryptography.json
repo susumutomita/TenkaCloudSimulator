@@ -1,0 +1,23 @@
+{
+ "client": "payment-cryptography",
+ "steps": [
+  {"op": "create_alias", "args": {"AliasName": "alias/fixture-pin"}, "expect": {"Alias.AliasName": "alias/fixture-pin"}},
+  {"op": "get_alias", "args": {"AliasName": "alias/fixture-pin"}, "expect": {"Alias.AliasName": "alias/fixture-pin"}},
+  {"op": "list_aliases", "args": {}, "expect": {"Aliases#count": 1}},
+  {"op": "update_alias", "args": {"AliasName": "alias/fixture-pin"}, "expect": {"Alias.AliasName": "alias/fixture-pin"}},
+  {"op": "create_alias", "args": {"AliasName": "alias/fixture-pin"}, "error": "ConflictException"},
+  {"op": "update_alias", "args": {"AliasName": "alias/fixture-pin", "KeyArn": "arn:aws:payment-cryptography:us-east-1:000000000000:key/abcdefghijklmnop"}, "error": "ResourceNotFoundException"},
+  {"op": "create_key", "args": {"Exportable": false, "KeyAttributes": {"KeyAlgorithm": "TDES_3KEY", "KeyClass": "SYMMETRIC_KEY", "KeyUsage": "TR31_P0_PIN_ENCRYPTION_KEY", "KeyModesOfUse": {"Encrypt": true, "Decrypt": true}}}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_alias", "args": {"AliasName": "alias/missing"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_aliases", "args": {}, "expect": {"Aliases#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_alias", "args": {"AliasName": "alias/fixture-pin"}, "expect": {"Alias.AliasName": "alias/fixture-pin"}}
+ ],
+ "cleanup": [
+  {"op": "delete_alias", "args": {"AliasName": "alias/fixture-pin"}},
+  {"op": "list_aliases", "args": {}, "expect": {"Aliases#count": 0}}
+ ]
+}

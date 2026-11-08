@@ -1,0 +1,793 @@
+{
+ "components": {
+  "schemas": {
+   "CloudWatchLogsDestination": {
+    "additionalProperties": false,
+    "properties": {
+     "IamRoleArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "LogGroupArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "IamRoleArn",
+     "LogGroupArn"
+    ],
+    "type": "object"
+   },
+   "ConfigurationSetFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "enum": [
+       "event-destination-name",
+       "matching-event-types",
+       "default-message-type",
+       "default-sender-id",
+       "default-message-feedback-enabled",
+       "protect-configuration-id"
+      ],
+      "type": "string"
+     },
+     "Values": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Values"
+    ],
+    "type": "object"
+   },
+   "ConfigurationSetInformation": {
+    "additionalProperties": false,
+    "properties": {
+     "ConfigurationSetArn": {
+      "type": "string"
+     },
+     "ConfigurationSetName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DefaultMessageFeedbackEnabled": {
+      "type": "boolean"
+     },
+     "DefaultMessageType": {
+      "enum": [
+       "TRANSACTIONAL",
+       "PROMOTIONAL"
+      ],
+      "type": "string"
+     },
+     "DefaultSenderId": {
+      "maxLength": 11,
+      "minLength": 1,
+      "type": "string"
+     },
+     "EventDestinations": {
+      "items": {
+       "$ref": "#/components/schemas/EventDestination"
+      },
+      "type": "array"
+     },
+     "ProtectConfigurationId": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConfigurationSetArn",
+     "ConfigurationSetName",
+     "EventDestinations",
+     "CreatedTimestamp"
+    ],
+    "type": "object"
+   },
+   "CreateConfigurationSetRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ClientToken": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ConfigurationSetName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ConfigurationSetName"
+    ],
+    "type": "object"
+   },
+   "CreateConfigurationSetResult": {
+    "additionalProperties": false,
+    "properties": {
+     "ConfigurationSetArn": {
+      "type": "string"
+     },
+     "ConfigurationSetName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CreateOptOutListRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ClientToken": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OptOutListName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "OptOutListName"
+    ],
+    "type": "object"
+   },
+   "CreateOptOutListResult": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "OptOutListArn": {
+      "type": "string"
+     },
+     "OptOutListName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteConfigurationSetRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ConfigurationSetName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConfigurationSetName"
+    ],
+    "type": "object"
+   },
+   "DeleteConfigurationSetResult": {
+    "additionalProperties": false,
+    "properties": {
+     "ConfigurationSetArn": {
+      "type": "string"
+     },
+     "ConfigurationSetName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DefaultMessageFeedbackEnabled": {
+      "type": "boolean"
+     },
+     "DefaultMessageType": {
+      "enum": [
+       "TRANSACTIONAL",
+       "PROMOTIONAL"
+      ],
+      "type": "string"
+     },
+     "DefaultSenderId": {
+      "maxLength": 11,
+      "minLength": 1,
+      "type": "string"
+     },
+     "EventDestinations": {
+      "items": {
+       "$ref": "#/components/schemas/EventDestination"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteOptOutListRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "OptOutListName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OptOutListName"
+    ],
+    "type": "object"
+   },
+   "DeleteOptOutListResult": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "OptOutListArn": {
+      "type": "string"
+     },
+     "OptOutListName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeConfigurationSetsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ConfigurationSetNames": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Filters": {
+      "items": {
+       "$ref": "#/components/schemas/ConfigurationSetFilter"
+      },
+      "maxItems": 20,
+      "minItems": 0,
+      "type": "array"
+     },
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeConfigurationSetsResult": {
+    "additionalProperties": false,
+    "properties": {
+     "ConfigurationSets": {
+      "items": {
+       "$ref": "#/components/schemas/ConfigurationSetInformation"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeOptOutListsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OptOutListNames": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Owner": {
+      "enum": [
+       "SELF",
+       "SHARED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeOptOutListsResult": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OptOutLists": {
+      "items": {
+       "$ref": "#/components/schemas/OptOutListInformation"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "EventDestination": {
+    "additionalProperties": false,
+    "properties": {
+     "CloudWatchLogsDestination": {
+      "$ref": "#/components/schemas/CloudWatchLogsDestination"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "EventDestinationName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "KinesisFirehoseDestination": {
+      "$ref": "#/components/schemas/KinesisFirehoseDestination"
+     },
+     "MatchingEventTypes": {
+      "items": {
+       "enum": [
+        "ALL",
+        "TEXT_ALL",
+        "TEXT_SENT",
+        "TEXT_PENDING",
+        "TEXT_QUEUED",
+        "TEXT_SUCCESSFUL",
+        "TEXT_DELIVERED",
+        "TEXT_INVALID",
+        "TEXT_INVALID_MESSAGE",
+        "TEXT_UNREACHABLE",
+        "TEXT_CARRIER_UNREACHABLE",
+        "TEXT_BLOCKED",
+        "TEXT_CARRIER_BLOCKED",
+        "TEXT_SPAM",
+        "TEXT_UNKNOWN",
+        "TEXT_TTL_EXPIRED",
+        "TEXT_PROTECT_BLOCKED",
+        "VOICE_ALL",
+        "VOICE_INITIATED",
+        "VOICE_RINGING",
+        "VOICE_ANSWERED",
+        "VOICE_COMPLETED",
+        "VOICE_BUSY",
+        "VOICE_NO_ANSWER",
+        "VOICE_FAILED",
+        "VOICE_TTL_EXPIRED",
+        "MEDIA_ALL",
+        "MEDIA_PENDING",
+        "MEDIA_QUEUED",
+        "MEDIA_SUCCESSFUL",
+        "MEDIA_DELIVERED",
+        "MEDIA_INVALID",
+        "MEDIA_INVALID_MESSAGE",
+        "MEDIA_UNREACHABLE",
+        "MEDIA_CARRIER_UNREACHABLE",
+        "MEDIA_BLOCKED",
+        "MEDIA_CARRIER_BLOCKED",
+        "MEDIA_SPAM",
+        "MEDIA_UNKNOWN",
+        "MEDIA_TTL_EXPIRED",
+        "MEDIA_FILE_INACCESSIBLE",
+        "MEDIA_FILE_TYPE_UNSUPPORTED",
+        "MEDIA_FILE_SIZE_EXCEEDED"
+       ],
+       "type": "string"
+      },
+      "maxItems": 43,
+      "minItems": 1,
+      "type": "array"
+     },
+     "SnsDestination": {
+      "$ref": "#/components/schemas/SnsDestination"
+     }
+    },
+    "required": [
+     "EventDestinationName",
+     "Enabled",
+     "MatchingEventTypes"
+    ],
+    "type": "object"
+   },
+   "KinesisFirehoseDestination": {
+    "additionalProperties": false,
+    "properties": {
+     "DeliveryStreamArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "IamRoleArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "IamRoleArn",
+     "DeliveryStreamArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 256,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResult": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 256,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "OptOutListInformation": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "OptOutListArn": {
+      "type": "string"
+     },
+     "OptOutListName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OptOutListArn",
+     "OptOutListName",
+     "CreatedTimestamp"
+    ],
+    "type": "object"
+   },
+   "SnsDestination": {
+    "additionalProperties": false,
+    "properties": {
+     "TopicArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "TopicArn"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 256,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 256,
+      "minLength": 20,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Pinpoint SMS Voice V2 API (2022-03-31). Every other official operation returns HTTP 501 UnknownOperationException. Configuration sets and opt-out lists are configuration metadata: no text, voice or media message is sent, no phone number, sender ID, pool or registration is requested, and SendTextMessage and the other sending APIs return UnknownOperationException with HTTP 501. Event destinations, default sender settings, opted-out numbers, protect configurations and spend limits are not implemented. The account's Default opt-out list is not pre-created and its name is reserved. Describe filters and the Owner member are refused.",
+  "title": "AWS End User Messaging SMS (simulator catalog)",
+  "version": "2022-03-31"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "pinpoint-sms-voice-v2JSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "PinpointSMSVoiceV2.CreateConfigurationSet",
+        "PinpointSMSVoiceV2.CreateOptOutList",
+        "PinpointSMSVoiceV2.DeleteConfigurationSet",
+        "PinpointSMSVoiceV2.DeleteOptOutList",
+        "PinpointSMSVoiceV2.DescribeConfigurationSets",
+        "PinpointSMSVoiceV2.DescribeOptOutLists",
+        "PinpointSMSVoiceV2.ListTagsForResource",
+        "PinpointSMSVoiceV2.TagResource",
+        "PinpointSMSVoiceV2.UntagResource"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.0": {
+       "examples": {
+        "CreateConfigurationSet": {
+         "summary": "X-Amz-Target: PinpointSMSVoiceV2.CreateConfigurationSet",
+         "value": {}
+        },
+        "CreateOptOutList": {
+         "summary": "X-Amz-Target: PinpointSMSVoiceV2.CreateOptOutList",
+         "value": {}
+        },
+        "DeleteConfigurationSet": {
+         "summary": "X-Amz-Target: PinpointSMSVoiceV2.DeleteConfigurationSet",
+         "value": {}
+        },
+        "DeleteOptOutList": {
+         "summary": "X-Amz-Target: PinpointSMSVoiceV2.DeleteOptOutList",
+         "value": {}
+        },
+        "DescribeConfigurationSets": {
+         "summary": "X-Amz-Target: PinpointSMSVoiceV2.DescribeConfigurationSets",
+         "value": {}
+        },
+        "DescribeOptOutLists": {
+         "summary": "X-Amz-Target: PinpointSMSVoiceV2.DescribeOptOutLists",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: PinpointSMSVoiceV2.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: PinpointSMSVoiceV2.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: PinpointSMSVoiceV2.UntagResource",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.0": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS End User Messaging SMS JSON 1.0 operations",
+    "tags": [
+     "AWS End User Messaging SMS"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Pinpoint SMS Voice V2 API (2022-03-31). Every other official operation returns HTTP 501 UnknownOperationException. Configuration sets and opt-out lists are configuration metadata: no text, voice or media message is sent, no phone number, sender ID, pool or registration is requested, and SendTextMessage and the other sending APIs return UnknownOperationException with HTTP 501. Event destinations, default sender settings, opted-out numbers, protect configurations and spend limits are not implemented. The account's Default opt-out list is not pre-created and its name is reserved. Describe filters and the Owner member are refused.",
+   "name": "AWS End User Messaging SMS"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/pinpoint-sms-voice-v2/2022-03-31/service-2.json",
+  "sha256": "ee4bd7819edee6554dd50156aee6062f19e71e1a59da00248a79115b4c258945",
+  "license": "Apache-2.0"
+ }
+}

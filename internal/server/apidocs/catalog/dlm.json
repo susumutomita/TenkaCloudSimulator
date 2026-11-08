@@ -1,0 +1,1517 @@
+{
+ "components": {
+  "schemas": {
+   "Action": {
+    "additionalProperties": false,
+    "properties": {
+     "CrossRegionCopy": {
+      "items": {
+       "$ref": "#/components/schemas/CrossRegionCopyAction"
+      },
+      "maxItems": 3,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Name": {
+      "maxLength": 120,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "CrossRegionCopy"
+    ],
+    "type": "object"
+   },
+   "ArchiveRetainRule": {
+    "additionalProperties": false,
+    "properties": {
+     "RetentionArchiveTier": {
+      "$ref": "#/components/schemas/RetentionArchiveTier"
+     }
+    },
+    "required": [
+     "RetentionArchiveTier"
+    ],
+    "type": "object"
+   },
+   "ArchiveRule": {
+    "additionalProperties": false,
+    "properties": {
+     "RetainRule": {
+      "$ref": "#/components/schemas/ArchiveRetainRule"
+     }
+    },
+    "required": [
+     "RetainRule"
+    ],
+    "type": "object"
+   },
+   "CreateRule": {
+    "additionalProperties": false,
+    "properties": {
+     "CronExpression": {
+      "maxLength": 106,
+      "minLength": 17,
+      "type": "string"
+     },
+     "Interval": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "IntervalUnit": {
+      "enum": [
+       "HOURS"
+      ],
+      "type": "string"
+     },
+     "Location": {
+      "enum": [
+       "CLOUD",
+       "OUTPOST_LOCAL",
+       "LOCAL_ZONE"
+      ],
+      "type": "string"
+     },
+     "Scripts": {
+      "items": {
+       "$ref": "#/components/schemas/Script"
+      },
+      "maxItems": 1,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Times": {
+      "items": {
+       "maxLength": 5,
+       "minLength": 5,
+       "type": "string"
+      },
+      "maxItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CrossRegionCopyAction": {
+    "additionalProperties": false,
+    "properties": {
+     "EncryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "RetainRule": {
+      "$ref": "#/components/schemas/CrossRegionCopyRetainRule"
+     },
+     "Target": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Target",
+     "EncryptionConfiguration"
+    ],
+    "type": "object"
+   },
+   "CrossRegionCopyDeprecateRule": {
+    "additionalProperties": false,
+    "properties": {
+     "Interval": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "IntervalUnit": {
+      "enum": [
+       "DAYS",
+       "WEEKS",
+       "MONTHS",
+       "YEARS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CrossRegionCopyRetainRule": {
+    "additionalProperties": false,
+    "properties": {
+     "Interval": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "IntervalUnit": {
+      "enum": [
+       "DAYS",
+       "WEEKS",
+       "MONTHS",
+       "YEARS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CrossRegionCopyRule": {
+    "additionalProperties": false,
+    "properties": {
+     "CmkArn": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "CopyTags": {
+      "type": "boolean"
+     },
+     "DeprecateRule": {
+      "$ref": "#/components/schemas/CrossRegionCopyDeprecateRule"
+     },
+     "Encrypted": {
+      "type": "boolean"
+     },
+     "RetainRule": {
+      "$ref": "#/components/schemas/CrossRegionCopyRetainRule"
+     },
+     "Target": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "TargetRegion": {
+      "maxLength": 16,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Encrypted"
+    ],
+    "type": "object"
+   },
+   "CrossRegionCopyTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "TargetRegion": {
+      "maxLength": 16,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeprecateRule": {
+    "additionalProperties": false,
+    "properties": {
+     "Count": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "Interval": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "IntervalUnit": {
+      "enum": [
+       "DAYS",
+       "WEEKS",
+       "MONTHS",
+       "YEARS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "CmkArn": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Encrypted": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "Encrypted"
+    ],
+    "type": "object"
+   },
+   "EventParameters": {
+    "additionalProperties": false,
+    "properties": {
+     "DescriptionRegex": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "EventType": {
+      "enum": [
+       "shareSnapshot"
+      ],
+      "type": "string"
+     },
+     "SnapshotOwner": {
+      "items": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "EventType",
+     "SnapshotOwner",
+     "DescriptionRegex"
+    ],
+    "type": "object"
+   },
+   "EventSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Parameters": {
+      "$ref": "#/components/schemas/EventParameters"
+     },
+     "Type": {
+      "enum": [
+       "MANAGED_CWE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type"
+    ],
+    "type": "object"
+   },
+   "Exclusions": {
+    "additionalProperties": false,
+    "properties": {
+     "ExcludeBootVolumes": {
+      "type": "boolean"
+     },
+     "ExcludeTags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     },
+     "ExcludeVolumeTypes": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 6,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "FastRestoreRule": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailabilityZones": {
+      "items": {
+       "maxLength": 16,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Count": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "Interval": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "IntervalUnit": {
+      "enum": [
+       "DAYS",
+       "WEEKS",
+       "MONTHS",
+       "YEARS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "AvailabilityZones"
+    ],
+    "type": "object"
+   },
+   "LifecyclePolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "DateCreated": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DateModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DefaultPolicy": {
+      "type": "boolean"
+     },
+     "Description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ExecutionRoleArn": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PolicyArn": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PolicyDetails": {
+      "$ref": "#/components/schemas/PolicyDetails"
+     },
+     "PolicyId": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "ENABLED",
+       "DISABLED",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "StatusMessage": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "LifecyclePolicySummary": {
+    "additionalProperties": false,
+    "properties": {
+     "DefaultPolicy": {
+      "type": "boolean"
+     },
+     "Description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PolicyId": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PolicyType": {
+      "enum": [
+       "EBS_SNAPSHOT_MANAGEMENT",
+       "IMAGE_MANAGEMENT",
+       "EVENT_BASED_POLICY"
+      ],
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "ENABLED",
+       "DISABLED",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "Parameters": {
+    "additionalProperties": false,
+    "properties": {
+     "ExcludeBootVolume": {
+      "type": "boolean"
+     },
+     "ExcludeDataVolumeTags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     },
+     "NoReboot": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "PolicyDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "Actions": {
+      "items": {
+       "$ref": "#/components/schemas/Action"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "CopyTags": {
+      "type": "boolean"
+     },
+     "CreateInterval": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "CrossRegionCopyTargets": {
+      "items": {
+       "$ref": "#/components/schemas/CrossRegionCopyTarget"
+      },
+      "maxItems": 3,
+      "minItems": 0,
+      "type": "array"
+     },
+     "EventSource": {
+      "$ref": "#/components/schemas/EventSource"
+     },
+     "Exclusions": {
+      "$ref": "#/components/schemas/Exclusions"
+     },
+     "ExtendDeletion": {
+      "type": "boolean"
+     },
+     "Parameters": {
+      "$ref": "#/components/schemas/Parameters"
+     },
+     "PolicyLanguage": {
+      "enum": [
+       "SIMPLIFIED",
+       "STANDARD"
+      ],
+      "type": "string"
+     },
+     "PolicyType": {
+      "enum": [
+       "EBS_SNAPSHOT_MANAGEMENT",
+       "IMAGE_MANAGEMENT",
+       "EVENT_BASED_POLICY"
+      ],
+      "type": "string"
+     },
+     "ResourceLocations": {
+      "items": {
+       "enum": [
+        "CLOUD",
+        "OUTPOST",
+        "LOCAL_ZONE"
+       ],
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ResourceType": {
+      "enum": [
+       "VOLUME",
+       "INSTANCE"
+      ],
+      "type": "string"
+     },
+     "ResourceTypes": {
+      "items": {
+       "enum": [
+        "VOLUME",
+        "INSTANCE"
+       ],
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "RetainInterval": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "Schedules": {
+      "items": {
+       "$ref": "#/components/schemas/Schedule"
+      },
+      "maxItems": 4,
+      "minItems": 1,
+      "type": "array"
+     },
+     "TargetTags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RetainRule": {
+    "additionalProperties": false,
+    "properties": {
+     "Count": {
+      "maximum": 1000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Interval": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "IntervalUnit": {
+      "enum": [
+       "DAYS",
+       "WEEKS",
+       "MONTHS",
+       "YEARS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RetentionArchiveTier": {
+    "additionalProperties": false,
+    "properties": {
+     "Count": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "Interval": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "IntervalUnit": {
+      "enum": [
+       "DAYS",
+       "WEEKS",
+       "MONTHS",
+       "YEARS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Schedule": {
+    "additionalProperties": false,
+    "properties": {
+     "ArchiveRule": {
+      "$ref": "#/components/schemas/ArchiveRule"
+     },
+     "CopyTags": {
+      "type": "boolean"
+     },
+     "CreateRule": {
+      "$ref": "#/components/schemas/CreateRule"
+     },
+     "CrossRegionCopyRules": {
+      "items": {
+       "$ref": "#/components/schemas/CrossRegionCopyRule"
+      },
+      "maxItems": 3,
+      "minItems": 0,
+      "type": "array"
+     },
+     "DeprecateRule": {
+      "$ref": "#/components/schemas/DeprecateRule"
+     },
+     "FastRestoreRule": {
+      "$ref": "#/components/schemas/FastRestoreRule"
+     },
+     "Name": {
+      "maxLength": 120,
+      "minLength": 0,
+      "type": "string"
+     },
+     "RetainRule": {
+      "$ref": "#/components/schemas/RetainRule"
+     },
+     "ShareRules": {
+      "items": {
+       "$ref": "#/components/schemas/ShareRule"
+      },
+      "maxItems": 1,
+      "minItems": 0,
+      "type": "array"
+     },
+     "TagsToAdd": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 45,
+      "minItems": 0,
+      "type": "array"
+     },
+     "VariableTags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 45,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Script": {
+    "additionalProperties": false,
+    "properties": {
+     "ExecuteOperationOnScriptFailure": {
+      "type": "boolean"
+     },
+     "ExecutionHandler": {
+      "maxLength": 200,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ExecutionHandlerService": {
+      "enum": [
+       "AWS_SYSTEMS_MANAGER"
+      ],
+      "type": "string"
+     },
+     "ExecutionTimeout": {
+      "maximum": 120,
+      "minimum": 10,
+      "type": "integer"
+     },
+     "MaximumRetryCount": {
+      "maximum": 3,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Stages": {
+      "items": {
+       "enum": [
+        "PRE",
+        "POST"
+       ],
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ExecutionHandler"
+    ],
+    "type": "object"
+   },
+   "ShareRule": {
+    "additionalProperties": false,
+    "properties": {
+     "TargetAccounts": {
+      "items": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     },
+     "UnshareInterval": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "UnshareIntervalUnit": {
+      "enum": [
+       "DAYS",
+       "WEEKS",
+       "MONTHS",
+       "YEARS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "TargetAccounts"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Data Lifecycle Manager API (2018-01-12). Every other official operation returns HTTP 501 UnknownOperationException. Custom lifecycle policies are stored metadata: their schedules never run, so no EBS snapshot, EBS-backed AMI or cross-Region or cross-account copy is created, retained or deleted, and the execution role is not assumed. Default policies (DefaultPolicy and its CreateInterval, RetainInterval, CopyTags, ExtendDeletion, CrossRegionCopyTargets and Exclusions request members) are refused; PolicyDetails is required. GetLifecyclePolicies filters by PolicyIds and State only; the policy type is not repeated in list summaries.",
+  "title": "Amazon Data Lifecycle Manager (simulator catalog)",
+  "version": "2018-01-12"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/policies": {
+   "get": {
+    "operationId": "dlmGetLifecyclePolicies",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dlm"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "defaultPolicyType",
+      "schema": {
+       "enum": [
+        "VOLUME",
+        "INSTANCE",
+        "ALL"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "policyIds",
+      "schema": {
+       "items": {
+        "maxLength": 64,
+        "minLength": 0,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceTypes",
+      "schema": {
+       "items": {
+        "enum": [
+         "VOLUME",
+         "INSTANCE"
+        ],
+        "type": "string"
+       },
+       "maxItems": 1,
+       "minItems": 1,
+       "type": "array"
+      }
+     },
+     {
+      "in": "query",
+      "name": "state",
+      "schema": {
+       "enum": [
+        "ENABLED",
+        "DISABLED",
+        "ERROR"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagsToAdd",
+      "schema": {
+       "items": {
+        "maxLength": 256,
+        "minLength": 0,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 0,
+       "type": "array"
+      }
+     },
+     {
+      "in": "query",
+      "name": "targetTags",
+      "schema": {
+       "items": {
+        "maxLength": 256,
+        "minLength": 0,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Policies": {
+           "items": {
+            "$ref": "#/components/schemas/LifecyclePolicySummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetLifecyclePolicies",
+    "tags": [
+     "Amazon Data Lifecycle Manager"
+    ]
+   },
+   "post": {
+    "operationId": "dlmCreateLifecyclePolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dlm"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CopyTags": {
+          "type": "boolean"
+         },
+         "CreateInterval": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "CrossRegionCopyTargets": {
+          "items": {
+           "$ref": "#/components/schemas/CrossRegionCopyTarget"
+          },
+          "maxItems": 3,
+          "minItems": 0,
+          "type": "array"
+         },
+         "DefaultPolicy": {
+          "enum": [
+           "VOLUME",
+           "INSTANCE"
+          ],
+          "type": "string"
+         },
+         "Description": {
+          "maxLength": 500,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Exclusions": {
+          "$ref": "#/components/schemas/Exclusions"
+         },
+         "ExecutionRoleArn": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "ExtendDeletion": {
+          "type": "boolean"
+         },
+         "PolicyDetails": {
+          "$ref": "#/components/schemas/PolicyDetails"
+         },
+         "RetainInterval": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "State": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Description",
+         "ExecutionRoleArn",
+         "State"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "PolicyId": {
+           "maxLength": 64,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateLifecyclePolicy",
+    "tags": [
+     "Amazon Data Lifecycle Manager"
+    ]
+   }
+  },
+  "/policies/{policyId}": {
+   "delete": {
+    "operationId": "dlmDeleteLifecyclePolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dlm"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "policyId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteLifecyclePolicy",
+    "tags": [
+     "Amazon Data Lifecycle Manager"
+    ]
+   },
+   "get": {
+    "operationId": "dlmGetLifecyclePolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dlm"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "policyId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Policy": {
+           "$ref": "#/components/schemas/LifecyclePolicy"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetLifecyclePolicy",
+    "tags": [
+     "Amazon Data Lifecycle Manager"
+    ]
+   },
+   "patch": {
+    "operationId": "dlmUpdateLifecyclePolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dlm"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "policyId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CopyTags": {
+          "type": "boolean"
+         },
+         "CreateInterval": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "CrossRegionCopyTargets": {
+          "items": {
+           "$ref": "#/components/schemas/CrossRegionCopyTarget"
+          },
+          "maxItems": 3,
+          "minItems": 0,
+          "type": "array"
+         },
+         "Description": {
+          "maxLength": 500,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Exclusions": {
+          "$ref": "#/components/schemas/Exclusions"
+         },
+         "ExecutionRoleArn": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "ExtendDeletion": {
+          "type": "boolean"
+         },
+         "PolicyDetails": {
+          "$ref": "#/components/schemas/PolicyDetails"
+         },
+         "RetainInterval": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "State": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateLifecyclePolicy",
+    "tags": [
+     "Amazon Data Lifecycle Manager"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "dlmUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dlm"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Data Lifecycle Manager"
+    ]
+   },
+   "get": {
+    "operationId": "dlmListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dlm"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Data Lifecycle Manager"
+    ]
+   },
+   "post": {
+    "operationId": "dlmTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "dlm"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Data Lifecycle Manager"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Data Lifecycle Manager API (2018-01-12). Every other official operation returns HTTP 501 UnknownOperationException. Custom lifecycle policies are stored metadata: their schedules never run, so no EBS snapshot, EBS-backed AMI or cross-Region or cross-account copy is created, retained or deleted, and the execution role is not assumed. Default policies (DefaultPolicy and its CreateInterval, RetainInterval, CopyTags, ExtendDeletion, CrossRegionCopyTargets and Exclusions request members) are refused; PolicyDetails is required. GetLifecyclePolicies filters by PolicyIds and State only; the policy type is not repeated in list summaries.",
+   "name": "Amazon Data Lifecycle Manager"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/dlm/2018-01-12/service-2.json",
+  "sha256": "d0e54c79c3b14d82e1f42726da16546664f24ef0f82e1510ae58e8a0954bb98f",
+  "license": "Apache-2.0"
+ }
+}

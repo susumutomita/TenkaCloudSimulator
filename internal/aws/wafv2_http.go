@@ -255,25 +255,24 @@ func (s *WAFStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region stri
 		arn = q.WebACLArn
 	}
 	if operation == "DisassociateWebACL" || operation == "GetWebACLForResource" {
-		associated, lookupErr := s.ForResource(r.Context(), region, q.ResourceArn)
-		if lookupErr != nil {
-			fail(lookupErr)
+		acl, operationErr := s.resourceOperation(r.Context(), region, q.ResourceArn, operation == "DisassociateWebACL", authorize)
+		if operationErr != nil {
+			fail(operationErr)
 			return
 		}
-		if associated != nil {
-			arn = associated.ARN
+		response := map[string]any{}
+		if operation == "GetWebACLForResource" && acl != nil {
+			response["WebACL"] = acl
 		}
+		ssmJSON(w, 200, response)
+		return
 	}
 	if authorize == nil || !authorize("wafv2:"+operation, arn) {
 		fail(ssmFailure{"AccessDeniedException", "WAF action is not allowed."})
 		return
 	}
-	if (operation == "AssociateWebACL" || operation == "DisassociateWebACL") && (authorize == nil || !authorize("apigateway:SetWebACL", q.ResourceArn)) {
+	if operation == "AssociateWebACL" && (authorize == nil || !authorize("apigateway:SetWebACL", q.ResourceArn)) {
 		fail(ssmFailure{"AccessDeniedException", "API Gateway stage association is not allowed."})
-		return
-	}
-	if operation == "GetWebACLForResource" && !authorize("wafv2:GetWebACL", arn) {
-		fail(ssmFailure{"AccessDeniedException", "Web ACL read is not allowed."})
 		return
 	}
 	ctx := r.Context()
@@ -305,14 +304,6 @@ func (s *WAFStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region stri
 		response = v
 	case "AssociateWebACL":
 		e = s.Associate(ctx, region, q.ResourceArn, q.WebACLArn)
-	case "DisassociateWebACL":
-		e = s.Disassociate(ctx, region, q.ResourceArn)
-	case "GetWebACLForResource":
-		var a *WAFWebACL
-		a, e = s.ForResource(ctx, region, q.ResourceArn)
-		if a != nil {
-			response = map[string]any{"WebACL": a}
-		}
 	case "ListTagsForResource":
 		var tags []WAFTag
 		tags, e = s.Tags(ctx, region, q.ResourceARN)

@@ -1,0 +1,64 @@
+{
+ "client": "greengrassv2",
+ "steps": [
+  {
+   "op": "associate_service_role_to_account",
+   "args": {
+    "roleArn": "arn:aws:iam::000000000000:role/Greengrass_ServiceRole"
+   },
+   "save": {
+    "at": "associatedAt"
+   }
+  },
+  {
+   "op": "get_service_role_for_account",
+   "args": {},
+   "expect": {
+    "roleArn": "arn:aws:iam::000000000000:role/Greengrass_ServiceRole",
+    "associatedAt": "${at}"
+   }
+  },
+  {
+   "op": "associate_service_role_to_account",
+   "args": {
+    "roleArn": "arn:aws:iam::000000000000:user/admin"
+   },
+   "error": "ValidationException"
+  },
+  {
+   "op": "list_core_devices",
+   "args": {},
+   "error": "UnknownOperationException",
+   "status": 501
+  }
+ ],
+ "isolation": [
+  {
+   "op": "disassociate_service_role_from_account",
+   "args": {},
+   "error": "ResourceNotFoundException",
+   "status": 404
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_service_role_for_account",
+   "args": {},
+   "expect": {
+    "roleArn": "arn:aws:iam::000000000000:role/Greengrass_ServiceRole"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "disassociate_service_role_from_account",
+   "args": {}
+  },
+  {
+   "op": "disassociate_service_role_from_account",
+   "args": {},
+   "error": "ResourceNotFoundException",
+   "status": 404
+  }
+ ]
+}

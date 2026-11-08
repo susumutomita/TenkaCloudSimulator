@@ -1,0 +1,162 @@
+{
+ "namespace": "Microsoft.ContainerRegistry",
+ "client": "containerregistry",
+ "steps": [
+  {
+   "call": "user_assigned_identities.create_or_update",
+   "client": "msi",
+   "args": {
+    "resource_group_name": "${rg}",
+    "resource_name": "registry-pull",
+    "parameters": {
+     "location": "eastus"
+    }
+   },
+   "save": {
+    "pull": "id",
+    "pullPrincipal": "principal_id"
+   }
+  },
+  {
+   "call": "registries.begin_create",
+   "args": {
+    "resource_group_name": "${rg}",
+    "registry_name": "fixtureregistry",
+    "registry": {
+     "location": "eastus",
+     "sku": {
+      "name": "Basic"
+     },
+     "identity": {
+      "type": "UserAssigned",
+      "userAssignedIdentities": {
+       "${pull}": {}
+      }
+     }
+    }
+   },
+   "expect": {
+    "provisioning_state": "Succeeded",
+    "sku.tier": "Basic",
+    "login_server": null
+   }
+  },
+  {
+   "call": "registries.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "registry_name": "fixtureregistry"
+   },
+   "expect": {
+    "admin_user_enabled": null
+   }
+  },
+  {
+   "call": "registries.begin_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "registry_name": "fixtureregistry",
+    "registry_update_parameters": {
+     "tags": {
+      "team": "a"
+     },
+     "properties": {
+      "adminUserEnabled": true
+     }
+    }
+   },
+   "expect": {
+    "admin_user_enabled": true
+   }
+  },
+  {
+   "call": "registries.list_by_resource_group",
+   "args": {
+    "resource_group_name": "${rg}"
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "registries.list",
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "registries.begin_create",
+   "args": {
+    "resource_group_name": "${rg}",
+    "registry_name": "ghostidentity",
+    "registry": {
+     "location": "eastus",
+     "sku": {
+      "name": "Basic"
+     },
+     "identity": {
+      "type": "UserAssigned",
+      "userAssignedIdentities": {
+       "/subscriptions/${subscription}/resourceGroups/${rg}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/missing": {}
+      }
+     }
+    }
+   },
+   "error": "InvalidIdentity",
+   "status": 400
+  },
+  {
+   "call": "user_assigned_identities.delete",
+   "client": "msi",
+   "args": {
+    "resource_group_name": "${rg}",
+    "resource_name": "registry-pull"
+   }
+  }
+ ],
+ "probe": {
+  "call": "registries.list"
+ },
+ "unbound": {
+  "call": "registries.list_credentials",
+  "args": {
+   "resource_group_name": "${rg}",
+   "registry_name": "fixtureregistry"
+  }
+ },
+ "isolation": [
+  {
+   "call": "registries.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "registries.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "registry_name": "fixtureregistry"
+   },
+   "expect": {
+    "admin_user_enabled": true
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "registries.begin_delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "registry_name": "fixtureregistry"
+   }
+  },
+  {
+   "call": "registries.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ]
+}

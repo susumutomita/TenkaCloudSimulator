@@ -1,0 +1,51 @@
+{
+ "client": "glue",
+ "steps": [
+  {"op": "create_database", "args": {"DatabaseInput": {"Name": "fixture_sales", "Description": "Sales lake", "LocationUri": "s3://fixture-lake/sales/", "Parameters": {"classification": "parquet"}}, "Tags": {"team": "a"}}},
+  {"op": "get_database", "args": {"Name": "fixture_sales"}, "expect": {"Database.LocationUri": "s3://fixture-lake/sales/", "Database.CatalogId": "000000000000"}},
+  {"op": "get_databases", "args": {}, "expect": {"DatabaseList#count": 1}},
+  {"op": "update_database", "args": {"Name": "fixture_sales", "DatabaseInput": {"Name": "fixture_sales", "Description": "Curated sales lake"}}},
+  {"op": "update_database", "args": {"Name": "fixture_sales", "DatabaseInput": {"Name": "fixture_renamed"}}, "error": "InvalidInputException"},
+  {"op": "create_database", "args": {"DatabaseInput": {"Name": "Fixture_Upper"}}, "error": "InvalidInputException"},
+  {"op": "create_table", "args": {"DatabaseName": "fixture_sales", "TableInput": {"Name": "orders", "TableType": "EXTERNAL_TABLE", "Parameters": {"classification": "parquet"}, "PartitionKeys": [{"Name": "dt", "Type": "string"}], "StorageDescriptor": {"Columns": [{"Name": "order_id", "Type": "string"}, {"Name": "amount", "Type": "double"}], "Location": "s3://fixture-lake/sales/orders/", "InputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat", "OutputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat", "SerdeInfo": {"SerializationLibrary": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"}}}}},
+  {"op": "get_table", "args": {"DatabaseName": "fixture_sales", "Name": "orders"}, "expect": {"Table.DatabaseName": "fixture_sales", "Table.StorageDescriptor.Columns#count": 2}},
+  {"op": "get_tables", "args": {"DatabaseName": "fixture_sales"}, "expect": {"TableList#count": 1, "TableList[0].Name": "orders"}},
+  {"op": "update_table", "args": {"DatabaseName": "fixture_sales", "TableInput": {"Name": "orders", "Description": "Orders by day", "StorageDescriptor": {"Columns": [{"Name": "order_id", "Type": "string"}, {"Name": "amount", "Type": "double"}, {"Name": "currency", "Type": "string"}], "Location": "s3://fixture-lake/sales/orders/"}}}},
+  {"op": "create_table", "args": {"DatabaseName": "fixture_missing", "TableInput": {"Name": "orders"}}, "error": "EntityNotFoundException"},
+  {"op": "create_job", "args": {"Name": "fixture-etl", "Role": "arn:aws:iam::000000000000:role/fixture-glue", "Command": {"Name": "glueetl", "ScriptLocation": "s3://fixture-lake/scripts/etl.py", "PythonVersion": "3"}, "GlueVersion": "4.0", "WorkerType": "G.1X", "NumberOfWorkers": 2, "DefaultArguments": {"--job-language": "python"}, "Tags": {"team": "a"}}, "expect": {"Name": "fixture-etl"}},
+  {"op": "get_job", "args": {"JobName": "fixture-etl"}, "expect": {"Job.Command.Name": "glueetl", "Job.NumberOfWorkers": 2}},
+  {"op": "list_jobs", "args": {}, "expect": {"JobNames": ["fixture-etl"]}},
+  {"op": "get_jobs", "args": {}, "expect": {"Jobs#count": 1}},
+  {"op": "update_job", "args": {"JobName": "fixture-etl", "JobUpdate": {"Role": "arn:aws:iam::000000000000:role/fixture-glue", "Command": {"Name": "glueetl", "ScriptLocation": "s3://fixture-lake/scripts/etl.py"}, "NumberOfWorkers": 4}}, "expect": {"JobName": "fixture-etl"}},
+  {"op": "create_crawler", "args": {"Name": "fixture-crawler", "Role": "arn:aws:iam::000000000000:role/fixture-glue", "DatabaseName": "fixture_sales", "Targets": {"S3Targets": [{"Path": "s3://fixture-lake/sales/"}]}, "Tags": {"team": "a"}}},
+  {"op": "create_crawler", "args": {"Name": "fixture-scheduled", "Role": "arn:aws:iam::000000000000:role/fixture-glue", "Targets": {"S3Targets": [{"Path": "s3://fixture-lake/"}]}, "Schedule": "cron(0 1 * * ? *)"}, "error": "InvalidInputException"},
+  {"op": "get_crawler", "args": {"Name": "fixture-crawler"}, "expect": {"Crawler.State": "READY", "Crawler.DatabaseName": "fixture_sales"}},
+  {"op": "list_crawlers", "args": {}, "expect": {"CrawlerNames": ["fixture-crawler"]}},
+  {"op": "get_crawlers", "args": {}, "expect": {"Crawlers#count": 1}},
+  {"op": "update_crawler", "args": {"Name": "fixture-crawler", "TablePrefix": "raw_"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "arn:aws:glue:us-east-1:000000000000:job/fixture-etl", "TagsToAdd": {"cost": "lab"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "arn:aws:glue:us-east-1:000000000000:job/fixture-etl", "TagsToRemove": ["team"]}},
+  {"op": "get_tags", "args": {"ResourceArn": "arn:aws:glue:us-east-1:000000000000:job/fixture-etl"}, "expect": {"Tags": {"cost": "lab"}}},
+  {"op": "start_job_run", "args": {"JobName": "fixture-etl"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_table", "args": {"DatabaseName": "fixture_sales", "Name": "missing"}, "error": "EntityNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "get_databases", "args": {}, "expect": {"DatabaseList#count": 0}},
+  {"op": "list_jobs", "args": {}, "expect": {"JobNames#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_database", "args": {"Name": "fixture_sales"}, "expect": {"Database.Description": "Curated sales lake"}},
+  {"op": "get_table", "args": {"DatabaseName": "fixture_sales", "Name": "orders"}, "expect": {"Table.Description": "Orders by day", "Table.StorageDescriptor.Columns#count": 3}},
+  {"op": "get_job", "args": {"JobName": "fixture-etl"}, "expect": {"Job.NumberOfWorkers": 4}},
+  {"op": "get_crawler", "args": {"Name": "fixture-crawler"}, "expect": {"Crawler.TablePrefix": "raw_"}}
+ ],
+ "cleanup": [
+  {"op": "delete_table", "args": {"DatabaseName": "fixture_sales", "Name": "orders"}},
+  {"op": "delete_database", "args": {"Name": "fixture_sales"}},
+  {"op": "delete_job", "args": {"JobName": "fixture-etl"}, "expect": {"JobName": "fixture-etl"}},
+  {"op": "delete_crawler", "args": {"Name": "fixture-crawler"}},
+  {"op": "get_databases", "args": {}, "expect": {"DatabaseList#count": 0}},
+  {"op": "list_jobs", "args": {}, "expect": {"JobNames#count": 0}},
+  {"op": "list_crawlers", "args": {}, "expect": {"CrawlerNames#count": 0}}
+ ]
+}

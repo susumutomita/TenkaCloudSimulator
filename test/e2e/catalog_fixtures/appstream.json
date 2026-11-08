@@ -1,0 +1,263 @@
+{
+ "client": "appstream",
+ "steps": [
+  {
+   "op": "create_stack",
+   "args": {
+    "Name": "kiosk",
+    "DisplayName": "Kiosk",
+    "Tags": {
+     "team": "a"
+    },
+    "UserSettings": [
+     {
+      "Action": "CLIPBOARD_COPY_FROM_LOCAL_DEVICE",
+      "Permission": "DISABLED"
+     }
+    ],
+    "ApplicationSettings": {
+     "Enabled": false
+    }
+   },
+   "save": {
+    "stack": "Stack.Arn"
+   },
+   "expect": {
+    "Stack.Arn": "arn:aws:appstream:us-east-1:000000000000:stack/kiosk",
+    "Stack.ApplicationSettings.Enabled": false
+   }
+  },
+  {
+   "op": "describe_stacks",
+   "args": {
+    "Names": [
+     "kiosk"
+    ]
+   },
+   "expect": {
+    "Stacks[0].DisplayName": "Kiosk",
+    "Stacks[0].UserSettings[0].Permission": "DISABLED"
+   }
+  },
+  {
+   "op": "update_stack",
+   "args": {
+    "Name": "kiosk",
+    "Description": "front desk",
+    "RedirectURL": "https://example.com/bye"
+   },
+   "expect": {
+    "Stack.Description": "front desk",
+    "Stack.DisplayName": "Kiosk"
+   }
+  },
+  {
+   "op": "create_app_block",
+   "args": {
+    "Name": "office-vhd",
+    "SourceS3Location": {
+     "S3Bucket": "fixture-apps",
+     "S3Key": "office.vhdx"
+    },
+    "SetupScriptDetails": {
+     "ScriptS3Location": {
+      "S3Bucket": "fixture-apps",
+      "S3Key": "mount.ps1"
+     },
+     "ExecutablePath": "powershell.exe",
+     "TimeoutInSeconds": 120
+    }
+   },
+   "save": {
+    "block": "AppBlock.Arn"
+   },
+   "expect": {
+    "AppBlock.State": "INACTIVE",
+    "AppBlock.PackagingType": "CUSTOM"
+   }
+  },
+  {
+   "op": "describe_app_blocks",
+   "args": {
+    "Arns": [
+     "${block}"
+    ]
+   },
+   "expect": {
+    "AppBlocks#count": 1,
+    "AppBlocks[0].SetupScriptDetails.TimeoutInSeconds": 120
+   }
+  },
+  {
+   "op": "create_application",
+   "args": {
+    "Name": "notepad",
+    "IconS3Location": {
+     "S3Bucket": "fixture-apps",
+     "S3Key": "notepad.png"
+    },
+    "LaunchPath": "C:\\Windows\\notepad.exe",
+    "Platforms": [
+     "WINDOWS_SERVER_2022"
+    ],
+    "InstanceFamilies": [
+     "GENERAL_PURPOSE"
+    ],
+    "AppBlockArn": "${block}"
+   },
+   "save": {
+    "app": "Application.Arn"
+   },
+   "expect": {
+    "Application.Enabled": true
+   }
+  },
+  {
+   "op": "create_application",
+   "args": {
+    "Name": "paint",
+    "IconS3Location": {
+     "S3Bucket": "fixture-apps",
+     "S3Key": "paint.png"
+    },
+    "LaunchPath": "C:\\Windows\\mspaint.exe",
+    "Platforms": [
+     "WINDOWS_SERVER_2022"
+    ],
+    "InstanceFamilies": [
+     "GENERAL_PURPOSE"
+    ],
+    "AppBlockArn": "arn:aws:appstream:us-east-1:000000000000:app-block/missing"
+   },
+   "error": "ResourceNotFoundException"
+  },
+  {
+   "op": "describe_applications",
+   "args": {},
+   "expect": {
+    "Applications#count": 1
+   }
+  },
+  {
+   "op": "update_application",
+   "args": {
+    "Name": "notepad",
+    "DisplayName": "Notepad"
+   },
+   "expect": {
+    "Application.DisplayName": "Notepad"
+   }
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "ResourceArn": "${stack}",
+    "Tags": {
+     "stage": "dev"
+    }
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "ResourceArn": "${stack}",
+    "TagKeys": [
+     "stage"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "ResourceArn": "${stack}"
+   },
+   "expect": {
+    "Tags": {
+     "team": "a"
+    }
+   }
+  },
+  {
+   "op": "create_fleet",
+   "args": {
+    "Name": "fleet",
+    "InstanceType": "stream.standard.small"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "describe_stacks",
+   "args": {
+    "Names": [
+     "missing"
+    ]
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "describe_stacks",
+   "args": {},
+   "expect": {
+    "Stacks#count": 0
+   }
+  },
+  {
+   "op": "describe_app_blocks",
+   "args": {},
+   "expect": {
+    "AppBlocks#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "describe_applications",
+   "args": {
+    "Arns": [
+     "${app}"
+    ]
+   },
+   "expect": {
+    "Applications[0].AppBlockArn": "${block}",
+    "Applications[0].DisplayName": "Notepad"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_application",
+   "args": {
+    "Name": "notepad"
+   }
+  },
+  {
+   "op": "delete_app_block",
+   "args": {
+    "Name": "office-vhd"
+   }
+  },
+  {
+   "op": "delete_stack",
+   "args": {
+    "Name": "kiosk"
+   }
+  },
+  {
+   "op": "describe_stacks",
+   "args": {},
+   "expect": {
+    "Stacks#count": 0
+   }
+  },
+  {
+   "op": "describe_applications",
+   "args": {},
+   "expect": {
+    "Applications#count": 0
+   }
+  }
+ ]
+}

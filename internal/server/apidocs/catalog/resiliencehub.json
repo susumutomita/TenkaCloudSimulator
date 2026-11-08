@@ -1,0 +1,1468 @@
+{
+ "components": {
+  "schemas": {
+   "App": {
+    "additionalProperties": false,
+    "properties": {
+     "appArn": {
+      "type": "string"
+     },
+     "assessmentSchedule": {
+      "enum": [
+       "Disabled",
+       "Daily"
+      ],
+      "type": "string"
+     },
+     "awsApplicationArn": {
+      "type": "string"
+     },
+     "complianceStatus": {
+      "enum": [
+       "PolicyBreached",
+       "PolicyMet",
+       "NotAssessed",
+       "ChangesDetected",
+       "NotApplicable",
+       "MissingPolicy"
+      ],
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "driftStatus": {
+      "enum": [
+       "NotChecked",
+       "NotDetected",
+       "Detected"
+      ],
+      "type": "string"
+     },
+     "eventSubscriptions": {
+      "items": {
+       "$ref": "#/components/schemas/EventSubscription"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "lastAppComplianceEvaluationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastDriftEvaluationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastResiliencyScoreEvaluationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "type": "string"
+     },
+     "permissionModel": {
+      "$ref": "#/components/schemas/PermissionModel"
+     },
+     "policyArn": {
+      "type": "string"
+     },
+     "resiliencyScore": {
+      "type": "number"
+     },
+     "rpoInSecs": {
+      "type": "integer"
+     },
+     "rtoInSecs": {
+      "type": "integer"
+     },
+     "status": {
+      "enum": [
+       "Active",
+       "Deleting"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "appArn",
+     "creationTime",
+     "name"
+    ],
+    "type": "object"
+   },
+   "AppSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "appArn": {
+      "type": "string"
+     },
+     "assessmentSchedule": {
+      "enum": [
+       "Disabled",
+       "Daily"
+      ],
+      "type": "string"
+     },
+     "awsApplicationArn": {
+      "type": "string"
+     },
+     "complianceStatus": {
+      "enum": [
+       "PolicyBreached",
+       "PolicyMet",
+       "NotAssessed",
+       "ChangesDetected",
+       "NotApplicable",
+       "MissingPolicy"
+      ],
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "driftStatus": {
+      "enum": [
+       "NotChecked",
+       "NotDetected",
+       "Detected"
+      ],
+      "type": "string"
+     },
+     "lastAppComplianceEvaluationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "type": "string"
+     },
+     "resiliencyScore": {
+      "type": "number"
+     },
+     "rpoInSecs": {
+      "type": "integer"
+     },
+     "rtoInSecs": {
+      "type": "integer"
+     },
+     "status": {
+      "enum": [
+       "Active",
+       "Deleting"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "appArn",
+     "creationTime",
+     "name"
+    ],
+    "type": "object"
+   },
+   "EventSubscription": {
+    "additionalProperties": false,
+    "properties": {
+     "eventType": {
+      "enum": [
+       "ScheduledAssessmentFailure",
+       "DriftDetected"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "snsTopicArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "eventType",
+     "name"
+    ],
+    "type": "object"
+   },
+   "FailurePolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "rpoInSecs": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "rtoInSecs": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "rpoInSecs",
+     "rtoInSecs"
+    ],
+    "type": "object"
+   },
+   "PermissionModel": {
+    "additionalProperties": false,
+    "properties": {
+     "crossAccountRoleArns": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "invokerRoleName": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "LegacyIAMUser",
+       "RoleBased"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "ResiliencyPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "dataLocationConstraint": {
+      "enum": [
+       "AnyLocation",
+       "SameContinent",
+       "SameCountry"
+      ],
+      "type": "string"
+     },
+     "estimatedCostTier": {
+      "enum": [
+       "L1",
+       "L2",
+       "L3",
+       "L4"
+      ],
+      "type": "string"
+     },
+     "policy": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/FailurePolicy"
+      },
+      "type": "object"
+     },
+     "policyArn": {
+      "type": "string"
+     },
+     "policyDescription": {
+      "maxLength": 500,
+      "minLength": 0,
+      "type": "string"
+     },
+     "policyName": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "tier": {
+      "enum": [
+       "MissionCritical",
+       "Critical",
+       "Important",
+       "CoreServices",
+       "NonCritical",
+       "NotApplicable"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Resilience Hub API (2020-04-30). Every other official operation returns HTTP 501 UnknownOperationException. Resiliency policies and applications are stored metadata: no resource is imported or resolved, no assessment, drift check or recommendation runs and no event is sent to the subscribed SNS topics, so applications report no compliance, drift, resiliency score or estimated cost tier. Scheduled Daily assessments are refused and clearResiliencyPolicyArn is not supported; a referenced policyArn must name a stored policy, but deleting a policy does not check the applications that use it. App versions, components, resources, input sources, assessments, recommendations, suggested policies, grouping recommendations and metrics return UnknownOperationException with HTTP 501. ListApps filters by name and ARNs only, and delete client tokens are accepted without replay.",
+  "title": "AWS Resilience Hub (simulator catalog)",
+  "version": "2020-04-30"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/create-app": {
+   "post": {
+    "operationId": "resiliencehubCreateApp",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "assessmentSchedule": {
+          "enum": [
+           "Disabled",
+           "Daily"
+          ],
+          "type": "string"
+         },
+         "awsApplicationArn": {
+          "type": "string"
+         },
+         "clientToken": {
+          "maxLength": 63,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 500,
+          "minLength": 0,
+          "type": "string"
+         },
+         "eventSubscriptions": {
+          "items": {
+           "$ref": "#/components/schemas/EventSubscription"
+          },
+          "maxItems": 10,
+          "minItems": 0,
+          "type": "array"
+         },
+         "name": {
+          "type": "string"
+         },
+         "permissionModel": {
+          "$ref": "#/components/schemas/PermissionModel"
+         },
+         "policyArn": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateApp",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   }
+  },
+  "/create-resiliency-policy": {
+   "post": {
+    "operationId": "resiliencehubCreateResiliencyPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 63,
+          "minLength": 1,
+          "type": "string"
+         },
+         "dataLocationConstraint": {
+          "enum": [
+           "AnyLocation",
+           "SameContinent",
+           "SameCountry"
+          ],
+          "type": "string"
+         },
+         "policy": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/FailurePolicy"
+          },
+          "type": "object"
+         },
+         "policyDescription": {
+          "maxLength": 500,
+          "minLength": 0,
+          "type": "string"
+         },
+         "policyName": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         },
+         "tier": {
+          "enum": [
+           "MissionCritical",
+           "Critical",
+           "Important",
+           "CoreServices",
+           "NonCritical",
+           "NotApplicable"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "policy",
+         "policyName",
+         "tier"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "policy": {
+           "$ref": "#/components/schemas/ResiliencyPolicy"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateResiliencyPolicy",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   }
+  },
+  "/delete-app": {
+   "post": {
+    "operationId": "resiliencehubDeleteApp",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "appArn": {
+          "type": "string"
+         },
+         "clientToken": {
+          "maxLength": 63,
+          "minLength": 1,
+          "type": "string"
+         },
+         "forceDelete": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "appArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "appArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteApp",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   }
+  },
+  "/delete-resiliency-policy": {
+   "post": {
+    "operationId": "resiliencehubDeleteResiliencyPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 63,
+          "minLength": 1,
+          "type": "string"
+         },
+         "policyArn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "policyArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "policyArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteResiliencyPolicy",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   }
+  },
+  "/describe-app": {
+   "post": {
+    "operationId": "resiliencehubDescribeApp",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "appArn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "appArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeApp",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   }
+  },
+  "/describe-resiliency-policy": {
+   "post": {
+    "operationId": "resiliencehubDescribeResiliencyPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "policyArn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "policyArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "policy": {
+           "$ref": "#/components/schemas/ResiliencyPolicy"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeResiliencyPolicy",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   }
+  },
+  "/list-apps": {
+   "get": {
+    "operationId": "resiliencehubListApps",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "appArn",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "awsApplicationArn",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "fromLastAssessmentTime",
+      "schema": {
+       "description": "Epoch seconds in JSON protocols",
+       "type": [
+        "number",
+        "string"
+       ]
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "name",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "reverseOrder",
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "toLastAssessmentTime",
+      "schema": {
+       "description": "Epoch seconds in JSON protocols",
+       "type": [
+        "number",
+        "string"
+       ]
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "appSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/AppSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListApps",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   }
+  },
+  "/list-resiliency-policies": {
+   "get": {
+    "operationId": "resiliencehubListResiliencyPolicies",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "policyName",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "resiliencyPolicies": {
+           "items": {
+            "$ref": "#/components/schemas/ResiliencyPolicy"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListResiliencyPolicies",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "resiliencehubUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   },
+   "get": {
+    "operationId": "resiliencehubListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   },
+   "post": {
+    "operationId": "resiliencehubTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   }
+  },
+  "/update-app": {
+   "post": {
+    "operationId": "resiliencehubUpdateApp",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "appArn": {
+          "type": "string"
+         },
+         "assessmentSchedule": {
+          "enum": [
+           "Disabled",
+           "Daily"
+          ],
+          "type": "string"
+         },
+         "clearResiliencyPolicyArn": {
+          "type": "boolean"
+         },
+         "description": {
+          "maxLength": 500,
+          "minLength": 0,
+          "type": "string"
+         },
+         "eventSubscriptions": {
+          "items": {
+           "$ref": "#/components/schemas/EventSubscription"
+          },
+          "maxItems": 10,
+          "minItems": 0,
+          "type": "array"
+         },
+         "permissionModel": {
+          "$ref": "#/components/schemas/PermissionModel"
+         },
+         "policyArn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "appArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateApp",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   }
+  },
+  "/update-resiliency-policy": {
+   "post": {
+    "operationId": "resiliencehubUpdateResiliencyPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resiliencehub"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "dataLocationConstraint": {
+          "enum": [
+           "AnyLocation",
+           "SameContinent",
+           "SameCountry"
+          ],
+          "type": "string"
+         },
+         "policy": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/FailurePolicy"
+          },
+          "type": "object"
+         },
+         "policyArn": {
+          "type": "string"
+         },
+         "policyDescription": {
+          "maxLength": 500,
+          "minLength": 0,
+          "type": "string"
+         },
+         "policyName": {
+          "type": "string"
+         },
+         "tier": {
+          "enum": [
+           "MissionCritical",
+           "Critical",
+           "Important",
+           "CoreServices",
+           "NonCritical",
+           "NotApplicable"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "policyArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "policy": {
+           "$ref": "#/components/schemas/ResiliencyPolicy"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateResiliencyPolicy",
+    "tags": [
+     "AWS Resilience Hub"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Resilience Hub API (2020-04-30). Every other official operation returns HTTP 501 UnknownOperationException. Resiliency policies and applications are stored metadata: no resource is imported or resolved, no assessment, drift check or recommendation runs and no event is sent to the subscribed SNS topics, so applications report no compliance, drift, resiliency score or estimated cost tier. Scheduled Daily assessments are refused and clearResiliencyPolicyArn is not supported; a referenced policyArn must name a stored policy, but deleting a policy does not check the applications that use it. App versions, components, resources, input sources, assessments, recommendations, suggested policies, grouping recommendations and metrics return UnknownOperationException with HTTP 501. ListApps filters by name and ARNs only, and delete client tokens are accepted without replay.",
+   "name": "AWS Resilience Hub"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/resiliencehub/2020-04-30/service-2.json",
+  "sha256": "128b6a761683137a1918960353bea477baf42d205d0cc899b2a0722922e7f811",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "client": "translate",
+ "steps": [
+  {"op": "import_terminology", "args": {"Name": "fixture-terms", "MergeStrategy": "OVERWRITE", "Description": "Product names", "TerminologyData": {"File": "en,ja,fr\nTenkaCloud,TenkaCloud,TenkaCloud\nsimulator,simulator,simulateur\n", "Format": "CSV"}, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"terms": "TerminologyProperties.Arn"}, "expect": {"TerminologyProperties.SourceLanguageCode": "en", "TerminologyProperties.TargetLanguageCodes": ["ja", "fr"], "TerminologyProperties.TermCount": 2}},
+  {"op": "get_terminology", "args": {"Name": "fixture-terms"}, "expect": {"TerminologyProperties.Arn": "arn:aws:translate:us-east-1:000000000000:terminology/fixture-terms/LATEST", "TerminologyProperties.Directionality": "UNI"}},
+  {"op": "list_terminologies", "args": {}, "expect": {"TerminologyPropertiesList#count": 1, "TerminologyPropertiesList[0].Name": "fixture-terms"}},
+  {"op": "create_parallel_data", "args": {"Name": "fixture-pairs", "ParallelDataConfig": {"S3Uri": "s3://fixture-bucket/pairs.csv", "Format": "CSV"}, "ClientToken": "fixture-parallel-data", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"pairs": "Name"}, "expect": {"Status": "CREATING"}},
+  {"op": "get_parallel_data", "args": {"Name": "fixture-pairs"}, "expect": {"ParallelDataProperties.Status": "CREATING", "ParallelDataProperties.Arn": "arn:aws:translate:us-east-1:000000000000:parallel-data/fixture-pairs"}},
+  {"op": "list_parallel_data", "args": {}, "expect": {"ParallelDataPropertiesList#count": 1}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${terms}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${terms}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${terms}"}, "expect": {"Tags#count": 1, "Tags[0].Key": "team"}},
+  {"op": "import_terminology", "args": {"Name": "tmx-terms", "MergeStrategy": "OVERWRITE", "TerminologyData": {"File": "<tmx version=\"1.4\"></tmx>", "Format": "TMX"}}, "error": "InvalidParameterValueException", "status": 400},
+  {"op": "translate_text", "args": {"Text": "Hello", "SourceLanguageCode": "en", "TargetLanguageCode": "ja"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_terminology", "args": {"Name": "missing-terms"}, "error": "ResourceNotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "list_terminologies", "args": {}, "expect": {"TerminologyPropertiesList#count": 0}},
+  {"op": "list_parallel_data", "args": {}, "expect": {"ParallelDataPropertiesList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_terminology", "args": {"Name": "fixture-terms", "TerminologyDataFormat": "CSV"}, "expect": {"TerminologyProperties.Description": "Product names"}},
+  {"op": "get_parallel_data", "args": {"Name": "fixture-pairs"}, "expect": {"ParallelDataProperties.ParallelDataConfig.Format": "CSV"}}
+ ],
+ "cleanup": [
+  {"op": "delete_terminology", "args": {"Name": "fixture-terms"}},
+  {"op": "delete_parallel_data", "args": {"Name": "fixture-pairs"}, "expect": {"Status": "DELETING"}},
+  {"op": "list_terminologies", "args": {}, "expect": {"TerminologyPropertiesList#count": 0}},
+  {"op": "list_parallel_data", "args": {}, "expect": {"ParallelDataPropertiesList#count": 0}}
+ ]
+}

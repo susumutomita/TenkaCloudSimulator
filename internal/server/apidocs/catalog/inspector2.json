@@ -1,0 +1,1170 @@
+{
+ "components": {
+  "schemas": {
+   "DateFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "endInclusive": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "startInclusive": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "Filter": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "NONE",
+       "SUPPRESS"
+      ],
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "criteria": {
+      "$ref": "#/components/schemas/FilterCriteria"
+     },
+     "description": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ownerId": {
+      "maxLength": 34,
+      "minLength": 12,
+      "type": "string"
+     },
+     "reason": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "arn",
+     "ownerId",
+     "name",
+     "criteria",
+     "action",
+     "createdAt",
+     "updatedAt"
+    ],
+    "type": "object"
+   },
+   "FilterCriteria": {
+    "additionalProperties": false,
+    "properties": {
+     "awsAccountId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "codeRepositoryProjectName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "codeRepositoryProviderType": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "codeVulnerabilityDetectorName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "codeVulnerabilityDetectorTags": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "codeVulnerabilityFilePath": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "componentId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "componentType": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ec2InstanceImageId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ec2InstanceSubnetId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ec2InstanceVpcId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ecrImageArchitecture": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ecrImageHash": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ecrImageInUseCount": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ecrImageLastInUseAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ecrImagePushedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ecrImageRegistry": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ecrImageRepositoryName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ecrImageTags": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "epssScore": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "exploitAvailable": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "findingArn": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "findingStatus": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "findingType": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "firstObservedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "fixAvailable": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "inspectorScore": {
+      "items": {
+       "$ref": "#/components/schemas/NumberFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "lambdaFunctionExecutionRoleArn": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "lambdaFunctionLastModifiedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "lambdaFunctionLayers": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "lambdaFunctionName": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "lambdaFunctionRuntime": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "lastObservedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "networkProtocol": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "portRange": {
+      "items": {
+       "$ref": "#/components/schemas/PortRangeFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "relatedVulnerabilities": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "resourceId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "resourceTags": {
+      "items": {
+       "$ref": "#/components/schemas/MapFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "resourceType": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "severity": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "title": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "updatedAt": {
+      "items": {
+       "$ref": "#/components/schemas/DateFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "vendorSeverity": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "vulnerabilityId": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "vulnerabilitySource": {
+      "items": {
+       "$ref": "#/components/schemas/StringFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "vulnerablePackages": {
+      "items": {
+       "$ref": "#/components/schemas/PackageFilter"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MapFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "comparison": {
+      "enum": [
+       "EQUALS"
+      ],
+      "type": "string"
+     },
+     "key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "comparison",
+     "key"
+    ],
+    "type": "object"
+   },
+   "NumberFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "lowerInclusive": {
+      "type": "number"
+     },
+     "upperInclusive": {
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "PackageFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "architecture": {
+      "$ref": "#/components/schemas/StringFilter"
+     },
+     "epoch": {
+      "$ref": "#/components/schemas/NumberFilter"
+     },
+     "filePath": {
+      "$ref": "#/components/schemas/StringFilter"
+     },
+     "name": {
+      "$ref": "#/components/schemas/StringFilter"
+     },
+     "release": {
+      "$ref": "#/components/schemas/StringFilter"
+     },
+     "sourceLambdaLayerArn": {
+      "$ref": "#/components/schemas/StringFilter"
+     },
+     "sourceLayerHash": {
+      "$ref": "#/components/schemas/StringFilter"
+     },
+     "version": {
+      "$ref": "#/components/schemas/StringFilter"
+     }
+    },
+    "type": "object"
+   },
+   "PortRangeFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "beginInclusive": {
+      "maximum": 65535,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "endInclusive": {
+      "maximum": 65535,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "StringFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "comparison": {
+      "enum": [
+       "EQUALS",
+       "PREFIX",
+       "NOT_EQUALS"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "comparison",
+     "value"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Inspector2 API (2020-06-08). Every other official operation returns HTTP 501 UnknownOperationException. Findings filters are configuration metadata that need no prior Enable call: no Amazon EC2 instance, Amazon ECR image, Lambda function or code repository is scanned and no finding exists, so a SUPPRESS filter hides nothing. ListFilters returns stored filters in creation order; a filter ARN named in arns that does not exist fails the request with ValidationException. Scanning enablement, findings, coverage, CIS scan configurations and sessions, code security integrations and scans, SBOM exports, findings reports, encryption keys, members, delegated administrators and organization configuration return UnknownOperationException with HTTP 501.",
+  "title": "Amazon Inspector (simulator catalog)",
+  "version": "2020-06-08"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/filters/create": {
+   "post": {
+    "operationId": "inspector2CreateFilter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "inspector2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "action": {
+          "enum": [
+           "NONE",
+           "SUPPRESS"
+          ],
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "filterCriteria": {
+          "$ref": "#/components/schemas/FilterCriteria"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "reason": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "action",
+         "filterCriteria",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateFilter",
+    "tags": [
+     "Amazon Inspector"
+    ]
+   }
+  },
+  "/filters/delete": {
+   "post": {
+    "operationId": "inspector2DeleteFilter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "inspector2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteFilter",
+    "tags": [
+     "Amazon Inspector"
+    ]
+   }
+  },
+  "/filters/list": {
+   "post": {
+    "operationId": "inspector2ListFilters",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "inspector2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "action": {
+          "enum": [
+           "NONE",
+           "SUPPRESS"
+          ],
+          "type": "string"
+         },
+         "arns": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "maxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 1000000,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "filters": {
+           "items": {
+            "$ref": "#/components/schemas/Filter"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 1000000,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListFilters",
+    "tags": [
+     "Amazon Inspector"
+    ]
+   }
+  },
+  "/filters/update": {
+   "post": {
+    "operationId": "inspector2UpdateFilter",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "inspector2"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "action": {
+          "enum": [
+           "NONE",
+           "SUPPRESS"
+          ],
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "filterArn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "filterCriteria": {
+          "$ref": "#/components/schemas/FilterCriteria"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "reason": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "filterArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateFilter",
+    "tags": [
+     "Amazon Inspector"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "inspector2UntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "inspector2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Inspector"
+    ]
+   },
+   "get": {
+    "operationId": "inspector2ListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "inspector2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Inspector"
+    ]
+   },
+   "post": {
+    "operationId": "inspector2TagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "inspector2"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Inspector"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Inspector2 API (2020-06-08). Every other official operation returns HTTP 501 UnknownOperationException. Findings filters are configuration metadata that need no prior Enable call: no Amazon EC2 instance, Amazon ECR image, Lambda function or code repository is scanned and no finding exists, so a SUPPRESS filter hides nothing. ListFilters returns stored filters in creation order; a filter ARN named in arns that does not exist fails the request with ValidationException. Scanning enablement, findings, coverage, CIS scan configurations and sessions, code security integrations and scans, SBOM exports, findings reports, encryption keys, members, delegated administrators and organization configuration return UnknownOperationException with HTTP 501.",
+   "name": "Amazon Inspector"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/inspector2/2020-06-08/service-2.json",
+  "sha256": "a96769ab0762b20911e0b17c9411bad210b08b631ab46da6bee64ad9f1a8a5e2",
+  "license": "Apache-2.0"
+ }
+}

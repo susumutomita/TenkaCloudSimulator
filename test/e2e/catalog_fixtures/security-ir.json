@@ -1,0 +1,26 @@
+{
+ "client": "security-ir",
+ "steps": [
+  {"op": "create_membership", "args": {"membershipName": "fixture-ir", "incidentResponseTeam": [{"name": "Alice Example", "jobTitle": "Security lead", "email": "alice@example.com"}, {"name": "Bob Example", "jobTitle": "Engineer", "email": "bob@example.com"}], "optInFeatures": [{"featureName": "Triage", "isEnabled": false}], "tags": {"team": "a"}}, "save": {"membership": "membershipId"}},
+  {"op": "get_membership", "args": {"membershipId": "${membership}"}, "save": {"membershipArn": "membershipArn"}, "expect": {"membershipStatus": "Active", "customerType": "Standalone", "accountId": "000000000000", "region": "us-east-1", "incidentResponseTeam#count": 2}},
+  {"op": "list_memberships", "args": {}, "expect": {"items#count": 1, "items[0].membershipId": "${membership}"}},
+  {"op": "update_membership", "args": {"membershipId": "${membership}", "membershipName": "fixture-ir-renamed"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${membershipArn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${membershipArn}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${membershipArn}"}, "expect": {"tags": {"k": "v"}}},
+  {"op": "update_membership", "args": {"membershipId": "${membership}", "optInFeatures": [{"featureName": "Triage", "isEnabled": true}]}, "error": "ValidationException", "status": 400},
+  {"op": "create_membership", "args": {"membershipName": "second", "incidentResponseTeam": [{"name": "Alice Example", "jobTitle": "Lead", "email": "alice@example.com"}, {"name": "Bob Example", "jobTitle": "Engineer", "email": "bob@example.com"}]}, "error": "ServiceQuotaExceededException"},
+  {"op": "create_case", "args": {"resolverType": "Self", "title": "t", "description": "d", "engagementType": "Investigation", "reportedIncidentStartDate": "2026-11-01T00:00:00Z", "impactedAccounts": [], "watchers": []}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_membership", "args": {"membershipId": "m-0000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_memberships", "args": {}, "expect": {"items#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_membership", "args": {"membershipId": "${membership}"}, "expect": {"membershipName": "fixture-ir-renamed"}}
+ ],
+ "cleanup": [
+  {"op": "cancel_membership", "args": {"membershipId": "${membership}"}, "expect": {"membershipId": "${membership}"}},
+  {"op": "get_membership", "args": {"membershipId": "${membership}"}, "expect": {"membershipStatus": "Cancelled"}}
+ ]
+}

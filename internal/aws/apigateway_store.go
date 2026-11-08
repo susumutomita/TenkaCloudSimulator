@@ -1,8 +1,9 @@
-// Copyright (c) 2025 sivchari
 // SPDX-License-Identifier: MIT
-// Selected REST wire fields adapted from Kumo ce37a8fb406ecb96b5619204f645c26302b651a5,
-// internal/service/apigateway/types.go. Original notice: third_party/KUMO-LICENSE.txt.
-// SQLite storage, quotas, ownership and deployment snapshots are local adapters.
+// Provider-owned REST state and independently authored AWS JSON projections.
+// Historical notice retained for earlier, replaced Kumo adaptations:
+// Copyright (c) 2025 sivchari
+// Original permission and historical provenance: third_party/KUMO-LICENSE.txt
+// and the corresponding third_party/kumo-*.json record.
 package aws
 
 import (
@@ -17,51 +18,115 @@ import (
 	"unicode/utf8"
 )
 
-// Provider-owned state retains the native REST wire field names.
+// Provider-owned models hold the bounded local REST state. Explicit projections
+// below define the public and persisted JSON representation from the AWS REST
+// resource contracts; storage and admission do not depend on reflection tags.
 type APIGatewayStore struct{ db *sql.DB }
 type RESTAPI struct {
-	ID                    string            `json:"id"`
-	Name                  string            `json:"name"`
-	Description           string            `json:"description,omitempty"`
-	CreatedDate           float64           `json:"createdDate"`
-	RootResourceID        string            `json:"rootResourceId"`
-	Tags                  map[string]string `json:"tags,omitempty"`
-	EndpointConfiguration RESTEndpoint      `json:"endpointConfiguration"`
+	ID                    string
+	Name                  string
+	Description           string
+	CreatedDate           float64
+	RootResourceID        string
+	Tags                  map[string]string
+	EndpointConfiguration RESTEndpoint
 }
 type RESTEndpoint struct {
-	Types []string `json:"types"`
+	Types []string
 }
 type RESTResource struct {
-	ID              string                `json:"id"`
-	ParentID        string                `json:"parentId,omitempty"`
-	PathPart        string                `json:"pathPart,omitempty"`
-	Path            string                `json:"path"`
-	ResourceMethods map[string]RESTMethod `json:"resourceMethods,omitempty"`
+	ID              string
+	ParentID        string
+	PathPart        string
+	Path            string
+	ResourceMethods map[string]RESTMethod
 }
 type RESTMethod struct {
-	RequestParameters map[string]bool  `json:"requestParameters,omitempty"`
-	HTTPMethod        string           `json:"httpMethod"`
-	AuthorizationType string           `json:"authorizationType"`
-	APIKeyRequired    bool             `json:"apiKeyRequired"`
-	MethodIntegration *RESTIntegration `json:"methodIntegration,omitempty"`
+	RequestParameters map[string]bool
+	HTTPMethod        string
+	AuthorizationType string
+	APIKeyRequired    bool
+	MethodIntegration *RESTIntegration
 }
 type RESTIntegration struct {
-	Type            string `json:"type"`
-	HTTPMethod      string `json:"httpMethod"`
-	URI             string `json:"uri"`
-	TimeoutInMillis int    `json:"timeoutInMillis"`
+	Type            string
+	HTTPMethod      string
+	URI             string
+	TimeoutInMillis int
 }
 type RESTDeployment struct {
-	ID          string  `json:"id"`
-	CreatedDate float64 `json:"createdDate"`
-	Description string  `json:"description,omitempty"`
+	ID          string
+	CreatedDate float64
+	Description string
 }
 type RESTStage struct {
-	StageName       string            `json:"stageName"`
-	DeploymentID    string            `json:"deploymentId"`
-	CreatedDate     float64           `json:"createdDate"`
-	LastUpdatedDate float64           `json:"lastUpdatedDate"`
-	Variables       map[string]string `json:"variables,omitempty"`
+	StageName       string
+	DeploymentID    string
+	CreatedDate     float64
+	LastUpdatedDate float64
+	Variables       map[string]string
+}
+
+// All supported spellings also fold to the provider field names, so the standard
+// JSON decoder still reads existing SQLite documents without migration. It keeps
+// unknown-field handling under the caller's control, including strict requests.
+// https://docs.aws.amazon.com/apigateway/latest/api/API_GetRestApi.html
+func (api RESTAPI) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"id", api.ID, false}, awsOwnedWireField{"name", api.Name, false},
+		awsOwnedWireField{"description", api.Description, api.Description == ""},
+		awsOwnedWireField{"createdDate", api.CreatedDate, false},
+		awsOwnedWireField{"rootResourceId", api.RootResourceID, false},
+		awsOwnedWireField{"tags", api.Tags, len(api.Tags) == 0},
+		awsOwnedWireField{"endpointConfiguration", api.EndpointConfiguration, false})
+}
+func (endpoint RESTEndpoint) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(awsOwnedWireField{"types", endpoint.Types, false})
+}
+
+// https://docs.aws.amazon.com/apigateway/latest/api/API_GetResource.html
+func (resource RESTResource) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"id", resource.ID, false},
+		awsOwnedWireField{"parentId", resource.ParentID, resource.ParentID == ""},
+		awsOwnedWireField{"pathPart", resource.PathPart, resource.PathPart == ""},
+		awsOwnedWireField{"path", resource.Path, false},
+		awsOwnedWireField{"resourceMethods", resource.ResourceMethods, len(resource.ResourceMethods) == 0})
+}
+
+// https://docs.aws.amazon.com/apigateway/latest/api/API_GetMethod.html
+func (method RESTMethod) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"requestParameters", method.RequestParameters, len(method.RequestParameters) == 0},
+		awsOwnedWireField{"httpMethod", method.HTTPMethod, false},
+		awsOwnedWireField{"authorizationType", method.AuthorizationType, false},
+		awsOwnedWireField{"apiKeyRequired", method.APIKeyRequired, false},
+		awsOwnedWireField{"methodIntegration", method.MethodIntegration, method.MethodIntegration == nil})
+}
+func (integration RESTIntegration) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"type", integration.Type, false},
+		awsOwnedWireField{"httpMethod", integration.HTTPMethod, false},
+		awsOwnedWireField{"uri", integration.URI, false},
+		awsOwnedWireField{"timeoutInMillis", integration.TimeoutInMillis, false})
+}
+
+// https://docs.aws.amazon.com/apigateway/latest/api/API_GetDeployment.html
+func (deployment RESTDeployment) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"id", deployment.ID, false},
+		awsOwnedWireField{"createdDate", deployment.CreatedDate, false},
+		awsOwnedWireField{"description", deployment.Description, deployment.Description == ""})
+}
+
+// https://docs.aws.amazon.com/apigateway/latest/api/API_GetStage.html
+func (stage RESTStage) MarshalJSON() ([]byte, error) {
+	return marshalAWSOwnedWireObject(
+		awsOwnedWireField{"stageName", stage.StageName, false},
+		awsOwnedWireField{"deploymentId", stage.DeploymentID, false},
+		awsOwnedWireField{"createdDate", stage.CreatedDate, false},
+		awsOwnedWireField{"lastUpdatedDate", stage.LastUpdatedDate, false},
+		awsOwnedWireField{"variables", stage.Variables, len(stage.Variables) == 0})
 }
 
 func NewAPIGatewayStore(db *sql.DB) (*APIGatewayStore, error) {
@@ -77,7 +142,7 @@ func NewAPIGatewayStore(db *sql.DB) (*APIGatewayStore, error) {
  CREATE TABLE IF NOT EXISTS aws_apigateway_stages (
  region TEXT NOT NULL,api_id TEXT NOT NULL,name TEXT NOT NULL,deployment_id TEXT NOT NULL,document TEXT NOT NULL,
  PRIMARY KEY(region,api_id,name),FOREIGN KEY(region,api_id,deployment_id) REFERENCES aws_apigateway_deployments(region,api_id,id));`)
-	return &APIGatewayStore{db}, err
+	return &APIGatewayStore{db: db}, err
 }
 func apiFailure(code, message string) error { return ssmFailure{code, message} }
 func apiRead(ctx context.Context, query interface {
@@ -104,6 +169,18 @@ func (s *APIGatewayStore) API(ctx context.Context, region, id string) (RESTAPI, 
 	return apiRead(ctx, s.db, region, id)
 }
 func (s *APIGatewayStore) CreateAPI(ctx context.Context, region, name, description string, tags map[string]string) (RESTAPI, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return RESTAPI{}, err
+	}
+	defer tx.Rollback()
+	result, err := createAPITx(ctx, tx, region, name, description, tags, "", "")
+	if err != nil {
+		return RESTAPI{}, err
+	}
+	return result, tx.Commit()
+}
+func createAPITx(ctx context.Context, tx *sql.Tx, region, name, description string, tags map[string]string, idOverride, rootOverride string) (RESTAPI, error) {
 	if !slices.Contains(Regions, region) || strings.TrimSpace(name) == "" || len(name) > 128 || !utf8.ValidString(name) || len(description) > 1024 || !utf8.ValidString(description) || len(tags) > 50 {
 		return RESTAPI{}, apiFailure("BadRequestException", "Use the documented regional REST API name, description and tag limits.")
 	}
@@ -120,14 +197,21 @@ func (s *APIGatewayStore) CreateAPI(ctx context.Context, region, name, descripti
 	if err != nil {
 		return RESTAPI{}, err
 	}
+	if idOverride != "" {
+		if !apiLocalID.MatchString(idOverride) {
+			return RESTAPI{}, apiFailure("BadRequestException", "Invalid provisioned API identifier.")
+		}
+		id = idOverride
+	}
+	if rootOverride != "" {
+		if !apiLocalID.MatchString(rootOverride) {
+			return RESTAPI{}, apiFailure("BadRequestException", "Invalid provisioned root identifier.")
+		}
+		root = rootOverride
+	}
 	api := RESTAPI{ID: id[:10], Name: name, Description: description, RootResourceID: root[:10], CreatedDate: float64(time.Now().UnixMilli()) / 1000, Tags: tags, EndpointConfiguration: RESTEndpoint{Types: []string{"REGIONAL"}}}
 	document, _ := json.Marshal(api)
 	resource, _ := json.Marshal(RESTResource{ID: api.RootResourceID, Path: "/"})
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return RESTAPI{}, err
-	}
-	defer tx.Rollback()
 	var count int
 	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_apigateway_apis").Scan(&count); err != nil {
 		return RESTAPI{}, err
@@ -141,7 +225,7 @@ func (s *APIGatewayStore) CreateAPI(ctx context.Context, region, name, descripti
 	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_apigateway_resources(region,api_id,id,parent_id,path,document) VALUES(?,?,?,NULL,'/',?)", region, api.ID, api.RootResourceID, string(resource)); err != nil {
 		return RESTAPI{}, err
 	}
-	return api, tx.Commit()
+	return api, nil
 }
 func (s *APIGatewayStore) APIs(ctx context.Context, region, after string, limit int) ([]RESTAPI, error) {
 	rows, err := s.db.QueryContext(ctx, "SELECT document FROM aws_apigateway_apis WHERE region=? AND id>? ORDER BY id LIMIT ?", region, after, limit)
@@ -169,6 +253,13 @@ func (s *APIGatewayStore) DeleteAPI(ctx context.Context, region, id string) erro
 		return err
 	}
 	defer tx.Rollback()
+	if err = deleteAPITx(ctx, tx, region, id); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func deleteAPITx(ctx context.Context, tx *sql.Tx, region, id string) error {
+	var err error
 	if _, err = apiRead(ctx, tx, region, id); err != nil {
 		return err
 	}
@@ -179,5 +270,5 @@ func (s *APIGatewayStore) DeleteAPI(ctx context.Context, region, id string) erro
 	if _, err = tx.ExecContext(ctx, "DELETE FROM aws_apigateway_apis WHERE region=? AND id=?", region, id); err != nil {
 		return err
 	}
-	return tx.Commit()
+	return nil
 }

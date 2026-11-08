@@ -1,0 +1,3183 @@
+{
+ "components": {
+  "schemas": {
+   "BackupConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "backupChainBytes": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "backupPolicies": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "backupVault": {
+      "type": "string"
+     },
+     "scheduledBackupEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "BackupPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "assignedVolumeCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "dailyBackupLimit": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "description": {
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "monthlyBackupLimit": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "READY",
+       "DELETING",
+       "ERROR",
+       "UPDATING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "weeklyBackupLimit": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "BackupRetentionPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "backupMinimumEnforcedRetentionDays": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "dailyBackupImmutable": {
+      "type": "boolean"
+     },
+     "manualBackupImmutable": {
+      "type": "boolean"
+     },
+     "monthlyBackupImmutable": {
+      "type": "boolean"
+     },
+     "weeklyBackupImmutable": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "BackupVault": {
+    "additionalProperties": false,
+    "properties": {
+     "backupRegion": {
+      "type": "string"
+     },
+     "backupRetentionPolicy": {
+      "$ref": "#/components/schemas/BackupRetentionPolicy"
+     },
+     "backupVaultType": {
+      "enum": [
+       "BACKUP_VAULT_TYPE_UNSPECIFIED",
+       "IN_REGION",
+       "CROSS_REGION"
+      ],
+      "type": "string"
+     },
+     "backupsCryptoKeyVersion": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "destinationBackupVault": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "encryptionState": {
+      "enum": [
+       "ENCRYPTION_STATE_UNSPECIFIED",
+       "ENCRYPTION_STATE_PENDING",
+       "ENCRYPTION_STATE_COMPLETED",
+       "ENCRYPTION_STATE_IN_PROGRESS",
+       "ENCRYPTION_STATE_FAILED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "kmsConfig": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "sourceBackupVault": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceRegion": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "READY",
+       "DELETING",
+       "ERROR",
+       "UPDATING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BlockDevice": {
+    "additionalProperties": false,
+    "properties": {
+     "hostGroups": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "identifier": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "osType": {
+      "enum": [
+       "OS_TYPE_UNSPECIFIED",
+       "LINUX",
+       "WINDOWS",
+       "ESXI"
+      ],
+      "type": "string"
+     },
+     "sizeGib": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CacheConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "cachePrePopulate": {
+      "$ref": "#/components/schemas/CachePrePopulate"
+     },
+     "cachePrePopulateState": {
+      "enum": [
+       "CACHE_PRE_POPULATE_STATE_UNSPECIFIED",
+       "NOT_NEEDED",
+       "IN_PROGRESS",
+       "COMPLETE",
+       "ERROR"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "cifsChangeNotifyEnabled": {
+      "type": "boolean"
+     },
+     "writebackEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "CacheParameters": {
+    "additionalProperties": false,
+    "properties": {
+     "cacheConfig": {
+      "$ref": "#/components/schemas/CacheConfig"
+     },
+     "cacheState": {
+      "enum": [
+       "CACHE_STATE_UNSPECIFIED",
+       "PENDING_CLUSTER_PEERING",
+       "PENDING_SVM_PEERING",
+       "PEERED",
+       "ERROR"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "command": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "enableGlobalFileLock": {
+      "type": "boolean"
+     },
+     "passphrase": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "peerClusterName": {
+      "type": "string"
+     },
+     "peerIpAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "peerSvmName": {
+      "type": "string"
+     },
+     "peerVolumeName": {
+      "type": "string"
+     },
+     "peeringCommandExpiryTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "stateDetails": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CachePrePopulate": {
+    "additionalProperties": false,
+    "properties": {
+     "excludePathList": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "pathList": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "recursion": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "CloneDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "sharedSpaceGib": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceSnapshot": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "sourceVolume": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "splitState": {
+      "enum": [
+       "SPLIT_STATE_UNSPECIFIED",
+       "SPLIT_STATE_NOT_SPLITTING",
+       "SPLIT_STATE_IN_PROGRESS",
+       "SPLIT_STATE_FAILED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DailySchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "hour": {
+      "format": "double",
+      "type": "number"
+     },
+     "minute": {
+      "format": "double",
+      "type": "number"
+     },
+     "snapshotsToKeep": {
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "ExportPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "rules": {
+      "items": {
+       "$ref": "#/components/schemas/SimpleExportPolicyRule"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "HourlySchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "minute": {
+      "format": "double",
+      "type": "number"
+     },
+     "snapshotsToKeep": {
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "HybridReplicationParameters": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterLocation": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "hybridReplicationType": {
+      "enum": [
+       "VOLUME_HYBRID_REPLICATION_TYPE_UNSPECIFIED",
+       "MIGRATION",
+       "CONTINUOUS_REPLICATION",
+       "ONPREM_REPLICATION",
+       "REVERSE_ONPREM_REPLICATION"
+      ],
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "largeVolumeConstituentCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "peerClusterName": {
+      "type": "string"
+     },
+     "peerIpAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "peerSvmName": {
+      "type": "string"
+     },
+     "peerVolumeName": {
+      "type": "string"
+     },
+     "replication": {
+      "type": "string"
+     },
+     "replicationSchedule": {
+      "enum": [
+       "HYBRID_REPLICATION_SCHEDULE_UNSPECIFIED",
+       "EVERY_10_MINUTES",
+       "HOURLY",
+       "DAILY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LargeCapacityConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "constituentCount": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ListBackupPoliciesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "backupPolicies": {
+      "items": {
+       "$ref": "#/components/schemas/BackupPolicy"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListBackupVaultsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "backupVaults": {
+      "items": {
+       "$ref": "#/components/schemas/BackupVault"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListSnapshotsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "snapshots": {
+      "items": {
+       "$ref": "#/components/schemas/Snapshot"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListStoragePoolsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "storagePools": {
+      "items": {
+       "$ref": "#/components/schemas/StoragePool"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListVolumesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "volumes": {
+      "items": {
+       "$ref": "#/components/schemas/Volume"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MonthlySchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "daysOfMonth": {
+      "type": "string"
+     },
+     "hour": {
+      "format": "double",
+      "type": "number"
+     },
+     "minute": {
+      "format": "double",
+      "type": "number"
+     },
+     "snapshotsToKeep": {
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "MountOption": {
+    "additionalProperties": false,
+    "properties": {
+     "export": {
+      "type": "string"
+     },
+     "exportFull": {
+      "type": "string"
+     },
+     "instructions": {
+      "type": "string"
+     },
+     "ipAddress": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "protocol": {
+      "enum": [
+       "PROTOCOLS_UNSPECIFIED",
+       "NFSV3",
+       "NFSV4",
+       "SMB",
+       "ISCSI",
+       "NVME"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "RestoreParameters": {
+    "additionalProperties": false,
+    "properties": {
+     "sourceBackup": {
+      "type": "string"
+     },
+     "sourceSnapshot": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SimpleExportPolicyRule": {
+    "additionalProperties": false,
+    "properties": {
+     "accessType": {
+      "enum": [
+       "ACCESS_TYPE_UNSPECIFIED",
+       "READ_ONLY",
+       "READ_WRITE",
+       "READ_NONE"
+      ],
+      "type": "string"
+     },
+     "allowedClients": {
+      "type": "string"
+     },
+     "anonUid": {
+      "format": "int64",
+      "type": "string"
+     },
+     "hasRootAccess": {
+      "type": "string"
+     },
+     "kerberos5ReadOnly": {
+      "type": "boolean"
+     },
+     "kerberos5ReadWrite": {
+      "type": "boolean"
+     },
+     "kerberos5iReadOnly": {
+      "type": "boolean"
+     },
+     "kerberos5iReadWrite": {
+      "type": "boolean"
+     },
+     "kerberos5pReadOnly": {
+      "type": "boolean"
+     },
+     "kerberos5pReadWrite": {
+      "type": "boolean"
+     },
+     "nfsv3": {
+      "type": "boolean"
+     },
+     "nfsv4": {
+      "type": "boolean"
+     },
+     "squashMode": {
+      "enum": [
+       "SQUASH_MODE_UNSPECIFIED",
+       "NO_ROOT_SQUASH",
+       "ROOT_SQUASH",
+       "ALL_SQUASH"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Snapshot": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "READY",
+       "CREATING",
+       "DELETING",
+       "UPDATING",
+       "DISABLED",
+       "ERROR"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "stateDetails": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "usedBytes": {
+      "format": "double",
+      "readOnly": true,
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "SnapshotPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "dailySchedule": {
+      "$ref": "#/components/schemas/DailySchedule"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "hourlySchedule": {
+      "$ref": "#/components/schemas/HourlySchedule"
+     },
+     "monthlySchedule": {
+      "$ref": "#/components/schemas/MonthlySchedule"
+     },
+     "weeklySchedule": {
+      "$ref": "#/components/schemas/WeeklySchedule"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StoragePool": {
+    "additionalProperties": false,
+    "properties": {
+     "activeDirectory": {
+      "type": "string"
+     },
+     "allowAutoTiering": {
+      "type": "boolean"
+     },
+     "availableThroughputMibps": {
+      "format": "double",
+      "readOnly": true,
+      "type": "number"
+     },
+     "capacityGib": {
+      "format": "int64",
+      "type": "string"
+     },
+     "coldTierSizeUsedGib": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "customPerformanceEnabled": {
+      "type": "boolean"
+     },
+     "description": {
+      "type": "string"
+     },
+     "enableHotTierAutoResize": {
+      "type": "boolean"
+     },
+     "encryptionType": {
+      "enum": [
+       "ENCRYPTION_TYPE_UNSPECIFIED",
+       "SERVICE_MANAGED",
+       "CLOUD_KMS"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "globalAccessAllowed": {
+      "type": "boolean"
+     },
+     "hotTierSizeGib": {
+      "format": "int64",
+      "type": "string"
+     },
+     "hotTierSizeUsedGib": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "kmsConfig": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "ldapEnabled": {
+      "type": "boolean"
+     },
+     "mode": {
+      "enum": [
+       "MODE_UNSPECIFIED",
+       "DEFAULT",
+       "ONTAP"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     },
+     "psaRange": {
+      "type": "string"
+     },
+     "qosType": {
+      "enum": [
+       "QOS_TYPE_UNSPECIFIED",
+       "AUTO",
+       "MANUAL"
+      ],
+      "type": "string"
+     },
+     "replicaZone": {
+      "type": "string"
+     },
+     "satisfiesPzi": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "satisfiesPzs": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "scaleType": {
+      "enum": [
+       "SCALE_TYPE_UNSPECIFIED",
+       "SCALE_TYPE_DEFAULT",
+       "SCALE_TYPE_SCALEOUT"
+      ],
+      "type": "string"
+     },
+     "serviceLevel": {
+      "enum": [
+       "SERVICE_LEVEL_UNSPECIFIED",
+       "PREMIUM",
+       "EXTREME",
+       "STANDARD",
+       "FLEX"
+      ],
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "READY",
+       "CREATING",
+       "DELETING",
+       "UPDATING",
+       "RESTORING",
+       "DISABLED",
+       "ERROR"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "stateDetails": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "totalIops": {
+      "format": "int64",
+      "type": "string"
+     },
+     "totalThroughputMibps": {
+      "format": "int64",
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "STORAGE_POOL_TYPE_UNSPECIFIED",
+       "FILE",
+       "UNIFIED"
+      ],
+      "type": "string"
+     },
+     "volumeCapacityGib": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "volumeCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "zone": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TieringPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "coolingThresholdDays": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "hotTierBypassModeEnabled": {
+      "type": "boolean"
+     },
+     "tierAction": {
+      "enum": [
+       "TIER_ACTION_UNSPECIFIED",
+       "ENABLED",
+       "PAUSED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Volume": {
+    "additionalProperties": false,
+    "properties": {
+     "activeDirectory": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "backupConfig": {
+      "$ref": "#/components/schemas/BackupConfig"
+     },
+     "blockDevices": {
+      "items": {
+       "$ref": "#/components/schemas/BlockDevice"
+      },
+      "type": "array"
+     },
+     "cacheParameters": {
+      "$ref": "#/components/schemas/CacheParameters"
+     },
+     "capacityGib": {
+      "format": "int64",
+      "type": "string"
+     },
+     "cloneDetails": {
+      "$ref": "#/components/schemas/CloneDetails"
+     },
+     "coldTierSizeGib": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "encryptionType": {
+      "enum": [
+       "ENCRYPTION_TYPE_UNSPECIFIED",
+       "SERVICE_MANAGED",
+       "CLOUD_KMS"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "exportPolicy": {
+      "$ref": "#/components/schemas/ExportPolicy"
+     },
+     "hasReplication": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "hotTierSizeUsedGib": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "hybridReplicationParameters": {
+      "$ref": "#/components/schemas/HybridReplicationParameters"
+     },
+     "kerberosEnabled": {
+      "type": "boolean"
+     },
+     "kmsConfig": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "largeCapacity": {
+      "type": "boolean"
+     },
+     "largeCapacityConfig": {
+      "$ref": "#/components/schemas/LargeCapacityConfig"
+     },
+     "ldapEnabled": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "mountOptions": {
+      "items": {
+       "$ref": "#/components/schemas/MountOption"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "multipleEndpoints": {
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "network": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "protocols": {
+      "items": {
+       "enum": [
+        "PROTOCOLS_UNSPECIFIED",
+        "NFSV3",
+        "NFSV4",
+        "SMB",
+        "ISCSI",
+        "NVME"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "psaRange": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "replicaZone": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "restoreParameters": {
+      "$ref": "#/components/schemas/RestoreParameters"
+     },
+     "restrictedActions": {
+      "items": {
+       "enum": [
+        "RESTRICTED_ACTION_UNSPECIFIED",
+        "DELETE"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "securityStyle": {
+      "enum": [
+       "SECURITY_STYLE_UNSPECIFIED",
+       "NTFS",
+       "UNIX"
+      ],
+      "type": "string"
+     },
+     "serviceLevel": {
+      "enum": [
+       "SERVICE_LEVEL_UNSPECIFIED",
+       "PREMIUM",
+       "EXTREME",
+       "STANDARD",
+       "FLEX"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "shareName": {
+      "type": "string"
+     },
+     "smbSettings": {
+      "items": {
+       "enum": [
+        "SMB_SETTINGS_UNSPECIFIED",
+        "ENCRYPT_DATA",
+        "BROWSABLE",
+        "CHANGE_NOTIFY",
+        "NON_BROWSABLE",
+        "OPLOCKS",
+        "SHOW_SNAPSHOT",
+        "SHOW_PREVIOUS_VERSIONS",
+        "ACCESS_BASED_ENUMERATION",
+        "CONTINUOUSLY_AVAILABLE"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "snapReserve": {
+      "format": "double",
+      "type": "number"
+     },
+     "snapshotDirectory": {
+      "type": "boolean"
+     },
+     "snapshotPolicy": {
+      "$ref": "#/components/schemas/SnapshotPolicy"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "READY",
+       "CREATING",
+       "DELETING",
+       "UPDATING",
+       "RESTORING",
+       "DISABLED",
+       "ERROR",
+       "PREPARING",
+       "READ_ONLY"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "stateDetails": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "storagePool": {
+      "type": "string"
+     },
+     "throughputMibps": {
+      "format": "double",
+      "type": "number"
+     },
+     "tieringPolicy": {
+      "$ref": "#/components/schemas/TieringPolicy"
+     },
+     "unixPermissions": {
+      "type": "string"
+     },
+     "usedGib": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "zone": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WeeklySchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "day": {
+      "type": "string"
+     },
+     "hour": {
+      "format": "double",
+      "type": "number"
+     },
+     "minute": {
+      "format": "double",
+      "type": "number"
+     },
+     "snapshotsToKeep": {
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official NetApp API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Storage pools, volumes, snapshots, backup vaults and backup policies are configuration metadata: no ONTAP system, NFS, SMB or block endpoint, capacity accounting or data exists, and every resource reports READY immediately. A volume must name an existing storage pool, and a pool cannot be deleted while a volume names it; derived volume fields such as serviceLevel and network are not populated. Active Directory, KMS, restore, backup, replication, cache, block device and cross-region vault settings are refused; delete a volume with snapshots only with force=true. Long-running operations complete synchronously.",
+  "title": "Google Cloud NetApp Volumes (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/backupPolicies": {
+   "get": {
+    "operationId": "netapp.projects.locations.backupPolicies.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListBackupPoliciesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupPolicies.list",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "post": {
+    "operationId": "netapp.projects.locations.backupPolicies.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "backupPolicyId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BackupPolicy"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupPolicies.create",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/backupPolicies/{backupPoliciesId}": {
+   "delete": {
+    "operationId": "netapp.projects.locations.backupPolicies.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupPolicies.delete",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "get": {
+    "operationId": "netapp.projects.locations.backupPolicies.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BackupPolicy"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupPolicies.get",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "patch": {
+    "operationId": "netapp.projects.locations.backupPolicies.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BackupPolicy"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupPolicies.patch",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/backupVaults": {
+   "get": {
+    "operationId": "netapp.projects.locations.backupVaults.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListBackupVaultsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupVaults.list",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "post": {
+    "operationId": "netapp.projects.locations.backupVaults.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "backupVaultId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BackupVault"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupVaults.create",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/backupVaults/{backupVaultsId}": {
+   "delete": {
+    "operationId": "netapp.projects.locations.backupVaults.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupVaultsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupVaults.delete",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "get": {
+    "operationId": "netapp.projects.locations.backupVaults.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupVaultsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BackupVault"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupVaults.get",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "patch": {
+    "operationId": "netapp.projects.locations.backupVaults.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupVaultsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BackupVault"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupVaults.patch",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "netapp.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "netapp.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/storagePools": {
+   "get": {
+    "operationId": "netapp.projects.locations.storagePools.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListStoragePoolsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.storagePools.list",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "post": {
+    "operationId": "netapp.projects.locations.storagePools.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "storagePoolId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/StoragePool"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.storagePools.create",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/storagePools/{storagePoolsId}": {
+   "delete": {
+    "operationId": "netapp.projects.locations.storagePools.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "storagePoolsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.storagePools.delete",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "get": {
+    "operationId": "netapp.projects.locations.storagePools.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "storagePoolsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/StoragePool"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.storagePools.get",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "patch": {
+    "operationId": "netapp.projects.locations.storagePools.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "storagePoolsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/StoragePool"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.storagePools.patch",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/volumes": {
+   "get": {
+    "operationId": "netapp.projects.locations.volumes.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListVolumesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.volumes.list",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "post": {
+    "operationId": "netapp.projects.locations.volumes.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "volumeId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Volume"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.volumes.create",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/volumes/{volumesId}": {
+   "delete": {
+    "operationId": "netapp.projects.locations.volumes.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "volumesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.volumes.delete",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "get": {
+    "operationId": "netapp.projects.locations.volumes.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "volumesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Volume"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.volumes.get",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "patch": {
+    "operationId": "netapp.projects.locations.volumes.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "volumesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Volume"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.volumes.patch",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/volumes/{volumesId}/snapshots": {
+   "get": {
+    "operationId": "netapp.projects.locations.volumes.snapshots.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "volumesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListSnapshotsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.volumes.snapshots.list",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "post": {
+    "operationId": "netapp.projects.locations.volumes.snapshots.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "volumesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "snapshotId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Snapshot"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.volumes.snapshots.create",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/volumes/{volumesId}/snapshots/{snapshotsId}": {
+   "delete": {
+    "operationId": "netapp.projects.locations.volumes.snapshots.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "volumesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "snapshotsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.volumes.snapshots.delete",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "get": {
+    "operationId": "netapp.projects.locations.volumes.snapshots.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "volumesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "snapshotsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Snapshot"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.volumes.snapshots.get",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   },
+   "patch": {
+    "operationId": "netapp.projects.locations.volumes.snapshots.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "volumesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "snapshotsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Snapshot"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.volumes.snapshots.patch",
+    "tags": [
+     "Google Cloud NetApp Volumes"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/netapp"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official NetApp API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Storage pools, volumes, snapshots, backup vaults and backup policies are configuration metadata: no ONTAP system, NFS, SMB or block endpoint, capacity accounting or data exists, and every resource reports READY immediately. A volume must name an existing storage pool, and a pool cannot be deleted while a volume names it; derived volume fields such as serviceLevel and network are not populated. Active Directory, KMS, restore, backup, replication, cache, block device and cross-region vault settings are refused; delete a volume with snapshots only with force=true. Long-running operations complete synchronously.",
+   "name": "Google Cloud NetApp Volumes"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/netapp.v1.json",
+  "sha256": "decb2b3a168a80fe404105415d795d9eb7c586813b121059e0ed3b17c97b4f19",
+  "license": "Apache-2.0",
+  "revision": "20260719"
+ }
+}

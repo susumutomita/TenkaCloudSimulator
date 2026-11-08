@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/apirouting"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 )
 
@@ -120,7 +119,7 @@ func TestWAFInvocationBlocksBeforeLambdaLookupAndRejectsUntrustedEvent(t *testin
 	}
 	t.Cleanup(func() { _ = functions.Close() })
 	gateway := &Gateway{WAF: store, Lambdas: functions}
-	event := apirouting.ProxyEventV1{Path: "/wp-json/batch/v1", HTTPMethod: "POST", Body: `{"requests":[{"body":{"category":"x' UNION SELECT id, marker, note FROM vault -- "}}]}`, RequestContext: apirouting.ProxyContextV1{APIID: apiID, Stage: stageName}}
+	event := wafProxyEvent{Path: "/wp-json/batch/v1", HTTPMethod: "POST", Body: `{"requests":[{"body":{"category":"x' UNION SELECT id, marker, note FROM vault -- "}}]}`, RequestContext: wafProxyContext{APIID: apiID, Stage: stageName}}
 	data, _ := json.Marshal(event)
 	response, e := gateway.invokeREST(ctx, wafTestRegion, route, event.Path, event.HTTPMethod, data)
 	if e != nil || response.StatusCode != 403 {

@@ -1,16 +1,37 @@
 {
-  "repository": "https://github.com/sivchari/kumo",
-  "commit": "ce37a8fb406ecb96b5619204f645c26302b651a5",
-  "license": "MIT",
-  "copyright": "Copyright (c) 2025 sivchari",
-  "source": "internal/service/iam/types.go",
-  "sourceSha256": "be19438a4f5be46e446a2965fddcba524723942ea7978bbf5ed24476756c14dc",
-  "selectedType": "Role",
-  "modifications": [
-    "Provider-local IAMRole name",
-    "Only implemented root-path role fields retained; unused attached-policy/tag DTO fields not copied",
-    "Provider-owned SQLite and trust validation; no Kumo memory backend or dependencies"
-  ],
-  "licenseSha256": "02f8d83277fea29291727639f45ddafcbcbf7cbc2d92ea1297eb84f0b8ee9fe2",
-  "status": "Native IAM Role wire fields adapted; only the documented and tested bounded role subset is implemented"
+  "provenanceSchemaVersion": 2,
+  "historicalAdaptation": {
+    "repository": "https://github.com/sivchari/kumo",
+    "commit": "ce37a8fb406ecb96b5619204f645c26302b651a5",
+    "license": "MIT",
+    "copyright": "Copyright (c) 2025 sivchari",
+    "source": "internal/service/iam/types.go",
+    "sourceSha256": "be19438a4f5be46e446a2965fddcba524723942ea7978bbf5ed24476756c14dc",
+    "selectedType": "Role",
+    "modifications": [
+      "Provider-local IAMRole name",
+      "Only implemented root-path role fields retained; unused attached-policy/tag DTO fields not copied",
+      "Provider-owned SQLite and trust validation; no Kumo memory backend or dependencies"
+    ],
+    "licenseSha256": "02f8d83277fea29291727639f45ddafcbcbf7cbc2d92ea1297eb84f0b8ee9fe2",
+    "status": "Native IAM Role wire fields adapted; only the documented and tested bounded role subset is implemented"
+  },
+  "historicalRuntimeFiles": {
+    "internal/aws/iam_roles.go": {
+      "sourceCommit": "1b34ed4e5fe7c9a314194c10bd2d0261ec7efb98",
+      "gitBlob": "00ba32537aab4fb0689d0a759a58ec9aa0b61fd5",
+      "sha256": "560d64b591201d0f7201e3358d8182409bdb987e69df5c93a1fcf05cd81f79db"
+    }
+  },
+  "replacement": {
+    "currentKumoCode": false,
+    "status": "accepted",
+    "reviewedReplacementIdentity": {
+      "sourceCommit": "9e86ff993296fc09f2d3c5adf113871b9e612711",
+      "receiptSha256": "4fbc8630c29dba9882d0baaf0feba1904ab85499252da7881dff8106d12f31cb"
+    },
+    "paths": [
+      "internal/aws/iam_roles.go"
+    ]
+  }
 }

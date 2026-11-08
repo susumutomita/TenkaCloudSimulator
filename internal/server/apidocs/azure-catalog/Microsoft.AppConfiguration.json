@@ -1,0 +1,921 @@
+{
+ "components": {
+  "schemas": {
+   "ConfigurationStore": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/TrackedResource"
+     }
+    ],
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/ResourceIdentity"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ConfigurationStoreProperties"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/Sku"
+     },
+     "systemData": {
+      "$ref": "#/components/schemas/systemData"
+     }
+    },
+    "required": [
+     "location",
+     "sku"
+    ],
+    "type": "object"
+   },
+   "ConfigurationStoreListResult": {
+    "properties": {
+     "nextLink": {
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/ConfigurationStore"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ConfigurationStoreProperties": {
+    "properties": {
+     "createMode": {
+      "enum": [
+       "Recover",
+       "Default"
+      ],
+      "type": "string",
+      "writeOnly": true
+     },
+     "creationDate": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "dataPlaneProxy": {
+      "$ref": "#/components/schemas/DataPlaneProxyProperties"
+     },
+     "defaultKeyValueRevisionRetentionPeriodInSeconds": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "disableLocalAuth": {
+      "type": "boolean"
+     },
+     "enablePurgeProtection": {
+      "type": "boolean"
+     },
+     "encryption": {
+      "$ref": "#/components/schemas/EncryptionProperties"
+     },
+     "endpoint": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "privateEndpointConnections": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateEndpointConnectionReference"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "provisioningState": {
+      "enum": [
+       "Creating",
+       "Updating",
+       "Deleting",
+       "Succeeded",
+       "Failed",
+       "Canceled"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "publicNetworkAccess": {
+      "enum": [
+       "Enabled",
+       "Disabled"
+      ],
+      "type": "string"
+     },
+     "softDeleteRetentionInDays": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ConfigurationStorePropertiesUpdateParameters": {
+    "properties": {
+     "dataPlaneProxy": {
+      "$ref": "#/components/schemas/DataPlaneProxyProperties"
+     },
+     "defaultKeyValueRevisionRetentionPeriodInSeconds": {
+      "format": "int64",
+      "type": "integer"
+     },
+     "disableLocalAuth": {
+      "type": "boolean"
+     },
+     "enablePurgeProtection": {
+      "type": "boolean"
+     },
+     "encryption": {
+      "$ref": "#/components/schemas/EncryptionProperties"
+     },
+     "publicNetworkAccess": {
+      "enum": [
+       "Enabled",
+       "Disabled"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConfigurationStoreUpdateParameters": {
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/ResourceIdentity"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ConfigurationStorePropertiesUpdateParameters"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/Sku"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "DataPlaneProxyProperties": {
+    "properties": {
+     "authenticationMode": {
+      "enum": [
+       "Local",
+       "Pass-through"
+      ],
+      "type": "string"
+     },
+     "privateLinkDelegation": {
+      "enum": [
+       "Enabled",
+       "Disabled"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionProperties": {
+    "properties": {
+     "keyVaultProperties": {
+      "$ref": "#/components/schemas/KeyVaultProperties"
+     }
+    },
+    "type": "object"
+   },
+   "KeyVaultProperties": {
+    "properties": {
+     "identityClientId": {
+      "type": "string"
+     },
+     "keyIdentifier": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpoint": {
+    "properties": {
+     "id": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointConnectionProperties": {
+    "properties": {
+     "privateEndpoint": {
+      "$ref": "#/components/schemas/PrivateEndpoint"
+     },
+     "privateLinkServiceConnectionState": {
+      "$ref": "#/components/schemas/PrivateLinkServiceConnectionState"
+     },
+     "provisioningState": {
+      "enum": [
+       "Creating",
+       "Updating",
+       "Deleting",
+       "Succeeded",
+       "Failed",
+       "Canceled"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "required": [
+     "privateLinkServiceConnectionState"
+    ],
+    "type": "object"
+   },
+   "PrivateEndpointConnectionReference": {
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/PrivateEndpointConnectionProperties"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateLinkServiceConnectionState": {
+    "properties": {
+     "actionsRequired": {
+      "enum": [
+       "None",
+       "Recreate"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "Pending",
+       "Approved",
+       "Rejected",
+       "Disconnected"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Resource": {
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceIdentity": {
+    "properties": {
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tenantId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "None",
+       "SystemAssigned",
+       "UserAssigned",
+       "SystemAssigned, UserAssigned"
+      ],
+      "type": "string"
+     },
+     "userAssignedIdentities": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/UserIdentity"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "Sku": {
+    "properties": {
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "TrackedResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "location": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "location"
+    ],
+    "type": "object"
+   },
+   "UserIdentity": {
+    "properties": {
+     "clientId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "systemData": {
+    "properties": {
+     "createdAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "createdByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "lastModifiedBy": {
+      "type": "string"
+     },
+     "lastModifiedByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     }
+    },
+    "readOnly": true,
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Microsoft.AppConfiguration api-version 2024-06-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Store metadata only: no key-value data plane, endpoint, access key or connection string exists. Deletion is immediate and permanent; createMode Recover, customer-managed keys, key listing and regeneration are refused or not implemented (HTTP 501).",
+  "title": "App Configuration (Microsoft.AppConfiguration, simulator catalog)",
+  "version": "2024-06-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/subscriptions/{subscriptionId}/providers/Microsoft.AppConfiguration/configurationStores": {
+   "get": {
+    "operationId": "ConfigurationStores_List",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2024-06-01",
+       "enum": [
+        "2024-06-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "$skipToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConfigurationStoreListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ConfigurationStores_List",
+    "tags": [
+     "App Configuration"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppConfiguration/configurationStores": {
+   "get": {
+    "operationId": "ConfigurationStores_ListByResourceGroup",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2024-06-01",
+       "enum": [
+        "2024-06-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "$skipToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConfigurationStoreListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ConfigurationStores_ListByResourceGroup",
+    "tags": [
+     "App Configuration"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppConfiguration/configurationStores/{configStoreName}": {
+   "delete": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "ConfigurationStores_Delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configStoreName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2024-06-01",
+       "enum": [
+        "2024-06-01"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ConfigurationStores_Delete",
+    "tags": [
+     "App Configuration"
+    ]
+   },
+   "get": {
+    "operationId": "ConfigurationStores_Get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configStoreName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2024-06-01",
+       "enum": [
+        "2024-06-01"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConfigurationStore"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ConfigurationStores_Get",
+    "tags": [
+     "App Configuration"
+    ]
+   },
+   "patch": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "ConfigurationStores_Update",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configStoreName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2024-06-01",
+       "enum": [
+        "2024-06-01"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConfigurationStoreUpdateParameters"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConfigurationStore"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConfigurationStore"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ConfigurationStores_Update",
+    "tags": [
+     "App Configuration"
+    ]
+   },
+   "put": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "ConfigurationStores_Create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configStoreName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2024-06-01",
+       "enum": [
+        "2024-06-01"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConfigurationStore"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConfigurationStore"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConfigurationStore"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ConfigurationStores_Create",
+    "tags": [
+     "App Configuration"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/azure-arm"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Microsoft.AppConfiguration api-version 2024-06-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Store metadata only: no key-value data plane, endpoint, access key or connection string exists. Deletion is immediate and permanent; createMode Recover, customer-managed keys, key listing and regeneration are refused or not implemented (HTTP 501).",
+   "name": "App Configuration"
+  }
+ ],
+ "x-simulator-source": {
+  "repository": "github.com/Azure/azure-rest-api-specs",
+  "commit": "8254fa29b6360b48084554122a7c49f6c4237d84",
+  "license": "MIT",
+  "files": [
+   {
+    "path": "specification/appconfiguration/resource-manager/Microsoft.AppConfiguration/AppConfiguration/stable/2024-06-01/appconfiguration.json",
+    "sha256": "4f9d67b92dc8bc6af2ab3493866bd4cfa2e07f0d5af5ff0a7fd05c36e8dabb29"
+   },
+   {
+    "path": "specification/common-types/resource-management/v2/types.json",
+    "sha256": "ccb3b6327aad7d108bdaffca3eefcd15737032ec655ca3f933300e828047d723"
+   }
+  ]
+ }
+}

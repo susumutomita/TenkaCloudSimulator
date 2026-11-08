@@ -1,0 +1,126 @@
+{
+ "namespace": "Microsoft.AppConfiguration",
+ "client": "appconfiguration",
+ "steps": [
+  {
+   "call": "configuration_stores.begin_create",
+   "args": {
+    "resource_group_name": "${rg}",
+    "config_store_name": "fixture-config",
+    "config_store_creation_parameters": {
+     "location": "eastus",
+     "sku": {
+      "name": "Standard"
+     }
+    }
+   },
+   "expect": {
+    "provisioning_state": "Succeeded",
+    "endpoint": null
+   }
+  },
+  {
+   "call": "configuration_stores.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "config_store_name": "fixture-config"
+   },
+   "expect": {
+    "sku.name": "Standard"
+   }
+  },
+  {
+   "call": "configuration_stores.begin_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "config_store_name": "fixture-config",
+    "config_store_update_parameters": {
+     "tags": {
+      "team": "a"
+     },
+     "properties": {
+      "disableLocalAuth": true
+     }
+    }
+   },
+   "expect": {
+    "disable_local_auth": true
+   }
+  },
+  {
+   "call": "configuration_stores.list_by_resource_group",
+   "args": {
+    "resource_group_name": "${rg}"
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "configuration_stores.list",
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "configuration_stores.begin_create",
+   "args": {
+    "resource_group_name": "${rg}",
+    "config_store_name": "fixture-config2",
+    "config_store_creation_parameters": {
+     "location": "eastus",
+     "sku": {
+      "name": "Gold"
+     }
+    }
+   },
+   "error": "InvalidRequestContent",
+   "status": 400
+  }
+ ],
+ "probe": {
+  "call": "configuration_stores.list"
+ },
+ "unbound": {
+  "call": "configuration_stores.list_keys",
+  "args": {
+   "resource_group_name": "${rg}",
+   "config_store_name": "fixture-config"
+  }
+ },
+ "isolation": [
+  {
+   "call": "configuration_stores.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "configuration_stores.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "config_store_name": "fixture-config"
+   },
+   "expect": {
+    "tags.team": "a"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "configuration_stores.begin_delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "config_store_name": "fixture-config"
+   }
+  },
+  {
+   "call": "configuration_stores.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ]
+}

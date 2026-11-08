@@ -1,0 +1,149 @@
+{
+ "client": "workspaces-thin-client",
+ "inject_host_prefix": false,
+ "steps": [
+  {
+   "op": "create_environment",
+   "args": {
+    "name": "lobby",
+    "desktopArn": "arn:aws:workspaces-web:us-east-1:000000000000:portal/0f1e2d3c-aaaa-bbbb-cccc-111122223333",
+    "tags": {
+     "team": "a"
+    },
+    "maintenanceWindow": {
+     "type": "SYSTEM"
+    }
+   },
+   "save": {
+    "env": "environment.id",
+    "envArn": "environment.arn"
+   },
+   "expect": {
+    "environment.desktopType": "workspaces-web"
+   }
+  },
+  {
+   "op": "get_environment",
+   "args": {
+    "id": "${env}"
+   },
+   "expect": {
+    "environment.registeredDevicesCount": 0,
+    "environment.softwareSetComplianceStatus": "NO_REGISTERED_DEVICES"
+   }
+  },
+  {
+   "op": "list_environments",
+   "args": {},
+   "expect": {
+    "environments#count": 1
+   }
+  },
+  {
+   "op": "update_environment",
+   "args": {
+    "id": "${env}",
+    "name": "lobby-2",
+    "desktopArn": "arn:aws:appstream:us-east-1:000000000000:stack/kiosk"
+   },
+   "expect": {
+    "environment.desktopType": "appstream",
+    "environment.name": "lobby-2"
+   }
+  },
+  {
+   "op": "update_environment",
+   "args": {
+    "id": "${env}",
+    "desiredSoftwareSetId": "12"
+   },
+   "error": "ResourceNotFoundException",
+   "status": 404
+  },
+  {
+   "op": "create_environment",
+   "args": {
+    "desktopArn": "arn:aws:s3:::fixture-bucket/desktop"
+   },
+   "error": "ValidationException"
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "resourceArn": "${envArn}",
+    "tags": {
+     "stage": "dev"
+    }
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "resourceArn": "${envArn}",
+    "tagKeys": [
+     "stage"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "resourceArn": "${envArn}"
+   },
+   "expect": {
+    "tags": {
+     "team": "a"
+    }
+   }
+  },
+  {
+   "op": "list_devices",
+   "args": {},
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "get_environment",
+   "args": {
+    "id": "abcdefghi"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_environments",
+   "args": {},
+   "expect": {
+    "environments#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_environment",
+   "args": {
+    "id": "${env}"
+   },
+   "expect": {
+    "environment.name": "lobby-2",
+    "environment.desktopType": "appstream"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_environment",
+   "args": {
+    "id": "${env}"
+   }
+  },
+  {
+   "op": "list_environments",
+   "args": {},
+   "expect": {
+    "environments#count": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,290 @@
+{
+ "client": "gamelift",
+ "steps": [
+  {
+   "op": "create_alias",
+   "args": {
+    "Name": "retired",
+    "Description": "old build",
+    "RoutingStrategy": {
+     "Type": "TERMINAL",
+     "Message": "This version has ended."
+    },
+    "Tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ]
+   },
+   "save": {
+    "alias": "Alias.AliasId",
+    "aliasArn": "Alias.AliasArn"
+   }
+  },
+  {
+   "op": "describe_alias",
+   "args": {
+    "AliasId": "${alias}"
+   },
+   "expect": {
+    "Alias.RoutingStrategy.Type": "TERMINAL",
+    "Alias.AliasArn": "${aliasArn}"
+   }
+  },
+  {
+   "op": "list_aliases",
+   "args": {
+    "Name": "retired"
+   },
+   "expect": {
+    "Aliases#count": 1
+   }
+  },
+  {
+   "op": "update_alias",
+   "args": {
+    "AliasId": "${aliasArn}",
+    "Description": "retired build"
+   },
+   "expect": {
+    "Alias.Description": "retired build"
+   }
+  },
+  {
+   "op": "create_alias",
+   "args": {
+    "Name": "live",
+    "RoutingStrategy": {
+     "Type": "SIMPLE",
+     "FleetId": "fleet-1234"
+    }
+   },
+   "error": "InvalidRequestException"
+  },
+  {
+   "op": "create_location",
+   "args": {
+    "LocationName": "custom-home-lab",
+    "Tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ]
+   },
+   "save": {
+    "location": "Location.LocationArn"
+   }
+  },
+  {
+   "op": "list_locations",
+   "args": {},
+   "expect": {
+    "Locations[0].LocationName": "custom-home-lab"
+   }
+  },
+  {
+   "op": "create_game_session_queue",
+   "args": {
+    "Name": "lobby",
+    "TimeoutInSeconds": 300,
+    "PlayerLatencyPolicies": [
+     {
+      "MaximumIndividualPlayerLatencyMilliseconds": 100,
+      "PolicyDurationSeconds": 30
+     }
+    ]
+   },
+   "save": {
+    "queue": "GameSessionQueue.GameSessionQueueArn"
+   }
+  },
+  {
+   "op": "describe_game_session_queues",
+   "args": {
+    "Names": [
+     "lobby"
+    ]
+   },
+   "expect": {
+    "GameSessionQueues[0].TimeoutInSeconds": 300,
+    "GameSessionQueues[0].PlayerLatencyPolicies#count": 1
+   }
+  },
+  {
+   "op": "update_game_session_queue",
+   "args": {
+    "Name": "${queue}",
+    "TimeoutInSeconds": 120
+   },
+   "expect": {
+    "GameSessionQueue.TimeoutInSeconds": 120
+   }
+  },
+  {
+   "op": "create_game_session_queue",
+   "args": {
+    "Name": "placed",
+    "Destinations": [
+     {
+      "DestinationArn": "arn:aws:gamelift:us-east-1:000000000000:fleet/fleet-1234"
+     }
+    ]
+   },
+   "error": "InvalidRequestException"
+  },
+  {
+   "op": "create_matchmaking_rule_set",
+   "args": {
+    "Name": "duel",
+    "RuleSetBody": "{\"ruleLanguageVersion\": \"1.0\", \"teams\": [{\"name\": \"players\", \"minPlayers\": 2, \"maxPlayers\": 2}]}"
+   },
+   "save": {
+    "ruleSet": "RuleSet.RuleSetArn"
+   }
+  },
+  {
+   "op": "describe_matchmaking_rule_sets",
+   "args": {
+    "Names": [
+     "duel"
+    ]
+   },
+   "expect": {
+    "RuleSets#count": 1,
+    "RuleSets[0].RuleSetName": "duel"
+   }
+  },
+  {
+   "op": "create_matchmaking_rule_set",
+   "args": {
+    "Name": "broken",
+    "RuleSetBody": "{\"teams\": []}"
+   },
+   "error": "InvalidRequestException"
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "ResourceARN": "${aliasArn}",
+    "Tags": [
+     {
+      "Key": "stage",
+      "Value": "dev"
+     }
+    ]
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "ResourceARN": "${aliasArn}",
+    "TagKeys": [
+     "stage"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "ResourceARN": "${aliasArn}"
+   },
+   "expect": {
+    "Tags#count": 1,
+    "Tags[0].Key": "team"
+   }
+  },
+  {
+   "op": "create_build",
+   "args": {},
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "describe_alias",
+   "args": {
+    "AliasId": "alias-00000000000000000000000000000000"
+   },
+   "error": "NotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_aliases",
+   "args": {},
+   "expect": {
+    "Aliases#count": 0
+   }
+  },
+  {
+   "op": "list_locations",
+   "args": {},
+   "expect": {
+    "Locations#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "describe_game_session_queues",
+   "args": {
+    "Names": [
+     "${queue}"
+    ]
+   },
+   "expect": {
+    "GameSessionQueues[0].TimeoutInSeconds": 120
+   }
+  },
+  {
+   "op": "describe_alias",
+   "args": {
+    "AliasId": "${alias}"
+   },
+   "expect": {
+    "Alias.Description": "retired build"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_alias",
+   "args": {
+    "AliasId": "${alias}"
+   }
+  },
+  {
+   "op": "delete_location",
+   "args": {
+    "LocationName": "${location}"
+   }
+  },
+  {
+   "op": "delete_game_session_queue",
+   "args": {
+    "Name": "lobby"
+   }
+  },
+  {
+   "op": "delete_matchmaking_rule_set",
+   "args": {
+    "Name": "duel"
+   }
+  },
+  {
+   "op": "list_aliases",
+   "args": {},
+   "expect": {
+    "Aliases#count": 0
+   }
+  },
+  {
+   "op": "describe_game_session_queues",
+   "args": {},
+   "expect": {
+    "GameSessionQueues#count": 0
+   }
+  }
+ ]
+}

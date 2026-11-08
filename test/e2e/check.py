@@ -71,6 +71,44 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_sts_native_sdk_original_hello_world(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('sts_sdk.py'))],check=True,timeout=180)
+ def test_sns_native_admission_persistence_and_isolation(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name("sns_admission.py"))], check=True, timeout=180)
+
+ def test_landing_topology_html_fallback_keyboard_and_public_navigation(self):
+  from landing_topology import run_landing_topology
+  # The fixture owns fresh dummy credentials for readiness only. The helper
+  # receives no token, browser authentication, native API state or user keys.
+  with running(authenticated=True) as (endpoint,_):
+   result=run_landing_topology(endpoint,REPORTS/'landing-topology')
+  self.assertEqual(result['cases'],8)
+  self.assertEqual(result['strictAxeStates'],6)
+ def test_sakura_reference_real_examples_and_scalar_send(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('sakura_reference_live.py')), '--root', str(Path(__file__).resolve().parents[2]), '--binary', str(BINARY), '--reports', str(REPORTS/'sakura-reference-live'), '--browser'], check=True, timeout=180)
+ def test_sakura_disk_console_real_native_state_and_scope(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('sakura_disks_console.py'))], check=True, timeout=180)
+ def test_sakura_native_reference_schema_and_preservation_controls(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('test_sakura_openapi.py'))], check=True)
+ def test_sakura_opt_in_native_two_cli_authority_and_persistence(self):
+  # Native stdlib HTTP, not SDK verification; failure is mandatory and unskipped.
+  subprocess.run([sys.executable, str(Path(__file__).with_name('sakura_cli.py')), '--binary', str(BINARY), '--report', str(REPORTS/'sakura-cli.json')], check=True, timeout=180)
+ def test_browser_actual_clipboard_login_and_safe_errors(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('login_paste.py'))],check=True)
+ def test_browser_explicit_token_file_and_strict_authentication(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('login_token_file.py'))],check=True)
+ def test_console_language_and_provider_catalog(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('console_language.py'))],check=True)
+ def test_s3_provider_prefix_preserves_literal_keys(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('provider_paths.py'))],check=True)
+ def test_azure_container_properties_native_typed_targets(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('azure_container_properties.py'))], check=True, timeout=180)
+ def test_azure_live_properties_head_and_scope_lifecycle(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('azure_live_properties.py'))], check=True, timeout=180)
+ def test_crossprovider_console_two_cli_state_and_authority(self):
+  # Run the actual standalone acceptance as a required case, never a source-only
+  # or optional/skip check. It must import the real browser/audit dependencies.
+  subprocess.run([sys.executable, str(Path(__file__).with_name('crossprovider_console.py'))], check=True, timeout=300)
  def test_lambda_execution_role_sdk_bridge_two_teams(self):
   with running(authenticated=True) as (endpoint,operator),running(authenticated=True) as (other,other_operator):
    def client(service,url,token):
@@ -261,12 +299,55 @@ def handler(event,context):
     f=client('cloudformation',endpoint,token);c=client('lambda',endpoint,token)
     result=c.invoke(FunctionName='cfn-inline-app',Payload=b'null');self.assertNotIn('FunctionError',result);self.assertEqual(json.loads(result['Payload'].read()),{'answer':42,'value':'team-one','event':None})
     f.delete_stack(StackName='inline-practice');self.assertEqual(c.list_functions()['Functions'],[])
+ def test_console_account_sign_out_revokes_browser_session_only(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('console_logout.py'))],check=True)
+
+ def test_openapi_parameter_detector_controls(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_openapi_parameters.py'))],check=True)
+ def test_openapi_json10_shared_schema_controls(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_openapi_json10.py'))],check=True,timeout=30)
+ def test_scalar_s3_docs_live_response_reader(self):
+  from scalar_s3_docs import run_scalar_s3_docs
+  run_scalar_s3_docs()
+ def test_kms_native_sdk_served_examples_two_teams_and_restart(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms.py'))],check=True)
+ def test_kms_console_actual_native_state_identity_and_logout(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms_console.py'))],check=True)
+ def test_kms_aliases_native_sdk_scopes_crypto_and_restart(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms_aliases.py'))],check=True)
+ def test_kms_aliases_console_actual_native_lifecycle(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms_aliases_console.py'))],check=True)
+ def test_kms_aliases_served_examples_both_native_routes(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms_alias_docs.py'))],check=True)
+ def test_kms_japanese_uses_canonical_crypto_operations(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('kms_locale.py'))],check=True,timeout=120)
+ def test_service_japanese_uses_canonical_native_operations(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('service_locale.py'))],check=True,timeout=180)
+ def test_official_storage_sdk_harness_boundaries(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_crossprovider_official_storage.py'))],check=True,timeout=30)
+ def test_official_storage_sdks_two_teams_restart_and_conditions(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('crossprovider_official_storage.py')),'--binary',str(BINARY),'--provider','both'],check=True,timeout=300)
+ def test_cloudformation_rest_native_sdk_lifecycle(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_rest.py'))],check=True)
+ def test_sqs_native_sdk_two_teams_restart_retention_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('sqs.py'))],check=True)
  def test_apigateway_rest_sdk_permissions_and_two_teams(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway.py'))],check=True)
  def test_apigateway_console_and_actual_scalar_requests(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('apigateway_console.py'))],check=True)
  def test_wafv2_native_console_concurrency_and_state(self):
-  subprocess.run([sys.executable,str(Path(__file__).with_name('wafv2_console.py'))],check=True)
+  subprocess.run([sys.executable,str(Path(__file__).with_name('wafv2_console.py'))],check=True,timeout=180)
+ def test_iam_managed_console_native_policy_versions_and_attachments(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed_console.py'))],check=True,timeout=240)
+ def test_iam_managed_served_reference_templates_execute(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed_reference.py'))],check=True,timeout=180)
+ def test_api_reference_cloud_sections_and_live_native_results(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('api_cloud_sections_contract.py')),'--self-test'],check=True)
+  subprocess.run([sys.executable,str(Path(__file__).with_name('api_cloud_sections.py'))],check=True,timeout=180)
+ def test_iam_managed_policy_reaches_saved_lambda_role_sdk(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed_lambda.py'))],check=True,timeout=180)
+ def test_iam_managed_policy_sdk_isolation_restart_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_managed.py'))],check=True)
  def test_native_iam_query_and_console_to_lambda(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('native_iam.py'))],check=True)
  def test_iam_role_console_to_lambda_deploy_without_host_setup(self):
@@ -322,23 +403,44 @@ def handler(event,context):
    with page.expect_download() as download:submit(page)
    self.assertEqual(Path(download.value.path()).read_bytes(),b'hello from UI')
    page.get_by_role('link',name='General purpose buckets',exact=True).click();page.get_by_role('radio',name='Select ui-practice',exact=True).check();page.get_by_role('button',name='Delete',exact=True).click();page.get_by_label('Type ui-practice to confirm').fill('ui-practice');submit(page);expect(page.get_by_role('dialog')).to_contain_text('BucketNotEmpty');page.get_by_role('button',name='Cancel',exact=True).click()
-   page.get_by_role('link',name='Identity policies',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page);page.get_by_role('button',name='Choose identity',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page);expect(page.get_by_role('button',name='Choose identity',exact=True)).to_have_text('reader')
-   page.get_by_role('button',name='Create bucket',exact=True).first.click();page.get_by_label('Bucket name',exact=True).fill('denied-bucket');submit(page);expect(page.locator('[id^=form-error-]')).to_contain_text('implicitDeny');page.get_by_role('button',name='Cancel',exact=True).click();self.assertNotIn('denied-bucket',[b['Name'] for b in c.list_buckets()['Buckets']])
+   page.get_by_role('link',name='Identity policies',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page)
+   page.get_by_role('button',name='Account menu',exact=True).click();page.get_by_role('menuitem',name='Choose identity',exact=True).click();page.get_by_label('Principal name',exact=True).fill('reader');submit(page);expect(page.get_by_role('button',name='Account menu',exact=True)).to_contain_text('reader')
+   buckets_before=sorted(b['Name'] for b in c.list_buckets()['Buckets'])
+   page.get_by_role('button',name='Create bucket',exact=True).first.click();page.get_by_label('Bucket name',exact=True).fill('denied-bucket')
+   with page.expect_response(lambda response:response.request.method=='PUT' and response.url==endpoint+'/denied-bucket') as denied_create:submit(page)
+   self.assertEqual(denied_create.value.status,403);self.assertEqual(denied_create.value.request.headers.get('x-simulator-principal'),'reader');expect(page.locator('[id^=form-error-]')).to_contain_text('implicitDeny');page.get_by_role('button',name='Cancel',exact=True).click()
+   self.assertNotIn('denied-bucket',[b['Name'] for b in c.list_buckets()['Buckets']]);self.assertEqual(sorted(b['Name'] for b in c.list_buckets()['Buckets']),buckets_before);self.assertEqual(c.get_object(Bucket='ui-practice',Key='docs/hello.txt')['Body'].read(),b'hello from UI');self.assertEqual(c.get_object(Bucket='ui-practice',Key='from-sdk.txt')['Body'].read(),b'shared')
    page.get_by_role('searchbox',name='Find resources',exact=True).fill('no-matches');expect(page.get_by_role('heading',name='No matching resources')).to_be_visible();page.get_by_role('searchbox',name='Find resources',exact=True).fill('')
    page.set_viewport_size({'width':390,'height':844});expect(page.get_by_role('button',name='Create bucket',exact=True).first).to_be_visible();page.screenshot(path=str(REPORTS/'console-mobile.png'),full_page=True);assert_reflow(page)
    self.assertEqual(page.evaluate('window.__policyViolations'),[]);page.set_viewport_size({'width':1440,'height':1000});page.goto(endpoint+'/_simulator/docs/');expect(page.get_by_role('heading',name='TenkaCloud Simulator API',exact=True)).to_be_visible(timeout=15000)
    expect(page.get_by_role('button',name='Ask AI',exact=True)).to_have_count(0)
-   # Scalar executes the real S3 ListBuckets operation. The response contains console-created state.
-   page.get_by_role('button',name='Test Request (get /)',exact=True).click();page.wait_for_timeout(400)
+   # Cloud groups now start at Introduction. Expand the actual AWS/S3 sidebar
+   # before selecting the operation; do not replace Scalar Send with a fetch.
+   def select_s3_operation(title):
+    sidebar=page.get_by_role('complementary',name='Sidebar for TenkaCloud Simulator API',exact=True)
+    for group_name in ['AWS','S3 basic object storage']:
+     group=sidebar.get_by_role('button',name=re.compile(r'^(Open|Close) Group - '+re.escape(group_name)+r'$'))
+     expect(group).to_be_visible()
+     if group.get_attribute('aria-expanded')=='false':group.click()
+    sidebar.get_by_role('link',name=re.compile('^'+re.escape(title))).click()
+   select_s3_operation('List all buckets')
+   page.get_by_role('button',name='Test Request (get /)',exact=True).click()
    # Use the request client Send button, not a parallel fetch injected by the test.
    send=page.get_by_role('button',name=re.compile('^Send.*get request'))
-   expect(send).to_be_visible();send.click();expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
+   expect(send).to_be_visible()
+   with page.expect_response(lambda response:response.request.method=='GET' and response.url.rstrip('/')==endpoint) as listed:
+    send.click()
+   self.assertEqual(listed.value.status,200);self.assertIn('ListAllMyBucketsResult',listed.value.text());self.assertIn('ui-practice',listed.value.text())
+   expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
    page.get_by_role('button',name='Close Client',exact=True).click()
    c.create_bucket(Bucket='practice-bucket')
-   page.get_by_role('link',name=re.compile('^Upload or replace an object')).click()
+   select_s3_operation('Upload or replace an object')
    page.get_by_role('button',name='Test Request (put /{bucket}/{key})',exact=True).click()
    put_send=page.get_by_role('button',name=re.compile('^Send.*put request'))
-   expect(put_send).to_be_visible();put_send.click()
+   expect(put_send).to_be_visible()
+   with page.expect_response(lambda response:response.request.method=='PUT' and response.url==endpoint+'/practice-bucket/hello.txt') as uploaded:
+    put_send.click()
+   self.assertEqual(uploaded.value.status,200)
    # The prefilled OpenAPI text example goes through the actual Scalar editor/client.
    deadline=time.monotonic()+8
    while True:
@@ -350,10 +452,13 @@ def handler(event,context):
    self.assertEqual(body,b'Hello from the API reference.')
    page.screenshot(path=str(REPORTS/'api-reference-put.png'),full_page=False,animations='disabled')
    page.get_by_role('button',name='Close Client',exact=True).click()
-   page.get_by_role('link',name=re.compile('^List all buckets')).click()
+   select_s3_operation('List all buckets')
    page.get_by_role('button',name='Test Request (get /)',exact=True).click()
    send=page.get_by_role('button',name=re.compile('^Send.*get request'))
-   send.click();expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
+   with page.expect_response(lambda response:response.request.method=='GET' and response.url.rstrip('/')==endpoint) as listed:
+    send.click()
+   self.assertEqual(listed.value.status,200);self.assertIn('ui-practice',listed.value.text());self.assertIn('practice-bucket',listed.value.text())
+   expect(page.get_by_text('ui-practice',exact=False).last).to_be_visible(timeout=10000)
    page.screenshot(path=str(REPORTS/'api-reference.png'),full_page=False,animations='disabled')
    self.assertEqual(page.evaluate('window.__policyViolations'),[]);self.assertEqual(errors,[]);self.assertEqual(outside,[],'Runtime attempted external network requests');browser.close()
  def test_console_literal_dot_keys_do_not_mutate_neighbors(self):
@@ -404,7 +509,7 @@ def handler(event,context):
     else:outside.append(r.request.url);r.abort()
    page.route('**/*',route)
    page.goto(endpoint+'/_simulator/console/');expect(page.get_by_role('heading',name='Open your local sandbox',exact=True)).to_be_visible();page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click()
-   expect(page.get_by_role('button',name='Choose identity',exact=True)).to_have_count(0)
+   page.get_by_role('button',name='Account menu',exact=True).click();expect(page.get_by_role('menuitem',name='Sign out',exact=True)).to_be_visible();expect(page.get_by_role('menuitem',name='Choose identity',exact=True)).to_have_count(0);page.keyboard.press('Escape')
    page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='Systems Manager',exact=True).click();page.get_by_role('link',name=outputs['ParameterName'],exact=True).click();expect(page.get_by_label('Value',exact=True)).to_have_value('TC{'+seed+'}');expect(page.get_by_role('tab',name='Overview',exact=True)).to_be_visible()
    page.get_by_role('button',name='Edit parameter',exact=True).click();expect(page.get_by_role('button',name='Type String',exact=True)).to_be_disabled();page.get_by_label('Value',exact=True).fill('unauthorized change');page.get_by_role('button',name='Save changes',exact=True).click();expect(page.locator('[id^=form-error-]')).to_contain_text('403');self.assertEqual(client('ssm',token).get_parameter(Name=outputs['ParameterName'])['Parameter']['Value'],'TC{'+seed+'}')
    page.get_by_role('button',name='Cancel',exact=True).click();page.set_viewport_size({'width':390,'height':844});assert_reflow(page);self.assertEqual(errors,[]);self.assertEqual(outside,[])
@@ -477,4 +582,73 @@ def handler(event,context):
    page.get_by_role('button',name='Functions',exact=True).click();page.get_by_role('radio',name='Select ui-lambda',exact=True).check();page.get_by_role('button',name='Delete',exact=True).click();page.get_by_label('Type ui-lambda to confirm',exact=True).fill('ui-lambda');page.get_by_role('dialog').get_by_role('button',name='Delete',exact=True).click();expect(page.get_by_role('heading',name='No functions yet',exact=True)).to_be_visible();self.assertEqual(c.list_functions()['Functions'],[]);self.assertEqual(len(other.list_functions()['Functions']),1);other.delete_function(FunctionName='ui-lambda');self.assertEqual(errors,[]);self.assertEqual(outside,[]);browser.close()
  def test_refuses_non_loopback_by_default(self):
   result=subprocess.run([str(BINARY),'--listen','0.0.0.0:0'],capture_output=True,text=True);self.assertNotEqual(result.returncode,0);self.assertIn('--allow-remote',result.stderr)
+
+ def test_sqs_served_static_templates_execute_against_native_state(self):
+  from sqs_docs import run
+  run()
+
+ def test_sqs_console_native_state_scope_and_receipt_custody(self):
+  from sqs_console import run
+  run()
+
+ def test_cloudwatch_logs_native_sdk_restart_and_two_teams(self):
+  from cloudwatch_logs import run
+  run()
+
+ def test_cloudwatch_logs_console_and_native_sdk_share_state(self):
+  from cloudwatch_logs_console import run
+  run()
+
+ def test_secrets_manager_native_two_teams_restart_and_redaction(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager.py'))],check=True)
+
+ def test_secrets_manager_version_metadata_native_sdk_and_cursor_scope(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_versions.py'))],check=True,timeout=180)
+
+ def test_secrets_manager_version_metadata_console_scope_and_paging(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secret_versions_console.py'))],check=True,timeout=180)
+
+ def test_secrets_manager_console_reveal_context_and_hide(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager_console.py'))],check=True)
+
+ def test_secrets_manager_served_openapi_examples(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager_docs.py'))],check=True)
+
+ def test_dynamodb_native_sdk_two_clis_identity_restart_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('dynamodb.py'))],check=True,timeout=120)
+
+ def test_dynamodb_served_seven_templates_native_shared_state(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('dynamodb_docs.py'))],check=True,timeout=120)
+ def test_sqs_console_locale_preserves_drafts_and_native_receipts(self):
+  from sqs_locale import run_sqs_locale
+  run_sqs_locale()
+
+ def test_dynamodb_console_native_state_keys_context_locale_and_cancellation(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('dynamodb_console.py'))],check=True,timeout=240)
+
+ def test_cloudformation_original_crypto_template_native_sdk_lifecycle(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('cloudformation_crypto.py'))], check=True, timeout=180)
+
+ def test_aws_catalog_native_sdk_two_teams_policy_restart_and_cleanup(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog.py'))], check=True, timeout=240)
+
+ def test_aws_catalog_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_console.py'))], check=True, timeout=300)
+
+ def test_aws_catalog_fixture_lifecycles_cover_every_bound_operation(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_fixtures.py'))], check=True, timeout=900)
+
+ def test_gcp_catalog_discovery_client_two_teams_owner_restart_and_cleanup(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_fixtures.py'))], check=True, timeout=600)
+
+ def test_gcp_catalog_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_console.py'))], check=True, timeout=300)
+
+ def test_azure_catalog_official_sdks_two_teams_owner_restart_and_cleanup(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('azure_catalog_fixtures.py'))], check=True, timeout=600)
+
+ def test_azure_catalog_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('azure_catalog_console.py'))], check=True, timeout=300)
+
+
 if __name__=='__main__':unittest.main(verbosity=2)

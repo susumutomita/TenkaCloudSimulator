@@ -1,0 +1,28 @@
+{
+ "client": "fsx",
+ "steps": [
+  {"op": "create_file_system", "args": {"FileSystemType": "LUSTRE", "StorageCapacity": 1200, "SubnetIds": ["subnet-0a1b2c3d4e5f60718"], "LustreConfiguration": {"DeploymentType": "PERSISTENT_2", "PerUnitStorageThroughput": 125}, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"fs": "FileSystem.FileSystemId", "fsArn": "FileSystem.ResourceARN"}, "expect": {"FileSystem.Lifecycle": "CREATING", "FileSystem.OwnerId": "000000000000", "FileSystem.StorageType": "SSD"}},
+  {"op": "describe_file_systems", "args": {"FileSystemIds": ["${fs}"]}, "expect": {"FileSystems#count": 1, "FileSystems[0].LustreConfiguration.DeploymentType": "PERSISTENT_2", "FileSystems[0].Tags": [{"Key": "team", "Value": "a"}]}},
+  {"op": "create_file_cache", "args": {"FileCacheType": "LUSTRE", "FileCacheTypeVersion": "2.12", "StorageCapacity": 1200, "SubnetIds": ["subnet-0a1b2c3d4e5f60718"], "LustreConfiguration": {"PerUnitStorageThroughput": 1000, "DeploymentType": "CACHE_1", "MetadataConfiguration": {"StorageCapacity": 2400}}}, "save": {"cache": "FileCache.FileCacheId", "cacheArn": "FileCache.ResourceARN"}, "expect": {"FileCache.Lifecycle": "CREATING"}},
+  {"op": "describe_file_caches", "args": {}, "expect": {"FileCaches#count": 1, "FileCaches[0].FileCacheId": "${cache}", "FileCaches[0].LustreConfiguration.DeploymentType": "CACHE_1"}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${cacheArn}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${fsArn}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${cacheArn}"}, "expect": {"Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "create_file_system", "args": {"FileSystemType": "WINDOWS", "StorageCapacity": 32, "SubnetIds": ["subnet-0a1b2c3d4e5f60718"]}, "error": "BadRequest"},
+  {"op": "create_backup", "args": {"FileSystemId": "${fs}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_file_systems", "args": {"FileSystemIds": ["fs-0123456789abcdef0"]}, "error": "FileSystemNotFound"}
+ ],
+ "isolation": [
+  {"op": "describe_file_systems", "args": {}, "expect": {"FileSystems#count": 0}},
+  {"op": "describe_file_caches", "args": {}, "expect": {"FileCaches#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_file_systems", "args": {}, "expect": {"FileSystems[0].FileSystemId": "${fs}", "FileSystems[0].StorageCapacity": 1200}}
+ ],
+ "cleanup": [
+  {"op": "delete_file_system", "args": {"FileSystemId": "${fs}", "LustreConfiguration": {"SkipFinalBackup": true}}, "expect": {"FileSystemId": "${fs}", "Lifecycle": "DELETING"}},
+  {"op": "delete_file_cache", "args": {"FileCacheId": "${cache}"}, "expect": {"Lifecycle": "DELETING"}},
+  {"op": "describe_file_systems", "args": {}, "expect": {"FileSystems#count": 0}},
+  {"op": "describe_file_caches", "args": {}, "expect": {"FileCaches#count": 0}}
+ ]
+}

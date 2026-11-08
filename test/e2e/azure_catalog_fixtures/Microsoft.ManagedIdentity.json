@@ -1,0 +1,125 @@
+{
+ "namespace": "Microsoft.ManagedIdentity",
+ "client": "msi",
+ "steps": [
+  {
+   "call": "user_assigned_identities.create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "resource_name": "fixture-identity",
+    "parameters": {
+     "location": "eastus",
+     "tags": {
+      "team": "a"
+     }
+    }
+   },
+   "save": {
+    "identity": "id",
+    "principal": "principal_id"
+   },
+   "expect": {
+    "tenant_id": "${tenant}"
+   }
+  },
+  {
+   "call": "user_assigned_identities.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "resource_name": "fixture-identity"
+   },
+   "expect": {
+    "principal_id": "${principal}"
+   }
+  },
+  {
+   "call": "user_assigned_identities.update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "resource_name": "fixture-identity",
+    "parameters": {
+     "tags": {
+      "team": "b"
+     }
+    }
+   },
+   "expect": {
+    "tags.team": "b",
+    "principal_id": "${principal}"
+   }
+  },
+  {
+   "call": "user_assigned_identities.list_by_resource_group",
+   "args": {
+    "resource_group_name": "${rg}"
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "user_assigned_identities.list_by_subscription",
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "user_assigned_identities.update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "resource_name": "fixture-identity",
+    "parameters": {
+     "location": "westeurope"
+    }
+   },
+   "error": "PropertyChangeNotAllowed",
+   "status": 400
+  }
+ ],
+ "probe": {
+  "call": "user_assigned_identities.list_by_subscription"
+ },
+ "unbound": {
+  "call": "federated_identity_credentials.list",
+  "args": {
+   "resource_group_name": "${rg}",
+   "resource_name": "fixture-identity"
+  }
+ },
+ "isolation": [
+  {
+   "call": "user_assigned_identities.list_by_subscription",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "user_assigned_identities.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "resource_name": "fixture-identity"
+   },
+   "expect": {
+    "principal_id": "${principal}"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "user_assigned_identities.delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "resource_name": "fixture-identity"
+   }
+  },
+  {
+   "call": "user_assigned_identities.list_by_subscription",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ],
+ "probeVersion": "2018-11-30"
+}

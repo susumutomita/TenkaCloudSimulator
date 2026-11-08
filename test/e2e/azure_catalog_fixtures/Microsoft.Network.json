@@ -1,0 +1,382 @@
+{
+ "namespace": "Microsoft.Network",
+ "client": "network",
+ "steps": [
+  {
+   "call": "virtual_networks.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "virtual_network_name": "fixture-vnet",
+    "parameters": {
+     "location": "eastus",
+     "properties": {
+      "addressSpace": {
+       "addressPrefixes": [
+        "10.10.0.0/16"
+       ]
+      }
+     }
+    }
+   },
+   "save": {
+    "vnet": "id"
+   },
+   "expect": {
+    "provisioning_state": "Succeeded"
+   }
+  },
+  {
+   "call": "virtual_networks.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "virtual_network_name": "fixture-vnet"
+   },
+   "expect": {
+    "address_space.address_prefixes": [
+     "10.10.0.0/16"
+    ]
+   }
+  },
+  {
+   "call": "virtual_networks.update_tags",
+   "args": {
+    "resource_group_name": "${rg}",
+    "virtual_network_name": "fixture-vnet",
+    "parameters": {
+     "tags": {
+      "team": "a"
+     }
+    }
+   },
+   "expect": {
+    "tags.team": "a"
+   }
+  },
+  {
+   "call": "virtual_networks.list",
+   "args": {
+    "resource_group_name": "${rg}"
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "virtual_networks.list_all",
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "network_security_groups.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "network_security_group_name": "fixture-nsg",
+    "parameters": {
+     "location": "eastus",
+     "properties": {
+      "securityRules": [
+       {
+        "name": "allow-https",
+        "properties": {
+         "protocol": "Tcp",
+         "access": "Allow",
+         "direction": "Inbound",
+         "priority": 200,
+         "sourceAddressPrefix": "*",
+         "sourcePortRange": "*",
+         "destinationAddressPrefix": "*",
+         "destinationPortRange": "443"
+        }
+       }
+      ]
+     }
+    }
+   },
+   "save": {
+    "nsg": "id"
+   },
+   "expect": {
+    "security_rules[0].name": "allow-https"
+   }
+  },
+  {
+   "call": "network_security_groups.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "network_security_group_name": "fixture-nsg"
+   },
+   "expect": {
+    "security_rules[0].priority": 200
+   }
+  },
+  {
+   "call": "network_security_groups.update_tags",
+   "args": {
+    "resource_group_name": "${rg}",
+    "network_security_group_name": "fixture-nsg",
+    "parameters": {
+     "tags": {
+      "team": "a"
+     }
+    }
+   },
+   "expect": {
+    "tags.team": "a"
+   }
+  },
+  {
+   "call": "network_security_groups.list",
+   "args": {
+    "resource_group_name": "${rg}"
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "network_security_groups.list_all",
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "subnets.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "virtual_network_name": "fixture-vnet",
+    "subnet_name": "default",
+    "subnet_parameters": {
+     "properties": {
+      "addressPrefix": "10.10.1.0/24",
+      "networkSecurityGroup": {
+       "id": "${nsg}"
+      }
+     }
+    }
+   },
+   "save": {
+    "subnet": "id"
+   },
+   "expect": {
+    "network_security_group.id": "${nsg}"
+   }
+  },
+  {
+   "call": "subnets.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "virtual_network_name": "fixture-vnet",
+    "subnet_name": "default"
+   },
+   "expect": {
+    "address_prefix": "10.10.1.0/24"
+   }
+  },
+  {
+   "call": "subnets.list",
+   "args": {
+    "resource_group_name": "${rg}",
+    "virtual_network_name": "fixture-vnet"
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "subnets.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "virtual_network_name": "fixture-vnet",
+    "subnet_name": "overlap",
+    "subnet_parameters": {
+     "properties": {
+      "addressPrefix": "10.10.1.128/25"
+     }
+    }
+   },
+   "error": "NetcfgSubnetRangesOverlap",
+   "status": 400
+  },
+  {
+   "call": "subnets.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "virtual_network_name": "fixture-vnet",
+    "subnet_name": "outside",
+    "subnet_parameters": {
+     "properties": {
+      "addressPrefix": "192.168.0.0/24"
+     }
+    }
+   },
+   "error": "NetcfgSubnetRangeOutsideVnet",
+   "status": 400
+  },
+  {
+   "call": "network_security_groups.begin_delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "network_security_group_name": "fixture-nsg"
+   },
+   "error": "InUseNetworkSecurityGroupCannotBeDeleted",
+   "status": 409
+  },
+  {
+   "call": "public_ip_addresses.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "public_ip_address_name": "fixture-ip",
+    "parameters": {
+     "location": "eastus",
+     "sku": {
+      "name": "Standard"
+     },
+     "properties": {
+      "publicIPAllocationMethod": "Static"
+     }
+    }
+   },
+   "expect": {
+    "public_ip_allocation_method": "Static",
+    "ip_address": null
+   }
+  },
+  {
+   "call": "public_ip_addresses.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "public_ip_address_name": "fixture-ip"
+   },
+   "expect": {
+    "sku.name": "Standard"
+   }
+  },
+  {
+   "call": "public_ip_addresses.update_tags",
+   "args": {
+    "resource_group_name": "${rg}",
+    "public_ip_address_name": "fixture-ip",
+    "parameters": {
+     "tags": {
+      "team": "a"
+     }
+    }
+   },
+   "expect": {
+    "tags.team": "a"
+   }
+  },
+  {
+   "call": "public_ip_addresses.list",
+   "args": {
+    "resource_group_name": "${rg}"
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "public_ip_addresses.list_all",
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "public_ip_addresses.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "public_ip_address_name": "dynamic-ip",
+    "parameters": {
+     "location": "eastus",
+     "sku": {
+      "name": "Standard"
+     },
+     "properties": {
+      "publicIPAllocationMethod": "Dynamic"
+     }
+    }
+   },
+   "error": "StandardSkuPublicIPAddressCannotBeDynamic",
+   "status": 400
+  }
+ ],
+ "probe": {
+  "call": "virtual_networks.list",
+  "args": {
+   "resource_group_name": "${rg}",
+   "api_version": "2015-01-01"
+  }
+ },
+ "unbound": {
+  "call": "virtual_networks.list_usage",
+  "args": {
+   "resource_group_name": "${rg}",
+   "virtual_network_name": "fixture-vnet"
+  }
+ },
+ "isolation": [
+  {
+   "call": "virtual_networks.list_all",
+   "expect": {
+    "#count": 0
+   }
+  },
+  {
+   "call": "public_ip_addresses.list_all",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "subnets.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "virtual_network_name": "fixture-vnet",
+    "subnet_name": "default"
+   },
+   "expect": {
+    "network_security_group.id": "${nsg}"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "subnets.begin_delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "virtual_network_name": "fixture-vnet",
+    "subnet_name": "default"
+   }
+  },
+  {
+   "call": "network_security_groups.begin_delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "network_security_group_name": "fixture-nsg"
+   }
+  },
+  {
+   "call": "public_ip_addresses.begin_delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "public_ip_address_name": "fixture-ip"
+   }
+  },
+  {
+   "call": "virtual_networks.begin_delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "virtual_network_name": "fixture-vnet"
+   }
+  },
+  {
+   "call": "virtual_networks.list_all",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ]
+}

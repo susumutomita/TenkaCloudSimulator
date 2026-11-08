@@ -1,0 +1,31 @@
+{
+ "client": "proton",
+ "steps": [
+  {"op": "create_environment_template", "args": {"name": "fixture-env", "displayName": "Fixture environment", "tags": [{"key": "team", "value": "a"}]}, "save": {"env": "environmentTemplate.arn"}, "expect": {"environmentTemplate.arn": "arn:aws:proton:us-east-1:000000000000:environment-template/fixture-env"}},
+  {"op": "get_environment_template", "args": {"name": "fixture-env"}, "expect": {"environmentTemplate.displayName": "Fixture environment"}},
+  {"op": "list_environment_templates", "args": {}, "expect": {"templates#count": 1}},
+  {"op": "update_environment_template", "args": {"name": "fixture-env", "description": "Shared VPC"}, "expect": {"environmentTemplate.description": "Shared VPC"}},
+  {"op": "create_service_template", "args": {"name": "fixture-svc", "pipelineProvisioning": "CUSTOMER_MANAGED"}},
+  {"op": "get_service_template", "args": {"name": "fixture-svc"}, "expect": {"serviceTemplate.pipelineProvisioning": "CUSTOMER_MANAGED"}},
+  {"op": "list_service_templates", "args": {}, "expect": {"templates#count": 1}},
+  {"op": "update_service_template", "args": {"name": "fixture-svc", "displayName": "Fixture service"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${env}", "tags": [{"key": "k", "value": "v"}]}},
+  {"op": "untag_resource", "args": {"resourceArn": "${env}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${env}"}, "expect": {"tags": [{"key": "k", "value": "v"}]}},
+  {"op": "create_environment_template_version", "args": {"templateName": "fixture-env", "source": {"s3": {"bucket": "templates", "key": "env.tar.gz"}}}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_service_template", "args": {"name": "missing"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_environment_templates", "args": {}, "expect": {"templates#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_environment_template", "args": {"name": "fixture-env"}, "expect": {"environmentTemplate.description": "Shared VPC"}},
+  {"op": "get_service_template", "args": {"name": "fixture-svc"}, "expect": {"serviceTemplate.displayName": "Fixture service"}}
+ ],
+ "cleanup": [
+  {"op": "delete_environment_template", "args": {"name": "fixture-env"}, "expect": {"environmentTemplate.name": "fixture-env"}},
+  {"op": "delete_service_template", "args": {"name": "fixture-svc"}},
+  {"op": "list_environment_templates", "args": {}, "expect": {"templates#count": 0}},
+  {"op": "list_service_templates", "args": {}, "expect": {"templates#count": 0}}
+ ]
+}

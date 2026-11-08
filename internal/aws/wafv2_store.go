@@ -311,21 +311,76 @@ func (s *WAFStore) Disassociate(ctx context.Context, region, resource string) er
 	}
 	return tx.Commit()
 }
-func (s *WAFStore) ForResource(ctx context.Context, region, resource string) (*WAFWebACL, error) {
+
+// wafForResource reads association and ACL bytes through the same transaction.
+func wafForResource(ctx context.Context, q wafQuery, region, resource string) (*WAFWebACL, error) {
 	if _, _, e := wafStageParts(region, resource); e != nil {
 		return nil, e
 	}
 	var name, id string
-	e := s.db.QueryRowContext(ctx, "SELECT a.id,a.name FROM aws_wafv2_associations b JOIN aws_wafv2_acls a ON a.region=b.region AND a.id=b.acl_id WHERE b.region=? AND b.resource_arn=?", region, resource).Scan(&id, &name)
+	e := q.QueryRowContext(ctx, "SELECT a.id,a.name FROM aws_wafv2_associations b JOIN aws_wafv2_acls a ON a.region=b.region AND a.id=b.acl_id WHERE b.region=? AND b.resource_arn=?", region, resource).Scan(&id, &name)
 	if errors.Is(e, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if e != nil {
 		return nil, e
 	}
-	acl, _, e := s.Get(ctx, region, id, name)
-	return &acl, e
+	acl, _, e := wafRead(ctx, q, region, id, name)
+	if e != nil {
+		return nil, e
+	}
+	return &acl, nil
 }
+
+func (s *WAFStore) ForResource(ctx context.Context, region, resource string) (*WAFWebACL, error) {
+	tx, e := s.db.BeginTx(ctx, nil)
+	if e != nil {
+		return nil, e
+	}
+	defer tx.Rollback()
+	acl, e := wafForResource(ctx, tx, region, resource)
+	if e != nil {
+		return nil, e
+	}
+	return acl, tx.Commit()
+}
+
+// resourceOperation binds the checked ACL and the returned/deleted association
+// to one immediate transaction. A concurrent reassociation cannot borrow an
+// authorization decision made for another Web ACL.
+func (s *WAFStore) resourceOperation(ctx context.Context, region, resource string, remove bool, authorize func(string, string) bool) (*WAFWebACL, error) {
+	tx, e := s.db.BeginTx(ctx, nil)
+	if e != nil {
+		return nil, e
+	}
+	defer tx.Rollback()
+	acl, e := wafForResource(ctx, tx, region, resource)
+	if e != nil {
+		return nil, e
+	}
+	arn, operation := "*", "wafv2:GetWebACLForResource"
+	if acl != nil {
+		arn = acl.ARN
+	}
+	if remove {
+		operation = "wafv2:DisassociateWebACL"
+	}
+	if authorize == nil || !authorize(operation, arn) {
+		return nil, ssmFailure{"AccessDeniedException", "WAF action is not allowed."}
+	}
+	if remove {
+		if !authorize("apigateway:SetWebACL", resource) {
+			return nil, ssmFailure{"AccessDeniedException", "API Gateway stage association is not allowed."}
+		}
+		if e = DisassociateWebACLTx(ctx, tx, region, resource); e != nil {
+			return nil, e
+		}
+	} else if !authorize("wafv2:GetWebACL", arn) {
+		return nil, ssmFailure{"AccessDeniedException", "Web ACL read is not allowed."}
+	}
+	return acl, tx.Commit()
+}
+
 func (s *WAFStore) Resources(ctx context.Context, region, arn string) ([]string, error) {
 	id, name, e := wafACLParts(region, arn)
 	if e != nil {

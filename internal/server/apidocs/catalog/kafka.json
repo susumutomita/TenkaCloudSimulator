@@ -1,0 +1,1156 @@
+{
+ "components": {
+  "schemas": {
+   "BrokerLogs": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchLogs": {
+      "$ref": "#/components/schemas/CloudWatchLogs"
+     },
+     "firehose": {
+      "$ref": "#/components/schemas/Firehose"
+     },
+     "s3": {
+      "$ref": "#/components/schemas/S3"
+     }
+    },
+    "type": "object"
+   },
+   "BrokerNodeGroupInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "brokerAZDistribution": {
+      "enum": [
+       "DEFAULT"
+      ],
+      "type": "string"
+     },
+     "clientSubnets": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "connectivityInfo": {
+      "$ref": "#/components/schemas/ConnectivityInfo"
+     },
+     "instanceType": {
+      "maxLength": 32,
+      "minLength": 5,
+      "type": "string"
+     },
+     "securityGroups": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "storageInfo": {
+      "$ref": "#/components/schemas/StorageInfo"
+     },
+     "zoneIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "clientSubnets",
+     "instanceType"
+    ],
+    "type": "object"
+   },
+   "BrokerSoftwareInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "configurationArn": {
+      "type": "string"
+     },
+     "configurationRevision": {
+      "type": "integer"
+     },
+     "kafkaVersion": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ClientAuthentication": {
+    "additionalProperties": false,
+    "properties": {
+     "sasl": {
+      "$ref": "#/components/schemas/Sasl"
+     },
+     "tls": {
+      "$ref": "#/components/schemas/Tls"
+     },
+     "unauthenticated": {
+      "$ref": "#/components/schemas/Unauthenticated"
+     }
+    },
+    "type": "object"
+   },
+   "CloudWatchLogs": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "logGroup": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "ClusterInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "activeOperationArn": {
+      "type": "string"
+     },
+     "brokerNodeGroupInfo": {
+      "$ref": "#/components/schemas/BrokerNodeGroupInfo"
+     },
+     "clientAuthentication": {
+      "$ref": "#/components/schemas/ClientAuthentication"
+     },
+     "clusterArn": {
+      "type": "string"
+     },
+     "clusterName": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "currentBrokerSoftwareInfo": {
+      "$ref": "#/components/schemas/BrokerSoftwareInfo"
+     },
+     "currentVersion": {
+      "type": "string"
+     },
+     "customerActionStatus": {
+      "enum": [
+       "CRITICAL_ACTION_REQUIRED",
+       "ACTION_RECOMMENDED",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "encryptionInfo": {
+      "$ref": "#/components/schemas/EncryptionInfo"
+     },
+     "enhancedMonitoring": {
+      "enum": [
+       "DEFAULT",
+       "PER_BROKER",
+       "PER_TOPIC_PER_BROKER",
+       "PER_TOPIC_PER_PARTITION"
+      ],
+      "type": "string"
+     },
+     "loggingInfo": {
+      "$ref": "#/components/schemas/LoggingInfo"
+     },
+     "numberOfBrokerNodes": {
+      "type": "integer"
+     },
+     "openMonitoring": {
+      "$ref": "#/components/schemas/OpenMonitoring"
+     },
+     "rebalancing": {
+      "$ref": "#/components/schemas/Rebalancing"
+     },
+     "state": {
+      "enum": [
+       "ACTIVE",
+       "CREATING",
+       "DELETING",
+       "FAILED",
+       "HEALING",
+       "MAINTENANCE",
+       "REBOOTING_BROKER",
+       "UPDATING"
+      ],
+      "type": "string"
+     },
+     "stateInfo": {
+      "$ref": "#/components/schemas/StateInfo"
+     },
+     "storageMode": {
+      "enum": [
+       "LOCAL",
+       "TIERED"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "zookeeperConnectString": {
+      "type": "string"
+     },
+     "zookeeperConnectStringTls": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConfigurationInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "revision": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "revision",
+     "arn"
+    ],
+    "type": "object"
+   },
+   "ConnectivityInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "publicAccess": {
+      "$ref": "#/components/schemas/PublicAccess"
+     },
+     "vpcConnectivity": {
+      "$ref": "#/components/schemas/VpcConnectivity"
+     }
+    },
+    "type": "object"
+   },
+   "EBSStorageInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "provisionedThroughput": {
+      "$ref": "#/components/schemas/ProvisionedThroughput"
+     },
+     "volumeSize": {
+      "maximum": 16384,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionAtRest": {
+    "additionalProperties": false,
+    "properties": {
+     "dataVolumeKMSKeyId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "dataVolumeKMSKeyId"
+    ],
+    "type": "object"
+   },
+   "EncryptionInTransit": {
+    "additionalProperties": false,
+    "properties": {
+     "clientBroker": {
+      "enum": [
+       "TLS",
+       "TLS_PLAINTEXT",
+       "PLAINTEXT"
+      ],
+      "type": "string"
+     },
+     "inCluster": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionAtRest": {
+      "$ref": "#/components/schemas/EncryptionAtRest"
+     },
+     "encryptionInTransit": {
+      "$ref": "#/components/schemas/EncryptionInTransit"
+     }
+    },
+    "type": "object"
+   },
+   "Firehose": {
+    "additionalProperties": false,
+    "properties": {
+     "deliveryStream": {
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "Iam": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "JmxExporter": {
+    "additionalProperties": false,
+    "properties": {
+     "enabledInBroker": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabledInBroker"
+    ],
+    "type": "object"
+   },
+   "JmxExporterInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "enabledInBroker": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabledInBroker"
+    ],
+    "type": "object"
+   },
+   "LoggingInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "brokerLogs": {
+      "$ref": "#/components/schemas/BrokerLogs"
+     }
+    },
+    "required": [
+     "brokerLogs"
+    ],
+    "type": "object"
+   },
+   "NodeExporter": {
+    "additionalProperties": false,
+    "properties": {
+     "enabledInBroker": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabledInBroker"
+    ],
+    "type": "object"
+   },
+   "NodeExporterInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "enabledInBroker": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabledInBroker"
+    ],
+    "type": "object"
+   },
+   "OpenMonitoring": {
+    "additionalProperties": false,
+    "properties": {
+     "prometheus": {
+      "$ref": "#/components/schemas/Prometheus"
+     }
+    },
+    "required": [
+     "prometheus"
+    ],
+    "type": "object"
+   },
+   "OpenMonitoringInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "prometheus": {
+      "$ref": "#/components/schemas/PrometheusInfo"
+     }
+    },
+    "required": [
+     "prometheus"
+    ],
+    "type": "object"
+   },
+   "Prometheus": {
+    "additionalProperties": false,
+    "properties": {
+     "jmxExporter": {
+      "$ref": "#/components/schemas/JmxExporter"
+     },
+     "nodeExporter": {
+      "$ref": "#/components/schemas/NodeExporter"
+     }
+    },
+    "type": "object"
+   },
+   "PrometheusInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "jmxExporter": {
+      "$ref": "#/components/schemas/JmxExporterInfo"
+     },
+     "nodeExporter": {
+      "$ref": "#/components/schemas/NodeExporterInfo"
+     }
+    },
+    "type": "object"
+   },
+   "ProvisionedThroughput": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "volumeThroughput": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "PublicAccess": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Rebalancing": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "PAUSED",
+       "ACTIVE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "prefix": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "Sasl": {
+    "additionalProperties": false,
+    "properties": {
+     "iam": {
+      "$ref": "#/components/schemas/Iam"
+     },
+     "scram": {
+      "$ref": "#/components/schemas/Scram"
+     }
+    },
+    "type": "object"
+   },
+   "Scram": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "StateInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StorageInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "ebsStorageInfo": {
+      "$ref": "#/components/schemas/EBSStorageInfo"
+     }
+    },
+    "type": "object"
+   },
+   "Tls": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateAuthorityArnList": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Unauthenticated": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "VpcConnectivity": {
+    "additionalProperties": false,
+    "properties": {
+     "clientAuthentication": {
+      "$ref": "#/components/schemas/VpcConnectivityClientAuthentication"
+     }
+    },
+    "type": "object"
+   },
+   "VpcConnectivityClientAuthentication": {
+    "additionalProperties": false,
+    "properties": {
+     "sasl": {
+      "$ref": "#/components/schemas/VpcConnectivitySasl"
+     },
+     "tls": {
+      "$ref": "#/components/schemas/VpcConnectivityTls"
+     }
+    },
+    "type": "object"
+   },
+   "VpcConnectivityIam": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "VpcConnectivitySasl": {
+    "additionalProperties": false,
+    "properties": {
+     "iam": {
+      "$ref": "#/components/schemas/VpcConnectivityIam"
+     },
+     "scram": {
+      "$ref": "#/components/schemas/VpcConnectivityScram"
+     }
+    },
+    "type": "object"
+   },
+   "VpcConnectivityScram": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "VpcConnectivityTls": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Managed Streaming for Kafka API (2018-11-14). Every other official operation returns HTTP 501 UnknownOperationException. Provisioned clusters are configuration records that stay CREATING: no broker, ZooKeeper or KRaft controller, topic, bootstrap endpoint or network interface exists, no record is produced or consumed, and GetBootstrapBrokers, topic, replicator, VPC connection and SCRAM secret APIs return UnknownOperationException with HTTP 501. The V2 and serverless APIs, configurations (whose server properties need revision storage), ConfigurationInfo, cluster policies and every cluster update operation are not implemented. CurrentVersion is the constant K1 because no update is possible, and DeleteCluster refuses any other version. NumberOfBrokerNodes must be a multiple of the number of client subnets; subnets, security groups, certificate authorities, KMS keys and log destinations are stored without being checked. ListClusters refuses ClusterNameFilter.",
+  "title": "Amazon Managed Streaming for Apache Kafka (simulator catalog)",
+  "version": "2018-11-14"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/clusters": {
+   "get": {
+    "operationId": "kafkaListClusters",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clusterNameFilter",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "clusterInfoList": {
+           "items": {
+            "$ref": "#/components/schemas/ClusterInfo"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListClusters",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   },
+   "post": {
+    "operationId": "kafkaCreateCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "brokerNodeGroupInfo": {
+          "$ref": "#/components/schemas/BrokerNodeGroupInfo"
+         },
+         "clientAuthentication": {
+          "$ref": "#/components/schemas/ClientAuthentication"
+         },
+         "clusterName": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "configurationInfo": {
+          "$ref": "#/components/schemas/ConfigurationInfo"
+         },
+         "encryptionInfo": {
+          "$ref": "#/components/schemas/EncryptionInfo"
+         },
+         "enhancedMonitoring": {
+          "enum": [
+           "DEFAULT",
+           "PER_BROKER",
+           "PER_TOPIC_PER_BROKER",
+           "PER_TOPIC_PER_PARTITION"
+          ],
+          "type": "string"
+         },
+         "kafkaVersion": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "loggingInfo": {
+          "$ref": "#/components/schemas/LoggingInfo"
+         },
+         "numberOfBrokerNodes": {
+          "maximum": 15,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "openMonitoring": {
+          "$ref": "#/components/schemas/OpenMonitoringInfo"
+         },
+         "rebalancing": {
+          "$ref": "#/components/schemas/Rebalancing"
+         },
+         "storageMode": {
+          "enum": [
+           "LOCAL",
+           "TIERED"
+          ],
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "brokerNodeGroupInfo",
+         "clusterName",
+         "kafkaVersion",
+         "numberOfBrokerNodes"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "clusterArn": {
+           "type": "string"
+          },
+          "clusterName": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "ACTIVE",
+            "CREATING",
+            "DELETING",
+            "FAILED",
+            "HEALING",
+            "MAINTENANCE",
+            "REBOOTING_BROKER",
+            "UPDATING"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateCluster",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   }
+  },
+  "/v1/clusters/{clusterArn}": {
+   "delete": {
+    "operationId": "kafkaDeleteCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clusterArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "currentVersion",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "clusterArn": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "ACTIVE",
+            "CREATING",
+            "DELETING",
+            "FAILED",
+            "HEALING",
+            "MAINTENANCE",
+            "REBOOTING_BROKER",
+            "UPDATING"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteCluster",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   },
+   "get": {
+    "operationId": "kafkaDescribeCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "clusterArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "clusterInfo": {
+           "$ref": "#/components/schemas/ClusterInfo"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeCluster",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   }
+  },
+  "/v1/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "kafkaUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   },
+   "get": {
+    "operationId": "kafkaListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   },
+   "post": {
+    "operationId": "kafkaTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Managed Streaming for Kafka API (2018-11-14). Every other official operation returns HTTP 501 UnknownOperationException. Provisioned clusters are configuration records that stay CREATING: no broker, ZooKeeper or KRaft controller, topic, bootstrap endpoint or network interface exists, no record is produced or consumed, and GetBootstrapBrokers, topic, replicator, VPC connection and SCRAM secret APIs return UnknownOperationException with HTTP 501. The V2 and serverless APIs, configurations (whose server properties need revision storage), ConfigurationInfo, cluster policies and every cluster update operation are not implemented. CurrentVersion is the constant K1 because no update is possible, and DeleteCluster refuses any other version. NumberOfBrokerNodes must be a multiple of the number of client subnets; subnets, security groups, certificate authorities, KMS keys and log destinations are stored without being checked. ListClusters refuses ClusterNameFilter.",
+   "name": "Amazon Managed Streaming for Apache Kafka"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/kafka/2018-11-14/service-2.json",
+  "sha256": "54ca639797c413e404aafb2c77a51da8e05083cfc1610f1bd907a23886a3f464",
+  "license": "Apache-2.0"
+ }
+}

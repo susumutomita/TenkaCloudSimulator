@@ -1,0 +1,1817 @@
+{
+ "components": {
+  "schemas": {
+   "App": {
+    "additionalProperties": false,
+    "properties": {
+     "appArn": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "appId": {
+      "maxLength": 20,
+      "minLength": 1,
+      "type": "string"
+     },
+     "autoBranchCreationConfig": {
+      "$ref": "#/components/schemas/AutoBranchCreationConfig"
+     },
+     "autoBranchCreationPatterns": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "basicAuthCredentials": {
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "buildSpec": {
+      "maxLength": 25000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "cacheConfig": {
+      "$ref": "#/components/schemas/CacheConfig"
+     },
+     "computeRoleArn": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "createTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "customHeaders": {
+      "maxLength": 25000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "customRules": {
+      "items": {
+       "$ref": "#/components/schemas/CustomRule"
+      },
+      "type": "array"
+     },
+     "defaultDomain": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "enableAutoBranchCreation": {
+      "type": "boolean"
+     },
+     "enableBasicAuth": {
+      "type": "boolean"
+     },
+     "enableBranchAutoBuild": {
+      "type": "boolean"
+     },
+     "enableBranchAutoDeletion": {
+      "type": "boolean"
+     },
+     "environmentVariables": {
+      "additionalProperties": {
+       "maxLength": 5500,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "iamServiceRoleArn": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "jobConfig": {
+      "$ref": "#/components/schemas/JobConfig"
+     },
+     "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "platform": {
+      "enum": [
+       "WEB",
+       "WEB_DYNAMIC",
+       "WEB_COMPUTE"
+      ],
+      "type": "string"
+     },
+     "productionBranch": {
+      "$ref": "#/components/schemas/ProductionBranch"
+     },
+     "repository": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "repositoryCloneMethod": {
+      "enum": [
+       "SSH",
+       "TOKEN",
+       "SIGV4"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "updateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "wafConfiguration": {
+      "$ref": "#/components/schemas/WafConfiguration"
+     },
+     "webhookCreateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "appId",
+     "appArn",
+     "name",
+     "description",
+     "repository",
+     "platform",
+     "createTime",
+     "updateTime",
+     "environmentVariables",
+     "defaultDomain",
+     "enableBranchAutoBuild",
+     "enableBasicAuth"
+    ],
+    "type": "object"
+   },
+   "AutoBranchCreationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "basicAuthCredentials": {
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "buildSpec": {
+      "maxLength": 25000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "enableAutoBuild": {
+      "type": "boolean"
+     },
+     "enableBasicAuth": {
+      "type": "boolean"
+     },
+     "enablePerformanceMode": {
+      "type": "boolean"
+     },
+     "enablePullRequestPreview": {
+      "type": "boolean"
+     },
+     "environmentVariables": {
+      "additionalProperties": {
+       "maxLength": 5500,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "framework": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "pullRequestEnvironmentName": {
+      "maxLength": 20,
+      "type": "string"
+     },
+     "stage": {
+      "enum": [
+       "PRODUCTION",
+       "BETA",
+       "DEVELOPMENT",
+       "EXPERIMENTAL",
+       "PULL_REQUEST"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Backend": {
+    "additionalProperties": false,
+    "properties": {
+     "stackArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Branch": {
+    "additionalProperties": false,
+    "properties": {
+     "activeJobId": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "associatedResources": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "backend": {
+      "$ref": "#/components/schemas/Backend"
+     },
+     "backendEnvironmentArn": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "basicAuthCredentials": {
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "branchArn": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "branchName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "buildSpec": {
+      "maxLength": 25000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "computeRoleArn": {
+      "maxLength": 1000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "createTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "customDomains": {
+      "items": {
+       "maxLength": 255,
+       "type": "string"
+      },
+      "maxItems": 255,
+      "type": "array"
+     },
+     "description": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "destinationBranch": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "enableAutoBuild": {
+      "type": "boolean"
+     },
+     "enableBasicAuth": {
+      "type": "boolean"
+     },
+     "enableNotification": {
+      "type": "boolean"
+     },
+     "enablePerformanceMode": {
+      "type": "boolean"
+     },
+     "enablePullRequestPreview": {
+      "type": "boolean"
+     },
+     "enableSkewProtection": {
+      "type": "boolean"
+     },
+     "environmentVariables": {
+      "additionalProperties": {
+       "maxLength": 5500,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "framework": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "pullRequestEnvironmentName": {
+      "maxLength": 20,
+      "type": "string"
+     },
+     "sourceBranch": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "stage": {
+      "enum": [
+       "PRODUCTION",
+       "BETA",
+       "DEVELOPMENT",
+       "EXPERIMENTAL",
+       "PULL_REQUEST"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "thumbnailUrl": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "totalNumberOfJobs": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "ttl": {
+      "maxLength": 32,
+      "minLength": 0,
+      "type": "string"
+     },
+     "updateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "branchArn",
+     "branchName",
+     "description",
+     "stage",
+     "displayName",
+     "enableNotification",
+     "createTime",
+     "updateTime",
+     "environmentVariables",
+     "enableAutoBuild",
+     "customDomains",
+     "framework",
+     "activeJobId",
+     "totalNumberOfJobs",
+     "enableBasicAuth",
+     "ttl",
+     "enablePullRequestPreview"
+    ],
+    "type": "object"
+   },
+   "CacheConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "AMPLIFY_MANAGED",
+       "AMPLIFY_MANAGED_NO_COOKIES"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "CustomRule": {
+    "additionalProperties": false,
+    "properties": {
+     "condition": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "source": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "maxLength": 7,
+      "minLength": 3,
+      "type": "string"
+     },
+     "target": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "source",
+     "target"
+    ],
+    "type": "object"
+   },
+   "JobConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "buildComputeType": {
+      "enum": [
+       "STANDARD_8GB",
+       "LARGE_16GB",
+       "XLARGE_72GB"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "buildComputeType"
+    ],
+    "type": "object"
+   },
+   "ProductionBranch": {
+    "additionalProperties": false,
+    "properties": {
+     "branchName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastDeployTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "status": {
+      "maxLength": 7,
+      "minLength": 3,
+      "type": "string"
+     },
+     "thumbnailUrl": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WafConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "statusReason": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "wafStatus": {
+      "enum": [
+       "ASSOCIATING",
+       "ASSOCIATION_FAILED",
+       "ASSOCIATION_SUCCESS",
+       "DISASSOCIATING",
+       "DISASSOCIATION_FAILED"
+      ],
+      "type": "string"
+     },
+     "webAclArn": {
+      "maxLength": 512,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Amplify API (2017-07-25). Every other official operation returns HTTP 501 UnknownOperationException. Apps and branches are configuration metadata: no repository connection, OAuth or access token, build, deployment, hosting or domain is created. oauthToken, accessToken and basic-auth credentials are refused. Deleting an app with branches is refused until the branches are deleted.",
+  "title": "AWS Amplify (simulator catalog)",
+  "version": "2017-07-25"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/apps": {
+   "get": {
+    "operationId": "amplifyListApps",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2000,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "apps": {
+           "items": {
+            "$ref": "#/components/schemas/App"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2000,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListApps",
+    "tags": [
+     "AWS Amplify"
+    ]
+   },
+   "post": {
+    "operationId": "amplifyCreateApp",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accessToken": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "autoBranchCreationConfig": {
+          "$ref": "#/components/schemas/AutoBranchCreationConfig"
+         },
+         "autoBranchCreationPatterns": {
+          "items": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "basicAuthCredentials": {
+          "maxLength": 2000,
+          "type": "string"
+         },
+         "buildSpec": {
+          "maxLength": 25000,
+          "minLength": 1,
+          "type": "string"
+         },
+         "cacheConfig": {
+          "$ref": "#/components/schemas/CacheConfig"
+         },
+         "computeRoleArn": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "customHeaders": {
+          "maxLength": 25000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "customRules": {
+          "items": {
+           "$ref": "#/components/schemas/CustomRule"
+          },
+          "type": "array"
+         },
+         "description": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "enableAutoBranchCreation": {
+          "type": "boolean"
+         },
+         "enableBasicAuth": {
+          "type": "boolean"
+         },
+         "enableBranchAutoBuild": {
+          "type": "boolean"
+         },
+         "enableBranchAutoDeletion": {
+          "type": "boolean"
+         },
+         "environmentVariables": {
+          "additionalProperties": {
+           "maxLength": 5500,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "iamServiceRoleArn": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "jobConfig": {
+          "$ref": "#/components/schemas/JobConfig"
+         },
+         "name": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "oauthToken": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "platform": {
+          "enum": [
+           "WEB",
+           "WEB_DYNAMIC",
+           "WEB_COMPUTE"
+          ],
+          "type": "string"
+         },
+         "repository": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateApp",
+    "tags": [
+     "AWS Amplify"
+    ]
+   }
+  },
+  "/apps/{appId}": {
+   "delete": {
+    "operationId": "amplifyDeleteApp",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appId",
+      "required": true,
+      "schema": {
+       "maxLength": 20,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteApp",
+    "tags": [
+     "AWS Amplify"
+    ]
+   },
+   "get": {
+    "operationId": "amplifyGetApp",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appId",
+      "required": true,
+      "schema": {
+       "maxLength": 20,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetApp",
+    "tags": [
+     "AWS Amplify"
+    ]
+   },
+   "post": {
+    "operationId": "amplifyUpdateApp",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appId",
+      "required": true,
+      "schema": {
+       "maxLength": 20,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accessToken": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "autoBranchCreationConfig": {
+          "$ref": "#/components/schemas/AutoBranchCreationConfig"
+         },
+         "autoBranchCreationPatterns": {
+          "items": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "basicAuthCredentials": {
+          "maxLength": 2000,
+          "type": "string"
+         },
+         "buildSpec": {
+          "maxLength": 25000,
+          "minLength": 1,
+          "type": "string"
+         },
+         "cacheConfig": {
+          "$ref": "#/components/schemas/CacheConfig"
+         },
+         "computeRoleArn": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "customHeaders": {
+          "maxLength": 25000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "customRules": {
+          "items": {
+           "$ref": "#/components/schemas/CustomRule"
+          },
+          "type": "array"
+         },
+         "description": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "enableAutoBranchCreation": {
+          "type": "boolean"
+         },
+         "enableBasicAuth": {
+          "type": "boolean"
+         },
+         "enableBranchAutoBuild": {
+          "type": "boolean"
+         },
+         "enableBranchAutoDeletion": {
+          "type": "boolean"
+         },
+         "environmentVariables": {
+          "additionalProperties": {
+           "maxLength": 5500,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "iamServiceRoleArn": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "jobConfig": {
+          "$ref": "#/components/schemas/JobConfig"
+         },
+         "name": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "oauthToken": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "platform": {
+          "enum": [
+           "WEB",
+           "WEB_DYNAMIC",
+           "WEB_COMPUTE"
+          ],
+          "type": "string"
+         },
+         "repository": {
+          "maxLength": 1000,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "app": {
+           "$ref": "#/components/schemas/App"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateApp",
+    "tags": [
+     "AWS Amplify"
+    ]
+   }
+  },
+  "/apps/{appId}/branches": {
+   "get": {
+    "operationId": "amplifyListBranches",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appId",
+      "required": true,
+      "schema": {
+       "maxLength": 20,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 50,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2000,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "branches": {
+           "items": {
+            "$ref": "#/components/schemas/Branch"
+           },
+           "maxItems": 255,
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2000,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListBranches",
+    "tags": [
+     "AWS Amplify"
+    ]
+   },
+   "post": {
+    "operationId": "amplifyCreateBranch",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appId",
+      "required": true,
+      "schema": {
+       "maxLength": 20,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "backend": {
+          "$ref": "#/components/schemas/Backend"
+         },
+         "backendEnvironmentArn": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "basicAuthCredentials": {
+          "maxLength": 2000,
+          "type": "string"
+         },
+         "branchName": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "buildSpec": {
+          "maxLength": 25000,
+          "minLength": 1,
+          "type": "string"
+         },
+         "computeRoleArn": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 255,
+          "type": "string"
+         },
+         "enableAutoBuild": {
+          "type": "boolean"
+         },
+         "enableBasicAuth": {
+          "type": "boolean"
+         },
+         "enableNotification": {
+          "type": "boolean"
+         },
+         "enablePerformanceMode": {
+          "type": "boolean"
+         },
+         "enablePullRequestPreview": {
+          "type": "boolean"
+         },
+         "enableSkewProtection": {
+          "type": "boolean"
+         },
+         "environmentVariables": {
+          "additionalProperties": {
+           "maxLength": 5500,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "framework": {
+          "maxLength": 255,
+          "type": "string"
+         },
+         "pullRequestEnvironmentName": {
+          "maxLength": 20,
+          "type": "string"
+         },
+         "stage": {
+          "enum": [
+           "PRODUCTION",
+           "BETA",
+           "DEVELOPMENT",
+           "EXPERIMENTAL",
+           "PULL_REQUEST"
+          ],
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "ttl": {
+          "maxLength": 32,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "required": [
+         "branchName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "branch": {
+           "$ref": "#/components/schemas/Branch"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateBranch",
+    "tags": [
+     "AWS Amplify"
+    ]
+   }
+  },
+  "/apps/{appId}/branches/{branchName}": {
+   "delete": {
+    "operationId": "amplifyDeleteBranch",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appId",
+      "required": true,
+      "schema": {
+       "maxLength": 20,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "branchName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "branch": {
+           "$ref": "#/components/schemas/Branch"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteBranch",
+    "tags": [
+     "AWS Amplify"
+    ]
+   },
+   "get": {
+    "operationId": "amplifyGetBranch",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appId",
+      "required": true,
+      "schema": {
+       "maxLength": 20,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "branchName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "branch": {
+           "$ref": "#/components/schemas/Branch"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetBranch",
+    "tags": [
+     "AWS Amplify"
+    ]
+   },
+   "post": {
+    "operationId": "amplifyUpdateBranch",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appId",
+      "required": true,
+      "schema": {
+       "maxLength": 20,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "branchName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "backend": {
+          "$ref": "#/components/schemas/Backend"
+         },
+         "backendEnvironmentArn": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "basicAuthCredentials": {
+          "maxLength": 2000,
+          "type": "string"
+         },
+         "buildSpec": {
+          "maxLength": 25000,
+          "minLength": 1,
+          "type": "string"
+         },
+         "computeRoleArn": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 255,
+          "type": "string"
+         },
+         "enableAutoBuild": {
+          "type": "boolean"
+         },
+         "enableBasicAuth": {
+          "type": "boolean"
+         },
+         "enableNotification": {
+          "type": "boolean"
+         },
+         "enablePerformanceMode": {
+          "type": "boolean"
+         },
+         "enablePullRequestPreview": {
+          "type": "boolean"
+         },
+         "enableSkewProtection": {
+          "type": "boolean"
+         },
+         "environmentVariables": {
+          "additionalProperties": {
+           "maxLength": 5500,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "framework": {
+          "maxLength": 255,
+          "type": "string"
+         },
+         "pullRequestEnvironmentName": {
+          "maxLength": 20,
+          "type": "string"
+         },
+         "stage": {
+          "enum": [
+           "PRODUCTION",
+           "BETA",
+           "DEVELOPMENT",
+           "EXPERIMENTAL",
+           "PULL_REQUEST"
+          ],
+          "type": "string"
+         },
+         "ttl": {
+          "maxLength": 32,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "branch": {
+           "$ref": "#/components/schemas/Branch"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateBranch",
+    "tags": [
+     "AWS Amplify"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "amplifyUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Amplify"
+    ]
+   },
+   "get": {
+    "operationId": "amplifyListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Amplify"
+    ]
+   },
+   "post": {
+    "operationId": "amplifyTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "amplify"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Amplify"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Amplify API (2017-07-25). Every other official operation returns HTTP 501 UnknownOperationException. Apps and branches are configuration metadata: no repository connection, OAuth or access token, build, deployment, hosting or domain is created. oauthToken, accessToken and basic-auth credentials are refused. Deleting an app with branches is refused until the branches are deleted.",
+   "name": "AWS Amplify"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/amplify/2017-07-25/service-2.json",
+  "sha256": "602c55d9c517a1233f2fb956013b3b38b3ffeae4d9063f189a847364719b08a5",
+  "license": "Apache-2.0"
+ }
+}

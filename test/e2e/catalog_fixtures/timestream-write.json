@@ -1,0 +1,31 @@
+{
+ "client": "timestream-write",
+ "steps": [
+  {"op": "create_database", "args": {"DatabaseName": "fixture_db", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"db": "Database.Arn"}},
+  {"op": "describe_database", "args": {"DatabaseName": "fixture_db"}, "expect": {"Database.Arn": "${db}", "Database.DatabaseName": "fixture_db"}},
+  {"op": "list_databases", "args": {}, "expect": {"Databases#count": 1, "Databases[0].DatabaseName": "fixture_db"}},
+  {"op": "update_database", "args": {"DatabaseName": "fixture_db", "KmsKeyId": "alias/fixture"}, "expect": {"Database.KmsKeyId": "alias/fixture"}},
+  {"op": "create_table", "args": {"DatabaseName": "fixture_db", "TableName": "metrics", "MagneticStoreWriteProperties": {"EnableMagneticStoreWrites": false}}, "save": {"table": "Table.Arn"}, "expect": {"Table.TableStatus": "ACTIVE", "Table.RetentionProperties.MemoryStoreRetentionPeriodInHours": 6, "Table.RetentionProperties.MagneticStoreRetentionPeriodInDays": 73000}},
+  {"op": "describe_table", "args": {"DatabaseName": "fixture_db", "TableName": "metrics"}, "expect": {"Table.Arn": "${table}", "Table.DatabaseName": "fixture_db"}},
+  {"op": "list_tables", "args": {"DatabaseName": "fixture_db"}, "expect": {"Tables#count": 1, "Tables[0].TableName": "metrics"}},
+  {"op": "update_table", "args": {"DatabaseName": "fixture_db", "TableName": "metrics", "RetentionProperties": {"MemoryStoreRetentionPeriodInHours": 12, "MagneticStoreRetentionPeriodInDays": 30}}, "expect": {"Table.RetentionProperties.MagneticStoreRetentionPeriodInDays": 30}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${table}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${table}", "TagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${db}"}, "expect": {"Tags": [{"Key": "team", "Value": "a"}]}},
+  {"op": "write_records", "args": {"DatabaseName": "fixture_db", "TableName": "metrics", "Records": [{"MeasureName": "cpu", "MeasureValue": "1", "Time": "1"}]}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_table", "args": {"DatabaseName": "fixture_db", "TableName": "missing"}, "error": "ResourceNotFoundException"},
+  {"op": "delete_database", "args": {"DatabaseName": "fixture_db"}, "error": "ValidationException"},
+  {"op": "list_tables", "args": {}, "error": "ValidationException"}
+ ],
+ "isolation": [
+  {"op": "list_databases", "args": {}, "expect": {"Databases#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_table", "args": {"DatabaseName": "fixture_db", "TableName": "metrics"}, "expect": {"Table.RetentionProperties.MemoryStoreRetentionPeriodInHours": 12}}
+ ],
+ "cleanup": [
+  {"op": "delete_table", "args": {"DatabaseName": "fixture_db", "TableName": "metrics"}},
+  {"op": "delete_database", "args": {"DatabaseName": "fixture_db"}},
+  {"op": "list_databases", "args": {}, "expect": {"Databases#count": 0}}
+ ]
+}

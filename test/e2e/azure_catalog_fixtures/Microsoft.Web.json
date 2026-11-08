@@ -1,0 +1,131 @@
+{
+ "namespace": "Microsoft.Web",
+ "client": "web",
+ "steps": [
+  {
+   "call": "app_service_plans.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "name": "fixture-plan",
+    "app_service_plan": {
+     "location": "eastus",
+     "kind": "linux",
+     "sku": {
+      "name": "B1",
+      "tier": "Basic"
+     },
+     "properties": {
+      "reserved": true
+     }
+    }
+   },
+   "expect": {
+    "provisioning_state": "Succeeded",
+    "status": "Ready",
+    "reserved": true
+   }
+  },
+  {
+   "call": "app_service_plans.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "name": "fixture-plan"
+   },
+   "expect": {
+    "sku.name": "B1"
+   }
+  },
+  {
+   "call": "app_service_plans.update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "name": "fixture-plan",
+    "app_service_plan": {
+     "properties": {
+      "perSiteScaling": true
+     }
+    }
+   },
+   "expect": {
+    "per_site_scaling": true
+   }
+  },
+  {
+   "call": "app_service_plans.list_by_resource_group",
+   "args": {
+    "resource_group_name": "${rg}"
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "app_service_plans.list",
+   "args": {
+    "detailed": true
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "app_service_plans.update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "name": "fixture-plan",
+    "app_service_plan": {
+     "properties": {
+      "reserved": false
+     }
+    }
+   },
+   "error": "PropertyChangeNotAllowed",
+   "status": 400
+  }
+ ],
+ "probe": {
+  "call": "app_service_plans.list"
+ },
+ "unbound": {
+  "call": "app_service_plans.list_web_apps",
+  "args": {
+   "resource_group_name": "${rg}",
+   "name": "fixture-plan"
+  }
+ },
+ "isolation": [
+  {
+   "call": "app_service_plans.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "app_service_plans.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "name": "fixture-plan"
+   },
+   "expect": {
+    "per_site_scaling": true
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "app_service_plans.delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "name": "fixture-plan"
+   }
+  },
+  {
+   "call": "app_service_plans.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ]
+}

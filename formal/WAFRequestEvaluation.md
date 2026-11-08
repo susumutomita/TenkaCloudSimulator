@@ -53,13 +53,12 @@ original problem's provisioning, grading or cleanup.
 Use the existing checksum-pinned TLC jar:
 
 ```sh
-TLA_JAR=/tmp/simulator-tla.jar python3 scripts/check-waf-formal.py \
-  --output /workspace/simulator-python-build/waf-formal-worker
+TLA_JAR=/path/to/checksum-verified/tla2tools.jar make formal
 ```
 
 The runner validates `formal/tla2tools.sha256`, puts Java temporary/model/state
-files below the output directory, runs one TLC worker with a1GiB heap and a60s
-per-variant deadline, preserves concise complete logs, and removes temporary
+files below the configured report directory, runs one TLC worker with a 60s
+per-variant deadline, preserves complete logs, and removes temporary
 state files after completion. It performs no AWS/network/publication operations.
 
 Verified with TLC2.19 rev5a47802: baseline277728 states generated,
@@ -76,5 +75,7 @@ Verified with TLC2.19 rev5a47802: baseline277728 states generated,
 A mutation must fail by the intended invariant; parsing errors or an empty action
 are not accepted as successful sensitivity controls. The runner checks mutation
 anchor uniqueness and removes `phase` from the Count mutant's UNCHANGED tuple so
-its bad action is reachable. Existing formal models and their runner are not
-modified; adding this runner to shared CI belongs to the integration owner.
+its bad action is reachable. The model and five controls are registered in `formal/models.json` and run by
+the shared fail-closed checker alongside all current-main models. The state
+counts above are historical branch evidence; the integrated source requires a
+fresh complete formal run.

@@ -1,0 +1,26 @@
+{
+ "client": "dsql",
+ "steps": [
+  {"op": "create_cluster", "args": {"deletionProtectionEnabled": false, "kmsEncryptionKey": "AWS_OWNED_KMS_KEY", "tags": {"team": "a"}}, "save": {"cluster": "identifier", "arn": "arn"}, "expect": {"status": "CREATING"}},
+  {"op": "get_cluster", "args": {"identifier": "${cluster}"}, "expect": {"arn": "${arn}", "encryptionDetails.encryptionType": "AWS_OWNED_KMS_KEY", "deletionProtectionEnabled": false, "tags": {"team": "a"}}},
+  {"op": "list_clusters", "args": {}, "expect": {"clusters#count": 1, "clusters[0].identifier": "${cluster}"}},
+  {"op": "update_cluster", "args": {"identifier": "${cluster}", "kmsEncryptionKey": "arn:aws:kms:us-east-1:000000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab"}, "expect": {"arn": "${arn}", "status": "CREATING"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${arn}", "tags": {"stage": "dev"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${arn}", "tagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${arn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "get_vpc_endpoint_service_name", "args": {"identifier": "${cluster}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_cluster", "args": {"identifier": "abcdefghijklmnopqrstuvwxyz"}, "error": "ResourceNotFoundException"},
+  {"op": "create_cluster", "args": {}, "error": "ValidationException"},
+  {"op": "update_cluster", "args": {"identifier": "${cluster}", "deletionProtectionEnabled": true}, "error": "ValidationException"}
+ ],
+ "isolation": [
+  {"op": "list_clusters", "args": {}, "expect": {"clusters#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_cluster", "args": {"identifier": "${cluster}"}, "expect": {"encryptionDetails.encryptionType": "CUSTOMER_MANAGED_KMS_KEY", "encryptionDetails.kmsKeyArn": "arn:aws:kms:us-east-1:000000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab"}}
+ ],
+ "cleanup": [
+  {"op": "delete_cluster", "args": {"identifier": "${cluster}"}, "expect": {"status": "DELETING", "arn": "${arn}"}},
+  {"op": "list_clusters", "args": {}, "expect": {"clusters#count": 0}}
+ ]
+}

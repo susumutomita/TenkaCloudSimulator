@@ -1,0 +1,1751 @@
+{
+ "components": {
+  "schemas": {
+   "AIMLOptionsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "NaturalLanguageQueryGenerationOptions": {
+      "$ref": "#/components/schemas/NaturalLanguageQueryGenerationOptionsInput"
+     },
+     "S3VectorsEngine": {
+      "$ref": "#/components/schemas/S3VectorsEngine"
+     }
+    },
+    "type": "object"
+   },
+   "AIMLOptionsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "NaturalLanguageQueryGenerationOptions": {
+      "$ref": "#/components/schemas/NaturalLanguageQueryGenerationOptionsOutput"
+     },
+     "S3VectorsEngine": {
+      "$ref": "#/components/schemas/S3VectorsEngine"
+     }
+    },
+    "type": "object"
+   },
+   "AdvancedSecurityOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "AnonymousAuthDisableDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "AnonymousAuthEnabled": {
+      "type": "boolean"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "IAMFederationOptions": {
+      "$ref": "#/components/schemas/IAMFederationOptionsOutput"
+     },
+     "InternalUserDatabaseEnabled": {
+      "type": "boolean"
+     },
+     "JWTOptions": {
+      "$ref": "#/components/schemas/JWTOptionsOutput"
+     },
+     "SAMLOptions": {
+      "$ref": "#/components/schemas/SAMLOptionsOutput"
+     }
+    },
+    "type": "object"
+   },
+   "AdvancedSecurityOptionsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "AnonymousAuthEnabled": {
+      "type": "boolean"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "IAMFederationOptions": {
+      "$ref": "#/components/schemas/IAMFederationOptionsInput"
+     },
+     "InternalUserDatabaseEnabled": {
+      "type": "boolean"
+     },
+     "JWTOptions": {
+      "$ref": "#/components/schemas/JWTOptionsInput"
+     },
+     "MasterUserOptions": {
+      "$ref": "#/components/schemas/MasterUserOptions"
+     },
+     "SAMLOptions": {
+      "$ref": "#/components/schemas/SAMLOptionsInput"
+     }
+    },
+    "type": "object"
+   },
+   "AutoTuneMaintenanceSchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "CronExpressionForRecurrence": {
+      "type": "string"
+     },
+     "Duration": {
+      "$ref": "#/components/schemas/Duration"
+     },
+     "StartAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "AutoTuneOptionsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "DesiredState": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "MaintenanceSchedules": {
+      "items": {
+       "$ref": "#/components/schemas/AutoTuneMaintenanceSchedule"
+      },
+      "maxItems": 100,
+      "type": "array"
+     },
+     "UseOffPeakWindow": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "AutoTuneOptionsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "ErrorMessage": {
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "ENABLED",
+       "DISABLED",
+       "ENABLE_IN_PROGRESS",
+       "DISABLE_IN_PROGRESS",
+       "DISABLED_AND_ROLLBACK_SCHEDULED",
+       "DISABLED_AND_ROLLBACK_IN_PROGRESS",
+       "DISABLED_AND_ROLLBACK_COMPLETE",
+       "DISABLED_AND_ROLLBACK_ERROR",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "UseOffPeakWindow": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ChangeProgressDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "ChangeId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "ConfigChangeStatus": {
+      "enum": [
+       "Pending",
+       "Initializing",
+       "Validating",
+       "ValidationFailed",
+       "ApplyingChanges",
+       "Completed",
+       "PendingUserInput",
+       "Cancelled"
+      ],
+      "type": "string"
+     },
+     "InitiatedBy": {
+      "enum": [
+       "CUSTOMER",
+       "SERVICE"
+      ],
+      "type": "string"
+     },
+     "LastUpdatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Message": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "StartTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "ClusterConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "ColdStorageOptions": {
+      "$ref": "#/components/schemas/ColdStorageOptions"
+     },
+     "DedicatedMasterCount": {
+      "type": "integer"
+     },
+     "DedicatedMasterEnabled": {
+      "type": "boolean"
+     },
+     "DedicatedMasterType": {
+      "enum": [
+       "m3.medium.search",
+       "m3.large.search",
+       "m3.xlarge.search",
+       "m3.2xlarge.search",
+       "m4.large.search",
+       "m4.xlarge.search",
+       "m4.2xlarge.search",
+       "m4.4xlarge.search",
+       "m4.10xlarge.search",
+       "m5.large.search",
+       "m5.xlarge.search",
+       "m5.2xlarge.search",
+       "m5.4xlarge.search",
+       "m5.12xlarge.search",
+       "m5.24xlarge.search",
+       "r5.large.search",
+       "r5.xlarge.search",
+       "r5.2xlarge.search",
+       "r5.4xlarge.search",
+       "r5.12xlarge.search",
+       "r5.24xlarge.search",
+       "c5.large.search",
+       "c5.xlarge.search",
+       "c5.2xlarge.search",
+       "c5.4xlarge.search",
+       "c5.9xlarge.search",
+       "c5.18xlarge.search",
+       "t3.nano.search",
+       "t3.micro.search",
+       "t3.small.search",
+       "t3.medium.search",
+       "t3.large.search",
+       "t3.xlarge.search",
+       "t3.2xlarge.search",
+       "or1.medium.search",
+       "or1.large.search",
+       "or1.xlarge.search",
+       "or1.2xlarge.search",
+       "or1.4xlarge.search",
+       "or1.8xlarge.search",
+       "or1.12xlarge.search",
+       "or1.16xlarge.search",
+       "ultrawarm1.medium.search",
+       "ultrawarm1.large.search",
+       "ultrawarm1.xlarge.search",
+       "t2.micro.search",
+       "t2.small.search",
+       "t2.medium.search",
+       "r3.large.search",
+       "r3.xlarge.search",
+       "r3.2xlarge.search",
+       "r3.4xlarge.search",
+       "r3.8xlarge.search",
+       "i2.xlarge.search",
+       "i2.2xlarge.search",
+       "d2.xlarge.search",
+       "d2.2xlarge.search",
+       "d2.4xlarge.search",
+       "d2.8xlarge.search",
+       "c4.large.search",
+       "c4.xlarge.search",
+       "c4.2xlarge.search",
+       "c4.4xlarge.search",
+       "c4.8xlarge.search",
+       "r4.large.search",
+       "r4.xlarge.search",
+       "r4.2xlarge.search",
+       "r4.4xlarge.search",
+       "r4.8xlarge.search",
+       "r4.16xlarge.search",
+       "i3.large.search",
+       "i3.xlarge.search",
+       "i3.2xlarge.search",
+       "i3.4xlarge.search",
+       "i3.8xlarge.search",
+       "i3.16xlarge.search",
+       "r6g.large.search",
+       "r6g.xlarge.search",
+       "r6g.2xlarge.search",
+       "r6g.4xlarge.search",
+       "r6g.8xlarge.search",
+       "r6g.12xlarge.search",
+       "m6g.large.search",
+       "m6g.xlarge.search",
+       "m6g.2xlarge.search",
+       "m6g.4xlarge.search",
+       "m6g.8xlarge.search",
+       "m6g.12xlarge.search",
+       "c6g.large.search",
+       "c6g.xlarge.search",
+       "c6g.2xlarge.search",
+       "c6g.4xlarge.search",
+       "c6g.8xlarge.search",
+       "c6g.12xlarge.search",
+       "r6gd.large.search",
+       "r6gd.xlarge.search",
+       "r6gd.2xlarge.search",
+       "r6gd.4xlarge.search",
+       "r6gd.8xlarge.search",
+       "r6gd.12xlarge.search",
+       "r6gd.16xlarge.search",
+       "t4g.small.search",
+       "t4g.medium.search"
+      ],
+      "type": "string"
+     },
+     "InstanceCount": {
+      "type": "integer"
+     },
+     "InstanceType": {
+      "enum": [
+       "m3.medium.search",
+       "m3.large.search",
+       "m3.xlarge.search",
+       "m3.2xlarge.search",
+       "m4.large.search",
+       "m4.xlarge.search",
+       "m4.2xlarge.search",
+       "m4.4xlarge.search",
+       "m4.10xlarge.search",
+       "m5.large.search",
+       "m5.xlarge.search",
+       "m5.2xlarge.search",
+       "m5.4xlarge.search",
+       "m5.12xlarge.search",
+       "m5.24xlarge.search",
+       "r5.large.search",
+       "r5.xlarge.search",
+       "r5.2xlarge.search",
+       "r5.4xlarge.search",
+       "r5.12xlarge.search",
+       "r5.24xlarge.search",
+       "c5.large.search",
+       "c5.xlarge.search",
+       "c5.2xlarge.search",
+       "c5.4xlarge.search",
+       "c5.9xlarge.search",
+       "c5.18xlarge.search",
+       "t3.nano.search",
+       "t3.micro.search",
+       "t3.small.search",
+       "t3.medium.search",
+       "t3.large.search",
+       "t3.xlarge.search",
+       "t3.2xlarge.search",
+       "or1.medium.search",
+       "or1.large.search",
+       "or1.xlarge.search",
+       "or1.2xlarge.search",
+       "or1.4xlarge.search",
+       "or1.8xlarge.search",
+       "or1.12xlarge.search",
+       "or1.16xlarge.search",
+       "ultrawarm1.medium.search",
+       "ultrawarm1.large.search",
+       "ultrawarm1.xlarge.search",
+       "t2.micro.search",
+       "t2.small.search",
+       "t2.medium.search",
+       "r3.large.search",
+       "r3.xlarge.search",
+       "r3.2xlarge.search",
+       "r3.4xlarge.search",
+       "r3.8xlarge.search",
+       "i2.xlarge.search",
+       "i2.2xlarge.search",
+       "d2.xlarge.search",
+       "d2.2xlarge.search",
+       "d2.4xlarge.search",
+       "d2.8xlarge.search",
+       "c4.large.search",
+       "c4.xlarge.search",
+       "c4.2xlarge.search",
+       "c4.4xlarge.search",
+       "c4.8xlarge.search",
+       "r4.large.search",
+       "r4.xlarge.search",
+       "r4.2xlarge.search",
+       "r4.4xlarge.search",
+       "r4.8xlarge.search",
+       "r4.16xlarge.search",
+       "i3.large.search",
+       "i3.xlarge.search",
+       "i3.2xlarge.search",
+       "i3.4xlarge.search",
+       "i3.8xlarge.search",
+       "i3.16xlarge.search",
+       "r6g.large.search",
+       "r6g.xlarge.search",
+       "r6g.2xlarge.search",
+       "r6g.4xlarge.search",
+       "r6g.8xlarge.search",
+       "r6g.12xlarge.search",
+       "m6g.large.search",
+       "m6g.xlarge.search",
+       "m6g.2xlarge.search",
+       "m6g.4xlarge.search",
+       "m6g.8xlarge.search",
+       "m6g.12xlarge.search",
+       "c6g.large.search",
+       "c6g.xlarge.search",
+       "c6g.2xlarge.search",
+       "c6g.4xlarge.search",
+       "c6g.8xlarge.search",
+       "c6g.12xlarge.search",
+       "r6gd.large.search",
+       "r6gd.xlarge.search",
+       "r6gd.2xlarge.search",
+       "r6gd.4xlarge.search",
+       "r6gd.8xlarge.search",
+       "r6gd.12xlarge.search",
+       "r6gd.16xlarge.search",
+       "t4g.small.search",
+       "t4g.medium.search"
+      ],
+      "type": "string"
+     },
+     "MultiAZWithStandbyEnabled": {
+      "type": "boolean"
+     },
+     "NodeOptions": {
+      "items": {
+       "$ref": "#/components/schemas/NodeOption"
+      },
+      "type": "array"
+     },
+     "WarmCount": {
+      "type": "integer"
+     },
+     "WarmEnabled": {
+      "type": "boolean"
+     },
+     "WarmType": {
+      "enum": [
+       "ultrawarm1.medium.search",
+       "ultrawarm1.large.search",
+       "ultrawarm1.xlarge.search"
+      ],
+      "type": "string"
+     },
+     "ZoneAwarenessConfig": {
+      "$ref": "#/components/schemas/ZoneAwarenessConfig"
+     },
+     "ZoneAwarenessEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "CognitoOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "IdentityPoolId": {
+      "maxLength": 55,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RoleArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "UserPoolId": {
+      "maxLength": 55,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ColdStorageOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "Enabled"
+    ],
+    "type": "object"
+   },
+   "DomainEndpointOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "CustomEndpoint": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CustomEndpointCertificateArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "CustomEndpointEnabled": {
+      "type": "boolean"
+     },
+     "EnforceHTTPS": {
+      "type": "boolean"
+     },
+     "TLSSecurityPolicy": {
+      "enum": [
+       "Policy-Min-TLS-1-0-2019-07",
+       "Policy-Min-TLS-1-2-2019-07",
+       "Policy-Min-TLS-1-2-PFS-2023-10"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DomainInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "DomainName": {
+      "maxLength": 28,
+      "minLength": 3,
+      "type": "string"
+     },
+     "EngineType": {
+      "enum": [
+       "OpenSearch",
+       "Elasticsearch"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DomainStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "AIMLOptions": {
+      "$ref": "#/components/schemas/AIMLOptionsOutput"
+     },
+     "ARN": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "AccessPolicies": {
+      "maxLength": 102400,
+      "minLength": 0,
+      "type": "string"
+     },
+     "AdvancedOptions": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "AdvancedSecurityOptions": {
+      "$ref": "#/components/schemas/AdvancedSecurityOptions"
+     },
+     "AutoTuneOptions": {
+      "$ref": "#/components/schemas/AutoTuneOptionsOutput"
+     },
+     "ChangeProgressDetails": {
+      "$ref": "#/components/schemas/ChangeProgressDetails"
+     },
+     "ClusterConfig": {
+      "$ref": "#/components/schemas/ClusterConfig"
+     },
+     "CognitoOptions": {
+      "$ref": "#/components/schemas/CognitoOptions"
+     },
+     "Created": {
+      "type": "boolean"
+     },
+     "Deleted": {
+      "type": "boolean"
+     },
+     "DomainEndpointOptions": {
+      "$ref": "#/components/schemas/DomainEndpointOptions"
+     },
+     "DomainEndpointV2HostedZoneId": {
+      "type": "string"
+     },
+     "DomainId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DomainName": {
+      "maxLength": 28,
+      "minLength": 3,
+      "type": "string"
+     },
+     "DomainProcessingStatus": {
+      "enum": [
+       "Creating",
+       "Active",
+       "Modifying",
+       "UpgradingEngineVersion",
+       "UpdatingServiceSoftware",
+       "Isolated",
+       "Deleting"
+      ],
+      "type": "string"
+     },
+     "EBSOptions": {
+      "$ref": "#/components/schemas/EBSOptions"
+     },
+     "EncryptionAtRestOptions": {
+      "$ref": "#/components/schemas/EncryptionAtRestOptions"
+     },
+     "Endpoint": {
+      "type": "string"
+     },
+     "EndpointV2": {
+      "type": "string"
+     },
+     "Endpoints": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "EngineVersion": {
+      "maxLength": 18,
+      "minLength": 14,
+      "type": "string"
+     },
+     "IPAddressType": {
+      "enum": [
+       "ipv4",
+       "dualstack"
+      ],
+      "type": "string"
+     },
+     "IdentityCenterOptions": {
+      "$ref": "#/components/schemas/IdentityCenterOptions"
+     },
+     "LogPublishingOptions": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/LogPublishingOption"
+      },
+      "type": "object"
+     },
+     "ModifyingProperties": {
+      "items": {
+       "$ref": "#/components/schemas/ModifyingProperties"
+      },
+      "type": "array"
+     },
+     "NodeToNodeEncryptionOptions": {
+      "$ref": "#/components/schemas/NodeToNodeEncryptionOptions"
+     },
+     "OffPeakWindowOptions": {
+      "$ref": "#/components/schemas/OffPeakWindowOptions"
+     },
+     "Processing": {
+      "type": "boolean"
+     },
+     "ServiceSoftwareOptions": {
+      "$ref": "#/components/schemas/ServiceSoftwareOptions"
+     },
+     "SnapshotOptions": {
+      "$ref": "#/components/schemas/SnapshotOptions"
+     },
+     "SoftwareUpdateOptions": {
+      "$ref": "#/components/schemas/SoftwareUpdateOptions"
+     },
+     "UpgradeProcessing": {
+      "type": "boolean"
+     },
+     "VPCOptions": {
+      "$ref": "#/components/schemas/VPCDerivedInfo"
+     }
+    },
+    "required": [
+     "DomainId",
+     "DomainName",
+     "ARN",
+     "ClusterConfig"
+    ],
+    "type": "object"
+   },
+   "Duration": {
+    "additionalProperties": false,
+    "properties": {
+     "Unit": {
+      "enum": [
+       "HOURS"
+      ],
+      "type": "string"
+     },
+     "Value": {
+      "maximum": 24,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "EBSOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "EBSEnabled": {
+      "type": "boolean"
+     },
+     "Iops": {
+      "type": "integer"
+     },
+     "Throughput": {
+      "type": "integer"
+     },
+     "VolumeSize": {
+      "type": "integer"
+     },
+     "VolumeType": {
+      "enum": [
+       "standard",
+       "gp2",
+       "io1",
+       "gp3"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionAtRestOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "KmsKeyId": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IAMFederationOptionsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "RolesKey": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SubjectKey": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IAMFederationOptionsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "RolesKey": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SubjectKey": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IdentityCenterOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "EnabledAPIAccess": {
+      "type": "boolean"
+     },
+     "IdentityCenterApplicationARN": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "IdentityCenterInstanceARN": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "IdentityStoreId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RolesKey": {
+      "enum": [
+       "GroupName",
+       "GroupId"
+      ],
+      "type": "string"
+     },
+     "SubjectKey": {
+      "enum": [
+       "UserName",
+       "UserId",
+       "Email"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IdentityCenterOptionsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "EnabledAPIAccess": {
+      "type": "boolean"
+     },
+     "IdentityCenterInstanceARN": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "RolesKey": {
+      "enum": [
+       "GroupName",
+       "GroupId"
+      ],
+      "type": "string"
+     },
+     "SubjectKey": {
+      "enum": [
+       "UserName",
+       "UserId",
+       "Email"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "JWTOptionsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "PublicKey": {
+      "type": "string"
+     },
+     "RolesKey": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SubjectKey": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "JWTOptionsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "PublicKey": {
+      "type": "string"
+     },
+     "RolesKey": {
+      "type": "string"
+     },
+     "SubjectKey": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LogPublishingOption": {
+    "additionalProperties": false,
+    "properties": {
+     "CloudWatchLogsLogGroupArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "MasterUserOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "MasterUserARN": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "MasterUserName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "MasterUserPassword": {
+      "maxLength": 128,
+      "minLength": 8,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ModifyingProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "ActiveValue": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PendingValue": {
+      "type": "string"
+     },
+     "ValueType": {
+      "enum": [
+       "PLAIN_TEXT",
+       "STRINGIFIED_JSON"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NaturalLanguageQueryGenerationOptionsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "DesiredState": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NaturalLanguageQueryGenerationOptionsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "CurrentState": {
+      "enum": [
+       "NOT_ENABLED",
+       "ENABLE_COMPLETE",
+       "ENABLE_IN_PROGRESS",
+       "ENABLE_FAILED",
+       "DISABLE_COMPLETE",
+       "DISABLE_IN_PROGRESS",
+       "DISABLE_FAILED"
+      ],
+      "type": "string"
+     },
+     "DesiredState": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NodeConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "Count": {
+      "type": "integer"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "Type": {
+      "enum": [
+       "m3.medium.search",
+       "m3.large.search",
+       "m3.xlarge.search",
+       "m3.2xlarge.search",
+       "m4.large.search",
+       "m4.xlarge.search",
+       "m4.2xlarge.search",
+       "m4.4xlarge.search",
+       "m4.10xlarge.search",
+       "m5.large.search",
+       "m5.xlarge.search",
+       "m5.2xlarge.search",
+       "m5.4xlarge.search",
+       "m5.12xlarge.search",
+       "m5.24xlarge.search",
+       "r5.large.search",
+       "r5.xlarge.search",
+       "r5.2xlarge.search",
+       "r5.4xlarge.search",
+       "r5.12xlarge.search",
+       "r5.24xlarge.search",
+       "c5.large.search",
+       "c5.xlarge.search",
+       "c5.2xlarge.search",
+       "c5.4xlarge.search",
+       "c5.9xlarge.search",
+       "c5.18xlarge.search",
+       "t3.nano.search",
+       "t3.micro.search",
+       "t3.small.search",
+       "t3.medium.search",
+       "t3.large.search",
+       "t3.xlarge.search",
+       "t3.2xlarge.search",
+       "or1.medium.search",
+       "or1.large.search",
+       "or1.xlarge.search",
+       "or1.2xlarge.search",
+       "or1.4xlarge.search",
+       "or1.8xlarge.search",
+       "or1.12xlarge.search",
+       "or1.16xlarge.search",
+       "ultrawarm1.medium.search",
+       "ultrawarm1.large.search",
+       "ultrawarm1.xlarge.search",
+       "t2.micro.search",
+       "t2.small.search",
+       "t2.medium.search",
+       "r3.large.search",
+       "r3.xlarge.search",
+       "r3.2xlarge.search",
+       "r3.4xlarge.search",
+       "r3.8xlarge.search",
+       "i2.xlarge.search",
+       "i2.2xlarge.search",
+       "d2.xlarge.search",
+       "d2.2xlarge.search",
+       "d2.4xlarge.search",
+       "d2.8xlarge.search",
+       "c4.large.search",
+       "c4.xlarge.search",
+       "c4.2xlarge.search",
+       "c4.4xlarge.search",
+       "c4.8xlarge.search",
+       "r4.large.search",
+       "r4.xlarge.search",
+       "r4.2xlarge.search",
+       "r4.4xlarge.search",
+       "r4.8xlarge.search",
+       "r4.16xlarge.search",
+       "i3.large.search",
+       "i3.xlarge.search",
+       "i3.2xlarge.search",
+       "i3.4xlarge.search",
+       "i3.8xlarge.search",
+       "i3.16xlarge.search",
+       "r6g.large.search",
+       "r6g.xlarge.search",
+       "r6g.2xlarge.search",
+       "r6g.4xlarge.search",
+       "r6g.8xlarge.search",
+       "r6g.12xlarge.search",
+       "m6g.large.search",
+       "m6g.xlarge.search",
+       "m6g.2xlarge.search",
+       "m6g.4xlarge.search",
+       "m6g.8xlarge.search",
+       "m6g.12xlarge.search",
+       "c6g.large.search",
+       "c6g.xlarge.search",
+       "c6g.2xlarge.search",
+       "c6g.4xlarge.search",
+       "c6g.8xlarge.search",
+       "c6g.12xlarge.search",
+       "r6gd.large.search",
+       "r6gd.xlarge.search",
+       "r6gd.2xlarge.search",
+       "r6gd.4xlarge.search",
+       "r6gd.8xlarge.search",
+       "r6gd.12xlarge.search",
+       "r6gd.16xlarge.search",
+       "t4g.small.search",
+       "t4g.medium.search"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NodeOption": {
+    "additionalProperties": false,
+    "properties": {
+     "NodeConfig": {
+      "$ref": "#/components/schemas/NodeConfig"
+     },
+     "NodeType": {
+      "enum": [
+       "coordinator"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NodeToNodeEncryptionOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "OffPeakWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "WindowStartTime": {
+      "$ref": "#/components/schemas/WindowStartTime"
+     }
+    },
+    "type": "object"
+   },
+   "OffPeakWindowOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "OffPeakWindow": {
+      "$ref": "#/components/schemas/OffPeakWindow"
+     }
+    },
+    "type": "object"
+   },
+   "S3VectorsEngine": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "SAMLIdp": {
+    "additionalProperties": false,
+    "properties": {
+     "EntityId": {
+      "maxLength": 512,
+      "minLength": 8,
+      "type": "string"
+     },
+     "MetadataContent": {
+      "maxLength": 1048576,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "MetadataContent",
+     "EntityId"
+    ],
+    "type": "object"
+   },
+   "SAMLOptionsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "Idp": {
+      "$ref": "#/components/schemas/SAMLIdp"
+     },
+     "MasterBackendRole": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "MasterUserName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RolesKey": {
+      "type": "string"
+     },
+     "SessionTimeoutMinutes": {
+      "type": "integer"
+     },
+     "SubjectKey": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SAMLOptionsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "Idp": {
+      "$ref": "#/components/schemas/SAMLIdp"
+     },
+     "RolesKey": {
+      "type": "string"
+     },
+     "SessionTimeoutMinutes": {
+      "type": "integer"
+     },
+     "SubjectKey": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceSoftwareOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "AutomatedUpdateDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Cancellable": {
+      "type": "boolean"
+     },
+     "CurrentVersion": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "NewVersion": {
+      "type": "string"
+     },
+     "OptionalDeployment": {
+      "type": "boolean"
+     },
+     "UpdateAvailable": {
+      "type": "boolean"
+     },
+     "UpdateStatus": {
+      "enum": [
+       "PENDING_UPDATE",
+       "IN_PROGRESS",
+       "COMPLETED",
+       "NOT_ELIGIBLE",
+       "ELIGIBLE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SnapshotOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "AutomatedSnapshotStartHour": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "SoftwareUpdateOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoSoftwareUpdateEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "VPCDerivedInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailabilityZones": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SecurityGroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SubnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "VPCId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VPCOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "SecurityGroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SubnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "WindowStartTime": {
+    "additionalProperties": false,
+    "properties": {
+     "Hours": {
+      "maximum": 23,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Minutes": {
+      "maximum": 59,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Hours",
+     "Minutes"
+    ],
+    "type": "object"
+   },
+   "ZoneAwarenessConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailabilityZoneCount": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon OpenSearch Service API (2021-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Domains are configuration records: no cluster, node, storage, endpoint, index, document or search exists, Endpoint is never returned, and UpdateDomainConfig, index, package, connection and VPC endpoint APIs return UnknownOperationException with HTTP 501. Only OpenSearch engine versions are accepted. VPC options, fine-grained access control and master-user credentials, Cognito and IAM Identity Center authentication, Auto-Tune and AI/ML options are refused; access policies are stored but not enforced. CreateDomain stores TagList, but AddTags, RemoveTags and ListTags are not implemented.",
+  "title": "Amazon OpenSearch Service (simulator catalog)",
+  "version": "2021-01-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/2021-01-01/domain": {
+   "get": {
+    "operationId": "opensearchListDomainNames",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "es"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "engineType",
+      "schema": {
+       "enum": [
+        "OpenSearch",
+        "Elasticsearch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DomainNames": {
+           "items": {
+            "$ref": "#/components/schemas/DomainInfo"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListDomainNames",
+    "tags": [
+     "Amazon OpenSearch Service"
+    ]
+   }
+  },
+  "/2021-01-01/opensearch/domain": {
+   "post": {
+    "operationId": "opensearchCreateDomain",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "es"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AIMLOptions": {
+          "$ref": "#/components/schemas/AIMLOptionsInput"
+         },
+         "AccessPolicies": {
+          "maxLength": 102400,
+          "minLength": 0,
+          "type": "string"
+         },
+         "AdvancedOptions": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "AdvancedSecurityOptions": {
+          "$ref": "#/components/schemas/AdvancedSecurityOptionsInput"
+         },
+         "AutoTuneOptions": {
+          "$ref": "#/components/schemas/AutoTuneOptionsInput"
+         },
+         "ClusterConfig": {
+          "$ref": "#/components/schemas/ClusterConfig"
+         },
+         "CognitoOptions": {
+          "$ref": "#/components/schemas/CognitoOptions"
+         },
+         "DomainEndpointOptions": {
+          "$ref": "#/components/schemas/DomainEndpointOptions"
+         },
+         "DomainName": {
+          "maxLength": 28,
+          "minLength": 3,
+          "type": "string"
+         },
+         "EBSOptions": {
+          "$ref": "#/components/schemas/EBSOptions"
+         },
+         "EncryptionAtRestOptions": {
+          "$ref": "#/components/schemas/EncryptionAtRestOptions"
+         },
+         "EngineVersion": {
+          "maxLength": 18,
+          "minLength": 14,
+          "type": "string"
+         },
+         "IPAddressType": {
+          "enum": [
+           "ipv4",
+           "dualstack"
+          ],
+          "type": "string"
+         },
+         "IdentityCenterOptions": {
+          "$ref": "#/components/schemas/IdentityCenterOptionsInput"
+         },
+         "LogPublishingOptions": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/LogPublishingOption"
+          },
+          "type": "object"
+         },
+         "NodeToNodeEncryptionOptions": {
+          "$ref": "#/components/schemas/NodeToNodeEncryptionOptions"
+         },
+         "OffPeakWindowOptions": {
+          "$ref": "#/components/schemas/OffPeakWindowOptions"
+         },
+         "SnapshotOptions": {
+          "$ref": "#/components/schemas/SnapshotOptions"
+         },
+         "SoftwareUpdateOptions": {
+          "$ref": "#/components/schemas/SoftwareUpdateOptions"
+         },
+         "TagList": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         },
+         "VPCOptions": {
+          "$ref": "#/components/schemas/VPCOptions"
+         }
+        },
+        "required": [
+         "DomainName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DomainStatus": {
+           "$ref": "#/components/schemas/DomainStatus"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateDomain",
+    "tags": [
+     "Amazon OpenSearch Service"
+    ]
+   }
+  },
+  "/2021-01-01/opensearch/domain/{DomainName}": {
+   "delete": {
+    "operationId": "opensearchDeleteDomain",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "es"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "DomainName",
+      "required": true,
+      "schema": {
+       "maxLength": 28,
+       "minLength": 3,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DomainStatus": {
+           "$ref": "#/components/schemas/DomainStatus"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteDomain",
+    "tags": [
+     "Amazon OpenSearch Service"
+    ]
+   },
+   "get": {
+    "operationId": "opensearchDescribeDomain",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "es"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "DomainName",
+      "required": true,
+      "schema": {
+       "maxLength": 28,
+       "minLength": 3,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DomainStatus": {
+           "$ref": "#/components/schemas/DomainStatus"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeDomain",
+    "tags": [
+     "Amazon OpenSearch Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon OpenSearch Service API (2021-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Domains are configuration records: no cluster, node, storage, endpoint, index, document or search exists, Endpoint is never returned, and UpdateDomainConfig, index, package, connection and VPC endpoint APIs return UnknownOperationException with HTTP 501. Only OpenSearch engine versions are accepted. VPC options, fine-grained access control and master-user credentials, Cognito and IAM Identity Center authentication, Auto-Tune and AI/ML options are refused; access policies are stored but not enforced. CreateDomain stores TagList, but AddTags, RemoveTags and ListTags are not implemented.",
+   "name": "Amazon OpenSearch Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/opensearch/2021-01-01/service-2.json",
+  "sha256": "d2645d6cef46a205a69785aa0dc5d2ca4e6f2b368a0368ccd1e39d8dbcccec47",
+  "license": "Apache-2.0"
+ }
+}

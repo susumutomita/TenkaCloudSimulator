@@ -1,0 +1,724 @@
+{
+ "components": {
+  "schemas": {
+   "Connection": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ConnectionName": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ConnectionStatus": {
+      "enum": [
+       "PENDING",
+       "AVAILABLE",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "HostArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "OwnerAccountId": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "ProviderType": {
+      "enum": [
+       "Bitbucket",
+       "GitHub",
+       "GitHubEnterpriseServer",
+       "GitLab",
+       "GitLabSelfManaged",
+       "AzureDevOps"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateConnectionInput": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionName": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "HostArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ProviderType": {
+      "enum": [
+       "Bitbucket",
+       "GitHub",
+       "GitHubEnterpriseServer",
+       "GitLab",
+       "GitLabSelfManaged",
+       "AzureDevOps"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ConnectionName"
+    ],
+    "type": "object"
+   },
+   "CreateConnectionOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ConnectionArn"
+    ],
+    "type": "object"
+   },
+   "CreateHostInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProviderEndpoint": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProviderType": {
+      "enum": [
+       "Bitbucket",
+       "GitHub",
+       "GitHubEnterpriseServer",
+       "GitLab",
+       "GitLabSelfManaged",
+       "AzureDevOps"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     },
+     "VpcConfiguration": {
+      "$ref": "#/components/schemas/VpcConfiguration"
+     }
+    },
+    "required": [
+     "Name",
+     "ProviderType",
+     "ProviderEndpoint"
+    ],
+    "type": "object"
+   },
+   "CreateHostOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "HostArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteConnectionInput": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConnectionArn"
+    ],
+    "type": "object"
+   },
+   "DeleteConnectionOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteHostInput": {
+    "additionalProperties": false,
+    "properties": {
+     "HostArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "HostArn"
+    ],
+    "type": "object"
+   },
+   "DeleteHostOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GetConnectionInput": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectionArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConnectionArn"
+    ],
+    "type": "object"
+   },
+   "GetConnectionOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Connection": {
+      "$ref": "#/components/schemas/Connection"
+     }
+    },
+    "type": "object"
+   },
+   "GetHostInput": {
+    "additionalProperties": false,
+    "properties": {
+     "HostArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "HostArn"
+    ],
+    "type": "object"
+   },
+   "GetHostOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProviderEndpoint": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProviderType": {
+      "enum": [
+       "Bitbucket",
+       "GitHub",
+       "GitHubEnterpriseServer",
+       "GitLab",
+       "GitLabSelfManaged",
+       "AzureDevOps"
+      ],
+      "type": "string"
+     },
+     "Status": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "VpcConfiguration": {
+      "$ref": "#/components/schemas/VpcConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "Host": {
+    "additionalProperties": false,
+    "properties": {
+     "HostArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProviderEndpoint": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProviderType": {
+      "enum": [
+       "Bitbucket",
+       "GitHub",
+       "GitHubEnterpriseServer",
+       "GitLab",
+       "GitLabSelfManaged",
+       "AzureDevOps"
+      ],
+      "type": "string"
+     },
+     "Status": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "StatusMessage": {
+      "type": "string"
+     },
+     "VpcConfiguration": {
+      "$ref": "#/components/schemas/VpcConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "ListConnectionsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "HostArnFilter": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProviderTypeFilter": {
+      "enum": [
+       "Bitbucket",
+       "GitHub",
+       "GitHubEnterpriseServer",
+       "GitLab",
+       "GitLabSelfManaged",
+       "AzureDevOps"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListConnectionsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Connections": {
+      "items": {
+       "$ref": "#/components/schemas/Connection"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListHostsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListHostsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Hosts": {
+      "items": {
+       "$ref": "#/components/schemas/Host"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceInput": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateHostInput": {
+    "additionalProperties": false,
+    "properties": {
+     "HostArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ProviderEndpoint": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "VpcConfiguration": {
+      "$ref": "#/components/schemas/VpcConfiguration"
+     }
+    },
+    "required": [
+     "HostArn"
+    ],
+    "type": "object"
+   },
+   "UpdateHostOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "VpcConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "SecurityGroupIds": {
+      "items": {
+       "maxLength": 20,
+       "minLength": 11,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "SubnetIds": {
+      "items": {
+       "maxLength": 24,
+       "minLength": 15,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "TlsCertificate": {
+      "maxLength": 16384,
+      "minLength": 1,
+      "type": "string"
+     },
+     "VpcId": {
+      "maxLength": 21,
+      "minLength": 12,
+      "type": "string"
+     }
+    },
+    "required": [
+     "VpcId",
+     "SubnetIds",
+     "SecurityGroupIds"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS CodeConnections API (2023-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Connections and hosts stay PENDING: no OAuth handshake, provider app installation or repository access is performed. Connection resource links, repository sync configurations and CodeStar Connections legacy endpoints are not implemented.",
+  "title": "AWS CodeConnections (simulator catalog)",
+  "version": "2023-12-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "codeconnectionsJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "com.amazonaws.codeconnections.CodeConnections_20231201.CreateConnection",
+        "com.amazonaws.codeconnections.CodeConnections_20231201.CreateHost",
+        "com.amazonaws.codeconnections.CodeConnections_20231201.DeleteConnection",
+        "com.amazonaws.codeconnections.CodeConnections_20231201.DeleteHost",
+        "com.amazonaws.codeconnections.CodeConnections_20231201.GetConnection",
+        "com.amazonaws.codeconnections.CodeConnections_20231201.GetHost",
+        "com.amazonaws.codeconnections.CodeConnections_20231201.ListConnections",
+        "com.amazonaws.codeconnections.CodeConnections_20231201.ListHosts",
+        "com.amazonaws.codeconnections.CodeConnections_20231201.ListTagsForResource",
+        "com.amazonaws.codeconnections.CodeConnections_20231201.TagResource",
+        "com.amazonaws.codeconnections.CodeConnections_20231201.UntagResource",
+        "com.amazonaws.codeconnections.CodeConnections_20231201.UpdateHost"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.0": {
+       "examples": {
+        "CreateConnection": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.CreateConnection",
+         "value": {}
+        },
+        "CreateHost": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.CreateHost",
+         "value": {}
+        },
+        "DeleteConnection": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.DeleteConnection",
+         "value": {}
+        },
+        "DeleteHost": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.DeleteHost",
+         "value": {}
+        },
+        "GetConnection": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.GetConnection",
+         "value": {}
+        },
+        "GetHost": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.GetHost",
+         "value": {}
+        },
+        "ListConnections": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.ListConnections",
+         "value": {}
+        },
+        "ListHosts": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.ListHosts",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.UntagResource",
+         "value": {}
+        },
+        "UpdateHost": {
+         "summary": "X-Amz-Target: com.amazonaws.codeconnections.CodeConnections_20231201.UpdateHost",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.0": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS CodeConnections JSON 1.0 operations",
+    "tags": [
+     "AWS CodeConnections"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS CodeConnections API (2023-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Connections and hosts stay PENDING: no OAuth handshake, provider app installation or repository access is performed. Connection resource links, repository sync configurations and CodeStar Connections legacy endpoints are not implemented.",
+   "name": "AWS CodeConnections"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/codeconnections/2023-12-01/service-2.json",
+  "sha256": "c2b7780facc20c58a9e87fb634434ac5fce63b465ba868fca81909d41a90b17c",
+  "license": "Apache-2.0"
+ }
+}

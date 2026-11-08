@@ -1,0 +1,2033 @@
+{
+ "components": {
+  "schemas": {
+   "AccountConnector": {
+    "additionalProperties": false,
+    "properties": {
+     "annotations": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "customOauthConfig": {
+      "$ref": "#/components/schemas/CustomOAuthConfig"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "oauthStartUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "providerOauthConfig": {
+      "$ref": "#/components/schemas/ProviderOAuthConfig"
+     },
+     "proxyConfig": {
+      "$ref": "#/components/schemas/ProxyConfig"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BasicAuthentication": {
+    "additionalProperties": false,
+    "properties": {
+     "passwordSecretVersion": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BearerTokenAuthentication": {
+    "additionalProperties": false,
+    "properties": {
+     "tokenSecretVersion": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BitbucketCloudConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authorizerCredential": {
+      "$ref": "#/components/schemas/UserCredential"
+     },
+     "readAuthorizerCredential": {
+      "$ref": "#/components/schemas/UserCredential"
+     },
+     "webhookSecretSecretVersion": {
+      "type": "string"
+     },
+     "workspace": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BitbucketDataCenterConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authorizerCredential": {
+      "$ref": "#/components/schemas/UserCredential"
+     },
+     "hostUri": {
+      "type": "string"
+     },
+     "readAuthorizerCredential": {
+      "$ref": "#/components/schemas/UserCredential"
+     },
+     "serverVersion": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "serviceDirectoryConfig": {
+      "$ref": "#/components/schemas/ServiceDirectoryConfig"
+     },
+     "sslCaCertificate": {
+      "type": "string"
+     },
+     "webhookSecretSecretVersion": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Connection": {
+    "additionalProperties": false,
+    "properties": {
+     "annotations": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "bitbucketCloudConfig": {
+      "$ref": "#/components/schemas/BitbucketCloudConfig"
+     },
+     "bitbucketDataCenterConfig": {
+      "$ref": "#/components/schemas/BitbucketDataCenterConfig"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "cryptoKeyConfig": {
+      "$ref": "#/components/schemas/CryptoKeyConfig"
+     },
+     "deleteTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "disabled": {
+      "type": "boolean"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "gitProxyConfig": {
+      "$ref": "#/components/schemas/GitProxyConfig"
+     },
+     "githubConfig": {
+      "$ref": "#/components/schemas/GitHubConfig"
+     },
+     "githubEnterpriseConfig": {
+      "$ref": "#/components/schemas/GitHubEnterpriseConfig"
+     },
+     "gitlabConfig": {
+      "$ref": "#/components/schemas/GitLabConfig"
+     },
+     "gitlabEnterpriseConfig": {
+      "$ref": "#/components/schemas/GitLabEnterpriseConfig"
+     },
+     "httpConfig": {
+      "$ref": "#/components/schemas/GenericHTTPEndpointConfig"
+     },
+     "installationState": {
+      "$ref": "#/components/schemas/InstallationState"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "reconciling": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "secureSourceManagerInstanceConfig": {
+      "$ref": "#/components/schemas/SecureSourceManagerInstanceConfig"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CryptoKeyConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "keyReference": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CustomOAuthConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authUri": {
+      "type": "string"
+     },
+     "clientId": {
+      "type": "string"
+     },
+     "clientSecret": {
+      "type": "string"
+     },
+     "hostUri": {
+      "type": "string"
+     },
+     "pkceDisabled": {
+      "type": "boolean"
+     },
+     "scmProvider": {
+      "enum": [
+       "SCM_PROVIDER_UNKNOWN",
+       "GITHUB_ENTERPRISE",
+       "GITLAB_ENTERPRISE",
+       "BITBUCKET_DATA_CENTER"
+      ],
+      "type": "string"
+     },
+     "scopes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "serverVersion": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "serviceDirectoryConfig": {
+      "$ref": "#/components/schemas/ServiceDirectoryConfig"
+     },
+     "sslCaCertificate": {
+      "type": "string"
+     },
+     "tokenUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GenericHTTPEndpointConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "basicAuthentication": {
+      "$ref": "#/components/schemas/BasicAuthentication"
+     },
+     "bearerTokenAuthentication": {
+      "$ref": "#/components/schemas/BearerTokenAuthentication"
+     },
+     "hostUri": {
+      "type": "string"
+     },
+     "serviceDirectoryConfig": {
+      "$ref": "#/components/schemas/ServiceDirectoryConfig"
+     },
+     "sslCaCertificate": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitHubConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "appInstallationId": {
+      "format": "int64",
+      "type": "string"
+     },
+     "authorizerCredential": {
+      "$ref": "#/components/schemas/OAuthCredential"
+     },
+     "githubApp": {
+      "enum": [
+       "GIT_HUB_APP_UNSPECIFIED",
+       "DEVELOPER_CONNECT",
+       "FIREBASE",
+       "GEMINI_CODE_ASSIST",
+       "DATAFORM"
+      ],
+      "type": "string"
+     },
+     "installationUri": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitHubEnterpriseConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "appId": {
+      "format": "int64",
+      "type": "string"
+     },
+     "appInstallationId": {
+      "format": "int64",
+      "type": "string"
+     },
+     "appSlug": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "hostUri": {
+      "type": "string"
+     },
+     "installationUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "organization": {
+      "type": "string"
+     },
+     "privateKeySecretVersion": {
+      "type": "string"
+     },
+     "serverVersion": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "serviceDirectoryConfig": {
+      "$ref": "#/components/schemas/ServiceDirectoryConfig"
+     },
+     "sslCaCertificate": {
+      "type": "string"
+     },
+     "webhookSecretSecretVersion": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitLabConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authorizerCredential": {
+      "$ref": "#/components/schemas/UserCredential"
+     },
+     "readAuthorizerCredential": {
+      "$ref": "#/components/schemas/UserCredential"
+     },
+     "webhookSecretSecretVersion": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitLabEnterpriseConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "authorizerCredential": {
+      "$ref": "#/components/schemas/UserCredential"
+     },
+     "hostUri": {
+      "type": "string"
+     },
+     "readAuthorizerCredential": {
+      "$ref": "#/components/schemas/UserCredential"
+     },
+     "serverVersion": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "serviceDirectoryConfig": {
+      "$ref": "#/components/schemas/ServiceDirectoryConfig"
+     },
+     "sslCaCertificate": {
+      "type": "string"
+     },
+     "webhookSecretSecretVersion": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitProxyConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "httpProxyBaseUri": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GitRepositoryLink": {
+    "additionalProperties": false,
+    "properties": {
+     "annotations": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "cloneUri": {
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "deleteTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "gitProxyUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "reconciling": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "webhookId": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InstallationState": {
+    "additionalProperties": false,
+    "properties": {
+     "actionUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "message": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "stage": {
+      "enum": [
+       "STAGE_UNSPECIFIED",
+       "PENDING_CREATE_APP",
+       "PENDING_USER_OAUTH",
+       "PENDING_INSTALL_APP",
+       "COMPLETE"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListAccountConnectorsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "accountConnectors": {
+      "items": {
+       "$ref": "#/components/schemas/AccountConnector"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListConnectionsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "connections": {
+      "items": {
+       "$ref": "#/components/schemas/Connection"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListGitRepositoryLinksResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "gitRepositoryLinks": {
+      "items": {
+       "$ref": "#/components/schemas/GitRepositoryLink"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "OAuthCredential": {
+    "additionalProperties": false,
+    "properties": {
+     "oauthTokenSecretVersion": {
+      "type": "string"
+     },
+     "username": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ProviderOAuthConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "scopes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "systemProviderId": {
+      "enum": [
+       "SYSTEM_PROVIDER_UNSPECIFIED",
+       "GITHUB",
+       "GITLAB",
+       "GOOGLE",
+       "SENTRY",
+       "ROVO",
+       "NEW_RELIC",
+       "DATASTAX",
+       "DYNATRACE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProxyConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "httpProxyBaseUri": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SecureSourceManagerInstanceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "instance": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceDirectoryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "service": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UserCredential": {
+    "additionalProperties": false,
+    "properties": {
+     "userTokenSecretVersion": {
+      "type": "string"
+     },
+     "username": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Developer Connect API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Connections, Git repository links and account connectors are configuration metadata: no Git provider, GitHub App, OAuth flow, webhook or Git proxy is contacted or created, and installation state, webhook IDs and proxy URIs are not reported. Credentials must be Secret Manager version names, which are stored as references and never resolved. Custom OAuth client secrets and enabling a proxy are refused, and only labels, annotations and disabled can be updated. Deleting a connection that still has Git repository links fails with FAILED_PRECONDITION. Long-running operations complete synchronously.",
+  "title": "Developer Connect (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/accountConnectors": {
+   "get": {
+    "operationId": "developerconnect.projects.locations.accountConnectors.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListAccountConnectorsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.accountConnectors.list",
+    "tags": [
+     "Developer Connect"
+    ]
+   },
+   "post": {
+    "operationId": "developerconnect.projects.locations.accountConnectors.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "accountConnectorId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AccountConnector"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.accountConnectors.create",
+    "tags": [
+     "Developer Connect"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/accountConnectors/{accountConnectorsId}": {
+   "delete": {
+    "operationId": "developerconnect.projects.locations.accountConnectors.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountConnectorsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.accountConnectors.delete",
+    "tags": [
+     "Developer Connect"
+    ]
+   },
+   "get": {
+    "operationId": "developerconnect.projects.locations.accountConnectors.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountConnectorsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AccountConnector"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.accountConnectors.get",
+    "tags": [
+     "Developer Connect"
+    ]
+   },
+   "patch": {
+    "operationId": "developerconnect.projects.locations.accountConnectors.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountConnectorsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AccountConnector"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.accountConnectors.patch",
+    "tags": [
+     "Developer Connect"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/connections": {
+   "get": {
+    "operationId": "developerconnect.projects.locations.connections.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListConnectionsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connections.list",
+    "tags": [
+     "Developer Connect"
+    ]
+   },
+   "post": {
+    "operationId": "developerconnect.projects.locations.connections.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "connectionId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Connection"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connections.create",
+    "tags": [
+     "Developer Connect"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/connections/{connectionsId}": {
+   "delete": {
+    "operationId": "developerconnect.projects.locations.connections.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connections.delete",
+    "tags": [
+     "Developer Connect"
+    ]
+   },
+   "get": {
+    "operationId": "developerconnect.projects.locations.connections.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Connection"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connections.get",
+    "tags": [
+     "Developer Connect"
+    ]
+   },
+   "patch": {
+    "operationId": "developerconnect.projects.locations.connections.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Connection"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connections.patch",
+    "tags": [
+     "Developer Connect"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/connections/{connectionsId}/gitRepositoryLinks": {
+   "get": {
+    "operationId": "developerconnect.projects.locations.connections.gitRepositoryLinks.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListGitRepositoryLinksResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connections.gitRepositoryLinks.list",
+    "tags": [
+     "Developer Connect"
+    ]
+   },
+   "post": {
+    "operationId": "developerconnect.projects.locations.connections.gitRepositoryLinks.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "gitRepositoryLinkId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GitRepositoryLink"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connections.gitRepositoryLinks.create",
+    "tags": [
+     "Developer Connect"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/connections/{connectionsId}/gitRepositoryLinks/{gitRepositoryLinksId}": {
+   "delete": {
+    "operationId": "developerconnect.projects.locations.connections.gitRepositoryLinks.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gitRepositoryLinksId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connections.gitRepositoryLinks.delete",
+    "tags": [
+     "Developer Connect"
+    ]
+   },
+   "get": {
+    "operationId": "developerconnect.projects.locations.connections.gitRepositoryLinks.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gitRepositoryLinksId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GitRepositoryLink"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.connections.gitRepositoryLinks.get",
+    "tags": [
+     "Developer Connect"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "developerconnect.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Developer Connect"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "developerconnect.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Developer Connect"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/developerconnect"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Developer Connect API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Connections, Git repository links and account connectors are configuration metadata: no Git provider, GitHub App, OAuth flow, webhook or Git proxy is contacted or created, and installation state, webhook IDs and proxy URIs are not reported. Credentials must be Secret Manager version names, which are stored as references and never resolved. Custom OAuth client secrets and enabling a proxy are refused, and only labels, annotations and disabled can be updated. Deleting a connection that still has Git repository links fails with FAILED_PRECONDITION. Long-running operations complete synchronously.",
+   "name": "Developer Connect"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/developerconnect.v1.json",
+  "sha256": "da9d1e6232870f49f66fc349434575967394d2bc28a241d6bdcbf97f743106c8",
+  "license": "Apache-2.0",
+  "revision": "20260611"
+ }
+}

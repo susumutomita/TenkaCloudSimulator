@@ -1,0 +1,552 @@
+{
+ "components": {
+  "schemas": {
+   "CreateCollectionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CollectionId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "CollectionId"
+    ],
+    "type": "object"
+   },
+   "CreateCollectionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CollectionArn": {
+      "type": "string"
+     },
+     "FaceModelVersion": {
+      "type": "string"
+     },
+     "StatusCode": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "CreateProjectRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoUpdate": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "Feature": {
+      "enum": [
+       "CONTENT_MODERATION",
+       "CUSTOM_LABELS"
+      ],
+      "type": "string"
+     },
+     "ProjectName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "ProjectName"
+    ],
+    "type": "object"
+   },
+   "CreateProjectResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ProjectArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DatasetMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "CreationTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DatasetArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "DatasetType": {
+      "enum": [
+       "TRAIN",
+       "TEST"
+      ],
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "CREATE_IN_PROGRESS",
+       "CREATE_COMPLETE",
+       "CREATE_FAILED",
+       "UPDATE_IN_PROGRESS",
+       "UPDATE_COMPLETE",
+       "UPDATE_FAILED",
+       "DELETE_IN_PROGRESS"
+      ],
+      "type": "string"
+     },
+     "StatusMessage": {
+      "type": "string"
+     },
+     "StatusMessageCode": {
+      "enum": [
+       "SUCCESS",
+       "SERVICE_ERROR",
+       "CLIENT_ERROR"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteCollectionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CollectionId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "CollectionId"
+    ],
+    "type": "object"
+   },
+   "DeleteCollectionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "StatusCode": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteProjectRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ProjectArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ProjectArn"
+    ],
+    "type": "object"
+   },
+   "DeleteProjectResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Status": {
+      "enum": [
+       "CREATING",
+       "CREATED",
+       "DELETING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeCollectionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CollectionId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "CollectionId"
+    ],
+    "type": "object"
+   },
+   "DescribeCollectionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CollectionARN": {
+      "type": "string"
+     },
+     "CreationTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "FaceCount": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "FaceModelVersion": {
+      "type": "string"
+     },
+     "UserCount": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeProjectsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Features": {
+      "items": {
+       "enum": [
+        "CONTENT_MODERATION",
+        "CUSTOM_LABELS"
+       ],
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "type": "array"
+     },
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "type": "string"
+     },
+     "ProjectNames": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeProjectsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 1024,
+      "type": "string"
+     },
+     "ProjectDescriptions": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectDescription"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "AutoUpdate": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "CreationTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Datasets": {
+      "items": {
+       "$ref": "#/components/schemas/DatasetMetadata"
+      },
+      "type": "array"
+     },
+     "Feature": {
+      "enum": [
+       "CONTENT_MODERATION",
+       "CUSTOM_LABELS"
+      ],
+      "type": "string"
+     },
+     "ProjectArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "CREATING",
+       "CREATED",
+       "DELETING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Rekognition API (2016-06-27). Every other official operation returns HTTP 501 UnknownOperationException. Face collections are stored empty with face model version 7.0: no face or user is indexed, searched or associated, so FaceCount and UserCount stay 0. ListCollections is not implemented because its parallel CollectionIds and FaceModelVersions lists cannot be projected from one stored member. Projects are stored CREATED with no datasets and no project versions, so no Custom Labels or adapter model is ever trained, started or run; AutoUpdate is accepted only for CONTENT_MODERATION. Project ARNs end in the fixed number 1 instead of a creation timestamp, so re-creating a deleted project name reuses its ARN. DescribeProjects refuses Features. Every detection, comparison, search, face indexing, video analysis, media analysis job, Face Liveness session, stream processor, dataset, project version and project policy operation returns UnknownOperationException with HTTP 501.",
+  "title": "Amazon Rekognition (simulator catalog)",
+  "version": "2016-06-27"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "rekognitionJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "RekognitionService.CreateCollection",
+        "RekognitionService.CreateProject",
+        "RekognitionService.DeleteCollection",
+        "RekognitionService.DeleteProject",
+        "RekognitionService.DescribeCollection",
+        "RekognitionService.DescribeProjects",
+        "RekognitionService.ListTagsForResource",
+        "RekognitionService.TagResource",
+        "RekognitionService.UntagResource"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateCollection": {
+         "summary": "X-Amz-Target: RekognitionService.CreateCollection",
+         "value": {}
+        },
+        "CreateProject": {
+         "summary": "X-Amz-Target: RekognitionService.CreateProject",
+         "value": {}
+        },
+        "DeleteCollection": {
+         "summary": "X-Amz-Target: RekognitionService.DeleteCollection",
+         "value": {}
+        },
+        "DeleteProject": {
+         "summary": "X-Amz-Target: RekognitionService.DeleteProject",
+         "value": {}
+        },
+        "DescribeCollection": {
+         "summary": "X-Amz-Target: RekognitionService.DescribeCollection",
+         "value": {}
+        },
+        "DescribeProjects": {
+         "summary": "X-Amz-Target: RekognitionService.DescribeProjects",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: RekognitionService.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: RekognitionService.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: RekognitionService.UntagResource",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon Rekognition JSON 1.1 operations",
+    "tags": [
+     "Amazon Rekognition"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Rekognition API (2016-06-27). Every other official operation returns HTTP 501 UnknownOperationException. Face collections are stored empty with face model version 7.0: no face or user is indexed, searched or associated, so FaceCount and UserCount stay 0. ListCollections is not implemented because its parallel CollectionIds and FaceModelVersions lists cannot be projected from one stored member. Projects are stored CREATED with no datasets and no project versions, so no Custom Labels or adapter model is ever trained, started or run; AutoUpdate is accepted only for CONTENT_MODERATION. Project ARNs end in the fixed number 1 instead of a creation timestamp, so re-creating a deleted project name reuses its ARN. DescribeProjects refuses Features. Every detection, comparison, search, face indexing, video analysis, media analysis job, Face Liveness session, stream processor, dataset, project version and project policy operation returns UnknownOperationException with HTTP 501.",
+   "name": "Amazon Rekognition"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/rekognition/2016-06-27/service-2.json",
+  "sha256": "d79da9785c74ca2e687d9dd55f9b0975ea01ac2a4ec3482c9f5faa31161d3fec",
+  "license": "Apache-2.0"
+ }
+}

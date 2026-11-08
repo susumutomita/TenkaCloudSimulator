@@ -36,15 +36,27 @@ var Regions = []string{"us-east-1", "us-west-2", "ap-northeast-1", "eu-west-1"}
 
 type Gateway struct {
 	WAF               *WAFStore
+	SNS               *SNSStore
+	QueueFanout       SNSQueueFanout
+	Secrets           *SecretStore
+	CloudWatchLogs    *CloudWatchLogsStore
+	KMS               *KMSStore
 	APIGateway        *APIGatewayStore
 	LambdaPermissions *LambdaPermissionStore
 	Store             *core.Store
 	S3                *S3Store
 	Identities        *core.Identities
 	Parameters        *ParameterStore
+	Queues            *SQSStore
 	Stacks            *StackStore
 	Lambdas           *LambdaStore
 	Roles             *IAMRoleStore
+	DynamoDB          *DynamoDBStore
+	// Catalog serves model-driven bounded control-plane services. It owns
+	// only its registered JSON targets and REST signing scopes.
+	Catalog http.Handler
+	// CatalogOwns reports whether a request belongs to Catalog.
+	CatalogOwns func(*http.Request) bool
 }
 type failure struct {
 	XMLName   xml.Name `xml:"Error"`

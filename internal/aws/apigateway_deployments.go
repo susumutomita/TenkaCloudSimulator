@@ -16,6 +16,19 @@ var apiVariableName = regexp.MustCompile(`^[a-zA-Z0-9_]+$`)
 var apiVariableValue = regexp.MustCompile(`^[A-Za-z0-9-._~:/?#&=,]+$`)
 
 func (s *APIGatewayStore) PutIntegration(ctx context.Context, region, api, id, method, uri string) (RESTIntegration, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return RESTIntegration{}, err
+	}
+	defer tx.Rollback()
+	result, err := putIntegrationTx(ctx, tx, region, api, id, method, uri)
+	if err != nil {
+		return RESTIntegration{}, err
+	}
+	return result, tx.Commit()
+}
+func putIntegrationTx(ctx context.Context, tx *sql.Tx, region, api, id, method, uri string) (RESTIntegration, error) {
+	var err error
 	prefix := "arn:aws:apigateway:" + region + ":lambda:path/2015-03-31/functions/"
 	suffix := "/invocations"
 	if !strings.HasPrefix(uri, prefix) || !strings.HasSuffix(uri, suffix) {
@@ -26,11 +39,6 @@ func (s *APIGatewayStore) PutIntegration(ctx context.Context, region, api, id, m
 	if !strings.HasPrefix(target, arnPrefix) || !lambdaName.MatchString(strings.TrimPrefix(target, arnPrefix)) {
 		return RESTIntegration{}, apiFailure("BadRequestException", "Integration must target an unqualified local function in the same region.")
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return RESTIntegration{}, err
-	}
-	defer tx.Rollback()
 	resource, err := apiResourceRead(ctx, tx, region, api, id)
 	if err != nil {
 		return RESTIntegration{}, err
@@ -46,9 +54,21 @@ func (s *APIGatewayStore) PutIntegration(ctx context.Context, region, api, id, m
 	if _, err = tx.ExecContext(ctx, "UPDATE aws_apigateway_resources SET document=? WHERE region=? AND api_id=? AND id=?", string(data), region, api, id); err != nil {
 		return RESTIntegration{}, err
 	}
-	return integration, tx.Commit()
+	return integration, nil
 }
 func (s *APIGatewayStore) CreateDeployment(ctx context.Context, region, api, description string) (RESTDeployment, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return RESTDeployment{}, err
+	}
+	defer tx.Rollback()
+	result, err := createDeploymentTx(ctx, tx, region, api, description, "")
+	if err != nil {
+		return RESTDeployment{}, err
+	}
+	return result, tx.Commit()
+}
+func createDeploymentTx(ctx context.Context, tx *sql.Tx, region, api, description string, idOverride string) (RESTDeployment, error) {
 	if len(description) > 1024 || !utf8.ValidString(description) {
 		return RESTDeployment{}, apiFailure("BadRequestException", "Deployment description exceeds1024bytes.")
 	}
@@ -56,11 +76,6 @@ func (s *APIGatewayStore) CreateDeployment(ctx context.Context, region, api, des
 	if err != nil {
 		return RESTDeployment{}, err
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return RESTDeployment{}, err
-	}
-	defer tx.Rollback()
 	if _, err = apiRead(ctx, tx, region, api); err != nil {
 		return RESTDeployment{}, err
 	}
@@ -108,13 +123,19 @@ func (s *APIGatewayStore) CreateDeployment(ctx context.Context, region, api, des
 	if count >= 100 {
 		return RESTDeployment{}, apiFailure("LimitExceededException", "Local deployments are limited to100perAPI.")
 	}
+	if idOverride != "" {
+		if !apiLocalID.MatchString(idOverride) {
+			return RESTDeployment{}, apiFailure("BadRequestException", "Invalid provisioned API identifier.")
+		}
+		id = idOverride
+	}
 	deployment := RESTDeployment{ID: id[:10], CreatedDate: float64(time.Now().UnixMilli()) / 1000, Description: description}
 	data, _ := json.Marshal(deployment)
 	frozen, _ := json.Marshal(snapshot)
 	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_apigateway_deployments(region,api_id,id,document,snapshot) VALUES(?,?,?,?,?)", region, api, deployment.ID, string(data), string(frozen)); err != nil {
 		return RESTDeployment{}, err
 	}
-	return deployment, tx.Commit()
+	return deployment, nil
 }
 func apiDeploymentRead(ctx context.Context, query interface {
 	QueryRowContext(context.Context, string, ...any) *sql.Row
@@ -139,6 +160,19 @@ func (s *APIGatewayStore) Deployment(ctx context.Context, region, api, id string
 	return apiDeploymentRead(ctx, s.db, region, api, id)
 }
 func (s *APIGatewayStore) CreateStage(ctx context.Context, region, api, name, deployment string, variables map[string]string) (RESTStage, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return RESTStage{}, err
+	}
+	defer tx.Rollback()
+	result, err := createStageTx(ctx, tx, region, api, name, deployment, variables)
+	if err != nil {
+		return RESTStage{}, err
+	}
+	return result, tx.Commit()
+}
+func createStageTx(ctx context.Context, tx *sql.Tx, region, api, name, deployment string, variables map[string]string) (RESTStage, error) {
+	var err error
 	if !apiStageName.MatchString(name) || len(variables) > 20 {
 		return RESTStage{}, apiFailure("BadRequestException", "Use a local stage name and at most20variables.")
 	}
@@ -152,11 +186,6 @@ func (s *APIGatewayStore) CreateStage(ctx context.Context, region, api, name, de
 	if bytes > 4096 {
 		return RESTStage{}, apiFailure("BadRequestException", "Stage variables exceed4096bytes.")
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return RESTStage{}, err
-	}
-	defer tx.Rollback()
 	if _, _, err = apiDeploymentRead(ctx, tx, region, api, deployment); err != nil {
 		return RESTStage{}, err
 	}
@@ -176,7 +205,7 @@ func (s *APIGatewayStore) CreateStage(ctx context.Context, region, api, name, de
 	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_apigateway_stages(region,api_id,name,deployment_id,document) VALUES(?,?,?,?,?)", region, api, name, deployment, string(data)); err != nil {
 		return RESTStage{}, err
 	}
-	return stage, tx.Commit()
+	return stage, nil
 }
 func (s *APIGatewayStore) Stage(ctx context.Context, region, api, name string) (RESTStage, error) {
 	var data string

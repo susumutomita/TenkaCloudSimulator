@@ -1,0 +1,2752 @@
+{
+ "components": {
+  "schemas": {
+   "AlertTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "alertTargetArn": {
+      "type": "string"
+     },
+     "roleArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "alertTargetArn",
+     "roleArn"
+    ],
+    "type": "object"
+   },
+   "AttributePayload": {
+    "additionalProperties": false,
+    "properties": {
+     "attributes": {
+      "additionalProperties": {
+       "maxLength": 800,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "merge": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Behavior": {
+    "additionalProperties": false,
+    "properties": {
+     "criteria": {
+      "$ref": "#/components/schemas/BehaviorCriteria"
+     },
+     "exportMetric": {
+      "type": "boolean"
+     },
+     "metric": {
+      "type": "string"
+     },
+     "metricDimension": {
+      "$ref": "#/components/schemas/MetricDimension"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "suppressAlerts": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "BehaviorCriteria": {
+    "additionalProperties": false,
+    "properties": {
+     "comparisonOperator": {
+      "enum": [
+       "less-than",
+       "less-than-equals",
+       "greater-than",
+       "greater-than-equals",
+       "in-cidr-set",
+       "not-in-cidr-set",
+       "in-port-set",
+       "not-in-port-set",
+       "in-set",
+       "not-in-set"
+      ],
+      "type": "string"
+     },
+     "consecutiveDatapointsToAlarm": {
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "consecutiveDatapointsToClear": {
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "durationSeconds": {
+      "type": "integer"
+     },
+     "mlDetectionConfig": {
+      "$ref": "#/components/schemas/MachineLearningDetectionConfig"
+     },
+     "statisticalThreshold": {
+      "$ref": "#/components/schemas/StatisticalThreshold"
+     },
+     "value": {
+      "$ref": "#/components/schemas/MetricValue"
+     }
+    },
+    "type": "object"
+   },
+   "GroupNameAndArn": {
+    "additionalProperties": false,
+    "properties": {
+     "groupArn": {
+      "type": "string"
+     },
+     "groupName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MachineLearningDetectionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "confidenceLevel": {
+      "enum": [
+       "LOW",
+       "MEDIUM",
+       "HIGH"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "confidenceLevel"
+    ],
+    "type": "object"
+   },
+   "MetricDimension": {
+    "additionalProperties": false,
+    "properties": {
+     "dimensionName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "operator": {
+      "enum": [
+       "IN",
+       "NOT_IN"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "dimensionName"
+    ],
+    "type": "object"
+   },
+   "MetricToRetain": {
+    "additionalProperties": false,
+    "properties": {
+     "exportMetric": {
+      "type": "boolean"
+     },
+     "metric": {
+      "type": "string"
+     },
+     "metricDimension": {
+      "$ref": "#/components/schemas/MetricDimension"
+     }
+    },
+    "required": [
+     "metric"
+    ],
+    "type": "object"
+   },
+   "MetricValue": {
+    "additionalProperties": false,
+    "properties": {
+     "cidrs": {
+      "items": {
+       "maxLength": 43,
+       "minLength": 2,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "count": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "number": {
+      "type": "number"
+     },
+     "numbers": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array"
+     },
+     "ports": {
+      "items": {
+       "maximum": 65535,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "strings": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MetricsExportConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "mqttTopic": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "roleArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "mqttTopic",
+     "roleArn"
+    ],
+    "type": "object"
+   },
+   "Mqtt5Configuration": {
+    "additionalProperties": false,
+    "properties": {
+     "propagatingAttributes": {
+      "items": {
+       "$ref": "#/components/schemas/PropagatingAttribute"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Policy": {
+    "additionalProperties": false,
+    "properties": {
+     "policyArn": {
+      "type": "string"
+     },
+     "policyName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PropagatingAttribute": {
+    "additionalProperties": false,
+    "properties": {
+     "connectionAttribute": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "thingAttribute": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "userPropertyKey": {
+      "maxLength": 128,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SecurityProfileIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "arn"
+    ],
+    "type": "object"
+   },
+   "StatisticalThreshold": {
+    "additionalProperties": false,
+    "properties": {
+     "statistic": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "ThingAttribute": {
+    "additionalProperties": false,
+    "properties": {
+     "attributes": {
+      "additionalProperties": {
+       "maxLength": 800,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "thingArn": {
+      "type": "string"
+     },
+     "thingName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "thingTypeName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "version": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ThingGroupMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "parentGroupName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "rootToParentThingGroups": {
+      "items": {
+       "$ref": "#/components/schemas/GroupNameAndArn"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ThingGroupProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "attributePayload": {
+      "$ref": "#/components/schemas/AttributePayload"
+     },
+     "thingGroupDescription": {
+      "maxLength": 2028,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ThingTypeDefinition": {
+    "additionalProperties": false,
+    "properties": {
+     "thingTypeArn": {
+      "type": "string"
+     },
+     "thingTypeMetadata": {
+      "$ref": "#/components/schemas/ThingTypeMetadata"
+     },
+     "thingTypeName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "thingTypeProperties": {
+      "$ref": "#/components/schemas/ThingTypeProperties"
+     }
+    },
+    "type": "object"
+   },
+   "ThingTypeMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "deprecated": {
+      "type": "boolean"
+     },
+     "deprecationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "ThingTypeProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "mqtt5Configuration": {
+      "$ref": "#/components/schemas/Mqtt5Configuration"
+     },
+     "searchableAttributes": {
+      "items": {
+       "maxLength": 128,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "thingTypeDescription": {
+      "maxLength": 2028,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS IoT API (2015-05-28). Every other official operation returns HTTP 501 UnknownOperationException. Things, thing types, policies, static thing groups and Device Defender security profiles are registry metadata: no certificate, principal, MQTT connection, device shadow, message, rule, job, audit, detection or alert exists, thing groups hold no things and security profiles have no targets. CreateKeysAndCertificate, AttachPolicy, AddThingToThingGroup, AttachSecurityProfile, CreateTopicRule and the other device, data and job APIs return UnknownOperationException with HTTP 501. Versions of things, thing groups and security profiles stay 1, so expectedVersion must be 1. Creating an existing name fails with ResourceAlreadyExistsException even when the configuration is identical. Things store thingTypeName without checking that the type exists; billing groups, thing group parents, attribute merging and removeThingType are refused, and empty attribute values remove the attribute. Thing types cannot be deprecated (DeprecateThingType returns HTTP 501) and are deleted at once without checking things that use them. Policies hold only version 1, policy documents must be JSON objects with a Statement and at most 2048 characters excluding whitespace, and policies are never evaluated or attached. UpdateThingGroup replaces thingGroupProperties as a whole, and UpdateSecurityProfile delete flags are refused. Things cannot be tagged, as in the official API. ListThings attribute filters, ListThingGroups parent, prefix and recursive filters, ListSecurityProfiles dimension and metric filters, ListPolicies ascendingOrder and ListTagsForResource nextToken are refused. Deleting a missing thing succeeds, as documented, and so does deleting a missing thing group or security profile, whose official operations model no not-found error.",
+  "title": "AWS IoT (simulator catalog)",
+  "version": "2015-05-28"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/policies": {
+   "get": {
+    "operationId": "iotListPolicies",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "isAscendingOrder",
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "marker",
+      "schema": {
+       "maxLength": 1024,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "schema": {
+       "maximum": 250,
+       "minimum": 1,
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextMarker": {
+           "maxLength": 1024,
+           "type": "string"
+          },
+          "policies": {
+           "items": {
+            "$ref": "#/components/schemas/Policy"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListPolicies",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  },
+  "/policies/{policyName}": {
+   "delete": {
+    "operationId": "iotDeletePolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "policyName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeletePolicy",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "get": {
+    "operationId": "iotGetPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "policyName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "creationDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "defaultVersionId": {
+           "type": "string"
+          },
+          "generationId": {
+           "type": "string"
+          },
+          "lastModifiedDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "policyArn": {
+           "type": "string"
+          },
+          "policyDocument": {
+           "maxLength": 404600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "policyName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetPolicy",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "post": {
+    "operationId": "iotCreatePolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "policyName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "policyDocument": {
+          "maxLength": 404600,
+          "minLength": 0,
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "policyDocument"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "policyArn": {
+           "type": "string"
+          },
+          "policyDocument": {
+           "maxLength": 404600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "policyName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "policyVersionId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreatePolicy",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  },
+  "/security-profiles": {
+   "get": {
+    "operationId": "iotListSecurityProfiles",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "dimensionName",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 250,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "metricName",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "securityProfileIdentifiers": {
+           "items": {
+            "$ref": "#/components/schemas/SecurityProfileIdentifier"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSecurityProfiles",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  },
+  "/security-profiles/{securityProfileName}": {
+   "delete": {
+    "operationId": "iotDeleteSecurityProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "expectedVersion",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "path",
+      "name": "securityProfileName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSecurityProfile",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "get": {
+    "operationId": "iotDescribeSecurityProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "securityProfileName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "additionalMetricsToRetain": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "additionalMetricsToRetainV2": {
+           "items": {
+            "$ref": "#/components/schemas/MetricToRetain"
+           },
+           "type": "array"
+          },
+          "alertTargets": {
+           "additionalProperties": {
+            "$ref": "#/components/schemas/AlertTarget"
+           },
+           "type": "object"
+          },
+          "behaviors": {
+           "items": {
+            "$ref": "#/components/schemas/Behavior"
+           },
+           "maxItems": 100,
+           "type": "array"
+          },
+          "creationDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "lastModifiedDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "metricsExportConfig": {
+           "$ref": "#/components/schemas/MetricsExportConfig"
+          },
+          "securityProfileArn": {
+           "type": "string"
+          },
+          "securityProfileDescription": {
+           "maxLength": 1000,
+           "type": "string"
+          },
+          "securityProfileName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "version": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeSecurityProfile",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "patch": {
+    "operationId": "iotUpdateSecurityProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "expectedVersion",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "path",
+      "name": "securityProfileName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "additionalMetricsToRetain": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "additionalMetricsToRetainV2": {
+          "items": {
+           "$ref": "#/components/schemas/MetricToRetain"
+          },
+          "type": "array"
+         },
+         "alertTargets": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/AlertTarget"
+          },
+          "type": "object"
+         },
+         "behaviors": {
+          "items": {
+           "$ref": "#/components/schemas/Behavior"
+          },
+          "maxItems": 100,
+          "type": "array"
+         },
+         "deleteAdditionalMetricsToRetain": {
+          "type": "boolean"
+         },
+         "deleteAlertTargets": {
+          "type": "boolean"
+         },
+         "deleteBehaviors": {
+          "type": "boolean"
+         },
+         "deleteMetricsExportConfig": {
+          "type": "boolean"
+         },
+         "metricsExportConfig": {
+          "$ref": "#/components/schemas/MetricsExportConfig"
+         },
+         "securityProfileDescription": {
+          "maxLength": 1000,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "additionalMetricsToRetain": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "additionalMetricsToRetainV2": {
+           "items": {
+            "$ref": "#/components/schemas/MetricToRetain"
+           },
+           "type": "array"
+          },
+          "alertTargets": {
+           "additionalProperties": {
+            "$ref": "#/components/schemas/AlertTarget"
+           },
+           "type": "object"
+          },
+          "behaviors": {
+           "items": {
+            "$ref": "#/components/schemas/Behavior"
+           },
+           "maxItems": 100,
+           "type": "array"
+          },
+          "creationDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "lastModifiedDate": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "metricsExportConfig": {
+           "$ref": "#/components/schemas/MetricsExportConfig"
+          },
+          "securityProfileArn": {
+           "type": "string"
+          },
+          "securityProfileDescription": {
+           "maxLength": 1000,
+           "type": "string"
+          },
+          "securityProfileName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "version": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSecurityProfile",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "post": {
+    "operationId": "iotCreateSecurityProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "securityProfileName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "additionalMetricsToRetain": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "additionalMetricsToRetainV2": {
+          "items": {
+           "$ref": "#/components/schemas/MetricToRetain"
+          },
+          "type": "array"
+         },
+         "alertTargets": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/AlertTarget"
+          },
+          "type": "object"
+         },
+         "behaviors": {
+          "items": {
+           "$ref": "#/components/schemas/Behavior"
+          },
+          "maxItems": 100,
+          "type": "array"
+         },
+         "metricsExportConfig": {
+          "$ref": "#/components/schemas/MetricsExportConfig"
+         },
+         "securityProfileDescription": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "securityProfileArn": {
+           "type": "string"
+          },
+          "securityProfileName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSecurityProfile",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  },
+  "/tags": {
+   "get": {
+    "operationId": "iotListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceArn",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "post": {
+    "operationId": "iotTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "resourceArn": {
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "resourceArn",
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  },
+  "/thing-groups": {
+   "get": {
+    "operationId": "iotListThingGroups",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 250,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "namePrefixFilter",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "parentGroup",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "recursive",
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "thingGroups": {
+           "items": {
+            "$ref": "#/components/schemas/GroupNameAndArn"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListThingGroups",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  },
+  "/thing-groups/{thingGroupName}": {
+   "delete": {
+    "operationId": "iotDeleteThingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "expectedVersion",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingGroupName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteThingGroup",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "get": {
+    "operationId": "iotDescribeThingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingGroupName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "indexName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "queryString": {
+           "minLength": 1,
+           "type": "string"
+          },
+          "queryVersion": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "BUILDING",
+            "REBUILDING"
+           ],
+           "type": "string"
+          },
+          "thingGroupArn": {
+           "type": "string"
+          },
+          "thingGroupId": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "thingGroupMetadata": {
+           "$ref": "#/components/schemas/ThingGroupMetadata"
+          },
+          "thingGroupName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "thingGroupProperties": {
+           "$ref": "#/components/schemas/ThingGroupProperties"
+          },
+          "version": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeThingGroup",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "patch": {
+    "operationId": "iotUpdateThingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingGroupName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "expectedVersion": {
+          "type": "integer"
+         },
+         "thingGroupProperties": {
+          "$ref": "#/components/schemas/ThingGroupProperties"
+         }
+        },
+        "required": [
+         "thingGroupProperties"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "version": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateThingGroup",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "post": {
+    "operationId": "iotCreateThingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingGroupName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "parentGroupName": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         },
+         "thingGroupProperties": {
+          "$ref": "#/components/schemas/ThingGroupProperties"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "thingGroupArn": {
+           "type": "string"
+          },
+          "thingGroupId": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "thingGroupName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateThingGroup",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  },
+  "/thing-types": {
+   "get": {
+    "operationId": "iotListThingTypes",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 250,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "thingTypeName",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "thingTypes": {
+           "items": {
+            "$ref": "#/components/schemas/ThingTypeDefinition"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListThingTypes",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  },
+  "/thing-types/{thingTypeName}": {
+   "delete": {
+    "operationId": "iotDeleteThingType",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingTypeName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteThingType",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "get": {
+    "operationId": "iotDescribeThingType",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingTypeName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "thingTypeArn": {
+           "type": "string"
+          },
+          "thingTypeId": {
+           "type": "string"
+          },
+          "thingTypeMetadata": {
+           "$ref": "#/components/schemas/ThingTypeMetadata"
+          },
+          "thingTypeName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "thingTypeProperties": {
+           "$ref": "#/components/schemas/ThingTypeProperties"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeThingType",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "patch": {
+    "operationId": "iotUpdateThingType",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingTypeName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "thingTypeProperties": {
+          "$ref": "#/components/schemas/ThingTypeProperties"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateThingType",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "post": {
+    "operationId": "iotCreateThingType",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingTypeName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         },
+         "thingTypeProperties": {
+          "$ref": "#/components/schemas/ThingTypeProperties"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "thingTypeArn": {
+           "type": "string"
+          },
+          "thingTypeId": {
+           "type": "string"
+          },
+          "thingTypeName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateThingType",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  },
+  "/things": {
+   "get": {
+    "operationId": "iotListThings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "attributeName",
+      "schema": {
+       "maxLength": 128,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "attributeValue",
+      "schema": {
+       "maxLength": 800,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 250,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "thingTypeName",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "usePrefixAttributeValue",
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "things": {
+           "items": {
+            "$ref": "#/components/schemas/ThingAttribute"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListThings",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  },
+  "/things/{thingName}": {
+   "delete": {
+    "operationId": "iotDeleteThing",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "expectedVersion",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteThing",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "get": {
+    "operationId": "iotDescribeThing",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "attributes": {
+           "additionalProperties": {
+            "maxLength": 800,
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "billingGroupName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "defaultClientId": {
+           "type": "string"
+          },
+          "thingArn": {
+           "type": "string"
+          },
+          "thingId": {
+           "type": "string"
+          },
+          "thingName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "thingTypeName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "version": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeThing",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "patch": {
+    "operationId": "iotUpdateThing",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "attributePayload": {
+          "$ref": "#/components/schemas/AttributePayload"
+         },
+         "expectedVersion": {
+          "type": "integer"
+         },
+         "removeThingType": {
+          "type": "boolean"
+         },
+         "thingTypeName": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateThing",
+    "tags": [
+     "AWS IoT"
+    ]
+   },
+   "post": {
+    "operationId": "iotCreateThing",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "thingName",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "attributePayload": {
+          "$ref": "#/components/schemas/AttributePayload"
+         },
+         "billingGroupName": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "thingTypeName": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "thingArn": {
+           "type": "string"
+          },
+          "thingId": {
+           "type": "string"
+          },
+          "thingName": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateThing",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  },
+  "/untag": {
+   "post": {
+    "operationId": "iotUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iot"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "resourceArn": {
+          "type": "string"
+         },
+         "tagKeys": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "resourceArn",
+         "tagKeys"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS IoT"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS IoT API (2015-05-28). Every other official operation returns HTTP 501 UnknownOperationException. Things, thing types, policies, static thing groups and Device Defender security profiles are registry metadata: no certificate, principal, MQTT connection, device shadow, message, rule, job, audit, detection or alert exists, thing groups hold no things and security profiles have no targets. CreateKeysAndCertificate, AttachPolicy, AddThingToThingGroup, AttachSecurityProfile, CreateTopicRule and the other device, data and job APIs return UnknownOperationException with HTTP 501. Versions of things, thing groups and security profiles stay 1, so expectedVersion must be 1. Creating an existing name fails with ResourceAlreadyExistsException even when the configuration is identical. Things store thingTypeName without checking that the type exists; billing groups, thing group parents, attribute merging and removeThingType are refused, and empty attribute values remove the attribute. Thing types cannot be deprecated (DeprecateThingType returns HTTP 501) and are deleted at once without checking things that use them. Policies hold only version 1, policy documents must be JSON objects with a Statement and at most 2048 characters excluding whitespace, and policies are never evaluated or attached. UpdateThingGroup replaces thingGroupProperties as a whole, and UpdateSecurityProfile delete flags are refused. Things cannot be tagged, as in the official API. ListThings attribute filters, ListThingGroups parent, prefix and recursive filters, ListSecurityProfiles dimension and metric filters, ListPolicies ascendingOrder and ListTagsForResource nextToken are refused. Deleting a missing thing succeeds, as documented, and so does deleting a missing thing group or security profile, whose official operations model no not-found error.",
+   "name": "AWS IoT"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/iot/2015-05-28/service-2.json",
+  "sha256": "c19964d2dfd6b8176f3eed5ad49fe78c52e3142197f0bb74385a0244c9e23b02",
+  "license": "Apache-2.0"
+ }
+}

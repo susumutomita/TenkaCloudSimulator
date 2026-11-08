@@ -1,0 +1,30 @@
+{
+ "client": "auditmanager",
+ "steps": [
+  {"op": "create_control", "args": {"name": "fixture-mfa", "description": "Root user has MFA", "testingInformation": "Check the root user", "controlMappingSources": [{"sourceName": "Root MFA", "sourceSetUpOption": "Procedural_Controls_Mapping", "sourceType": "MANUAL"}], "tags": {"team": "a"}}, "save": {"control": "control.id", "controlArn": "control.arn"}, "expect": {"control.type": "Custom", "control.state": "ACTIVE", "control.tags.team": "a"}},
+  {"op": "get_control", "args": {"controlId": "${control}"}, "expect": {"control.name": "fixture-mfa", "control.arn": "arn:aws:auditmanager:us-east-1:000000000000:control/${control}", "control.controlMappingSources[0].sourceType": "MANUAL"}},
+  {"op": "list_controls", "args": {"controlType": "Custom"}, "expect": {"controlMetadataList#count": 1, "controlMetadataList[0].name": "fixture-mfa"}},
+  {"op": "list_controls", "args": {"controlType": "Standard"}, "expect": {"controlMetadataList#count": 0}},
+  {"op": "update_control", "args": {"controlId": "${control}", "name": "fixture-mfa", "actionPlanTitle": "Enable MFA", "controlMappingSources": [{"sourceName": "Root MFA", "sourceSetUpOption": "Procedural_Controls_Mapping", "sourceType": "MANUAL"}]}, "expect": {"control.actionPlanTitle": "Enable MFA"}},
+  {"op": "get_settings", "args": {"attribute": "ALL"}, "expect": {"settings.isAwsOrgEnabled": false, "settings.evidenceFinderEnablement.enablementStatus": "DISABLED"}},
+  {"op": "update_settings", "args": {"snsTopic": "arn:aws:sns:us-east-1:000000000000:audit", "defaultProcessOwners": [{"roleType": "PROCESS_OWNER", "roleArn": "arn:aws:iam::000000000000:role/auditor"}]}, "expect": {"settings.snsTopic": "arn:aws:sns:us-east-1:000000000000:audit"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${controlArn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${controlArn}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${controlArn}"}, "expect": {"tags": {"k": "v"}}},
+  {"op": "get_settings", "args": {"attribute": "SNS_TOPIC"}, "error": "ValidationException", "status": 400},
+  {"op": "update_settings", "args": {"evidenceFinderEnabled": true}, "error": "ValidationException", "status": 400},
+  {"op": "create_assessment_framework", "args": {"name": "fixture", "controlSets": [{"name": "set", "controls": [{"id": "${control}"}]}]}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_control", "args": {"controlId": "00000000-0000-4000-8000-000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_controls", "args": {"controlType": "Custom"}, "expect": {"controlMetadataList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_control", "args": {"controlId": "${control}"}, "expect": {"control.actionPlanTitle": "Enable MFA", "control.tags": {"k": "v"}}},
+  {"op": "get_settings", "args": {"attribute": "ALL"}, "expect": {"settings.defaultProcessOwners[0].roleArn": "arn:aws:iam::000000000000:role/auditor"}}
+ ],
+ "cleanup": [
+  {"op": "delete_control", "args": {"controlId": "${control}"}},
+  {"op": "list_controls", "args": {"controlType": "Custom"}, "expect": {"controlMetadataList#count": 0}}
+ ]
+}

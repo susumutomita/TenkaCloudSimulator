@@ -1,0 +1,43 @@
+{
+ "api": "datastream.v1",
+ "steps": [
+  {"call": "projects.locations.connectionProfiles.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "connectionProfileId": "source"}, "body": {"displayName": "Source", "mysqlProfile": {"hostname": "10.0.0.5", "port": 3306, "username": "replicator", "secretManagerStoredPassword": "projects/tenkacloud-local/secrets/mysql/versions/1"}}, "save": {"op": "name", "source": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op}"}, "expect": {"response.displayName": "Source"}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.connectionProfiles.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "connectionProfileId": "dest", "force": true}, "body": {"displayName": "Destination", "bigqueryProfile": {}}, "save": {"dest": "response.name"}},
+  {"call": "projects.locations.connectionProfiles.get", "args": {"name": "${source}"}, "expect": {"mysqlProfile.hostname": "10.0.0.5"}},
+  {"call": "projects.locations.connectionProfiles.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"connectionProfiles#count": 2}},
+  {"call": "projects.locations.connectionProfiles.patch", "args": {"name": "${source}", "updateMask": "displayName"}, "body": {"displayName": "MySQL source"}},
+  {"call": "projects.locations.connectionProfiles.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "connectionProfileId": "leaky"}, "body": {"displayName": "Leaky", "mysqlProfile": {"hostname": "h", "username": "u", "password": "not-stored"}}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.privateConnections.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "privateConnectionId": "peer"}, "body": {"displayName": "Peer", "vpcPeeringConfig": {"vpc": "projects/tenkacloud-local/global/networks/default", "subnet": "10.10.0.0/29"}}, "save": {"pc": "response.name"}, "expect": {"response.state": "CREATED"}},
+  {"call": "projects.locations.privateConnections.get", "args": {"name": "${pc}"}, "expect": {"vpcPeeringConfig.subnet": "10.10.0.0/29"}},
+  {"call": "projects.locations.privateConnections.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"privateConnections#count": 1}},
+  {"call": "projects.locations.privateConnections.routes.create", "args": {"parent": "${pc}", "routeId": "db"}, "body": {"displayName": "DB", "destinationAddress": "10.0.0.5", "destinationPort": 3306}, "save": {"route": "response.name"}},
+  {"call": "projects.locations.privateConnections.routes.get", "args": {"name": "${route}"}, "expect": {"destinationPort": 3306}},
+  {"call": "projects.locations.privateConnections.routes.list", "args": {"parent": "${pc}"}, "expect": {"routes#count": 1}},
+  {"call": "projects.locations.streams.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "streamId": "cdc"}, "body": {"displayName": "CDC", "sourceConfig": {"sourceConnectionProfile": "${source}", "mysqlSourceConfig": {}}, "destinationConfig": {"destinationConnectionProfile": "${dest}", "bigqueryDestinationConfig": {}}, "backfillNone": {}}, "save": {"stream": "response.name"}, "expect": {"response.state": "NOT_STARTED"}},
+  {"call": "projects.locations.streams.get", "args": {"name": "${stream}"}, "expect": {"state": "NOT_STARTED"}},
+  {"call": "projects.locations.streams.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"streams#count": 1}},
+  {"call": "projects.locations.streams.patch", "args": {"name": "${stream}", "updateMask": "displayName"}, "body": {"displayName": "CDC 2"}},
+  {"call": "projects.locations.streams.patch", "args": {"name": "${stream}", "updateMask": "state"}, "body": {"state": "RUNNING"}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.streams.run", "args": {"name": "${stream}", "body": {}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.privateConnections.delete", "args": {"name": "${pc}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.locations.streams.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/streams/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.streams.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.connectionProfiles.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"connectionProfiles#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.streams.get", "args": {"name": "${stream}"}, "expect": {"displayName": "CDC 2", "state": "NOT_STARTED"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.streams.delete", "args": {"name": "${stream}"}},
+  {"call": "projects.locations.privateConnections.routes.delete", "args": {"name": "${route}"}},
+  {"call": "projects.locations.privateConnections.delete", "args": {"name": "${pc}"}},
+  {"call": "projects.locations.connectionProfiles.delete", "args": {"name": "${source}"}},
+  {"call": "projects.locations.connectionProfiles.delete", "args": {"name": "${dest}"}},
+  {"call": "projects.locations.connectionProfiles.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"connectionProfiles#count": 0}},
+  {"call": "projects.locations.privateConnections.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"privateConnections#count": 0}}
+ ]
+}

@@ -1,71 +1,97 @@
-// Copyright (c) 2025 sivchari
-// SPDX-License-Identifier: MIT
-// Adapted from sivchari/kumo ce37a8fb406ecb96b5619204f645c26302b651a5,
-// internal/service/execapi/path.go. Original notice: KUMO-LICENSE.txt.
-// Modified by TenkaCloudSimulator: provider-local package; reject empty and
-// nonterminal greedy captures and unnamed parameters. Only the bounded local AWS provider uses this adapter.
-
 package apirouting
 
 import "strings"
 
-// SplitPath trims outer slashes and preserves interior empty segments; root yields nil.
+// These utilities implement the simulator's bounded path language. API Gateway's
+// public proxy contract distinguishes literal segments, {name}, and a terminal
+// {name+}; request path bytes are data, not filesystem paths.
+// Reference: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
+
+// SplitPath ignores outer separators only. In particular, it neither cleans dot
+// segments nor decodes escapes, and repeated interior separators remain visible.
 func SplitPath(path string) []string {
-	trimmed := strings.Trim(path, "/")
-	if trimmed == "" {
+	begin, end := 0, len(path)
+	for begin < end && path[begin] == '/' {
+		begin++
+	}
+	for end > begin && path[end-1] == '/' {
+		end--
+	}
+	if begin == end {
 		return nil
 	}
-
-	return strings.Split(trimmed, "/")
+	var parts []string
+	for cursor := begin; cursor <= end; cursor++ {
+		if cursor == end || path[cursor] == '/' {
+			parts = append(parts, path[begin:cursor])
+			begin = cursor + 1
+		}
+	}
+	return parts
 }
 
-// MatchPath matches a path template against request segments. Template
-// segments may be literal, a single-segment wildcard {name}, or a greedy
-// wildcard {name+} matching the remainder. It returns captured parameters and
-// a specificity score (number of literal segments matched), or ok=false.
-func MatchPath(template string, reqSegs []string) (map[string]string, int, bool) {
-	tmplSegs := SplitPath(template)
-	params := map[string]string{}
-	score := 0
+type routeLiteral struct {
+	position int
+	text     string
+}
+type routeCapture struct {
+	position int
+	name     string
+}
+type routeProgram struct {
+	width    int
+	literals []routeLiteral
+	captures []routeCapture
+	rest     *routeCapture
+}
 
-	for i := range tmplSegs {
-		seg := tmplSegs[i]
-
-		// Greedy wildcard {name+} matches the entire remainder.
-		if strings.HasPrefix(seg, "{") && strings.HasSuffix(seg, "+}") {
-			name := strings.TrimSuffix(strings.TrimPrefix(seg, "{"), "+}")
-			if i >= len(reqSegs) || i != len(tmplSegs)-1 || name == "" {
-				return nil, -1, false
-			}
-			params[name] = strings.Join(reqSegs[i:], "/")
-
-			return params, score, true
-		}
-
-		if i >= len(reqSegs) {
-			return nil, -1, false
-		}
-
-		if strings.HasPrefix(seg, "{") && strings.HasSuffix(seg, "}") {
-			name := strings.TrimSuffix(strings.TrimPrefix(seg, "{"), "}")
-			if name == "" {
-				return nil, -1, false
-			}
-			params[name] = reqSegs[i]
-
+// Compile first, then check cardinality and all literals before extracting any
+// captures. A failed candidate therefore never publishes partial parameters.
+func compileRoute(template string) (routeProgram, bool) {
+	parts := SplitPath(template)
+	program := routeProgram{width: len(parts)}
+	for position, text := range parts {
+		if len(text) < 2 || text[0] != '{' || text[len(text)-1] != '}' {
+			program.literals = append(program.literals, routeLiteral{position, text})
 			continue
 		}
-
-		if seg != reqSegs[i] {
-			return nil, -1, false
+		name := text[1 : len(text)-1]
+		greedy := len(name) > 0 && name[len(name)-1] == '+'
+		if greedy {
+			name = name[:len(name)-1]
 		}
-
-		score++
+		if name == "" || greedy && position != len(parts)-1 {
+			return routeProgram{}, false
+		}
+		capture := routeCapture{position, name}
+		if greedy {
+			program.rest = &capture
+			program.width--
+		} else {
+			program.captures = append(program.captures, capture)
+		}
 	}
+	return program, true
+}
 
-	if len(tmplSegs) != len(reqSegs) {
+// MatchPath returns captures and the literal count used by the provider's route
+// precedence rules. Method/ANY selection remains the provider's responsibility.
+func MatchPath(template string, request []string) (map[string]string, int, bool) {
+	program, valid := compileRoute(template)
+	if !valid || program.rest == nil && len(request) != program.width || program.rest != nil && len(request) <= program.width {
 		return nil, -1, false
 	}
-
-	return params, score, true
+	for _, constraint := range program.literals {
+		if request[constraint.position] != constraint.text {
+			return nil, -1, false
+		}
+	}
+	values := make(map[string]string, len(program.captures)+1)
+	for _, slot := range program.captures {
+		values[slot.name] = request[slot.position]
+	}
+	if slot := program.rest; slot != nil {
+		values[slot.name] = strings.Join(request[slot.position:], "/")
+	}
+	return values, len(program.literals), true
 }

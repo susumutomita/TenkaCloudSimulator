@@ -1,0 +1,1583 @@
+{
+ "components": {
+  "schemas": {
+   "DakCertificateMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "ApId": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "CertificateId": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "DeviceTypeId": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "FactorySupport": {
+      "type": "boolean"
+     },
+     "MaxAllowedSignature": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "CertificateId"
+    ],
+    "type": "object"
+   },
+   "Destinations": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "Expression": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "ExpressionType": {
+      "enum": [
+       "RuleName",
+       "MqttTopic"
+      ],
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "RoleArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeviceProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "Id": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LoRaWANDeviceProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "ClassBTimeout": {
+      "maximum": 1000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "ClassCTimeout": {
+      "maximum": 1000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "FactoryPresetFreqsList": {
+      "items": {
+       "maximum": 16700000,
+       "minimum": 1000000,
+       "type": "integer"
+      },
+      "maxItems": 20,
+      "minItems": 0,
+      "type": "array"
+     },
+     "MacVersion": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "MaxDutyCycle": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "MaxEirp": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "PingSlotDr": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "PingSlotFreq": {
+      "maximum": 16700000,
+      "minimum": 1000000,
+      "type": "integer"
+     },
+     "PingSlotPeriod": {
+      "maximum": 4096,
+      "minimum": 32,
+      "type": "integer"
+     },
+     "RegParamsRevision": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "RfRegion": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "RxDataRate2": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "RxDelay1": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "RxDrOffset1": {
+      "maximum": 7,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "RxFreq2": {
+      "maximum": 16700000,
+      "minimum": 1000000,
+      "type": "integer"
+     },
+     "Supports32BitFCnt": {
+      "type": "boolean"
+     },
+     "SupportsClassB": {
+      "type": "boolean"
+     },
+     "SupportsClassC": {
+      "type": "boolean"
+     },
+     "SupportsJoin": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "LoRaWANGetServiceProfileInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "AddGwMetadata": {
+      "type": "boolean"
+     },
+     "ChannelMask": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "DevStatusReqFreq": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "DlBucketSize": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "DlRate": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "DlRatePolicy": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "DrMax": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "DrMin": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "HrAllowed": {
+      "type": "boolean"
+     },
+     "MinGwDiversity": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NbTransMax": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "NbTransMin": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "NwkGeoLoc": {
+      "type": "boolean"
+     },
+     "PrAllowed": {
+      "type": "boolean"
+     },
+     "RaAllowed": {
+      "type": "boolean"
+     },
+     "ReportDevStatusBattery": {
+      "type": "boolean"
+     },
+     "ReportDevStatusMargin": {
+      "type": "boolean"
+     },
+     "TargetPer": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "TxPowerIndexMax": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "TxPowerIndexMin": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "UlBucketSize": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "UlRate": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "UlRatePolicy": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LoRaWANServiceProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "AddGwMetadata": {
+      "type": "boolean"
+     },
+     "DrMax": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "DrMin": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "NbTransMax": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "NbTransMin": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "PrAllowed": {
+      "type": "boolean"
+     },
+     "RaAllowed": {
+      "type": "boolean"
+     },
+     "TxPowerIndexMax": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "TxPowerIndexMin": {
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "Id": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SidewalkCreateDeviceProfile": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "SidewalkGetDeviceProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationServerPublicKey": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DakCertificateMetadata": {
+      "items": {
+       "$ref": "#/components/schemas/DakCertificateMetadata"
+      },
+      "type": "array"
+     },
+     "QualificationStatus": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS IoT Wireless API (2020-11-22). Every other official operation returns HTTP 501 UnknownOperationException. Destinations and LoRaWAN device and service profiles are configuration metadata: no wireless device, gateway, FUOTA task, multicast group, network analyzer, partner account or position resource exists, and no uplink is routed to a destination's AWS IoT rule or MQTT topic. CreateWirelessDevice, CreateWirelessGateway, SendDataToWirelessDevice and the other device and data APIs return UnknownOperationException with HTTP 501. Amazon Sidewalk device profiles are refused because their official description carries an application server public key and device attestation certificates. Service profiles report only the supplied LoRaWAN members, not the network server's derived values, and roles are stored without checking them. ListDeviceProfiles DeviceProfileType is refused.",
+  "title": "AWS IoT Wireless (simulator catalog)",
+  "version": "2020-11-22"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/destinations": {
+   "get": {
+    "operationId": "iotwirelessListDestinations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 250,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 4096,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DestinationList": {
+           "items": {
+            "$ref": "#/components/schemas/Destinations"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 4096,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListDestinations",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   },
+   "post": {
+    "operationId": "iotwirelessCreateDestination",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ClientRequestToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Description": {
+          "maxLength": 2048,
+          "type": "string"
+         },
+         "Expression": {
+          "maxLength": 2048,
+          "type": "string"
+         },
+         "ExpressionType": {
+          "enum": [
+           "RuleName",
+           "MqttTopic"
+          ],
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 128,
+          "type": "string"
+         },
+         "RoleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "Expression",
+         "ExpressionType",
+         "Name",
+         "RoleArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 128,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateDestination",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   }
+  },
+  "/destinations/{Name}": {
+   "delete": {
+    "operationId": "iotwirelessDeleteDestination",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteDestination",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   },
+   "get": {
+    "operationId": "iotwirelessGetDestination",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 2048,
+           "type": "string"
+          },
+          "Expression": {
+           "maxLength": 2048,
+           "type": "string"
+          },
+          "ExpressionType": {
+           "enum": [
+            "RuleName",
+            "MqttTopic"
+           ],
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 128,
+           "type": "string"
+          },
+          "RoleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetDestination",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   },
+   "patch": {
+    "operationId": "iotwirelessUpdateDestination",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 2048,
+          "type": "string"
+         },
+         "Expression": {
+          "maxLength": 2048,
+          "type": "string"
+         },
+         "ExpressionType": {
+          "enum": [
+           "RuleName",
+           "MqttTopic"
+          ],
+          "type": "string"
+         },
+         "RoleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateDestination",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   }
+  },
+  "/device-profiles": {
+   "get": {
+    "operationId": "iotwirelessListDeviceProfiles",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "deviceProfileType",
+      "schema": {
+       "enum": [
+        "Sidewalk",
+        "LoRaWAN"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 250,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 4096,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DeviceProfileList": {
+           "items": {
+            "$ref": "#/components/schemas/DeviceProfile"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 4096,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListDeviceProfiles",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   },
+   "post": {
+    "operationId": "iotwirelessCreateDeviceProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ClientRequestToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "LoRaWAN": {
+          "$ref": "#/components/schemas/LoRaWANDeviceProfile"
+         },
+         "Name": {
+          "maxLength": 256,
+          "type": "string"
+         },
+         "Sidewalk": {
+          "$ref": "#/components/schemas/SidewalkCreateDeviceProfile"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 256,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateDeviceProfile",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   }
+  },
+  "/device-profiles/{Id}": {
+   "delete": {
+    "operationId": "iotwirelessDeleteDeviceProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Id",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteDeviceProfile",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   },
+   "get": {
+    "operationId": "iotwirelessGetDeviceProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Id",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "LoRaWAN": {
+           "$ref": "#/components/schemas/LoRaWANDeviceProfile"
+          },
+          "Name": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "Sidewalk": {
+           "$ref": "#/components/schemas/SidewalkGetDeviceProfile"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetDeviceProfile",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   }
+  },
+  "/service-profiles": {
+   "get": {
+    "operationId": "iotwirelessListServiceProfiles",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 250,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 4096,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "maxLength": 4096,
+           "type": "string"
+          },
+          "ServiceProfileList": {
+           "items": {
+            "$ref": "#/components/schemas/ServiceProfile"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListServiceProfiles",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   },
+   "post": {
+    "operationId": "iotwirelessCreateServiceProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ClientRequestToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "LoRaWAN": {
+          "$ref": "#/components/schemas/LoRaWANServiceProfile"
+         },
+         "Name": {
+          "maxLength": 256,
+          "type": "string"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 256,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateServiceProfile",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   }
+  },
+  "/service-profiles/{Id}": {
+   "delete": {
+    "operationId": "iotwirelessDeleteServiceProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Id",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteServiceProfile",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   },
+   "get": {
+    "operationId": "iotwirelessGetServiceProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Id",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "LoRaWAN": {
+           "$ref": "#/components/schemas/LoRaWANGetServiceProfileInfo"
+          },
+          "Name": {
+           "maxLength": 256,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetServiceProfile",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   }
+  },
+  "/tags": {
+   "delete": {
+    "operationId": "iotwirelessUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceArn",
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   },
+   "get": {
+    "operationId": "iotwirelessListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceArn",
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   },
+   "post": {
+    "operationId": "iotwirelessTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "iotwireless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "resourceArn",
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS IoT Wireless"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS IoT Wireless API (2020-11-22). Every other official operation returns HTTP 501 UnknownOperationException. Destinations and LoRaWAN device and service profiles are configuration metadata: no wireless device, gateway, FUOTA task, multicast group, network analyzer, partner account or position resource exists, and no uplink is routed to a destination's AWS IoT rule or MQTT topic. CreateWirelessDevice, CreateWirelessGateway, SendDataToWirelessDevice and the other device and data APIs return UnknownOperationException with HTTP 501. Amazon Sidewalk device profiles are refused because their official description carries an application server public key and device attestation certificates. Service profiles report only the supplied LoRaWAN members, not the network server's derived values, and roles are stored without checking them. ListDeviceProfiles DeviceProfileType is refused.",
+   "name": "AWS IoT Wireless"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/iotwireless/2020-11-22/service-2.json",
+  "sha256": "8f7641b329f06958dc29ad7e7aa3c11de236b47d3ee7acd10c2a7081a3317ad3",
+  "license": "Apache-2.0"
+ }
+}

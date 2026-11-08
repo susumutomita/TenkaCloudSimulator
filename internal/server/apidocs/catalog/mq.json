@@ -1,0 +1,634 @@
+{
+ "components": {
+  "schemas": {
+   "Configuration": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "authenticationStrategy": {
+      "enum": [
+       "SIMPLE",
+       "LDAP",
+       "CONFIG_MANAGED"
+      ],
+      "type": "string"
+     },
+     "created": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "type": "string"
+     },
+     "engineType": {
+      "enum": [
+       "ACTIVEMQ",
+       "RABBITMQ"
+      ],
+      "type": "string"
+     },
+     "engineVersion": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "latestRevision": {
+      "$ref": "#/components/schemas/ConfigurationRevision"
+     },
+     "name": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "description",
+     "engineVersion",
+     "latestRevision",
+     "authenticationStrategy",
+     "engineType",
+     "id",
+     "arn",
+     "name",
+     "created"
+    ],
+    "type": "object"
+   },
+   "ConfigurationRevision": {
+    "additionalProperties": false,
+    "properties": {
+     "created": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "type": "string"
+     },
+     "revision": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "revision",
+     "created"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AmazonMQ API (2017-11-27). Every other official operation returns HTTP 501 UnknownOperationException. Only broker configurations are stored: no ActiveMQ or RabbitMQ broker runs and no message is sent or consumed. Brokers and broker users are not implemented because they require user passwords or LDAP service account passwords, which the simulator never stores; their APIs return UnknownOperationException with HTTP 501. Each configuration keeps revision 1 with no stored XML or Cuttlefish data and no generated description: UpdateConfiguration, DescribeConfigurationRevision and ListConfigurationRevisions are not implemented. Configuration IDs use c- followed by 32 hexadecimal digits.",
+  "title": "Amazon MQ (simulator catalog)",
+  "version": "2017-11-27"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/configurations": {
+   "get": {
+    "operationId": "mqListConfigurations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mq"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configurations": {
+           "items": {
+            "$ref": "#/components/schemas/Configuration"
+           },
+           "type": "array"
+          },
+          "maxResults": {
+           "type": "integer"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListConfigurations",
+    "tags": [
+     "Amazon MQ"
+    ]
+   },
+   "post": {
+    "operationId": "mqCreateConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mq"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "authenticationStrategy": {
+          "enum": [
+           "SIMPLE",
+           "LDAP",
+           "CONFIG_MANAGED"
+          ],
+          "type": "string"
+         },
+         "engineType": {
+          "enum": [
+           "ACTIVEMQ",
+           "RABBITMQ"
+          ],
+          "type": "string"
+         },
+         "engineVersion": {
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "engineType",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "authenticationStrategy": {
+           "enum": [
+            "SIMPLE",
+            "LDAP",
+            "CONFIG_MANAGED"
+           ],
+           "type": "string"
+          },
+          "created": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "id": {
+           "type": "string"
+          },
+          "latestRevision": {
+           "$ref": "#/components/schemas/ConfigurationRevision"
+          },
+          "name": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateConfiguration",
+    "tags": [
+     "Amazon MQ"
+    ]
+   }
+  },
+  "/v1/configurations/{configuration-id}": {
+   "delete": {
+    "operationId": "mqDeleteConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mq"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configuration-id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configurationId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteConfiguration",
+    "tags": [
+     "Amazon MQ"
+    ]
+   },
+   "get": {
+    "operationId": "mqDescribeConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mq"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configuration-id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "authenticationStrategy": {
+           "enum": [
+            "SIMPLE",
+            "LDAP",
+            "CONFIG_MANAGED"
+           ],
+           "type": "string"
+          },
+          "created": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "type": "string"
+          },
+          "engineType": {
+           "enum": [
+            "ACTIVEMQ",
+            "RABBITMQ"
+           ],
+           "type": "string"
+          },
+          "engineVersion": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "latestRevision": {
+           "$ref": "#/components/schemas/ConfigurationRevision"
+          },
+          "name": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeConfiguration",
+    "tags": [
+     "Amazon MQ"
+    ]
+   }
+  },
+  "/v1/tags/{resource-arn}": {
+   "delete": {
+    "operationId": "mqDeleteTags",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mq"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteTags",
+    "tags": [
+     "Amazon MQ"
+    ]
+   },
+   "get": {
+    "operationId": "mqListTags",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mq"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTags",
+    "tags": [
+     "Amazon MQ"
+    ]
+   },
+   "post": {
+    "operationId": "mqCreateTags",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mq"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateTags",
+    "tags": [
+     "Amazon MQ"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AmazonMQ API (2017-11-27). Every other official operation returns HTTP 501 UnknownOperationException. Only broker configurations are stored: no ActiveMQ or RabbitMQ broker runs and no message is sent or consumed. Brokers and broker users are not implemented because they require user passwords or LDAP service account passwords, which the simulator never stores; their APIs return UnknownOperationException with HTTP 501. Each configuration keeps revision 1 with no stored XML or Cuttlefish data and no generated description: UpdateConfiguration, DescribeConfigurationRevision and ListConfigurationRevisions are not implemented. Configuration IDs use c- followed by 32 hexadecimal digits.",
+   "name": "Amazon MQ"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/mq/2017-11-27/service-2.json",
+  "sha256": "1e273fbd329f67e3c3bfe8cbb73a522c95fb4a17931afee08e0c5ca288043ed7",
+  "license": "Apache-2.0"
+ }
+}

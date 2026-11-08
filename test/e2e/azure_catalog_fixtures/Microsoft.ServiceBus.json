@@ -1,0 +1,181 @@
+{
+ "namespace": "Microsoft.ServiceBus",
+ "client": "servicebus",
+ "steps": [
+  {
+   "call": "namespaces.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "namespace_name": "fixture-queues",
+    "parameters": {
+     "location": "eastus",
+     "sku": {
+      "name": "Standard"
+     }
+    }
+   },
+   "expect": {
+    "provisioning_state": "Succeeded",
+    "sku.tier": "Standard"
+   }
+  },
+  {
+   "call": "namespaces.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "namespace_name": "fixture-queues"
+   },
+   "expect": {
+    "status": "Active"
+   }
+  },
+  {
+   "call": "namespaces.update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "namespace_name": "fixture-queues",
+    "parameters": {
+     "tags": {
+      "team": "a"
+     }
+    }
+   },
+   "expect": {
+    "tags.team": "a"
+   }
+  },
+  {
+   "call": "namespaces.list_by_resource_group",
+   "args": {
+    "resource_group_name": "${rg}"
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "namespaces.list",
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "queues.create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "namespace_name": "fixture-queues",
+    "queue_name": "orders",
+    "parameters": {
+     "properties": {
+      "maxDeliveryCount": 5
+     }
+    }
+   },
+   "expect": {
+    "max_delivery_count": 5
+   }
+  },
+  {
+   "call": "queues.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "namespace_name": "fixture-queues",
+    "queue_name": "orders"
+   },
+   "expect": {
+    "name": "orders"
+   }
+  },
+  {
+   "call": "queues.list_by_namespace",
+   "args": {
+    "resource_group_name": "${rg}",
+    "namespace_name": "fixture-queues",
+    "top": 1
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "queues.create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "namespace_name": "fixture-queues",
+    "queue_name": "forward",
+    "parameters": {
+     "properties": {
+      "forwardTo": "missing"
+     }
+    }
+   },
+   "error": "InvalidRequestContent",
+   "status": 400
+  },
+  {
+   "call": "queues.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "namespace_name": "missing-space",
+    "queue_name": "orders"
+   },
+   "error": "ParentResourceNotFound",
+   "status": 404
+  }
+ ],
+ "probe": {
+  "call": "namespaces.list"
+ },
+ "unbound": {
+  "call": "namespaces.list_keys",
+  "args": {
+   "resource_group_name": "${rg}",
+   "namespace_name": "fixture-queues",
+   "authorization_rule_name": "RootManageSharedAccessKey"
+  }
+ },
+ "isolation": [
+  {
+   "call": "namespaces.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "queues.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "namespace_name": "fixture-queues",
+    "queue_name": "orders"
+   },
+   "expect": {
+    "name": "orders"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "queues.delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "namespace_name": "fixture-queues",
+    "queue_name": "orders"
+   }
+  },
+  {
+   "call": "namespaces.begin_delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "namespace_name": "fixture-queues"
+   }
+  },
+  {
+   "call": "namespaces.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ]
+}

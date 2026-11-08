@@ -3,9 +3,52 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:
+  console-acceptance:
+    name: Japanese service console acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: '1.26.10'
+          cache: true
+      - name: Build the actual embedded simulator
+        run: make build
+      - name: Install pinned Python SDK and browser tools
+        timeout-minutes: 3
+        run: |
+          python3 -m venv /tmp/simulator-tests
+          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
+      - name: Install full Chromium system dependencies
+        timeout-minutes: 12
+        run: /tmp/simulator-tests/bin/playwright install-deps chromium
+      - name: Install pinned Chromium browser
+        timeout-minutes: 5
+        run: /tmp/simulator-tests/bin/playwright install chromium
+      - name: Check native discovery, Japanese operations and desktop/mobile layouts
+        run: /tmp/simulator-tests/bin/python test/e2e/service_locale.py
+      - name: Check Secrets disclosure boundaries and actual metadata accessibility
+        run: |
+          /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-console-audit
+          AXE_SCRIPT=/tmp/simulator-console-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/secrets_manager_console.py
+      - name: Retain focused service console evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: service-console-focused-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            reports/service-locale-*.png
+            reports/secrets-metadata-*.png
+            reports/secrets-a11y-summary.json
+          if-no-files-found: warn
+          retention-days: 14
   ci:
     runs-on: ubuntu-latest
     steps:
@@ -28,6 +71,10 @@ jobs:
           node tools/console/build.mjs
           git diff --exit-code -- internal/server/web internal/legal/assets/CONSOLE-NOTICES.txt third_party/CONSOLE-NOTICES.txt third_party/console-packages.json tools/console/bundle-inputs.json tools/console/bundle-digests.json
           npm audit --prefix tools/console --audit-level=high
+      - name: Check immutable release packaging and refusal regressions
+        run: python3 test/ci/release_pipeline.py
+      - name: Check native token input regression cases
+        run: node --test test/console/login-native-input.test.mjs
       - name: Run Go quality gates and compile all supported targets
         run: make before-commit cross-check
       - name: Generate coverage views and enforce both 90% floors
@@ -51,13 +98,37 @@ jobs:
         run: npm audit --prefix tools/scalar --audit-level=high
       - name: Check Go vulnerabilities against the canonical service
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
-      - name: Install development-only browser and SDK tools
+      - name: Install Python SDK and browser tools
+        timeout-minutes: 3
         run: |
           python3 -m venv /tmp/simulator-tests
           /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-          /tmp/simulator-tests/bin/playwright install --with-deps chromium
+      - name: Install full Chromium system dependencies
+        timeout-minutes: 12
+        run: /tmp/simulator-tests/bin/playwright install-deps chromium
+      - name: Install pinned Chromium browser
+        timeout-minutes: 5
+        run: /tmp/simulator-tests/bin/playwright install chromium
+      - name: Prepare pinned axe-core for mandatory browser accessibility checks
+        run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
       - name: Verify real binary, SDK, console, and offline API reference
-        run: make e2e PYTHON=/tmp/simulator-tests/bin/python
+        run: AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/simulator-tests/bin/python
+      - name: Retain service console screenshots and safe audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: service-console-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            reports/service-locale-*.png
+            reports/secrets-metadata-*.png
+            reports/secrets-a11y-summary.json
+            reports/landing-topology/**
+            reports/login-first-native-failure.json
+            reports/login-first-native-observer-status.json
+            reports/login-second-native-clear-failure.json
+            reports/login-second-native-clear-observer-status.json
+          if-no-files-found: warn
+          retention-days: 14
       - name: Run the actual platform hello-world lifecycle and participant browser
         run: |
           git init /tmp/simulator-platform
@@ -80,11 +151,11 @@ jobs:
           /tmp/simulator-tests/bin/python test/platform/wp-sdk-subset.py
       - name: Inspect console flow, keyboard behavior, and accessible contrast
         run: |
-          /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
           AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make audit PYTHON=/tmp/simulator-tests/bin/python
           AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_console.py
           CHALLENGE_ROOT=/tmp/simulator-challenges AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_original_http.py
       - name: Finite state model check and deletion-guard mutation
         run: |
-          curl --fail --location https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar --output /tmp/tla2tools.jar
+          python3 test/ci/tla_download.py
+          timeout --kill-after=5s 95s curl --fail --location --retry 3 --retry-delay 2 --retry-max-time 60 --connect-timeout 10 --max-time 30 https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar --output /tmp/tla2tools.jar
           TLA_JAR=/tmp/tla2tools.jar make formal

@@ -1,0 +1,25 @@
+{
+ "client": "cloudtrail",
+ "steps": [
+  {"op": "create_trail", "args": {"Name": "fixture-trail", "S3BucketName": "fixture-audit-logs", "EnableLogFileValidation": true, "TagsList": [{"Key": "team", "Value": "a"}]}, "save": {"trail": "TrailARN"}, "expect": {"LogFileValidationEnabled": true, "IsMultiRegionTrail": false, "TrailARN": "arn:aws:cloudtrail:us-east-1:000000000000:trail/fixture-trail"}},
+  {"op": "get_trail", "args": {"Name": "fixture-trail"}, "expect": {"Trail.HomeRegion": "us-east-1", "Trail.S3BucketName": "fixture-audit-logs", "Trail.HasCustomEventSelectors": false}},
+  {"op": "describe_trails", "args": {"includeShadowTrails": false}, "expect": {"trailList#count": 1, "trailList[0].TrailARN": "${trail}"}},
+  {"op": "list_trails", "args": {}, "expect": {"Trails#count": 1, "Trails[0].Name": "fixture-trail", "Trails[0].HomeRegion": "us-east-1"}},
+  {"op": "update_trail", "args": {"Name": "${trail}", "S3KeyPrefix": "audit", "IsMultiRegionTrail": true}, "expect": {"S3KeyPrefix": "audit", "IsMultiRegionTrail": true}},
+  {"op": "create_trail", "args": {"Name": "fixture-trail", "S3BucketName": "fixture-audit-logs"}, "error": "TrailAlreadyExistsException"},
+  {"op": "create_trail", "args": {"Name": "bad--name", "S3BucketName": "fixture-audit-logs"}, "error": "InvalidTrailNameException"},
+  {"op": "create_trail", "args": {"Name": "org-trail", "S3BucketName": "fixture-audit-logs", "IsOrganizationTrail": true}, "error": "OrganizationsNotInUseException"},
+  {"op": "start_logging", "args": {"Name": "fixture-trail"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_trail", "args": {"Name": "missing-trail"}, "error": "TrailNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_trails", "args": {}, "expect": {"Trails#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_trail", "args": {"Name": "${trail}"}, "expect": {"Trail.S3KeyPrefix": "audit", "Trail.LogFileValidationEnabled": true}}
+ ],
+ "cleanup": [
+  {"op": "delete_trail", "args": {"Name": "fixture-trail"}},
+  {"op": "describe_trails", "args": {}, "expect": {"trailList#count": 0}}
+ ]
+}

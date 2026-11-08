@@ -1,0 +1,33 @@
+{
+ "client": "guardduty",
+ "steps": [
+  {"op": "create_detector", "args": {"Enable": true, "FindingPublishingFrequency": "ONE_HOUR", "Tags": {"team": "a"}}, "save": {"detector": "DetectorId"}},
+  {"op": "get_detector", "args": {"DetectorId": "${detector}"}, "expect": {"Status": "ENABLED", "FindingPublishingFrequency": "ONE_HOUR", "Tags.team": "a", "ServiceRole": "arn:aws:iam::000000000000:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty"}},
+  {"op": "list_detectors", "args": {}, "expect": {"DetectorIds": ["${detector}"]}},
+  {"op": "update_detector", "args": {"DetectorId": "${detector}", "Enable": true, "FindingPublishingFrequency": "FIFTEEN_MINUTES"}},
+  {"op": "create_filter", "args": {"DetectorId": "${detector}", "Name": "fixture-filter", "Action": "ARCHIVE", "Rank": 1, "FindingCriteria": {"Criterion": {"severity": {"GreaterThanOrEqual": 4}}}}, "save": {"filter": "Name"}},
+  {"op": "get_filter", "args": {"DetectorId": "${detector}", "FilterName": "${filter}"}, "expect": {"Action": "ARCHIVE", "Rank": 1, "FindingCriteria.Criterion.severity.GreaterThanOrEqual": 4}},
+  {"op": "list_filters", "args": {"DetectorId": "${detector}"}, "expect": {"FilterNames": ["fixture-filter"]}},
+  {"op": "update_filter", "args": {"DetectorId": "${detector}", "FilterName": "${filter}", "Description": "Updated fixture filter"}, "expect": {"Name": "fixture-filter"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "arn:aws:guardduty:us-east-1:000000000000:detector/${detector}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "arn:aws:guardduty:us-east-1:000000000000:detector/${detector}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "arn:aws:guardduty:us-east-1:000000000000:detector/${detector}"}, "expect": {"Tags": {"k": "v"}}},
+  {"op": "update_detector", "args": {"DetectorId": "${detector}", "Enable": false}, "error": "BadRequestException", "status": 400},
+  {"op": "create_detector", "args": {"Enable": true, "Features": [{"Name": "S3_DATA_EVENTS", "Status": "ENABLED"}]}, "error": "BadRequestException", "status": 400},
+  {"op": "create_detector", "args": {"Enable": true}, "error": "BadRequestException", "status": 400},
+  {"op": "list_findings", "args": {"DetectorId": "${detector}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_detector", "args": {"DetectorId": "00000000000000000000000000000000"}, "error": "BadRequestException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "list_detectors", "args": {}, "expect": {"DetectorIds#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_detector", "args": {"DetectorId": "${detector}"}, "expect": {"FindingPublishingFrequency": "FIFTEEN_MINUTES"}},
+  {"op": "get_filter", "args": {"DetectorId": "${detector}", "FilterName": "${filter}"}, "expect": {"Description": "Updated fixture filter"}}
+ ],
+ "cleanup": [
+  {"op": "delete_filter", "args": {"DetectorId": "${detector}", "FilterName": "${filter}"}},
+  {"op": "delete_detector", "args": {"DetectorId": "${detector}"}},
+  {"op": "list_detectors", "args": {}, "expect": {"DetectorIds#count": 0}}
+ ]
+}

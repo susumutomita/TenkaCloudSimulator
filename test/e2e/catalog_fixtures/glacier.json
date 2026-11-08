@@ -1,0 +1,28 @@
+{
+ "client": "glacier",
+ "steps": [
+  {"op": "create_vault", "args": {"vaultName": "fixture-vault"}, "expect": {"location": "/000000000000/vaults/fixture-vault"}},
+  {"op": "create_vault", "args": {"vaultName": "fixture-vault"}, "expect": {"location": "/000000000000/vaults/fixture-vault"}},
+  {"op": "describe_vault", "args": {"vaultName": "fixture-vault"}, "save": {"vault": "VaultARN"}, "expect": {"VaultARN": "arn:aws:glacier:us-east-1:000000000000:vaults/fixture-vault", "NumberOfArchives": 0, "SizeInBytes": 0}},
+  {"op": "list_vaults", "args": {}, "expect": {"VaultList#count": 1, "VaultList[0].VaultName": "fixture-vault"}},
+  {"op": "get_data_retrieval_policy", "args": {}, "expect": {"Policy": {}}},
+  {"op": "set_data_retrieval_policy", "args": {"Policy": {"Rules": [{"Strategy": "BytesPerHour", "BytesPerHour": 10737418240}]}}},
+  {"op": "get_data_retrieval_policy", "args": {"accountId": "000000000000"}, "expect": {"Policy.Rules[0].Strategy": "BytesPerHour"}},
+  {"op": "set_data_retrieval_policy", "args": {"Policy": {"Rules": [{"Strategy": "FreeTier", "BytesPerHour": 1}]}}, "error": "InvalidParameterValueException"},
+  {"op": "describe_vault", "args": {"accountId": "111111111111", "vaultName": "fixture-vault"}, "error": "InvalidParameterValueException"},
+  {"op": "upload_archive", "args": {"vaultName": "fixture-vault", "body": "archive"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_vault", "args": {"vaultName": "missing-vault"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_vaults", "args": {}, "expect": {"VaultList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_vault", "args": {"vaultName": "fixture-vault"}, "expect": {"VaultARN": "${vault}"}},
+  {"op": "get_data_retrieval_policy", "args": {}, "expect": {"Policy.Rules[0].BytesPerHour": 10737418240}}
+ ],
+ "cleanup": [
+  {"op": "delete_vault", "args": {"vaultName": "fixture-vault"}},
+  {"op": "set_data_retrieval_policy", "args": {"Policy": {"Rules": [{"Strategy": "FreeTier"}]}}},
+  {"op": "list_vaults", "args": {}, "expect": {"VaultList#count": 0}}
+ ]
+}

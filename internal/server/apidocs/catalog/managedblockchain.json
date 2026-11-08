@@ -1,0 +1,661 @@
+{
+ "components": {
+  "schemas": {
+   "Accessor": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "BillingToken": {
+      "maxLength": 42,
+      "minLength": 42,
+      "type": "string"
+     },
+     "CreationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Id": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NetworkType": {
+      "enum": [
+       "ETHEREUM_GOERLI",
+       "ETHEREUM_MAINNET",
+       "ETHEREUM_MAINNET_AND_GOERLI",
+       "POLYGON_MAINNET",
+       "POLYGON_MUMBAI"
+      ],
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "AVAILABLE",
+       "PENDING_DELETION",
+       "DELETED"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "Type": {
+      "enum": [
+       "BILLING_TOKEN"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AccessorSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Id": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NetworkType": {
+      "enum": [
+       "ETHEREUM_GOERLI",
+       "ETHEREUM_MAINNET",
+       "ETHEREUM_MAINNET_AND_GOERLI",
+       "POLYGON_MAINNET",
+       "POLYGON_MUMBAI"
+      ],
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "AVAILABLE",
+       "PENDING_DELETION",
+       "DELETED"
+      ],
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "BILLING_TOKEN"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Managed Blockchain API (2018-09-24). Every other official operation returns HTTP 501 UnknownOperationException. Only token-based accessors are stored. Their BillingToken is a local placeholder derived from the accessor ID that grants no access, and no Ethereum or Polygon node is reachable. Hyperledger Fabric networks, members, nodes, proposals and invitations are not implemented and return UnknownOperationException with HTTP 501. Deleted accessors are removed immediately instead of passing through PENDING_DELETION.",
+  "title": "Amazon Managed Blockchain (simulator catalog)",
+  "version": "2018-09-24"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/accessors": {
+   "get": {
+    "operationId": "managedblockchainListAccessors",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "managedblockchain"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "networkType",
+      "schema": {
+       "enum": [
+        "ETHEREUM_GOERLI",
+        "ETHEREUM_MAINNET",
+        "ETHEREUM_MAINNET_AND_GOERLI",
+        "POLYGON_MAINNET",
+        "POLYGON_MUMBAI"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 128,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Accessors": {
+           "items": {
+            "$ref": "#/components/schemas/AccessorSummary"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 128,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListAccessors",
+    "tags": [
+     "Amazon Managed Blockchain"
+    ]
+   },
+   "post": {
+    "operationId": "managedblockchainCreateAccessor",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "managedblockchain"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AccessorType": {
+          "enum": [
+           "BILLING_TOKEN"
+          ],
+          "type": "string"
+         },
+         "ClientRequestToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "NetworkType": {
+          "enum": [
+           "ETHEREUM_GOERLI",
+           "ETHEREUM_MAINNET",
+           "ETHEREUM_MAINNET_AND_GOERLI",
+           "POLYGON_MAINNET",
+           "POLYGON_MUMBAI"
+          ],
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "AccessorType",
+         "ClientRequestToken"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AccessorId": {
+           "maxLength": 32,
+           "minLength": 1,
+           "type": "string"
+          },
+          "BillingToken": {
+           "maxLength": 42,
+           "minLength": 42,
+           "type": "string"
+          },
+          "NetworkType": {
+           "enum": [
+            "ETHEREUM_GOERLI",
+            "ETHEREUM_MAINNET",
+            "ETHEREUM_MAINNET_AND_GOERLI",
+            "POLYGON_MAINNET",
+            "POLYGON_MUMBAI"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateAccessor",
+    "tags": [
+     "Amazon Managed Blockchain"
+    ]
+   }
+  },
+  "/accessors/{AccessorId}": {
+   "delete": {
+    "operationId": "managedblockchainDeleteAccessor",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "managedblockchain"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AccessorId",
+      "required": true,
+      "schema": {
+       "maxLength": 32,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteAccessor",
+    "tags": [
+     "Amazon Managed Blockchain"
+    ]
+   },
+   "get": {
+    "operationId": "managedblockchainGetAccessor",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "managedblockchain"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AccessorId",
+      "required": true,
+      "schema": {
+       "maxLength": 32,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Accessor": {
+           "$ref": "#/components/schemas/Accessor"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetAccessor",
+    "tags": [
+     "Amazon Managed Blockchain"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "managedblockchainUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "managedblockchain"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Managed Blockchain"
+    ]
+   },
+   "get": {
+    "operationId": "managedblockchainListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "managedblockchain"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Managed Blockchain"
+    ]
+   },
+   "post": {
+    "operationId": "managedblockchainTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "managedblockchain"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Managed Blockchain"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Managed Blockchain API (2018-09-24). Every other official operation returns HTTP 501 UnknownOperationException. Only token-based accessors are stored. Their BillingToken is a local placeholder derived from the accessor ID that grants no access, and no Ethereum or Polygon node is reachable. Hyperledger Fabric networks, members, nodes, proposals and invitations are not implemented and return UnknownOperationException with HTTP 501. Deleted accessors are removed immediately instead of passing through PENDING_DELETION.",
+   "name": "Amazon Managed Blockchain"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/managedblockchain/2018-09-24/service-2.json",
+  "sha256": "08671b701a1dae4dae5bd38f9bda7e4f02cbbcebbab205a743cdeb5b910ced19",
+  "license": "Apache-2.0"
+ }
+}

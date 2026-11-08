@@ -1,0 +1,26 @@
+{
+ "client": "servicediscovery",
+ "steps": [
+  {"op": "create_http_namespace", "args": {"Name": "fixture-ns", "Description": "fixture", "CreatorRequestId": "fixture-1", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"op1": "OperationId"}},
+  {"op": "create_http_namespace", "args": {"Name": "fixture-ns", "Description": "fixture", "CreatorRequestId": "fixture-1", "Tags": [{"Key": "team", "Value": "a"}]}, "expect": {"OperationId": "${op1}"}},
+  {"op": "list_namespaces", "args": {}, "save": {"ns": "Namespaces[0].Id", "arn": "Namespaces[0].Arn"}, "expect": {"Namespaces#count": 1, "Namespaces[0].Name": "fixture-ns", "Namespaces[0].Type": "HTTP", "Namespaces[0].Properties.HttpProperties.HttpName": "fixture-ns"}},
+  {"op": "get_namespace", "args": {"Id": "${ns}"}, "expect": {"Namespace.Description": "fixture", "Namespace.ServiceCount": 0, "Namespace.Arn": "${arn}", "Namespace.ResourceOwner": "000000000000"}},
+  {"op": "update_http_namespace", "args": {"Id": "${ns}", "UpdaterRequestId": "fixture-2", "Namespace": {"Description": "updated"}}},
+  {"op": "create_http_namespace", "args": {"Name": "fixture-ns", "CreatorRequestId": "fixture-3"}, "error": "NamespaceAlreadyExists"},
+  {"op": "tag_resource", "args": {"ResourceARN": "${arn}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${arn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${arn}"}, "expect": {"Tags#count": 1, "Tags[0].Key": "team"}},
+  {"op": "get_operation", "args": {"OperationId": "${op1}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_namespace", "args": {"Id": "ns-ghost0000000000"}, "error": "NamespaceNotFound"}
+ ],
+ "isolation": [
+  {"op": "list_namespaces", "args": {}, "expect": {"Namespaces#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_namespace", "args": {"Id": "${ns}"}, "expect": {"Namespace.Description": "updated"}}
+ ],
+ "cleanup": [
+  {"op": "delete_namespace", "args": {"Id": "${ns}"}},
+  {"op": "list_namespaces", "args": {}, "expect": {"Namespaces#count": 0}}
+ ]
+}
