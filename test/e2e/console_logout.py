@@ -36,7 +36,7 @@ with running(authenticated=True) as (team_a,operator),running(authenticated=True
    for width in (1440,390):
     page.set_viewport_size({'width':width,'height':1000});assert_reflow(page);page.screenshot(path=str(REPORTS/('logout-login-'+str(width)+'.png')),full_page=True,animations='disabled')
    page.set_viewport_size({'width':1440,'height':1000})
-  page.get_by_role('button',name='Open sandbox',exact=True).click();page.wait_for_url(endpoint+'/_simulator/console/');expect(page.get_by_role('button',name='Account menu',exact=True)).to_be_visible();expect(page.get_by_role('link',name='logout-team-b-only' if endpoint==team_b else 'logout-team-a-only',exact=True)).to_be_visible()
+  page.get_by_role('button',name='Open sandbox',exact=True).click();page.wait_for_url(endpoint+'/_simulator/console/');expect(page.get_by_role('button',name='Account menu',exact=True)).to_be_visible();page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='S3',exact=True).click();expect(page.get_by_role('link',name='logout-team-b-only' if endpoint==team_b else 'logout-team-a-only',exact=True)).to_be_visible()
  def cookie(page,endpoint):
   values=[item for item in page.context.cookies(endpoint) if item['name'].startswith('tcsim_')]
   assert len(values)==1,'Expected a single local authority cookie';return values[0]

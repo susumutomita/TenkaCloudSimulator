@@ -149,6 +149,8 @@ def run():
                 page.goto(a.endpoint + '/_simulator/console/')
                 page.get_by_label('Access token', exact=True).fill(a.token)
                 page.get_by_role('button', name='Open sandbox', exact=True).click()
+                page.get_by_role('button', name='Services', exact=True).click()
+                page.get_by_role('menuitem', name='S3', exact=True).click()
                 page.get_by_role('link', name=bucket, exact=True).click()
                 page.get_by_role('tab', name='Management', exact=True).click()
                 # Cloudscape places the group label on the selection-column header;

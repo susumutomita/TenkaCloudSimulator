@@ -101,7 +101,7 @@ func TestConsoleHandoffBindingReplayAndRevocation(t *testing.T) {
 	a, c, valid, policy := newHandoffFixture(t)
 	code := issueHandoffCode(t, a, c)
 	w := handoffRedeem(a, code)
-	if w.Code != 303 || w.Header().Get("Location") != "/_simulator/console/#/ssm?parameter=%2Fown%2Fvalue&region=us-east-1" {
+	if w.Code != 303 || w.Header().Get("Location") != "/_simulator/console/#/home?region=us-east-1" {
 		t.Fatal("redemption destination", w.Code, w.Header())
 	}
 	cookies := w.Result().Cookies()
@@ -122,6 +122,16 @@ func TestConsoleHandoffBindingReplayAndRevocation(t *testing.T) {
 	if send("/_simulator/v1/capabilities", "").Code != 204 {
 		t.Fatal("browser rejected")
 	}
+	for _, path := range []string{"/_simulator/docs/", "/_simulator/docs/openapi.json", "/_simulator/docs/scalar.js", "/_simulator/docs/init.js"} {
+		if send(path, "").Code != 204 {
+			t.Fatal("static API reference rejected", path)
+		}
+		r := httptest.NewRequest("POST", "http://127.0.0.1:4566"+path, nil)
+		r.AddCookie(cookies[0])
+		if handoffRequest(a, r).Code != 403 {
+			t.Fatal("reference path broadened mutation access", path)
+		}
+	}
 	policy.Statement = nil
 	if send("/_simulator/v1/capabilities", "").Code != 204 {
 		t.Fatal("policy refresh lost")
@@ -129,7 +139,7 @@ func TestConsoleHandoffBindingReplayAndRevocation(t *testing.T) {
 	if send("/_simulator/console/", "simulator-admin").Code != 403 {
 		t.Fatal("admin selection accepted")
 	}
-	for _, path := range []string{"/_simulator/v1/iam/identities", "/_simulator/v1/access", "/_simulator/providers/gcp/storage/v1/b", "/"} {
+	for _, path := range []string{"/_simulator/v1/iam/identities", "/_simulator/v1/access", "/_simulator/providers/gcp/storage/v1/b", "/_simulator/docs-admin/", "/"} {
 		if send(path, "").Code != 403 {
 			t.Fatal("broadened API access", path)
 		}
@@ -214,6 +224,17 @@ func TestConsoleHandoffActualSSMIsolation(t *testing.T) {
 	code := issueHandoffCode(t, a, c)
 	login := handoffRedeem(a, code)
 	cookie := login.Result().Cookies()[0]
+	for _, path := range []string{"/_simulator/docs/", "/_simulator/docs/openapi.json", "/_simulator/docs/init.js", "/_simulator/docs/boot.js", "/_simulator/docs/scalar.js"} {
+		r := httptest.NewRequest("GET", "http://127.0.0.1:4566"+path, nil)
+		r.AddCookie(cookie)
+		w := handoffRequest(a, r)
+		if w.Code != 200 || w.Body.Len() == 0 {
+			t.Fatal("embedded participant API reference unavailable", path, w.Code)
+		}
+		if strings.Contains(w.Body.String(), "practice-value") {
+			t.Fatal("static reference exposed a parameter value", path)
+		}
+	}
 	if w := send("GetParameter", "/own/value", "us-east-1", cookie); w.Code != 200 || !strings.Contains(w.Body.String(), "practice-value") {
 		t.Fatal("own value unavailable", w.Code, w.Body.String())
 	}

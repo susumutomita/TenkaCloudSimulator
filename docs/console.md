@@ -16,13 +16,42 @@
 
 実AWSログイン済みコンソールはアクセスしていない。公式ガイドの画像URL取得は環境のHTTP403、Cloudscape live demoはtunnel failureだった。したがって現行実AWSのpixel比較、全配置/余白/レスポンシブ一致は**未検証**。ガイド手順との一致と、Simulatorの実ブラウザ検証を区別する。単にCloudscapeを使ったから本物と同一とは主張しない。
 
+## 実画面を参照した Home と参加者導線（2026-11-08）
+
+利用者提供の現行 AWS Console Home・Services flyout・Parameter Store の画面と、
+ReadOnly role で開いている実 AWS の SSM 一覧を閲覧して比較した。これは実画面の
+読み取りによる配置確認であり、実 AWS リソースの作成・変更や画素単位の一致試験ではない。
+上の2026-11-03記録は当時の確認範囲として保持する。
+
+- Console の起点は特定サービスではなく Console Home。中央のカード型dashboard、
+  常設サービス検索、濃紺の2ペインServicesメニュー、サービスshortcut帯を参照した。
+  Simulatorは利用可能サービスとローカル環境情報を表示し、実装していない料金・Health・
+  利用履歴を架空の実測値として表示しない。AWSロゴや利用者のaccount情報もコピーしない。
+- 参加者handoffもHomeへ着地する。Homeと割当Parameter名の一覧は値のAPIを呼ばない。
+  Systems Manager → Parameter Store → 自分のParameter名を明示的に開いて初めて
+  GetParameterを送る。Stringの値は詳細で通常表示し、回答隠しの特殊ルールは追加しない。
+- 一覧の列は名前・利用枠・種類・データ型・最終変更日、My parametersタブを使う。
+  参加者scopeはParameter名だけを保持するため、取得していないmetadataはダッシュ表示。
+  他のParameterを列挙するDescribeParameters権限を広げたり、値を先読みしたりしない。
+  Public parametersとSettingsは未実装と表示する。直接の名前入力は一覧取得エラー時の補助。
+- パンくずのConsole HomeはHomeへ戻る。SSM詳細URLはregionとParameter名を保持し、
+  reloadとBack/Forwardで戻れる。値、operator token、STS秘密鍵はURLへ含めない。
+  一覧で取得済みのDescriptionだけを同じidentity/region/名前の詳細へ引き継ぐ。
+  直接URLやreloadで説明を取得していない場合は編集欄へ未取得と明示し、未編集なら保持する。
+- 同じ参加者sessionから同梱API referenceの静的GETを開ける。Scalarの実Sendにも
+  元のexact Parameter名・region・Get/Put操作・IAM判定が適用される。資料の閲覧を
+  S3やIAM管理操作、他チームのAPIアクセス許可へ変換しない。
+
+この変更はAWSの全機能・全画面の再現ではない。料金、Health、ウィジェット編集、
+CloudShell、未実装サービス、その他providerのidentity体系は追加していない。
+
 ## ブラウザ検証
 
 `make e2e`は実バイナリを空ディレクトリ・PATH空で起動し、UI/SDK共有状態、upload/download、literal dot-segment keys、IAM拒否、Scalarの実Sendを検証。全外部requestsを遮断し、要求があれば失敗。`make audit`は50段階を撮影、DOM snapshot、キーボードfocus/validation、390px/720pxのdocument幅、axe WCAGルールを検証。機械検査は完全なアクセシビリティ認証ではない。
 
 スクリーンショットはreports/console-objects-desktop.png、reports/console-mobile.png、reports/audit/へ保存。ダミー値のみ使用。実ホストintegrationは秘密flagをログや画面に出さず採点結果のみ記録する。
 
-現状のURLはサービス単位のhash routingまで。リージョン・operatorの選択identity・選択resource詳細はページ状態で、reload時の復元やresource詳細のブラウザBack履歴は実AWS同等ではない。これらと未実装tab/設定の追加は引き続き対応が必要であり、今回のhello-world完走と区別する。
+SSM詳細はregion・Parameter名をhashに保持する。その他サービスの選択resource詳細とoperatorの選択identityはページ状態で、reload時の復元やresource詳細のブラウザBack履歴は実AWS同等ではない。これらと未実装tab/設定の追加は引き続き対応が必要であり、今回のhello-world完走と区別する。
 
 リージョン変更は選択bucket/detail/modalを破棄して、そのリージョンのbucket一覧へ戻す。保存中のcontext変更をUIでガードし、古いregionのbucketへ誤って書き込まないことをSDK readback付きの実ブラウザ回帰で検証する。
 
@@ -106,3 +135,35 @@ AWS、Google Cloud、Azure を同じ階層で選び、そのクラウドの対�
 共通言語設定は実Chromiumで切替・保存・再読込・編集中の値の保持・保存禁止環境を検査した。共通の言語設定と各クラウド操作は実埋込バイナリのPC1440/390で検証済み。言語12状態・ストレージ操作22状態のaxe、外部通信0・ページエラー0、チーム分離、403/401、世代412拒否と詳細表示を確認した。既存E2Eを含む全体ゲートと新HEADのCIは進行中。完了前の画面を完成版として扱わない。Google Cloudの公開手順とAzureの公開公式画像を参照しているが、認証済みの現行画面は未確認。[GCP画面](gcp-console.md)、[Azure画面](azure-console.md)、[共通契約](design/0006-console-provider-contract.md)に範囲を分けて記録する。
 
 明示的なローカルトークンファイル選択は[専用ガイド](login-token-file.md)を参照。実埋込バイナリでもファイル選択・ログイン／ログアウト、古い読込結果の破棄、日英表示を検証したが、実Mac/Diaの確認は含まない。
+
+## CloudFormation Events（2026-11-08、検証中）
+
+Stacksの名前を選ぶか「Open stack history」に名前または正確なStack IDを
+入力すると、既存のDescribeStackEvents APIから同じSQLiteの記録を表示する。
+Eventsが初期タブで、Outputsは出力タブを明示的に選んだ場合だけ取得する。
+時刻、論理ID、状態、リソースタイプ、物理ID、イベントIDを新しい順に表示し、
+100件を超える履歴は「Load older events」で追加する。Refreshは先頭ページを
+再取得する。削除済みスタックは保持範囲内の正確なStack IDで参照できる。
+名前の再利用による別世代の混在を避け、画面の一覧からはIDを渡す。
+
+リージョン・演習ID・サービス・選択スタック変更とCloseで古い読取を破棄し、
+拒否されたRefresh/追加読込では既存行も消す。IAMとparticipant browserへの
+既存拒否を変更せず、DescribeStacks一覧権限がないoperator演習IDでも、
+許可されたStack ARNのEventsを名前指定で読む導線を提供する。
+
+記録は確定した同期ローカル作成・削除のみ。失敗した要求はAPIエラーとなり、
+failure event、任意例外、parameter/property値、Outputsはイベントに記録しない。
+CloudTrail実操作記録、Lambda自動ログ配送、実AWS非同期lifecycleやpixel一致を
+この表示から主張しない。native仕様は
+[DescribeStackEvents](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DescribeStackEvents.html)
+を参照するが、実AWS呼出しは行わない。
+
+新規Node投影・Query試験4件と既存console試験を含む19件、production bundle、
+Python構文検査は成功。実SDK作成104イベント、ページ追加、削除世代、権限変更、
+古い応答、1440/390px reflow/axeを要求するブラウザ回帰をmake e2eへ登録した。
+クラウドChromiumは既存調査でsocket EPERMとなっており、新規GUI回帰は未実行。
+`bee5cbf`固定sourceのmake before-commitは全Go race/fmt/vet/assets/modules/buildを
+通過し、statement coverageは20691/21659（95.53%、閾値90%）。その後の変更は
+E2E fixtureの明示SSM Nameとこの証跡だけで、runtime/埋込assetsは同一。
+実際のE2E native fixtureも104件、100+4件のページ、削除世代の取得を通過した。
+これはブラウザ実行の代替ではない。make e2eと公開HEADのhosted CIは未完了。
