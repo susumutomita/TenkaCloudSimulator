@@ -108,8 +108,9 @@ Concurrent work already authorized may finish after revocation, as for the
 existing browser path.
 
 This first handoff surface permits only `GetParameter` and `PutParameter` on
-the exact bound region/account/parameter ARN, intersected with the current role
-policy. It does not grant writes to a read-only role. Enumeration, deletion,
+the exact bound parameter name and region, plus its account/parameter ARN,
+intersected with the current role policy. Leading-slash aliases remain separate
+parameter names even when IAM ARN normalization produces the same ARN. It does not grant writes to a read-only role. Enumeration, deletion,
 other parameters/regions, all other cloud providers and identity/control APIs
 are refused server-side. Hiding UI controls is not the security boundary. A
 host must still authorize the user and choose the correct parameter; this
@@ -131,12 +132,26 @@ STS issuance, cross-site top-level login, fragment removal, list/detail/reload,
 read-only refusal and authorized writes, replay and role deletion, plus desktop
 and mobile accessibility. Host answer submission is separate integration
 acceptance. The existing BrowserSessions finite model describes the legacy
-session subset, not the new STS binding; no new formal refinement claim is made.
+session subset. The separate [ConsoleHandoff model](console-handoff-formal.md)
+checks bounded issuance, redemption, destination, revocation and authority
+invariants with twenty required mutation controls; no implementation refinement
+claim is made.
 
-Local candidate validation, 2026-11-08: `make before-commit` passed with all
-packages under the race detector, 95.60% whole-module statement coverage, vet,
-asset/license checks and standalone build. Focused handoff tests also passed.
-`make e2e` and the new GUI helper stopped before page launch because this
-executor rejects Chromium's process-singleton socket, including with approved
-escalated execution. GUI, accessibility and host answer submission are therefore
-not claimed as locally verified; the registered tests require hosted execution.
+Validation history, 2026-11-08: the original candidate passed
+`make before-commit` with all packages under the race detector, 95.60% whole-module
+statement coverage, vet, asset/license checks and standalone build. A separate
+isolated macOS host rehearsal subsequently reached the participant Console,
+rendered its own SSM value and submitted the answer for 100 points. This is
+historical integration evidence, not a pass for every later source revision.
+
+Independent review found and corrected an exact-name alias gap: the browser
+boundary now checks the parsed parameter name and region before SSM storage
+access, retaining the IAM ARN/action check as a second boundary. Actual-handler
+regressions cover both leading-slash directions, read/write refusal and unchanged
+own-name access. Unauthenticated embeddings no longer advertise handoff support;
+spoofing the similarly named request header cannot enable that capability.
+The separate finite model passed its baseline and all twenty required mutants,
+and the formal-policy suite passed 78 tests. The final native source also passed
+`make before-commit`: all packages under the race detector, 20,316/21,251
+statements (95.60%), vet, asset/license checks, module verification and build.
+Full exact-commit browser and formal gates remain required before merge.

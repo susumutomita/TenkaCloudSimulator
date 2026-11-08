@@ -59,6 +59,9 @@ type sdkIdentityContextKey struct{}
 type sdkPolicyContextKey struct{}
 type sdkSessionKeyContextKey struct{}
 type consoleParameterBoundaryKey struct{}
+type consoleParameterBoundary struct {
+	name, region, arn string
+}
 
 func SDKPolicyFromContext(ctx context.Context) (core.Policy, bool) {
 	p, ok := ctx.Value(sdkPolicyContextKey{}).(core.Policy)
@@ -67,8 +70,8 @@ func SDKPolicyFromContext(ctx context.Context) (core.Policy, bool) {
 
 // sdkDecision consumes the policy from the same snapshot as role-generation validation.
 func (g *Gateway) sdkDecision(r *http.Request, principal, action, resource string) (string, error) {
-	if resourceLimit, ok := r.Context().Value(consoleParameterBoundaryKey{}).(string); ok {
-		if resource != resourceLimit || (action != "ssm:GetParameter" && action != "ssm:PutParameter") {
+	if resourceLimit, ok := r.Context().Value(consoleParameterBoundaryKey{}).(consoleParameterBoundary); ok {
+		if resource != resourceLimit.arn || (action != "ssm:GetParameter" && action != "ssm:PutParameter") {
 			return "implicitDeny", nil
 		}
 	}
@@ -227,7 +230,7 @@ func (a *STSAuthority) ConsoleBinding(r *http.Request, region, parameter string)
 		}
 		ctx := context.WithValue(request.Context(), sdkIdentityContextKey{}, session.identity)
 		ctx = context.WithValue(ctx, sdkPolicyContextKey{}, policy)
-		ctx = context.WithValue(ctx, consoleParameterBoundaryKey{}, "arn:aws:ssm:"+region+":000000000000:parameter/"+strings.TrimPrefix(parameter, "/"))
+		ctx = context.WithValue(ctx, consoleParameterBoundaryKey{}, consoleParameterBoundary{name: parameter, region: region, arn: "arn:aws:ssm:" + region + ":000000000000:parameter/" + strings.TrimPrefix(parameter, "/")})
 		// No STS authority or native signing key is granted to a browser.
 		return request.Clone(ctx), session.identity, nil
 	}, nil

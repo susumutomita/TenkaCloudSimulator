@@ -24,6 +24,18 @@ type consoleScope struct {
 
 func consoleScopeFromRequest(r *http.Request) any { return r.Context().Value(consoleScopeKey{}) }
 
+// Only the Access wrapper sets this response marker. Request headers cannot
+// make an unauthenticated embedding advertise an authority it does not provide.
+func addConsoleHandoffCapabilities(w http.ResponseWriter, r *http.Request, capabilities map[string]any) map[string]any {
+	if w.Header().Get("X-Simulator-Authentication") == "required" {
+		capabilities["consoleHandoff"] = map[string]any{"version": 1, "services": []string{"ssm-parameter"}}
+		if scope := consoleScopeFromRequest(r); scope != nil {
+			capabilities["consoleScope"] = scope
+		}
+	}
+	return capabilities
+}
+
 type consoleHandoff struct {
 	scope       consoleScope
 	expires     time.Time

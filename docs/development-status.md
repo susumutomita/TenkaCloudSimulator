@@ -65,15 +65,21 @@ No tag or public release has been created. Signing/notarization, Gatekeeper and
 repository tag protections remain outside the verified scope.
 ## Participant console handoff, 2026-11-08
 
-Implemented locally: dedicated branch `feat/participant-console-handoff` based on
-`0d0abe6`, owner participant-console worker. Scope: STS authority browser binding,
-exact signed handoff endpoint, login fragment redemption, capability and negative
-tests. No CFN backlog or release files owned. `make before-commit` passed
-(full-module race, 95.60% statement coverage, vet, assets, module checks and build).
-`make e2e` and the new actual-browser helper are blocked before page launch by
-Chromium socket EPERM in this executor, including an approved escalated attempt.
-Hosted exact-source browser/host-GUI acceptance remains required. No publication
-or merge is claimed; hosts still own correct participant/resource selection.
+In progress: dedicated branch `feat/participant-console-handoff`, integrated
+with public main `74985ee93a1ab38c9b1101ffdd3a2c8c3430e01b`. The integration
+owner retains STS browser binding, the exact signed handoff endpoint, fragment
+redemption, capability discovery, tests and the separate ConsoleHandoff finite
+model. Other service PRs and release workflows remain outside this change.
+
+Historical native checks and the isolated macOS host GUI-to-100-point rehearsal
+are recorded in [console sessions](console-sessions.md). Independent review
+repaired a leading-slash parameter alias gap and unsupported capability metadata.
+The new 59th finite model preserves the prior 58 registry entries; its baseline,
+twenty required controls and all 78 formal-policy tests pass. The final integrated
+native source passed `make before-commit` with race coverage of 95.60%, vet,
+assets, module verification and build. Exact-commit browser/formal gates,
+publication and merge remain pending. No release or current-head GUI pass is
+implied by historical evidence.
 
 
 ## CloudFormation Battle intrinsic prerequisite: 2026-11-08

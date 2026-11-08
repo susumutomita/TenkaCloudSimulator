@@ -82,7 +82,12 @@ func newHandoffFixture(t *testing.T) (*Access, aws.STSCredentials, *bool, *core.
 }
 func issueHandoffCode(t *testing.T, a *Access, c aws.STSCredentials) string {
 	t.Helper()
-	w := handoffRequest(a, signedHandoff(c, `{"ParameterName":"/own/value","Region":"us-east-1"}`))
+	return issueHandoffCodeForParameter(t, a, c, "/own/value")
+}
+func issueHandoffCodeForParameter(t *testing.T, a *Access, c aws.STSCredentials, name string) string {
+	t.Helper()
+	body, _ := json.Marshal(map[string]string{"ParameterName": name, "Region": "us-east-1"})
+	w := handoffRequest(a, signedHandoff(c, string(body)))
 	if w.Code != 200 {
 		t.Fatalf("issuance status %d: %s", w.Code, w.Body.String())
 	}
@@ -201,7 +206,7 @@ func TestConsoleHandoffActualSSMIsolation(t *testing.T) {
 		}
 		return handoffRequest(a, r)
 	}
-	for _, name := range []string{"/own/value", "/other/value"} {
+	for _, name := range []string{"/own/value", "own/value", "/other/value"} {
 		if w := send("PutParameter", name, "us-east-1", nil); w.Code != 200 {
 			t.Fatal(w.Code, w.Body.String())
 		}
@@ -212,7 +217,7 @@ func TestConsoleHandoffActualSSMIsolation(t *testing.T) {
 	if w := send("GetParameter", "/own/value", "us-east-1", cookie); w.Code != 200 || !strings.Contains(w.Body.String(), "practice-value") {
 		t.Fatal("own value unavailable", w.Code, w.Body.String())
 	}
-	for _, tc := range []struct{ op, name, region string }{{"GetParameter", "/other/value", "us-east-1"}, {"GetParameter", "/own/value", "us-west-2"}, {"PutParameter", "/own/value", "us-east-1"}} {
+	for _, tc := range []struct{ op, name, region string }{{"GetParameter", "own/value", "us-east-1"}, {"GetParameter", "/other/value", "us-east-1"}, {"GetParameter", "/own/value", "us-west-2"}, {"PutParameter", "/own/value", "us-east-1"}} {
 		if w := send(tc.op, tc.name, tc.region, cookie); w.Code != 403 {
 			t.Fatal("role or boundary ignored", tc, w.Code, w.Body.String())
 		}
@@ -220,6 +225,11 @@ func TestConsoleHandoffActualSSMIsolation(t *testing.T) {
 	policy.Statement[0].Action = core.StringList{"ssm:*"}
 	if w := send("PutParameter", "/own/value", "us-east-1", cookie); w.Code != 200 {
 		t.Fatal("allowed write denied", w.Code, w.Body.String())
+	}
+	for _, op := range []string{"GetParameter", "PutParameter"} {
+		if w := send(op, "own/value", "us-east-1", cookie); w.Code != 403 {
+			t.Fatal("leading-slash alias escaped exact name boundary", op, w.Code)
+		}
 	}
 	if w := send("PutParameter", "/other/value", "us-east-1", cookie); w.Code != 403 {
 		t.Fatal("broad role escaped boundary", w.Code)
@@ -232,6 +242,20 @@ func TestConsoleHandoffActualSSMIsolation(t *testing.T) {
 	w := handoffRequest(a, r)
 	if w.Code != 200 || !strings.Contains(w.Body.String(), `"parameterName":"/own/value"`) || !strings.Contains(w.Body.String(), `"identitySelection":false`) {
 		t.Fatal("scope capability missing", w.Code)
+	}
+	// The inverse binding must also preserve the exact database key.
+	aliasLogin := handoffRedeem(a, issueHandoffCodeForParameter(t, a, c, "own/value"))
+	if aliasLogin.Code != 303 {
+		t.Fatal("alias target login failed", aliasLogin.Code)
+	}
+	aliasCookie := aliasLogin.Result().Cookies()[0]
+	for _, op := range []string{"GetParameter", "PutParameter"} {
+		if w := send(op, "own/value", "us-east-1", aliasCookie); w.Code != 200 {
+			t.Fatal("exact non-slash target denied", op, w.Code)
+		}
+		if w := send(op, "/own/value", "us-east-1", aliasCookie); w.Code != 403 {
+			t.Fatal("slash-prefixed sibling escaped exact name boundary", op, w.Code)
+		}
 	}
 }
 
@@ -333,5 +357,20 @@ func TestConsoleHandoffConcurrentReplay(t *testing.T) {
 	}
 	if success != 1 {
 		t.Fatal("concurrent redemption count", success)
+	}
+}
+
+func TestConsoleHandoffRequiresAccessCapability(t *testing.T) {
+	h, closeState, err := New(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closeState()
+	bareRequest := httptest.NewRequest("GET", "http://127.0.0.1:4566/_simulator/v1/capabilities", nil)
+	bareRequest.Header.Set("X-Simulator-Authentication", "required")
+	bareResponse := httptest.NewRecorder()
+	h.ServeHTTP(bareResponse, bareRequest)
+	if bareResponse.Code != 200 || strings.Contains(bareResponse.Body.String(), `"consoleHandoff"`) {
+		t.Fatal("embedding without Access advertised console handoff", bareResponse.Code)
 	}
 }
