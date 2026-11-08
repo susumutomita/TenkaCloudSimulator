@@ -19,7 +19,7 @@ import urllib.request
 def run(root, binary, reports, browser=False):
     sys.path.insert(0, str(root/'test/e2e'))
     from sakura_cli import CLI, BASE, BASIC, create, frame
-    from test_openapi_parameters import NATIVE_OPERATION_IDS
+    from test_openapi_parameters import validate_reference_inventory
     reports.mkdir(parents=True, exist_ok=True)
     statuses, executed = [], []
     owned = []
@@ -37,11 +37,11 @@ def run(root, binary, reports, browser=False):
             raw=response.read(1048577); assert len(raw)<=1048576
             spec=json.loads(raw)
         assert spec==json.loads((root/'internal/server/apidocs/openapi.json').read_text()), 'served candidate spec differs'
-        operations={op['operationId']:(path,method,op) for path,item in spec['paths'].items() for method,op in item.items() if isinstance(op,dict) and 'operationId' in op}
-        # Preserve the independently declared operation set, including the
-        # additive S3 multipart POST; do not infer the expected count from itself.
-        assert set(operations) == NATIVE_OPERATION_IDS
-        assert len(operations) == 67
+        entries=[(path,method,op) for path,item in spec['paths'].items() for method,op in item.items() if isinstance(op,dict) and 'operationId' in op]
+        # Check the independent 67-operation inventory before dictionary creation,
+        # including Sakura and multipart IDs and rejection of duplicate IDs.
+        validate_reference_inventory([op['operationId'] for _,_,op in entries])
+        operations={op['operationId']:(path,method,op) for path,method,op in entries}
         names={'SakuraListDisks','SakuraCreateDisk','SakuraGetDisk','SakuraUpdateDisk','SakuraDeleteDisk'}
         assert names<=set(operations)
         templates={name:copy.deepcopy(operations[name][2].get('requestBody',{}).get('content',{}).get('application/json',{}).get('examples',{})) for name in names}
