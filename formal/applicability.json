@@ -39,7 +39,7 @@
     },
     {
       "path": "docs/wafv2.md",
-      "sha256": "d1963a29451fc2264421368695758b4643fef7366e6d7925c74eec491acf126a",
+      "sha256": "d0b7bac57d61ce208f854ed3c4f20cef8259fa7e618314b60760c96fcc0d7e26",
       "disposition": "documentation",
       "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
       "models": []
@@ -457,7 +457,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "0e7230cb648dc33bcae52ca584a60d75914d8fbcf8adec81740a679495a8b1d6",
+      "sha256": "92cc1433b1edfc4019e6fdaba2aba8b2f24bd68b6f39e16e274d37958fd2e72d",
       "disposition": "modeled",
       "reason": "Adds the WAF view while preserving current-main session/navigation and epoch behavior. Existing model bindings cover retained shell behavior, not the new WAF editor; native browser tests remain a separate required check.",
       "models": [
@@ -523,6 +523,13 @@
       "models": []
     },
     {
+      "path": "test/console/waf-lifecycle.test.mjs",
+      "disposition": "test-support",
+      "reason": "Executes the shipped WAF mutation/unmount boundary with deterministic callbacks to check parent-saving cleanup and stale-completion isolation; not a browser acceptance claim.",
+      "models": [],
+      "sha256": "76d4b4deb3891ae0f27830b0b4c134850db6a1114a6c6186c2750f08ccb936c3"
+    },
+    {
       "path": "test/e2e/check.py",
       "sha256": "494dcc45289f927c09857b0cd3c79a89bf342e266cc69e71c226b6bf67ac24f2",
       "disposition": "test-support",
@@ -573,14 +580,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "c6d3d3eb65161f08189552ed7473c54864fd8f8000300e925dd94295398ff2c9",
+      "sha256": "eae482ab74159795e770f5772d49eb862390f605013515598102c61ef31d8707",
       "disposition": "presentation",
       "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "22f9d342286705d0a57ab6d6816f303afe782601344504656fccc266b50310bd",
+      "sha256": "abf358b445bf560485e1b9161b23f107377bbfd3946806ad84046dd1037f002e",
       "disposition": "presentation",
       "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
       "models": []
@@ -626,7 +633,7 @@
     },
     {
       "path": "tools/console/src/wafv2.jsx",
-      "sha256": "d86ee7bc1d642b3c66112dd6a64083dc02119903e308f891a8d6086835d301e4",
+      "sha256": "1f0e2be542e388217033d14ad91f1cd254e6a17aacd0f6774ae55515020528c9",
       "disposition": "presentation",
       "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
       "models": []

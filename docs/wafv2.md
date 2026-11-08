@@ -62,6 +62,12 @@ WAFAssociationAuthorization model represents that lock boundary with two ACLs
 and a competing writer; its controls remove the lock, ACL check or stage check.
 These abstractions do not prove the concrete Go/SQL/IAM implementation.
 
+Independent review found a WAF unmount path that could leave the parent console
+locked in its saving state after browser history navigation. Cleanup now releases
+that flag immediately; a delayed old completion cannot clear a new view's save.
+The shipped lifecycle functions are exercised by a deterministic regression test
+that fails before this fix. This is not a browser-history acceptance claim.
+
 Focused WAF aws/server tests pass both normally and with race instrumentation.
 Both WAF models and all ten sensitivity controls pass. Console rebuilding and
 asset/license checks pass. An optional existing Secrets Manager locale source
