@@ -79,6 +79,11 @@ Press Ctrl+C to stop. Restarting with the same state and token files reuses them
 Omitting `--state` when invoking the CLI creates a fresh in-memory database.
 The startup token is displayed only on a real stdout terminal when the `CI`
 environment variable is absent; redirection or even an empty `CI` suppresses it.
+Hosts can also open an existing participant STS session in the Parameter Store
+GUI using a [one-use console handoff](docs/console-sessions.md#participant-sts-console-handoff-version-1).
+It is restricted to one parameter and current role permissions; participants do
+not need the operator token.
+
 **Account → Sign out** revokes only that browser session. More options:
 [startup](docs/start.md), [sessions](docs/console-sessions.md).
 

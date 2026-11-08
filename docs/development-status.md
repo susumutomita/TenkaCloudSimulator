@@ -24,6 +24,18 @@ and draft-first publication without replacing existing tags/assets. Ambient Go
 configuration and observed tag drift are refused. Windows remains compile-only.
 No tag or public release has been created. Signing/notarization, Gatekeeper and
 repository tag protections remain outside the verified scope.
+## Participant console handoff, 2026-11-08
+
+Implemented locally: dedicated branch `feat/participant-console-handoff` based on
+`0d0abe6`, owner participant-console worker. Scope: STS authority browser binding,
+exact signed handoff endpoint, login fragment redemption, capability and negative
+tests. No CFN backlog or release files owned. `make before-commit` passed
+(full-module race, 95.60% statement coverage, vet, assets, module checks and build).
+`make e2e` and the new actual-browser helper are blocked before page launch by
+Chromium socket EPERM in this executor, including an approved escalated attempt.
+Hosted exact-source browser/host-GUI acceptance remains required. No publication
+or merge is claimed; hosts still own correct participant/resource selection.
+
 
 ## CloudFormation Battle intrinsic prerequisite: 2026-11-08
 

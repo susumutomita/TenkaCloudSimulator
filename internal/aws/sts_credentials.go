@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -56,6 +57,8 @@ func NewSTSAuthority(operatorToken string) *STSAuthority {
 type stsAuthorityContextKey struct{}
 type sdkIdentityContextKey struct{}
 type sdkPolicyContextKey struct{}
+type sdkSessionKeyContextKey struct{}
+type consoleParameterBoundaryKey struct{}
 
 func SDKPolicyFromContext(ctx context.Context) (core.Policy, bool) {
 	p, ok := ctx.Value(sdkPolicyContextKey{}).(core.Policy)
@@ -64,6 +67,11 @@ func SDKPolicyFromContext(ctx context.Context) (core.Policy, bool) {
 
 // sdkDecision consumes the policy from the same snapshot as role-generation validation.
 func (g *Gateway) sdkDecision(r *http.Request, principal, action, resource string) (string, error) {
+	if resourceLimit, ok := r.Context().Value(consoleParameterBoundaryKey{}).(string); ok {
+		if resource != resourceLimit || (action != "ssm:GetParameter" && action != "ssm:PutParameter") {
+			return "implicitDeny", nil
+		}
+	}
 	if p, ok := SDKPolicyFromContext(r.Context()); ok {
 		return core.Evaluate(p, action, resource), nil
 	}
@@ -168,6 +176,7 @@ func (a *STSAuthority) Authenticate(r *http.Request) (*http.Request, SDKIdentity
 		}
 	}
 	ctx := context.WithValue(r.Context(), stsAuthorityContextKey{}, a)
+	ctx = context.WithValue(ctx, sdkSessionKeyContextKey{}, signature.key)
 	ctx = context.WithValue(ctx, sdkIdentityContextKey{}, identity)
 	if snapshot != nil {
 		policy, err := snapshot(r.Context())
@@ -188,4 +197,38 @@ func (a *STSAuthority) Authenticate(r *http.Request) (*http.Request, SDKIdentity
 	clone := r.Clone(ctx)
 	clone.Header.Del("X-Amz-Security-Token")
 	return clone, identity, nil
+}
+
+// ConsoleBinding retains only an internal session reference, never an operator
+// credential. Every use repeats expiry, role generation and policy validation.
+func (a *STSAuthority) ConsoleBinding(r *http.Request, region, parameter string) (func(*http.Request) (*http.Request, SDKIdentity, error), error) {
+	key, ok := r.Context().Value(sdkSessionKeyContextKey{}).(string)
+	authority, _ := STSAuthorityFromContext(r.Context())
+	if !ok || key == "TCSIMOPERATOR" || authority != a {
+		return nil, fmt.Errorf("participant STS session required")
+	}
+	return func(request *http.Request) (*http.Request, SDKIdentity, error) {
+		a.mu.Lock()
+		session, exists := a.sessions[key]
+		valid := exists && a.now().Before(session.credentials.Expiration)
+		a.mu.Unlock()
+		if !valid {
+			return nil, SDKIdentity{}, fmt.Errorf("session expired")
+		}
+		if err := session.validate(request.Context()); err != nil {
+			return nil, SDKIdentity{}, err
+		}
+		policy, err := session.snapshot(request.Context())
+		if err != nil {
+			return nil, SDKIdentity{}, err
+		}
+		if !a.now().Before(session.credentials.Expiration) {
+			return nil, SDKIdentity{}, fmt.Errorf("session expired")
+		}
+		ctx := context.WithValue(request.Context(), sdkIdentityContextKey{}, session.identity)
+		ctx = context.WithValue(ctx, sdkPolicyContextKey{}, policy)
+		ctx = context.WithValue(ctx, consoleParameterBoundaryKey{}, "arn:aws:ssm:"+region+":000000000000:parameter/"+strings.TrimPrefix(parameter, "/"))
+		// No STS authority or native signing key is granted to a browser.
+		return request.Clone(ctx), session.identity, nil
+	}, nil
 }

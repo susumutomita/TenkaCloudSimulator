@@ -71,7 +71,7 @@ export function servicesForProvider(provider, capabilities, query = '') {
 }
 export function serviceFromHash(hash) {
   if (!hash || hash === '#' || hash === '#/') return 's3';
-  const first = /^#\/([^/]+)(?:\/|$)/.exec(hash)?.[1];
+  const first = /^#\/([^/?]+)(?:[/?]|$)/.exec(hash)?.[1];
   const aliases = {secrets: 'secretsmanager', parameters: 'ssm', stacks: 'cfn', functions: 'lambda', roles: 'iam'};
   const id = aliases[first] ?? first;
   return serviceDescriptor(id) ? id : null;

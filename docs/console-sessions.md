@@ -73,3 +73,70 @@ The combined eight baselines and eighteen specified sensitivity controls require
 fresh immutable-HEAD TLC execution. Source-only integration and Python policy/
 applicability checks are separate from native Go, actual browser, hosted CI and
 review evidence; no fresh runtime execution is implied by restacking.
+
+## Participant STS console handoff (version 1)
+
+A host can open the participant's existing local STS session in the actual
+Cloudscape Parameter Store console without exposing its operator token. Sign
+`POST /_simulator/v1/console-handoffs` using the participant's local SigV4 STS
+credentials, service `sts`, and `Content-Type: application/json`. The exact body
+is `{"ParameterName":"/practice/own","Region":"us-east-1"}`. Both fields are
+required; unknown fields fail. The response is `{"Code":"…","ExpiresAt":"…"}`.
+The code is a 256-bit random, single-use reference, valid for at most 60 seconds
+and never beyond the original STS expiry. Issuance is capped at 1000 outstanding
+codes per process. No operator, legacy participant token, or unsigned request
+can mint this handoff. Signed non-root routes other than this exact endpoint
+remain unsupported.
+
+Navigate to `/_simulator/login#handoff=CODE`. The login script erases the fragment
+before rendering or making requests, then redeems it through a same-origin form
+POST. The server consumes the code atomically and returns its bound destination;
+no arbitrary redirect target is accepted. Failed redemption requires a fresh
+code. A top-level cross-site navigation may load only public login HTML; it does
+not redeem the fragment or authorize any API. Cross-origin POSTs, subframes and
+other cross-site requests remain rejected. Hosts should use an isolated new tab
+with `noopener,noreferrer` and must not put codes in query strings, logs or
+persistent storage.
+
+The resulting HttpOnly, SameSite=Strict cookie lasts at most 15 minutes and
+never outlives the original STS session. Every authenticated request revalidates
+that session's existence and expiry, role generation and current effective
+policy snapshot. Role deletion/recreation, permission changes, process restart,
+expiry and browser logout retain their original effects. A browser does not
+receive native STS issuing authority or become a legacy access-token session.
+Concurrent work already authorized may finish after revocation, as for the
+existing browser path.
+
+This first handoff surface permits only `GetParameter` and `PutParameter` on
+the exact bound region/account/parameter ARN, intersected with the current role
+policy. It does not grant writes to a read-only role. Enumeration, deletion,
+other parameters/regions, all other cloud providers and identity/control APIs
+are refused server-side. Hiding UI controls is not the security boundary. A
+host must still authorize the user and choose the correct parameter; this
+restriction does not change the SDK credentials' own permissions or replace the
+one-process/database/token-authority-per-team hosting contract.
+
+Capabilities advertise `consoleHandoff: {version: 1, services:
+["ssm-parameter"]}`. Bound browser discovery also includes its own
+`consoleScope` (parameterName and region), allowing a one-parameter list and
+detail/refresh through GetParameter without DescribeParameters. Older binaries
+must show an explicit upgrade requirement in the host rather than falling back
+to operator login. Embeddings without Access do not provide handoff authority.
+
+Verification: the new Go tests exercise actual SSM authorization, exact-resource
+and region limits, fresh policy changes, role generation/expiry, replay, quota,
+operator rejection, route refusal and cross-site navigation boundaries.
+`test/e2e/console_handoff.py`, registered in `make e2e`, exercises actual native
+STS issuance, cross-site top-level login, fragment removal, list/detail/reload,
+read-only refusal and authorized writes, replay and role deletion, plus desktop
+and mobile accessibility. Host answer submission is separate integration
+acceptance. The existing BrowserSessions finite model describes the legacy
+session subset, not the new STS binding; no new formal refinement claim is made.
+
+Local candidate validation, 2026-11-08: `make before-commit` passed with all
+packages under the race detector, 95.60% whole-module statement coverage, vet,
+asset/license checks and standalone build. Focused handoff tests also passed.
+`make e2e` and the new GUI helper stopped before page launch because this
+executor rejects Chromium's process-singleton socket, including with approved
+escalated execution. GUI, accessibility and host answer submission are therefore
+not claimed as locally verified; the registered tests require hosted execution.

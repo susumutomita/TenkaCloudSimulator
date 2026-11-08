@@ -166,7 +166,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(addSakuraCapabilities(map[string]any{"protocolVersion": "2026-11-03", "principal": r.Header.Get("X-Simulator-Principal"), "identitySelection": r.Header.Get("X-Simulator-Access-Role") != "participant", "simulatorVersion": "0.1.0", "providers": registry.Names(), "cloudStorage": cloudStorageCapabilities(cloudConfig), "gcpCatalog": gcpCatalogCapabilities(gcpCatalog, cloudConfig), "azureCatalog": azureCatalogCapabilities(azureCatalog), "persistence": func() string {
+		_ = json.NewEncoder(w).Encode(addSakuraCapabilities(map[string]any{"protocolVersion": "2026-11-03", "consoleScope": consoleScopeFromRequest(r), "consoleHandoff": map[string]any{"version": 1, "services": []string{"ssm-parameter"}}, "principal": r.Header.Get("X-Simulator-Principal"), "identitySelection": r.Header.Get("X-Simulator-Access-Role") != "participant", "simulatorVersion": "0.1.0", "providers": registry.Names(), "cloudStorage": cloudStorageCapabilities(cloudConfig), "gcpCatalog": gcpCatalogCapabilities(gcpCatalog, cloudConfig), "azureCatalog": azureCatalogCapabilities(azureCatalog), "persistence": func() string {
 			if path == "" || path == ":memory:" {
 				return "memory"
 			}

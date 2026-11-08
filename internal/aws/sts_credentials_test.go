@@ -186,3 +186,75 @@ func TestSTSSlowBodyExpiryAndHeaderPreservation(t *testing.T) {
 		t.Fatal("session expired during body read was accepted")
 	}
 }
+
+func TestSTSConsoleBindingBoundaryAndFreshAuthority(t *testing.T) {
+	now := time.Now().UTC().Truncate(time.Second)
+	a := NewSTSAuthority(strings.Repeat("a", 32))
+	a.now = func() time.Time { return now }
+	valid := true
+	policy := core.Policy{Version: "2012-10-17", Statement: core.Statements{{Effect: "Allow", Action: core.StringList{"*"}, Resource: core.StringList{"*"}}}}
+	c, err := a.Issue(STSSessionRequest{Principal: "viewer", RoleARN: "arn:aws:iam::000000000000:role/viewer", RoleID: "generation", SessionName: "console-test", Duration: 15 * time.Minute, Validate: func(context.Context) error {
+		if !valid {
+			return fmt.Errorf("generation changed")
+		}
+		return nil
+	}, Snapshot: func(context.Context) (core.Policy, error) { return policy, nil }})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request, _, err := a.Authenticate(signedSTSRequest(c.AccessKeyID, c.SecretAccessKey, c.SessionToken, now))
+	if err != nil {
+		t.Fatal(err)
+	}
+	bind, err := a.ConsoleBinding(request, "us-east-1", "/own/value")
+	if err != nil {
+		t.Fatal(err)
+	}
+	browser, _, err := bind(httptest.NewRequest("POST", "http://127.0.0.1/", nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := STSAuthorityFromContext(browser.Context()); ok {
+		t.Fatal("browser can mint native sessions")
+	}
+	g := &Gateway{}
+	arn := "arn:aws:ssm:us-east-1:000000000000:parameter/own/value"
+	for _, tc := range []struct{ action, resource, want string }{{"ssm:GetParameter", arn, "allowed"}, {"ssm:PutParameter", arn, "allowed"}, {"ssm:GetParameter", arn + "-other", "implicitDeny"}, {"ssm:GetParameter", strings.Replace(arn, "us-east-1", "us-west-2", 1), "implicitDeny"}, {"ssm:DescribeParameters", "*", "implicitDeny"}, {"ssm:DeleteParameter", arn, "implicitDeny"}, {"iam:CreateRole", "*", "implicitDeny"}} {
+		decision, err := g.sdkDecision(browser, "viewer", tc.action, tc.resource)
+		if err != nil || decision != tc.want {
+			t.Fatalf("%s %s => %s %v", tc.action, tc.resource, decision, err)
+		}
+	}
+	policy.Statement = nil
+	browser, _, err = bind(browser)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if decision, _ := g.sdkDecision(browser, "viewer", "ssm:GetParameter", arn); decision == "allowed" {
+		t.Fatal("stale role policy snapshot")
+	}
+	valid = false
+	if _, _, err := bind(browser); err == nil {
+		t.Fatal("deleted/recreated role accepted")
+	}
+	valid = true
+	now = now.Add(15 * time.Minute)
+	if _, _, err := bind(browser); err == nil {
+		t.Fatal("STS expiry ignored")
+	}
+	now = now.Add(-15 * time.Minute)
+	delete(a.sessions, c.AccessKeyID)
+	if _, _, err := bind(browser); err == nil {
+		t.Fatal("removed STS session accepted")
+	}
+	op, _, err := a.Authenticate(signedSTSRequest("TCSIMOPERATOR", a.operator, "", now))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := a.ConsoleBinding(op, "us-east-1", "/own"); err == nil {
+		t.Fatal("operator made participant binding")
+	}
+	if _, err := a.ConsoleBinding(httptest.NewRequest("GET", "http://127.0.0.1/", nil), "us-east-1", "/own"); err == nil {
+		t.Fatal("unsigned made binding")
+	}
+}
