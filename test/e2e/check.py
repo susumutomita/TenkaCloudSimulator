@@ -327,6 +327,8 @@ def handler(event,context):
   subprocess.run([sys.executable,str(Path(__file__).with_name('test_crossprovider_official_storage.py'))],check=True,timeout=30)
  def test_official_storage_sdks_two_teams_restart_and_conditions(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('crossprovider_official_storage.py')),'--binary',str(BINARY),'--provider','both'],check=True,timeout=300)
+ def test_cloudformation_local_ssm_parameter_snapshot(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_ssm_parameters.py'))],check=True,timeout=120)
  def test_cloudformation_rest_native_sdk_lifecycle(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_rest.py'))],check=True)
  def test_sqs_native_sdk_two_teams_restart_retention_and_cleanup(self):

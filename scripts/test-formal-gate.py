@@ -174,9 +174,34 @@ class FormalGateTests(unittest.TestCase):
             with self.subTest(control=control['id']), self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
                 apply_mutant(source, entry['id'], broken)
 
+    def test_cfn_parameter_snapshot_required_inventory(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            registry = json.loads(original)
+            entry = next(m for m in registry['models'] if m['id'] == 'CFNParameterSnapshot')
+            for value in list(entry[field]):
+                candidate = json.loads(original)
+                changed = next(m for m in candidate['models'] if m['id'] == 'CFNParameterSnapshot')
+                changed[field].remove(value)
+                path.write_text(json.dumps(candidate))
+                try:
+                    with self.subTest(field=field, value=value), self.assertRaises(GateError):
+                        load_registry(self.root)
+                finally:
+                    path.write_text(original)
+        registry = json.loads(original)
+        registry['models'] = [m for m in registry['models'] if m['id'] != 'CFNParameterSnapshot']
+        path.write_text(json.dumps(registry))
+        try:
+            with self.assertRaises(GateError):
+                load_registry(self.root)
+        finally:
+            path.write_text(original)
+
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'SNSAdmission', 'SNSLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'CatalogResourceLifecycle', 'CatalogConsoleEpoch', 'LoginInputIntent', 'STSSessionLifecycle', 'CFNEventHistory', 'WAFRequestEvaluation', 'WAFAssociationAuthorization'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'SNSAdmission', 'SNSLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'CatalogResourceLifecycle', 'CatalogConsoleEpoch', 'LoginInputIntent', 'STSSessionLifecycle', 'CFNEventHistory', 'WAFRequestEvaluation', 'WAFAssociationAuthorization'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:

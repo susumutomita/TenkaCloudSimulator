@@ -1065,6 +1065,43 @@ REQUIRED_MUTANTS['WAFAssociationAuthorization'] = {'AllowPrivateACL',
  'WriterIgnoresTransaction'}
 REQUIRED_SOURCE_SCOPES['WAFAssociationAuthorization'] = {'internal/aws/wafv2_http.go', 'internal/aws/wafv2_store.go'}
 
+# Bounded local CloudFormation SSM snapshot requirements.
+BASE_MODELS.add('CFNParameterSnapshot')
+BASE_INVARIANTS['CFNParameterSnapshot'] = {'AdmissionExact',
+ 'AuthorizeEveryKeyBeforeRead',
+ 'CompletePublication',
+ 'ConditionsUseResolvedValues',
+ 'KeysPreserved',
+ 'NoEarlyWrites',
+ 'NoFailedWrites',
+ 'OneAtomicSnapshot',
+ 'RefsUseResolvedValues',
+ 'ReplayIdentityExact',
+ 'ReplayNoSourceRead',
+ 'ReplayPreservesStack',
+ 'SnapshotFrozen',
+ 'TypeOK',
+ 'ValidInputsPublish',
+ 'ValidateBeforeRead'}
+REQUIRED_MUTANTS['CFNParameterSnapshot'] = {'AcceptMismatchedToken',
+ 'AcceptNonStringSource',
+ 'AuthorizeOnlyFirstKey',
+ 'ConditionsUseKeys',
+ 'LeakWritesOnReadFailure',
+ 'OmitEvents',
+ 'RefreshAtCommit',
+ 'RefsUseKeys',
+ 'ReplayReadsAgain',
+ 'SkipInputValidation',
+ 'SkipPlanValidation',
+ 'SkipReplayAuthorization',
+ 'StoreValuesAsKeys',
+ 'TearSnapshot',
+ 'ValidateResolvedValueAsKey'}
+REQUIRED_SOURCE_SCOPES['CFNParameterSnapshot'] = {'internal/aws/cloudformation.go',
+ 'internal/aws/cloudformation_conditions.go',
+ 'internal/aws/cloudformation_ssm_parameters.go'}
+
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a

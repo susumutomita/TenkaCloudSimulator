@@ -14,7 +14,7 @@ Every push, pull request and manual run checks out the exact tested head and run
 4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
 5. Required real-binary/SDK/console/Scalar regression, including the new two-provider
    PC/mobile acceptance, plus the existing accessibility audit. The current source
-   registers 72 Conformance cases and 59 finite TLC baselines/484 named sensitivity
+   registers 73 Conformance cases and 60 finite TLC baselines/499 named sensitivity
    counterexamples; only completed exact-head runs count as verified.
    Official Google/Azure storage SDK acceptance runs against local CLIs with pinned development dependencies and documented transport limits;
    native HTTP and browser proof must not be labelled official SDK compatibility.

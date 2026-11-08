@@ -92,6 +92,11 @@ statements, missing owned state and immutable deployment behavior.
 
 ## Parameters and conditions
 
+[Local SSM value parameters](cloudformation-ssm-parameters.md) additionally resolve
+String and EC2 Image ID carriers from existing local String values with explicit
+source permission and immutable saved key/value snapshots. No public AWS lookup
+or EC2 execution is implied.
+
 The local compiler accepts String and Number parameters with bounded defaults,
 AllowedValues, String AllowedPattern/MinLength/MaxLength, and Number MinValue/
 MaxValue. Every definition and default is checked, even when a supplied value
@@ -112,7 +117,8 @@ value; direct `AWS::NoValue` arms remove a map property or list member. Both arm
 must have supported syntax and known Ref/GetAtt/Sub symbols. Only selected active
 links may require active resources. Disabled declarations still undergo resource
 kind/attribute/property validation and do not authorize unsupported types. This
-is a pure compile step before native state mutation; it adds no UpdateStack,
+is validation before native state mutation (SSM-backed parameters read a local
+authorized snapshot); it adds no UpdateStack,
 custom resources, new resource types or host problem-specific behavior.
 
 The exact original catalog fixture is retained at

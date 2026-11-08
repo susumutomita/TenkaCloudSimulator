@@ -65,7 +65,9 @@ now passes YAML intrinsic parsing. Tests resolve its actual subnet
 The full original CreateStack still fails explicitly on unsupported resource
 types, before any native state or successful deployment history is written.
 
-EC2/VPC resources, IAM InstanceProfile, SSM-backed AMI parameter types, the full
+A later [local SSM value parameter slice](cloudformation-ssm-parameters.md) admits
+the AMI parameter carrier without providing public image data.
+EC2/VPC resources, IAM InstanceProfile, the full
 IAM policy language, real guest boot, Session Manager and guest HTTP services
 remain outside this change. This is an intrinsic prerequisite, **not a working
 Battle deployment or gameplay/grading acceptance**. Supported native SSM test
