@@ -1061,6 +1061,11 @@ REQUIRED_SOURCE_SCOPES['CFNParameterSnapshot'] = {'internal/aws/cloudformation.g
  'internal/aws/cloudformation_conditions.go',
  'internal/aws/cloudformation_ssm_parameters.go'}
 
+BASE_MODELS.add('ConsoleHandoff')
+BASE_INVARIANTS['ConsoleHandoff'] = {'LogoutRejectsReplay', 'TypeOK', 'RedeemRequiresFreshParent', 'OperatorRefused', 'ExactDestination', 'ParentLifetimeBound', 'AttemptConsumesCode', 'UseRequiresFreshAuthority', 'SDKAuthorityPreserved', 'UnrelatedSessionsPreserved', 'OneTimeRedemption'}
+REQUIRED_MUTANTS['ConsoleHandoff'] = {'SkipParameter', 'RevokeSDK', 'SkipRedeemExpiry', 'SkipUseGeneration', 'CachePolicy', 'ExtendHandoff', 'SkipRedeemGeneration', 'SkipCookie', 'SkipRegion', 'SkipBrowserExpiry', 'ReuseCode', 'SkipAction', 'SkipRedeemParent', 'RevokePeer', 'KeepLoggedOutCookie', 'ExtendBrowser', 'IgnoreConsumedCode', 'SkipUseParent', 'GrantBrowserSDK', 'AllowOperator'}
+REQUIRED_SOURCE_SCOPES['ConsoleHandoff'] = {'internal/server/console_handoff.go', 'internal/aws/sts_credentials_test.go', 'internal/server/console_handoff_test.go', 'internal/server/access.go', 'internal/aws/sts_roles.go', 'internal/aws/sts_credentials.go', 'internal/server/server.go', 'internal/aws/ssm.go'}
+
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a

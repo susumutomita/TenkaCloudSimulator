@@ -303,6 +303,9 @@ def handler(event,context):
     f=client('cloudformation',endpoint,token);c=client('lambda',endpoint,token)
     result=c.invoke(FunctionName='cfn-inline-app',Payload=b'null');self.assertNotIn('FunctionError',result);self.assertEqual(json.loads(result['Payload'].read()),{'answer':42,'value':'team-one','event':None})
     f.delete_stack(StackName='inline-practice');self.assertEqual(c.list_functions()['Functions'],[])
+ def test_console_participant_sts_handoff(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('console_handoff.py'))],check=True,timeout=180)
+
  def test_console_account_sign_out_revokes_browser_session_only(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('console_logout.py'))],check=True)
 

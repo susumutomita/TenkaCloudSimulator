@@ -32,15 +32,17 @@ type browserSession struct {
 // Access binds opaque local credentials to exercise identities. A separate
 // Access instance and database must be assigned to each team by the host.
 type Access struct {
-	next     http.Handler
-	sdk      *sdkAuthority
-	operator [32]byte
-	cookie   string
-	remote   bool
-	mu       sync.Mutex
-	sessions map[[32]byte]accessSession
-	browsers map[[32]byte]browserSession
-	now      func() time.Time
+	next          http.Handler
+	sdk           *sdkAuthority
+	operator      [32]byte
+	cookie        string
+	remote        bool
+	mu            sync.Mutex
+	sessions      map[[32]byte]accessSession
+	browsers      map[[32]byte]browserSession
+	handoffs      map[[32]byte]consoleHandoff
+	boundBrowsers map[[32]byte]consoleHandoff
+	now           func() time.Time
 }
 
 func NewAccess(next http.Handler, operatorToken string, allowRemote bool) (*Access, error) {
@@ -48,7 +50,7 @@ func NewAccess(next http.Handler, operatorToken string, allowRemote bool) (*Acce
 		return nil, fmt.Errorf("operator token must contain 32–256 URL-safe characters")
 	}
 	sum := sha256.Sum256([]byte(operatorToken))
-	return &Access{next: next, sdk: newSDKAuthority(operatorToken), operator: sum, cookie: "tcsim_" + hex.EncodeToString(sum[:6]), remote: allowRemote, sessions: map[[32]byte]accessSession{}, browsers: map[[32]byte]browserSession{}, now: time.Now}, nil
+	return &Access{next: next, sdk: newSDKAuthority(operatorToken), operator: sum, cookie: "tcsim_" + hex.EncodeToString(sum[:6]), remote: allowRemote, sessions: map[[32]byte]accessSession{}, browsers: map[[32]byte]browserSession{}, handoffs: map[[32]byte]consoleHandoff{}, boundBrowsers: map[[32]byte]consoleHandoff{}, now: time.Now}, nil
 }
 func (a *Access) credential(token string) (accessSession, bool) {
 	sum := sha256.Sum256([]byte(token))
@@ -96,6 +98,7 @@ func (a *Access) browserCookie(r *http.Request, token string, expires time.Time)
 func (a *Access) revokeBrowser(r *http.Request) {
 	if cookie, err := r.Cookie(a.cookie); err == nil {
 		delete(a.browsers, sha256.Sum256([]byte(cookie.Value)))
+		delete(a.boundBrowsers, sha256.Sum256([]byte(cookie.Value)))
 	}
 }
 func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +128,8 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if r.Header.Get("Sec-Fetch-Site") == "cross-site" {
+	loginNavigation := r.Method == "GET" && r.URL.Path == "/_simulator/login" && r.URL.RawQuery == "" && r.Header.Get("Sec-Fetch-Mode") == "navigate" && r.Header.Get("Sec-Fetch-Dest") == "document"
+	if r.Header.Get("Sec-Fetch-Site") == "cross-site" && !loginNavigation {
 		http.Error(w, "Cross-site request rejected", 403)
 		return
 	}
@@ -156,6 +160,10 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			u := *r.URL
 			clone.URL = &u
 			clone.URL.Path = "/_simulator/console/"
+			// This exception serves only public login HTML, never an authenticated API.
+			if loginNavigation {
+				clone.Header.Del("Sec-Fetch-Site")
+			}
 			a.next.ServeHTTP(w, clone)
 			return
 		}
@@ -166,6 +174,10 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, 4096)
 		if r.ParseForm() != nil {
 			http.Error(w, "Invalid sign-in request", 400)
+			return
+		}
+		if r.PostForm.Has("handoff") {
+			a.redeemConsoleHandoff(w, r)
 			return
 		}
 		token := r.PostForm.Get("token")
@@ -195,18 +207,15 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		for key, session := range a.browsers {
-			if !now.Before(session.expires) {
-				delete(a.browsers, key)
-			}
-		}
+		a.pruneConsoleSessions(now)
 		// Replacing this browser's session must not consume another quota slot.
 		oldToken := ""
 		if old, err := r.Cookie(a.cookie); err == nil {
 			oldToken = old.Value
 		}
 		_, replacing := a.browsers[sha256.Sum256([]byte(oldToken))]
-		if len(a.browsers) >= 1000 && !replacing {
+		_, replacingBound := a.boundBrowsers[sha256.Sum256([]byte(oldToken))]
+		if len(a.browsers)+len(a.boundBrowsers) >= 1000 && !replacing && !replacingBound {
 			a.mu.Unlock()
 			http.Error(w, "Browser-session limit reached", 429)
 			return
@@ -235,7 +244,15 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		principal, ok = a.identity(token)
 	} else {
 		if cookie, e := r.Cookie(a.cookie); e == nil {
-			principal, ok = a.browserIdentity(cookie.Value)
+			var bound bool
+			r, principal, ok, bound = a.consoleBrowserRequest(r, cookie.Value)
+			if bound && !ok && principal != "" {
+				http.Error(w, "Request outside console session scope", 403)
+				return
+			}
+			if !bound {
+				principal, ok = a.browserIdentity(cookie.Value)
+			}
 		}
 	}
 	if !ok {
@@ -318,6 +335,10 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		a.mu.Unlock()
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{"AccessToken": newToken, "Principal": input.Principal, "ExpiresAt": expires.Format(time.RFC3339)})
+		return
+	}
+	if r.URL.Path == "/_simulator/v1/console-handoffs" {
+		a.issueConsoleHandoff(w, r)
 		return
 	}
 	a.next.ServeHTTP(w, r)

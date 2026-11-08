@@ -1,5 +1,20 @@
 # Development roster
 
+## S3 multipart and GUI main integration, 2026-11-08
+
+Claimed by the PR440 integration worker on `integrate/pr440-gui-20261108`
+in `/workspace/scratch/5da5816d240c/simulator-pr440-merge`: normal merge of
+published PR440 `31df6fc66ff4a742334dc6cc8d4ceaafcc439a9f` with GUI main
+`d968be38dd2ed933e1e756b219ef2b0d26f665b0`. Owns conflict resolution,
+console bundle regeneration, registry union and exact applicability only.
+Preserves GUI handoff/auth/SSM behavior and the multipart cache-header fix.
+The combined inventory is 60 models and 514 controls (574 executions).
+Full native/race, coverage, assets, formal and automatic browser gates are
+pending for this integration; prior receipts below remain historical.
+No workflows, dependency locks, releases or unrelated service work are changed.
+Heavy checks are serialized in the integration worker's reserved CPU lane;
+local browser execution is unavailable and must not be claimed as verified.
+
 ## S3 multipart PR440 integration, 2026-11-08
 
 Status: in progress on `integrate/pr440-docs-20261108`, integrating the
@@ -82,6 +97,39 @@ and draft-first publication without replacing existing tags/assets. Ambient Go
 configuration and observed tag drift are refused. Windows remains compile-only.
 No tag or public release has been created. Signing/notarization, Gatekeeper and
 repository tag protections remain outside the verified scope.
+## Participant console handoff, 2026-11-08
+
+In progress: dedicated branch `feat/participant-console-handoff`, integrated
+with public main `74985ee93a1ab38c9b1101ffdd3a2c8c3430e01b`. The integration
+owner retains STS browser binding, the exact signed handoff endpoint, fragment
+redemption, capability discovery, tests and the separate ConsoleHandoff finite
+model. Other service PRs and release workflows remain outside this change.
+
+Historical native checks and the isolated macOS host GUI-to-100-point rehearsal
+are recorded in [console sessions](console-sessions.md). Independent review
+repaired a leading-slash parameter alias gap and unsupported capability metadata.
+The new 59th finite model preserves the prior 58 registry entries; its baseline,
+twenty required controls and all 78 formal-policy tests pass. The final integrated
+native source passed `make before-commit` with race coverage of 95.60%, vet,
+assets, module verification and build. Exact-commit browser/formal gates,
+publication and merge remain pending. No release or current-head GUI pass is
+implied by historical evidence.
+
+The PR #446 audit follow-up owns only `test/e2e/console_handoff.py`, this roster
+and their exact applicability entries, starting from
+`3395abbf2a22c80b2128a36d2f4a3e0c507e7532` in the same dedicated branch/worktree.
+The hosted browser reached the bound parameter, then correctly rejected the
+test's inline script tag under the Console CSP. The fix uses the existing
+Playwright audit evaluation pattern without changing the site's CSP, runtime
+or assets. Both 1440/390 accessibility audits and all subsequent scope, write,
+replay and revocation assertions remain required. Native `make before-commit`
+and fresh exact-head browser/formal checks are required for this follow-up;
+the previous source's successful native/formal checks are historical evidence.
+The next hosted run passed both accessibility audits but found the denied-write
+text in both the visible form error and Cloudscape's hidden live-region copy.
+The same owner scopes error/success assertions to their respective Alerts;
+the visible denial, successful write and later authorization checks stay intact.
+
 
 ## CloudFormation Battle intrinsic prerequisite: 2026-11-08
 
