@@ -42,7 +42,8 @@ with running(authenticated=True) as (endpoint,operator), sync_playwright() as p:
  assert not any('DescribeParameters' in (request[2] or '') for request in requests)
  for width in (1440,390):
   page.set_viewport_size({'width':width,'height':1000});assert_reflow(page)
-  page.add_script_tag(content=axe);audit=page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})")
+  # Use the same audit instrumentation as console_logout; keep the site CSP intact.
+  page.evaluate(axe);audit=page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})")
   assert not audit['violations'],[v['id'] for v in audit['violations']]
   page.screenshot(path=str(REPORTS/('console-handoff-'+str(width)+'.png')),full_page=True)
  page.set_viewport_size({'width':1440,'height':1000})

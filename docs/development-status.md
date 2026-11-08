@@ -81,6 +81,17 @@ assets, module verification and build. Exact-commit browser/formal gates,
 publication and merge remain pending. No release or current-head GUI pass is
 implied by historical evidence.
 
+The PR #446 audit follow-up owns only `test/e2e/console_handoff.py`, this roster
+and their exact applicability entries, starting from
+`3395abbf2a22c80b2128a36d2f4a3e0c507e7532` in the same dedicated branch/worktree.
+The hosted browser reached the bound parameter, then correctly rejected the
+test's inline script tag under the Console CSP. The fix uses the existing
+Playwright audit evaluation pattern without changing the site's CSP, runtime
+or assets. Both 1440/390 accessibility audits and all subsequent scope, write,
+replay and revocation assertions remain required. Native `make before-commit`
+and fresh exact-head browser/formal checks are required for this follow-up;
+the previous source's successful native/formal checks are historical evidence.
+
 
 ## CloudFormation Battle intrinsic prerequisite: 2026-11-08
 
