@@ -183,3 +183,10 @@ ARN. Legacy exercise participants remain blocked from host event history; native
 SDK assumed roles use their actual role permission snapshot. The original
 hello-world viewer role does not have this permission. The host may present a
 separate authorized, sanitized per-team projection.
+
+## Bounded value intrinsics
+
+`Select`, synthetic local `GetAZs`, `Base64` and scalar `Sub` literal escapes are
+available in properties and outputs. See the [operand limits, local-zone contract
+and original Battle acceptance boundary](cloudformation-intrinsics.md). This adds
+no EC2, Session Manager, guest execution or full Battle support.
