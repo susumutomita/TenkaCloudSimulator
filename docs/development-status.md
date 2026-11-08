@@ -3,11 +3,11 @@
 ## WAF PR #50 integration, 2026-11-08
 
 Issue #38/#42: the original `feat/waf-integration-20261104` branch is being
-integrated with main `835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152` without rewriting
+integrated with main `74985ee93a1ab38c9b1101ffdd3a2c8c3430e01b` without rewriting
 its published history. Scope: WAF service/tests, pre-Lambda enforcement, WAF
 navigation/capabilities, generated assets, formal registration and applicability.
-Other console handoff work and #27/#327 remain separate; the merged #445 local
-SSM snapshot implementation and its model are retained.
+Other console handoff work and #27 remain separate; merged #327 documentation
+and #445 local SSM snapshot implementation and model are retained.
 
 Focused WAF native/race, console asset/license checks and two finite baselines
 with ten sensitivity controls pass. The original association authorization race
@@ -17,22 +17,44 @@ unfiltered source lines. These results do not replace checks on the new tree.
 Full integrated quality/E2E, all registered models and exact-head hosted CI
 remain pending. No merge or release is claimed.
 
+## Service evidence documentation integration, 2026-11-08
+
+PR [#327](https://github.com/susumutomita/TenkaCloudSimulator/pull/327) is being
+integrated with public main `835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152`.
+The integration owner owns only this roster, the
+[service verification matrix](service-verification.md), and their exact
+applicability record. Runtime, console assets, dependency locks, model registry,
+workflows and existing service assignments remain unchanged from that base.
+The matrix separates the current bounded multi-cloud contracts and 58 registered
+finite models from its explicitly historical November 4 evidence. Historical
+PR states, five-model totals and AWS-only statements are not current support claims.
+
+The dated records below are preserved rather than replaced by the older PR.
+Their assignments, pending checks and completion statements apply to their named
+source revisions; this documentation integration does not reassign service work.
+PR #27, WAF #50 and ongoing console work are outside its editing scope.
+Fresh exact-HEAD CI and Formal validation are required before merge; earlier
+successful runs do not validate this integration. No release or deployment is
+performed by this change.
+
 ## CloudFormation local SSM parameter values, 2026-11-08
 
 Issue #54: `feat/battle-backlog-20261108`, base `0d0abe6eff9a219f5503ea7cc3c3ba612df4ae24`.
-Compiler owner owns CloudFormation parameter resolution, native/SDK tests and docs.
-An independent formal worker owns only the new SSM snapshot/admission model, its
-registry entry and correspondence document. S3 #440, EC2/Route53, UI, dispatch
-and dependencies remain excluded. One heavy runtime lane is reserved for the
-compiler owner; model checks coordinate before using it.
+The change covers CloudFormation parameter resolution, native/SDK tests,
+documentation and the finite SSM snapshot/admission model. S3 #440, EC2/Route53,
+UI, dispatch and dependencies remain excluded.
 
 The proposed subset resolves String and EC2 Image ID carriers only from local
 Standard String values, with caller GetParameters permission and preserved input
 keys/resolved values. No public AWS lookup, AMI existence, EC2 execution or full
 Battle success follows. Implementation and focused native/race checks are complete. Independent review
 found and repaired replay-name validation and exact-ARN preflight regressions.
-The scoped finite model passed its baseline and 15 controls. Full current-source
-quality/E2E/formal and hosted CI remain pending; no merge is claimed.
+The scoped finite model passed its baseline and 15 controls.
+[PR #445](https://github.com/susumutomita/TenkaCloudSimulator/pull/445) merged as
+`835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152` after all eleven checks on source
+`be291bc02712dbf9d02fe5e167e4bc33b0c4d565` succeeded, including whole CI and
+Formal validation. Post-merge main checks are separate evidence and are not
+claimed by those pre-merge results.
 
 ## Standalone release pipeline, 2026-11-08
 
