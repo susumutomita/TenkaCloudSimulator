@@ -6948,6 +6948,203 @@
      "expect_invariant": "NextCursorExact"
     }
    ]
+  },
+  {
+   "id": "CFNParameterSnapshot",
+   "model": "formal/CFNParameterSnapshot.tla",
+   "config": "formal/CFNParameterSnapshot.cfg",
+   "bounds": "Two selected local keys; two String values plus missing/wrong-type cells; four admission classes, four permission subsets, three replay modes and one interleaved source replacement/deletion.",
+   "properties": [
+    "TypeOK",
+    "ValidateBeforeRead",
+    "AuthorizeEveryKeyBeforeRead",
+    "OneAtomicSnapshot",
+    "NoFailedWrites",
+    "NoEarlyWrites",
+    "AdmissionExact",
+    "ValidInputsPublish",
+    "KeysPreserved",
+    "SnapshotFrozen",
+    "RefsUseResolvedValues",
+    "ConditionsUseResolvedValues",
+    "CompletePublication",
+    "ReplayNoSourceRead",
+    "ReplayIdentityExact",
+    "ReplayPreservesStack"
+   ],
+   "limits": "Abstract admission, atomic capture, immutable publication and replay only; no SQL/IAM/Go refinement, concrete constraints, AMI validity, VM execution, secret/list/version/cross-account resolution or liveness proof.",
+   "source_scope": [
+    "internal/aws/cloudformation.go",
+    "internal/aws/cloudformation_conditions.go",
+    "internal/aws/cloudformation_ssm_parameters.go"
+   ],
+   "mutants": [
+    {
+     "id": "SkipInputValidation",
+     "edits": [
+      {
+       "old": "IF InputOK(input) THEN",
+       "new": "IF TRUE THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValidateBeforeRead"
+    },
+    {
+     "id": "AuthorizeOnlyFirstKey",
+     "edits": [
+      {
+       "old": "i.allowed=Keys",
+       "new": "\"/local/a\" \\in i.allowed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizeEveryKeyBeforeRead"
+    },
+    {
+     "id": "AcceptNonStringSource",
+     "edits": [
+      {
+       "old": "StringSources(source) /\\ PlanOK(input)",
+       "new": "TRUE /\\ PlanOK(input)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionExact"
+    },
+    {
+     "id": "SkipPlanValidation",
+     "edits": [
+      {
+       "old": "/\\ PlanOK(input)",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionExact"
+    },
+    {
+     "id": "ValidateResolvedValueAsKey",
+     "edits": [
+      {
+       "old": "StringSources(source) /\\ PlanOK(input)",
+       "new": "StringSources(source) /\\ PlanOK(input) /\\ source[\"/local/a\"] \\in Keys",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValidInputsPublish"
+    },
+    {
+     "id": "TearSnapshot",
+     "edits": [
+      {
+       "old": "snapshot'=source",
+       "new": "snapshot'=[source EXCEPT ![\"/local/a\"] = \"wrongType\"]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OneAtomicSnapshot"
+    },
+    {
+     "id": "StoreValuesAsKeys",
+     "edits": [
+      {
+       "old": "keys |-> Keys, values",
+       "new": "keys |-> {}, values",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "KeysPreserved"
+    },
+    {
+     "id": "RefreshAtCommit",
+     "edits": [
+      {
+       "old": "values |-> snapshot, ref",
+       "new": "values |-> source, ref",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SnapshotFrozen"
+    },
+    {
+     "id": "RefsUseKeys",
+     "edits": [
+      {
+       "old": "ref |-> snapshot,",
+       "new": "ref |-> Empty,",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RefsUseResolvedValues"
+    },
+    {
+     "id": "ConditionsUseKeys",
+     "edits": [
+      {
+       "old": "condition |-> (snapshot[\"/local/a\"]=\"valueA\")",
+       "new": "condition |-> FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ConditionsUseResolvedValues"
+    },
+    {
+     "id": "OmitEvents",
+     "edits": [
+      {
+       "old": "resources |-> 1, events |-> 1",
+       "new": "resources |-> 1, events |-> 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CompletePublication"
+    },
+    {
+     "id": "ReplayReadsAgain",
+     "edits": [
+      {
+       "old": "UNCHANGED <<input,source,changed,captured,snapshot,reads,rows>>",
+       "new": "reads'=reads+1 /\\ UNCHANGED <<input,source,changed,captured,snapshot,rows>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReplayNoSourceRead"
+    },
+    {
+     "id": "AcceptMismatchedToken",
+     "edits": [
+      {
+       "old": "IF input.replay=\"match\" THEN",
+       "new": "IF input.replay # \"denied\" THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReplayIdentityExact"
+    },
+    {
+     "id": "SkipReplayAuthorization",
+     "edits": [
+      {
+       "old": "IF input.replay=\"match\" THEN",
+       "new": "IF input.replay # \"mismatch\" THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReplayIdentityExact"
+    },
+    {
+     "id": "LeakWritesOnReadFailure",
+     "edits": [
+      {
+       "old": "UNCHANGED <<input,source,changed,rows,reply>>",
+       "new": "rows'=(IF phase'=\"Failed\" THEN [Absent EXCEPT !.events=1] ELSE rows)\n /\\ UNCHANGED <<input,source,changed,reply>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoFailedWrites"
+    }
+   ]
   }
  ]
 }
