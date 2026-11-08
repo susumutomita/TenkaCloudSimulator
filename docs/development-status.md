@@ -2,46 +2,61 @@
 
 ## S3 multipart PR440 integration, 2026-11-08
 
-Status: in progress. The integration owner uses the dedicated
-`integrate/pr440-main-20261108` branch and `simulator-pr440-merge` checkout.
-Preserve PR440 head `2f13cda` and merge public main `835853a` (CloudFormation SSM snapshots included); do not overwrite
-GUI console-handoff work or CloudFormation SSM parameter work. Owned changes are
-multipart leaf files plus the necessary S3 capabilities, Management navigation,
-generated assets, formal registration and acceptance registration. Current-head
-quality, native SDK/browser, dual coverage and full formal/hosted CI remain
-required before merge. Heavy local tests coordinate with the GUI owner.
+Status: in progress on `integrate/pr440-docs-20261108`, integrating the
+published source `0937c5c958334cea6696c32c7b021d43838cf566` with documentation-only
+main `74985ee93a1ab38c9b1101ffdd3a2c8c3430e01b`. Runtime, embedded console,
+models, dependency locks and workflows are unchanged by this integration.
+The integration owner owns this roster and the exact applicability record;
+GUI console-handoff and WAF work remain separate and merges are serialized.
 
-Merged-source focused multipart store/SQL/HTTP/IAM race tests passed. Asset,
-notice/provenance and exact OpenAPI detector checks passed; all 57 main models
-and 474 controls remain unchanged, with one multipart model and five controls
-added (58 models, 479 controls). The multipart finite baseline and all five
-required counterexamples passed locally. Old push CI `42313437913` failed in
-two acceptance fixtures: Cloudscape radio labels omit the group header, and
-the Sakura reference still expected 66 operations. The fixtures now assert the
-exact actual row label and independently declared 67-operation inventory; native
-state assertions and accessibility checks remain required. Integrated full Go,
-browser, dual coverage and hosted formal results are pending.
+The published source includes the browser multipart cache-header fix. Its
+identical local source tree passed full `make before-commit`, including all
+race packages, assets, dependency verification, build and 95.61% full-module
+statement coverage. Exact applicability and 27 applicability regressions passed.
+Published-source Formal validation, Japanese console acceptance, CodeQL and
+GitGuardian passed; aggregate CI was still running when this entry was written.
+These results apply to the named source, not this new documentation integration.
+The registered inventory is 59 finite models and 494 controls; these bounded
+models are not proofs of concrete implementation or complete cloud compatibility.
 
-The previous integrated source `7e88b67` passed full Go/race/build with
-95.61% statement coverage. The later SSM parameter main integration preserves
-that feature and requires new exact-HEAD hosted checks.
+## Service evidence documentation integration, 2026-11-08
+
+PR [#327](https://github.com/susumutomita/TenkaCloudSimulator/pull/327) is being
+integrated with public main `835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152`.
+The integration owner owns only this roster, the
+[service verification matrix](service-verification.md), and their exact
+applicability record. Runtime, console assets, dependency locks, model registry,
+workflows and existing service assignments remain unchanged from that base.
+The matrix separates the current bounded multi-cloud contracts and 58 registered
+finite models from its explicitly historical November 4 evidence. Historical
+PR states, five-model totals and AWS-only statements are not current support claims.
+
+The dated records below are preserved rather than replaced by the older PR.
+Their assignments, pending checks and completion statements apply to their named
+source revisions; this documentation integration does not reassign service work.
+PR #27, WAF #50 and ongoing console work are outside its editing scope.
+Fresh exact-HEAD CI and Formal validation are required before merge; earlier
+successful runs do not validate this integration. No release or deployment is
+performed by this change.
 
 ## CloudFormation local SSM parameter values, 2026-11-08
 
 Issue #54: `feat/battle-backlog-20261108`, base `0d0abe6eff9a219f5503ea7cc3c3ba612df4ae24`.
-Compiler owner owns CloudFormation parameter resolution, native/SDK tests and docs.
-An independent formal worker owns only the new SSM snapshot/admission model, its
-registry entry and correspondence document. S3 #440, EC2/Route53, UI, dispatch
-and dependencies remain excluded. One heavy runtime lane is reserved for the
-compiler owner; model checks coordinate before using it.
+The change covers CloudFormation parameter resolution, native/SDK tests,
+documentation and the finite SSM snapshot/admission model. S3 #440, EC2/Route53,
+UI, dispatch and dependencies remain excluded.
 
 The proposed subset resolves String and EC2 Image ID carriers only from local
 Standard String values, with caller GetParameters permission and preserved input
 keys/resolved values. No public AWS lookup, AMI existence, EC2 execution or full
 Battle success follows. Implementation and focused native/race checks are complete. Independent review
 found and repaired replay-name validation and exact-ARN preflight regressions.
-The scoped finite model passed its baseline and 15 controls. Full current-source
-quality/E2E/formal and hosted CI remain pending; no merge is claimed.
+The scoped finite model passed its baseline and 15 controls.
+[PR #445](https://github.com/susumutomita/TenkaCloudSimulator/pull/445) merged as
+`835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152` after all eleven checks on source
+`be291bc02712dbf9d02fe5e167e4bc33b0c4d565` succeeded, including whole CI and
+Formal validation. Post-merge main checks are separate evidence and are not
+claimed by those pre-merge results.
 
 ## Standalone release pipeline, 2026-11-08
 
