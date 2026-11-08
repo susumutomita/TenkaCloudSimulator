@@ -1,5 +1,22 @@
 # Development roster
 
+## CloudFormation Battle intrinsic prerequisite: 2026-11-08
+
+Owner: `complete_battle_intrinsics`; status: in progress, not merged. Dedicated
+branch `feat/cfn-battle-intrinsics`, based on main `86e3bf9`. This slice owns
+CloudFormation parsing/value resolution/linking, its new intrinsic unit/native
+lifecycle tests, unchanged original Battle fixture, and intrinsic documentation.
+Other service implementations and release automation remain separate work.
+
+Acceptance: bounded Select/GetAZs/Base64 and escaped scalar Sub, all branches
+validated before admission, native state/event/permission rollback and cleanup,
+original fixture provenance, `make before-commit` and `make e2e`, followed by
+exact-HEAD hosted CI/review. Pure value resolution does not change a formal model.
+GetAZs is one synthetic local zone per supported region. EC2, InstanceProfile,
+SSM-backed AMIs, Linux/AL2023/nginx/systemd and Session Manager are unsupported;
+the original full Battle stack must still fail without leaving state behind.
+
+
 ## Current integration snapshot: catalog backlog, 2026-11-07
 
 Root integrates the open backlog on branch `claude/adoring-noether-7fvwju`
