@@ -175,7 +175,7 @@ def run():
                 content = operation['requestBody']['content']['application/x-www-form-urlencoded']
                 branches = content['schema']['oneOf']
                 schemas = {entry['title']: entry for entry in branches}
-                assert len(schemas) == len(branches) == 21 and OPERATIONS <= set(schemas)
+                assert len(schemas) == len(branches) == 28 and OPERATIONS <= set(schemas)
                 examples = {name: entry['value'] for name, entry in content['examples'].items()}
                 for name in OPERATIONS | {'CreateRole', 'DeleteRole'}:
                     validate_example(schemas[name], examples[name])
@@ -286,7 +286,7 @@ def run():
                 assert http_counts['calls'] == http_counts['responses']
                 assert all(c['calls'] > 0 and c['calls'] == c['sends'] == c['responses'] for c in sdk_counts)
                 REPORTS.mkdir(parents=True, exist_ok=True)
-                report = {'servedSpecEqualsSource': True, 'servedIAMBranches': 21,
+                report = {'servedSpecEqualsSource': True, 'servedIAMBranches': 28,
                           'unchangedStaticExamplesExecuted': executed, 'staticExamplesAreNotLiveState': True,
                           'lowercaseFormBooleans': True, 'singleFormDecodePreservesValues': True,
                           'GetVersionDocumentEncodedExactlyOnce': True, 'GetOnlyVersionDocument': True,
