@@ -45,6 +45,7 @@
 .tc-login-language { display: inline-flex; gap: 2px; border: 1px solid var(--tc-line); border-radius: 999px; padding: 4px; }
 .tc-login-language button { min-width: 42px; min-height: 32px; padding: 4px 11px; border: 0; border-radius: 999px; color: var(--tc-muted); background: transparent; font-size: 12px; cursor: pointer; }
 .tc-login-language button[aria-pressed="true"] { color: #fff; background: var(--tc-ink); font-weight: 500; }
+.tc-login-language button:disabled { cursor: default; }
 .tc-login-language button:hover:not([aria-pressed="true"]) { background: #f5f5f7; color: var(--tc-ink); }
 .tc-login-form-wrap { margin: auto; width: 100%; max-width: 420px; padding: 36px 0 28px; }
 .tc-login-kicker { margin: 0 0 14px; color: var(--tc-muted); font: 11.5px/1.5 var(--tc-mono); letter-spacing: .12em; }

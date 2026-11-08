@@ -153,8 +153,8 @@ export default function Login(){
     <main className="tc-login-panel">
       <div className="tc-login-topbar">
         <div className="tc-login-language" role="group" aria-label={t('Language','表示言語')}>
-          <button type="button" lang="ja" aria-label="日本語" aria-pressed={locale==='ja'} onClick={()=>setLocale('ja')}>JA</button>
-          <button type="button" lang="en" aria-label="English" aria-pressed={locale==='en'} onClick={()=>setLocale('en')}>EN</button>
+          <button type="button" lang="ja" aria-label="日本語" aria-pressed={locale==='ja'} disabled={locale==='ja'} onClick={()=>setLocale('ja')}>JA</button>
+          <button type="button" lang="en" aria-label="English" aria-pressed={locale==='en'} disabled={locale==='en'} onClick={()=>setLocale('en')}>EN</button>
         </div>
       </div>
       <div className="tc-login-form-wrap">

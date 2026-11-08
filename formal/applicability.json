@@ -59,14 +59,14 @@
     },
     {
       "path": "internal/server/web/app.css",
-      "sha256": "c75a332bf1e2c3ab631b8993fcec033b52709d8a3de4d33c55c5c10c6c0386b8",
+      "sha256": "10b64d895b5504e683686d4492d35ad9c97f439c49f8d7a4ec4a21dd77b5b945",
       "disposition": "presentation",
       "reason": "Console Home, service discovery, login presentation and reproducibly generated assets; no new API authority.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "aab6b7129ba5889e24c815c21ff80ad4bb4cbbc692c0a3babd28cce9096bff3e",
+      "sha256": "42c00768a85180a6ad763219e8394d41c044e5dcf748bf085ad30d695ff06b89",
       "disposition": "modeled",
       "reason": "Changes console presentation/navigation or regenerates its bundle while preserving the registered browser-authority and service-view state boundaries. Adds stack-event UI reads without changing native state or authority.",
       "models": [
@@ -203,6 +203,13 @@
       "models": []
     },
     {
+      "path": "test/e2e/azure_live_properties.py",
+      "disposition": "test-support",
+      "reason": "Checks actual provider-button hit targets after a provider transition at desktop/mobile widths, without force clicks or relaxing existing assertions.",
+      "models": [],
+      "sha256": "14b1a0e99df45856fa1be6ed839b6c843dd1984d9b8e5b1703702d2d71c1e3ea"
+    },
+    {
       "path": "test/e2e/check.py",
       "sha256": "d012706b53b658d98f47c8821036ec2929865d15e49756c780e075231a198975",
       "disposition": "test-support",
@@ -260,14 +267,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "7a98fa0fce930776b0d49ba28bf8e0847e979b8f4b9fe5c6750bc623f60a4c95",
+      "sha256": "31139d092b3435ad1551900a19e6e40e52e0c90a78ba67a90fe61ff3c2ed560c",
       "disposition": "presentation",
       "reason": "Console Home, service discovery, login presentation and reproducibly generated assets; no new API authority.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "70fadd05244836ab603bf745a3c03a538ee1440efe5a7a109318564ac31fac63",
+      "sha256": "0e1efb2c991c97ee4e048f6e436206c80f8ee2272b1b464bab39d6bd1ec863a5",
       "disposition": "presentation",
       "reason": "Console Home, service discovery, login presentation and reproducibly generated assets; no new API authority.",
       "models": []
@@ -302,7 +309,7 @@
     },
     {
       "path": "tools/console/src/console.css",
-      "sha256": "1f5c57936e3c11b6bced8af96e74b9d45cb42e246aa6a485e8cba2a16e298fd5",
+      "sha256": "0a1bdb9e8f91c96ec7c70834c0bdcba1afbf928f6f0e954f417db778f748621f",
       "disposition": "presentation",
       "reason": "Console Home, service discovery, login presentation and reproducibly generated assets; no new API authority.",
       "models": []
@@ -316,14 +323,14 @@
     },
     {
       "path": "tools/console/src/login.css",
-      "sha256": "1d387e22cda6c091999595f74506998db32da6f279e1f69d99e4e57142b11343",
+      "sha256": "4588629facab1cf01b84f119ef00607c00970dd7119d38c4ebb2421943134c9a",
       "disposition": "presentation",
       "reason": "Console Home, service discovery, login presentation and reproducibly generated assets; no new API authority.",
       "models": []
     },
     {
       "path": "tools/console/src/login.jsx",
-      "sha256": "f3a6b7f53f118d8106b48c94b7649effa130293be2c92627ded8b53fcb151d56",
+      "sha256": "d297c9ca4ce9781b789a2c3caf05ee0666bf20bff98ef41a9c6e8aa0d2605610",
       "disposition": "modeled",
       "reason": "Changes console presentation/navigation or regenerates its bundle while preserving the registered browser-authority and service-view state boundaries.",
       "models": [
