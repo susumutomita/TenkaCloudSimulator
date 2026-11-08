@@ -432,6 +432,11 @@ func stackSelectConditional(value any, conditions map[string]bool) (any, bool, e
 							return fmt.Errorf("only bounded scalar Sub supported")
 						}
 						return nil
+					case "Fn::Select", "Fn::GetAZs", "Fn::Base64":
+						if err := stackValueIntrinsicShape(key, x[key]); err != nil {
+							return err
+						}
+						return check(x[key], depth+1, false)
 					case "Fn::GetAtt":
 						if name, ok := x[key].(string); ok && len(name) <= 51200 && strings.Count(name, ".") == 1 {
 							left, right, _ := strings.Cut(name, ".")
