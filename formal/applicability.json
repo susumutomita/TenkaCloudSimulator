@@ -25,7 +25,7 @@
     },
     {
       "path": "docs/development-status.md",
-      "sha256": "65ca146135229cace3019997aa5568367a64ae6f84f434a52c17b92cfb09fc41",
+      "sha256": "1da4754510179bd9a8ee7d54c94a0985c0386249d50965b25d60fb0965ac4f02",
       "disposition": "documentation",
       "reason": "Documents participant Console scope, actual historical verification, independent-review fixes and bounded-model limitations. No runtime authority is created by documentation.",
       "models": []
@@ -365,9 +365,9 @@
     },
     {
       "path": "test/e2e/console_handoff.py",
-      "sha256": "26a98150f3a08771e1d3c1104264acfe6a935a367b12056e95c9ff58c4c88c01",
+      "sha256": "85118f1355b0dffd276c563a48a301978527ede5f0f2c49d3eefa481337bad1b",
       "disposition": "test-support",
-      "reason": "Exercises actual participant handoff and GUI acceptance against local native services. Accessibility instrumentation uses the existing Playwright evaluation pattern with the site CSP unchanged; both widths and all scope/write/replay/revocation assertions remain. Tests do not replace authorization checks or establish formal refinement.",
+      "reason": "Exercises actual participant handoff and GUI acceptance against local native services. Accessibility instrumentation preserves the site CSP; error/success assertions target the visible Cloudscape Alerts rather than duplicated hidden live-region text. Both widths and all scope/write/replay/revocation assertions remain. Tests do not replace authorization checks or establish formal refinement.",
       "models": []
     },
     {

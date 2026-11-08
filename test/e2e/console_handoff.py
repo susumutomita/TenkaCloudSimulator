@@ -59,10 +59,11 @@ with running(authenticated=True) as (endpoint,operator), sync_playwright() as p:
  assert native('PutParameter',name)==403
  # Denied request must not disturb the current page's valid browser session.
  page.get_by_role('button',name='Edit parameter',exact=True).click();page.get_by_label('Value',exact=True).fill('new-local-practice')
- page.get_by_role('button',name='Save changes',exact=True).click();expect(page.get_by_text('403:',exact=False)).to_be_visible();page.get_by_role('button',name='Cancel',exact=True).click()
+ # Cloudscape repeats form errors in a hidden live region; assert the visible error alert.
+ page.get_by_role('button',name='Save changes',exact=True).click();expect(page.locator('form [data-analytics-alert="error"]').get_by_text('403:',exact=False)).to_be_visible();page.get_by_role('button',name='Cancel',exact=True).click()
  policy(['ssm:GetParameter','ssm:PutParameter'])
  page.get_by_role('button',name='Edit parameter',exact=True).click();page.get_by_label('Value',exact=True).fill('new-local-practice');page.get_by_role('button',name='Save changes',exact=True).click()
- expect(page.get_by_text('Parameter saved.',exact=True)).to_be_visible()
+ expect(page.locator('[data-analytics-alert="success"]').get_by_text('Parameter saved.',exact=True)).to_be_visible()
  assert ssm.get_parameter(Name=name)['Parameter']['Value']=='new-local-practice'
  assert native('PutParameter',other)==403
  # One-use replay and role-generation revocation are exercised through HTTP.

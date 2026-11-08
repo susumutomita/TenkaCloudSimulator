@@ -91,6 +91,10 @@ or assets. Both 1440/390 accessibility audits and all subsequent scope, write,
 replay and revocation assertions remain required. Native `make before-commit`
 and fresh exact-head browser/formal checks are required for this follow-up;
 the previous source's successful native/formal checks are historical evidence.
+The next hosted run passed both accessibility audits but found the denied-write
+text in both the visible form error and Cloudscape's hidden live-region copy.
+The same owner scopes error/success assertions to their respective Alerts;
+the visible denial, successful write and later authorization checks stay intact.
 
 
 ## CloudFormation Battle intrinsic prerequisite: 2026-11-08
