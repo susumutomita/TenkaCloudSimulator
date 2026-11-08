@@ -2,7 +2,7 @@
 
 ## Current public source snapshot: 2026-11-08
 
-Baseline: [`0d0abe6eff9a219f5503ea7cc3c3ba612df4ae24`](https://github.com/susumutomita/TenkaCloudSimulator/commit/0d0abe6eff9a219f5503ea7cc3c3ba612df4ae24).
+Baseline: [`835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152`](https://github.com/susumutomita/TenkaCloudSimulator/commit/835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152).
 This is an index of bounded contracts and source evidence, not a service completion
 percentage or a claim that every named test was rerun by this documentation task.
 Use the [development roster](development-status.md) for dated integration records
@@ -13,7 +13,8 @@ The November 4 matrix below is historical and must not override this snapshot.
 |---|---|---|
 | Native AWS services: S3, SSM, IAM, Lambda, CloudFormation, API Gateway, SNS, SQS, Logs, Secrets Manager, KMS and DynamoDB | [Service table](../README.md#supported-services), [backlog acceptance](acceptance/backlog-services.md), [IAM policies](formal-iam-managed-policies.md), and the service-specific guides linked there; implementation and tests in `internal/aws/` and `test/e2e/` | Each guide defines operations, fields, quotas and exclusions. API support does not imply a console, CloudFormation adapter or completed Challenge. Dummy practice data only. |
 | Native STS and CloudFormation event lifecycle | [STS contract](sts-native.md), [STS model](sts-formal-candidate.md), [event model](formal-cfn-event-history.md), `internal/aws/sts_*.go`, `internal/aws/cloudformation_events*.go` | Local SigV4 is verified only on the documented native surfaces. No real AWS identity, general federation or full asynchronous AWS lifecycle. |
-| Battle value intrinsics | [Bounded intrinsics](cloudformation-intrinsics.md), `internal/aws/cloudformation_intrinsics*.go`, [PR #443](https://github.com/susumutomita/TenkaCloudSimulator/pull/443) | Select/GetAZs/Base64 and escaped scalar Sub do not enable the original full Battle stack. EC2, InstanceProfile, SSM AMIs and Linux execution remain unsupported. |
+| Battle value intrinsics | [Bounded intrinsics](cloudformation-intrinsics.md), `internal/aws/cloudformation_intrinsics*.go`, [PR #443](https://github.com/susumutomita/TenkaCloudSimulator/pull/443) | Select/GetAZs/Base64 and escaped scalar Sub do not enable the original full Battle stack. EC2, InstanceProfile, public SSM AMI lookups and Linux execution remain unsupported. |
+| CloudFormation local SSM parameter values | [Typed parameter contract](cloudformation-ssm-parameters.md), [snapshot model](formal-cfn-parameter-snapshot.md), `internal/aws/cloudformation_ssm_parameters.go`, [PR #445](https://github.com/susumutomita/TenkaCloudSimulator/pull/445) | Two typed carriers resolve local Standard String values with scoped permission checks and saved snapshots. An Image ID carrier does not verify an AMI, execute EC2, fetch public AWS parameters or enable full Battle. |
 | AWS model-driven catalog | [Catalog contract](aws-catalog.md), [generated service table](aws-catalog-services.md), `internal/aws/catalog/selection.json`, `internal/aws/catalog/*_test.go` | Configuration metadata for 112 additional AWS services. No workload execution, data planes, external delivery or unlisted operations. |
 | Google Cloud and Azure storage | [Cross-provider official SDK acceptance](acceptance/crossprovider-official-storage.md), [Cloud Storage](gcp-storage.md), [Blob Storage](azure-blob.md), [provider console acceptance](acceptance/crossprovider-console.md) | Bounded object/blob state and provider-specific authority in synthetic scopes, not general cloud tenancy or the full provider APIs. |
 | Google Cloud catalog | [Catalog contract](gcp-catalog.md), `internal/gcp/catalog/selection.json`, `internal/gcp/catalog/*_test.go` | Configuration metadata for 40 APIs from pinned discovery documents. No cloud workload execution. |
@@ -22,8 +23,8 @@ The November 4 matrix below is historical and must not override this snapshot.
 | Startup, console sessions and API reference | [Startup](start.md), [browser sessions](console-sessions.md), [token-file login](login-token-file.md), [API reference](api-reference.md) | Present in this base; the November 4 pending-PR descriptions below are historical. Authenticated provider-console equivalence and actual Dia/1Password behavior remain unverified. |
 | Standalone release pipeline | [Release contract](releases.md), [PR #444](https://github.com/susumutomita/TenkaCloudSimulator/pull/444) | Pipeline source is merged. This document does not assert a published release, tag, signing/notarization or deployment. |
 
-The executable [formal registry](../formal/models.json) contains **57 baselines
-and 474 required mutation controls (531 executions)** at this exact base.
+The executable [formal registry](../formal/models.json) contains **58 baselines
+and 489 required mutation controls (547 executions)** at this exact base.
 [Formal validation](formal-validation.md) describes the bounds, implementation
 scope, sensitivity requirements and immutable-input applicability policy. These
 are finite abstraction checks, not Go refinement proofs or real-cloud differential
