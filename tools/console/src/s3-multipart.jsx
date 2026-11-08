@@ -43,7 +43,10 @@ export default function S3Multipart({bucket,region,request,onSaving,onComplete})
  function inspect(item){action(()=>readParts(item),rows=>{setSelected([item]);setParts(rows);clearPartDraft()})}
  function start(){action(async()=>{
   if(!key||new TextEncoder().encode(key).length>1024)throw Error(t('Enter an object key up to 1024 UTF-8 bytes.','UTF-8で1024バイト以内のオブジェクトキーを入力してください。'));
-  const d=xml(await(await call(path(key)+'?uploads',{method:'POST',headers:{'Content-Type':'application/octet-stream'}})).text());return {key,id:value(d,'UploadId'),created:''};
+  // Explicitly omit object cache metadata. Chromium may otherwise synthesize
+  // Cache-Control: no-cache when its transport cache is disabled. This API
+  // deliberately rejects nonempty, unsupported persisted metadata.
+  const d=xml(await(await call(path(key)+'?uploads',{method:'POST',headers:{'Content-Type':'application/octet-stream','Cache-Control':''}})).text());return {key,id:value(d,'UploadId'),created:''};
  },item=>{setUploads(old=>[...old,item]);setSelected([item]);setParts([]);clearPartDraft();setNotice('started');setReceipt({key:item.key,id:item.id})})}
  function upload(){action(async()=>{
   const chosen=file.current;if(!chosen)throw Error(t('Choose a part file.','partファイルを選択してください。'));

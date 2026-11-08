@@ -60,6 +60,20 @@ func TestS3MultipartHTTPAdmissionPaginationAndIAM(t *testing.T) {
 	for _, header := range []string{"Cache-Control", "Content-Disposition", "Content-Encoding", "Content-Language", "Expires"} {
 		status(t, s, "POST", "/multipart-bucket/key?uploads", "", 501, map[string]string{header: "unsupported"})
 	}
+	// Browser cache policy is not a request to persist unsupported S3 object
+	// metadata. The console sends an explicit empty value, while nonempty
+	// metadata remains rejected rather than silently discarded.
+	for _, value := range []string{"no-cache", "no-store", "max-age=60"} {
+		status(t, s, "POST", "/multipart-bucket/key?uploads", "", 501, map[string]string{"Cache-Control": value})
+	}
+	emptyCache := status(t, s, "POST", "/multipart-bucket/browser?uploads", "", 200, map[string]string{"Cache-Control": ""})
+	var browserUpload struct {
+		ID string `xml:"UploadId"`
+	}
+	if err := xml.Unmarshal(emptyCache, &browserUpload); err != nil || len(browserUpload.ID) != 32 {
+		t.Fatal(string(emptyCache), err)
+	}
+	status(t, s, "DELETE", "/multipart-bucket/browser?uploadId="+browserUpload.ID, "", 204, nil)
 	for _, tt := range []struct {
 		method, path, body string
 		code               int

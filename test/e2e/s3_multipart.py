@@ -171,7 +171,14 @@ def run():
                 assert page.get_by_label('partファイル', exact=True).evaluate('(input) => input.files[0].name') == 'previous-upload.txt'
                 page.get_by_role('combobox', name='言語', exact=True).select_option('en')
                 assert len(mutations) == before_locale
-                page.get_by_role('button', name='Start upload', exact=True).click()
+                with page.expect_response(lambda response: response.request.method == 'POST'
+                        and urlsplit(response.url).query == 'uploads') as creation:
+                    page.get_by_role('button', name='Start upload', exact=True).click()
+                assert creation.value.status == 200, creation.value.text()
+                # Routing disables Chromium's cache. The console must explicitly
+                # omit unsupported object cache metadata, not rely on the browser
+                # avoiding an automatically synthesized no-cache header.
+                assert creation.value.request.header_value('cache-control') in (None, '')
                 expect(page.get_by_text('Multipart upload started.', exact=True)).to_be_visible()
                 expect(page.get_by_label('Part number', exact=True)).to_have_value('1')
                 expect(page.get_by_label('Confirmation word', exact=True)).to_have_value('')
