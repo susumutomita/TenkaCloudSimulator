@@ -1,5 +1,25 @@
 # Development roster
 
+## Standalone release pipeline, 2026-11-08
+
+Claimed by release-pipeline worker on `ci/standalone-release-20261108`, dedicated
+worktree `simulator-release-candidate`, base
+`86e3bf9d8a3006076aae8e7635395456f54300db`. Continues the existing uncommitted
+release preparation without discarding it. Scope: release workflow/build and
+verification scripts, CI regression hooks, release documentation and exact
+formal-applicability classification/record. Runtime service/UI code is excluded.
+
+Acceptance: immutable-source Linux/macOS amd64/arm64 executables and SHA256SUMS /
+BUILDINFO, original CI gates, four native runner smoke tests before publication,
+manual candidate-only runs, and draft-first release publication without replacing
+existing tags/assets. Windows remains compile-only and is not a release target.
+Fourteen offline packaging/refusal/provenance/tag/workflow regression tests pass;
+independent review findings for the full formal gate, ambient Go build settings
+and remote tag drift have been addressed. Whole-source checks, cross-build and
+native execution remain pending. No tag or release has been published.
+Cross-compilation is not foreign-platform runtime validation. Expensive checks
+are serialized with the separate Battle worker.
+
 ## Current integration snapshot: catalog backlog, 2026-11-07
 
 Root integrates the open backlog on branch `claude/adoring-noether-7fvwju`
