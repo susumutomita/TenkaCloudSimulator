@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"encoding/xml"
@@ -72,9 +73,9 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 		}
 		return stackTaggedYAMLNode(n.Content[0], depth+1, nodes)
 	}
-	if n.Tag == "!Equals" || n.Tag == "!If" {
+	if n.Tag == "!Equals" || n.Tag == "!If" || n.Tag == "!Select" {
 		if n.Kind != yaml.SequenceNode {
-			return nil, fmt.Errorf("condition shorthand requires a sequence")
+			return nil, fmt.Errorf("intrinsic shorthand requires a sequence")
 		}
 		values := []any{}
 		for _, child := range n.Content {
@@ -87,8 +88,28 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 		key := "Fn::Equals"
 		if n.Tag == "!If" {
 			key = "Fn::If"
+		} else if n.Tag == "!Select" {
+			key = "Fn::Select"
 		}
 		return map[string]any{key: values}, nil
+	}
+	if n.Tag == "!Base64" || n.Tag == "!GetAZs" {
+		if n.Kind == yaml.ScalarNode && n.Value == "" && n.Style&(yaml.DoubleQuotedStyle|yaml.SingleQuotedStyle|yaml.LiteralStyle|yaml.FoldedStyle) == 0 {
+			return nil, fmt.Errorf("Base64/GetAZs requires an explicit operand")
+		}
+		if n.Kind != yaml.ScalarNode && n.Kind != yaml.MappingNode {
+			return nil, fmt.Errorf("Base64/GetAZs shorthand requires a scalar or mapping")
+		}
+		copy := *n
+		copy.Tag = "!!str"
+		if n.Kind == yaml.MappingNode {
+			copy.Tag = "!!map"
+		}
+		value, err := stackTaggedYAMLNode(&copy, depth+1, nodes)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]any{"Fn::" + n.Tag[1:]: value}, nil
 	}
 	if strings.HasPrefix(n.Tag, "!") && !strings.HasPrefix(n.Tag, "!!") && n.Kind != yaml.ScalarNode {
 		return nil, fmt.Errorf("intrinsic shorthand must be scalar")
@@ -144,9 +165,24 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 func object(v any) map[string]any { m, _ := v.(map[string]any); return m }
 func stringValue(v any) string    { s, _ := v.(string); return s }
 
-var subExpression = regexp.MustCompile(`\$\{([^}]+)\}`)
-
 func resolve(v any, refs map[string]string, attributes map[string]string) (any, error) {
+	nodes := 0
+	return stackResolveValue(v, refs, attributes, 1, &nodes)
+}
+
+func stackResolveValue(v any, refs, attributes map[string]string, depth int, nodes *int) (result any, err error) {
+	*nodes++
+	if depth > stackConditionalDepth || *nodes > stackConditionalNodes {
+		return nil, fmt.Errorf("resolved value exceeds local depth/node bound")
+	}
+	defer func() {
+		if text, ok := result.(string); ok && len(text) > stackIntrinsicStringBytes {
+			result, err = nil, fmt.Errorf("resolved string exceeds local byte bound")
+		}
+	}()
+	next := func(value any) (any, error) {
+		return stackResolveValue(value, refs, attributes, depth+1, nodes)
+	}
 	switch x := v.(type) {
 	case string:
 		return x, nil
@@ -157,7 +193,7 @@ func resolve(v any, refs map[string]string, attributes map[string]string) (any, 
 	case []any:
 		r := []any{}
 		for _, c := range x {
-			v, e := resolve(c, refs, attributes)
+			v, e := next(c)
 			if e != nil {
 				return nil, e
 			}
@@ -189,29 +225,85 @@ func resolve(v any, refs map[string]string, attributes map[string]string) (any, 
 			if !valid || len(x) != 1 {
 				return nil, fmt.Errorf("only scalar Fn::Sub is supported")
 			}
-			var failed string
-			out := subExpression.ReplaceAllStringFunc(source, func(match string) string {
-				key := match[2 : len(match)-1]
-				if value, ok := refs[key]; ok {
-					return value
-				}
-				if value, ok := attributes[key]; ok {
-					return value
-				}
-				failed = key
-				return ""
-			})
-			if failed != "" {
-				return nil, fmt.Errorf("unknown substitution %s", failed)
+			return stackResolveSub(source, refs, attributes)
+		}
+		for _, key := range []string{"Fn::Select", "Fn::GetAZs", "Fn::Base64"} {
+			raw, ok := x[key]
+			if !ok {
+				continue
 			}
-			return out, nil
+			if len(x) != 1 {
+				return nil, fmt.Errorf("intrinsic must have exactly one key")
+			}
+			if err := stackValueIntrinsicShape(key, raw); err != nil {
+				return nil, err
+			}
+			switch key {
+			case "Fn::Base64":
+				value, err := next(raw)
+				if err != nil {
+					return nil, err
+				}
+				text, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("Base64 input must resolve to a string")
+				}
+				if base64.StdEncoding.EncodedLen(len(text)) > stackIntrinsicStringBytes {
+					return nil, fmt.Errorf("Base64 result exceeds local byte bound")
+				}
+				return base64.StdEncoding.EncodeToString([]byte(text)), nil
+			case "Fn::GetAZs":
+				value, err := next(raw)
+				if err != nil {
+					return nil, err
+				}
+				region, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("GetAZs region must resolve to a string")
+				}
+				if region == "" {
+					region = refs["AWS::Region"]
+				}
+				return localAvailabilityZones(region)
+			case "Fn::Select":
+				args := raw.([]any)
+				// Validate the index before resolving the list, preserving the
+				// lossless numeric carrier without accepting arbitrary numbers
+				// as ordinary template values.
+				indexValue := args[0]
+				if _, isRef := indexValue.(map[string]any); isRef {
+					var err error
+					indexValue, err = next(indexValue)
+					if err != nil {
+						return nil, err
+					}
+				}
+				index, err := stackSelectIndex(indexValue)
+				if err != nil {
+					return nil, err
+				}
+				value, err := next(args[1])
+				if err != nil {
+					return nil, err
+				}
+				list, ok := value.([]any)
+				if !ok || index >= len(list) {
+					return nil, fmt.Errorf("Select requires a list with an in-range index")
+				}
+				for _, item := range list {
+					if item == nil {
+						return nil, fmt.Errorf("Select list cannot contain null")
+					}
+				}
+				return list[index], nil
+			}
 		}
 		r := map[string]any{}
 		for k, c := range x {
 			if strings.HasPrefix(k, "Fn::") {
 				return nil, fmt.Errorf("unsupported intrinsic %s", k)
 			}
-			value, e := resolve(c, refs, attributes)
+			value, e := next(c)
 			if e != nil {
 				return nil, e
 			}
@@ -267,8 +359,12 @@ func resourceOrder(resources map[string]any) ([]string, error) {
 							add(stringValue(item))
 						}
 					case "Fn::Sub":
-						for _, match := range subExpression.FindAllStringSubmatch(stringValue(item), -1) {
-							add(match[1])
+						// The compiler has already validated substitution syntax.
+						parts, _ := stackSubParts(stringValue(item))
+						for _, part := range parts {
+							if part.name != "" && !part.escaped {
+								add(part.name)
+							}
 						}
 					default:
 						walk(item)
