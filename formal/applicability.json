@@ -1,147 +1,89 @@
 {
   "version": 1,
-  "base_sha": "86e3bf9d8a3006076aae8e7635395456f54300db",
+  "base_sha": "4ab99d4902571c75862aa642052cd94a1e4f5b61",
   "changes": [
     {
-      "path": "docs/cloudformation-intrinsics.md",
-      "sha256": "1ace3da049545f7f75d1fd942241c224379680609e6a9d636d9c15caf33ce306",
-      "disposition": "documentation",
-      "reason": "Documents the bounded intrinsic contract, ownership, synthetic local availability and remaining unsupported Battle behavior; no runtime code or acceptance proof.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "a4b27bd84e498ff6fb1cc9e9c28fc1d3ecd38cd4055bcc7a3d6af0372290c82f",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserves full existing validation gates and adds release validation dependency or exact validation-tool classification/regressions; no model registry or property is removed.",
       "models": []
     },
     {
-      "path": "docs/cloudformation-rest.md",
-      "sha256": "0c20aefc0a11c28c5797199f7592ddd3576c28fa6e55cb6b2bf3f1d270d30501",
-      "disposition": "documentation",
-      "reason": "Documents the bounded intrinsic contract, ownership, synthetic local availability and remaining unsupported Battle behavior; no runtime code or acceptance proof.",
+      "path": ".github/workflows/formal.yml",
+      "sha256": "092100cd8f83a48b91ab8744d91ad6167630ddd5f52ddfa71a6aa8749065aa38",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserves full existing validation gates and adds release validation dependency or exact validation-tool classification/regressions; no model registry or property is removed.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "sha256": "7ec4ddd1d3dc318888fcdc107596e40a928a13f6fc9c7925661d51689e3a34bc",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserves full existing validation gates and adds release validation dependency or exact validation-tool classification/regressions; no model registry or property is removed.",
       "models": []
     },
     {
       "path": "docs/development-status.md",
-      "sha256": "383f3b564785185ec112274d328d4f737824a6878fdf21f55d6d3f6e92ab2198",
+      "sha256": "224a11ab7b5f04142584321e90f4c6825d9d5e32a3395ead2ae0f97ed6627bac",
       "disposition": "documentation",
-      "reason": "Documents the bounded intrinsic contract, ownership, synthetic local availability and remaining unsupported Battle behavior; no runtime code or acceptance proof.",
+      "reason": "Documents standalone release packaging, validated scope and remaining publication/native platform obligations; does not change runtime semantics.",
       "models": []
     },
     {
-      "path": "formal/models.json",
-      "sha256": "015b84a65ecc78b3b94e93c036cedfd39290705ab0a409a5e85ed254fc903ab0",
+      "path": "docs/releases.md",
+      "sha256": "85e8a827a91996811b8977dcaaaaee5873702489d102f8b075699ee7e341a8bd",
+      "disposition": "documentation",
+      "reason": "Documents standalone release packaging, validated scope and remaining publication/native platform obligations; does not change runtime semantics.",
+      "models": []
+    },
+    {
+      "path": "scripts/build-release.py",
+      "sha256": "158bff7eb3821c1348b4288e685bdafeb6c28c957b2a46ccd5be20011644f0ad",
+      "disposition": "validation-tooling",
+      "reason": "Builds or validates immutable-source release candidates, checksum manifests and tag/source identity; does not add simulator runtime behavior or claim implementation refinement.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_applicability.py",
+      "sha256": "9f6df1ec7de75722de885157e4d657c5f8adb2a883db63aa9221d35887f39dcb",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the pure intrinsic helper to the existing conditional admission source correspondence. All model transitions, invariants, configurations, seeds and negative controls remain unchanged.",
+      "reason": "Preserves full existing validation gates and adds release validation dependency or exact validation-tool classification/regressions; no model registry or property is removed.",
       "models": []
     },
     {
-      "path": "internal/aws/cloudformation.go",
-      "sha256": "7347ccc2cace1b21a8275df7d1bae95b209625e29e232744a45f42d58e578610",
-      "disposition": "modeled",
-      "reason": "Extends pure intrinsic parsing, shape validation, symbol linking and bounded value resolution before publication. Existing admission ordering and failure isolation remain unchanged; native tests exercise the concrete algorithms.",
-      "models": [
-        {
-          "id": "CFNConditionAdmission",
-          "properties": [
-            "BothBranchesValidated",
-            "SelectedLinkValidated",
-            "NoResultOnInvalid",
-            "NoEarlyPublication"
-          ],
-          "limits": "Finite admission-order abstraction with supplied validity verdicts only. It does not prove YAML/JSON parsing, Sub tokenization, Select indexes or list typing, Base64 bytes, synthetic availability, depth/node/expansion bounds, resource effects, SQL transactions, concurrency or Go refinement. Those are separate native regression obligations; model transition and invariant bytes are unchanged."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudformation_conditions.go",
-      "sha256": "9a45f5aa1f8e5cb36ba478bf853645256c3c940e0314b6536f335b74794a7564",
-      "disposition": "modeled",
-      "reason": "Extends pure intrinsic parsing, shape validation, symbol linking and bounded value resolution before publication. Existing admission ordering and failure isolation remain unchanged; native tests exercise the concrete algorithms.",
-      "models": [
-        {
-          "id": "CFNConditionAdmission",
-          "properties": [
-            "BothBranchesValidated",
-            "SelectedLinkValidated",
-            "NoResultOnInvalid",
-            "NoEarlyPublication"
-          ],
-          "limits": "Finite admission-order abstraction with supplied validity verdicts only. It does not prove YAML/JSON parsing, Sub tokenization, Select indexes or list typing, Base64 bytes, synthetic availability, depth/node/expansion bounds, resource effects, SQL transactions, concurrency or Go refinement. Those are separate native regression obligations; model transition and invariant bytes are unchanged."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudformation_conditions_link.go",
-      "sha256": "39341becd5df902201c814ce94eb9c327750861b75c5c55a624458c748915d26",
-      "disposition": "modeled",
-      "reason": "Extends pure intrinsic parsing, shape validation, symbol linking and bounded value resolution before publication. Existing admission ordering and failure isolation remain unchanged; native tests exercise the concrete algorithms.",
-      "models": [
-        {
-          "id": "CFNConditionAdmission",
-          "properties": [
-            "BothBranchesValidated",
-            "SelectedLinkValidated",
-            "NoResultOnInvalid",
-            "NoEarlyPublication"
-          ],
-          "limits": "Finite admission-order abstraction with supplied validity verdicts only. It does not prove YAML/JSON parsing, Sub tokenization, Select indexes or list typing, Base64 bytes, synthetic availability, depth/node/expansion bounds, resource effects, SQL transactions, concurrency or Go refinement. Those are separate native regression obligations; model transition and invariant bytes are unchanged."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudformation_intrinsics.go",
-      "sha256": "f74df6cd7f21faf5e5b67ef8b95696f05632372509bb08d2ebba575c56f3a5a7",
-      "disposition": "modeled",
-      "reason": "Extends pure intrinsic parsing, shape validation, symbol linking and bounded value resolution before publication. Existing admission ordering and failure isolation remain unchanged; native tests exercise the concrete algorithms.",
-      "models": [
-        {
-          "id": "CFNConditionAdmission",
-          "properties": [
-            "BothBranchesValidated",
-            "SelectedLinkValidated",
-            "NoResultOnInvalid",
-            "NoEarlyPublication"
-          ],
-          "limits": "Finite admission-order abstraction with supplied validity verdicts only. It does not prove YAML/JSON parsing, Sub tokenization, Select indexes or list typing, Base64 bytes, synthetic availability, depth/node/expansion bounds, resource effects, SQL transactions, concurrency or Go refinement. Those are separate native regression obligations; model transition and invariant bytes are unchanged."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudformation_intrinsics_lifecycle_test.go",
-      "sha256": "6f32372380472ba60959bf1d0f6fe841501cf6aeb1fcb1080de7888181b908b2",
-      "disposition": "test-support",
-      "reason": "Adds original licensed test-only template input or native regression coverage for intrinsic values, errors, state preservation and cleanup; this is not model or Battle gameplay proof.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudformation_intrinsics_test.go",
-      "sha256": "9cb2ab7f6efe338be05fca6915afb7aac9eec2d65f2e60693256a0feb08bc122",
-      "disposition": "test-support",
-      "reason": "Adds original licensed test-only template input or native regression coverage for intrinsic values, errors, state preservation and cleanup; this is not model or Battle gameplay proof.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "6086a7a87b9242c8c8e3782504f58849f78b332af4a826227e9d9c0be6c6280e",
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "3741a0a3ed9f8d7034ee720d47a7be82f7f6e153cf6c72f1d00e5405dc2972e6",
       "disposition": "formal-infrastructure",
-      "reason": "Require the new pure intrinsic helper in the exact conditional admission source scope. Existing omission/addition detector tests exercise every declared source path. No invariants, model semantics, quotas or required negative controls are relaxed.",
+      "reason": "Preserves full existing validation gates and adds release validation dependency or exact validation-tool classification/regressions; no model registry or property is removed.",
       "models": []
     },
     {
-      "path": "test/fixtures/hello-world-battle-c1aaaa9/LICENSE",
-      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
-      "disposition": "test-support",
-      "reason": "Adds original licensed test-only template input or native regression coverage for intrinsic values, errors, state preservation and cleanup; this is not model or Battle gameplay proof.",
+      "path": "scripts/verify-release-tag.py",
+      "sha256": "07309d5ae591b3f5e7bc8c80383354638a7a9df73b7f4de4f68060857b0337f0",
+      "disposition": "validation-tooling",
+      "reason": "Builds or validates immutable-source release candidates, checksum manifests and tag/source identity; does not add simulator runtime behavior or claim implementation refinement.",
       "models": []
     },
     {
-      "path": "test/fixtures/hello-world-battle-c1aaaa9/README.md",
-      "sha256": "3ec91d1c780034ec28d16d5d081250c4c9601e207963e0c4993dc669d588bf8e",
-      "disposition": "test-support",
-      "reason": "Adds original licensed test-only template input or native regression coverage for intrinsic values, errors, state preservation and cleanup; this is not model or Battle gameplay proof.",
+      "path": "scripts/verify-release.py",
+      "sha256": "17ddda4ddd67c5d9fcc57b336020d11c63e66948416b6461794e829d76ce8f2f",
+      "disposition": "validation-tooling",
+      "reason": "Builds or validates immutable-source release candidates, checksum manifests and tag/source identity; does not add simulator runtime behavior or claim implementation refinement.",
       "models": []
     },
     {
-      "path": "test/fixtures/hello-world-battle-c1aaaa9/template.yaml",
-      "sha256": "4de530625bd2a3c0b5a5881f511061709c94c9eb6884d8d6fd1037f3d9bc6bc5",
+      "path": "test/ci/release_pipeline.py",
+      "sha256": "3557b410f91c6dbdd6ff5384bb2f7dadf289e595817e8bd1b33bb81c1afcc03b",
       "disposition": "test-support",
-      "reason": "Adds original licensed test-only template input or native regression coverage for intrinsic values, errors, state preservation and cleanup; this is not model or Battle gameplay proof.",
+      "reason": "Exercises release packaging/refusal and actual native startup/authentication/embedded assets/restart/shutdown; no runtime production behavior is changed.",
+      "models": []
+    },
+    {
+      "path": "test/ci/release_smoke.py",
+      "sha256": "f714c36adba53399dd82013c95d8fb98dbf4c979d6b62e4a45323e3ea6aa3d95",
+      "disposition": "test-support",
+      "reason": "Exercises release packaging/refusal and actual native startup/authentication/embedded assets/restart/shutdown; no runtime production behavior is changed.",
       "models": []
     }
   ]

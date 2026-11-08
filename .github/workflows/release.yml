@@ -1,0 +1,137 @@
+name: Release standalone simulator
+on:
+  push:
+    tags:
+      - 'v[0-9]*.[0-9]*.[0-9]*'
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'scripts/build-release.py'
+      - 'scripts/verify-release.py'
+      - 'scripts/verify-release-tag.py'
+      - 'test/ci/release*.py'
+      - 'docs/releases.md'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Candidate version (no public release on manual runs)
+        required: true
+        default: v0.1.0
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    # PRs already run the normal CI and Formal validation workflows independently.
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/ci.yml
+  formal:
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/formal.yml
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: '1.26.10'
+          cache: true
+      - name: Check release packaging and refusal regressions
+        run: python3 test/ci/release_pipeline.py
+      - name: Build immutable selected source
+        env:
+          RELEASE_VERSION: ${{ inputs.version || (github.event_name == 'pull_request' && 'v0.0.0-ci') || github.ref_name }}
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python3 scripts/build-release.py --ref "$SOURCE_COMMIT" --version "$RELEASE_VERSION" --output dist/release
+          python3 scripts/verify-release.py dist/release --commit "$SOURCE_COMMIT" --version "$RELEASE_VERSION"
+      - name: Retain candidate for native execution and publication
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: simulator-release-${{ github.event.pull_request.head.sha || github.sha }}
+          path: dist/release/*
+          if-no-files-found: error
+          retention-days: 14
+  smoke:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: linux_amd64
+          - runner: ubuntu-24.04-arm
+            target: linux_arm64
+          - runner: macos-15-intel
+            target: darwin_amd64
+          - runner: macos-15
+            target: darwin_arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: simulator-release-${{ github.event.pull_request.head.sha || github.sha }}
+          path: release
+      - name: Verify every checksum and execute the native artifact
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          python3 scripts/verify-release.py release --commit "$SOURCE_COMMIT"
+          python3 test/ci/release_smoke.py "release/tenkacloud-simulator_$TARGET"
+  publish:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: [validate, formal, build, smoke]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: simulator-release-${{ github.sha }}
+          path: release
+      - name: Verify and publish tagged assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify-release.py release --commit "$GITHUB_SHA" --version "$RELEASE_TAG"
+          python3 scripts/verify-release-tag.py --repository "$GH_REPO" --tag "$RELEASE_TAG" --commit "$GITHUB_SHA"
+          cd release
+          flags=()
+          if [[ "$RELEASE_TAG" == *-* ]]; then flags+=(--prerelease); fi
+          # Upload as a draft first; a failed upload must not expose a partial public release.
+          # Existing releases are never overwritten or resumed automatically.
+          gh release create "$RELEASE_TAG" --verify-tag --target "$GITHUB_SHA" --draft \
+            --title "$RELEASE_TAG" --notes "Standalone simulator from source $GITHUB_SHA. See BUILDINFO.json and SHA256SUMS for provenance and integrity. Darwin binaries are not signed or notarized. Windows is not a release target." \
+            "${flags[@]}" tenkacloud-simulator_* BUILDINFO.json SHA256SUMS
+          gh release view "$RELEASE_TAG" --json assets > "$RUNNER_TEMP/release-assets.json"
+          python3 - <<'PYTHON'
+          import json, os
+          from pathlib import Path
+          expected = {p.name: p.stat().st_size for p in Path('.').iterdir()}
+          assets = json.load(open(os.environ['RUNNER_TEMP'] + '/release-assets.json'))['assets']
+          assert len(assets) == len(expected)
+          assert {a['name']: a['size'] for a in assets} == expected
+          assert all(a['state'] == 'uploaded' for a in assets)
+          PYTHON
+          python3 ../scripts/verify-release-tag.py --repository "$GH_REPO" --tag "$RELEASE_TAG" --commit "$GITHUB_SHA"
+          gh release edit "$RELEASE_TAG" --draft=false

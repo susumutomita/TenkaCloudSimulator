@@ -30,6 +30,15 @@ class LandingPresentationBoundaryTests(unittest.TestCase):
             self.assertIsNone(disposition(path), path)
 
 
+class ReleaseClassificationTests(unittest.TestCase):
+    def test_release_validation_classification_is_exact(self):
+        for name in ('build-release.py', 'verify-release.py', 'verify-release-tag.py'):
+            self.assertEqual(disposition('scripts/' + name), 'validation-tooling')
+        for path in ('scripts/build-release-other.py', 'scripts/verify-release-wrapper.py',
+                     'internal/aws/release.go'):
+            self.assertIsNone(disposition(path), path)
+
+
 class STSFixtureClassificationTests(unittest.TestCase):
     def test_exact_sts_fixture_and_helper_classification(self):
         self.assertEqual(disposition('scripts/check-sts-formal-candidate.py'), 'validation-tooling')

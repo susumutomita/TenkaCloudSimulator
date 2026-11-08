@@ -1,21 +1,47 @@
 # Development roster
 
+## Standalone release pipeline, 2026-11-08
+
+[Draft PR #444](https://github.com/susumutomita/TenkaCloudSimulator/pull/444)
+owns release workflows/build and verification scripts, regression hooks, release
+documentation and exact applicability. It now normally integrates main
+`4ab99d4902571c75862aa642052cd94a1e4f5b61`; runtime service/UI bytes are unchanged
+from that main. The integrated source requires new exact-HEAD CI before merge. BUILDINFO now
+declares launcher/token-control `host_protocol: 1` for host-local release locks;
+this is not a database downgrade guarantee and does not pin host source hashes.
+
+Pre-integration `be3bfc7` passed 15 release regressions, 27 applicability tests,
+76 formal-policy controls, both hosted coverage gates, full CI/browser/platform
+acceptance and named Formal validation. The actual packaged Linux/macOS
+amd64/arm64 binaries each passed native startup/auth/assets/persistence/restart/
+shutdown on its respective GitHub runner. These are historical results, not
+substitutes for the new integrated-source gates. Linux also passed local smoke
+with an empty executable PATH; all four candidate checksums were verified.
+
+Acceptance preserves full CI and formal gates, immutable-source build, complete
+SHA256SUMS/BUILDINFO, four native smoke runners, candidate-only manual runs,
+and draft-first publication without replacing existing tags/assets. Ambient Go
+configuration and observed tag drift are refused. Windows remains compile-only.
+No tag or public release has been created. Signing/notarization, Gatekeeper and
+repository tag protections remain outside the verified scope.
+
 ## CloudFormation Battle intrinsic prerequisite: 2026-11-08
 
-Owner: `complete_battle_intrinsics`; status: in progress, not merged. Dedicated
-branch `feat/cfn-battle-intrinsics`, based on main `86e3bf9`. This slice owns
-CloudFormation parsing/value resolution/linking, its new intrinsic unit/native
-lifecycle tests, unchanged original Battle fixture, and intrinsic documentation.
-Other service implementations and release automation remain separate work.
+[PR #443](https://github.com/susumutomita/TenkaCloudSimulator/pull/443) merged as
+`4ab99d4902571c75862aa642052cd94a1e4f5b61` after exact-head full CI, native SDK/
+browser/platform/audit and Formal validation passed. The resulting main tree
+matches the independently reviewed/tested source. Post-merge full CI did not
+start because GitHub's generated squash body inherited an intermediate skip-CI
+marker; that is not claimed as a new-main pass. The release integration's explicit
+merge message will avoid that marker and requires new-main checks.
 
-Acceptance: bounded Select/GetAZs/Base64 and escaped scalar Sub, all branches
-validated before admission, native state/event/permission rollback and cleanup,
-original fixture provenance, `make before-commit` and `make e2e`, followed by
-exact-HEAD hosted CI/review. Pure value resolution does not change a formal model.
-GetAZs is one synthetic local zone per supported region. EC2, InstanceProfile,
-SSM-backed AMIs, Linux/AL2023/nginx/systemd and Session Manager are unsupported;
-the original full Battle stack must still fail without leaving state behind.
-
+The bounded scope is Select/GetAZs/Base64 and escaped scalar Sub, admission of
+all branches, native state/event/permission rollback and cleanup, unchanged
+original Battle fixture, and documentation. GetAZs is one synthetic local zone
+per supported region. EC2, InstanceProfile, SSM-backed AMIs, Linux/AL2023/nginx/
+systemd and Session Manager remain unsupported; the original full Battle stack
+must fail without leaving state. The finite admission abstraction does not prove
+concrete value parsing or full Battle execution.
 
 ## Current integration snapshot: catalog backlog, 2026-11-07
 
