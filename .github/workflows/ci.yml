@@ -3,6 +3,7 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:
@@ -70,6 +71,8 @@ jobs:
           node tools/console/build.mjs
           git diff --exit-code -- internal/server/web internal/legal/assets/CONSOLE-NOTICES.txt third_party/CONSOLE-NOTICES.txt third_party/console-packages.json tools/console/bundle-inputs.json tools/console/bundle-digests.json
           npm audit --prefix tools/console --audit-level=high
+      - name: Check immutable release packaging and refusal regressions
+        run: python3 test/ci/release_pipeline.py
       - name: Check native token input regression cases
         run: node --test test/console/login-native-input.test.mjs
       - name: Run Go quality gates and compile all supported targets
