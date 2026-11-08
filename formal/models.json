@@ -452,7 +452,7 @@
    "id": "SQSStorageBudget",
    "model": "formal/SQSStorageBudget.tla",
    "config": "formal/SQSStorageBudget.cfg",
-   "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1\u20132 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
+   "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1–2 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
    "properties": [
     "TypeOK",
     "FailedSendPreservesRows",
@@ -644,7 +644,7 @@
    "id": "ProviderActor",
    "model": "formal/ProviderActor.tla",
    "config": "formal/ProviderActor.cfg",
-   "bounds": "64 request combinations: authentication2 \u00d7 credential roles2 \u00d7 exercise selections4 \u00d7 spoofed wire roles2 \u00d7 capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
+   "bounds": "64 request combinations: authentication2 × credential roles2 × exercise selections4 × spoofed wire roles2 × capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
    "properties": [
     "TypeOK",
     "NoActorOnRejected",
@@ -848,7 +848,7 @@
    "id": "AzureBlobState",
    "model": "formal/AzureBlobState.tla",
    "config": "formal/AzureBlobState.cfg",
-   "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1\u20132, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
+   "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1–2, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
    "properties": [
     "TypeOK",
     "NoUnauthorizedMutation",
@@ -4373,7 +4373,7 @@
    "id": "KMSAliasesViewEpoch",
    "model": "formal/KMSAliasesViewEpoch.tla",
    "config": "formal/KMSAliasesViewEpoch.cfg",
-   "bounds": "Two context incarnations A\u2192B/unmount; two known customer keys per context; one alias; initial successful list and initial picker lookup normalized as reachable seed/completion. At most two subsequent ListAliases requests and two selected-target metadata requests, one form intent per context, one submitted write, one acknowledged read-only retry. Native backend outcomes abstract Success/Failure. No second normal write; request count0..2 admits replay mutant.",
+   "bounds": "Two context incarnations A→B/unmount; two known customer keys per context; one alias; initial successful list and initial picker lookup normalized as reachable seed/completion. At most two subsequent ListAliases requests and two selected-target metadata requests, one form intent per context, one submitted write, one acknowledged read-only retry. Native backend outcomes abstract Success/Failure. No second normal write; request count0..2 admits replay mutant.",
    "properties": [
     "TypeOK",
     "CurrentListOutcome",
@@ -4990,7 +4990,7 @@
    "id": "CFNConditionAdmission",
    "model": "formal/CFNConditionAdmission.tla",
    "config": "formal/CFNConditionAdmission.cfg",
-   "bounds": "13 defect scenarios \u00d7 2 equality results \u00d7 3 then arms \u00d7 3 else arms = 234 immutable inputs; 6 deterministic compilation phases, no request loops",
+   "bounds": "13 defect scenarios × 2 equality results × 3 then arms × 3 else arms = 234 immutable inputs; 6 deterministic compilation phases, no request loops",
    "properties": [
     "TypeOK",
     "ParameterAdmission",
@@ -7473,6 +7473,167 @@
       }
      ],
      "expect_invariant": "RedeemRequiresFreshParent"
+    }
+   ]
+  },
+  {
+   "id": "IAMInstanceProfiles",
+   "model": "formal/IAMInstanceProfiles.tla",
+   "config": "formal/IAMInstanceProfiles.cfg",
+   "bounds": "Two profile names and two role names, two retained generations, four API-reachable seeds, at most two additional arbitrary lifecycle requests; Boolean action/PassRole authorization, captured-generation validity and storage success.",
+   "properties": [
+    "TypeOK",
+    "AuthorizationRequired",
+    "PassRoleRequired",
+    "ProfileGenerationGuard",
+    "RoleGenerationGuard",
+    "FailureFrame",
+    "SingleRole",
+    "AttachmentAuthority",
+    "FreshProfileIdentity",
+    "PeerFrame",
+    "RemovalExact"
+   ],
+   "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history.",
+   "source_scope": [
+    "internal/aws/iam_instance_profiles.go",
+    "internal/aws/iam_instance_profiles_query.go",
+    "internal/aws/iam_roles.go",
+    "internal/aws/iam_query.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "IgnoreActionAuthorization",
+     "edits": [
+      {
+       "old": "IF ~q.allowed THEN \"Denied\"",
+       "new": "IF FALSE THEN \"Denied\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizationRequired"
+    },
+    {
+     "id": "IgnorePassRole",
+     "edits": [
+      {
+       "old": "ELSE IF q.op = \"AddRole\" /\\ ~q.passRole THEN \"Denied\"",
+       "new": "ELSE IF FALSE THEN \"Denied\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PassRoleRequired"
+    },
+    {
+     "id": "IgnoreProfileGeneration",
+     "edits": [
+      {
+       "old": "ELSE IF q.op \\in ProfileOps /\\ ~q.freshP THEN \"StaleProfile\"",
+       "new": "ELSE IF FALSE THEN \"StaleProfile\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ProfileGenerationGuard"
+    },
+    {
+     "id": "IgnoreRoleGeneration",
+     "edits": [
+      {
+       "old": "ELSE IF q.op \\in RoleOps /\\ ~q.freshR THEN \"StaleRole\"",
+       "new": "ELSE IF FALSE THEN \"StaleRole\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RoleGenerationGuard"
+    },
+    {
+     "id": "CommitStorageFailure",
+     "edits": [
+      {
+       "old": "IF result = \"Accepted\" THEN Candidate(s, q) ELSE s",
+       "new": "IF result \\in {\"Accepted\", \"StorageError\"} THEN Candidate(s, q) ELSE s",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureFrame"
+    },
+    {
+     "id": "AllowMultipleRoles",
+     "edits": [
+      {
+       "old": "(q.op = \"AddRole\" /\\ ForProfile(s, q.p) # {})",
+       "new": "(q.op = \"AddRole\" /\\ FALSE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SingleRole"
+    },
+    {
+     "id": "DeletePopulatedProfile",
+     "edits": [
+      {
+       "old": "(q.op = \"DeleteProfile\" /\\ ForProfile(s, q.p) # {})",
+       "new": "(q.op = \"DeleteProfile\" /\\ FALSE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttachmentAuthority"
+    },
+    {
+     "id": "DeleteAttachedRole",
+     "edits": [
+      {
+       "old": "(q.op = \"DeleteRole\" /\\ ForRole(s, q.r) # {})",
+       "new": "(q.op = \"DeleteRole\" /\\ FALSE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttachmentAuthority"
+    },
+    {
+     "id": "BindWrongProfileGeneration",
+     "edits": [
+      {
+       "old": "Edge(q.p, s.profiles[q.p].gen, q.r, s.roles[q.r].gen)",
+       "new": "Edge(q.p, 0, q.r, s.roles[q.r].gen)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttachmentAuthority"
+    },
+    {
+     "id": "BindWrongRoleGeneration",
+     "edits": [
+      {
+       "old": "Edge(q.p, s.profiles[q.p].gen, q.r, s.roles[q.r].gen)",
+       "new": "Edge(q.p, s.profiles[q.p].gen, q.r, 0)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttachmentAuthority"
+    },
+    {
+     "id": "ReuseProfileIdentity",
+     "edits": [
+      {
+       "old": "NewProfileGeneration(s, p) == s.profiles[p].gen + 1",
+       "new": "NewProfileGeneration(s, p) == 1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FreshProfileIdentity"
+    },
+    {
+     "id": "RemovePeerMembership",
+     "edits": [
+      {
+       "old": "!.edges = @ \\ SameRole(s, q.p, q.r)",
+       "new": "!.edges = {}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PeerFrame"
     }
    ]
   }

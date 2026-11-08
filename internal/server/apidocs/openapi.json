@@ -3,7 +3,7 @@
   "info": {
     "title": "TenkaCloud Simulator API",
     "version": "0.1.0",
-    "description": "Sign in through the local console first. The browser sends its same-origin session cookie; Test Request uses that session. For curl or SDKs add the host-issued `X-Simulator-Token` header. Dummy TCSIM signature credentials identify the AWS wire format; they are not host authentication. `x-simulator-principal` selects an exercise identity only. Participant sessions are already bound to an identity and cannot select simulator-admin. Never enter real AWS credentials here. \n\n**Examples are static documentation, not saved state.** Use Test Request → Send to query your environment. S3 responses remain native XML/bytes; expand typed schemas below to understand fields.\n\nIndependent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, SQS, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result. API Gateway REST APIs support an explicit REGIONAL/NONE/Lambda AWS_PROXY subset. Deployments freeze resources and integrations; stages refer to a deployment. No public endpoint or real AWS is created. Local invocation requires the host access token/session and a bounded Lambda apigateway.amazonaws.com resource permission with a matching local execute-api SourceArn. Responses are non-executing downloads, with protected cookie/navigation/CORS/CSP headers removed. Active browser app hosting, WAF, custom domains, authorizers, binary media, API keys, caching, stage editing and full WP grading remain unsupported. CloudFormation also provisions the bounded RestApi/Resource/Method/Deployment/Stage and Lambda::Permission subset in the same native SQLite transaction. Deployment DependsOn methods is explicit; API children are same-stack, snapshots immutable, and native drift blocks destructive cleanup. No WAF or custom resources are supported.\n\nGoogle Cloud Storage JSON API and Azure Blob Storage REST are bounded independently implemented local providers. Synthetic project/account scope and owner bindings are host configured; Google IAM/Azure RBAC, cloud account provisioning, OAuth/Entra/SharedKey/SAS are not implemented. See the provider-specific operations below and capabilities; SDK compatibility is separately tested and must not be inferred from API existence. DynamoDB supports seven basic JSON 1.0 operations at the shared regional root and a bounded table/item console; Query/Scan, indexes and CFN remain unsupported.",
+    "description": "Sign in through the local console first. The browser sends its same-origin session cookie; Test Request uses that session. For curl or SDKs add the host-issued `X-Simulator-Token` header. Dummy TCSIM signature credentials identify the AWS wire format; they are not host authentication. `x-simulator-principal` selects an exercise identity only. Participant sessions are already bound to an identity and cannot select simulator-admin. Never enter real AWS credentials here. \n\n**Examples are static documentation, not saved state.** Use Test Request \u2192 Send to query your environment. S3 responses remain native XML/bytes; expand typed schemas below to understand fields.\n\nIndependent local cloud simulator. AWS is the first provider, with documented S3, Systems Manager Parameter Store, SQS, Lambda, CloudFormation and IAM role subsets. No real infrastructure is created. This document describes only implemented operations. S3 wire APIs retain their XML formats; Native IAM roles use Query/XML; legacy identity control remains a separate JSON API. Native role ownership blocks legacy PUT/DELETE with HTTP409. Use unsigned requests or dummy TCSIM SDK credentials. Default principal simulator-admin has full sandbox access. IAM Query routing uses X-Simulator-Service: iam (or the dummy SDK signature scope), root POST and Version2010-05-08. Nine bounded role/inline-policy operations are implemented; no STS, managed policies, Conditions or non-root paths. Native Lambda roles must trust lambda.amazonaws.com. Legacy CFN/local identity roles retain their prior metadata-only trust semantics. For IAM exercises send x-simulator-principal. SQLite is ephemeral by default; --state persists it. See /_simulator/v1/capabilities for limits and deviations. Lambda supports a bounded Python 3.12 ZIP subset through the native REST paths below. Host Python is not required. A limited saved-role local SSM/S3 function SDK is supported; arbitrary network/HTTP and Function URLs remain unsupported. CloudFormation supports inline Python AWS::Lambda::Function with index.handler, existing local role, Ref/Arn and explicit DependsOn. Caller requires Lambda Create/DeleteFunction and iam:PassRole; tagged creation also requires lambda:TagResource. Only the declared saved-role SSM/S3 capability bridge is available, with no arbitrary network or managed-policy grants. Function SDK limits: S3 object body32KiB, native response48KiB before capability encoding, message64KiB,128calls and1MiB request/response aggregate. Oversized native SSM or S3 responses return EntityTooLarge without a partial successful result. API Gateway REST APIs support an explicit REGIONAL/NONE/Lambda AWS_PROXY subset. Deployments freeze resources and integrations; stages refer to a deployment. No public endpoint or real AWS is created. Local invocation requires the host access token/session and a bounded Lambda apigateway.amazonaws.com resource permission with a matching local execute-api SourceArn. Responses are non-executing downloads, with protected cookie/navigation/CORS/CSP headers removed. Active browser app hosting, WAF, custom domains, authorizers, binary media, API keys, caching, stage editing and full WP grading remain unsupported. CloudFormation also provisions the bounded RestApi/Resource/Method/Deployment/Stage and Lambda::Permission subset in the same native SQLite transaction. Deployment DependsOn methods is explicit; API children are same-stack, snapshots immutable, and native drift blocks destructive cleanup. No WAF or custom resources are supported.\n\nGoogle Cloud Storage JSON API and Azure Blob Storage REST are bounded independently implemented local providers. Synthetic project/account scope and owner bindings are host configured; Google IAM/Azure RBAC, cloud account provisioning, OAuth/Entra/SharedKey/SAS are not implemented. See the provider-specific operations below and capabilities; SDK compatibility is separately tested and must not be inferred from API existence. DynamoDB supports seven basic JSON 1.0 operations at the shared regional root and a bounded table/item console; Query/Scan, indexes and CFN remain unsupported.",
     "license": {
       "name": "MIT"
     }
@@ -19,7 +19,7 @@
       "get": {
         "operationId": "ListBuckets",
         "summary": "List all buckets",
-        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Lists the buckets currently saved in this environment, across the supported regions. `Buckets/Bucket/Name` is a bucket name; `BucketRegion` is its saved region; `CreationDate` is UTC. An actually executed response with `<Buckets></Buckets>` is empty. The example below intentionally contains two sample buckets. Requires `s3:ListAllMyBuckets` on `*`.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result · Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
+        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Lists the buckets currently saved in this environment, across the supported regions. `Buckets/Bucket/Name` is a bucket name; `BucketRegion` is its saved region; `CreationDate` is UTC. An actually executed response with `<Buckets></Buckets>` is empty. The example below intentionally contains two sample buckets. Requires `s3:ListAllMyBuckets` on `*`.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result \u00b7 Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -39,7 +39,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Static example — two sample buckets, not a live inventory. Expand the response schema for each field; execute Send for your actual list.",
+            "description": "Static example \u2014 two sample buckets, not a live inventory. Expand the response schema for each field; execute Send for your actual list.",
             "content": {
               "application/xml": {
                 "schema": {
@@ -78,7 +78,7 @@
       },
       "post": {
         "summary": "AWS native JSON or Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request → Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM customer-managed policies and role attachments are also available through the dedicated IAM provider template, with explicit ListPolicies Scope=Local. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1–64; inline policy names1–128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1–4096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.\n\nKMS aliases: TrentService.CreateAlias, ListAliases, UpdateAlias, DeleteAlias. Customer alias names include alias/ and are case-sensitive; alias/aws/ is reserved. Alias targets are concrete local key IDs/ARNs in the same account/Region. Create requires kms:CreateAlias on alias+target, Update kms:UpdateAlias on alias+old+new, Delete kms:DeleteAlias on alias+target, List kms:ListAliases on *. Local aliases are capped at1000 total/50 per key; ListAliases defaults50 and accepts1–100. Create/Update/Delete return empty200. Encrypt/Decrypt accept aliases, resolving and authorizing the concrete key in the same transaction. No alias identifiers for DescribeKey/EnableKey/DisableKey/GetKeyPolicy, AWS-managed aliases, alias ABAC, key deletion lifecycle, grants or CFN KMS resources.",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request \u2192 Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM customer-managed policies and role attachments are also available through the dedicated IAM provider template, with explicit ListPolicies Scope=Local. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. No managed grants or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1\u20134096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.\n\nKMS aliases: TrentService.CreateAlias, ListAliases, UpdateAlias, DeleteAlias. Customer alias names include alias/ and are case-sensitive; alias/aws/ is reserved. Alias targets are concrete local key IDs/ARNs in the same account/Region. Create requires kms:CreateAlias on alias+target, Update kms:UpdateAlias on alias+old+new, Delete kms:DeleteAlias on alias+target, List kms:ListAliases on *. Local aliases are capped at1000 total/50 per key; ListAliases defaults50 and accepts1\u2013100. Create/Update/Delete return empty200. Encrypt/Decrypt accept aliases, resolving and authorizing the concrete key in the same transaction. No alias identifiers for DescribeKey/EnableKey/DisableKey/GetKeyPolicy, AWS-managed aliases, alias ABAC, key deletion lifecycle, grants or CFN KMS resources.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -263,7 +263,7 @@
                   }
                 },
                 "LogsCreateLogGroup": {
-                  "summary": "CreateLogGroup — X-Amz-Target: Logs_20140328.CreateLogGroup; service=logs",
+                  "summary": "CreateLogGroup \u2014 X-Amz-Target: Logs_20140328.CreateLogGroup; service=logs",
                   "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
                   "value": {
                     "logGroupName": "/aws/reference-example",
@@ -274,7 +274,7 @@
                   }
                 },
                 "LogsDescribeLogGroups": {
-                  "summary": "DescribeLogGroups — X-Amz-Target: Logs_20140328.DescribeLogGroups; service=logs",
+                  "summary": "DescribeLogGroups \u2014 X-Amz-Target: Logs_20140328.DescribeLogGroups; service=logs",
                   "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
                   "value": {
                     "logGroupNamePrefix": "/aws/",
@@ -285,7 +285,7 @@
                   }
                 },
                 "LogsDeleteLogGroup": {
-                  "summary": "DeleteLogGroup — X-Amz-Target: Logs_20140328.DeleteLogGroup; service=logs",
+                  "summary": "DeleteLogGroup \u2014 X-Amz-Target: Logs_20140328.DeleteLogGroup; service=logs",
                   "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
                   "value": {
                     "logGroupName": "/aws/reference-example"
@@ -295,7 +295,7 @@
                   }
                 },
                 "LogsCreateLogStream": {
-                  "summary": "CreateLogStream — X-Amz-Target: Logs_20140328.CreateLogStream; service=logs",
+                  "summary": "CreateLogStream \u2014 X-Amz-Target: Logs_20140328.CreateLogStream; service=logs",
                   "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
                   "value": {
                     "logGroupName": "/aws/reference-example",
@@ -306,7 +306,7 @@
                   }
                 },
                 "LogsDescribeLogStreams": {
-                  "summary": "DescribeLogStreams — X-Amz-Target: Logs_20140328.DescribeLogStreams; service=logs",
+                  "summary": "DescribeLogStreams \u2014 X-Amz-Target: Logs_20140328.DescribeLogStreams; service=logs",
                   "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
                   "value": {
                     "logGroupName": "/aws/reference-example",
@@ -318,7 +318,7 @@
                   }
                 },
                 "LogsPutLogEvents": {
-                  "summary": "PutLogEvents — X-Amz-Target: Logs_20140328.PutLogEvents; service=logs",
+                  "summary": "PutLogEvents \u2014 X-Amz-Target: Logs_20140328.PutLogEvents; service=logs",
                   "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup. Replace timestamp=0 with current epoch milliseconds; otherwise it is correctly rejected as too old.",
                   "value": {
                     "logGroupName": "/aws/reference-example",
@@ -335,7 +335,7 @@
                   }
                 },
                 "LogsGetLogEvents": {
-                  "summary": "GetLogEvents — X-Amz-Target: Logs_20140328.GetLogEvents; service=logs",
+                  "summary": "GetLogEvents \u2014 X-Amz-Target: Logs_20140328.GetLogEvents; service=logs",
                   "description": "Static template, not saved state. Create group then stream before ingest/read, and delete the group to cascade cleanup.",
                   "value": {
                     "logGroupName": "/aws/reference-example",
@@ -469,7 +469,14 @@
                       "GetRolePolicy",
                       "DeleteRolePolicy",
                       "ListRolePolicies",
-                      "UpdateAssumeRolePolicy"
+                      "UpdateAssumeRolePolicy",
+                      "CreateInstanceProfile",
+                      "GetInstanceProfile",
+                      "ListInstanceProfiles",
+                      "DeleteInstanceProfile",
+                      "AddRoleToInstanceProfile",
+                      "RemoveRoleFromInstanceProfile",
+                      "ListInstanceProfilesForRole"
                     ]
                   },
                   "Version": {
@@ -534,6 +541,12 @@
                       "CAPABILITY_NAMED_IAM"
                     ],
                     "description": "CreateStack only; acknowledgement does not grant permissions."
+                  },
+                  "InstanceProfileName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_+=,.@-]+$"
                   }
                 }
               },
@@ -624,7 +637,7 @@
                   }
                 },
                 "CreateRESTStack": {
-                  "summary": "Local REST→Lambda→SSM stack (no real AWS)",
+                  "summary": "Local REST\u2192Lambda\u2192SSM stack (no real AWS)",
                   "value": {
                     "Action": "CreateStack",
                     "Version": "2010-05-15",
@@ -634,7 +647,7 @@
                   }
                 },
                 "CreatePolicy": {
-                  "summary": "CreatePolicy — static request template; send for live state",
+                  "summary": "CreatePolicy \u2014 static request template; send for live state",
                   "value": {
                     "Action": "CreatePolicy",
                     "Version": "2010-05-08",
@@ -643,7 +656,7 @@
                   }
                 },
                 "GetPolicy": {
-                  "summary": "GetPolicy — static request template; send for live state",
+                  "summary": "GetPolicy \u2014 static request template; send for live state",
                   "value": {
                     "Action": "GetPolicy",
                     "Version": "2010-05-08",
@@ -651,7 +664,7 @@
                   }
                 },
                 "ListPolicies": {
-                  "summary": "ListPolicies — static request template; send for live state",
+                  "summary": "ListPolicies \u2014 static request template; send for live state",
                   "value": {
                     "Action": "ListPolicies",
                     "Version": "2010-05-08",
@@ -660,7 +673,7 @@
                   }
                 },
                 "DeletePolicy": {
-                  "summary": "DeletePolicy — static request template; send for live state",
+                  "summary": "DeletePolicy \u2014 static request template; send for live state",
                   "value": {
                     "Action": "DeletePolicy",
                     "Version": "2010-05-08",
@@ -668,7 +681,7 @@
                   }
                 },
                 "CreatePolicyVersion": {
-                  "summary": "CreatePolicyVersion — static request template; send for live state",
+                  "summary": "CreatePolicyVersion \u2014 static request template; send for live state",
                   "value": {
                     "Action": "CreatePolicyVersion",
                     "Version": "2010-05-08",
@@ -678,7 +691,7 @@
                   }
                 },
                 "GetPolicyVersion": {
-                  "summary": "GetPolicyVersion — static request template; send for live state",
+                  "summary": "GetPolicyVersion \u2014 static request template; send for live state",
                   "value": {
                     "Action": "GetPolicyVersion",
                     "Version": "2010-05-08",
@@ -687,7 +700,7 @@
                   }
                 },
                 "ListPolicyVersions": {
-                  "summary": "ListPolicyVersions — static request template; send for live state",
+                  "summary": "ListPolicyVersions \u2014 static request template; send for live state",
                   "value": {
                     "Action": "ListPolicyVersions",
                     "Version": "2010-05-08",
@@ -696,7 +709,7 @@
                   }
                 },
                 "SetDefaultPolicyVersion": {
-                  "summary": "SetDefaultPolicyVersion — static request template; send for live state",
+                  "summary": "SetDefaultPolicyVersion \u2014 static request template; send for live state",
                   "value": {
                     "Action": "SetDefaultPolicyVersion",
                     "Version": "2010-05-08",
@@ -705,7 +718,7 @@
                   }
                 },
                 "DeletePolicyVersion": {
-                  "summary": "DeletePolicyVersion — static request template; send for live state",
+                  "summary": "DeletePolicyVersion \u2014 static request template; send for live state",
                   "value": {
                     "Action": "DeletePolicyVersion",
                     "Version": "2010-05-08",
@@ -714,7 +727,7 @@
                   }
                 },
                 "AttachRolePolicy": {
-                  "summary": "AttachRolePolicy — static request template; send for live state",
+                  "summary": "AttachRolePolicy \u2014 static request template; send for live state",
                   "value": {
                     "Action": "AttachRolePolicy",
                     "Version": "2010-05-08",
@@ -723,7 +736,7 @@
                   }
                 },
                 "DetachRolePolicy": {
-                  "summary": "DetachRolePolicy — static request template; send for live state",
+                  "summary": "DetachRolePolicy \u2014 static request template; send for live state",
                   "value": {
                     "Action": "DetachRolePolicy",
                     "Version": "2010-05-08",
@@ -732,12 +745,69 @@
                   }
                 },
                 "ListAttachedRolePolicies": {
-                  "summary": "ListAttachedRolePolicies — static request template; send for live state",
+                  "summary": "ListAttachedRolePolicies \u2014 static request template; send for live state",
                   "value": {
                     "Action": "ListAttachedRolePolicies",
                     "Version": "2010-05-08",
                     "RoleName": "practice-executor",
                     "MaxItems": 100
+                  }
+                },
+                "CreateInstanceProfile": {
+                  "summary": "CreateInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "CreateInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "GetInstanceProfile": {
+                  "summary": "GetInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "GetInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "ListInstanceProfiles": {
+                  "summary": "ListInstanceProfiles (IAM service header required)",
+                  "value": {
+                    "Action": "ListInstanceProfiles",
+                    "Version": "2010-05-08"
+                  }
+                },
+                "DeleteInstanceProfile": {
+                  "summary": "DeleteInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "DeleteInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "AddRoleToInstanceProfile": {
+                  "summary": "AddRoleToInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "AddRoleToInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "RemoveRoleFromInstanceProfile": {
+                  "summary": "RemoveRoleFromInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "RemoveRoleFromInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "ListInstanceProfilesForRole": {
+                  "summary": "ListInstanceProfilesForRole (IAM service header required)",
+                  "value": {
+                    "Action": "ListInstanceProfilesForRole",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor"
                   }
                 }
               }
@@ -903,7 +973,7 @@
                   "x-simulator-static-template": true
                 },
                 "DynamoDBCreateTable": {
-                  "summary": "CreateTable — set X-Amz-Target: DynamoDB_20120810.CreateTable",
+                  "summary": "CreateTable \u2014 set X-Amz-Target: DynamoDB_20120810.CreateTable",
                   "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
                   "x-simulator-target": "DynamoDB_20120810.CreateTable",
                   "value": {
@@ -927,7 +997,7 @@
                   }
                 },
                 "DynamoDBListTables": {
-                  "summary": "ListTables — set X-Amz-Target: DynamoDB_20120810.ListTables",
+                  "summary": "ListTables \u2014 set X-Amz-Target: DynamoDB_20120810.ListTables",
                   "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
                   "x-simulator-target": "DynamoDB_20120810.ListTables",
                   "value": {
@@ -938,7 +1008,7 @@
                   }
                 },
                 "DynamoDBDescribeTable": {
-                  "summary": "DescribeTable — set X-Amz-Target: DynamoDB_20120810.DescribeTable",
+                  "summary": "DescribeTable \u2014 set X-Amz-Target: DynamoDB_20120810.DescribeTable",
                   "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
                   "x-simulator-target": "DynamoDB_20120810.DescribeTable",
                   "value": {
@@ -949,7 +1019,7 @@
                   }
                 },
                 "DynamoDBPutItem": {
-                  "summary": "PutItem — set X-Amz-Target: DynamoDB_20120810.PutItem",
+                  "summary": "PutItem \u2014 set X-Amz-Target: DynamoDB_20120810.PutItem",
                   "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
                   "x-simulator-target": "DynamoDB_20120810.PutItem",
                   "value": {
@@ -959,7 +1029,7 @@
                         "S": "documented"
                       },
                       "payload": {
-                        "S": "sample <value> 日本語"
+                        "S": "sample <value> \u65e5\u672c\u8a9e"
                       }
                     },
                     "ConditionExpression": "attribute_not_exists(id)"
@@ -969,7 +1039,7 @@
                   }
                 },
                 "DynamoDBGetItem": {
-                  "summary": "GetItem — set X-Amz-Target: DynamoDB_20120810.GetItem",
+                  "summary": "GetItem \u2014 set X-Amz-Target: DynamoDB_20120810.GetItem",
                   "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
                   "x-simulator-target": "DynamoDB_20120810.GetItem",
                   "value": {
@@ -986,7 +1056,7 @@
                   }
                 },
                 "DynamoDBDeleteItem": {
-                  "summary": "DeleteItem — set X-Amz-Target: DynamoDB_20120810.DeleteItem",
+                  "summary": "DeleteItem \u2014 set X-Amz-Target: DynamoDB_20120810.DeleteItem",
                   "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
                   "x-simulator-target": "DynamoDB_20120810.DeleteItem",
                   "value": {
@@ -1002,7 +1072,7 @@
                   }
                 },
                 "DynamoDBDeleteTable": {
-                  "summary": "DeleteTable — set X-Amz-Target: DynamoDB_20120810.DeleteTable",
+                  "summary": "DeleteTable \u2014 set X-Amz-Target: DynamoDB_20120810.DeleteTable",
                   "description": "Static private-table request template. Execute operations in documented order; no real AWS or automatic header selection.",
                   "x-simulator-target": "DynamoDB_20120810.DeleteTable",
                   "value": {
@@ -1544,19 +1614,19 @@
               "examples": {
                 "createBucket": {
                   "value": "<CreateBucketConfiguration><LocationConstraint>ap-northeast-1</LocationConstraint></CreateBucketConfiguration>",
-                  "summary": "STATIC request template — choose the matching query selector before Send"
+                  "summary": "STATIC request template \u2014 choose the matching query selector before Send"
                 },
                 "enableVersioning": {
                   "value": "<VersioningConfiguration><Status>Enabled</Status></VersioningConfiguration>",
-                  "summary": "STATIC request template — choose the matching query selector before Send"
+                  "summary": "STATIC request template \u2014 choose the matching query selector before Send"
                 },
                 "publicAccessBlock": {
                   "value": "<PublicAccessBlockConfiguration><BlockPublicAcls>true</BlockPublicAcls><IgnorePublicAcls>true</IgnorePublicAcls><BlockPublicPolicy>true</BlockPublicPolicy><RestrictPublicBuckets>true</RestrictPublicBuckets></PublicAccessBlockConfiguration>",
-                  "summary": "STATIC request template — choose the matching query selector before Send"
+                  "summary": "STATIC request template \u2014 choose the matching query selector before Send"
                 },
                 "bucketTags": {
                   "value": "<Tagging><TagSet><Tag><Key>Environment</Key><Value>practice</Value></Tag></TagSet></Tagging>",
-                  "summary": "STATIC request template — choose the matching query selector before Send",
+                  "summary": "STATIC request template \u2014 choose the matching query selector before Send",
                   "description": "For this exact minified XML template use ?tagging and Content-MD5: tIgFdZ9IMEXsF8MypLdCYQ==. Recompute if any body byte changes. This is a static request template, not an executed update."
                 }
               }
@@ -1568,7 +1638,7 @@
       "get": {
         "operationId": "ListObjectsV2OrGetBucketLocation",
         "summary": "List objects, versions or bucket settings",
-        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Choose **one** query mode. Do not combine selectors.\n\n| Goal | Query | XML root / what it means |\n| --- | --- | --- |\n| Current objects | `?list-type=2` (default) | `ListBucketResult`: `Contents/Key` is an object key, `Size` is bytes, `KeyCount` is this page's entries. |\n| Retained versions | `?versions` | `ListVersionsResult`: `Version` contains saved bodies; `DeleteMarker` hides a key without erasing old versions. |\n| Bucket region | `?location` | `LocationConstraint`: empty text means `us-east-1`. |\n| Versioning setting | `?versioning` | `VersioningConfiguration`: missing `Status` means never enabled. |\n| Public-access settings | `?publicAccessBlock` | `PublicAccessBlockConfiguration`: four saved booleans. |\n| User tags | `?tagging` | `Tagging/TagSet/Tag`: `Key` and `Value` pairs. |\n\nFor any setting/history mode, **remove `list-type=2`** and unrelated query fields in the request editor before Send. A 404 setting/tag error means that configuration is absent, not necessarily that the bucket is absent. Requires the corresponding S3 read action; this simulator rejects unsupported selectors, combined selectors and nonempty selector values. `ListBucketResult` is not a bucket list.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result · Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
+        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Choose **one** query mode. Do not combine selectors.\n\n| Goal | Query | XML root / what it means |\n| --- | --- | --- |\n| Current objects | `?list-type=2` (default) | `ListBucketResult`: `Contents/Key` is an object key, `Size` is bytes, `KeyCount` is this page's entries. |\n| Retained versions | `?versions` | `ListVersionsResult`: `Version` contains saved bodies; `DeleteMarker` hides a key without erasing old versions. |\n| Bucket region | `?location` | `LocationConstraint`: empty text means `us-east-1`. |\n| Versioning setting | `?versioning` | `VersioningConfiguration`: missing `Status` means never enabled. |\n| Public-access settings | `?publicAccessBlock` | `PublicAccessBlockConfiguration`: four saved booleans. |\n| User tags | `?tagging` | `Tagging/TagSet/Tag`: `Key` and `Value` pairs. |\n\nFor any setting/history mode, **remove `list-type=2`** and unrelated query fields in the request editor before Send. A 404 setting/tag error means that configuration is absent, not necessarily that the bucket is absent. Requires the corresponding S3 read action; this simulator rejects unsupported selectors, combined selectors and nonempty selector values. `ListBucketResult` is not a bucket list.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nAfter a live S3 metadata request, use the **Live S3 result \u00b7 Read fields** button or **Alt+Shift+R** for a bounded field explanation. The API client keeps the original XML. The explanation is not available for arbitrary object bodies.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -1611,7 +1681,7 @@
           {
             "name": "max-keys",
             "in": "query",
-            "description": "Object/version list page size, 0–1000. REMOVE for location/versioning/publicAccessBlock/tagging reads.",
+            "description": "Object/version list page size, 0\u20131000. REMOVE for location/versioning/publicAccessBlock/tagging reads.",
             "schema": {
               "type": "integer",
               "default": 1000
@@ -1719,7 +1789,7 @@
             "name": "max-uploads",
             "in": "query",
             "required": false,
-            "description": "Multipart listing page limit 0–1000.",
+            "description": "Multipart listing page limit 0\u20131000.",
             "schema": {
               "type": "integer"
             }
@@ -1752,7 +1822,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Static examples — select the example matching your query. Actual state is read only after Test Request → Send.",
+            "description": "Static examples \u2014 select the example matching your query. Actual state is read only after Test Request \u2192 Send.",
             "content": {
               "application/xml": {
                 "schema": {
@@ -1779,27 +1849,27 @@
                 },
                 "examples": {
                   "currentObjects": {
-                    "summary": "STATIC: ?list-type=2 — one object, not buckets",
+                    "summary": "STATIC: ?list-type=2 \u2014 one object, not buckets",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListBucketResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <Name>practice-bucket</Name>\n  <Prefix></Prefix>\n  <MaxKeys>1000</MaxKeys>\n  <KeyCount>1</KeyCount>\n  <IsTruncated>false</IsTruncated>\n  <Contents>\n    <Key>hello.txt</Key>\n    <LastModified>2026-11-04T09:02:00Z</LastModified>\n    <ETag>&quot;dummy-entity-tag&quot;</ETag>\n    <Size>31</Size>\n    <StorageClass>STANDARD</StorageClass>\n  </Contents>\n</ListBucketResult>\n"
                   },
                   "versions": {
-                    "summary": "STATIC: ?versions — retained version",
+                    "summary": "STATIC: ?versions \u2014 retained version",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListVersionsResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <Name>practice-bucket</Name>\n  <Prefix></Prefix>\n  <KeyMarker></KeyMarker>\n  <VersionIdMarker></VersionIdMarker>\n  <MaxKeys>1000</MaxKeys>\n  <IsTruncated>false</IsTruncated>\n  <Version>\n    <Key>hello.txt</Key>\n    <VersionId>EXAMPLE-VERSION</VersionId>\n    <IsLatest>true</IsLatest>\n    <LastModified>2026-11-04T09:02:00Z</LastModified>\n    <ETag>&quot;dummy-entity-tag&quot;</ETag>\n    <Size>31</Size>\n    <StorageClass>STANDARD</StorageClass>\n  </Version>\n</ListVersionsResult>\n"
                   },
                   "location": {
-                    "summary": "STATIC: ?location — saved region",
+                    "summary": "STATIC: ?location \u2014 saved region",
                     "value": "<LocationConstraint xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">us-west-2</LocationConstraint>\n"
                   },
                   "versioning": {
-                    "summary": "STATIC: ?versioning — enabled",
+                    "summary": "STATIC: ?versioning \u2014 enabled",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<VersioningConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <Status>Enabled</Status>\n</VersioningConfiguration>\n"
                   },
                   "publicAccessBlock": {
-                    "summary": "STATIC: ?publicAccessBlock — saved settings",
+                    "summary": "STATIC: ?publicAccessBlock \u2014 saved settings",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<PublicAccessBlockConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <BlockPublicAcls>true</BlockPublicAcls>\n  <IgnorePublicAcls>true</IgnorePublicAcls>\n  <BlockPublicPolicy>true</BlockPublicPolicy>\n  <RestrictPublicBuckets>true</RestrictPublicBuckets>\n</PublicAccessBlockConfiguration>\n"
                   },
                   "tags": {
-                    "summary": "STATIC: ?tagging — one user tag",
+                    "summary": "STATIC: ?tagging \u2014 one user tag",
                     "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Tagging xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n  <TagSet>\n    <Tag>\n      <Key>Environment</Key>\n      <Value>practice</Value>\n    </Tag>\n  </TagSet>\n</Tagging>\n"
                   }
                 }
@@ -1858,7 +1928,7 @@
       "head": {
         "operationId": "HeadBucket",
         "summary": "Check whether a bucket exists",
-        "description": "**Static documentation, not a live existence check.** Use Test Request → Send; HEAD never returns an XML body. A live 200 means the bucket exists and the selected identity can list it. Read x-amz-bucket-region in Response Headers. Requires s3:ListBucket. Use GET ?location for readable region XML; bucket configuration selectors do not apply to HEAD.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
+        "description": "**Static documentation, not a live existence check.** Use Test Request \u2192 Send; HEAD never returns an XML body. A live 200 means the bucket exists and the selected identity can list it. Read x-amz-bucket-region in Response Headers. Requires s3:ListBucket. Use GET ?location for readable region XML; bucket configuration selectors do not apply to HEAD.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -3519,7 +3589,7 @@
         "tags": [
           "IAM roles"
         ],
-        "description": "Global native IAM Query/XML on the existing AWS provider alias. Roles, inline policies, customer-managed policy versions and attachments share SQLite with native SDKs, Lambda and the console. Select one of 21 static request templates; use Test Request → Send for live state. Root-path customer policies only. ListPolicies requires explicit Scope=Local; AWS default All, AWS catalog, OnlyAttached/PolicyUsageFilter and nonroot paths return501. GetPolicyVersion and role-policy document responses are RFC3986 encoded once; CreatePolicyVersion/ListPolicyVersions omit Document. Default switches atomically update every attached role; effective permissions union inline and attached default versions with explicit Deny priority. Default versions cannot be deleted, attached or multi-version policies cannot be deleted, and attached roles cannot be deleted. No STS, users/groups, boundaries, advanced Conditions or AWS-managed grants. CFN ManagedPolicyArns remain metadata. See docs/iam.md and capabilities for exact local bounds.\n\nStatic examples use dummy names/ARNs and never represent current state. Execute CreateRole/CreatePolicy first, then attach their returned ARN; create v2 before selecting or deleting it, detach and delete nondefault versions before cleanup. SDK/console/live requests use the same state. Browser requests use your signed-in session. curl/SDK need the host-issued X-Simulator-Token; dummy AWS signing keys are not login credentials. Host401 means sign in; IAM403 means current identity lacks permission.",
+        "description": "Global native IAM Query/XML on the existing AWS provider alias. Roles, inline policies, customer-managed policy versions and attachments share SQLite with native SDKs, Lambda and the console. Select one of 21 static request templates; use Test Request \u2192 Send for live state. Root-path customer policies only. ListPolicies requires explicit Scope=Local; AWS default All, AWS catalog, OnlyAttached/PolicyUsageFilter and nonroot paths return501. GetPolicyVersion and role-policy document responses are RFC3986 encoded once; CreatePolicyVersion/ListPolicyVersions omit Document. Default switches atomically update every attached role; effective permissions union inline and attached default versions with explicit Deny priority. Default versions cannot be deleted, attached or multi-version policies cannot be deleted, and attached roles cannot be deleted. No STS, users/groups, boundaries, advanced Conditions or AWS-managed grants. CFN ManagedPolicyArns remain metadata. See docs/iam.md and capabilities for exact local bounds.\n\nStatic examples use dummy names/ARNs and never represent current state. Execute CreateRole/CreatePolicy first, then attach their returned ARN; create v2 before selecting or deleting it, detach and delete nondefault versions before cleanup. SDK/console/live requests use the same state. Browser requests use your signed-in session. curl/SDK need the host-issued X-Simulator-Token; dummy AWS signing keys are not login credentials. Host401 means sign in; IAM403 means current identity lacks permission.\nSeven native instance-profile operations share the same IAM state. Root paths only, one native role per profile, at most1000 active/retired profile names. AddRoleToInstanceProfile additionally requires iam:PassRole on the canonical role ARN. Attached roles and populated profiles cannot be deleted. Recreated profiles receive fresh IDs; callers and pagination are generation-bound. Tags, EC2 association, credentials, CloudFormation, a profile console and Session Manager are not provided by this lifecycle. See docs/iam-instance-profiles.md.\n",
         "parameters": [
           {
             "name": "X-Simulator-Service",
@@ -3939,7 +4009,7 @@
                       },
                       "PolicyDocument": {
                         "type": "string",
-                        "description": "JSON identity policy string: raw UTF-8≤32KiB, Latin-1 pattern, compact JSON≤6144 characters; quoted whitespace remains significant. Existing encoded Query body≤128KiB. Supported Action/Resource grammar only; no Conditions."
+                        "description": "JSON identity policy string: raw UTF-8\u226432KiB, Latin-1 pattern, compact JSON\u22646144 characters; quoted whitespace remains significant. Existing encoded Query body\u2264128KiB. Supported Action/Resource grammar only; no Conditions."
                       },
                       "Path": {
                         "type": "string",
@@ -4081,7 +4151,7 @@
                       },
                       "PolicyDocument": {
                         "type": "string",
-                        "description": "JSON identity policy string: raw UTF-8≤32KiB, Latin-1 pattern, compact JSON≤6144 characters; quoted whitespace remains significant. Existing encoded Query body≤128KiB. Supported Action/Resource grammar only; no Conditions."
+                        "description": "JSON identity policy string: raw UTF-8\u226432KiB, Latin-1 pattern, compact JSON\u22646144 characters; quoted whitespace remains significant. Existing encoded Query body\u2264128KiB. Supported Action/Resource grammar only; no Conditions."
                       },
                       "SetAsDefault": {
                         "type": "boolean",
@@ -4337,6 +4407,269 @@
                         "description": "Return the exact previous Marker. Parent generation/context checked; no snapshot guarantee."
                       }
                     }
+                  },
+                  {
+                    "title": "CreateInstanceProfile",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "InstanceProfileName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "CreateInstanceProfile"
+                        ],
+                        "default": "CreateInstanceProfile"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "InstanceProfileName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9_+=,.@-]+$"
+                      },
+                      "Path": {
+                        "type": "string",
+                        "enum": [
+                          "/"
+                        ],
+                        "description": "Only the root path is supported."
+                      }
+                    }
+                  },
+                  {
+                    "title": "GetInstanceProfile",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "InstanceProfileName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "GetInstanceProfile"
+                        ],
+                        "default": "GetInstanceProfile"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "InstanceProfileName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9_+=,.@-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "ListInstanceProfiles",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "ListInstanceProfiles"
+                        ],
+                        "default": "ListInstanceProfiles"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "PathPrefix": {
+                        "type": "string",
+                        "enum": [
+                          "/"
+                        ],
+                        "description": "Only the root path prefix is supported."
+                      },
+                      "Marker": {
+                        "type": "string",
+                        "description": "Use the opaque marker returned by the same list operation and parent role incarnation."
+                      },
+                      "MaxItems": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1000
+                      }
+                    }
+                  },
+                  {
+                    "title": "DeleteInstanceProfile",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "InstanceProfileName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "DeleteInstanceProfile"
+                        ],
+                        "default": "DeleteInstanceProfile"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "InstanceProfileName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9_+=,.@-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "AddRoleToInstanceProfile",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "InstanceProfileName",
+                      "RoleName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "AddRoleToInstanceProfile"
+                        ],
+                        "default": "AddRoleToInstanceProfile"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "InstanceProfileName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9_+=,.@-]+$"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "RemoveRoleFromInstanceProfile",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "InstanceProfileName",
+                      "RoleName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "RemoveRoleFromInstanceProfile"
+                        ],
+                        "default": "RemoveRoleFromInstanceProfile"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "InstanceProfileName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9_+=,.@-]+$"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "ListInstanceProfilesForRole",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "ListInstanceProfilesForRole"
+                        ],
+                        "default": "ListInstanceProfilesForRole"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      },
+                      "Marker": {
+                        "type": "string",
+                        "description": "Use the opaque marker returned by the same list operation and parent role incarnation."
+                      },
+                      "MaxItems": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1000
+                      }
+                    }
                   }
                 ],
                 "discriminator": {
@@ -4424,7 +4757,7 @@
                   }
                 },
                 "CreatePolicy": {
-                  "summary": "CreatePolicy — static request template; send for live state",
+                  "summary": "CreatePolicy \u2014 static request template; send for live state",
                   "value": {
                     "Action": "CreatePolicy",
                     "Version": "2010-05-08",
@@ -4433,7 +4766,7 @@
                   }
                 },
                 "GetPolicy": {
-                  "summary": "GetPolicy — static request template; send for live state",
+                  "summary": "GetPolicy \u2014 static request template; send for live state",
                   "value": {
                     "Action": "GetPolicy",
                     "Version": "2010-05-08",
@@ -4441,7 +4774,7 @@
                   }
                 },
                 "ListPolicies": {
-                  "summary": "ListPolicies — static request template; send for live state",
+                  "summary": "ListPolicies \u2014 static request template; send for live state",
                   "value": {
                     "Action": "ListPolicies",
                     "Version": "2010-05-08",
@@ -4450,7 +4783,7 @@
                   }
                 },
                 "DeletePolicy": {
-                  "summary": "DeletePolicy — static request template; send for live state",
+                  "summary": "DeletePolicy \u2014 static request template; send for live state",
                   "value": {
                     "Action": "DeletePolicy",
                     "Version": "2010-05-08",
@@ -4458,7 +4791,7 @@
                   }
                 },
                 "CreatePolicyVersion": {
-                  "summary": "CreatePolicyVersion — static request template; send for live state",
+                  "summary": "CreatePolicyVersion \u2014 static request template; send for live state",
                   "value": {
                     "Action": "CreatePolicyVersion",
                     "Version": "2010-05-08",
@@ -4468,7 +4801,7 @@
                   }
                 },
                 "GetPolicyVersion": {
-                  "summary": "GetPolicyVersion — static request template; send for live state",
+                  "summary": "GetPolicyVersion \u2014 static request template; send for live state",
                   "value": {
                     "Action": "GetPolicyVersion",
                     "Version": "2010-05-08",
@@ -4477,7 +4810,7 @@
                   }
                 },
                 "ListPolicyVersions": {
-                  "summary": "ListPolicyVersions — static request template; send for live state",
+                  "summary": "ListPolicyVersions \u2014 static request template; send for live state",
                   "value": {
                     "Action": "ListPolicyVersions",
                     "Version": "2010-05-08",
@@ -4486,7 +4819,7 @@
                   }
                 },
                 "SetDefaultPolicyVersion": {
-                  "summary": "SetDefaultPolicyVersion — static request template; send for live state",
+                  "summary": "SetDefaultPolicyVersion \u2014 static request template; send for live state",
                   "value": {
                     "Action": "SetDefaultPolicyVersion",
                     "Version": "2010-05-08",
@@ -4495,7 +4828,7 @@
                   }
                 },
                 "DeletePolicyVersion": {
-                  "summary": "DeletePolicyVersion — static request template; send for live state",
+                  "summary": "DeletePolicyVersion \u2014 static request template; send for live state",
                   "value": {
                     "Action": "DeletePolicyVersion",
                     "Version": "2010-05-08",
@@ -4504,7 +4837,7 @@
                   }
                 },
                 "AttachRolePolicy": {
-                  "summary": "AttachRolePolicy — static request template; send for live state",
+                  "summary": "AttachRolePolicy \u2014 static request template; send for live state",
                   "value": {
                     "Action": "AttachRolePolicy",
                     "Version": "2010-05-08",
@@ -4513,7 +4846,7 @@
                   }
                 },
                 "DetachRolePolicy": {
-                  "summary": "DetachRolePolicy — static request template; send for live state",
+                  "summary": "DetachRolePolicy \u2014 static request template; send for live state",
                   "value": {
                     "Action": "DetachRolePolicy",
                     "Version": "2010-05-08",
@@ -4522,12 +4855,69 @@
                   }
                 },
                 "ListAttachedRolePolicies": {
-                  "summary": "ListAttachedRolePolicies — static request template; send for live state",
+                  "summary": "ListAttachedRolePolicies \u2014 static request template; send for live state",
                   "value": {
                     "Action": "ListAttachedRolePolicies",
                     "Version": "2010-05-08",
                     "RoleName": "practice-executor",
                     "MaxItems": 100
+                  }
+                },
+                "CreateInstanceProfile": {
+                  "summary": "CreateInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "CreateInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "GetInstanceProfile": {
+                  "summary": "GetInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "GetInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "ListInstanceProfiles": {
+                  "summary": "ListInstanceProfiles (IAM service header required)",
+                  "value": {
+                    "Action": "ListInstanceProfiles",
+                    "Version": "2010-05-08"
+                  }
+                },
+                "DeleteInstanceProfile": {
+                  "summary": "DeleteInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "DeleteInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "AddRoleToInstanceProfile": {
+                  "summary": "AddRoleToInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "AddRoleToInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "RemoveRoleFromInstanceProfile": {
+                  "summary": "RemoveRoleFromInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "RemoveRoleFromInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "ListInstanceProfilesForRole": {
+                  "summary": "ListInstanceProfilesForRole (IAM service header required)",
+                  "value": {
+                    "Action": "ListInstanceProfilesForRole",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor"
                   }
                 }
               }
@@ -4608,7 +4998,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4812,7 +5202,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4978,7 +5368,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5133,7 +5523,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5409,7 +5799,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5587,7 +5977,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5888,7 +6278,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6081,7 +6471,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6242,7 +6632,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6415,7 +6805,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6578,7 +6968,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6715,7 +7105,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6892,7 +7282,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7161,7 +7551,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx–5xx.",
+            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx\u20135xx.",
             "content": {
               "application/octet-stream": {
                 "schema": {
@@ -7244,7 +7634,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx–5xx.",
+            "description": "The saved Lambda application body, returned as a non-executing download. It may be text or JSON depending on your code; this is not a fixed simulator success object. App status codes can also be 2xx\u20135xx.",
             "content": {
               "application/octet-stream": {
                 "schema": {
@@ -7340,7 +7730,7 @@
         ],
         "responses": {
           "201": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7529,7 +7919,7 @@
         ],
         "responses": {
           "200": {
-            "description": "STATIC example — native JSON fields for this operation. Execute Test Request → Send for current local values. Expand schema for field meanings.",
+            "description": "STATIC example \u2014 native JSON fields for this operation. Execute Test Request \u2192 Send for current local values. Expand schema for field meanings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7788,7 +8178,7 @@
         "tags": [
           "Google Cloud Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Returns only the configured project. Pagination uses maxResults/pageToken.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Returns only the configured project. Pagination uses maxResults/pageToken.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -8086,7 +8476,7 @@
         "tags": [
           "Google Cloud Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. STANDARD storage and the documented bounded location subset. Global names are not real cloud names.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. STANDARD storage and the documented bounded location subset. Global names are not real cloud names.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -8399,7 +8789,7 @@
         "tags": [
           "Google Cloud Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. ACL/resource policy fields are not implemented.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. ACL/resource policy fields are not implemented.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -8653,7 +9043,7 @@
         "tags": [
           "Google Cloud Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. A non-empty bucket is refused; delete objects first.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. A non-empty bucket is refused; delete objects first.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -8888,7 +9278,7 @@
         "tags": [
           "Google Cloud Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Flat listing with bounded prefix/delimiter and pagination.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Flat listing with bounded prefix/delimiter and pagination.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -9212,7 +9602,7 @@
         "tags": [
           "Google Cloud Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Default response is metadata. Use alt=media for original bytes; no HTML preview or resource policy evaluation.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Default response is metadata. Use alt=media for original bytes; no HTML preview or resource policy evaluation.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -9498,7 +9888,7 @@
         "tags": [
           "Google Cloud Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Use the generation observed from metadata to avoid deleting a newer value.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Use the generation observed from metadata to avoid deleting a newer value.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -9751,7 +10141,7 @@
         "tags": [
           "Google Cloud Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Media upload shown here; bounded multipart is also supported. Max 1 MiB. ifGenerationMatch=0 creates only; overwrite requires both object create and delete permissions. Resumable uploads are unsupported.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Media upload shown here; bounded multipart is also supported. Max 1 MiB. ifGenerationMatch=0 creates only; overwrite requires both object create and delete permissions. Resumable uploads are unsupported.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -10068,7 +10458,7 @@
         "tags": [
           "Azure Blob Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Account is preconfigured locally; ARM account creation is unsupported.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Account is preconfigured locally; ARM account creation is unsupported.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -10227,7 +10617,7 @@
         "tags": [
           "Azure Blob Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Container names and local quotas are validated.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Container names and local quotas are validated.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -10335,7 +10725,7 @@
         "tags": [
           "Azure Blob Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Returns ETag and native property headers without a body.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Returns ETag and native property headers without a body.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -10443,7 +10833,7 @@
         "tags": [
           "Azure Blob Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Native XML with continuation marker; expand fields rather than treating the static sample as current state.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Native XML with continuation marker; expand fields rather than treating the static sample as current state.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -10588,7 +10978,7 @@
         "tags": [
           "Azure Blob Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Local deletion synchronously cascades to contained blobs. This differs from the asynchronous cloud deletion lifecycle.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Local deletion synchronously cascades to contained blobs. This differs from the asynchronous cloud deletion lifecycle.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -10730,7 +11120,7 @@
         "tags": [
           "Azure Blob Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Max 8 MiB; 64 MiB aggregate local stored budget. Existing data is replaced unless If-Match/If-None-Match says otherwise. Staged blocks are unsupported.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Max 8 MiB; 64 MiB aggregate local stored budget. Existing data is replaced unless If-Match/If-None-Match says otherwise. Staged blocks are unsupported.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -10873,7 +11263,7 @@
         "tags": [
           "Azure Blob Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Non-executing attachment. ETag preconditions supported. Refer to current capabilities for optional range support. Native Range/x-ms-range supports bytes=start-end or bytes=start-. Single range returns206 and Content-Range; out-of-bounds returns416. x-ms-range takes precedence; suffix and multiple ranges are refused. An authorized ETag precondition is evaluated first.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Non-executing attachment. ETag preconditions supported. Refer to current capabilities for optional range support. Native Range/x-ms-range supports bytes=start-end or bytes=start-. Single range returns206 and Content-Range; out-of-bounds returns416. x-ms-range takes precedence; suffix and multiple ranges are refused. An authorized ETag precondition is evaluated first.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -10997,7 +11387,7 @@
         "tags": [
           "Azure Blob Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Returns Content-Length, Content-Type, ETag and native metadata headers, without blob bytes.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Returns Content-Length, Content-Type, ETag and native metadata headers, without blob bytes.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -11095,7 +11485,7 @@
         "tags": [
           "Azure Blob Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. If-Match guards against deleting a changed object; failed conditions leave all stored bytes unchanged.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. If-Match guards against deleting a changed object; failed conditions leave all stored bytes unchanged.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -11226,7 +11616,7 @@
         "tags": [
           "Google Cloud Storage"
         ],
-        "description": "**Static examples are documentation, not saved state.** Test Request → Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Default response is metadata. Use alt=media for original bytes; no HTML preview or resource policy evaluation. The official SDK download endpoint requires alt=media. Range/resumable transfers remain unsupported.",
+        "description": "**Static examples are documentation, not saved state.** Test Request \u2192 Send executes against this local environment. Opaque host token/session is required; never use real cloud credentials. Only the configured local exercise owner may operate this synthetic scope. Local owner bindings are not Google IAM or Azure RBAC; selecting an operator credential alone does not grant a different exercise identity access. Default response is metadata. Use alt=media for original bytes; no HTML preview or resource policy evaluation. The official SDK download endpoint requires alt=media. Range/resumable transfers remain unsupported.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SimulatorToken"
@@ -11498,7 +11888,7 @@
         "tags": [
           "Sakura Disk configuration"
         ],
-        "description": "**Static examples are documentation, not current saved state.** This is opt-in local Disk configuration metadata only. The provider is disabled by default; authenticated requests then receive plain-text404 Provider not implemented. The host must enable --enable-sakura-disks with all four fixed scope flags, establish its opaque token/session, and attach a typed Actor bound to the configured exercise owner. The fixed public dummy Basic marker is required AFTER owner authorization and grants nothing. Never use real Sakura keys. No implicit owner/operator bypass, real Sakura IAM, VM, boot/block storage, Availability, billing, server attachment, copies/resize, Object Storage or AppRun. Create/Read/Update/Delete/List share actual SQLite state; no simulator success for unsupported options. Mutating bodies are strict UTF-8 JSON at most64KiB; duplicate/case-ambiguous keys and unsupported fields are refused. Integer lexical forms and Unicode/encoding rules are stricter than structural JSON Schema. Error envelopes differ for host authentication and disabled provider. No authenticated real-console or live cloud differential equivalence is claimed. The no-query default works with Test Request→Send. Optional paging uses an UNNAMED raw/once-encoded JSON query object, not From/Count form parameters: append ?%7B%22From%22%3A0%2C%22Count%22%3A1%7D manually. The standard OpenAPI query builder cannot represent that syntax. Count omitted/0 means remaining rows up to100; query bound8KiB. No Filter/Sort parameters.",
+        "description": "**Static examples are documentation, not current saved state.** This is opt-in local Disk configuration metadata only. The provider is disabled by default; authenticated requests then receive plain-text404 Provider not implemented. The host must enable --enable-sakura-disks with all four fixed scope flags, establish its opaque token/session, and attach a typed Actor bound to the configured exercise owner. The fixed public dummy Basic marker is required AFTER owner authorization and grants nothing. Never use real Sakura keys. No implicit owner/operator bypass, real Sakura IAM, VM, boot/block storage, Availability, billing, server attachment, copies/resize, Object Storage or AppRun. Create/Read/Update/Delete/List share actual SQLite state; no simulator success for unsupported options. Mutating bodies are strict UTF-8 JSON at most64KiB; duplicate/case-ambiguous keys and unsupported fields are refused. Integer lexical forms and Unicode/encoding rules are stricter than structural JSON Schema. Error envelopes differ for host authentication and disabled provider. No authenticated real-console or live cloud differential equivalence is claimed. The no-query default works with Test Request\u2192Send. Optional paging uses an UNNAMED raw/once-encoded JSON query object, not From/Count form parameters: append ?%7B%22From%22%3A0%2C%22Count%22%3A1%7D manually. The standard OpenAPI query builder cannot represent that syntax. Count omitted/0 means remaining rows up to100; query bound8KiB. No Filter/Sort parameters.",
         "security": [
           {
             "SakuraDummyProtocolMarker": []
@@ -13183,7 +13573,7 @@
         "properties": {
           "Key": {
             "type": "string",
-            "description": "Unique tag key; 1–128 Unicode characters. aws: prefixes are reserved."
+            "description": "Unique tag key; 1\u2013128 Unicode characters. aws: prefixes are reserved."
           },
           "Value": {
             "type": "string",
@@ -13915,7 +14305,7 @@
             "contentEncoding": "base64",
             "minLength": 4,
             "maxLength": 5464,
-            "description": "Base64 of1–4096 arbitrary plaintext bytes; use dummy data."
+            "description": "Base64 of1\u20134096 arbitrary plaintext bytes; use dummy data."
           },
           "EncryptionContext": {
             "type": "object",
@@ -14191,15 +14581,15 @@
         "properties": {
           "VisibilityTimeout": {
             "type": "string",
-            "description": "Integer string0–43200 seconds; default30."
+            "description": "Integer string0\u201343200 seconds; default30."
           },
           "DelaySeconds": {
             "type": "string",
-            "description": "Integer string0–900 seconds; default0."
+            "description": "Integer string0\u2013900 seconds; default0."
           },
           "MessageRetentionPeriod": {
             "type": "string",
-            "description": "Integer string60–1209600 seconds; default345600."
+            "description": "Integer string60\u20131209600 seconds; default345600."
           }
         },
         "additionalProperties": false,
@@ -14321,7 +14711,7 @@
           },
           "MessageBody": {
             "type": "string",
-            "description": "1–262144 UTF-8 bytes, a fixed local limit versus current AWS1MiB; SQS-compatible characters only. JSON request <=320KiB including encoding/attributes."
+            "description": "1\u2013262144 UTF-8 bytes, a fixed local limit versus current AWS1MiB; SQS-compatible characters only. JSON request <=320KiB including encoding/attributes."
           },
           "DelaySeconds": {
             "type": "integer",
@@ -16327,31 +16717,31 @@
     },
     {
       "name": "Systems Manager Parameter Store",
-      "description": "Use JSON 1.1 with `X-Amz-Target: AmazonSSM.<operation>`. The `SSMGetParameter` template is static. Only the documented Standard String subset is supported.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+      "description": "Use JSON 1.1 with `X-Amz-Target: AmazonSSM.<operation>`. The `SSMGetParameter` template is static. Only the documented Standard String subset is supported.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request \u2192 Send for a real local response. No real cloud is contacted."
     },
     {
       "name": "CloudFormation stacks",
-      "description": "Use URL-encoded Query fields with `Action` and `Version=2010-05-15`. `DescribeStacks` and `CreateRESTStack` are static examples of the bounded stack/resource subset; unsupported resources fail.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+      "description": "Use URL-encoded Query fields with `Action` and `Version=2010-05-15`. `DescribeStacks` and `CreateRESTStack` are static examples of the bounded stack/resource subset; unsupported resources fail.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request \u2192 Send for a real local response. No real cloud is contacted."
     },
     {
       "name": "KMS service guide",
-      "description": "Use JSON 1.1 with `X-Amz-Target: TrentService.<operation>`. Twelve `KMS...` templates cover the bounded local symmetric-key and customer-alias APIs; local ciphertext is not compatible with real AWS KMS.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+      "description": "Use JSON 1.1 with `X-Amz-Target: TrentService.<operation>`. Twelve `KMS...` templates cover the bounded local symmetric-key and customer-alias APIs; local ciphertext is not compatible with real AWS KMS.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request \u2192 Send for a real local response. No real cloud is contacted."
     },
     {
       "name": "SQS queues",
-      "description": "Use JSON 1.0 with `X-Amz-Target: AmazonSQS.<operation>`. Nine Standard-queue templates use current QueueUrl and ReceiptHandle values returned by actual requests; FIFO/batch/Query protocol are unsupported.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+      "description": "Use JSON 1.0 with `X-Amz-Target: AmazonSQS.<operation>`. Nine Standard-queue templates use current QueueUrl and ReceiptHandle values returned by actual requests; FIFO/batch/Query protocol are unsupported.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request \u2192 Send for a real local response. No real cloud is contacted."
     },
     {
       "name": "CloudWatch Logs",
-      "description": "Use JSON 1.1 with `X-Amz-Target: Logs_20140328.<operation>`. Seven `Logs...` templates cover log groups, streams and events. Retention APIs, metrics, alarms, CFN Logs and automatic Lambda delivery are unsupported in this reference.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+      "description": "Use JSON 1.1 with `X-Amz-Target: Logs_20140328.<operation>`. Seven `Logs...` templates cover log groups, streams and events. Retention APIs, metrics, alarms, CFN Logs and automatic Lambda delivery are unsupported in this reference.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request \u2192 Send for a real local response. No real cloud is contacted."
     },
     {
       "name": "Secrets Manager",
-      "description": "Use JSON 1.1 with `X-Amz-Target: secretsmanager.<operation>`. Eight templates cover the bounded practice-only plaintext subset; no real KMS encryption, rotation or recovery window.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted. ListSecretVersionIds returns version IDs/stages/creation time only, with its own ARN permission and live DB/region/physical-identity/filter-scoped continuation. No values, KMS or last-access metadata."
+      "description": "Use JSON 1.1 with `X-Amz-Target: secretsmanager.<operation>`. Eight templates cover the bounded practice-only plaintext subset; no real KMS encryption, rotation or recovery window.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request \u2192 Send for a real local response. No real cloud is contacted. ListSecretVersionIds returns version IDs/stages/creation time only, with its own ARN permission and live DB/region/physical-identity/filter-scoped continuation. No values, KMS or last-access metadata."
     },
     {
       "name": "DynamoDB tables and items",
-      "description": "Use JSON 1.0 with `X-Amz-Target: DynamoDB_20120810.<operation>`. Seven `DynamoDB...` templates cover tables and items; no Query/Scan/indexes/CFN/console support.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request → Send for a real local response. No real cloud is contacted."
+      "description": "Use JSON 1.0 with `X-Amz-Target: DynamoDB_20120810.<operation>`. Seven `DynamoDB...` templates cover tables and items; no Query/Scan/indexes/CFN/console support.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request \u2192 Send for a real local response. No real cloud is contacted."
     },
     {
       "name": "Sakura Cloud status",

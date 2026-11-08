@@ -1,5 +1,97 @@
 # Development roster
 
+## Hello World Battle recovery and IAM integration, 2026-11-09
+
+Status: in progress. The continuation owner is integrating the existing
+`feat/hello-battle-runtime-20261108` candidate `21e838e` with verified main
+`1a36d62daf12878fc5f16ce2a37d2c0f44cd67ed` in the original dedicated cloud
+checkout. Scope is the native IAM profile increment, its exact formal record,
+SDK acceptance, and preservation of the merged console/event-history work.
+PR #50 and its WAF/shared integration remain with their current owner. No
+replacement VPC/ENI implementation is claimed: the historical candidate bundles
+were verified on their original executor but are not available in this checkout.
+
+The QGA control experiment stopped before guest boot: creation of its private
+Unix socket returned `Operation not permitted`, exit 1. The control directory is
+empty; no guest or control listener from that attempt remains. The exact denial
+layer is not established by that errno. No alternate channel, permission change,
+or retry is attempted. Guest command, PTY/session, mediated network and scoring
+acceptance remain blocked or unimplemented; the standalone guest-only proof is
+separate evidence. Existing unsupported Battle capability remains unchanged.
+
+Independent source review found a canonical-base64 marker contract mismatch;
+the continuation fixes it and adds encoding, complementary generation-fence,
+recreation-fault and pre-profile-schema regressions. Review of those changes
+found no further blocker. Source review and conflict resolution proceed while
+PR #50 owns the shared heavy-validation lane. New full quality/E2E/formal results must name the current
+integrated commit. Historical IAM or guest success is not a current gate pass.
+
+## Hello World Battle runtime, 2026-11-08
+
+Integration branch: `feat/hello-battle-runtime-20261108`,
+base `d968be38dd2ed933e1e756b219ef2b0d26f665b0`. Public open and closed
+PRs, Issues #53/#54/#56/#57 and existing cloud worktrees were checked.
+Service PR #440 merged as `56636cd` and was normally integrated; #50 retains
+its owner and remains excluded. All sixty incoming models and upstream service
+changes were preserved.
+
+- Guest execution proof covers an actual contained AL2023 guest on
+  this cloud computer. The signed AL2023 image now boots and the unchanged
+  resolved Battle UserData completes offline: real nginx/Python HTTP responses,
+  IMDSv2 fixture requests, service stop/restart and shutdown were observed. This
+  is guest proof, not native EC2/SSM/scoring integration. No GitHub Actions substitute, real AWS provisioning,
+  host security/network change, or runtime completion is authorized by this
+  record. QEMU, Docker and `/dev/kvm` were absent at initial inspection.
+- Network source recovery will verify the historical
+  VPC `4cd9f9e94d6630d8085186a356124abe0cd268fa` and ENI
+  `6edc0db240b6abbe54a3fb68fab005b7f06099ea` sources before any replacement work.
+  The existing source bundles have been located but not imported into this
+  checkout. Replacement implementation has not started. Other owners' branches
+  are preserved.
+- The IAM implementation owns the bounded native instance-profile lifecycle
+  needed by an eventual instance backend, without claiming guest execution.
+  Its dedicated worktree is `simulator-iam-profiles`, branch
+  `feat/iam-instance-profiles`, base `d968be38`.
+  Dedicated `iam_instance_profiles*.go` files plus minimal IAM schema/dispatch
+  and role-delete dependency hooks are reserved. Shared server/CFN/OpenAPI/UI
+  changes remain serialized with the integration owner.
+
+The native IAM increment passed focused normal/race/vet and actual boto3
+two-process, denial, restart and cleanup tests. The new finite model passed its
+1,191-state baseline and twelve designated counterexamples. These are focused
+receipts, not full current-HEAD quality/E2E/formal or merge evidence.
+
+The actual Battle is still unavailable. Original template bytes must remain
+unchanged. Acceptance requires real UserData/systemd/IMDS and nginx/Python
+responses, VPC/routes/SG/NACL enforcement, instance-profile authority, SSM
+session/commands, then register/score/disrupt/recover/cleanup with isolation.
+The default standalone runtime contract remains in force. Any optional VM
+backend must state its dependencies and cannot report running metadata as
+execution. Passing the guest and IAM checks does not complete the Battle.
+The integration owner also owns the new finite profile lifecycle model and its
+registry/correspondence integration. One heavy local validation lane is owned by
+the integration owner; VM proof must coordinate its CPU/memory use with that lane.
+
+## Service evidence documentation integration, 2026-11-08
+
+PR [#327](https://github.com/susumutomita/TenkaCloudSimulator/pull/327) is being
+integrated with public main `835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152`.
+The integration owner owns only this roster, the
+[service verification matrix](service-verification.md), and their exact
+applicability record. Runtime, console assets, dependency locks, model registry,
+workflows and existing service assignments remain unchanged from that base.
+The matrix separates the current bounded multi-cloud contracts and 58 registered
+finite models from its explicitly historical November 4 evidence. Historical
+PR states, five-model totals and AWS-only statements are not current support claims.
+
+The dated records below are preserved rather than replaced by the older PR.
+Their assignments, pending checks and completion statements apply to their named
+source revisions; this documentation integration does not reassign service work.
+PR #27, WAF #50 and ongoing console work are outside its editing scope.
+Fresh exact-HEAD CI and Formal validation are required before merge; earlier
+successful runs do not validate this integration. No release or deployment is
+performed by this change.
+
 ## S3 multipart and GUI main integration, 2026-11-08
 
 Claimed by the PR440 integration worker on `integrate/pr440-gui-20261108`

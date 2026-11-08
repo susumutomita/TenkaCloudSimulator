@@ -32,11 +32,13 @@ def operations(spec):
 
 def preserved(spec):
     # Exact main d166f56 projections plus reviewed bounded S3 multipart queries,
-    # descriptions, regional/auth headers and object POST. Components stay exact.
+    # descriptions, regional/auth headers and object POST, then the seven native
+    # IAM profile examples/action fields at root and the AWS alias. The reviewed
+    # profile addition changes only those IAM paths; components stay exact.
     # The independent paths digest excludes only the two existing Sakura paths.
     original_paths = {path:value for path,value in spec['paths'].items() if path not in (COLLECTION,ITEM)}
     assert len(original_paths)==34
-    assert digest(original_paths)=='0c8897292b83b7ca6d5acde890139c5817729b248dea27dfc0934d9faa35fa5b', 'Existing paths/operations/response examples changed'
+    assert digest(original_paths)=='50a9c8466265b7801276684d19318acf17f312ec6c20afd81baba382f0a17d5b', 'Existing paths/operations/response examples changed'
     original = copy.deepcopy(spec['components'])
     original.pop('securitySchemes',None)
     for group in ('schemas','parameters'):
@@ -162,6 +164,28 @@ class SakuraReference(unittest.TestCase):
             lambda paths: paths['/{bucket}']['get']['parameters'].append({'name':'unexpected','in':'query','schema':{'type':'string'}}),
             lambda paths: paths['/{bucket}/{key}']['get']['responses'].update({'200':{'description':'fake static success'}}),
             lambda paths: next(p for p in paths['/{bucket}/{key}']['post']['parameters'] if p.get('name')=='X-Simulator-Region')['schema'].update(default='eu-west-1'),
+        ):
+            broken=copy.deepcopy(self.spec)
+            change(broken['paths'])
+            with self.assertRaises(AssertionError):preserved(broken)
+
+    def test_profile_extension_cannot_hide_unreviewed_reference_changes(self):
+        form='application/x-www-form-urlencoded'
+        for path in ('/', '/_simulator/providers/aws/'):
+            for operation in ('CreateInstanceProfile', 'GetInstanceProfile',
+                              'ListInstanceProfiles', 'DeleteInstanceProfile',
+                              'AddRoleToInstanceProfile', 'RemoveRoleFromInstanceProfile',
+                              'ListInstanceProfilesForRole'):
+                broken=copy.deepcopy(self.spec)
+                examples=broken['paths'][path]['post']['requestBody']['content'][form]['examples']
+                examples.pop(operation)
+                with self.subTest(path=path,operation=operation),self.assertRaises(AssertionError):
+                    preserved(broken)
+        for change in (
+            lambda paths: paths['/']['post']['requestBody']['content'][form]['schema']['properties']['Action']['enum'].remove('CreateInstanceProfile'),
+            lambda paths: paths['/']['post']['requestBody']['content'][form]['schema']['properties']['InstanceProfileName'].update(maxLength=129),
+            lambda paths: paths['/_simulator/providers/aws/']['post']['requestBody']['content'][form]['examples']['AddRoleToInstanceProfile']['value'].update(RoleName='unreviewed-role'),
+            lambda paths: paths['/_simulator/providers/aws/']['post']['requestBody']['content'][form]['examples'].pop('CreateRole'),
         ):
             broken=copy.deepcopy(self.spec)
             change(broken['paths'])

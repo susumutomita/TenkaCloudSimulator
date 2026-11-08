@@ -1076,6 +1076,13 @@ CFG_KEYWORDS = {'CONSTANT', 'CONSTANTS', 'CONSTRAINT', 'CONSTRAINTS',
                 'PROPERTIES', 'TYPE', 'TYPE_CONSTRAINT', 'CHECK_DEADLOCK'}
 
 
+# Native instance profile membership, admission and retained-generation contract.
+BASE_MODELS.add('IAMInstanceProfiles')
+BASE_INVARIANTS['IAMInstanceProfiles'] = {'AttachmentAuthority', 'SingleRole', 'ProfileGenerationGuard', 'TypeOK', 'FailureFrame', 'PassRoleRequired', 'FreshProfileIdentity', 'PeerFrame', 'RemovalExact', 'RoleGenerationGuard', 'AuthorizationRequired'}
+REQUIRED_MUTANTS['IAMInstanceProfiles'] = {'IgnorePassRole', 'RemovePeerMembership', 'DeletePopulatedProfile', 'BindWrongProfileGeneration', 'ReuseProfileIdentity', 'IgnoreProfileGeneration', 'DeleteAttachedRole', 'IgnoreRoleGeneration', 'AllowMultipleRoles', 'BindWrongRoleGeneration', 'IgnoreActionAuthorization', 'CommitStorageFailure'}
+REQUIRED_SOURCE_SCOPES['IAMInstanceProfiles'] = {'internal/aws/iam_query.go', 'internal/aws/iam_roles.go', 'internal/server/server.go', 'internal/aws/iam_instance_profiles_query.go', 'internal/aws/iam_instance_profiles.go'}
+
+
 class GateError(ValueError):
     pass
 

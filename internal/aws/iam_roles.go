@@ -137,6 +137,9 @@ func NewIAMRoleStore(db *sql.DB) (*IAMRoleStore, error) {
 	if err == nil {
 		err = iamManagedSchema(db)
 	}
+	if err == nil {
+		err = iamInstanceProfileSchema(db)
+	}
 	return &IAMRoleStore{db}, err
 }
 
@@ -676,6 +679,13 @@ func (s *IAMRoleStore) Delete(ctx context.Context, name string, expectedRoleID .
 	}
 	if count != 0 {
 		return ssmFailure{"DeleteConflict", "Remove the role's inline and attached policies before deleting it."}
+	}
+	var memberships int
+	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_iam_instance_profile_roles WHERE role_name=?", role.RoleName).Scan(&memberships); err != nil {
+		return err
+	}
+	if memberships != 0 {
+		return ssmFailure{"DeleteConflict", "Remove the role from instance profiles before deleting it."}
 	}
 	var aggregate int
 	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM identity_policies WHERE name=?", role.RoleName).Scan(&aggregate); err != nil {

@@ -73,6 +73,8 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_iam_instance_profiles_sdk_isolation_restart_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_instance_profiles.py'))],check=True,timeout=180)
  def test_cloudformation_events_real_console_history(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_events_console.py'))],check=True,timeout=180)
  def test_s3_multipart_served_reference_examples(self):
