@@ -1,0 +1,31 @@
+{
+ "client": "kendra",
+ "steps": [
+  {"op": "create_index", "args": {"Name": "fixture-index", "RoleArn": "arn:aws:iam::000000000000:role/fixture-kendra", "Edition": "DEVELOPER_EDITION", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"index": "Id"}},
+  {"op": "describe_index", "args": {"Id": "${index}"}, "expect": {"Status": "ACTIVE", "Edition": "DEVELOPER_EDITION", "IndexStatistics.TextDocumentStatistics.IndexedTextDocumentsCount": 0}},
+  {"op": "list_indices", "args": {}, "expect": {"IndexConfigurationSummaryItems#count": 1, "IndexConfigurationSummaryItems[0].Id": "${index}"}},
+  {"op": "update_index", "args": {"Id": "${index}", "Description": "Fixture documents"}},
+  {"op": "create_data_source", "args": {"IndexId": "${index}", "Name": "fixture-source", "Type": "CUSTOM", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"source": "Id"}},
+  {"op": "describe_data_source", "args": {"Id": "${source}", "IndexId": "${index}"}, "expect": {"Type": "CUSTOM", "Status": "ACTIVE", "IndexId": "${index}"}},
+  {"op": "list_data_sources", "args": {"IndexId": "${index}"}, "expect": {"SummaryItems#count": 1, "SummaryItems[0].Name": "fixture-source"}},
+  {"op": "update_data_source", "args": {"Id": "${source}", "IndexId": "${index}", "Description": "Pushed through the API"}},
+  {"op": "tag_resource", "args": {"ResourceARN": "arn:aws:kendra:us-east-1:000000000000:index/${index}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "arn:aws:kendra:us-east-1:000000000000:index/${index}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "arn:aws:kendra:us-east-1:000000000000:index/${index}"}, "expect": {"Tags#count": 1, "Tags[0].Key": "team"}},
+  {"op": "create_data_source", "args": {"IndexId": "${index}", "Name": "refused-source", "Type": "S3", "Configuration": {"S3Configuration": {"BucketName": "fixture-docs"}}}, "error": "ValidationException", "status": 400},
+  {"op": "query", "args": {"IndexId": "${index}", "QueryText": "fixture"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_index", "args": {"Id": "00000000-0000-0000-0000-000000000000"}, "error": "ResourceNotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "list_indices", "args": {}, "expect": {"IndexConfigurationSummaryItems#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_index", "args": {"Id": "${index}"}, "expect": {"Description": "Fixture documents"}},
+  {"op": "describe_data_source", "args": {"Id": "${source}", "IndexId": "${index}"}, "expect": {"Description": "Pushed through the API"}}
+ ],
+ "cleanup": [
+  {"op": "delete_data_source", "args": {"Id": "${source}", "IndexId": "${index}"}},
+  {"op": "delete_index", "args": {"Id": "${index}"}},
+  {"op": "list_indices", "args": {}, "expect": {"IndexConfigurationSummaryItems#count": 0}}
+ ]
+}

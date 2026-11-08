@@ -1,0 +1,241 @@
+{
+ "client": "imagebuilder",
+ "steps": [
+  {
+   "op": "create_distribution_configuration",
+   "args": {
+    "name": "fixture-dist",
+    "description": "first",
+    "distributions": [
+     {
+      "region": "us-east-1",
+      "amiDistributionConfiguration": {
+       "name": "fixture-{{imagebuilder:buildDate}}"
+      }
+     }
+    ],
+    "tags": {
+     "team": "a"
+    }
+   },
+   "save": {
+    "dist": "distributionConfigurationArn"
+   }
+  },
+  {
+   "op": "get_distribution_configuration",
+   "args": {
+    "distributionConfigurationArn": "${dist}"
+   },
+   "expect": {
+    "distributionConfiguration.timeoutMinutes": 720,
+    "distributionConfiguration.tags.team": "a",
+    "distributionConfiguration.name": "fixture-dist"
+   }
+  },
+  {
+   "op": "list_distribution_configurations",
+   "args": {},
+   "expect": {
+    "distributionConfigurationSummaryList#count": 1
+   }
+  },
+  {
+   "op": "update_distribution_configuration",
+   "args": {
+    "distributionConfigurationArn": "${dist}",
+    "description": "second",
+    "distributions": [
+     {
+      "region": "us-east-1"
+     }
+    ]
+   },
+   "expect": {
+    "distributionConfigurationArn": "${dist}"
+   }
+  },
+  {
+   "op": "create_distribution_configuration",
+   "args": {
+    "name": "Fixture Dist",
+    "distributions": [
+     {
+      "region": "us-east-1"
+     }
+    ]
+   },
+   "error": "InvalidRequestException"
+  },
+  {
+   "op": "create_lifecycle_policy",
+   "args": {
+    "name": "fixture-retain",
+    "executionRole": "arn:aws:iam::000000000000:role/fixture-lifecycle",
+    "resourceType": "AMI_IMAGE",
+    "policyDetails": [
+     {
+      "action": {
+       "type": "DELETE"
+      },
+      "filter": {
+       "type": "COUNT",
+       "value": 5
+      }
+     }
+    ],
+    "resourceSelection": {
+     "tagMap": {
+      "stage": "test"
+     }
+    }
+   },
+   "save": {
+    "policy": "lifecyclePolicyArn"
+   }
+  },
+  {
+   "op": "get_lifecycle_policy",
+   "args": {
+    "lifecyclePolicyArn": "${policy}"
+   },
+   "expect": {
+    "lifecyclePolicy.resourceType": "AMI_IMAGE",
+    "lifecyclePolicy.policyDetails[0].filter.value": 5
+   }
+  },
+  {
+   "op": "list_lifecycle_policies",
+   "args": {},
+   "expect": {
+    "lifecyclePolicySummaryList#count": 1
+   }
+  },
+  {
+   "op": "update_lifecycle_policy",
+   "args": {
+    "lifecyclePolicyArn": "${policy}",
+    "status": "DISABLED",
+    "executionRole": "arn:aws:iam::000000000000:role/fixture-lifecycle",
+    "resourceType": "AMI_IMAGE",
+    "policyDetails": [
+     {
+      "action": {
+       "type": "DEPRECATE"
+      },
+      "filter": {
+       "type": "COUNT",
+       "value": 3
+      }
+     }
+    ],
+    "resourceSelection": {
+     "tagMap": {
+      "stage": "test"
+     }
+    }
+   },
+   "expect": {
+    "lifecyclePolicyArn": "${policy}"
+   }
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "resourceArn": "${policy}",
+    "tags": {
+     "k": "v"
+    }
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "resourceArn": "${policy}",
+    "tagKeys": [
+     "k"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "resourceArn": "${dist}"
+   },
+   "expect": {
+    "tags.team": "a"
+   }
+  },
+  {
+   "op": "create_image",
+   "args": {
+    "infrastructureConfigurationArn": "arn:aws:imagebuilder:us-east-1:000000000000:infrastructure-configuration/fixture"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "get_lifecycle_policy",
+   "args": {
+    "lifecyclePolicyArn": "arn:aws:imagebuilder:us-east-1:000000000000:lifecycle-policy/missing"
+   },
+   "error": "InvalidRequestException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_lifecycle_policies",
+   "args": {},
+   "expect": {
+    "lifecyclePolicySummaryList#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_distribution_configuration",
+   "args": {
+    "distributionConfigurationArn": "${dist}"
+   },
+   "expect": {
+    "distributionConfiguration.description": "second"
+   }
+  },
+  {
+   "op": "get_lifecycle_policy",
+   "args": {
+    "lifecyclePolicyArn": "${policy}"
+   },
+   "expect": {
+    "lifecyclePolicy.status": "DISABLED"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_distribution_configuration",
+   "args": {
+    "distributionConfigurationArn": "${dist}"
+   },
+   "expect": {
+    "distributionConfigurationArn": "${dist}"
+   }
+  },
+  {
+   "op": "delete_lifecycle_policy",
+   "args": {
+    "lifecyclePolicyArn": "${policy}"
+   },
+   "expect": {
+    "lifecyclePolicyArn": "${policy}"
+   }
+  },
+  {
+   "op": "list_distribution_configurations",
+   "args": {},
+   "expect": {
+    "distributionConfigurationSummaryList#count": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,817 @@
+{
+ "components": {
+  "schemas": {
+   "CreateParallelDataRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ClientToken": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "EncryptionKey": {
+      "$ref": "#/components/schemas/EncryptionKey"
+     },
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ParallelDataConfig": {
+      "$ref": "#/components/schemas/ParallelDataConfig"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "ParallelDataConfig",
+     "ClientToken"
+    ],
+    "type": "object"
+   },
+   "CreateParallelDataResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "CREATING",
+       "UPDATING",
+       "ACTIVE",
+       "DELETING",
+       "FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteParallelDataRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DeleteParallelDataResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "CREATING",
+       "UPDATING",
+       "ACTIVE",
+       "DELETING",
+       "FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteTerminologyRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "EncryptionKey": {
+    "additionalProperties": false,
+    "properties": {
+     "Id": {
+      "maxLength": 400,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "KMS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type",
+     "Id"
+    ],
+    "type": "object"
+   },
+   "GetParallelDataRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "GetParallelDataResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "AuxiliaryDataLocation": {
+      "$ref": "#/components/schemas/ParallelDataDataLocation"
+     },
+     "DataLocation": {
+      "$ref": "#/components/schemas/ParallelDataDataLocation"
+     },
+     "LatestUpdateAttemptAuxiliaryDataLocation": {
+      "$ref": "#/components/schemas/ParallelDataDataLocation"
+     },
+     "ParallelDataProperties": {
+      "$ref": "#/components/schemas/ParallelDataProperties"
+     }
+    },
+    "type": "object"
+   },
+   "GetTerminologyRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TerminologyDataFormat": {
+      "enum": [
+       "CSV",
+       "TMX",
+       "TSV"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "GetTerminologyResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "AuxiliaryDataLocation": {
+      "$ref": "#/components/schemas/TerminologyDataLocation"
+     },
+     "TerminologyDataLocation": {
+      "$ref": "#/components/schemas/TerminologyDataLocation"
+     },
+     "TerminologyProperties": {
+      "$ref": "#/components/schemas/TerminologyProperties"
+     }
+    },
+    "type": "object"
+   },
+   "ImportTerminologyRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "EncryptionKey": {
+      "$ref": "#/components/schemas/EncryptionKey"
+     },
+     "MergeStrategy": {
+      "enum": [
+       "OVERWRITE"
+      ],
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     },
+     "TerminologyData": {
+      "$ref": "#/components/schemas/TerminologyData"
+     }
+    },
+    "required": [
+     "Name",
+     "MergeStrategy",
+     "TerminologyData"
+    ],
+    "type": "object"
+   },
+   "ImportTerminologyResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "AuxiliaryDataLocation": {
+      "$ref": "#/components/schemas/TerminologyDataLocation"
+     },
+     "TerminologyProperties": {
+      "$ref": "#/components/schemas/TerminologyProperties"
+     }
+    },
+    "type": "object"
+   },
+   "ListParallelDataRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 500,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 8192,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListParallelDataResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 8192,
+      "type": "string"
+     },
+     "ParallelDataPropertiesList": {
+      "items": {
+       "$ref": "#/components/schemas/ParallelDataProperties"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTerminologiesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 500,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 8192,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTerminologiesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 8192,
+      "type": "string"
+     },
+     "TerminologyPropertiesList": {
+      "items": {
+       "$ref": "#/components/schemas/TerminologyProperties"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ParallelDataConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "Format": {
+      "enum": [
+       "TSV",
+       "CSV",
+       "TMX"
+      ],
+      "type": "string"
+     },
+     "S3Uri": {
+      "maxLength": 1024,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ParallelDataDataLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "Location": {
+      "maxLength": 10000,
+      "type": "string"
+     },
+     "RepositoryType": {
+      "maxLength": 10000,
+      "type": "string"
+     }
+    },
+    "required": [
+     "RepositoryType",
+     "Location"
+    ],
+    "type": "object"
+   },
+   "ParallelDataProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "EncryptionKey": {
+      "$ref": "#/components/schemas/EncryptionKey"
+     },
+     "FailedRecordCount": {
+      "type": "integer"
+     },
+     "ImportedDataSize": {
+      "type": "integer"
+     },
+     "ImportedRecordCount": {
+      "type": "integer"
+     },
+     "LastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LatestUpdateAttemptAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LatestUpdateAttemptStatus": {
+      "enum": [
+       "CREATING",
+       "UPDATING",
+       "ACTIVE",
+       "DELETING",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ParallelDataConfig": {
+      "$ref": "#/components/schemas/ParallelDataConfig"
+     },
+     "SkippedRecordCount": {
+      "type": "integer"
+     },
+     "SourceLanguageCode": {
+      "maxLength": 5,
+      "minLength": 2,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "CREATING",
+       "UPDATING",
+       "ACTIVE",
+       "DELETING",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "TargetLanguageCodes": {
+      "items": {
+       "maxLength": 5,
+       "minLength": 2,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "TerminologyData": {
+    "additionalProperties": false,
+    "properties": {
+     "Directionality": {
+      "enum": [
+       "UNI",
+       "MULTI"
+      ],
+      "type": "string"
+     },
+     "File": {
+      "contentEncoding": "base64",
+      "type": "string"
+     },
+     "Format": {
+      "enum": [
+       "CSV",
+       "TMX",
+       "TSV"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "File",
+     "Format"
+    ],
+    "type": "object"
+   },
+   "TerminologyDataLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "Location": {
+      "maxLength": 10000,
+      "type": "string"
+     },
+     "RepositoryType": {
+      "maxLength": 10000,
+      "type": "string"
+     }
+    },
+    "required": [
+     "RepositoryType",
+     "Location"
+    ],
+    "type": "object"
+   },
+   "TerminologyProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "Directionality": {
+      "enum": [
+       "UNI",
+       "MULTI"
+      ],
+      "type": "string"
+     },
+     "EncryptionKey": {
+      "$ref": "#/components/schemas/EncryptionKey"
+     },
+     "Format": {
+      "enum": [
+       "CSV",
+       "TMX",
+       "TSV"
+      ],
+      "type": "string"
+     },
+     "LastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Message": {
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SizeBytes": {
+      "type": "integer"
+     },
+     "SkippedTermCount": {
+      "type": "integer"
+     },
+     "SourceLanguageCode": {
+      "maxLength": 5,
+      "minLength": 2,
+      "type": "string"
+     },
+     "TargetLanguageCodes": {
+      "items": {
+       "maxLength": 5,
+       "minLength": 2,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "TermCount": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Translate API (2017-07-01). Every other official operation returns HTTP 501 UnknownOperationException. ImportTerminology reads the inline CSV or TSV file (UNI directionality only; TMX and MULTI are refused): the header row names the source and target languages and each further row is one term. Only the derived properties are stored, so GetTerminology returns no TerminologyDataLocation, and re-importing replaces only the supplied properties. Terms are never applied to a translation. Parallel data stays CREATING: the ParallelDataConfig S3 file is never read, so no record is imported and no language codes or counts are reported; UpdateParallelData returns UnknownOperationException with HTTP 501. TranslateText, TranslateDocument, batch translation jobs and ListLanguages return UnknownOperationException with HTTP 501.",
+  "title": "Amazon Translate (simulator catalog)",
+  "version": "2017-07-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "translateJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AWSShineFrontendService_20170701.CreateParallelData",
+        "AWSShineFrontendService_20170701.DeleteParallelData",
+        "AWSShineFrontendService_20170701.DeleteTerminology",
+        "AWSShineFrontendService_20170701.GetParallelData",
+        "AWSShineFrontendService_20170701.GetTerminology",
+        "AWSShineFrontendService_20170701.ImportTerminology",
+        "AWSShineFrontendService_20170701.ListParallelData",
+        "AWSShineFrontendService_20170701.ListTagsForResource",
+        "AWSShineFrontendService_20170701.ListTerminologies",
+        "AWSShineFrontendService_20170701.TagResource",
+        "AWSShineFrontendService_20170701.UntagResource"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateParallelData": {
+         "summary": "X-Amz-Target: AWSShineFrontendService_20170701.CreateParallelData",
+         "value": {}
+        },
+        "DeleteParallelData": {
+         "summary": "X-Amz-Target: AWSShineFrontendService_20170701.DeleteParallelData",
+         "value": {}
+        },
+        "DeleteTerminology": {
+         "summary": "X-Amz-Target: AWSShineFrontendService_20170701.DeleteTerminology",
+         "value": {}
+        },
+        "GetParallelData": {
+         "summary": "X-Amz-Target: AWSShineFrontendService_20170701.GetParallelData",
+         "value": {}
+        },
+        "GetTerminology": {
+         "summary": "X-Amz-Target: AWSShineFrontendService_20170701.GetTerminology",
+         "value": {}
+        },
+        "ImportTerminology": {
+         "summary": "X-Amz-Target: AWSShineFrontendService_20170701.ImportTerminology",
+         "value": {}
+        },
+        "ListParallelData": {
+         "summary": "X-Amz-Target: AWSShineFrontendService_20170701.ListParallelData",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: AWSShineFrontendService_20170701.ListTagsForResource",
+         "value": {}
+        },
+        "ListTerminologies": {
+         "summary": "X-Amz-Target: AWSShineFrontendService_20170701.ListTerminologies",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: AWSShineFrontendService_20170701.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: AWSShineFrontendService_20170701.UntagResource",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon Translate JSON 1.1 operations",
+    "tags": [
+     "Amazon Translate"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Translate API (2017-07-01). Every other official operation returns HTTP 501 UnknownOperationException. ImportTerminology reads the inline CSV or TSV file (UNI directionality only; TMX and MULTI are refused): the header row names the source and target languages and each further row is one term. Only the derived properties are stored, so GetTerminology returns no TerminologyDataLocation, and re-importing replaces only the supplied properties. Terms are never applied to a translation. Parallel data stays CREATING: the ParallelDataConfig S3 file is never read, so no record is imported and no language codes or counts are reported; UpdateParallelData returns UnknownOperationException with HTTP 501. TranslateText, TranslateDocument, batch translation jobs and ListLanguages return UnknownOperationException with HTTP 501.",
+   "name": "Amazon Translate"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/translate/2017-07-01/service-2.json",
+  "sha256": "3e8233923189a9f905b6a983539207247ad690bea3eff41b31d7c1e420dd0a2f",
+  "license": "Apache-2.0"
+ }
+}

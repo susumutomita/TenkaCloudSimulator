@@ -1,0 +1,39 @@
+{
+ "api": "dataform.v1",
+ "steps": [
+  {"call": "projects.locations.repositories.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "repositoryId": "fixture"}, "body": {"displayName": "Fixture", "gitRemoteSettings": {"url": "https://example.invalid/analytics.git", "defaultBranch": "main", "authenticationTokenSecretVersion": "projects/tenkacloud-local/secrets/git/versions/1"}}, "save": {"repo": "name"}},
+  {"call": "projects.locations.repositories.get", "args": {"name": "${repo}"}, "expect": {"gitRemoteSettings.defaultBranch": "main"}},
+  {"call": "projects.locations.repositories.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"repositories#count": 1}},
+  {"call": "projects.locations.repositories.patch", "args": {"name": "${repo}", "updateMask": "displayName"}, "body": {"displayName": "Analytics"}},
+  {"call": "projects.locations.repositories.workspaces.create", "args": {"parent": "${repo}", "workspaceId": "dev"}, "body": {}, "save": {"workspace": "name"}},
+  {"call": "projects.locations.repositories.workspaces.get", "args": {"name": "${workspace}"}},
+  {"call": "projects.locations.repositories.workspaces.list", "args": {"parent": "${repo}"}, "expect": {"workspaces#count": 1}},
+  {"call": "projects.locations.repositories.releaseConfigs.create", "args": {"parent": "${repo}", "releaseConfigId": "prod"}, "body": {"gitCommitish": "main"}, "save": {"release": "name"}},
+  {"call": "projects.locations.repositories.releaseConfigs.get", "args": {"name": "${release}"}, "expect": {"gitCommitish": "main"}},
+  {"call": "projects.locations.repositories.releaseConfigs.list", "args": {"parent": "${repo}"}, "expect": {"releaseConfigs#count": 1}},
+  {"call": "projects.locations.repositories.releaseConfigs.patch", "args": {"name": "${release}", "updateMask": "cronSchedule"}, "body": {"cronSchedule": "0 2 * * *"}},
+  {"call": "projects.locations.repositories.workflowConfigs.create", "args": {"parent": "${repo}", "workflowConfigId": "daily"}, "body": {"releaseConfig": "${release}", "invocationConfig": {"includedTags": ["daily"]}}, "save": {"workflow": "name"}},
+  {"call": "projects.locations.repositories.workflowConfigs.get", "args": {"name": "${workflow}"}, "expect": {"releaseConfig": "${release}"}},
+  {"call": "projects.locations.repositories.workflowConfigs.list", "args": {"parent": "${repo}"}, "expect": {"workflowConfigs#count": 1}},
+  {"call": "projects.locations.repositories.workflowConfigs.patch", "args": {"name": "${workflow}", "updateMask": "disabled"}, "body": {"disabled": true}},
+  {"call": "projects.locations.repositories.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "repositoryId": "admin"}, "body": {"setAuthenticatedUserAdmin": true}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.repositories.delete", "args": {"name": "${repo}", "force": true}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.locations.repositories.compilationResults.create", "args": {"parent": "${repo}", "body": {"gitCommitish": "main"}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.repositories.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/repositories/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.repositories.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.repositories.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"repositories#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.repositories.workflowConfigs.get", "args": {"name": "${workflow}"}, "expect": {"disabled": true}},
+  {"call": "projects.locations.repositories.releaseConfigs.get", "args": {"name": "${release}"}, "expect": {"cronSchedule": "0 2 * * *"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.repositories.workflowConfigs.delete", "args": {"name": "${workflow}"}},
+  {"call": "projects.locations.repositories.releaseConfigs.delete", "args": {"name": "${release}"}},
+  {"call": "projects.locations.repositories.workspaces.delete", "args": {"name": "${workspace}"}},
+  {"call": "projects.locations.repositories.delete", "args": {"name": "${repo}"}},
+  {"call": "projects.locations.repositories.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"repositories#count": 0}}
+ ]
+}

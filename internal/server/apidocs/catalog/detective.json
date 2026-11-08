@@ -1,0 +1,452 @@
+{
+ "components": {
+  "schemas": {
+   "Graph": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Detective API (2018-10-26). Every other official operation returns HTTP 501 UnknownOperationException. A behavior graph is configuration metadata: no data source is ingested and no investigation, indicator or finding is produced. A second graph in the same Region is refused. Members, invitations, datasource packages, investigations and organization APIs return UnknownOperationException with HTTP 501.",
+  "title": "Amazon Detective (simulator catalog)",
+  "version": "2018-10-26"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/graph": {
+   "post": {
+    "operationId": "detectiveCreateGraph",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "detective"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "GraphArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateGraph",
+    "tags": [
+     "Amazon Detective"
+    ]
+   }
+  },
+  "/graph/removal": {
+   "post": {
+    "operationId": "detectiveDeleteGraph",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "detective"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "GraphArn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "GraphArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteGraph",
+    "tags": [
+     "Amazon Detective"
+    ]
+   }
+  },
+  "/graphs/list": {
+   "post": {
+    "operationId": "detectiveListGraphs",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "detective"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "maximum": 200,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "GraphList": {
+           "items": {
+            "$ref": "#/components/schemas/Graph"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListGraphs",
+    "tags": [
+     "Amazon Detective"
+    ]
+   }
+  },
+  "/tags/{ResourceArn}": {
+   "delete": {
+    "operationId": "detectiveUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "detective"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Detective"
+    ]
+   },
+   "get": {
+    "operationId": "detectiveListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "detective"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Detective"
+    ]
+   },
+   "post": {
+    "operationId": "detectiveTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "detective"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Detective"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Detective API (2018-10-26). Every other official operation returns HTTP 501 UnknownOperationException. A behavior graph is configuration metadata: no data source is ingested and no investigation, indicator or finding is produced. A second graph in the same Region is refused. Members, invitations, datasource packages, investigations and organization APIs return UnknownOperationException with HTTP 501.",
+   "name": "Amazon Detective"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/detective/2018-10-26/service-2.json",
+  "sha256": "8173836f89c468f803186b3f2ee05b4d1d5b91f85fb547f636de868e0e134ac9",
+  "license": "Apache-2.0"
+ }
+}

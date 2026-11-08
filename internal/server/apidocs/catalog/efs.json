@@ -1,0 +1,1070 @@
+{
+ "components": {
+  "schemas": {
+   "FileSystemDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailabilityZoneId": {
+      "type": "string"
+     },
+     "AvailabilityZoneName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "CreationToken": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Encrypted": {
+      "type": "boolean"
+     },
+     "FileSystemArn": {
+      "type": "string"
+     },
+     "FileSystemId": {
+      "maxLength": 128,
+      "type": "string"
+     },
+     "FileSystemProtection": {
+      "$ref": "#/components/schemas/FileSystemProtectionDescription"
+     },
+     "KmsKeyId": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "LifeCycleState": {
+      "enum": [
+       "creating",
+       "available",
+       "updating",
+       "deleting",
+       "deleted",
+       "error"
+      ],
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "NumberOfMountTargets": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "OwnerId": {
+      "maxLength": 14,
+      "type": "string"
+     },
+     "PerformanceMode": {
+      "enum": [
+       "generalPurpose",
+       "maxIO"
+      ],
+      "type": "string"
+     },
+     "ProvisionedThroughputInMibps": {
+      "minimum": 1,
+      "type": "number"
+     },
+     "SizeInBytes": {
+      "$ref": "#/components/schemas/FileSystemSize"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "ThroughputMode": {
+      "enum": [
+       "bursting",
+       "provisioned",
+       "elastic"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "OwnerId",
+     "CreationToken",
+     "FileSystemId",
+     "CreationTime",
+     "LifeCycleState",
+     "NumberOfMountTargets",
+     "SizeInBytes",
+     "PerformanceMode",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "FileSystemProtectionDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "ReplicationOverwriteProtection": {
+      "enum": [
+       "ENABLED",
+       "DISABLED",
+       "REPLICATING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FileSystemSize": {
+    "additionalProperties": false,
+    "properties": {
+     "Timestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Value": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "ValueInArchive": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "ValueInIA": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "ValueInStandard": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Value"
+    ],
+    "type": "object"
+   },
+   "ResourceIdPreference": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceIdType": {
+      "enum": [
+       "LONG_ID",
+       "SHORT_ID"
+      ],
+      "type": "string"
+     },
+     "Resources": {
+      "items": {
+       "enum": [
+        "FILE_SYSTEM",
+        "MOUNT_TARGET"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Elastic File System API (2015-02-01). Every other official operation returns HTTP 501 UnknownOperationException. File systems are configuration records that are available immediately with no mount targets: no NFS endpoint, storage or data exists, SizeInBytes is always zero, and mount target, access point, replication, file system policy, lifecycle and backup policy APIs return UnknownOperationException with HTTP 501. The Backup member is refused. CreationToken is used as the client token: repeating it with identical input returns the original file system instead of FileSystemAlreadyExists, and it is not echoed in descriptions. The Name member, which AWS derives from the Name tag, is not reported, and KMS keys are stored without contacting KMS. DescribeFileSystems filters by FileSystemId and returns an empty list for an unknown ID; the CreationToken filter is refused. Tagging APIs require the resource ARN, and the legacy CreateTags, DeleteTags and DescribeTags APIs are not implemented. PutAccountPreferences accepts only LONG_ID because identifiers are always long.",
+  "title": "Amazon Elastic File System (simulator catalog)",
+  "version": "2015-02-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/2015-02-01/account-preferences": {
+   "get": {
+    "operationId": "efsDescribeAccountPreferences",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "elasticfilesystem"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ResourceIdPreference": {
+           "$ref": "#/components/schemas/ResourceIdPreference"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeAccountPreferences",
+    "tags": [
+     "Amazon Elastic File System"
+    ]
+   },
+   "put": {
+    "operationId": "efsPutAccountPreferences",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "elasticfilesystem"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ResourceIdType": {
+          "enum": [
+           "LONG_ID",
+           "SHORT_ID"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "ResourceIdType"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ResourceIdPreference": {
+           "$ref": "#/components/schemas/ResourceIdPreference"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "PutAccountPreferences",
+    "tags": [
+     "Amazon Elastic File System"
+    ]
+   }
+  },
+  "/2015-02-01/file-systems": {
+   "get": {
+    "operationId": "efsDescribeFileSystems",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "elasticfilesystem"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "CreationToken",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "FileSystemId",
+      "schema": {
+       "maxLength": 128,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "Marker",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "MaxItems",
+      "schema": {
+       "minimum": 1,
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "FileSystems": {
+           "items": {
+            "$ref": "#/components/schemas/FileSystemDescription"
+           },
+           "type": "array"
+          },
+          "Marker": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "NextMarker": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeFileSystems",
+    "tags": [
+     "Amazon Elastic File System"
+    ]
+   },
+   "post": {
+    "operationId": "efsCreateFileSystem",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "elasticfilesystem"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AvailabilityZoneName": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Backup": {
+          "type": "boolean"
+         },
+         "CreationToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Encrypted": {
+          "type": "boolean"
+         },
+         "KmsKeyId": {
+          "maxLength": 2048,
+          "type": "string"
+         },
+         "PerformanceMode": {
+          "enum": [
+           "generalPurpose",
+           "maxIO"
+          ],
+          "type": "string"
+         },
+         "ProvisionedThroughputInMibps": {
+          "minimum": 1,
+          "type": "number"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         },
+         "ThroughputMode": {
+          "enum": [
+           "bursting",
+           "provisioned",
+           "elastic"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "CreationToken"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AvailabilityZoneId": {
+           "type": "string"
+          },
+          "AvailabilityZoneName": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "CreationToken": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Encrypted": {
+           "type": "boolean"
+          },
+          "FileSystemArn": {
+           "type": "string"
+          },
+          "FileSystemId": {
+           "maxLength": 128,
+           "type": "string"
+          },
+          "FileSystemProtection": {
+           "$ref": "#/components/schemas/FileSystemProtectionDescription"
+          },
+          "KmsKeyId": {
+           "maxLength": 2048,
+           "type": "string"
+          },
+          "LifeCycleState": {
+           "enum": [
+            "creating",
+            "available",
+            "updating",
+            "deleting",
+            "deleted",
+            "error"
+           ],
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "NumberOfMountTargets": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "OwnerId": {
+           "maxLength": 14,
+           "type": "string"
+          },
+          "PerformanceMode": {
+           "enum": [
+            "generalPurpose",
+            "maxIO"
+           ],
+           "type": "string"
+          },
+          "ProvisionedThroughputInMibps": {
+           "minimum": 1,
+           "type": "number"
+          },
+          "SizeInBytes": {
+           "$ref": "#/components/schemas/FileSystemSize"
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          },
+          "ThroughputMode": {
+           "enum": [
+            "bursting",
+            "provisioned",
+            "elastic"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateFileSystem",
+    "tags": [
+     "Amazon Elastic File System"
+    ]
+   }
+  },
+  "/2015-02-01/file-systems/{FileSystemId}": {
+   "delete": {
+    "operationId": "efsDeleteFileSystem",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "elasticfilesystem"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "FileSystemId",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteFileSystem",
+    "tags": [
+     "Amazon Elastic File System"
+    ]
+   },
+   "put": {
+    "operationId": "efsUpdateFileSystem",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "elasticfilesystem"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "FileSystemId",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ProvisionedThroughputInMibps": {
+          "minimum": 1,
+          "type": "number"
+         },
+         "ThroughputMode": {
+          "enum": [
+           "bursting",
+           "provisioned",
+           "elastic"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AvailabilityZoneId": {
+           "type": "string"
+          },
+          "AvailabilityZoneName": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "CreationToken": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Encrypted": {
+           "type": "boolean"
+          },
+          "FileSystemArn": {
+           "type": "string"
+          },
+          "FileSystemId": {
+           "maxLength": 128,
+           "type": "string"
+          },
+          "FileSystemProtection": {
+           "$ref": "#/components/schemas/FileSystemProtectionDescription"
+          },
+          "KmsKeyId": {
+           "maxLength": 2048,
+           "type": "string"
+          },
+          "LifeCycleState": {
+           "enum": [
+            "creating",
+            "available",
+            "updating",
+            "deleting",
+            "deleted",
+            "error"
+           ],
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "NumberOfMountTargets": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "OwnerId": {
+           "maxLength": 14,
+           "type": "string"
+          },
+          "PerformanceMode": {
+           "enum": [
+            "generalPurpose",
+            "maxIO"
+           ],
+           "type": "string"
+          },
+          "ProvisionedThroughputInMibps": {
+           "minimum": 1,
+           "type": "number"
+          },
+          "SizeInBytes": {
+           "$ref": "#/components/schemas/FileSystemSize"
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          },
+          "ThroughputMode": {
+           "enum": [
+            "bursting",
+            "provisioned",
+            "elastic"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateFileSystem",
+    "tags": [
+     "Amazon Elastic File System"
+    ]
+   }
+  },
+  "/2015-02-01/resource-tags/{ResourceId}": {
+   "delete": {
+    "operationId": "efsUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "elasticfilesystem"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceId",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Elastic File System"
+    ]
+   },
+   "get": {
+    "operationId": "efsListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "elasticfilesystem"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceId",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Elastic File System"
+    ]
+   },
+   "post": {
+    "operationId": "efsTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "elasticfilesystem"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceId",
+      "required": true,
+      "schema": {
+       "maxLength": 128,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Elastic File System"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Elastic File System API (2015-02-01). Every other official operation returns HTTP 501 UnknownOperationException. File systems are configuration records that are available immediately with no mount targets: no NFS endpoint, storage or data exists, SizeInBytes is always zero, and mount target, access point, replication, file system policy, lifecycle and backup policy APIs return UnknownOperationException with HTTP 501. The Backup member is refused. CreationToken is used as the client token: repeating it with identical input returns the original file system instead of FileSystemAlreadyExists, and it is not echoed in descriptions. The Name member, which AWS derives from the Name tag, is not reported, and KMS keys are stored without contacting KMS. DescribeFileSystems filters by FileSystemId and returns an empty list for an unknown ID; the CreationToken filter is refused. Tagging APIs require the resource ARN, and the legacy CreateTags, DeleteTags and DescribeTags APIs are not implemented. PutAccountPreferences accepts only LONG_ID because identifiers are always long.",
+   "name": "Amazon Elastic File System"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/efs/2015-02-01/service-2.json",
+  "sha256": "ad2aaede37d03895a5eb64d7be27a2272e46adeb5e31aaefb3a61792d5a43c04",
+  "license": "Apache-2.0"
+ }
+}

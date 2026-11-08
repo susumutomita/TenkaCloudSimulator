@@ -1,0 +1,38 @@
+{
+ "client": "macie2",
+ "steps": [
+  {"op": "create_allow_list", "args": {"name": "fixture-test-ids", "clientToken": "fixture-allow-list", "criteria": {"regex": "TEST-[0-9]{6}"}, "tags": {"team": "a"}}, "save": {"allowList": "id", "allowListArn": "arn"}},
+  {"op": "get_allow_list", "args": {"id": "${allowList}"}, "expect": {"name": "fixture-test-ids", "criteria.regex": "TEST-[0-9]{6}", "status.code": "OK", "tags.team": "a"}},
+  {"op": "list_allow_lists", "args": {}, "expect": {"allowLists#count": 1, "allowLists[0].id": "${allowList}"}},
+  {"op": "update_allow_list", "args": {"id": "${allowList}", "name": "fixture-test-ids", "description": "Synthetic test identifiers", "criteria": {"regex": "TEST-[0-9]{8}"}}, "expect": {"id": "${allowList}"}},
+  {"op": "create_custom_data_identifier", "args": {"name": "fixture-employee-id", "regex": "EMP-[0-9]{5}", "keywords": ["employee"], "tags": {"team": "a"}}, "save": {"identifier": "customDataIdentifierId"}},
+  {"op": "get_custom_data_identifier", "args": {"id": "${identifier}"}, "expect": {"regex": "EMP-[0-9]{5}", "maximumMatchDistance": 50, "deleted": false, "severityLevels[0].severity": "MEDIUM"}},
+  {"op": "list_custom_data_identifiers", "args": {}, "expect": {"items#count": 1, "items[0].name": "fixture-employee-id"}},
+  {"op": "create_findings_filter", "args": {"name": "fixture-archive-test", "action": "ARCHIVE", "position": 1, "findingCriteria": {"criterion": {"severity.description": {"eq": ["Low"]}}}}, "save": {"filter": "id"}},
+  {"op": "get_findings_filter", "args": {"id": "${filter}"}, "expect": {"action": "ARCHIVE", "position": 1, "findingCriteria.criterion#count": 1}},
+  {"op": "list_findings_filters", "args": {}, "expect": {"findingsFilterListItems#count": 1}},
+  {"op": "update_findings_filter", "args": {"id": "${filter}", "action": "NOOP", "description": "Review only"}, "expect": {"id": "${filter}"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${allowListArn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${allowListArn}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${allowListArn}"}, "expect": {"tags": {"k": "v"}}},
+  {"op": "create_allow_list", "args": {"name": "fixture-s3", "clientToken": "fixture-s3", "criteria": {"s3WordsList": {"bucketName": "fixture-bucket", "objectKey": "words.txt"}}}, "error": "ValidationException", "status": 400},
+  {"op": "create_findings_filter", "args": {"name": "ab", "action": "NOOP", "findingCriteria": {"criterion": {}}}, "error": "ValidationException", "status": 400},
+  {"op": "create_classification_job", "args": {"name": "scan", "jobType": "ONE_TIME", "clientToken": "scan", "s3JobDefinition": {"bucketDefinitions": [{"accountId": "000000000000", "buckets": ["fixture-bucket"]}]}}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_allow_list", "args": {"id": "aaaaaaaaaaaaaaaaaaaaaa"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_allow_lists", "args": {}, "expect": {"allowLists#count": 0}},
+  {"op": "list_findings_filters", "args": {}, "expect": {"findingsFilterListItems#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_allow_list", "args": {"id": "${allowList}"}, "expect": {"criteria.regex": "TEST-[0-9]{8}", "description": "Synthetic test identifiers"}},
+  {"op": "get_findings_filter", "args": {"id": "${filter}"}, "expect": {"action": "NOOP"}}
+ ],
+ "cleanup": [
+  {"op": "delete_allow_list", "args": {"id": "${allowList}"}},
+  {"op": "delete_custom_data_identifier", "args": {"id": "${identifier}"}},
+  {"op": "delete_findings_filter", "args": {"id": "${filter}"}},
+  {"op": "list_allow_lists", "args": {}, "expect": {"allowLists#count": 0}},
+  {"op": "list_custom_data_identifiers", "args": {}, "expect": {"items#count": 0}}
+ ]
+}

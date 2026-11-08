@@ -89,3 +89,104 @@ It checks cross-team token rejection, persistence across process restart and
 preservation of unrelated SSM state. It does not return fabricated grading flags.
 The Go adapter tests additionally cover rollback, foreign native children/policy
 statements, missing owned state and immutable deployment behavior.
+
+## Parameters and conditions
+
+The local compiler accepts String and Number parameters with bounded defaults,
+AllowedValues, String AllowedPattern/MinLength/MaxLength, and Number MinValue/
+MaxValue. Every definition and default is checked, even when a supplied value
+replaces that default. Unknown supplied parameters fail. The local String length
+unit is bytes, not a claim of AWS Unicode-length parity. Number comparison uses
+bounded exact decimal rational values (at most 128 text bytes, exponent −308…308);
+it is not general AWS parameter-type or numeric compatibility.
+
+Conditions support `Fn::Equals` over literals or parameter/pseudo-parameter Ref,
+and `{Condition: name}` aliases. All condition definitions must be valid, including
+unused aliases; unknown names and cycles fail. And, Or, Not, mappings, dynamic
+references and general intrinsic languages remain unsupported. Local bounds are
+100 parameter/condition definitions, depth 32 and 10,000 conditional-value nodes.
+String scalars are capped at 51,200 bytes; the TemplateBody limit remains 51,200.
+
+A resource or output may have a named Condition. `Fn::If` selects only the chosen
+value; direct `AWS::NoValue` arms remove a map property or list member. Both arms
+must have supported syntax and known Ref/GetAtt/Sub symbols. Only selected active
+links may require active resources. Disabled declarations still undergo resource
+kind/attribute/property validation and do not authorize unsupported types. This
+is a pure compile step before native state mutation; it adds no UpdateStack,
+custom resources, new resource types or host problem-specific behavior.
+
+The exact original catalog fixture is retained at
+`test/fixtures/crypto-battle-a749/template.yaml` with its Apache-2.0 license and
+SHA-256 `fb2af9be3ba67619b80de0ad8f00dc102aaade740742aea5861c9039d8bd09e6`.
+Its default-disabled ScoreSteal condition omits the optional SSM item/permissions
+and conditioned outputs. A new enabled stack adds the SSM item and matching
+inline permissions. `test/e2e/cloudformation_crypto.py` is the mandatory proposed
+real-CLI/boto3 acceptance: unchanged fixture, two separate DB/token environments,
+defaults and enabled mode, actual SSM permissions/refusals, invalid-input and late
+name-conflict rollback, restart and cleanup. At `2d76646` the helper passed against a regular embedded CLI: 73 SDK logical
+calls/sends/raw HTTP responses/parsed responses, plus nine auxiliary HTTP pairs,
+across four CLI process incarnations. This dated result is not the new combined
+61-case E2E after the normal main139eb merge. Those checks subsequently passed at docs-only `414c902` (980.726 seconds), including reflow/start. The full 429-case formal gate passed at `c298972`; this is not host grading acceptance.
+It is not a game or grading acceptance. The standalone final DeleteStack ACK
+correction from `7d56d9d` is now integrated as source: exactly one selected stack
+row must be deleted and both selected stack and owned-claim records must be
+absent before commit. A refusal rolls back the transaction. The new finite model
+covers only these final records; it assumes physical resource handlers succeed
+and does not prove their individual DELETE acknowledgement. Combined native,
+The dated checks passed at `c298972` (Go/profile/full429) and docs-only `414c902` (61 E2E/start). These are source-specific receipts; the latest publication HEAD still requires its hosted gates.
+The alias-depth cache correction additionally validates structural depth
+independently of sorted-name/memoization order; native regressions cover both
+naming directions, shared cached children and cycles. The separate
+CFNConditionMemoDepth model is now registered with twelve properties and nine
+controls. Its scoped `cca79267` run passed; the broad admission model is not its
+proof, and neither model proves arbitrary Go graphs or unbounded-depth behavior.
+The final-ACK CFG has an explicitly reviewed formatting-only adaptation to the
+repository grammar: the same five invariants each use a named INVARIANT line;
+its standalone TLA body, constants and finite bounds are unchanged.
+
+`NoEcho` is accepted only as Boolean metadata, not implemented parameter masking
+or a secret-storage guarantee. Dummy values can persist in the private SQLite
+stack record and resource properties. DescribeStacks does not expose a Parameters
+list or raw template; explicit outputs can contain parameter-derived values and
+are operator-only. AWS NoEcho itself also excludes Outputs from masking; see the
+[official parameter documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html).
+Legacy participant tokens are host-issued local role-bound credentials, not STS;
+native CFN rejects their stack-output reads. Separately, bounded native STS
+sessions use SigV4 and the actual assumed role policy; the original Hello World
+viewer role has no stack-output or event-history permission. CFN roles retain the
+legacy aggregate model,
+so native IAM GetRole/ListRoles do not expose them. Trust and allowed
+ManagedPolicyArns metadata do not grant AWS sign-in, federation, managed-policy
+or external-account authority. Host coordination, private-output filtering and
+actual crypto-battle scoring remain outside this simulator acceptance.
+
+A separate candidate check now verifies every selected SSM parameter (region/name) and S3 bucket (global name) is absent at the very end of the same deletion transaction, after all resource, ownership and stack cleanup writes. It detects ignored physical DELETEs and late reinsertion, rolling back on failure. Existing missing-resource and nonempty-bucket behavior is preserved. This does not change the standalone native S3 DeleteBucket API or promise acknowledgement checks for other resource types. The 196 native/scoped model receipts are historical inputs; the current combined 429-case formal suite passed at `c298972`; 61 E2E/start checks subsequently passed at docs-only `414c902`; exact-head hosted CI for this publication candidate remains pending.
+
+## Native deployment event history
+
+`DescribeStackEvents` requires a stack name or exact stack ID. It returns up to
+100 events newest-first, with a generation- and region-bound `NextToken` for
+older events. A live stack name resolves to its current generation. Deleted
+stacks require their exact ARN; the latest 100 deleted generations are retained
+globally in addition to all live generations.
+
+Create/delete stack and resource transitions are written in the same SQLite
+transaction as the actual operation. These are local synchronous transitions,
+not AWS asynchronous lifecycle emulation. Failed operations return their API
+error and roll back event writes. Existing pre-upgrade stacks do not acquire
+invented create history; deleting one can begin its actual recorded history.
+
+Events expose timestamps, IDs, resource types and statuses, never resource
+properties, parameter/output values, client request tokens or free-form failure
+reasons. `cloudformation:DescribeStackEvents` is evaluated for the exact stack
+ARN. Legacy exercise participants remain blocked from host event history; native
+SDK assumed roles use their actual role permission snapshot. The original
+hello-world viewer role does not have this permission. The host may present a
+separate authorized, sanitized per-team projection.
+
+## Bounded value intrinsics
+
+`Select`, synthetic local `GetAZs`, `Base64` and scalar `Sub` literal escapes are
+available in properties and outputs. See the [operand limits, local-zone contract
+and original Battle acceptance boundary](cloudformation-intrinsics.md). This adds
+no EC2, Session Manager, guest execution or full Battle support.

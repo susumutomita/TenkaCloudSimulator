@@ -1,0 +1,132 @@
+{
+ "namespace": "Microsoft.OperationalInsights",
+ "client": "loganalytics",
+ "steps": [
+  {
+   "call": "workspaces.begin_create_or_update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "workspace_name": "fixture-logs",
+    "parameters": {
+     "location": "eastus",
+     "properties": {
+      "sku": {
+       "name": "PerGB2018"
+      },
+      "retentionInDays": 30
+     }
+    }
+   },
+   "save": {
+    "customer": "customer_id"
+   },
+   "expect": {
+    "provisioning_state": "Succeeded",
+    "retention_in_days": 30
+   }
+  },
+  {
+   "call": "workspaces.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "workspace_name": "fixture-logs"
+   },
+   "expect": {
+    "customer_id": "${customer}"
+   }
+  },
+  {
+   "call": "workspaces.update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "workspace_name": "fixture-logs",
+    "parameters": {
+     "tags": {
+      "team": "a"
+     },
+     "properties": {
+      "retentionInDays": 60
+     }
+    }
+   },
+   "expect": {
+    "retention_in_days": 60
+   }
+  },
+  {
+   "call": "workspaces.list_by_resource_group",
+   "args": {
+    "resource_group_name": "${rg}"
+   },
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "workspaces.list",
+   "expect": {
+    "#count": 1
+   }
+  },
+  {
+   "call": "workspaces.update",
+   "args": {
+    "resource_group_name": "${rg}",
+    "workspace_name": "fixture-logs",
+    "parameters": {
+     "properties": {
+      "retentionInDays": 5
+     }
+    }
+   },
+   "error": "InvalidRequestContent",
+   "status": 400
+  }
+ ],
+ "probe": {
+  "call": "workspaces.list"
+ },
+ "unbound": {
+  "call": "workspaces.begin_failback",
+  "args": {
+   "resource_group_name": "${rg}",
+   "workspace_name": "fixture-logs"
+  }
+ },
+ "isolation": [
+  {
+   "call": "workspaces.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "workspaces.get",
+   "args": {
+    "resource_group_name": "${rg}",
+    "workspace_name": "fixture-logs"
+   },
+   "expect": {
+    "retention_in_days": 60
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "workspaces.begin_delete",
+   "args": {
+    "resource_group_name": "${rg}",
+    "workspace_name": "fixture-logs",
+    "force": true
+   }
+  },
+  {
+   "call": "workspaces.list",
+   "expect": {
+    "#count": 0
+   }
+  }
+ ]
+}

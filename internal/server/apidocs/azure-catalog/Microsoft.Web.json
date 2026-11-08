@@ -1,0 +1,1193 @@
+{
+ "components": {
+  "schemas": {
+   "AppServicePlan": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/TrackedResource"
+     }
+    ],
+    "properties": {
+     "extendedLocation": {
+      "$ref": "#/components/schemas/ExtendedLocation"
+     },
+     "identity": {
+      "$ref": "#/components/schemas/ManagedServiceIdentity"
+     },
+     "kind": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/AppServicePlanProperties"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/SkuDescription"
+     }
+    },
+    "type": "object"
+   },
+   "AppServicePlanCollection": {
+    "properties": {
+     "nextLink": {
+      "format": "uri",
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/AppServicePlan"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "value"
+    ],
+    "type": "object"
+   },
+   "AppServicePlanPatchResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/ProxyOnlyResource"
+     }
+    ],
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/ManagedServiceIdentity"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/AppServicePlanPatchResourceProperties"
+     }
+    },
+    "type": "object"
+   },
+   "AppServicePlanPatchResourceProperties": {
+    "properties": {
+     "elasticScaleEnabled": {
+      "type": "boolean"
+     },
+     "freeOfferExpirationTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "geoRegion": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "hostingEnvironmentProfile": {
+      "$ref": "#/components/schemas/HostingEnvironmentProfile"
+     },
+     "hyperV": {
+      "type": "boolean"
+     },
+     "isSpot": {
+      "type": "boolean"
+     },
+     "isXenon": {
+      "type": "boolean"
+     },
+     "kubeEnvironmentProfile": {
+      "$ref": "#/components/schemas/KubeEnvironmentProfile"
+     },
+     "maximumElasticWorkerCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "maximumNumberOfWorkers": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "numberOfSites": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "numberOfWorkers": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "perSiteScaling": {
+      "type": "boolean"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "reserved": {
+      "type": "boolean"
+     },
+     "resourceGroup": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "spotExpirationTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "status": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/StatusOptions"
+       }
+      ],
+      "readOnly": true
+     },
+     "subscription": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "targetWorkerCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "targetWorkerSizeId": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "workerTierName": {
+      "type": "string"
+     },
+     "zoneRedundant": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "AppServicePlanProperties": {
+    "properties": {
+     "asyncScalingEnabled": {
+      "type": "boolean"
+     },
+     "elasticScaleEnabled": {
+      "type": "boolean"
+     },
+     "freeOfferExpirationTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "geoRegion": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "hostingEnvironmentProfile": {
+      "$ref": "#/components/schemas/HostingEnvironmentProfile"
+     },
+     "hyperV": {
+      "type": "boolean"
+     },
+     "installScripts": {
+      "items": {
+       "$ref": "#/components/schemas/InstallScript"
+      },
+      "type": "array"
+     },
+     "isCustomMode": {
+      "type": "boolean"
+     },
+     "isSpot": {
+      "type": "boolean"
+     },
+     "isXenon": {
+      "type": "boolean"
+     },
+     "kubeEnvironmentProfile": {
+      "$ref": "#/components/schemas/KubeEnvironmentProfile"
+     },
+     "maximumElasticWorkerCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "maximumNumberOfWorkers": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "network": {
+      "$ref": "#/components/schemas/ServerFarmNetworkSettings"
+     },
+     "numberOfSites": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "numberOfWorkers": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "perSiteScaling": {
+      "type": "boolean"
+     },
+     "planDefaultIdentity": {
+      "$ref": "#/components/schemas/DefaultIdentity"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "rdpEnabled": {
+      "type": "boolean"
+     },
+     "registryAdapters": {
+      "items": {
+       "$ref": "#/components/schemas/RegistryAdapter"
+      },
+      "type": "array"
+     },
+     "reserved": {
+      "type": "boolean"
+     },
+     "resourceGroup": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "spotExpirationTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "status": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/StatusOptions"
+       }
+      ],
+      "readOnly": true
+     },
+     "storageMounts": {
+      "items": {
+       "$ref": "#/components/schemas/StorageMount"
+      },
+      "type": "array"
+     },
+     "subscription": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "targetWorkerCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "targetWorkerSizeId": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "workerTierName": {
+      "type": "string"
+     },
+     "zoneRedundant": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Capability": {
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "reason": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DefaultIdentity": {
+    "properties": {
+     "identityType": {
+      "$ref": "#/components/schemas/ManagedServiceIdentityType"
+     },
+     "userAssignedIdentityResourceId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExtendedLocation": {
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HostingEnvironmentProfile": {
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InstallScript": {
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "source": {
+      "$ref": "#/components/schemas/InstallScriptSource"
+     }
+    },
+    "type": "object"
+   },
+   "InstallScriptSource": {
+    "properties": {
+     "sourceUri": {
+      "type": "string"
+     },
+     "type": {
+      "$ref": "#/components/schemas/InstallScriptType"
+     }
+    },
+    "type": "object"
+   },
+   "InstallScriptType": {
+    "enum": [
+     "RemoteAzureBlob",
+     "PlatformStorage"
+    ],
+    "type": "string"
+   },
+   "KeyVaultReferenceWithStatus": {
+    "properties": {
+     "referenceStatus": {
+      "type": "string"
+     },
+     "secretUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "KubeEnvironmentProfile": {
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ManagedServiceIdentity": {
+    "properties": {
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tenantId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "$ref": "#/components/schemas/ManagedServiceIdentityType"
+     },
+     "userAssignedIdentities": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/UserAssignedIdentity"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ManagedServiceIdentityType": {
+    "enum": [
+     "SystemAssigned",
+     "UserAssigned",
+     "SystemAssigned, UserAssigned",
+     "None"
+    ],
+    "type": "string"
+   },
+   "ProvisioningState": {
+    "enum": [
+     "Succeeded",
+     "Failed",
+     "Canceled",
+     "InProgress",
+     "Deleting"
+    ],
+    "readOnly": true,
+    "type": "string"
+   },
+   "ProxyOnlyResource": {
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "kind": {
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RegistryAdapter": {
+    "properties": {
+     "keyVaultSecretReference": {
+      "$ref": "#/components/schemas/KeyVaultReferenceWithStatus"
+     },
+     "registryKey": {
+      "type": "string"
+     },
+     "type": {
+      "$ref": "#/components/schemas/RegistryAdapterType"
+     }
+    },
+    "type": "object"
+   },
+   "RegistryAdapterType": {
+    "enum": [
+     "Binary",
+     "String",
+     "Expand_String",
+     "Multi_String",
+     "DWord",
+     "QWord"
+    ],
+    "type": "string"
+   },
+   "Resource": {
+    "properties": {
+     "id": {
+      "format": "arm-id",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "systemData": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/systemData"
+       }
+      ],
+      "readOnly": true
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServerFarmNetworkSettings": {
+    "properties": {
+     "virtualNetworkSubnetId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SkuCapacity": {
+    "properties": {
+     "default": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "elasticMaximum": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "maximum": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minimum": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "scaleType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SkuDescription": {
+    "properties": {
+     "capabilities": {
+      "items": {
+       "$ref": "#/components/schemas/Capability"
+      },
+      "type": "array"
+     },
+     "capacity": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "family": {
+      "type": "string"
+     },
+     "locations": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "name": {
+      "type": "string"
+     },
+     "size": {
+      "type": "string"
+     },
+     "skuCapacity": {
+      "$ref": "#/components/schemas/SkuCapacity"
+     },
+     "tier": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StatusOptions": {
+    "enum": [
+     "Ready",
+     "Pending",
+     "Creating"
+    ],
+    "type": "string"
+   },
+   "StorageMount": {
+    "properties": {
+     "credentialsKeyVaultReference": {
+      "$ref": "#/components/schemas/KeyVaultReferenceWithStatus"
+     },
+     "destinationPath": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "source": {
+      "type": "string"
+     },
+     "type": {
+      "$ref": "#/components/schemas/StorageMountType"
+     }
+    },
+    "type": "object"
+   },
+   "StorageMountType": {
+    "enum": [
+     "AzureFiles",
+     "LocalStorage",
+     "FileShare"
+    ],
+    "type": "string"
+   },
+   "TrackedResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "location": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "location"
+    ],
+    "type": "object"
+   },
+   "UserAssignedIdentity": {
+    "properties": {
+     "clientId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "systemData": {
+    "properties": {
+     "createdAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "createdByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "lastModifiedBy": {
+      "type": "string"
+     },
+     "lastModifiedByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     }
+    },
+    "readOnly": true,
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Microsoft.Web api-version 2025-05-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Plan metadata only: no worker, site, deployment, certificate or hybrid connection exists; numberOfSites stays 0. The official plan PATCH definition has no tags; change tags with a full create-or-update. detailed is accepted because every stored property is always returned. Sites, App Service Environments, Kubernetes environments, registry adapters, storage mounts and every other operation are not implemented (HTTP 501).",
+  "title": "App Service (Microsoft.Web, simulator catalog)",
+  "version": "2025-05-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/subscriptions/{subscriptionId}/providers/Microsoft.Web/serverfarms": {
+   "get": {
+    "operationId": "AppServicePlans_List",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-05-01",
+       "enum": [
+        "2025-05-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "detailed",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AppServicePlanCollection"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "AppServicePlans_List",
+    "tags": [
+     "App Service"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/serverfarms": {
+   "get": {
+    "operationId": "AppServicePlans_ListByResourceGroup",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-05-01",
+       "enum": [
+        "2025-05-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AppServicePlanCollection"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "AppServicePlans_ListByResourceGroup",
+    "tags": [
+     "App Service"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/serverfarms/{name}": {
+   "delete": {
+    "operationId": "AppServicePlans_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-05-01",
+       "enum": [
+        "2025-05-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "AppServicePlans_Delete",
+    "tags": [
+     "App Service"
+    ]
+   },
+   "get": {
+    "operationId": "AppServicePlans_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-05-01",
+       "enum": [
+        "2025-05-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AppServicePlan"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "Official 404 response."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "AppServicePlans_Get",
+    "tags": [
+     "App Service"
+    ]
+   },
+   "patch": {
+    "operationId": "AppServicePlans_Update",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-05-01",
+       "enum": [
+        "2025-05-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AppServicePlanPatchResource"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AppServicePlan"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "202": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AppServicePlan"
+        }
+       }
+      },
+      "description": "Official 202 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "AppServicePlans_Update",
+    "tags": [
+     "App Service"
+    ]
+   },
+   "put": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "AppServicePlans_CreateOrUpdate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-05-01",
+       "enum": [
+        "2025-05-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "name",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AppServicePlan"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AppServicePlan"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "202": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AppServicePlan"
+        }
+       }
+      },
+      "description": "Official 202 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "AppServicePlans_CreateOrUpdate",
+    "tags": [
+     "App Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/azure-arm"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Microsoft.Web api-version 2025-05-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Plan metadata only: no worker, site, deployment, certificate or hybrid connection exists; numberOfSites stays 0. The official plan PATCH definition has no tags; change tags with a full create-or-update. detailed is accepted because every stored property is always returned. Sites, App Service Environments, Kubernetes environments, registry adapters, storage mounts and every other operation are not implemented (HTTP 501).",
+   "name": "App Service"
+  }
+ ],
+ "x-simulator-source": {
+  "repository": "github.com/Azure/azure-rest-api-specs",
+  "commit": "8254fa29b6360b48084554122a7c49f6c4237d84",
+  "license": "MIT",
+  "files": [
+   {
+    "path": "specification/common-types/resource-management/v5/types.json",
+    "sha256": "66767620b8edfbc04093c76b78d168cc59822cd9da1e726d35a9d45b73e642c1"
+   },
+   {
+    "path": "specification/web/resource-manager/Microsoft.Web/AppService/stable/2025-05-01/openapi.json",
+    "sha256": "161a0fc786d0c1a686e766df20986b81d50a37ea7736b784c32aee58c8c63d7e"
+   }
+  ]
+ }
+}

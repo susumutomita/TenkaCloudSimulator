@@ -1,0 +1,24 @@
+{
+ "client": "inspector2",
+ "steps": [
+  {"op": "create_filter", "args": {"name": "fixture-suppress-low", "action": "SUPPRESS", "reason": "Accepted risk", "filterCriteria": {"severity": [{"comparison": "EQUALS", "value": "LOW"}]}, "tags": {"team": "a"}}, "save": {"filter": "arn"}},
+  {"op": "list_filters", "args": {"arns": ["${filter}"]}, "expect": {"filters#count": 1, "filters[0].name": "fixture-suppress-low", "filters[0].ownerId": "000000000000", "filters[0].criteria.severity[0].value": "LOW", "filters[0].tags.team": "a"}},
+  {"op": "list_filters", "args": {"action": "NONE"}, "expect": {"filters#count": 0}},
+  {"op": "update_filter", "args": {"filterArn": "${filter}", "description": "Low severity is accepted", "filterCriteria": {"severity": [{"comparison": "EQUALS", "value": "INFORMATIONAL"}]}}, "expect": {"arn": "${filter}"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${filter}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${filter}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${filter}"}, "expect": {"tags": {"k": "v"}}},
+  {"op": "list_findings", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "update_filter", "args": {"filterArn": "arn:aws:inspector2:us-east-1:000000000000:owner/000000000000/filter/0000000000000000", "description": "x"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_filters", "args": {}, "expect": {"filters#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "list_filters", "args": {}, "expect": {"filters#count": 1, "filters[0].description": "Low severity is accepted", "filters[0].criteria.severity[0].value": "INFORMATIONAL"}}
+ ],
+ "cleanup": [
+  {"op": "delete_filter", "args": {"arn": "${filter}"}, "expect": {"arn": "${filter}"}},
+  {"op": "list_filters", "args": {}, "expect": {"filters#count": 0}}
+ ]
+}

@@ -1,0 +1,150 @@
+{
+ "client": "opensearch",
+ "steps": [
+  {
+   "op": "create_domain",
+   "args": {
+    "DomainName": "fixture-search",
+    "EngineVersion": "OpenSearch_2.11",
+    "ClusterConfig": {
+     "InstanceType": "t3.small.search",
+     "InstanceCount": 1
+    },
+    "EBSOptions": {
+     "EBSEnabled": true,
+     "VolumeType": "gp3",
+     "VolumeSize": 10
+    },
+    "EncryptionAtRestOptions": {
+     "Enabled": true
+    },
+    "NodeToNodeEncryptionOptions": {
+     "Enabled": true
+    },
+    "DomainEndpointOptions": {
+     "EnforceHTTPS": true
+    },
+    "TagList": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ]
+   },
+   "save": {
+    "domain": "DomainStatus.ARN"
+   },
+   "expect": {
+    "DomainStatus.DomainId": "000000000000/fixture-search",
+    "DomainStatus.Processing": false
+   }
+  },
+  {
+   "op": "describe_domain",
+   "args": {
+    "DomainName": "fixture-search"
+   },
+   "expect": {
+    "DomainStatus.ClusterConfig.InstanceType": "t3.small.search",
+    "DomainStatus.EngineVersion": "OpenSearch_2.11",
+    "DomainStatus.Created": true
+   }
+  },
+  {
+   "op": "create_domain",
+   "args": {
+    "DomainName": "fixture-vpc",
+    "VPCOptions": {
+     "SubnetIds": [
+      "subnet-0123456789abcdef0"
+     ]
+    }
+   },
+   "error": "ValidationException"
+  },
+  {
+   "op": "create_domain",
+   "args": {
+    "DomainName": "fixture-legacy",
+    "EngineVersion": "Elasticsearch_7.10"
+   },
+   "error": "ValidationException"
+  },
+  {
+   "op": "list_domain_names",
+   "args": {},
+   "expect": {
+    "DomainNames": [
+     {
+      "DomainName": "fixture-search",
+      "EngineType": "OpenSearch"
+     }
+    ]
+   }
+  },
+  {
+   "op": "list_domain_names",
+   "args": {
+    "EngineType": "Elasticsearch"
+   },
+   "expect": {
+    "DomainNames#count": 0
+   }
+  },
+  {
+   "op": "update_domain_config",
+   "args": {
+    "DomainName": "fixture-search",
+    "AccessPolicies": "{}"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "describe_domain",
+   "args": {
+    "DomainName": "fixture-missing"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_domain_names",
+   "args": {},
+   "expect": {
+    "DomainNames#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "describe_domain",
+   "args": {
+    "DomainName": "fixture-search"
+   },
+   "expect": {
+    "DomainStatus.ARN": "${domain}",
+    "DomainStatus.EBSOptions.VolumeSize": 10
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_domain",
+   "args": {
+    "DomainName": "fixture-search"
+   },
+   "expect": {
+    "DomainStatus.Deleted": true
+   }
+  },
+  {
+   "op": "list_domain_names",
+   "args": {},
+   "expect": {
+    "DomainNames#count": 0
+   }
+  }
+ ]
+}

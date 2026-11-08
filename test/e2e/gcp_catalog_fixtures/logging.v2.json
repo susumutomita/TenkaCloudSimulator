@@ -1,0 +1,47 @@
+{
+ "api": "logging.v2",
+ "steps": [
+  {"call": "projects.sinks.create", "args": {"parent": "projects/tenkacloud-local"}, "body": {"name": "errors-to-bucket", "destination": "logging.googleapis.com/projects/tenkacloud-local/locations/global/buckets/app", "filter": "severity>=ERROR"}, "expect": {"name": "errors-to-bucket"}},
+  {"call": "projects.sinks.get", "args": {"sinkName": "projects/tenkacloud-local/sinks/errors-to-bucket"}},
+  {"call": "projects.sinks.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"sinks#count": 1}},
+  {"call": "projects.sinks.patch", "args": {"sinkName": "projects/tenkacloud-local/sinks/errors-to-bucket", "updateMask": "filter"}, "body": {"filter": "severity>=WARNING"}},
+  {"call": "projects.exclusions.create", "args": {"parent": "projects/tenkacloud-local"}, "body": {"name": "no-debug", "filter": "severity<INFO"}, "expect": {"name": "no-debug"}},
+  {"call": "projects.exclusions.get", "args": {"name": "projects/tenkacloud-local/exclusions/no-debug"}},
+  {"call": "projects.exclusions.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"exclusions#count": 1}},
+  {"call": "projects.exclusions.patch", "args": {"name": "projects/tenkacloud-local/exclusions/no-debug", "updateMask": "disabled"}, "body": {"disabled": true}},
+  {"call": "projects.metrics.create", "args": {"parent": "projects/tenkacloud-local"}, "body": {"name": "error_count", "filter": "severity>=ERROR", "description": "Errors"}, "expect": {"name": "error_count"}},
+  {"call": "projects.metrics.get", "args": {"metricName": "projects/tenkacloud-local/metrics/error_count"}},
+  {"call": "projects.metrics.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"metrics#count": 1}},
+  {"call": "projects.locations.buckets.create", "args": {"parent": "projects/tenkacloud-local/locations/global", "bucketId": "app"}, "body": {"retentionDays": 30, "description": "App logs"}, "save": {"r3": "name"}},
+  {"call": "projects.locations.buckets.get", "args": {"name": "${r3}"}},
+  {"call": "projects.locations.buckets.list", "args": {"parent": "projects/tenkacloud-local/locations/global"}, "expect": {"buckets#count": 1}},
+  {"call": "projects.locations.buckets.patch", "args": {"name": "${r3}", "updateMask": "retentionDays"}, "body": {"retentionDays": 60}},
+  {"call": "projects.locations.buckets.views.create", "args": {"parent": "projects/tenkacloud-local/locations/global/buckets/app", "viewId": "errors"}, "body": {"filter": "SOURCE(\"projects/tenkacloud-local\")"}, "save": {"r4": "name"}},
+  {"call": "projects.locations.buckets.views.get", "args": {"name": "${r4}"}},
+  {"call": "projects.locations.buckets.views.list", "args": {"parent": "projects/tenkacloud-local/locations/global/buckets/app"}, "expect": {"views#count": 1}},
+  {"call": "projects.locations.buckets.views.patch", "args": {"name": "${r4}", "updateMask": "description"}, "body": {"description": "Errors view"}},
+  {"call": "projects.locations.buckets.create", "args": {"parent": "projects/tenkacloud-local/locations/global", "bucketId": "locked"}, "error": "INVALID_ARGUMENT", "status": 400, "body": {"locked": true}},
+  {"call": "entries.write", "args": {"body": {"entries": []}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.metrics.update", "args": {"metricName": "projects/tenkacloud-local/metrics/error_count", "body": {"name": "error_count", "filter": "x"}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.sinks.get", "args": {"sinkName": "projects/tenkacloud-local/sinks/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.sinks.list", "args": {"parent": "projects/other-project"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.sinks.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"sinks#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.sinks.get", "args": {"sinkName": "projects/tenkacloud-local/sinks/errors-to-bucket"}, "expect": {"filter": "severity>=WARNING"}},
+  {"call": "projects.exclusions.get", "args": {"name": "projects/tenkacloud-local/exclusions/no-debug"}, "expect": {"disabled": true}},
+  {"call": "projects.metrics.get", "args": {"metricName": "projects/tenkacloud-local/metrics/error_count"}},
+  {"call": "projects.locations.buckets.get", "args": {"name": "${r3}"}, "expect": {"retentionDays": 60}},
+  {"call": "projects.locations.buckets.views.get", "args": {"name": "${r4}"}, "expect": {"description": "Errors view"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.buckets.views.delete", "args": {"name": "${r4}"}},
+  {"call": "projects.locations.buckets.delete", "args": {"name": "${r3}"}},
+  {"call": "projects.metrics.delete", "args": {"metricName": "projects/tenkacloud-local/metrics/error_count"}},
+  {"call": "projects.exclusions.delete", "args": {"name": "projects/tenkacloud-local/exclusions/no-debug"}},
+  {"call": "projects.sinks.delete", "args": {"sinkName": "projects/tenkacloud-local/sinks/errors-to-bucket"}},
+  {"call": "projects.sinks.list", "args": {"parent": "projects/tenkacloud-local"}, "expect": {"sinks#count": 0}}
+ ]
+}

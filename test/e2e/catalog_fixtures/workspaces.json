@@ -1,0 +1,164 @@
+{
+ "client": "workspaces",
+ "steps": [
+  {
+   "op": "create_ip_group",
+   "args": {
+    "GroupName": "office",
+    "GroupDesc": "HQ",
+    "UserRules": [
+     {
+      "ipRule": "198.51.100.0/24",
+      "ruleDesc": "hq"
+     }
+    ]
+   },
+   "save": {
+    "group": "GroupId"
+   }
+  },
+  {
+   "op": "create_connection_alias",
+   "args": {
+    "ConnectionString": "desktop.example.com"
+   },
+   "save": {
+    "alias": "AliasId"
+   }
+  },
+  {
+   "op": "describe_ip_groups",
+   "args": {
+    "GroupIds": [
+     "${group}"
+    ]
+   },
+   "expect": {
+    "Result[0].groupName": "office",
+    "Result[0].groupDesc": "HQ",
+    "Result[0].userRules#count": 1
+   }
+  },
+  {
+   "op": "update_rules_of_ip_group",
+   "args": {
+    "GroupId": "${group}",
+    "UserRules": [
+     {
+      "ipRule": "203.0.113.7"
+     },
+     {
+      "ipRule": "198.51.100.0/24",
+      "ruleDesc": "hq"
+     }
+    ]
+   }
+  },
+  {
+   "op": "describe_connection_aliases",
+   "args": {
+    "AliasIds": [
+     "${alias}"
+    ]
+   },
+   "expect": {
+    "ConnectionAliases[0].State": "CREATED",
+    "ConnectionAliases[0].OwnerAccountId": "000000000000",
+    "ConnectionAliases[0].ConnectionString": "desktop.example.com"
+   }
+  },
+  {
+   "op": "create_ip_group",
+   "args": {
+    "GroupName": "bad",
+    "UserRules": [
+     {
+      "ipRule": "office"
+     }
+    ]
+   },
+   "error": "InvalidParameterValuesException"
+  },
+  {
+   "op": "create_ip_group",
+   "args": {
+    "GroupName": "office"
+   },
+   "error": "ResourceAlreadyExistsException"
+  },
+  {
+   "op": "authorize_ip_rules",
+   "args": {
+    "GroupId": "${group}",
+    "UserRules": [
+     {
+      "ipRule": "192.0.2.1"
+     }
+    ]
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "delete_ip_group",
+   "args": {
+    "GroupId": "wsipg-missing00"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "describe_ip_groups",
+   "args": {},
+   "expect": {
+    "Result#count": 0
+   }
+  },
+  {
+   "op": "describe_connection_aliases",
+   "args": {},
+   "expect": {
+    "ConnectionAliases#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "describe_ip_groups",
+   "args": {},
+   "expect": {
+    "Result[0].userRules#count": 2,
+    "Result[0].userRules[0].ipRule": "203.0.113.7"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_ip_group",
+   "args": {
+    "GroupId": "${group}"
+   }
+  },
+  {
+   "op": "delete_connection_alias",
+   "args": {
+    "AliasId": "${alias}"
+   }
+  },
+  {
+   "op": "describe_ip_groups",
+   "args": {},
+   "expect": {
+    "Result#count": 0
+   }
+  },
+  {
+   "op": "describe_connection_aliases",
+   "args": {},
+   "expect": {
+    "ConnectionAliases#count": 0
+   }
+  }
+ ]
+}

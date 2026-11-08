@@ -1,0 +1,27 @@
+{
+ "client": "resource-groups",
+ "steps": [
+  {"op": "create_group", "args": {"Name": "fixture-group", "Description": "fixture", "Owner": "platform", "Tags": {"team": "a"}}, "save": {"group": "Group.GroupArn"}, "expect": {"Tags": {"team": "a"}, "Group.Name": "fixture-group"}},
+  {"op": "get_group", "args": {"Group": "fixture-group"}, "expect": {"Group.Owner": "platform", "Group.GroupArn": "${group}"}},
+  {"op": "list_groups", "args": {}, "expect": {"Groups#count": 1, "GroupIdentifiers[0].GroupName": "fixture-group", "GroupIdentifiers[0].GroupArn": "${group}"}},
+  {"op": "update_group", "args": {"Group": "${group}", "Description": "updated", "Criticality": 2}, "expect": {"Group.Criticality": 2}},
+  {"op": "tag", "args": {"Arn": "${group}", "Tags": {"k": "v"}}},
+  {"op": "untag", "args": {"Arn": "${group}", "Keys": ["k"]}},
+  {"op": "get_tags", "args": {"Arn": "${group}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "create_group", "args": {"Name": "AWSReserved"}, "error": "BadRequestException"},
+  {"op": "create_group", "args": {"Name": "queried", "ResourceQuery": {"Type": "TAG_FILTERS_1_0", "Query": "{\"ResourceTypeFilters\":[\"AWS::AllSupported\"],\"TagFilters\":[{\"Key\":\"team\",\"Values\":[\"a\"]}]}"}}, "error": "BadRequestException"},
+  {"op": "get_group", "args": {"GroupName": "fixture-group"}, "error": "BadRequestException"},
+  {"op": "search_resources", "args": {"ResourceQuery": {"Type": "TAG_FILTERS_1_0", "Query": "{\"ResourceTypeFilters\":[\"AWS::AllSupported\"],\"TagFilters\":[]}"}}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_group", "args": {"Group": "missing-group"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_groups", "args": {}, "expect": {"Groups#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_group", "args": {"Group": "${group}"}, "expect": {"Group.Description": "updated"}}
+ ],
+ "cleanup": [
+  {"op": "delete_group", "args": {"Group": "fixture-group"}, "expect": {"Group.Name": "fixture-group"}},
+  {"op": "list_groups", "args": {}, "expect": {"Groups#count": 0}}
+ ]
+}

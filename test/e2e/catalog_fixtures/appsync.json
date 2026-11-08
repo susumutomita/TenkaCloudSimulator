@@ -1,0 +1,41 @@
+{
+ "client": "appsync",
+ "steps": [
+  {"op": "create_graphql_api", "args": {"name": "fixture_api", "authenticationType": "AWS_IAM", "tags": {"team": "a"}}, "save": {"api": "graphqlApi.apiId", "arn": "graphqlApi.arn"}, "expect": {"graphqlApi.apiType": "GRAPHQL", "graphqlApi.owner": "000000000000", "graphqlApi.visibility": "GLOBAL"}},
+  {"op": "get_graphql_api", "args": {"apiId": "${api}"}, "expect": {"graphqlApi.name": "fixture_api", "graphqlApi.tags": {"team": "a"}}},
+  {"op": "list_graphql_apis", "args": {"apiType": "GRAPHQL"}, "expect": {"graphqlApis#count": 1}},
+  {"op": "update_graphql_api", "args": {"apiId": "${api}", "name": "fixture_api", "authenticationType": "API_KEY", "xrayEnabled": true}, "expect": {"graphqlApi.authenticationType": "API_KEY", "graphqlApi.xrayEnabled": true}},
+  {"op": "update_graphql_api", "args": {"apiId": "${api}", "name": "fixture_api", "authenticationType": "AMAZON_COGNITO_USER_POOLS"}, "error": "BadRequestException"},
+  {"op": "create_data_source", "args": {"apiId": "${api}", "name": "tables", "type": "AMAZON_DYNAMODB", "serviceRoleArn": "arn:aws:iam::000000000000:role/appsync", "dynamodbConfig": {"tableName": "items", "awsRegion": "us-east-1"}}, "expect": {"dataSource.dataSourceArn": "arn:aws:appsync:us-east-1:000000000000:apis/${api}/datasources/tables"}},
+  {"op": "create_data_source", "args": {"apiId": "${api}", "name": "broken", "type": "AWS_LAMBDA"}, "error": "BadRequestException"},
+  {"op": "get_data_source", "args": {"apiId": "${api}", "name": "tables"}, "expect": {"dataSource.dynamodbConfig.tableName": "items"}},
+  {"op": "list_data_sources", "args": {"apiId": "${api}"}, "expect": {"dataSources#count": 1}},
+  {"op": "create_api", "args": {"name": "fixture-events", "eventConfig": {"authProviders": [{"authType": "API_KEY"}], "connectionAuthModes": [{"authType": "API_KEY"}], "defaultPublishAuthModes": [{"authType": "API_KEY"}], "defaultSubscribeAuthModes": [{"authType": "API_KEY"}]}}, "save": {"events": "api.apiId"}, "expect": {"api.name": "fixture-events"}},
+  {"op": "get_api", "args": {"apiId": "${events}"}, "expect": {"api.apiArn": "arn:aws:appsync:us-east-1:000000000000:apis/${events}"}},
+  {"op": "list_apis", "args": {}, "expect": {"apis#count": 1}},
+  {"op": "update_api", "args": {"apiId": "${events}", "name": "fixture-events", "ownerContact": "team a"}, "expect": {"api.ownerContact": "team a"}},
+  {"op": "create_channel_namespace", "args": {"apiId": "${events}", "name": "chat"}, "expect": {"channelNamespace.apiId": "${events}"}},
+  {"op": "get_channel_namespace", "args": {"apiId": "${events}", "name": "chat"}, "expect": {"channelNamespace.channelNamespaceArn": "arn:aws:appsync:us-east-1:000000000000:apis/${events}/channelNamespace/chat"}},
+  {"op": "list_channel_namespaces", "args": {"apiId": "${events}"}, "expect": {"channelNamespaces#count": 1}},
+  {"op": "update_channel_namespace", "args": {"apiId": "${events}", "name": "chat", "publishAuthModes": [{"authType": "API_KEY"}]}, "expect": {"channelNamespace.publishAuthModes[0].authType": "API_KEY"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${arn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${arn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${arn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "create_type", "args": {"apiId": "${api}", "definition": "type Query { hello: String }", "format": "SDL"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_graphql_api", "args": {"apiId": "abcdefghijklmnopqrstuvwxyz"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_graphql_apis", "args": {}, "expect": {"graphqlApis#count": 0}},
+  {"op": "list_apis", "args": {}, "expect": {"apis#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_graphql_api", "args": {"apiId": "${api}"}, "expect": {"graphqlApi.authenticationType": "API_KEY"}}
+ ],
+ "cleanup": [
+  {"op": "delete_data_source", "args": {"apiId": "${api}", "name": "tables"}},
+  {"op": "delete_graphql_api", "args": {"apiId": "${api}"}},
+  {"op": "delete_channel_namespace", "args": {"apiId": "${events}", "name": "chat"}},
+  {"op": "delete_api", "args": {"apiId": "${events}"}},
+  {"op": "list_graphql_apis", "args": {}, "expect": {"graphqlApis#count": 0}}
+ ]
+}

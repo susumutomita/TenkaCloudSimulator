@@ -1,0 +1,1204 @@
+{
+ "components": {
+  "schemas": {
+   "AssessmentReportsDestination": {
+    "additionalProperties": false,
+    "properties": {
+     "destination": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "destinationType": {
+      "enum": [
+       "S3"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Control": {
+    "additionalProperties": false,
+    "properties": {
+     "actionPlanInstructions": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "actionPlanTitle": {
+      "maxLength": 300,
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "controlMappingSources": {
+      "items": {
+       "$ref": "#/components/schemas/ControlMappingSource"
+      },
+      "minItems": 1,
+      "type": "array"
+     },
+     "controlSources": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBy": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastUpdatedBy": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "ACTIVE",
+       "END_OF_SUPPORT"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "testingInformation": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "Standard",
+       "Custom",
+       "Core"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ControlMappingSource": {
+    "additionalProperties": false,
+    "properties": {
+     "sourceDescription": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "sourceFrequency": {
+      "enum": [
+       "DAILY",
+       "WEEKLY",
+       "MONTHLY"
+      ],
+      "type": "string"
+     },
+     "sourceId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "sourceKeyword": {
+      "$ref": "#/components/schemas/SourceKeyword"
+     },
+     "sourceName": {
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     },
+     "sourceSetUpOption": {
+      "enum": [
+       "System_Controls_Mapping",
+       "Procedural_Controls_Mapping"
+      ],
+      "type": "string"
+     },
+     "sourceType": {
+      "enum": [
+       "AWS_Cloudtrail",
+       "AWS_Config",
+       "AWS_Security_Hub",
+       "AWS_API_Call",
+       "MANUAL",
+       "Common_Control",
+       "Core_Control"
+      ],
+      "type": "string"
+     },
+     "troubleshootingText": {
+      "maxLength": 1000,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ControlMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "controlSources": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateControlMappingSource": {
+    "additionalProperties": false,
+    "properties": {
+     "sourceDescription": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "sourceFrequency": {
+      "enum": [
+       "DAILY",
+       "WEEKLY",
+       "MONTHLY"
+      ],
+      "type": "string"
+     },
+     "sourceKeyword": {
+      "$ref": "#/components/schemas/SourceKeyword"
+     },
+     "sourceName": {
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     },
+     "sourceSetUpOption": {
+      "enum": [
+       "System_Controls_Mapping",
+       "Procedural_Controls_Mapping"
+      ],
+      "type": "string"
+     },
+     "sourceType": {
+      "enum": [
+       "AWS_Cloudtrail",
+       "AWS_Config",
+       "AWS_Security_Hub",
+       "AWS_API_Call",
+       "MANUAL",
+       "Common_Control",
+       "Core_Control"
+      ],
+      "type": "string"
+     },
+     "troubleshootingText": {
+      "maxLength": 1000,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DefaultExportDestination": {
+    "additionalProperties": false,
+    "properties": {
+     "destination": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "destinationType": {
+      "enum": [
+       "S3"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeregistrationPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "deleteResources": {
+      "enum": [
+       "ALL",
+       "DEFAULT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EvidenceFinderEnablement": {
+    "additionalProperties": false,
+    "properties": {
+     "backfillStatus": {
+      "enum": [
+       "NOT_STARTED",
+       "IN_PROGRESS",
+       "COMPLETED"
+      ],
+      "type": "string"
+     },
+     "enablementStatus": {
+      "enum": [
+       "ENABLED",
+       "DISABLED",
+       "ENABLE_IN_PROGRESS",
+       "DISABLE_IN_PROGRESS"
+      ],
+      "type": "string"
+     },
+     "error": {
+      "maxLength": 300,
+      "type": "string"
+     },
+     "eventDataStoreArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Role": {
+    "additionalProperties": false,
+    "properties": {
+     "roleArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "roleType": {
+      "enum": [
+       "PROCESS_OWNER",
+       "RESOURCE_OWNER"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "roleType",
+     "roleArn"
+    ],
+    "type": "object"
+   },
+   "Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "defaultAssessmentReportsDestination": {
+      "$ref": "#/components/schemas/AssessmentReportsDestination"
+     },
+     "defaultExportDestination": {
+      "$ref": "#/components/schemas/DefaultExportDestination"
+     },
+     "defaultProcessOwners": {
+      "items": {
+       "$ref": "#/components/schemas/Role"
+      },
+      "type": "array"
+     },
+     "deregistrationPolicy": {
+      "$ref": "#/components/schemas/DeregistrationPolicy"
+     },
+     "evidenceFinderEnablement": {
+      "$ref": "#/components/schemas/EvidenceFinderEnablement"
+     },
+     "isAwsOrgEnabled": {
+      "type": "boolean"
+     },
+     "kmsKey": {
+      "maxLength": 2048,
+      "minLength": 7,
+      "type": "string"
+     },
+     "snsTopic": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SourceKeyword": {
+    "additionalProperties": false,
+    "properties": {
+     "keywordInputType": {
+      "enum": [
+       "SELECT_FROM_LIST",
+       "UPLOAD_FILE",
+       "INPUT_TEXT"
+      ],
+      "type": "string"
+     },
+     "keywordValue": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Audit Manager API (2017-07-25). Every other official operation returns HTTP 501 UnknownOperationException. Custom controls and account settings are configuration metadata that need no prior RegisterAccount call: no assessment runs, no evidence is collected from AWS CloudTrail, AWS Config, AWS Security Hub or API calls, and no report is written to Amazon S3. ListControls lists only stored Custom controls (no Standard or Core control is served) and refuses controlCatalogId; control mapping sources get no sourceId, and controlSources, createdBy and lastUpdatedBy are not reported. GetSettings accepts attribute ALL only. UpdateSettings refuses evidenceFinderEnabled, and the SNS topic, report and export destinations, process owners and KMS key are stored without being checked or used. Assessments, assessment frameworks and their sharing, evidence, delegations, assessment reports, insights, notifications, account registration and organization APIs return UnknownOperationException with HTTP 501.",
+  "title": "AWS Audit Manager (simulator catalog)",
+  "version": "2017-07-25"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/controls": {
+   "get": {
+    "operationId": "auditmanagerListControls",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "auditmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "controlCatalogId",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 13,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "controlType",
+      "schema": {
+       "enum": [
+        "Standard",
+        "Custom",
+        "Core"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 1000,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "controlMetadataList": {
+           "items": {
+            "$ref": "#/components/schemas/ControlMetadata"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 1000,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListControls",
+    "tags": [
+     "AWS Audit Manager"
+    ]
+   },
+   "post": {
+    "operationId": "auditmanagerCreateControl",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "auditmanager"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "actionPlanInstructions": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "actionPlanTitle": {
+          "maxLength": 300,
+          "type": "string"
+         },
+         "controlMappingSources": {
+          "items": {
+           "$ref": "#/components/schemas/CreateControlMappingSource"
+          },
+          "minItems": 1,
+          "type": "array"
+         },
+         "description": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "testingInformation": {
+          "maxLength": 1000,
+          "type": "string"
+         }
+        },
+        "required": [
+         "controlMappingSources",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "control": {
+           "$ref": "#/components/schemas/Control"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateControl",
+    "tags": [
+     "AWS Audit Manager"
+    ]
+   }
+  },
+  "/controls/{controlId}": {
+   "delete": {
+    "operationId": "auditmanagerDeleteControl",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "auditmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "controlId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteControl",
+    "tags": [
+     "AWS Audit Manager"
+    ]
+   },
+   "get": {
+    "operationId": "auditmanagerGetControl",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "auditmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "controlId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "control": {
+           "$ref": "#/components/schemas/Control"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetControl",
+    "tags": [
+     "AWS Audit Manager"
+    ]
+   },
+   "put": {
+    "operationId": "auditmanagerUpdateControl",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "auditmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "controlId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "actionPlanInstructions": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "actionPlanTitle": {
+          "maxLength": 300,
+          "type": "string"
+         },
+         "controlMappingSources": {
+          "items": {
+           "$ref": "#/components/schemas/ControlMappingSource"
+          },
+          "minItems": 1,
+          "type": "array"
+         },
+         "description": {
+          "maxLength": 1000,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+         },
+         "testingInformation": {
+          "maxLength": 1000,
+          "type": "string"
+         }
+        },
+        "required": [
+         "controlMappingSources",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "control": {
+           "$ref": "#/components/schemas/Control"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateControl",
+    "tags": [
+     "AWS Audit Manager"
+    ]
+   }
+  },
+  "/settings": {
+   "put": {
+    "operationId": "auditmanagerUpdateSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "auditmanager"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "defaultAssessmentReportsDestination": {
+          "$ref": "#/components/schemas/AssessmentReportsDestination"
+         },
+         "defaultExportDestination": {
+          "$ref": "#/components/schemas/DefaultExportDestination"
+         },
+         "defaultProcessOwners": {
+          "items": {
+           "$ref": "#/components/schemas/Role"
+          },
+          "type": "array"
+         },
+         "deregistrationPolicy": {
+          "$ref": "#/components/schemas/DeregistrationPolicy"
+         },
+         "evidenceFinderEnabled": {
+          "type": "boolean"
+         },
+         "kmsKey": {
+          "maxLength": 2048,
+          "minLength": 7,
+          "type": "string"
+         },
+         "snsTopic": {
+          "maxLength": 2048,
+          "minLength": 4,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "settings": {
+           "$ref": "#/components/schemas/Settings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSettings",
+    "tags": [
+     "AWS Audit Manager"
+    ]
+   }
+  },
+  "/settings/{attribute}": {
+   "get": {
+    "operationId": "auditmanagerGetSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "auditmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "attribute",
+      "required": true,
+      "schema": {
+       "enum": [
+        "ALL",
+        "IS_AWS_ORG_ENABLED",
+        "SNS_TOPIC",
+        "DEFAULT_ASSESSMENT_REPORTS_DESTINATION",
+        "DEFAULT_PROCESS_OWNERS",
+        "EVIDENCE_FINDER_ENABLEMENT",
+        "DEREGISTRATION_POLICY",
+        "DEFAULT_EXPORT_DESTINATION"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "settings": {
+           "$ref": "#/components/schemas/Settings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetSettings",
+    "tags": [
+     "AWS Audit Manager"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "auditmanagerUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "auditmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Audit Manager"
+    ]
+   },
+   "get": {
+    "operationId": "auditmanagerListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "auditmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Audit Manager"
+    ]
+   },
+   "post": {
+    "operationId": "auditmanagerTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "auditmanager"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Audit Manager"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Audit Manager API (2017-07-25). Every other official operation returns HTTP 501 UnknownOperationException. Custom controls and account settings are configuration metadata that need no prior RegisterAccount call: no assessment runs, no evidence is collected from AWS CloudTrail, AWS Config, AWS Security Hub or API calls, and no report is written to Amazon S3. ListControls lists only stored Custom controls (no Standard or Core control is served) and refuses controlCatalogId; control mapping sources get no sourceId, and controlSources, createdBy and lastUpdatedBy are not reported. GetSettings accepts attribute ALL only. UpdateSettings refuses evidenceFinderEnabled, and the SNS topic, report and export destinations, process owners and KMS key are stored without being checked or used. Assessments, assessment frameworks and their sharing, evidence, delegations, assessment reports, insights, notifications, account registration and organization APIs return UnknownOperationException with HTTP 501.",
+   "name": "AWS Audit Manager"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/auditmanager/2017-07-25/service-2.json",
+  "sha256": "461fbeb8e12f947747b816f7fc5c781ae0613403facfe5b5854eaf74b8b11022",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,2663 @@
+{
+ "components": {
+  "schemas": {
+   "CloudWatchConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "largeDataDeliveryS3Config": {
+      "$ref": "#/components/schemas/S3Config"
+     },
+     "logGroupName": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "roleArn": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "logGroupName",
+     "roleArn"
+    ],
+    "type": "object"
+   },
+   "GuardrailAutomatedReasoningPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "confidenceThreshold": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     },
+     "policies": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "policies"
+    ],
+    "type": "object"
+   },
+   "GuardrailAutomatedReasoningPolicyConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "confidenceThreshold": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+     },
+     "policies": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "policies"
+    ],
+    "type": "object"
+   },
+   "GuardrailContentFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "inputModalities": {
+      "items": {
+       "enum": [
+        "TEXT",
+        "IMAGE"
+       ],
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "type": "array"
+     },
+     "inputStrength": {
+      "enum": [
+       "NONE",
+       "LOW",
+       "MEDIUM",
+       "HIGH"
+      ],
+      "type": "string"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "outputModalities": {
+      "items": {
+       "enum": [
+        "TEXT",
+        "IMAGE"
+       ],
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "type": "array"
+     },
+     "outputStrength": {
+      "enum": [
+       "NONE",
+       "LOW",
+       "MEDIUM",
+       "HIGH"
+      ],
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "SEXUAL",
+       "VIOLENCE",
+       "HATE",
+       "INSULTS",
+       "MISCONDUCT",
+       "PROMPT_ATTACK"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "inputStrength",
+     "outputStrength"
+    ],
+    "type": "object"
+   },
+   "GuardrailContentFilterConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "inputModalities": {
+      "items": {
+       "enum": [
+        "TEXT",
+        "IMAGE"
+       ],
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "type": "array"
+     },
+     "inputStrength": {
+      "enum": [
+       "NONE",
+       "LOW",
+       "MEDIUM",
+       "HIGH"
+      ],
+      "type": "string"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "outputModalities": {
+      "items": {
+       "enum": [
+        "TEXT",
+        "IMAGE"
+       ],
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "type": "array"
+     },
+     "outputStrength": {
+      "enum": [
+       "NONE",
+       "LOW",
+       "MEDIUM",
+       "HIGH"
+      ],
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "SEXUAL",
+       "VIOLENCE",
+       "HATE",
+       "INSULTS",
+       "MISCONDUCT",
+       "PROMPT_ATTACK"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "inputStrength",
+     "outputStrength"
+    ],
+    "type": "object"
+   },
+   "GuardrailContentFiltersTier": {
+    "additionalProperties": false,
+    "properties": {
+     "tierName": {
+      "enum": [
+       "CLASSIC",
+       "STANDARD"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "tierName"
+    ],
+    "type": "object"
+   },
+   "GuardrailContentFiltersTierConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "tierName": {
+      "enum": [
+       "CLASSIC",
+       "STANDARD"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "tierName"
+    ],
+    "type": "object"
+   },
+   "GuardrailContentPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "filters": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailContentFilter"
+      },
+      "maxItems": 6,
+      "minItems": 1,
+      "type": "array"
+     },
+     "tier": {
+      "$ref": "#/components/schemas/GuardrailContentFiltersTier"
+     }
+    },
+    "type": "object"
+   },
+   "GuardrailContentPolicyConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "filtersConfig": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailContentFilterConfig"
+      },
+      "maxItems": 6,
+      "minItems": 1,
+      "type": "array"
+     },
+     "tierConfig": {
+      "$ref": "#/components/schemas/GuardrailContentFiltersTierConfig"
+     }
+    },
+    "required": [
+     "filtersConfig"
+    ],
+    "type": "object"
+   },
+   "GuardrailContextualGroundingFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "threshold": {
+      "minimum": 0,
+      "type": "number"
+     },
+     "type": {
+      "enum": [
+       "GROUNDING",
+       "RELEVANCE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "threshold"
+    ],
+    "type": "object"
+   },
+   "GuardrailContextualGroundingFilterConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "threshold": {
+      "minimum": 0,
+      "type": "number"
+     },
+     "type": {
+      "enum": [
+       "GROUNDING",
+       "RELEVANCE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "threshold"
+    ],
+    "type": "object"
+   },
+   "GuardrailContextualGroundingPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "filters": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailContextualGroundingFilter"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "filters"
+    ],
+    "type": "object"
+   },
+   "GuardrailContextualGroundingPolicyConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "filtersConfig": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailContextualGroundingFilterConfig"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "filtersConfig"
+    ],
+    "type": "object"
+   },
+   "GuardrailCrossRegionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "guardrailProfileIdentifier": {
+      "maxLength": 2048,
+      "minLength": 15,
+      "type": "string"
+     }
+    },
+    "required": [
+     "guardrailProfileIdentifier"
+    ],
+    "type": "object"
+   },
+   "GuardrailCrossRegionDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "guardrailProfileArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "guardrailProfileId": {
+      "maxLength": 30,
+      "minLength": 15,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GuardrailManagedWords": {
+    "additionalProperties": false,
+    "properties": {
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "type": {
+      "enum": [
+       "PROFANITY"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "GuardrailManagedWordsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "type": {
+      "enum": [
+       "PROFANITY"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "GuardrailPiiEntity": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "type": {
+      "enum": [
+       "ADDRESS",
+       "AGE",
+       "AWS_ACCESS_KEY",
+       "AWS_SECRET_KEY",
+       "CA_HEALTH_NUMBER",
+       "CA_SOCIAL_INSURANCE_NUMBER",
+       "CREDIT_DEBIT_CARD_CVV",
+       "CREDIT_DEBIT_CARD_EXPIRY",
+       "CREDIT_DEBIT_CARD_NUMBER",
+       "DRIVER_ID",
+       "EMAIL",
+       "INTERNATIONAL_BANK_ACCOUNT_NUMBER",
+       "IP_ADDRESS",
+       "LICENSE_PLATE",
+       "MAC_ADDRESS",
+       "NAME",
+       "PASSWORD",
+       "PHONE",
+       "PIN",
+       "SWIFT_CODE",
+       "UK_NATIONAL_HEALTH_SERVICE_NUMBER",
+       "UK_NATIONAL_INSURANCE_NUMBER",
+       "UK_UNIQUE_TAXPAYER_REFERENCE_NUMBER",
+       "URL",
+       "USERNAME",
+       "US_BANK_ACCOUNT_NUMBER",
+       "US_BANK_ROUTING_NUMBER",
+       "US_INDIVIDUAL_TAX_IDENTIFICATION_NUMBER",
+       "US_PASSPORT_NUMBER",
+       "US_SOCIAL_SECURITY_NUMBER",
+       "VEHICLE_IDENTIFICATION_NUMBER"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "action"
+    ],
+    "type": "object"
+   },
+   "GuardrailPiiEntityConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "type": {
+      "enum": [
+       "ADDRESS",
+       "AGE",
+       "AWS_ACCESS_KEY",
+       "AWS_SECRET_KEY",
+       "CA_HEALTH_NUMBER",
+       "CA_SOCIAL_INSURANCE_NUMBER",
+       "CREDIT_DEBIT_CARD_CVV",
+       "CREDIT_DEBIT_CARD_EXPIRY",
+       "CREDIT_DEBIT_CARD_NUMBER",
+       "DRIVER_ID",
+       "EMAIL",
+       "INTERNATIONAL_BANK_ACCOUNT_NUMBER",
+       "IP_ADDRESS",
+       "LICENSE_PLATE",
+       "MAC_ADDRESS",
+       "NAME",
+       "PASSWORD",
+       "PHONE",
+       "PIN",
+       "SWIFT_CODE",
+       "UK_NATIONAL_HEALTH_SERVICE_NUMBER",
+       "UK_NATIONAL_INSURANCE_NUMBER",
+       "UK_UNIQUE_TAXPAYER_REFERENCE_NUMBER",
+       "URL",
+       "USERNAME",
+       "US_BANK_ACCOUNT_NUMBER",
+       "US_BANK_ROUTING_NUMBER",
+       "US_INDIVIDUAL_TAX_IDENTIFICATION_NUMBER",
+       "US_PASSPORT_NUMBER",
+       "US_SOCIAL_SECURITY_NUMBER",
+       "VEHICLE_IDENTIFICATION_NUMBER"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "action"
+    ],
+    "type": "object"
+   },
+   "GuardrailRegex": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "pattern": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "pattern",
+     "action"
+    ],
+    "type": "object"
+   },
+   "GuardrailRegexConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "ANONYMIZE",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "pattern": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "pattern",
+     "action"
+    ],
+    "type": "object"
+   },
+   "GuardrailSensitiveInformationPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "piiEntities": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailPiiEntity"
+      },
+      "minItems": 1,
+      "type": "array"
+     },
+     "regexes": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailRegex"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GuardrailSensitiveInformationPolicyConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "piiEntitiesConfig": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailPiiEntityConfig"
+      },
+      "minItems": 1,
+      "type": "array"
+     },
+     "regexesConfig": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailRegexConfig"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GuardrailSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "crossRegionDetails": {
+      "$ref": "#/components/schemas/GuardrailCrossRegionDetails"
+     },
+     "description": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "UPDATING",
+       "VERSIONING",
+       "READY",
+       "FAILED",
+       "DELETING"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "arn",
+     "status",
+     "name",
+     "version",
+     "createdAt",
+     "updatedAt"
+    ],
+    "type": "object"
+   },
+   "GuardrailTopic": {
+    "additionalProperties": false,
+    "properties": {
+     "definition": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "examples": {
+      "items": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 0,
+      "type": "array"
+     },
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "type": {
+      "enum": [
+       "DENY"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "definition"
+    ],
+    "type": "object"
+   },
+   "GuardrailTopicConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "definition": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "examples": {
+      "items": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 0,
+      "type": "array"
+     },
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "type": {
+      "enum": [
+       "DENY"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "definition",
+     "type"
+    ],
+    "type": "object"
+   },
+   "GuardrailTopicPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "tier": {
+      "$ref": "#/components/schemas/GuardrailTopicsTier"
+     },
+     "topics": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailTopic"
+      },
+      "maxItems": 30,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "topics"
+    ],
+    "type": "object"
+   },
+   "GuardrailTopicPolicyConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "tierConfig": {
+      "$ref": "#/components/schemas/GuardrailTopicsTierConfig"
+     },
+     "topicsConfig": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailTopicConfig"
+      },
+      "maxItems": 30,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "topicsConfig"
+    ],
+    "type": "object"
+   },
+   "GuardrailTopicsTier": {
+    "additionalProperties": false,
+    "properties": {
+     "tierName": {
+      "enum": [
+       "CLASSIC",
+       "STANDARD"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "tierName"
+    ],
+    "type": "object"
+   },
+   "GuardrailTopicsTierConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "tierName": {
+      "enum": [
+       "CLASSIC",
+       "STANDARD"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "tierName"
+    ],
+    "type": "object"
+   },
+   "GuardrailWord": {
+    "additionalProperties": false,
+    "properties": {
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "text": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "text"
+    ],
+    "type": "object"
+   },
+   "GuardrailWordConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "inputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "inputEnabled": {
+      "type": "boolean"
+     },
+     "outputAction": {
+      "enum": [
+       "BLOCK",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "outputEnabled": {
+      "type": "boolean"
+     },
+     "text": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "text"
+    ],
+    "type": "object"
+   },
+   "GuardrailWordPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "managedWordLists": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailManagedWords"
+      },
+      "type": "array"
+     },
+     "words": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailWord"
+      },
+      "maxItems": 10000,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GuardrailWordPolicyConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "managedWordListsConfig": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailManagedWordsConfig"
+      },
+      "type": "array"
+     },
+     "wordsConfig": {
+      "items": {
+       "$ref": "#/components/schemas/GuardrailWordConfig"
+      },
+      "maxItems": 10000,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "InferenceProfileModel": {
+    "additionalProperties": false,
+    "properties": {
+     "modelArn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InferenceProfileModelSource": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "copyFrom": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InferenceProfileSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "inferenceProfileArn": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "inferenceProfileId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "inferenceProfileName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "models": {
+      "items": {
+       "$ref": "#/components/schemas/InferenceProfileModel"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE"
+      ],
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "SYSTEM_DEFINED",
+       "APPLICATION"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "inferenceProfileName",
+     "inferenceProfileArn",
+     "models",
+     "inferenceProfileId",
+     "status",
+     "type"
+    ],
+    "type": "object"
+   },
+   "LoggingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchConfig": {
+      "$ref": "#/components/schemas/CloudWatchConfig"
+     },
+     "embeddingDataDeliveryEnabled": {
+      "type": "boolean"
+     },
+     "imageDataDeliveryEnabled": {
+      "type": "boolean"
+     },
+     "s3Config": {
+      "$ref": "#/components/schemas/S3Config"
+     },
+     "textDataDeliveryEnabled": {
+      "type": "boolean"
+     },
+     "videoDataDeliveryEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "S3Config": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "keyPrefix": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "bucketName"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "value"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Bedrock API (2023-04-20). Every other official operation returns HTTP 501 UnknownOperationException. Guardrails are stored DRAFT configuration that is READY at once: no prompt or model response is ever evaluated, filtered, masked or blocked, and ApplyGuardrail, guardrail versions, automated reasoning policies and cross-Region guardrail profiles are not implemented; automatedReasoningPolicyConfig and crossRegionConfig are refused. Policy configurations are stored in their official read form (for example topicPolicyConfig.topicsConfig is returned as topicPolicy.topics). kmsKeyId must be a KMS key ARN and is returned as kmsKeyArn without contacting AWS KMS. UpdateGuardrail replaces the whole draft, clearing omitted policies, description and key; a renamed guardrail keeps its original name reserved for uniqueness. guardrailVersion is accepted only as DRAFT on GetGuardrail; numbered versions do not exist, so any number returns ResourceNotFoundException. ListGuardrails lists only DRAFT versions and returns an empty list for an unknown guardrailIdentifier. Application inference profiles copy exactly one foundation model ARN, which is not checked against a model catalog; copying a system-defined cross-Region profile is refused, no system-defined profile exists, and ListInferenceProfiles requires typeEquals APPLICATION. Nothing is ever invoked through a profile. The model invocation logging configuration is stored without writing any log to Amazon S3 or CloudWatch Logs. DeleteModelInvocationLoggingConfiguration returns ResourceNotFoundException with HTTP 404 when no configuration is stored, which the official operation does not model. Model invocation, custom models (CreateCustomModel imports model weights), customization, import, copy, invocation and evaluation jobs, provisioned throughput, marketplace endpoints, foundation model listings and agreements, prompt routers (whose official ARN pattern admits only default routers) and enforced guardrail configurations return UnknownOperationException with HTTP 501.",
+  "title": "Amazon Bedrock (simulator catalog)",
+  "version": "2023-04-20"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/guardrails": {
+   "get": {
+    "operationId": "bedrockListGuardrails",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "guardrailIdentifier",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "guardrails": {
+           "items": {
+            "$ref": "#/components/schemas/GuardrailSummary"
+           },
+           "maxItems": 1000,
+           "minItems": 0,
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListGuardrails",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   },
+   "post": {
+    "operationId": "bedrockCreateGuardrail",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "automatedReasoningPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailAutomatedReasoningPolicyConfig"
+         },
+         "blockedInputMessaging": {
+          "maxLength": 500,
+          "minLength": 1,
+          "type": "string"
+         },
+         "blockedOutputsMessaging": {
+          "maxLength": 500,
+          "minLength": 1,
+          "type": "string"
+         },
+         "clientRequestToken": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "contentPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailContentPolicyConfig"
+         },
+         "contextualGroundingPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailContextualGroundingPolicyConfig"
+         },
+         "crossRegionConfig": {
+          "$ref": "#/components/schemas/GuardrailCrossRegionConfig"
+         },
+         "description": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+         },
+         "kmsKeyId": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 50,
+          "minLength": 1,
+          "type": "string"
+         },
+         "sensitiveInformationPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailSensitiveInformationPolicyConfig"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         },
+         "topicPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailTopicPolicyConfig"
+         },
+         "wordPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailWordPolicyConfig"
+         }
+        },
+        "required": [
+         "blockedInputMessaging",
+         "blockedOutputsMessaging",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "guardrailArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "guardrailId": {
+           "maxLength": 64,
+           "minLength": 0,
+           "type": "string"
+          },
+          "version": {
+           "maxLength": 5,
+           "minLength": 5,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateGuardrail",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   }
+  },
+  "/guardrails/{guardrailIdentifier}": {
+   "delete": {
+    "operationId": "bedrockDeleteGuardrail",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "guardrailIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "guardrailVersion",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteGuardrail",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   },
+   "get": {
+    "operationId": "bedrockGetGuardrail",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "guardrailIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "guardrailVersion",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "automatedReasoningPolicy": {
+           "$ref": "#/components/schemas/GuardrailAutomatedReasoningPolicy"
+          },
+          "blockedInputMessaging": {
+           "maxLength": 500,
+           "minLength": 1,
+           "type": "string"
+          },
+          "blockedOutputsMessaging": {
+           "maxLength": 500,
+           "minLength": 1,
+           "type": "string"
+          },
+          "contentPolicy": {
+           "$ref": "#/components/schemas/GuardrailContentPolicy"
+          },
+          "contextualGroundingPolicy": {
+           "$ref": "#/components/schemas/GuardrailContextualGroundingPolicy"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "crossRegionDetails": {
+           "$ref": "#/components/schemas/GuardrailCrossRegionDetails"
+          },
+          "description": {
+           "maxLength": 200,
+           "minLength": 1,
+           "type": "string"
+          },
+          "failureRecommendations": {
+           "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 100,
+           "minItems": 0,
+           "type": "array"
+          },
+          "guardrailArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "guardrailId": {
+           "maxLength": 64,
+           "minLength": 0,
+           "type": "string"
+          },
+          "kmsKeyArn": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 50,
+           "minLength": 1,
+           "type": "string"
+          },
+          "sensitiveInformationPolicy": {
+           "$ref": "#/components/schemas/GuardrailSensitiveInformationPolicy"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "UPDATING",
+            "VERSIONING",
+            "READY",
+            "FAILED",
+            "DELETING"
+           ],
+           "type": "string"
+          },
+          "statusReasons": {
+           "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 100,
+           "minItems": 0,
+           "type": "array"
+          },
+          "topicPolicy": {
+           "$ref": "#/components/schemas/GuardrailTopicPolicy"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "version": {
+           "type": "string"
+          },
+          "wordPolicy": {
+           "$ref": "#/components/schemas/GuardrailWordPolicy"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetGuardrail",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   },
+   "put": {
+    "operationId": "bedrockUpdateGuardrail",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "guardrailIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "automatedReasoningPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailAutomatedReasoningPolicyConfig"
+         },
+         "blockedInputMessaging": {
+          "maxLength": 500,
+          "minLength": 1,
+          "type": "string"
+         },
+         "blockedOutputsMessaging": {
+          "maxLength": 500,
+          "minLength": 1,
+          "type": "string"
+         },
+         "contentPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailContentPolicyConfig"
+         },
+         "contextualGroundingPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailContextualGroundingPolicyConfig"
+         },
+         "crossRegionConfig": {
+          "$ref": "#/components/schemas/GuardrailCrossRegionConfig"
+         },
+         "description": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+         },
+         "kmsKeyId": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 50,
+          "minLength": 1,
+          "type": "string"
+         },
+         "sensitiveInformationPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailSensitiveInformationPolicyConfig"
+         },
+         "topicPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailTopicPolicyConfig"
+         },
+         "wordPolicyConfig": {
+          "$ref": "#/components/schemas/GuardrailWordPolicyConfig"
+         }
+        },
+        "required": [
+         "blockedInputMessaging",
+         "blockedOutputsMessaging",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "guardrailArn": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "guardrailId": {
+           "maxLength": 64,
+           "minLength": 0,
+           "type": "string"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "version": {
+           "maxLength": 5,
+           "minLength": 5,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateGuardrail",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   }
+  },
+  "/inference-profiles": {
+   "get": {
+    "operationId": "bedrockListInferenceProfiles",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "type",
+      "schema": {
+       "enum": [
+        "SYSTEM_DEFINED",
+        "APPLICATION"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "inferenceProfileSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/InferenceProfileSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListInferenceProfiles",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   },
+   "post": {
+    "operationId": "bedrockCreateInferenceProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientRequestToken": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+         },
+         "inferenceProfileName": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "modelSource": {
+          "$ref": "#/components/schemas/InferenceProfileModelSource"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "inferenceProfileName",
+         "modelSource"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "inferenceProfileArn": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateInferenceProfile",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   }
+  },
+  "/inference-profiles/{inferenceProfileIdentifier}": {
+   "delete": {
+    "operationId": "bedrockDeleteInferenceProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "inferenceProfileIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteInferenceProfile",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   },
+   "get": {
+    "operationId": "bedrockGetInferenceProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "inferenceProfileIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 200,
+           "minLength": 1,
+           "type": "string"
+          },
+          "inferenceProfileArn": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "inferenceProfileId": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "inferenceProfileName": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "models": {
+           "items": {
+            "$ref": "#/components/schemas/InferenceProfileModel"
+           },
+           "maxItems": 5,
+           "minItems": 1,
+           "type": "array"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE"
+           ],
+           "type": "string"
+          },
+          "type": {
+           "enum": [
+            "SYSTEM_DEFINED",
+            "APPLICATION"
+           ],
+           "type": "string"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetInferenceProfile",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   }
+  },
+  "/listTagsForResource": {
+   "post": {
+    "operationId": "bedrockListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "resourceARN": {
+          "maxLength": 1011,
+          "minLength": 20,
+          "type": "string"
+         }
+        },
+        "required": [
+         "resourceARN"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   }
+  },
+  "/logging/modelinvocations": {
+   "delete": {
+    "operationId": "bedrockDeleteModelInvocationLoggingConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteModelInvocationLoggingConfiguration",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   },
+   "get": {
+    "operationId": "bedrockGetModelInvocationLoggingConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "loggingConfig": {
+           "$ref": "#/components/schemas/LoggingConfig"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetModelInvocationLoggingConfiguration",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   },
+   "put": {
+    "operationId": "bedrockPutModelInvocationLoggingConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "loggingConfig": {
+          "$ref": "#/components/schemas/LoggingConfig"
+         }
+        },
+        "required": [
+         "loggingConfig"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "PutModelInvocationLoggingConfiguration",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   }
+  },
+  "/tagResource": {
+   "post": {
+    "operationId": "bedrockTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "resourceARN": {
+          "maxLength": 1011,
+          "minLength": 20,
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "resourceARN",
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   }
+  },
+  "/untagResource": {
+   "post": {
+    "operationId": "bedrockUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "bedrock"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "resourceARN": {
+          "maxLength": 1011,
+          "minLength": 20,
+          "type": "string"
+         },
+         "tagKeys": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "resourceARN",
+         "tagKeys"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Bedrock"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Bedrock API (2023-04-20). Every other official operation returns HTTP 501 UnknownOperationException. Guardrails are stored DRAFT configuration that is READY at once: no prompt or model response is ever evaluated, filtered, masked or blocked, and ApplyGuardrail, guardrail versions, automated reasoning policies and cross-Region guardrail profiles are not implemented; automatedReasoningPolicyConfig and crossRegionConfig are refused. Policy configurations are stored in their official read form (for example topicPolicyConfig.topicsConfig is returned as topicPolicy.topics). kmsKeyId must be a KMS key ARN and is returned as kmsKeyArn without contacting AWS KMS. UpdateGuardrail replaces the whole draft, clearing omitted policies, description and key; a renamed guardrail keeps its original name reserved for uniqueness. guardrailVersion is accepted only as DRAFT on GetGuardrail; numbered versions do not exist, so any number returns ResourceNotFoundException. ListGuardrails lists only DRAFT versions and returns an empty list for an unknown guardrailIdentifier. Application inference profiles copy exactly one foundation model ARN, which is not checked against a model catalog; copying a system-defined cross-Region profile is refused, no system-defined profile exists, and ListInferenceProfiles requires typeEquals APPLICATION. Nothing is ever invoked through a profile. The model invocation logging configuration is stored without writing any log to Amazon S3 or CloudWatch Logs. DeleteModelInvocationLoggingConfiguration returns ResourceNotFoundException with HTTP 404 when no configuration is stored, which the official operation does not model. Model invocation, custom models (CreateCustomModel imports model weights), customization, import, copy, invocation and evaluation jobs, provisioned throughput, marketplace endpoints, foundation model listings and agreements, prompt routers (whose official ARN pattern admits only default routers) and enforced guardrail configurations return UnknownOperationException with HTTP 501.",
+   "name": "Amazon Bedrock"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/bedrock/2023-04-20/service-2.json",
+  "sha256": "5fef218f3456d3f3671fbe1f2268698a7ac295bb36ecd035a8000e38f831e11e",
+  "license": "Apache-2.0"
+ }
+}

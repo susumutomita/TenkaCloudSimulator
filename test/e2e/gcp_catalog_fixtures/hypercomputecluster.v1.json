@@ -1,0 +1,136 @@
+{
+ "api": "hypercomputecluster.v1",
+ "steps": [
+  {
+   "call": "projects.locations.clusters.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "clusterId": "fixture"
+   },
+   "body": {
+    "description": "HPC",
+    "networkResources": {
+     "net0": {}
+    }
+   },
+   "save": {
+    "op_cluster": "name",
+    "cluster": "response.name"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.clusters.get",
+   "args": {
+    "name": "${cluster}"
+   },
+   "expect": {
+    "description": "HPC"
+   }
+  },
+  {
+   "call": "projects.locations.clusters.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "clusters#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.clusters.patch",
+   "args": {
+    "name": "${cluster}",
+    "updateMask": "labels"
+   },
+   "body": {
+    "labels": {
+     "team": "a"
+    }
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.clusters.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "clusterId": "fixture-cluster"
+   },
+   "body": {},
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.operations.get",
+   "args": {
+    "name": "${op_cluster}"
+   },
+   "expect": {
+    "response.description": "HPC"
+   }
+  },
+  {
+   "call": "projects.locations.operations.list",
+   "args": {
+    "name": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "operations#count": 2
+   }
+  },
+  {
+   "call": "projects.locations.clusters.list",
+   "args": {
+    "parent": "projects/other-project/locations/us-central1"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.locations.clusters.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "clusters#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.locations.clusters.get",
+   "args": {
+    "name": "${cluster}"
+   },
+   "expect": {
+    "labels.team": "a"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.locations.clusters.delete",
+   "args": {
+    "name": "${cluster}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.clusters.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "clusters#count": 0
+   }
+  }
+ ]
+}

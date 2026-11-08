@@ -1,0 +1,1983 @@
+{
+ "components": {
+  "schemas": {
+   "AutoscalingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "autoscalingEnabled": {
+      "type": "boolean"
+     },
+     "autoscalingFactor": {
+      "format": "float",
+      "readOnly": true,
+      "type": "number"
+     },
+     "limitConfig": {
+      "$ref": "#/components/schemas/LimitConfig"
+     }
+    },
+    "type": "object"
+   },
+   "AuxiliaryVersionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "configOverrides": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "networkConfig": {
+      "$ref": "#/components/schemas/NetworkConfig"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BackendMetastore": {
+    "additionalProperties": false,
+    "properties": {
+     "metastoreType": {
+      "enum": [
+       "METASTORE_TYPE_UNSPECIFIED",
+       "BIGQUERY",
+       "DATAPROC_METASTORE"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Backup": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "endTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "restoringServices": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "serviceRevision": {
+      "$ref": "#/components/schemas/Service"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "DELETING",
+       "ACTIVE",
+       "FAILED",
+       "RESTORING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Consumer": {
+    "additionalProperties": false,
+    "properties": {
+     "endpointLocation": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "endpointUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "subnetwork": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DataCatalogConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKey": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Federation": {
+    "additionalProperties": false,
+    "properties": {
+     "backendMetastores": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/BackendMetastore"
+      },
+      "type": "object"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "endpointUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "ERROR"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "stateMessage": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HiveMetastoreConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "auxiliaryVersions": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/AuxiliaryVersionConfig"
+      },
+      "type": "object"
+     },
+     "configOverrides": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "endpointProtocol": {
+      "enum": [
+       "ENDPOINT_PROTOCOL_UNSPECIFIED",
+       "THRIFT",
+       "GRPC"
+      ],
+      "type": "string"
+     },
+     "kerberosConfig": {
+      "$ref": "#/components/schemas/KerberosConfig"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "KerberosConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "keytab": {
+      "$ref": "#/components/schemas/Secret"
+     },
+     "krb5ConfigGcsUri": {
+      "type": "string"
+     },
+     "principal": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LatestBackup": {
+    "additionalProperties": false,
+    "properties": {
+     "backupId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "duration": {
+      "format": "google-duration",
+      "readOnly": true,
+      "type": "string"
+     },
+     "startTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "IN_PROGRESS",
+       "SUCCEEDED",
+       "FAILED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LimitConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "maxScalingFactor": {
+      "format": "float",
+      "type": "number"
+     },
+     "minScalingFactor": {
+      "format": "float",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "ListBackupsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "backups": {
+      "items": {
+       "$ref": "#/components/schemas/Backup"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListFederationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "federations": {
+      "items": {
+       "$ref": "#/components/schemas/Federation"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListServicesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "services": {
+      "items": {
+       "$ref": "#/components/schemas/Service"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "dayOfWeek": {
+      "enum": [
+       "DAY_OF_WEEK_UNSPECIFIED",
+       "MONDAY",
+       "TUESDAY",
+       "WEDNESDAY",
+       "THURSDAY",
+       "FRIDAY",
+       "SATURDAY",
+       "SUNDAY"
+      ],
+      "type": "string"
+     },
+     "hourOfDay": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "MetadataExport": {
+    "additionalProperties": false,
+    "properties": {
+     "databaseDumpType": {
+      "enum": [
+       "TYPE_UNSPECIFIED",
+       "MYSQL",
+       "AVRO"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "destinationGcsUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "endTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "startTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "RUNNING",
+       "SUCCEEDED",
+       "FAILED",
+       "CANCELLED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MetadataIntegration": {
+    "additionalProperties": false,
+    "properties": {
+     "dataCatalogConfig": {
+      "$ref": "#/components/schemas/DataCatalogConfig"
+     }
+    },
+    "type": "object"
+   },
+   "MetadataManagementActivity": {
+    "additionalProperties": false,
+    "properties": {
+     "metadataExports": {
+      "items": {
+       "$ref": "#/components/schemas/MetadataExport"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "restores": {
+      "items": {
+       "$ref": "#/components/schemas/Restore"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "consumers": {
+      "items": {
+       "$ref": "#/components/schemas/Consumer"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "Restore": {
+    "additionalProperties": false,
+    "properties": {
+     "backup": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "backupLocation": {
+      "type": "string"
+     },
+     "details": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "endTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "startTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "RUNNING",
+       "SUCCEEDED",
+       "FAILED",
+       "CANCELLED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "RESTORE_TYPE_UNSPECIFIED",
+       "FULL",
+       "METADATA_ONLY"
+      ],
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ScalingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "autoscalingConfig": {
+      "$ref": "#/components/schemas/AutoscalingConfig"
+     },
+     "instanceSize": {
+      "enum": [
+       "INSTANCE_SIZE_UNSPECIFIED",
+       "EXTRA_SMALL",
+       "SMALL",
+       "MEDIUM",
+       "LARGE",
+       "EXTRA_LARGE"
+      ],
+      "type": "string"
+     },
+     "scalingFactor": {
+      "format": "float",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "ScheduledBackup": {
+    "additionalProperties": false,
+    "properties": {
+     "backupLocation": {
+      "type": "string"
+     },
+     "cronSchedule": {
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     },
+     "latestBackup": {
+      "$ref": "#/components/schemas/LatestBackup"
+     },
+     "nextScheduledTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "timeZone": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Secret": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudSecret": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Service": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactGcsUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "databaseType": {
+      "enum": [
+       "DATABASE_TYPE_UNSPECIFIED",
+       "MYSQL",
+       "SPANNER"
+      ],
+      "type": "string"
+     },
+     "deletionProtection": {
+      "type": "boolean"
+     },
+     "encryptionConfig": {
+      "$ref": "#/components/schemas/EncryptionConfig"
+     },
+     "endpointUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "hiveMetastoreConfig": {
+      "$ref": "#/components/schemas/HiveMetastoreConfig"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/MaintenanceWindow"
+     },
+     "metadataIntegration": {
+      "$ref": "#/components/schemas/MetadataIntegration"
+     },
+     "metadataManagementActivity": {
+      "$ref": "#/components/schemas/MetadataManagementActivity"
+     },
+     "name": {
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     },
+     "networkConfig": {
+      "$ref": "#/components/schemas/NetworkConfig"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "releaseChannel": {
+      "enum": [
+       "RELEASE_CHANNEL_UNSPECIFIED",
+       "CANARY",
+       "STABLE"
+      ],
+      "type": "string"
+     },
+     "scalingConfig": {
+      "$ref": "#/components/schemas/ScalingConfig"
+     },
+     "scheduledBackup": {
+      "$ref": "#/components/schemas/ScheduledBackup"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CREATING",
+       "ACTIVE",
+       "SUSPENDING",
+       "SUSPENDED",
+       "UPDATING",
+       "DELETING",
+       "ERROR",
+       "AUTOSCALING",
+       "MIGRATING",
+       "PROXY"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "stateMessage": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "telemetryConfig": {
+      "$ref": "#/components/schemas/TelemetryConfig"
+     },
+     "tier": {
+      "enum": [
+       "TIER_UNSPECIFIED",
+       "DEVELOPER",
+       "ENTERPRISE"
+      ],
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TelemetryConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "logFormat": {
+      "enum": [
+       "LOG_FORMAT_UNSPECIFIED",
+       "LEGACY",
+       "JSON"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Dataproc Metastore API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Services, backups and federations are configuration metadata: no Hive metastore, Thrift or gRPC endpoint, database, Spanner or MySQL instance exists, and they report ACTIVE immediately. Backups hold no Hive metadata and no service revision; restore, metadata import and export, migrations and scheduled backups never run and their methods are unimplemented. Resource Manager tags and deletion protection are refused rather than ignored; delete backups before their service, which otherwise fails with FAILED_PRECONDITION.",
+  "title": "Dataproc Metastore (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/federations": {
+   "get": {
+    "operationId": "metastore.projects.locations.federations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListFederationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.federations.list",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   },
+   "post": {
+    "operationId": "metastore.projects.locations.federations.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "federationId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Federation"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.federations.create",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/federations/{federationsId}": {
+   "delete": {
+    "operationId": "metastore.projects.locations.federations.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "federationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.federations.delete",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   },
+   "get": {
+    "operationId": "metastore.projects.locations.federations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "federationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Federation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.federations.get",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   },
+   "patch": {
+    "operationId": "metastore.projects.locations.federations.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "federationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Federation"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.federations.patch",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "metastore.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "metastore.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/services": {
+   "get": {
+    "operationId": "metastore.projects.locations.services.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListServicesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.services.list",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   },
+   "post": {
+    "operationId": "metastore.projects.locations.services.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "serviceId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Service"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.services.create",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/services/{servicesId}": {
+   "delete": {
+    "operationId": "metastore.projects.locations.services.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.services.delete",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   },
+   "get": {
+    "operationId": "metastore.projects.locations.services.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Service"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.services.get",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   },
+   "patch": {
+    "operationId": "metastore.projects.locations.services.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Service"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.services.patch",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/services/{servicesId}/backups": {
+   "get": {
+    "operationId": "metastore.projects.locations.services.backups.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListBackupsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.services.backups.list",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   },
+   "post": {
+    "operationId": "metastore.projects.locations.services.backups.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "backupId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Backup"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.services.backups.create",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/services/{servicesId}/backups/{backupsId}": {
+   "delete": {
+    "operationId": "metastore.projects.locations.services.backups.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.services.backups.delete",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   },
+   "get": {
+    "operationId": "metastore.projects.locations.services.backups.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Backup"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.services.backups.get",
+    "tags": [
+     "Dataproc Metastore"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/metastore"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Dataproc Metastore API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Services, backups and federations are configuration metadata: no Hive metastore, Thrift or gRPC endpoint, database, Spanner or MySQL instance exists, and they report ACTIVE immediately. Backups hold no Hive metadata and no service revision; restore, metadata import and export, migrations and scheduled backups never run and their methods are unimplemented. Resource Manager tags and deletion protection are refused rather than ignored; delete backups before their service, which otherwise fails with FAILED_PRECONDITION.",
+   "name": "Dataproc Metastore"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/metastore.v1.json",
+  "sha256": "378c21a1129e2008a7c516d5feb83ab415d79e56cbbb65d44ccef6b44d447f44",
+  "license": "Apache-2.0",
+  "revision": "20260716"
+ }
+}

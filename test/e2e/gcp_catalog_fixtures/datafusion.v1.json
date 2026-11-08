@@ -1,0 +1,29 @@
+{
+ "api": "datafusion.v1",
+ "steps": [
+  {"call": "projects.locations.instances.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "instanceId": "fixture"}, "body": {"type": "BASIC", "version": "6.10.1", "labels": {"team": "a"}}, "save": {"op": "name", "instance": "response.name"}, "expect": {"done": true}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op}"}, "expect": {"response.state": "ACTIVE"}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.instances.get", "args": {"name": "${instance}"}, "expect": {"type": "BASIC"}},
+  {"call": "projects.locations.instances.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"instances#count": 1}},
+  {"call": "projects.locations.instances.patch", "args": {"name": "${instance}", "updateMask": "enableStackdriverLogging"}, "body": {"enableStackdriverLogging": true}},
+  {"call": "projects.locations.instances.dnsPeerings.create", "args": {"parent": "${instance}", "dnsPeeringId": "corp"}, "body": {"domain": "corp.example.", "targetProject": "tenkacloud-local", "targetNetwork": "default"}, "save": {"peering": "name"}},
+  {"call": "projects.locations.instances.dnsPeerings.list", "args": {"parent": "${instance}"}, "expect": {"dnsPeerings#count": 1}},
+  {"call": "projects.locations.instances.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1", "instanceId": "tagged"}, "body": {"type": "BASIC", "tags": {"123/env": "dev"}}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.instances.delete", "args": {"name": "${instance}"}, "error": "FAILED_PRECONDITION", "status": 400},
+  {"call": "projects.locations.instances.restart", "args": {"name": "${instance}", "body": {}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.instances.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/instances/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.instances.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.instances.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"instances#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.instances.get", "args": {"name": "${instance}"}, "expect": {"enableStackdriverLogging": true, "state": "ACTIVE"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.instances.dnsPeerings.delete", "args": {"name": "${peering}"}},
+  {"call": "projects.locations.instances.delete", "args": {"name": "${instance}"}},
+  {"call": "projects.locations.instances.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"instances#count": 0}}
+ ]
+}

@@ -1,0 +1,1335 @@
+{
+ "components": {
+  "schemas": {
+   "AutoScalingGroupsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "autoScalingGroupNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "roleArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "autoScalingGroupNames",
+     "roleArn"
+    ],
+    "type": "object"
+   },
+   "EksEndpointsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterApiServerCaCertificateChain": {
+      "maxLength": 2097152,
+      "minLength": 1,
+      "type": "string"
+     },
+     "clusterApiServerEndpointUri": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "clusterName": {
+      "type": "string"
+     },
+     "endpointsResourceName": {
+      "type": "string"
+     },
+     "endpointsResourceNamespace": {
+      "type": "string"
+     },
+     "roleArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "endpointsResourceName",
+     "endpointsResourceNamespace",
+     "clusterApiServerEndpointUri",
+     "clusterApiServerCaCertificateChain",
+     "clusterName",
+     "roleArn"
+    ],
+    "type": "object"
+   },
+   "ManagedEndpointConfiguration": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "autoScalingGroups": {
+      "$ref": "#/components/schemas/AutoScalingGroupsConfiguration"
+     },
+     "eksEndpoints": {
+      "$ref": "#/components/schemas/EksEndpointsConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "TrustStoreConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateAuthorityCertificates": {
+      "items": {
+       "maxLength": 2097152,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "certificateAuthorityCertificates"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official RTBFabric API (2023-05-15). Every other official operation returns HTTP 501 UnknownOperationException. Requester and responder gateways are ACTIVE configuration metadata: VPC, subnet, security group, Auto Scaling group, EKS endpoint and trust store settings are stored without checking them, no network interface or endpoint is created, no domain name is assigned to a requester gateway and no bid request is accepted or forwarded. Links, inbound and outbound external links and link module flows are not implemented, so link counts stay 0; CreateLink, AcceptLink, CreateInboundExternalLink and their other operations return UnknownOperationException with HTTP 501. Update client tokens are accepted but not recorded.",
+  "title": "AWS RTB Fabric (simulator catalog)",
+  "version": "2023-05-15"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/requester-gateway": {
+   "post": {
+    "operationId": "rtbfabricCreateRequesterGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "description": {
+          "type": "string"
+         },
+         "securityGroupIds": {
+          "items": {
+           "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+         },
+         "subnetIds": {
+          "items": {
+           "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "vpcId": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "clientToken",
+         "securityGroupIds",
+         "subnetIds",
+         "vpcId"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "domainName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateRequesterGateway",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   }
+  },
+  "/requester-gateway/{gatewayId}": {
+   "delete": {
+    "operationId": "rtbfabricDeleteRequesterGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteRequesterGateway",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   },
+   "get": {
+    "operationId": "rtbfabricGetRequesterGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "activeLinksCount": {
+           "type": "integer"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "type": "string"
+          },
+          "domainName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayId": {
+           "type": "string"
+          },
+          "securityGroupIds": {
+           "items": {
+            "type": "string"
+           },
+           "minItems": 1,
+           "type": "array"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          },
+          "subnetIds": {
+           "items": {
+            "type": "string"
+           },
+           "minItems": 1,
+           "type": "array"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 1600,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "totalLinksCount": {
+           "type": "integer"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "vpcId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetRequesterGateway",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   }
+  },
+  "/requester-gateway/{gatewayId}/update": {
+   "post": {
+    "operationId": "rtbfabricUpdateRequesterGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "description": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "clientToken"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateRequesterGateway",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   }
+  },
+  "/requester-gateways": {
+   "get": {
+    "operationId": "rtbfabricListRequesterGateways",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 10,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gatewayIds": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListRequesterGateways",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   }
+  },
+  "/responder-gateway": {
+   "post": {
+    "operationId": "rtbfabricCreateResponderGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "description": {
+          "type": "string"
+         },
+         "domainName": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "managedEndpointConfiguration": {
+          "$ref": "#/components/schemas/ManagedEndpointConfiguration"
+         },
+         "port": {
+          "maximum": 65535,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "protocol": {
+          "enum": [
+           "HTTP",
+           "HTTPS"
+          ],
+          "type": "string"
+         },
+         "securityGroupIds": {
+          "items": {
+           "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+         },
+         "subnetIds": {
+          "items": {
+           "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "trustStoreConfiguration": {
+          "$ref": "#/components/schemas/TrustStoreConfiguration"
+         },
+         "vpcId": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "clientToken",
+         "port",
+         "protocol",
+         "securityGroupIds",
+         "subnetIds",
+         "vpcId"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateResponderGateway",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   }
+  },
+  "/responder-gateway/{gatewayId}": {
+   "delete": {
+    "operationId": "rtbfabricDeleteResponderGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteResponderGateway",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   },
+   "get": {
+    "operationId": "rtbfabricGetResponderGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "activeLinksCount": {
+           "type": "integer"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "type": "string"
+          },
+          "domainName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "gatewayId": {
+           "type": "string"
+          },
+          "inboundLinksCount": {
+           "type": "integer"
+          },
+          "managedEndpointConfiguration": {
+           "$ref": "#/components/schemas/ManagedEndpointConfiguration"
+          },
+          "port": {
+           "maximum": 65535,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "protocol": {
+           "enum": [
+            "HTTP",
+            "HTTPS"
+           ],
+           "type": "string"
+          },
+          "securityGroupIds": {
+           "items": {
+            "type": "string"
+           },
+           "minItems": 1,
+           "type": "array"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          },
+          "subnetIds": {
+           "items": {
+            "type": "string"
+           },
+           "minItems": 1,
+           "type": "array"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 1600,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "totalLinksCount": {
+           "type": "integer"
+          },
+          "trustStoreConfiguration": {
+           "$ref": "#/components/schemas/TrustStoreConfiguration"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "vpcId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetResponderGateway",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   }
+  },
+  "/responder-gateway/{gatewayId}/update": {
+   "post": {
+    "operationId": "rtbfabricUpdateResponderGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "gatewayId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "description": {
+          "type": "string"
+         },
+         "domainName": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "managedEndpointConfiguration": {
+          "$ref": "#/components/schemas/ManagedEndpointConfiguration"
+         },
+         "port": {
+          "maximum": 65535,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "protocol": {
+          "enum": [
+           "HTTP",
+           "HTTPS"
+          ],
+          "type": "string"
+         },
+         "trustStoreConfiguration": {
+          "$ref": "#/components/schemas/TrustStoreConfiguration"
+         }
+        },
+        "required": [
+         "clientToken",
+         "port",
+         "protocol"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gatewayId": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "PENDING_CREATION",
+            "ACTIVE",
+            "PENDING_DELETION",
+            "DELETED",
+            "ERROR",
+            "PENDING_UPDATE",
+            "ISOLATED",
+            "PENDING_ISOLATION",
+            "PENDING_RESTORATION"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateResponderGateway",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   }
+  },
+  "/responder-gateways": {
+   "get": {
+    "operationId": "rtbfabricListResponderGateways",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 10,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gatewayIds": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListResponderGateways",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "rtbfabricUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   },
+   "get": {
+    "operationId": "rtbfabricListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 1600,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   },
+   "post": {
+    "operationId": "rtbfabricTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "rtbfabric"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 1600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS RTB Fabric"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official RTBFabric API (2023-05-15). Every other official operation returns HTTP 501 UnknownOperationException. Requester and responder gateways are ACTIVE configuration metadata: VPC, subnet, security group, Auto Scaling group, EKS endpoint and trust store settings are stored without checking them, no network interface or endpoint is created, no domain name is assigned to a requester gateway and no bid request is accepted or forwarded. Links, inbound and outbound external links and link module flows are not implemented, so link counts stay 0; CreateLink, AcceptLink, CreateInboundExternalLink and their other operations return UnknownOperationException with HTTP 501. Update client tokens are accepted but not recorded.",
+   "name": "AWS RTB Fabric"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/rtbfabric/2023-05-15/service-2.json",
+  "sha256": "dbbbbeae424007ccce73790e126123163ed52fcd6b9f271a95a1ec302f9e9e8b",
+  "license": "Apache-2.0"
+ }
+}

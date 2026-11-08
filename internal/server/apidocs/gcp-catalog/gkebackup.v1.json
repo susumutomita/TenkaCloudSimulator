@@ -1,0 +1,1636 @@
+{
+ "components": {
+  "schemas": {
+   "BackupConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "allNamespaces": {
+      "type": "boolean"
+     },
+     "encryptionKey": {
+      "$ref": "#/components/schemas/EncryptionKey"
+     },
+     "includeSecrets": {
+      "type": "boolean"
+     },
+     "includeVolumeData": {
+      "type": "boolean"
+     },
+     "permissiveMode": {
+      "type": "boolean"
+     },
+     "selectedApplications": {
+      "$ref": "#/components/schemas/NamespacedNames"
+     },
+     "selectedNamespaceLabels": {
+      "$ref": "#/components/schemas/ResourceLabels"
+     },
+     "selectedNamespaces": {
+      "$ref": "#/components/schemas/Namespaces"
+     }
+    },
+    "type": "object"
+   },
+   "BackupPlan": {
+    "additionalProperties": false,
+    "properties": {
+     "backupChannel": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "backupConfig": {
+      "$ref": "#/components/schemas/BackupConfig"
+     },
+     "backupSchedule": {
+      "$ref": "#/components/schemas/Schedule"
+     },
+     "cluster": {
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "deactivated": {
+      "type": "boolean"
+     },
+     "description": {
+      "type": "string"
+     },
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "lastSuccessfulBackupTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "protectedNamespaceCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "protectedPodCount": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "retentionPolicy": {
+      "$ref": "#/components/schemas/RetentionPolicy"
+     },
+     "rpoRiskLevel": {
+      "format": "int32",
+      "readOnly": true,
+      "type": "integer"
+     },
+     "rpoRiskReason": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CLUSTER_PENDING",
+       "PROVISIONING",
+       "READY",
+       "FAILED",
+       "DEACTIVATED",
+       "DELETING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "stateReason": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ClusterResourceRestoreScope": {
+    "additionalProperties": false,
+    "properties": {
+     "allGroupKinds": {
+      "type": "boolean"
+     },
+     "excludedGroupKinds": {
+      "items": {
+       "$ref": "#/components/schemas/GroupKind"
+      },
+      "type": "array"
+     },
+     "noGroupKinds": {
+      "type": "boolean"
+     },
+     "selectedGroupKinds": {
+      "items": {
+       "$ref": "#/components/schemas/GroupKind"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Date": {
+    "additionalProperties": false,
+    "properties": {
+     "day": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "month": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "year": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DayOfWeekList": {
+    "additionalProperties": false,
+    "properties": {
+     "daysOfWeek": {
+      "items": {
+       "enum": [
+        "DAY_OF_WEEK_UNSPECIFIED",
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+        "SUNDAY"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionKey": {
+    "additionalProperties": false,
+    "properties": {
+     "gcpKmsEncryptionKey": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ExclusionWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "daily": {
+      "type": "boolean"
+     },
+     "daysOfWeek": {
+      "$ref": "#/components/schemas/DayOfWeekList"
+     },
+     "duration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "singleOccurrenceDate": {
+      "$ref": "#/components/schemas/Date"
+     },
+     "startTime": {
+      "$ref": "#/components/schemas/TimeOfDay"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleLongrunningListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/GoogleLongrunningOperation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleLongrunningOperation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/GoogleRpcStatus"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleRpcStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GroupKind": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceGroup": {
+      "type": "string"
+     },
+     "resourceKind": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GroupKindDependency": {
+    "additionalProperties": false,
+    "properties": {
+     "requiring": {
+      "$ref": "#/components/schemas/GroupKind"
+     },
+     "satisfying": {
+      "$ref": "#/components/schemas/GroupKind"
+     }
+    },
+    "type": "object"
+   },
+   "Label": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListBackupPlansResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "backupPlans": {
+      "items": {
+       "$ref": "#/components/schemas/BackupPlan"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListRestorePlansResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "restorePlans": {
+      "items": {
+       "$ref": "#/components/schemas/RestorePlan"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "NamespacedName": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "namespace": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NamespacedNames": {
+    "additionalProperties": false,
+    "properties": {
+     "namespacedNames": {
+      "items": {
+       "$ref": "#/components/schemas/NamespacedName"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Namespaces": {
+    "additionalProperties": false,
+    "properties": {
+     "namespaces": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "groupKinds": {
+      "items": {
+       "$ref": "#/components/schemas/GroupKind"
+      },
+      "type": "array"
+     },
+     "jsonPath": {
+      "type": "string"
+     },
+     "namespaces": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceLabels": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceLabels": {
+      "items": {
+       "$ref": "#/components/schemas/Label"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RestoreConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "allNamespaces": {
+      "type": "boolean"
+     },
+     "clusterResourceConflictPolicy": {
+      "enum": [
+       "CLUSTER_RESOURCE_CONFLICT_POLICY_UNSPECIFIED",
+       "USE_EXISTING_VERSION",
+       "USE_BACKUP_VERSION"
+      ],
+      "type": "string"
+     },
+     "clusterResourceRestoreScope": {
+      "$ref": "#/components/schemas/ClusterResourceRestoreScope"
+     },
+     "excludedNamespaces": {
+      "$ref": "#/components/schemas/Namespaces"
+     },
+     "namespacedResourceRestoreMode": {
+      "enum": [
+       "NAMESPACED_RESOURCE_RESTORE_MODE_UNSPECIFIED",
+       "DELETE_AND_RESTORE",
+       "FAIL_ON_CONFLICT",
+       "MERGE_SKIP_ON_CONFLICT",
+       "MERGE_REPLACE_VOLUME_ON_CONFLICT",
+       "MERGE_REPLACE_ON_CONFLICT"
+      ],
+      "type": "string"
+     },
+     "noNamespaces": {
+      "type": "boolean"
+     },
+     "restoreOrder": {
+      "$ref": "#/components/schemas/RestoreOrder"
+     },
+     "selectedApplications": {
+      "$ref": "#/components/schemas/NamespacedNames"
+     },
+     "selectedNamespaces": {
+      "$ref": "#/components/schemas/Namespaces"
+     },
+     "substitutionRules": {
+      "items": {
+       "$ref": "#/components/schemas/SubstitutionRule"
+      },
+      "type": "array"
+     },
+     "transformationRules": {
+      "items": {
+       "$ref": "#/components/schemas/TransformationRule"
+      },
+      "type": "array"
+     },
+     "volumeDataRestorePolicy": {
+      "enum": [
+       "VOLUME_DATA_RESTORE_POLICY_UNSPECIFIED",
+       "RESTORE_VOLUME_DATA_FROM_BACKUP",
+       "REUSE_VOLUME_HANDLE_FROM_BACKUP",
+       "NO_VOLUME_DATA_RESTORATION"
+      ],
+      "type": "string"
+     },
+     "volumeDataRestorePolicyBindings": {
+      "items": {
+       "$ref": "#/components/schemas/VolumeDataRestorePolicyBinding"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RestoreOrder": {
+    "additionalProperties": false,
+    "properties": {
+     "groupKindDependencies": {
+      "items": {
+       "$ref": "#/components/schemas/GroupKindDependency"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RestorePlan": {
+    "additionalProperties": false,
+    "properties": {
+     "backupPlan": {
+      "type": "string"
+     },
+     "cluster": {
+      "type": "string"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "etag": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "restoreChannel": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "restoreConfig": {
+      "$ref": "#/components/schemas/RestoreConfig"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "CLUSTER_PENDING",
+       "READY",
+       "FAILED",
+       "DELETING"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "stateReason": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RetentionPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "backupDeleteLockDays": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "backupRetainDays": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "locked": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "RpoConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "exclusionWindows": {
+      "items": {
+       "$ref": "#/components/schemas/ExclusionWindow"
+      },
+      "type": "array"
+     },
+     "targetRpoMinutes": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Schedule": {
+    "additionalProperties": false,
+    "properties": {
+     "cronSchedule": {
+      "type": "string"
+     },
+     "nextScheduledBackupTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "paused": {
+      "type": "boolean"
+     },
+     "rpoConfig": {
+      "$ref": "#/components/schemas/RpoConfig"
+     }
+    },
+    "type": "object"
+   },
+   "SubstitutionRule": {
+    "additionalProperties": false,
+    "properties": {
+     "newValue": {
+      "type": "string"
+     },
+     "originalValuePattern": {
+      "type": "string"
+     },
+     "targetGroupKinds": {
+      "items": {
+       "$ref": "#/components/schemas/GroupKind"
+      },
+      "type": "array"
+     },
+     "targetJsonPath": {
+      "type": "string"
+     },
+     "targetNamespaces": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "TimeOfDay": {
+    "additionalProperties": false,
+    "properties": {
+     "hours": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minutes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nanos": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "seconds": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "TransformationRule": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "type": "string"
+     },
+     "fieldActions": {
+      "items": {
+       "$ref": "#/components/schemas/TransformationRuleAction"
+      },
+      "type": "array"
+     },
+     "resourceFilter": {
+      "$ref": "#/components/schemas/ResourceFilter"
+     }
+    },
+    "type": "object"
+   },
+   "TransformationRuleAction": {
+    "additionalProperties": false,
+    "properties": {
+     "fromPath": {
+      "type": "string"
+     },
+     "op": {
+      "enum": [
+       "OP_UNSPECIFIED",
+       "REMOVE",
+       "MOVE",
+       "COPY",
+       "ADD",
+       "TEST",
+       "REPLACE"
+      ],
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VolumeDataRestorePolicyBinding": {
+    "additionalProperties": false,
+    "properties": {
+     "policy": {
+      "enum": [
+       "VOLUME_DATA_RESTORE_POLICY_UNSPECIFIED",
+       "RESTORE_VOLUME_DATA_FROM_BACKUP",
+       "REUSE_VOLUME_HANDLE_FROM_BACKUP",
+       "NO_VOLUME_DATA_RESTORATION"
+      ],
+      "type": "string"
+     },
+     "volumeType": {
+      "enum": [
+       "VOLUME_TYPE_UNSPECIFIED",
+       "GCE_PERSISTENT_DISK"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Backup for GKE API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Backup plans and restore plans are configuration metadata: the GKE cluster name is checked only for its format, no Backup for GKE agent runs, and no Kubernetes resource or volume is backed up or restored; plans report READY immediately. A restore plan must name an existing backup plan. Deactivated plans and locked retention policies are refused because their locks are not enforced. Backups, restores and channels remain unimplemented. Long-running operations complete synchronously.",
+  "title": "Backup for GKE (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/backupPlans": {
+   "get": {
+    "operationId": "gkebackup.projects.locations.backupPlans.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListBackupPlansResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupPlans.list",
+    "tags": [
+     "Backup for GKE"
+    ]
+   },
+   "post": {
+    "operationId": "gkebackup.projects.locations.backupPlans.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "backupPlanId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BackupPlan"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupPlans.create",
+    "tags": [
+     "Backup for GKE"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/backupPlans/{backupPlansId}": {
+   "delete": {
+    "operationId": "gkebackup.projects.locations.backupPlans.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupPlansId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupPlans.delete",
+    "tags": [
+     "Backup for GKE"
+    ]
+   },
+   "get": {
+    "operationId": "gkebackup.projects.locations.backupPlans.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupPlansId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BackupPlan"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupPlans.get",
+    "tags": [
+     "Backup for GKE"
+    ]
+   },
+   "patch": {
+    "operationId": "gkebackup.projects.locations.backupPlans.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "backupPlansId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BackupPlan"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.backupPlans.patch",
+    "tags": [
+     "Backup for GKE"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "gkebackup.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Backup for GKE"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "gkebackup.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Backup for GKE"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/restorePlans": {
+   "get": {
+    "operationId": "gkebackup.projects.locations.restorePlans.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListRestorePlansResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.restorePlans.list",
+    "tags": [
+     "Backup for GKE"
+    ]
+   },
+   "post": {
+    "operationId": "gkebackup.projects.locations.restorePlans.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "restorePlanId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RestorePlan"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.restorePlans.create",
+    "tags": [
+     "Backup for GKE"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/restorePlans/{restorePlansId}": {
+   "delete": {
+    "operationId": "gkebackup.projects.locations.restorePlans.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "restorePlansId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.restorePlans.delete",
+    "tags": [
+     "Backup for GKE"
+    ]
+   },
+   "get": {
+    "operationId": "gkebackup.projects.locations.restorePlans.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "restorePlansId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RestorePlan"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.restorePlans.get",
+    "tags": [
+     "Backup for GKE"
+    ]
+   },
+   "patch": {
+    "operationId": "gkebackup.projects.locations.restorePlans.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "restorePlansId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RestorePlan"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GoogleLongrunningOperation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.restorePlans.patch",
+    "tags": [
+     "Backup for GKE"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/gkebackup"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Backup for GKE API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Backup plans and restore plans are configuration metadata: the GKE cluster name is checked only for its format, no Backup for GKE agent runs, and no Kubernetes resource or volume is backed up or restored; plans report READY immediately. A restore plan must name an existing backup plan. Deactivated plans and locked retention policies are refused because their locks are not enforced. Backups, restores and channels remain unimplemented. Long-running operations complete synchronously.",
+   "name": "Backup for GKE"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/gkebackup.v1.json",
+  "sha256": "0ac6cf73706e3bfe4b9b744d5452e6df71f91f9cd6c7373474d3026288e668dd",
+  "license": "Apache-2.0",
+  "revision": "20260715"
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "client": "textract",
+ "steps": [
+  {"op": "create_adapter", "args": {"AdapterName": "fixture-adapter", "FeatureTypes": ["QUERIES"], "Description": "Invoices", "Tags": {"team": "a"}}, "save": {"adapter": "AdapterId"}},
+  {"op": "get_adapter", "args": {"AdapterId": "${adapter}"}, "expect": {"AdapterName": "fixture-adapter", "FeatureTypes": ["QUERIES"], "Tags": {"team": "a"}}},
+  {"op": "list_adapters", "args": {}, "expect": {"Adapters#count": 1, "Adapters[0].AdapterId": "${adapter}"}},
+  {"op": "update_adapter", "args": {"AdapterId": "${adapter}", "Description": "Receipts", "AutoUpdate": "DISABLED"}, "expect": {"Description": "Receipts", "AutoUpdate": "DISABLED"}},
+  {"op": "tag_resource", "args": {"ResourceARN": "arn:aws:textract:us-east-1:000000000000:/adapters/${adapter}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceARN": "arn:aws:textract:us-east-1:000000000000:/adapters/${adapter}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "arn:aws:textract:us-east-1:000000000000:/adapters/${adapter}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "list_adapters", "args": {"AfterCreationTime": 0}, "error": "ValidationException", "status": 400},
+  {"op": "list_adapter_versions", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_adapter", "args": {"AdapterId": "000000000000"}, "error": "ResourceNotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "list_adapters", "args": {}, "expect": {"Adapters#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_adapter", "args": {"AdapterId": "${adapter}"}, "expect": {"Description": "Receipts"}}
+ ],
+ "cleanup": [
+  {"op": "delete_adapter", "args": {"AdapterId": "${adapter}"}},
+  {"op": "list_adapters", "args": {}, "expect": {"Adapters#count": 0}}
+ ]
+}

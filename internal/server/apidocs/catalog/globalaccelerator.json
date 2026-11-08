@@ -1,0 +1,992 @@
+{
+ "components": {
+  "schemas": {
+   "Accelerator": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceleratorArn": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DnsName": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "DualStackDnsName": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "Events": {
+      "items": {
+       "$ref": "#/components/schemas/AcceleratorEvent"
+      },
+      "type": "array"
+     },
+     "IpAddressType": {
+      "enum": [
+       "IPV4",
+       "DUAL_STACK"
+      ],
+      "type": "string"
+     },
+     "IpSets": {
+      "items": {
+       "$ref": "#/components/schemas/IpSet"
+      },
+      "type": "array"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "DEPLOYED",
+       "IN_PROGRESS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AcceleratorEvent": {
+    "additionalProperties": false,
+    "properties": {
+     "Message": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Timestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "Attachment": {
+    "additionalProperties": false,
+    "properties": {
+     "AttachmentArn": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "Principals": {
+      "items": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Resources": {
+      "items": {
+       "$ref": "#/components/schemas/Resource"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CreateAcceleratorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "IdempotencyToken": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "IpAddressType": {
+      "enum": [
+       "IPV4",
+       "DUAL_STACK"
+      ],
+      "type": "string"
+     },
+     "IpAddresses": {
+      "items": {
+       "maxLength": 45,
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Name": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "IdempotencyToken"
+    ],
+    "type": "object"
+   },
+   "CreateAcceleratorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Accelerator": {
+      "$ref": "#/components/schemas/Accelerator"
+     }
+    },
+    "type": "object"
+   },
+   "CreateCrossAccountAttachmentRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "IdempotencyToken": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "Principals": {
+      "items": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Resources": {
+      "items": {
+       "$ref": "#/components/schemas/Resource"
+      },
+      "type": "array"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "IdempotencyToken"
+    ],
+    "type": "object"
+   },
+   "CreateCrossAccountAttachmentResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CrossAccountAttachment": {
+      "$ref": "#/components/schemas/Attachment"
+     }
+    },
+    "type": "object"
+   },
+   "CreateCustomRoutingAcceleratorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "IdempotencyToken": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "IpAddressType": {
+      "enum": [
+       "IPV4",
+       "DUAL_STACK"
+      ],
+      "type": "string"
+     },
+     "IpAddresses": {
+      "items": {
+       "maxLength": 45,
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Name": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "IdempotencyToken"
+    ],
+    "type": "object"
+   },
+   "CreateCustomRoutingAcceleratorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Accelerator": {
+      "$ref": "#/components/schemas/CustomRoutingAccelerator"
+     }
+    },
+    "type": "object"
+   },
+   "CustomRoutingAccelerator": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceleratorArn": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DnsName": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "IpAddressType": {
+      "enum": [
+       "IPV4",
+       "DUAL_STACK"
+      ],
+      "type": "string"
+     },
+     "IpSets": {
+      "items": {
+       "$ref": "#/components/schemas/IpSet"
+      },
+      "type": "array"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "DEPLOYED",
+       "IN_PROGRESS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteAcceleratorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceleratorArn": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AcceleratorArn"
+    ],
+    "type": "object"
+   },
+   "DeleteCrossAccountAttachmentRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AttachmentArn": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AttachmentArn"
+    ],
+    "type": "object"
+   },
+   "DeleteCustomRoutingAcceleratorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceleratorArn": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AcceleratorArn"
+    ],
+    "type": "object"
+   },
+   "DescribeAcceleratorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceleratorArn": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AcceleratorArn"
+    ],
+    "type": "object"
+   },
+   "DescribeAcceleratorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Accelerator": {
+      "$ref": "#/components/schemas/Accelerator"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeCrossAccountAttachmentRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AttachmentArn": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AttachmentArn"
+    ],
+    "type": "object"
+   },
+   "DescribeCrossAccountAttachmentResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CrossAccountAttachment": {
+      "$ref": "#/components/schemas/Attachment"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeCustomRoutingAcceleratorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceleratorArn": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AcceleratorArn"
+    ],
+    "type": "object"
+   },
+   "DescribeCustomRoutingAcceleratorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Accelerator": {
+      "$ref": "#/components/schemas/CustomRoutingAccelerator"
+     }
+    },
+    "type": "object"
+   },
+   "IpSet": {
+    "additionalProperties": false,
+    "properties": {
+     "IpAddressFamily": {
+      "enum": [
+       "IPv4",
+       "IPv6"
+      ],
+      "type": "string"
+     },
+     "IpAddresses": {
+      "items": {
+       "maxLength": 45,
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 0,
+      "type": "array"
+     },
+     "IpFamily": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListAcceleratorsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListAcceleratorsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Accelerators": {
+      "items": {
+       "$ref": "#/components/schemas/Accelerator"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListCrossAccountAttachmentsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListCrossAccountAttachmentsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CrossAccountAttachments": {
+      "items": {
+       "$ref": "#/components/schemas/Attachment"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListCustomRoutingAcceleratorsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListCustomRoutingAcceleratorsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Accelerators": {
+      "items": {
+       "$ref": "#/components/schemas/CustomRoutingAccelerator"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Resource": {
+    "additionalProperties": false,
+    "properties": {
+     "Cidr": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "EndpointId": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Region": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceArn",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateAcceleratorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceleratorArn": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "IpAddressType": {
+      "enum": [
+       "IPV4",
+       "DUAL_STACK"
+      ],
+      "type": "string"
+     },
+     "IpAddresses": {
+      "items": {
+       "maxLength": 45,
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Name": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AcceleratorArn"
+    ],
+    "type": "object"
+   },
+   "UpdateAcceleratorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Accelerator": {
+      "$ref": "#/components/schemas/Accelerator"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateCrossAccountAttachmentRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AddPrincipals": {
+      "items": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "AddResources": {
+      "items": {
+       "$ref": "#/components/schemas/Resource"
+      },
+      "type": "array"
+     },
+     "AttachmentArn": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "RemovePrincipals": {
+      "items": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "RemoveResources": {
+      "items": {
+       "$ref": "#/components/schemas/Resource"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "AttachmentArn"
+    ],
+    "type": "object"
+   },
+   "UpdateCrossAccountAttachmentResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CrossAccountAttachment": {
+      "$ref": "#/components/schemas/Attachment"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateCustomRoutingAcceleratorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AcceleratorArn": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "IpAddressType": {
+      "enum": [
+       "IPV4",
+       "DUAL_STACK"
+      ],
+      "type": "string"
+     },
+     "IpAddresses": {
+      "items": {
+       "maxLength": 45,
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Name": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AcceleratorArn"
+    ],
+    "type": "object"
+   },
+   "UpdateCustomRoutingAcceleratorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Accelerator": {
+      "$ref": "#/components/schemas/CustomRoutingAccelerator"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Global Accelerator API (2018-08-08). Every other official operation returns HTTP 501 UnknownOperationException. Standard and custom routing accelerators are global configuration metadata reported DEPLOYED with no IpSets, DnsName or DualStackDnsName: no anycast address is allocated and no traffic is accepted or routed. Accelerators must stay disabled, so Enabled must be false at creation and cannot become true; IpAddresses (bring your own IP) is refused. Listeners, endpoint groups, endpoints, accelerator attributes (flow logs), custom routing traffic rules and BYOIP address ranges are not implemented; CreateListener, CreateEndpointGroup, AddEndpoints, ProvisionByoipCidr and their other operations return UnknownOperationException with HTTP 501, so no accelerator has a listener when it is deleted. Cross-account attachments store their principals and resources without sharing anything with another account or checking the named endpoints and CIDR ranges; UpdateCrossAccountAttachment can only rename an attachment and refuses AddPrincipals, RemovePrincipals, AddResources and RemoveResources.",
+  "title": "AWS Global Accelerator (simulator catalog)",
+  "version": "2018-08-08"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "globalacceleratorJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "GlobalAccelerator_V20180706.CreateAccelerator",
+        "GlobalAccelerator_V20180706.CreateCrossAccountAttachment",
+        "GlobalAccelerator_V20180706.CreateCustomRoutingAccelerator",
+        "GlobalAccelerator_V20180706.DeleteAccelerator",
+        "GlobalAccelerator_V20180706.DeleteCrossAccountAttachment",
+        "GlobalAccelerator_V20180706.DeleteCustomRoutingAccelerator",
+        "GlobalAccelerator_V20180706.DescribeAccelerator",
+        "GlobalAccelerator_V20180706.DescribeCrossAccountAttachment",
+        "GlobalAccelerator_V20180706.DescribeCustomRoutingAccelerator",
+        "GlobalAccelerator_V20180706.ListAccelerators",
+        "GlobalAccelerator_V20180706.ListCrossAccountAttachments",
+        "GlobalAccelerator_V20180706.ListCustomRoutingAccelerators",
+        "GlobalAccelerator_V20180706.ListTagsForResource",
+        "GlobalAccelerator_V20180706.TagResource",
+        "GlobalAccelerator_V20180706.UntagResource",
+        "GlobalAccelerator_V20180706.UpdateAccelerator",
+        "GlobalAccelerator_V20180706.UpdateCrossAccountAttachment",
+        "GlobalAccelerator_V20180706.UpdateCustomRoutingAccelerator"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateAccelerator": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.CreateAccelerator",
+         "value": {}
+        },
+        "CreateCrossAccountAttachment": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.CreateCrossAccountAttachment",
+         "value": {}
+        },
+        "CreateCustomRoutingAccelerator": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.CreateCustomRoutingAccelerator",
+         "value": {}
+        },
+        "DeleteAccelerator": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.DeleteAccelerator",
+         "value": {}
+        },
+        "DeleteCrossAccountAttachment": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.DeleteCrossAccountAttachment",
+         "value": {}
+        },
+        "DeleteCustomRoutingAccelerator": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.DeleteCustomRoutingAccelerator",
+         "value": {}
+        },
+        "DescribeAccelerator": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.DescribeAccelerator",
+         "value": {}
+        },
+        "DescribeCrossAccountAttachment": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.DescribeCrossAccountAttachment",
+         "value": {}
+        },
+        "DescribeCustomRoutingAccelerator": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.DescribeCustomRoutingAccelerator",
+         "value": {}
+        },
+        "ListAccelerators": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.ListAccelerators",
+         "value": {}
+        },
+        "ListCrossAccountAttachments": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.ListCrossAccountAttachments",
+         "value": {}
+        },
+        "ListCustomRoutingAccelerators": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.ListCustomRoutingAccelerators",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.UntagResource",
+         "value": {}
+        },
+        "UpdateAccelerator": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.UpdateAccelerator",
+         "value": {}
+        },
+        "UpdateCrossAccountAttachment": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.UpdateCrossAccountAttachment",
+         "value": {}
+        },
+        "UpdateCustomRoutingAccelerator": {
+         "summary": "X-Amz-Target: GlobalAccelerator_V20180706.UpdateCustomRoutingAccelerator",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS Global Accelerator JSON 1.1 operations",
+    "tags": [
+     "AWS Global Accelerator"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Global Accelerator API (2018-08-08). Every other official operation returns HTTP 501 UnknownOperationException. Standard and custom routing accelerators are global configuration metadata reported DEPLOYED with no IpSets, DnsName or DualStackDnsName: no anycast address is allocated and no traffic is accepted or routed. Accelerators must stay disabled, so Enabled must be false at creation and cannot become true; IpAddresses (bring your own IP) is refused. Listeners, endpoint groups, endpoints, accelerator attributes (flow logs), custom routing traffic rules and BYOIP address ranges are not implemented; CreateListener, CreateEndpointGroup, AddEndpoints, ProvisionByoipCidr and their other operations return UnknownOperationException with HTTP 501, so no accelerator has a listener when it is deleted. Cross-account attachments store their principals and resources without sharing anything with another account or checking the named endpoints and CIDR ranges; UpdateCrossAccountAttachment can only rename an attachment and refuses AddPrincipals, RemovePrincipals, AddResources and RemoveResources.",
+   "name": "AWS Global Accelerator"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/globalaccelerator/2018-08-08/service-2.json",
+  "sha256": "63967da7d733c0263a08b302c322c28f2e0d1891684e87a6992f3f4d1d7d679c",
+  "license": "Apache-2.0"
+ }
+}

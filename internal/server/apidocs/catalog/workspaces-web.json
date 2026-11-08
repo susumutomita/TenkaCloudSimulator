@@ -1,0 +1,3049 @@
+{
+ "components": {
+  "schemas": {
+   "BrowserSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalEncryptionContext": {
+      "additionalProperties": {
+       "maxLength": 131072,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "associatedPortalArns": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "browserPolicy": {
+      "maxLength": 131072,
+      "minLength": 2,
+      "type": "string"
+     },
+     "browserSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "customerManagedKey": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "webContentFilteringPolicy": {
+      "$ref": "#/components/schemas/WebContentFilteringPolicy"
+     }
+    },
+    "required": [
+     "browserSettingsArn"
+    ],
+    "type": "object"
+   },
+   "BrowserSettingsSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "browserSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "browserSettingsArn"
+    ],
+    "type": "object"
+   },
+   "CookieSpecification": {
+    "additionalProperties": false,
+    "properties": {
+     "domain": {
+      "maxLength": 253,
+      "minLength": 0,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 4096,
+      "minLength": 0,
+      "type": "string"
+     },
+     "path": {
+      "maxLength": 2000,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "domain"
+    ],
+    "type": "object"
+   },
+   "CookieSynchronizationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "allowlist": {
+      "items": {
+       "$ref": "#/components/schemas/CookieSpecification"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "blocklist": {
+      "items": {
+       "$ref": "#/components/schemas/CookieSpecification"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "allowlist"
+    ],
+    "type": "object"
+   },
+   "IpAccessSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalEncryptionContext": {
+      "additionalProperties": {
+       "maxLength": 131072,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "associatedPortalArns": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "customerManagedKey": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ipAccessSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "ipRules": {
+      "items": {
+       "$ref": "#/components/schemas/IpRule"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ipAccessSettingsArn"
+    ],
+    "type": "object"
+   },
+   "IpAccessSettingsSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ipAccessSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ipAccessSettingsArn"
+    ],
+    "type": "object"
+   },
+   "IpRule": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ipRange": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ipRange"
+    ],
+    "type": "object"
+   },
+   "NetworkSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "associatedPortalArns": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "networkSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "securityGroupIds": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "subnetIds": {
+      "items": {
+       "maxLength": 32,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 2,
+      "type": "array"
+     },
+     "vpcId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "networkSettingsArn"
+    ],
+    "type": "object"
+   },
+   "NetworkSettingsSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "networkSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "vpcId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "networkSettingsArn"
+    ],
+    "type": "object"
+   },
+   "Portal": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalEncryptionContext": {
+      "additionalProperties": {
+       "maxLength": 131072,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "authenticationType": {
+      "enum": [
+       "Standard",
+       "IAM_Identity_Center"
+      ],
+      "type": "string"
+     },
+     "browserSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "browserType": {
+      "enum": [
+       "Chrome"
+      ],
+      "type": "string"
+     },
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "customerManagedKey": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "dataProtectionSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "instanceType": {
+      "enum": [
+       "standard.regular",
+       "standard.large",
+       "standard.xlarge"
+      ],
+      "type": "string"
+     },
+     "ipAccessSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "maxConcurrentSessions": {
+      "maximum": 5000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "networkSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "portalArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "portalEndpoint": {
+      "maxLength": 253,
+      "minLength": 1,
+      "type": "string"
+     },
+     "portalStatus": {
+      "enum": [
+       "Incomplete",
+       "Pending",
+       "Active"
+      ],
+      "type": "string"
+     },
+     "rendererType": {
+      "enum": [
+       "AppStream"
+      ],
+      "type": "string"
+     },
+     "sessionLoggerArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "statusReason": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "trustStoreArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "userAccessLoggingSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "userSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "portalArn"
+    ],
+    "type": "object"
+   },
+   "PortalSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "authenticationType": {
+      "enum": [
+       "Standard",
+       "IAM_Identity_Center"
+      ],
+      "type": "string"
+     },
+     "browserSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "browserType": {
+      "enum": [
+       "Chrome"
+      ],
+      "type": "string"
+     },
+     "creationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "dataProtectionSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "instanceType": {
+      "enum": [
+       "standard.regular",
+       "standard.large",
+       "standard.xlarge"
+      ],
+      "type": "string"
+     },
+     "ipAccessSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "maxConcurrentSessions": {
+      "maximum": 5000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "networkSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "portalArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "portalEndpoint": {
+      "maxLength": 253,
+      "minLength": 1,
+      "type": "string"
+     },
+     "portalStatus": {
+      "enum": [
+       "Incomplete",
+       "Pending",
+       "Active"
+      ],
+      "type": "string"
+     },
+     "rendererType": {
+      "enum": [
+       "AppStream"
+      ],
+      "type": "string"
+     },
+     "sessionLoggerArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "trustStoreArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "userAccessLoggingSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "userSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "portalArn"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "ToolbarConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "hiddenToolbarItems": {
+      "items": {
+       "enum": [
+        "Windows",
+        "DualMonitor",
+        "FullScreen",
+        "Webcam",
+        "Microphone"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "maxDisplayResolution": {
+      "enum": [
+       "size4096X2160",
+       "size3840X2160",
+       "size3440X1440",
+       "size2560X1440",
+       "size1920X1080",
+       "size1280X720",
+       "size1024X768",
+       "size800X600"
+      ],
+      "type": "string"
+     },
+     "toolbarType": {
+      "enum": [
+       "Floating",
+       "Docked"
+      ],
+      "type": "string"
+     },
+     "visualMode": {
+      "enum": [
+       "Dark",
+       "Light"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UserSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalEncryptionContext": {
+      "additionalProperties": {
+       "maxLength": 131072,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "associatedPortalArns": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "cookieSynchronizationConfiguration": {
+      "$ref": "#/components/schemas/CookieSynchronizationConfiguration"
+     },
+     "copyAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "customerManagedKey": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "deepLinkAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "disconnectTimeoutInMinutes": {
+      "maximum": 600,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "downloadAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "idleDisconnectTimeoutInMinutes": {
+      "maximum": 60,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "pasteAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "printAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "toolbarConfiguration": {
+      "$ref": "#/components/schemas/ToolbarConfiguration"
+     },
+     "uploadAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "userSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "userSettingsArn"
+    ],
+    "type": "object"
+   },
+   "UserSettingsSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "cookieSynchronizationConfiguration": {
+      "$ref": "#/components/schemas/CookieSynchronizationConfiguration"
+     },
+     "copyAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "deepLinkAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "disconnectTimeoutInMinutes": {
+      "maximum": 600,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "downloadAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "idleDisconnectTimeoutInMinutes": {
+      "maximum": 60,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "pasteAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "printAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "toolbarConfiguration": {
+      "$ref": "#/components/schemas/ToolbarConfiguration"
+     },
+     "uploadAllowed": {
+      "enum": [
+       "Disabled",
+       "Enabled"
+      ],
+      "type": "string"
+     },
+     "userSettingsArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "userSettingsArn"
+    ],
+    "type": "object"
+   },
+   "WebContentFilteringPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedUrls": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     },
+     "blockedCategories": {
+      "items": {
+       "enum": [
+        "Cults",
+        "Gambling",
+        "Nudity",
+        "Pornography",
+        "SexEducation",
+        "Tasteless",
+        "Violence",
+        "DownloadSites",
+        "ImageSharing",
+        "PeerToPeer",
+        "StreamingMediaAndDownloads",
+        "GenerativeAI",
+        "CriminalActivity",
+        "Hacking",
+        "HateAndIntolerance",
+        "IllegalDrug",
+        "IllegalSoftware",
+        "SchoolCheating",
+        "SelfHarm",
+        "Weapons",
+        "Chat",
+        "Games",
+        "InstantMessaging",
+        "ProfessionalNetwork",
+        "SocialNetworking",
+        "WebBasedEmail",
+        "ParkedDomains"
+       ],
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "blockedUrls": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon WorkSpaces Web API (2020-07-08). Every other official operation returns HTTP 501 UnknownOperationException. Portals and browser, network, user and IP access settings are configuration metadata: portals stay Incomplete, the portal endpoint is not served, and no streaming instance, session, network interface or IAM Identity Center application is created. Sessions, identity providers, trust stores, data protection settings, session loggers and user access logging settings return UnknownOperationException with HTTP 501. Settings cannot be associated with portals, so associatedPortalArns stays empty and portals name no settings. The official Associate*, Disassociate* and ListIdentityProviders operations below a portal ARN return HTTP 501. VPCs, subnets, security groups and KMS keys are stored without checking them, and browser policies must be JSON objects. Deleting a missing resource succeeds, as the official delete operations model no not-found error. Update and tagging client tokens are accepted but not recorded.",
+  "title": "Amazon WorkSpaces Secure Browser (simulator catalog)",
+  "version": "2020-07-08"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/browserSettings": {
+   "get": {
+    "operationId": "workspaces-webListBrowserSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "browserSettings": {
+           "items": {
+            "$ref": "#/components/schemas/BrowserSettingsSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListBrowserSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "post": {
+    "operationId": "workspaces-webCreateBrowserSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "additionalEncryptionContext": {
+          "additionalProperties": {
+           "maxLength": 131072,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "browserPolicy": {
+          "maxLength": 131072,
+          "minLength": 2,
+          "type": "string"
+         },
+         "clientToken": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "customerManagedKey": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         },
+         "webContentFilteringPolicy": {
+          "$ref": "#/components/schemas/WebContentFilteringPolicy"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "browserSettingsArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateBrowserSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   }
+  },
+  "/browserSettings/{browserSettingsArn}": {
+   "delete": {
+    "operationId": "workspaces-webDeleteBrowserSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "browserSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteBrowserSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "get": {
+    "operationId": "workspaces-webGetBrowserSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "browserSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "browserSettings": {
+           "$ref": "#/components/schemas/BrowserSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetBrowserSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "patch": {
+    "operationId": "workspaces-webUpdateBrowserSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "browserSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "browserPolicy": {
+          "maxLength": 131072,
+          "minLength": 2,
+          "type": "string"
+         },
+         "clientToken": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "webContentFilteringPolicy": {
+          "$ref": "#/components/schemas/WebContentFilteringPolicy"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "browserSettings": {
+           "$ref": "#/components/schemas/BrowserSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateBrowserSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   }
+  },
+  "/ipAccessSettings": {
+   "get": {
+    "operationId": "workspaces-webListIpAccessSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ipAccessSettings": {
+           "items": {
+            "$ref": "#/components/schemas/IpAccessSettingsSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListIpAccessSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "post": {
+    "operationId": "workspaces-webCreateIpAccessSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "additionalEncryptionContext": {
+          "additionalProperties": {
+           "maxLength": 131072,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "clientToken": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "customerManagedKey": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ipRules": {
+          "items": {
+           "$ref": "#/components/schemas/IpRule"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "ipRules"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ipAccessSettingsArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateIpAccessSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   }
+  },
+  "/ipAccessSettings/{ipAccessSettingsArn}": {
+   "delete": {
+    "operationId": "workspaces-webDeleteIpAccessSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ipAccessSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteIpAccessSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "get": {
+    "operationId": "workspaces-webGetIpAccessSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ipAccessSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ipAccessSettings": {
+           "$ref": "#/components/schemas/IpAccessSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetIpAccessSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "patch": {
+    "operationId": "workspaces-webUpdateIpAccessSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ipAccessSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ipRules": {
+          "items": {
+           "$ref": "#/components/schemas/IpRule"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ipAccessSettings": {
+           "$ref": "#/components/schemas/IpAccessSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateIpAccessSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   }
+  },
+  "/networkSettings": {
+   "get": {
+    "operationId": "workspaces-webListNetworkSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "networkSettings": {
+           "items": {
+            "$ref": "#/components/schemas/NetworkSettingsSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListNetworkSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "post": {
+    "operationId": "workspaces-webCreateNetworkSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "securityGroupIds": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "type": "array"
+         },
+         "subnetIds": {
+          "items": {
+           "maxLength": 32,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 2,
+          "type": "array"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         },
+         "vpcId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "securityGroupIds",
+         "subnetIds",
+         "vpcId"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "networkSettingsArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateNetworkSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   }
+  },
+  "/networkSettings/{networkSettingsArn}": {
+   "delete": {
+    "operationId": "workspaces-webDeleteNetworkSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "networkSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteNetworkSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "get": {
+    "operationId": "workspaces-webGetNetworkSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "networkSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "networkSettings": {
+           "$ref": "#/components/schemas/NetworkSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetNetworkSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "patch": {
+    "operationId": "workspaces-webUpdateNetworkSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "networkSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "securityGroupIds": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "type": "array"
+         },
+         "subnetIds": {
+          "items": {
+           "maxLength": 32,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 2,
+          "type": "array"
+         },
+         "vpcId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "networkSettings": {
+           "$ref": "#/components/schemas/NetworkSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateNetworkSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   }
+  },
+  "/portals": {
+   "get": {
+    "operationId": "workspaces-webListPortals",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "portals": {
+           "items": {
+            "$ref": "#/components/schemas/PortalSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListPortals",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "post": {
+    "operationId": "workspaces-webCreatePortal",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "additionalEncryptionContext": {
+          "additionalProperties": {
+           "maxLength": 131072,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "authenticationType": {
+          "enum": [
+           "Standard",
+           "IAM_Identity_Center"
+          ],
+          "type": "string"
+         },
+         "clientToken": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "customerManagedKey": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "instanceType": {
+          "enum": [
+           "standard.regular",
+           "standard.large",
+           "standard.xlarge"
+          ],
+          "type": "string"
+         },
+         "maxConcurrentSessions": {
+          "maximum": 5000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "portalArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "portalEndpoint": {
+           "maxLength": 253,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreatePortal",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   }
+  },
+  "/portals/{portalArn}": {
+   "delete": {
+    "operationId": "workspaces-webDeletePortal",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "portalArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeletePortal",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "get": {
+    "operationId": "workspaces-webGetPortal",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "portalArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "portal": {
+           "$ref": "#/components/schemas/Portal"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetPortal",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "put": {
+    "operationId": "workspaces-webUpdatePortal",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "portalArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "authenticationType": {
+          "enum": [
+           "Standard",
+           "IAM_Identity_Center"
+          ],
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "instanceType": {
+          "enum": [
+           "standard.regular",
+           "standard.large",
+           "standard.xlarge"
+          ],
+          "type": "string"
+         },
+         "maxConcurrentSessions": {
+          "maximum": 5000,
+          "minimum": 1,
+          "type": "integer"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "portal": {
+           "$ref": "#/components/schemas/Portal"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdatePortal",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "workspaces-webUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "get": {
+    "operationId": "workspaces-webListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "post": {
+    "operationId": "workspaces-webTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   }
+  },
+  "/userSettings": {
+   "get": {
+    "operationId": "workspaces-webListUserSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "userSettings": {
+           "items": {
+            "$ref": "#/components/schemas/UserSettingsSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListUserSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "post": {
+    "operationId": "workspaces-webCreateUserSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "additionalEncryptionContext": {
+          "additionalProperties": {
+           "maxLength": 131072,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "clientToken": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "cookieSynchronizationConfiguration": {
+          "$ref": "#/components/schemas/CookieSynchronizationConfiguration"
+         },
+         "copyAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         },
+         "customerManagedKey": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "deepLinkAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         },
+         "disconnectTimeoutInMinutes": {
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "downloadAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         },
+         "idleDisconnectTimeoutInMinutes": {
+          "maximum": 60,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "pasteAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         },
+         "printAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         },
+         "toolbarConfiguration": {
+          "$ref": "#/components/schemas/ToolbarConfiguration"
+         },
+         "uploadAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "copyAllowed",
+         "downloadAllowed",
+         "pasteAllowed",
+         "printAllowed",
+         "uploadAllowed"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "userSettingsArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateUserSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   }
+  },
+  "/userSettings/{userSettingsArn}": {
+   "delete": {
+    "operationId": "workspaces-webDeleteUserSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "userSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteUserSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "get": {
+    "operationId": "workspaces-webGetUserSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "userSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "userSettings": {
+           "$ref": "#/components/schemas/UserSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetUserSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   },
+   "patch": {
+    "operationId": "workspaces-webUpdateUserSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "workspaces-web"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "userSettingsArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "cookieSynchronizationConfiguration": {
+          "$ref": "#/components/schemas/CookieSynchronizationConfiguration"
+         },
+         "copyAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         },
+         "deepLinkAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         },
+         "disconnectTimeoutInMinutes": {
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "downloadAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         },
+         "idleDisconnectTimeoutInMinutes": {
+          "maximum": 60,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "pasteAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         },
+         "printAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         },
+         "toolbarConfiguration": {
+          "$ref": "#/components/schemas/ToolbarConfiguration"
+         },
+         "uploadAllowed": {
+          "enum": [
+           "Disabled",
+           "Enabled"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "userSettings": {
+           "$ref": "#/components/schemas/UserSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateUserSettings",
+    "tags": [
+     "Amazon WorkSpaces Secure Browser"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon WorkSpaces Web API (2020-07-08). Every other official operation returns HTTP 501 UnknownOperationException. Portals and browser, network, user and IP access settings are configuration metadata: portals stay Incomplete, the portal endpoint is not served, and no streaming instance, session, network interface or IAM Identity Center application is created. Sessions, identity providers, trust stores, data protection settings, session loggers and user access logging settings return UnknownOperationException with HTTP 501. Settings cannot be associated with portals, so associatedPortalArns stays empty and portals name no settings. The official Associate*, Disassociate* and ListIdentityProviders operations below a portal ARN return HTTP 501. VPCs, subnets, security groups and KMS keys are stored without checking them, and browser policies must be JSON objects. Deleting a missing resource succeeds, as the official delete operations model no not-found error. Update and tagging client tokens are accepted but not recorded.",
+   "name": "Amazon WorkSpaces Secure Browser"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/workspaces-web/2020-07-08/service-2.json",
+  "sha256": "faf5b72b8f9af8dbb538e7c03fa23d272929d89b3efd2df141c01f74a492c0e1",
+  "license": "Apache-2.0"
+ }
+}

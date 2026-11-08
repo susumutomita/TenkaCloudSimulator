@@ -1,0 +1,781 @@
+{
+ "components": {
+  "schemas": {
+   "SchemaInputAttribute": {
+    "additionalProperties": false,
+    "properties": {
+     "fieldName": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "groupName": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "hashed": {
+      "type": "boolean"
+     },
+     "matchKey": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "subType": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "NAME",
+       "NAME_FIRST",
+       "NAME_MIDDLE",
+       "NAME_LAST",
+       "ADDRESS",
+       "ADDRESS_STREET1",
+       "ADDRESS_STREET2",
+       "ADDRESS_STREET3",
+       "ADDRESS_CITY",
+       "ADDRESS_STATE",
+       "ADDRESS_COUNTRY",
+       "ADDRESS_POSTALCODE",
+       "PHONE",
+       "PHONE_NUMBER",
+       "PHONE_COUNTRYCODE",
+       "EMAIL_ADDRESS",
+       "UNIQUE_ID",
+       "DATE",
+       "STRING",
+       "PROVIDER_ID",
+       "IPV4",
+       "IPV6",
+       "MAID"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "fieldName",
+     "type"
+    ],
+    "type": "object"
+   },
+   "SchemaMappingSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "hasWorkflows": {
+      "type": "boolean"
+     },
+     "schemaArn": {
+      "type": "string"
+     },
+     "schemaName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "schemaName",
+     "schemaArn",
+     "createdAt",
+     "updatedAt",
+     "hasWorkflows"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS EntityResolution API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Only schema mappings are stored; matching and ID mapping workflows, ID namespaces, provider services, policies and match jobs are not implemented and return UnknownOperationException with HTTP 501, so no record is read, matched or written and hasWorkflows is always false.",
+  "title": "AWS Entity Resolution (simulator catalog)",
+  "version": "2018-05-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/schemas": {
+   "get": {
+    "operationId": "entityresolutionListSchemaMappings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "entityresolution"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 25,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "schemaList": {
+           "items": {
+            "$ref": "#/components/schemas/SchemaMappingSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSchemaMappings",
+    "tags": [
+     "AWS Entity Resolution"
+    ]
+   },
+   "post": {
+    "operationId": "entityresolutionCreateSchemaMapping",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "entityresolution"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "mappedInputFields": {
+          "items": {
+           "$ref": "#/components/schemas/SchemaInputAttribute"
+          },
+          "maxItems": 35,
+          "minItems": 2,
+          "type": "array"
+         },
+         "schemaName": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "mappedInputFields",
+         "schemaName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "description": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "mappedInputFields": {
+           "items": {
+            "$ref": "#/components/schemas/SchemaInputAttribute"
+           },
+           "maxItems": 35,
+           "minItems": 2,
+           "type": "array"
+          },
+          "schemaArn": {
+           "type": "string"
+          },
+          "schemaName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSchemaMapping",
+    "tags": [
+     "AWS Entity Resolution"
+    ]
+   }
+  },
+  "/schemas/{schemaName}": {
+   "delete": {
+    "operationId": "entityresolutionDeleteSchemaMapping",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "entityresolution"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "schemaName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "message": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSchemaMapping",
+    "tags": [
+     "AWS Entity Resolution"
+    ]
+   },
+   "get": {
+    "operationId": "entityresolutionGetSchemaMapping",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "entityresolution"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "schemaName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "hasWorkflows": {
+           "type": "boolean"
+          },
+          "mappedInputFields": {
+           "items": {
+            "$ref": "#/components/schemas/SchemaInputAttribute"
+           },
+           "maxItems": 35,
+           "minItems": 2,
+           "type": "array"
+          },
+          "schemaArn": {
+           "type": "string"
+          },
+          "schemaName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetSchemaMapping",
+    "tags": [
+     "AWS Entity Resolution"
+    ]
+   },
+   "put": {
+    "operationId": "entityresolutionUpdateSchemaMapping",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "entityresolution"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "schemaName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "mappedInputFields": {
+          "items": {
+           "$ref": "#/components/schemas/SchemaInputAttribute"
+          },
+          "maxItems": 35,
+          "minItems": 2,
+          "type": "array"
+         }
+        },
+        "required": [
+         "mappedInputFields"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "description": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "mappedInputFields": {
+           "items": {
+            "$ref": "#/components/schemas/SchemaInputAttribute"
+           },
+           "maxItems": 35,
+           "minItems": 2,
+           "type": "array"
+          },
+          "schemaArn": {
+           "type": "string"
+          },
+          "schemaName": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSchemaMapping",
+    "tags": [
+     "AWS Entity Resolution"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "entityresolutionUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "entityresolution"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Entity Resolution"
+    ]
+   },
+   "get": {
+    "operationId": "entityresolutionListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "entityresolution"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Entity Resolution"
+    ]
+   },
+   "post": {
+    "operationId": "entityresolutionTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "entityresolution"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Entity Resolution"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS EntityResolution API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Only schema mappings are stored; matching and ID mapping workflows, ID namespaces, provider services, policies and match jobs are not implemented and return UnknownOperationException with HTTP 501, so no record is read, matched or written and hasWorkflows is always false.",
+   "name": "AWS Entity Resolution"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/entityresolution/2018-05-10/service-2.json",
+  "sha256": "2d841b64e03a060211b25c53cec13bd6bb0e7f2b5b1add76494a7d5c925eda25",
+  "license": "Apache-2.0"
+ }
+}

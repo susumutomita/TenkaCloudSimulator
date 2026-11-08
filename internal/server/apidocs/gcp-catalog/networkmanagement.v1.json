@@ -1,0 +1,2418 @@
+{
+ "components": {
+  "schemas": {
+   "AbortInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "cause": {
+      "enum": [
+       "CAUSE_UNSPECIFIED",
+       "UNKNOWN_NETWORK",
+       "UNKNOWN_PROJECT",
+       "NO_EXTERNAL_IP",
+       "UNINTENDED_DESTINATION",
+       "SOURCE_ENDPOINT_NOT_FOUND",
+       "MISMATCHED_SOURCE_NETWORK",
+       "DESTINATION_ENDPOINT_NOT_FOUND",
+       "MISMATCHED_DESTINATION_NETWORK",
+       "UNKNOWN_IP",
+       "GOOGLE_MANAGED_SERVICE_UNKNOWN_IP",
+       "SOURCE_IP_ADDRESS_NOT_IN_SOURCE_NETWORK",
+       "PERMISSION_DENIED",
+       "PERMISSION_DENIED_NO_CLOUD_NAT_CONFIGS",
+       "PERMISSION_DENIED_NO_NEG_ENDPOINT_CONFIGS",
+       "PERMISSION_DENIED_NO_CLOUD_ROUTER_CONFIGS",
+       "NO_SOURCE_LOCATION",
+       "NO_SOURCE_GCP_NETWORK_LOCATION",
+       "NO_SOURCE_NON_GCP_NETWORK_LOCATION",
+       "NO_SOURCE_INTERNET_LOCATION",
+       "INVALID_ARGUMENT",
+       "TRACE_TOO_LONG",
+       "INTERNAL_ERROR",
+       "UNSUPPORTED",
+       "MISMATCHED_IP_VERSION",
+       "GKE_KONNECTIVITY_PROXY_UNSUPPORTED",
+       "RESOURCE_CONFIG_NOT_FOUND",
+       "VM_INSTANCE_CONFIG_NOT_FOUND",
+       "NETWORK_CONFIG_NOT_FOUND",
+       "FIREWALL_CONFIG_NOT_FOUND",
+       "ROUTE_CONFIG_NOT_FOUND",
+       "GOOGLE_MANAGED_SERVICE_AMBIGUOUS_PSC_ENDPOINT",
+       "GOOGLE_MANAGED_SERVICE_AMBIGUOUS_ENDPOINT",
+       "SOURCE_PSC_CLOUD_SQL_UNSUPPORTED",
+       "SOURCE_EXTERNAL_CLOUD_SQL_UNSUPPORTED",
+       "SOURCE_REDIS_CLUSTER_UNSUPPORTED",
+       "SOURCE_REDIS_INSTANCE_UNSUPPORTED",
+       "SOURCE_FORWARDING_RULE_UNSUPPORTED",
+       "NON_ROUTABLE_IP_ADDRESS",
+       "UNKNOWN_ISSUE_IN_GOOGLE_MANAGED_PROJECT",
+       "UNSUPPORTED_GOOGLE_MANAGED_PROJECT_CONFIG",
+       "NO_SERVERLESS_IP_RANGES",
+       "IP_VERSION_PROTOCOL_MISMATCH",
+       "GKE_POD_UNKNOWN_ENDPOINT_LOCATION",
+       "RESPONSE_TOO_LARGE"
+      ],
+      "type": "string"
+     },
+     "ipAddress": {
+      "type": "string"
+     },
+     "projectsMissingPermission": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "resourceUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AppEngineVersionEndpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AppEngineVersionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "environment": {
+      "type": "string"
+     },
+     "runtime": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CloudFunctionEndpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CloudFunctionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "location": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     },
+     "versionId": {
+      "format": "int64",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CloudRunJobInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "location": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CloudRunRevisionEndpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "serviceUri": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CloudRunRevisionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "location": {
+      "type": "string"
+     },
+     "serviceUri": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CloudSQLInstanceInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "externalIp": {
+      "type": "string"
+     },
+     "internalIp": {
+      "type": "string"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "region": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectivityTest": {
+    "additionalProperties": false,
+    "properties": {
+     "bypassFirewallChecks": {
+      "type": "boolean"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/Endpoint"
+     },
+     "displayName": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "probingDetails": {
+      "$ref": "#/components/schemas/ProbingDetails"
+     },
+     "protocol": {
+      "type": "string"
+     },
+     "reachabilityDetails": {
+      "$ref": "#/components/schemas/ReachabilityDetails"
+     },
+     "relatedProjects": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "returnReachabilityDetails": {
+      "$ref": "#/components/schemas/ReachabilityDetails"
+     },
+     "roundTrip": {
+      "type": "boolean"
+     },
+     "source": {
+      "$ref": "#/components/schemas/Endpoint"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeliverInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "googleServiceType": {
+      "enum": [
+       "GOOGLE_SERVICE_TYPE_UNSPECIFIED",
+       "IAP",
+       "GFE_PROXY_OR_HEALTH_CHECK_PROBER",
+       "CLOUD_DNS",
+       "PRIVATE_GOOGLE_ACCESS",
+       "SERVERLESS_VPC_ACCESS"
+      ],
+      "type": "string"
+     },
+     "ipAddress": {
+      "type": "string"
+     },
+     "pscGoogleApiTarget": {
+      "type": "string"
+     },
+     "resourceUri": {
+      "type": "string"
+     },
+     "storageBucket": {
+      "type": "string"
+     },
+     "target": {
+      "enum": [
+       "TARGET_UNSPECIFIED",
+       "INSTANCE",
+       "INTERNET",
+       "GOOGLE_API",
+       "GKE_MASTER",
+       "CLOUD_SQL_INSTANCE",
+       "PSC_PUBLISHED_SERVICE",
+       "PSC_GOOGLE_API",
+       "PSC_VPC_SC",
+       "SERVERLESS_NEG",
+       "STORAGE_BUCKET",
+       "PRIVATE_NETWORK",
+       "CLOUD_FUNCTION",
+       "APP_ENGINE_VERSION",
+       "CLOUD_RUN_REVISION",
+       "GOOGLE_MANAGED_SERVICE",
+       "REDIS_INSTANCE",
+       "REDIS_CLUSTER",
+       "GKE_POD",
+       "CLOUD_RUN_JOB",
+       "DMS_PRIVATE_CONNECTION",
+       "DATASTREAM_PRIVATE_CONNECTION"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DirectVpcEgressConnectionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "networkUri": {
+      "type": "string"
+     },
+     "region": {
+      "type": "string"
+     },
+     "selectedIpAddress": {
+      "type": "string"
+     },
+     "selectedIpRange": {
+      "type": "string"
+     },
+     "subnetworkUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DropInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "cause": {
+      "enum": [
+       "CAUSE_UNSPECIFIED",
+       "UNKNOWN_EXTERNAL_ADDRESS",
+       "FOREIGN_IP_DISALLOWED",
+       "FIREWALL_RULE",
+       "NO_ROUTE",
+       "ROUTE_BLACKHOLE",
+       "ROUTE_WRONG_NETWORK",
+       "ROUTE_NEXT_HOP_IP_ADDRESS_NOT_RESOLVED",
+       "ROUTE_NEXT_HOP_RESOURCE_NOT_FOUND",
+       "ROUTE_NEXT_HOP_INSTANCE_WRONG_NETWORK",
+       "ROUTE_NEXT_HOP_INSTANCE_NON_PRIMARY_IP",
+       "ROUTE_NEXT_HOP_FORWARDING_RULE_IP_MISMATCH",
+       "ROUTE_NEXT_HOP_VPN_TUNNEL_NOT_ESTABLISHED",
+       "ROUTE_NEXT_HOP_FORWARDING_RULE_TYPE_INVALID",
+       "NO_ROUTE_FROM_INTERNET_TO_PRIVATE_IPV6_ADDRESS",
+       "NO_ROUTE_FROM_INTERNET_TO_PRIVATE_IPV4_ADDRESS",
+       "NO_ROUTE_FROM_EXTERNAL_IPV6_SOURCE_TO_PRIVATE_IPV6_ADDRESS",
+       "VPN_TUNNEL_LOCAL_SELECTOR_MISMATCH",
+       "VPN_TUNNEL_REMOTE_SELECTOR_MISMATCH",
+       "PRIVATE_TRAFFIC_TO_INTERNET",
+       "PRIVATE_GOOGLE_ACCESS_DISALLOWED",
+       "PRIVATE_GOOGLE_ACCESS_VIA_VPN_TUNNEL_UNSUPPORTED",
+       "NO_EXTERNAL_ADDRESS",
+       "UNKNOWN_INTERNAL_ADDRESS",
+       "FORWARDING_RULE_MISMATCH",
+       "FORWARDING_RULE_NO_INSTANCES",
+       "FIREWALL_BLOCKING_LOAD_BALANCER_BACKEND_HEALTH_CHECK",
+       "FIREWALL_BLOCKING_LOAD_BALANCER_ENVOY_PROXY_HEALTH_CHECK",
+       "INGRESS_FIREWALL_TAGS_UNSUPPORTED_BY_DIRECT_VPC_EGRESS",
+       "INSTANCE_NOT_RUNNING",
+       "GKE_CLUSTER_NOT_RUNNING",
+       "GKE_POD_NOT_RUNNING",
+       "CLOUD_SQL_INSTANCE_NOT_RUNNING",
+       "REDIS_INSTANCE_NOT_RUNNING",
+       "REDIS_CLUSTER_NOT_RUNNING",
+       "TRAFFIC_TYPE_BLOCKED",
+       "GKE_MASTER_UNAUTHORIZED_ACCESS",
+       "CLOUD_SQL_INSTANCE_UNAUTHORIZED_ACCESS",
+       "DROPPED_INSIDE_GKE_SERVICE",
+       "DROPPED_INSIDE_CLOUD_SQL_SERVICE",
+       "DROPPED_INSIDE_DMS_PRIVATE_CONNECTION",
+       "DROPPED_INSIDE_DATASTREAM_PRIVATE_CONNECTION",
+       "GOOGLE_MANAGED_SERVICE_NO_PEERING",
+       "GOOGLE_MANAGED_SERVICE_NO_PSC_ENDPOINT",
+       "GKE_PSC_ENDPOINT_MISSING",
+       "CLOUD_SQL_INSTANCE_NO_IP_ADDRESS",
+       "GKE_CONTROL_PLANE_REGION_MISMATCH",
+       "PUBLIC_GKE_CONTROL_PLANE_TO_PRIVATE_DESTINATION",
+       "GKE_CONTROL_PLANE_NO_ROUTE",
+       "CLOUD_SQL_INSTANCE_NOT_CONFIGURED_FOR_EXTERNAL_TRAFFIC",
+       "PUBLIC_CLOUD_SQL_INSTANCE_TO_PRIVATE_DESTINATION",
+       "CLOUD_SQL_INSTANCE_NO_ROUTE",
+       "CLOUD_SQL_CONNECTOR_REQUIRED",
+       "CLOUD_FUNCTION_NOT_ACTIVE",
+       "VPC_CONNECTOR_NOT_SET",
+       "VPC_CONNECTOR_NOT_RUNNING",
+       "VPC_CONNECTOR_SERVERLESS_TRAFFIC_BLOCKED",
+       "VPC_CONNECTOR_HEALTH_CHECK_TRAFFIC_BLOCKED",
+       "FORWARDING_RULE_REGION_MISMATCH",
+       "PSC_CONNECTION_NOT_ACCEPTED",
+       "PSC_ENDPOINT_ACCESSED_FROM_PEERED_NETWORK",
+       "PSC_NEG_PRODUCER_ENDPOINT_NO_GLOBAL_ACCESS",
+       "PSC_NEG_PRODUCER_FORWARDING_RULE_MULTIPLE_PORTS",
+       "CLOUD_SQL_PSC_NEG_UNSUPPORTED",
+       "NO_NAT_SUBNETS_FOR_PSC_SERVICE_ATTACHMENT",
+       "PSC_TRANSITIVITY_NOT_PROPAGATED",
+       "HYBRID_NEG_NON_DYNAMIC_ROUTE_MATCHED",
+       "HYBRID_NEG_NON_LOCAL_DYNAMIC_ROUTE_MATCHED",
+       "CLOUD_RUN_REVISION_NOT_READY",
+       "CLOUD_RUN_JOB_NOT_READY",
+       "DROPPED_INSIDE_PSC_SERVICE_PRODUCER",
+       "LOAD_BALANCER_HAS_NO_PROXY_SUBNET",
+       "CLOUD_NAT_NO_ADDRESSES",
+       "ROUTING_LOOP",
+       "DROPPED_INSIDE_GOOGLE_MANAGED_SERVICE",
+       "LOAD_BALANCER_BACKEND_INVALID_NETWORK",
+       "BACKEND_SERVICE_NAMED_PORT_NOT_DEFINED",
+       "DESTINATION_IS_PRIVATE_NAT_IP_RANGE",
+       "DROPPED_INSIDE_REDIS_INSTANCE_SERVICE",
+       "REDIS_INSTANCE_UNSUPPORTED_PORT",
+       "REDIS_INSTANCE_CONNECTING_FROM_PUPI_ADDRESS",
+       "REDIS_INSTANCE_NO_ROUTE_TO_DESTINATION_NETWORK",
+       "REDIS_INSTANCE_NO_EXTERNAL_IP",
+       "REDIS_INSTANCE_UNSUPPORTED_PROTOCOL",
+       "DROPPED_INSIDE_REDIS_CLUSTER_SERVICE",
+       "REDIS_CLUSTER_UNSUPPORTED_PORT",
+       "REDIS_CLUSTER_NO_EXTERNAL_IP",
+       "REDIS_CLUSTER_UNSUPPORTED_PROTOCOL",
+       "NO_ADVERTISED_ROUTE_TO_GCP_DESTINATION",
+       "NO_TRAFFIC_SELECTOR_TO_GCP_DESTINATION",
+       "NO_KNOWN_ROUTE_FROM_PEERED_NETWORK_TO_DESTINATION",
+       "PRIVATE_NAT_TO_PSC_ENDPOINT_UNSUPPORTED",
+       "PRIVATE_NAT_SOURCE_IP_IN_EXCLUDED_RANGE",
+       "PRIVATE_NAT_SOURCE_IP_IS_A_LINK_LOCAL_IP_IN_GKE",
+       "PSC_PORT_MAPPING_PORT_MISMATCH",
+       "PSC_PORT_MAPPING_WITHOUT_PSC_CONNECTION_UNSUPPORTED",
+       "UNSUPPORTED_ROUTE_MATCHED_FOR_NAT64_DESTINATION",
+       "TRAFFIC_FROM_HYBRID_ENDPOINT_TO_INTERNET_DISALLOWED",
+       "NO_MATCHING_NAT64_GATEWAY",
+       "NO_CONFIGURED_PRIVATE_NAT64_RULE",
+       "LOAD_BALANCER_BACKEND_IP_VERSION_MISMATCH",
+       "NO_KNOWN_ROUTE_FROM_NCC_NETWORK_TO_DESTINATION",
+       "CLOUD_NAT_PROTOCOL_UNSUPPORTED",
+       "L2_INTERCONNECT_UNSUPPORTED_PROTOCOL",
+       "L2_INTERCONNECT_UNSUPPORTED_PORT",
+       "L2_INTERCONNECT_DESTINATION_IP_MISMATCH",
+       "NCC_ROUTE_WITHIN_HYBRID_SUBNET_UNSUPPORTED",
+       "HYBRID_SUBNET_REGION_MISMATCH",
+       "HYBRID_SUBNET_NO_ROUTE",
+       "GKE_NETWORK_POLICY",
+       "NO_VALID_ROUTE_FROM_GOOGLE_MANAGED_NETWORK_TO_DESTINATION",
+       "PRIVATE_CONNECTION_NO_RUNNING_INSTANCE"
+      ],
+      "type": "string"
+     },
+     "destinationGeolocationCode": {
+      "type": "string"
+     },
+     "destinationIp": {
+      "type": "string"
+     },
+     "region": {
+      "type": "string"
+     },
+     "resourceUri": {
+      "type": "string"
+     },
+     "sourceGeolocationCode": {
+      "type": "string"
+     },
+     "sourceIp": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EdgeLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "metropolitanArea": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Endpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "appEngineVersion": {
+      "$ref": "#/components/schemas/AppEngineVersionEndpoint"
+     },
+     "cloudFunction": {
+      "$ref": "#/components/schemas/CloudFunctionEndpoint"
+     },
+     "cloudRunJob": {
+      "type": "string"
+     },
+     "cloudRunRevision": {
+      "$ref": "#/components/schemas/CloudRunRevisionEndpoint"
+     },
+     "cloudSqlInstance": {
+      "type": "string"
+     },
+     "dmsPrivateConnection": {
+      "type": "string"
+     },
+     "forwardingRule": {
+      "type": "string"
+     },
+     "forwardingRuleTarget": {
+      "enum": [
+       "FORWARDING_RULE_TARGET_UNSPECIFIED",
+       "INSTANCE",
+       "LOAD_BALANCER",
+       "VPN_GATEWAY",
+       "PSC"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "fqdn": {
+      "type": "string"
+     },
+     "gkeMasterCluster": {
+      "type": "string"
+     },
+     "gkePod": {
+      "type": "string"
+     },
+     "instance": {
+      "type": "string"
+     },
+     "ipAddress": {
+      "type": "string"
+     },
+     "loadBalancerId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "loadBalancerType": {
+      "enum": [
+       "LOAD_BALANCER_TYPE_UNSPECIFIED",
+       "HTTPS_ADVANCED_LOAD_BALANCER",
+       "HTTPS_LOAD_BALANCER",
+       "REGIONAL_HTTPS_LOAD_BALANCER",
+       "INTERNAL_HTTPS_LOAD_BALANCER",
+       "SSL_PROXY_LOAD_BALANCER",
+       "TCP_PROXY_LOAD_BALANCER",
+       "INTERNAL_TCP_PROXY_LOAD_BALANCER",
+       "NETWORK_LOAD_BALANCER",
+       "LEGACY_NETWORK_LOAD_BALANCER",
+       "TCP_UDP_INTERNAL_LOAD_BALANCER"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "network": {
+      "type": "string"
+     },
+     "networkType": {
+      "enum": [
+       "NETWORK_TYPE_UNSPECIFIED",
+       "GCP_NETWORK",
+       "NON_GCP_NETWORK",
+       "INTERNET"
+      ],
+      "type": "string"
+     },
+     "port": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "projectId": {
+      "type": "string"
+     },
+     "redisCluster": {
+      "type": "string"
+     },
+     "redisInstance": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EndpointInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "destinationIp": {
+      "type": "string"
+     },
+     "destinationNetworkUri": {
+      "type": "string"
+     },
+     "destinationPort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "protocol": {
+      "type": "string"
+     },
+     "sourceAgentUri": {
+      "type": "string"
+     },
+     "sourceIp": {
+      "type": "string"
+     },
+     "sourceNetworkUri": {
+      "type": "string"
+     },
+     "sourcePort": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "FirewallInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "type": "string"
+     },
+     "direction": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "firewallRuleType": {
+      "enum": [
+       "FIREWALL_RULE_TYPE_UNSPECIFIED",
+       "HIERARCHICAL_FIREWALL_POLICY_RULE",
+       "VPC_FIREWALL_RULE",
+       "IMPLIED_VPC_FIREWALL_RULE",
+       "SERVERLESS_VPC_ACCESS_MANAGED_FIREWALL_RULE",
+       "NETWORK_FIREWALL_POLICY_RULE",
+       "NETWORK_REGIONAL_FIREWALL_POLICY_RULE",
+       "SYSTEM_NETWORK_FIREWALL_POLICY_RULE",
+       "SYSTEM_REGIONAL_NETWORK_FIREWALL_POLICY_RULE",
+       "UNSUPPORTED_FIREWALL_POLICY_RULE",
+       "TRACKING_STATE",
+       "ANALYSIS_SKIPPED"
+      ],
+      "type": "string"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "policy": {
+      "type": "string"
+     },
+     "policyPriority": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "policyUri": {
+      "type": "string"
+     },
+     "priority": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "targetServiceAccounts": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "targetTags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "targetType": {
+      "enum": [
+       "TARGET_TYPE_UNSPECIFIED",
+       "INSTANCES",
+       "INTERNAL_MANAGED_LB"
+      ],
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ForwardInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "ipAddress": {
+      "type": "string"
+     },
+     "resourceUri": {
+      "type": "string"
+     },
+     "target": {
+      "enum": [
+       "TARGET_UNSPECIFIED",
+       "PEERING_VPC",
+       "VPN_GATEWAY",
+       "INTERCONNECT",
+       "GKE_MASTER",
+       "IMPORTED_CUSTOM_ROUTE_NEXT_HOP",
+       "CLOUD_SQL_INSTANCE",
+       "ANOTHER_PROJECT",
+       "NCC_HUB",
+       "ROUTER_APPLIANCE",
+       "SECURE_WEB_PROXY_GATEWAY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ForwardingRuleInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "envoyHealthCheckFirewallsConfigState": {
+      "enum": [
+       "HEALTH_CHECK_FIREWALLS_CONFIG_STATE_UNSPECIFIED",
+       "FIREWALLS_CONFIGURED",
+       "FIREWALLS_PARTIALLY_CONFIGURED",
+       "FIREWALLS_NOT_CONFIGURED",
+       "FIREWALLS_UNSUPPORTED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "loadBalancerName": {
+      "type": "string"
+     },
+     "matchedPortRange": {
+      "type": "string"
+     },
+     "matchedProtocol": {
+      "type": "string"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "pscGoogleApiTarget": {
+      "type": "string"
+     },
+     "pscServiceAttachmentUri": {
+      "type": "string"
+     },
+     "region": {
+      "type": "string"
+     },
+     "target": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     },
+     "vip": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GKEMasterInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterNetworkUri": {
+      "type": "string"
+     },
+     "clusterUri": {
+      "type": "string"
+     },
+     "dnsEndpoint": {
+      "type": "string"
+     },
+     "externalIp": {
+      "type": "string"
+     },
+     "internalIp": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GkeNetworkPolicyInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "type": "string"
+     },
+     "direction": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GkeNetworkPolicySkippedInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "enum": [
+       "REASON_UNSPECIFIED",
+       "NETWORK_POLICY_DISABLED",
+       "INGRESS_SOURCE_ON_SAME_NODE",
+       "EGRESS_FROM_NODE_NETWORK_NAMESPACE_POD",
+       "NETWORK_POLICY_NOT_APPLIED_TO_RESPONSE_TRAFFIC",
+       "NETWORK_POLICY_ANALYSIS_UNSUPPORTED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GkePodInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "ipAddress": {
+      "type": "string"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "podUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleServiceInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "googleServiceType": {
+      "enum": [
+       "GOOGLE_SERVICE_TYPE_UNSPECIFIED",
+       "IAP",
+       "GFE_PROXY_OR_HEALTH_CHECK_PROBER",
+       "CLOUD_DNS",
+       "GOOGLE_API",
+       "GOOGLE_API_PSC",
+       "GOOGLE_API_VPC_SC",
+       "SERVERLESS_VPC_ACCESS"
+      ],
+      "type": "string"
+     },
+     "sourceIp": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HybridSubnetInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "region": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "externalIp": {
+      "type": "string"
+     },
+     "interface": {
+      "type": "string"
+     },
+     "internalIp": {
+      "type": "string"
+     },
+     "networkTags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "pscNetworkAttachmentUri": {
+      "type": "string"
+     },
+     "running": {
+      "type": "boolean"
+     },
+     "serviceAccount": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "STATUS_UNSPECIFIED",
+       "RUNNING",
+       "NOT_RUNNING"
+      ],
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InterconnectAttachmentInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudRouterUri": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "interconnectUri": {
+      "type": "string"
+     },
+     "l2AttachmentMatchedIpAddress": {
+      "type": "string"
+     },
+     "region": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "TYPE_UNSPECIFIED",
+       "DEDICATED",
+       "PARTNER",
+       "PARTNER_PROVIDER",
+       "L2_DEDICATED"
+      ],
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IpMasqueradingSkippedInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "nonMasqueradeRange": {
+      "type": "string"
+     },
+     "reason": {
+      "enum": [
+       "REASON_UNSPECIFIED",
+       "DESTINATION_IP_IN_CONFIGURED_NON_MASQUERADE_RANGE",
+       "DESTINATION_IP_IN_DEFAULT_NON_MASQUERADE_RANGE",
+       "DESTINATION_ON_SAME_NODE",
+       "DEFAULT_SNAT_DISABLED",
+       "NO_MASQUERADING_FOR_IPV6",
+       "POD_USES_NODE_NETWORK_NAMESPACE",
+       "NO_MASQUERADING_FOR_RETURN_PACKET"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LatencyDistribution": {
+    "additionalProperties": false,
+    "properties": {
+     "latencyPercentiles": {
+      "items": {
+       "$ref": "#/components/schemas/LatencyPercentile"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LatencyPercentile": {
+    "additionalProperties": false,
+    "properties": {
+     "latencyMicros": {
+      "format": "int64",
+      "type": "string"
+     },
+     "percent": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ListConnectivityTestsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "resources": {
+      "items": {
+       "$ref": "#/components/schemas/ConnectivityTest"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LoadBalancerBackend": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "healthCheckAllowingFirewallRules": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "healthCheckBlockingFirewallRules": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "healthCheckFirewallState": {
+      "enum": [
+       "HEALTH_CHECK_FIREWALL_STATE_UNSPECIFIED",
+       "CONFIGURED",
+       "MISCONFIGURED"
+      ],
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LoadBalancerBackendInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "backendBucketUri": {
+      "type": "string"
+     },
+     "backendServiceUri": {
+      "type": "string"
+     },
+     "healthCheckFirewallsConfigState": {
+      "enum": [
+       "HEALTH_CHECK_FIREWALLS_CONFIG_STATE_UNSPECIFIED",
+       "FIREWALLS_CONFIGURED",
+       "FIREWALLS_PARTIALLY_CONFIGURED",
+       "FIREWALLS_NOT_CONFIGURED",
+       "FIREWALLS_UNSUPPORTED"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "healthCheckUri": {
+      "type": "string"
+     },
+     "instanceGroupUri": {
+      "type": "string"
+     },
+     "instanceUri": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "networkEndpointGroupUri": {
+      "type": "string"
+     },
+     "pscGoogleApiTarget": {
+      "type": "string"
+     },
+     "pscServiceAttachmentUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LoadBalancerInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "backendType": {
+      "enum": [
+       "BACKEND_TYPE_UNSPECIFIED",
+       "BACKEND_SERVICE",
+       "TARGET_POOL",
+       "TARGET_INSTANCE"
+      ],
+      "type": "string"
+     },
+     "backendUri": {
+      "type": "string"
+     },
+     "backends": {
+      "items": {
+       "$ref": "#/components/schemas/LoadBalancerBackend"
+      },
+      "type": "array"
+     },
+     "healthCheckUri": {
+      "type": "string"
+     },
+     "loadBalancerType": {
+      "enum": [
+       "LOAD_BALANCER_TYPE_UNSPECIFIED",
+       "INTERNAL_TCP_UDP",
+       "NETWORK_TCP_UDP",
+       "HTTP_PROXY",
+       "TCP_PROXY",
+       "SSL_PROXY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NatInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudNatGatewayType": {
+      "enum": [
+       "CLOUD_NAT_GATEWAY_TYPE_UNSPECIFIED",
+       "PUBLIC_NAT44",
+       "PUBLIC_NAT64",
+       "PRIVATE_NAT_NCC",
+       "PRIVATE_NAT_HYBRID",
+       "PRIVATE_NAT64"
+      ],
+      "type": "string"
+     },
+     "natGatewayName": {
+      "type": "string"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "newDestinationIp": {
+      "type": "string"
+     },
+     "newDestinationPort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "newSourceIp": {
+      "type": "string"
+     },
+     "newSourcePort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "oldDestinationIp": {
+      "type": "string"
+     },
+     "oldDestinationPort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "oldSourceIp": {
+      "type": "string"
+     },
+     "oldSourcePort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "protocol": {
+      "type": "string"
+     },
+     "routerUri": {
+      "type": "string"
+     },
+     "ruleNumber": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "type": {
+      "enum": [
+       "TYPE_UNSPECIFIED",
+       "INTERNAL_TO_EXTERNAL",
+       "EXTERNAL_TO_INTERNAL",
+       "CLOUD_NAT",
+       "PRIVATE_SERVICE_CONNECT",
+       "GKE_POD_IP_MASQUERADING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "matchedIpRange": {
+      "type": "string"
+     },
+     "matchedSubnetUri": {
+      "type": "string"
+     },
+     "region": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NgfwPacketInspectionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "securityProfileGroupUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateConnectionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProbingDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "abortCause": {
+      "enum": [
+       "PROBING_ABORT_CAUSE_UNSPECIFIED",
+       "PERMISSION_DENIED",
+       "NO_SOURCE_LOCATION"
+      ],
+      "type": "string"
+     },
+     "destinationEgressLocation": {
+      "$ref": "#/components/schemas/EdgeLocation"
+     },
+     "edgeResponses": {
+      "items": {
+       "$ref": "#/components/schemas/SingleEdgeResponse"
+      },
+      "type": "array"
+     },
+     "endpointInfo": {
+      "$ref": "#/components/schemas/EndpointInfo"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "probedAllDevices": {
+      "type": "boolean"
+     },
+     "probingLatency": {
+      "$ref": "#/components/schemas/LatencyDistribution"
+     },
+     "result": {
+      "enum": [
+       "PROBING_RESULT_UNSPECIFIED",
+       "REACHABLE",
+       "UNREACHABLE",
+       "REACHABILITY_INCONSISTENT",
+       "UNDETERMINED"
+      ],
+      "type": "string"
+     },
+     "sentProbeCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "successfulProbeCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "verifyTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProxyConnectionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "networkUri": {
+      "type": "string"
+     },
+     "newDestinationIp": {
+      "type": "string"
+     },
+     "newDestinationPort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "newSourceIp": {
+      "type": "string"
+     },
+     "newSourcePort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "oldDestinationIp": {
+      "type": "string"
+     },
+     "oldDestinationPort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "oldSourceIp": {
+      "type": "string"
+     },
+     "oldSourcePort": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "protocol": {
+      "type": "string"
+     },
+     "subnetUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ReachabilityDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "result": {
+      "enum": [
+       "RESULT_UNSPECIFIED",
+       "REACHABLE",
+       "UNREACHABLE",
+       "AMBIGUOUS",
+       "UNDETERMINED"
+      ],
+      "type": "string"
+     },
+     "traces": {
+      "items": {
+       "$ref": "#/components/schemas/Trace"
+      },
+      "type": "array"
+     },
+     "verifyTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RedisClusterInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "discoveryEndpointIpAddress": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "location": {
+      "type": "string"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "secondaryEndpointIpAddress": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RedisInstanceInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "primaryEndpointIp": {
+      "type": "string"
+     },
+     "readEndpointIp": {
+      "type": "string"
+     },
+     "region": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RouteInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "advertisedRouteNextHopUri": {
+      "type": "string"
+     },
+     "advertisedRouteSourceRouterUri": {
+      "type": "string"
+     },
+     "destIpRange": {
+      "type": "string"
+     },
+     "destPortRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "instanceTags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "nccHubRouteUri": {
+      "type": "string"
+     },
+     "nccHubUri": {
+      "type": "string"
+     },
+     "nccSpokeUri": {
+      "type": "string"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "nextHop": {
+      "type": "string"
+     },
+     "nextHopNetworkUri": {
+      "type": "string"
+     },
+     "nextHopType": {
+      "enum": [
+       "NEXT_HOP_TYPE_UNSPECIFIED",
+       "NEXT_HOP_IP",
+       "NEXT_HOP_INSTANCE",
+       "NEXT_HOP_NETWORK",
+       "NEXT_HOP_PEERING",
+       "NEXT_HOP_INTERCONNECT",
+       "NEXT_HOP_VPN_TUNNEL",
+       "NEXT_HOP_VPN_GATEWAY",
+       "NEXT_HOP_INTERNET_GATEWAY",
+       "NEXT_HOP_BLACKHOLE",
+       "NEXT_HOP_ILB",
+       "NEXT_HOP_ROUTER_APPLIANCE",
+       "NEXT_HOP_NCC_HUB",
+       "SECURE_WEB_PROXY_GATEWAY"
+      ],
+      "type": "string"
+     },
+     "nextHopUri": {
+      "type": "string"
+     },
+     "originatingRouteDisplayName": {
+      "type": "string"
+     },
+     "originatingRouteUri": {
+      "type": "string"
+     },
+     "priority": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "protocols": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "region": {
+      "type": "string"
+     },
+     "routeScope": {
+      "enum": [
+       "ROUTE_SCOPE_UNSPECIFIED",
+       "NETWORK",
+       "NCC_HUB"
+      ],
+      "type": "string"
+     },
+     "routeType": {
+      "enum": [
+       "ROUTE_TYPE_UNSPECIFIED",
+       "SUBNET",
+       "STATIC",
+       "DYNAMIC",
+       "PEERING_SUBNET",
+       "PEERING_STATIC",
+       "PEERING_DYNAMIC",
+       "POLICY_BASED",
+       "ADVERTISED"
+      ],
+      "type": "string"
+     },
+     "srcIpRange": {
+      "type": "string"
+     },
+     "srcPortRanges": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServerlessExternalConnectionInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "selectedIpAddress": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServerlessNegInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "negUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SingleEdgeResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "destinationEgressLocation": {
+      "$ref": "#/components/schemas/EdgeLocation"
+     },
+     "destinationRouter": {
+      "type": "string"
+     },
+     "probingLatency": {
+      "$ref": "#/components/schemas/LatencyDistribution"
+     },
+     "result": {
+      "enum": [
+       "PROBING_RESULT_UNSPECIFIED",
+       "REACHABLE",
+       "UNREACHABLE",
+       "REACHABILITY_INCONSISTENT",
+       "UNDETERMINED"
+      ],
+      "type": "string"
+     },
+     "sentProbeCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "successfulProbeCount": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Step": {
+    "additionalProperties": false,
+    "properties": {
+     "abort": {
+      "$ref": "#/components/schemas/AbortInfo"
+     },
+     "appEngineVersion": {
+      "$ref": "#/components/schemas/AppEngineVersionInfo"
+     },
+     "causesDrop": {
+      "type": "boolean"
+     },
+     "cloudFunction": {
+      "$ref": "#/components/schemas/CloudFunctionInfo"
+     },
+     "cloudRunJob": {
+      "$ref": "#/components/schemas/CloudRunJobInfo"
+     },
+     "cloudRunRevision": {
+      "$ref": "#/components/schemas/CloudRunRevisionInfo"
+     },
+     "cloudSqlInstance": {
+      "$ref": "#/components/schemas/CloudSQLInstanceInfo"
+     },
+     "datastreamPrivateConnection": {
+      "$ref": "#/components/schemas/PrivateConnectionInfo"
+     },
+     "deliver": {
+      "$ref": "#/components/schemas/DeliverInfo"
+     },
+     "description": {
+      "type": "string"
+     },
+     "directVpcEgressConnection": {
+      "$ref": "#/components/schemas/DirectVpcEgressConnectionInfo"
+     },
+     "dmsPrivateConnection": {
+      "$ref": "#/components/schemas/PrivateConnectionInfo"
+     },
+     "drop": {
+      "$ref": "#/components/schemas/DropInfo"
+     },
+     "endpoint": {
+      "$ref": "#/components/schemas/EndpointInfo"
+     },
+     "firewall": {
+      "$ref": "#/components/schemas/FirewallInfo"
+     },
+     "forward": {
+      "$ref": "#/components/schemas/ForwardInfo"
+     },
+     "forwardingRule": {
+      "$ref": "#/components/schemas/ForwardingRuleInfo"
+     },
+     "gkeMaster": {
+      "$ref": "#/components/schemas/GKEMasterInfo"
+     },
+     "gkeNetworkPolicy": {
+      "$ref": "#/components/schemas/GkeNetworkPolicyInfo"
+     },
+     "gkeNetworkPolicySkipped": {
+      "$ref": "#/components/schemas/GkeNetworkPolicySkippedInfo"
+     },
+     "gkePod": {
+      "$ref": "#/components/schemas/GkePodInfo"
+     },
+     "googleService": {
+      "$ref": "#/components/schemas/GoogleServiceInfo"
+     },
+     "hybridSubnet": {
+      "$ref": "#/components/schemas/HybridSubnetInfo"
+     },
+     "instance": {
+      "$ref": "#/components/schemas/InstanceInfo"
+     },
+     "interconnectAttachment": {
+      "$ref": "#/components/schemas/InterconnectAttachmentInfo"
+     },
+     "ipMasqueradingSkipped": {
+      "$ref": "#/components/schemas/IpMasqueradingSkippedInfo"
+     },
+     "loadBalancer": {
+      "$ref": "#/components/schemas/LoadBalancerInfo"
+     },
+     "loadBalancerBackendInfo": {
+      "$ref": "#/components/schemas/LoadBalancerBackendInfo"
+     },
+     "nat": {
+      "$ref": "#/components/schemas/NatInfo"
+     },
+     "network": {
+      "$ref": "#/components/schemas/NetworkInfo"
+     },
+     "ngfwPacketInspection": {
+      "$ref": "#/components/schemas/NgfwPacketInspectionInfo"
+     },
+     "projectId": {
+      "type": "string"
+     },
+     "proxyConnection": {
+      "$ref": "#/components/schemas/ProxyConnectionInfo"
+     },
+     "redisCluster": {
+      "$ref": "#/components/schemas/RedisClusterInfo"
+     },
+     "redisInstance": {
+      "$ref": "#/components/schemas/RedisInstanceInfo"
+     },
+     "route": {
+      "$ref": "#/components/schemas/RouteInfo"
+     },
+     "serverlessExternalConnection": {
+      "$ref": "#/components/schemas/ServerlessExternalConnectionInfo"
+     },
+     "serverlessNeg": {
+      "$ref": "#/components/schemas/ServerlessNegInfo"
+     },
+     "state": {
+      "enum": [
+       "STATE_UNSPECIFIED",
+       "START_FROM_INSTANCE",
+       "START_FROM_INTERNET",
+       "START_FROM_GOOGLE_SERVICE",
+       "START_FROM_PRIVATE_NETWORK",
+       "START_FROM_GKE_MASTER",
+       "START_FROM_CLOUD_SQL_INSTANCE",
+       "START_FROM_GKE_POD",
+       "START_FROM_REDIS_INSTANCE",
+       "START_FROM_REDIS_CLUSTER",
+       "START_FROM_CLOUD_FUNCTION",
+       "START_FROM_APP_ENGINE_VERSION",
+       "START_FROM_CLOUD_RUN_REVISION",
+       "START_FROM_CLOUD_RUN_JOB",
+       "START_FROM_STORAGE_BUCKET",
+       "START_FROM_PSC_PUBLISHED_SERVICE",
+       "START_FROM_SERVERLESS_NEG",
+       "START_FROM_DMS_PRIVATE_CONNECTION",
+       "START_FROM_DATASTREAM_PRIVATE_CONNECTION",
+       "APPLY_INGRESS_FIREWALL_RULE",
+       "APPLY_EGRESS_FIREWALL_RULE",
+       "APPLY_ROUTE",
+       "APPLY_FORWARDING_RULE",
+       "ANALYZE_LOAD_BALANCER_BACKEND",
+       "SPOOFING_APPROVED",
+       "ARRIVE_AT_INSTANCE",
+       "ARRIVE_AT_INTERNAL_LOAD_BALANCER",
+       "ARRIVE_AT_EXTERNAL_LOAD_BALANCER",
+       "ARRIVE_AT_HYBRID_SUBNET",
+       "ARRIVE_AT_VPN_GATEWAY",
+       "ARRIVE_AT_VPN_TUNNEL",
+       "ARRIVE_AT_INTERCONNECT_ATTACHMENT",
+       "ARRIVE_AT_VPC_CONNECTOR",
+       "ARRIVE_AT_GKE_POD",
+       "DIRECT_VPC_EGRESS_CONNECTION",
+       "SERVERLESS_EXTERNAL_CONNECTION",
+       "NGFW_PACKET_INSPECTION",
+       "NAT",
+       "SKIP_GKE_POD_IP_MASQUERADING",
+       "SKIP_GKE_INGRESS_NETWORK_POLICY",
+       "SKIP_GKE_EGRESS_NETWORK_POLICY",
+       "APPLY_INGRESS_GKE_NETWORK_POLICY",
+       "APPLY_EGRESS_GKE_NETWORK_POLICY",
+       "PROXY_CONNECTION",
+       "DELIVER",
+       "DROP",
+       "FORWARD",
+       "ABORT",
+       "VIEWER_PERMISSION_MISSING"
+      ],
+      "type": "string"
+     },
+     "storageBucket": {
+      "$ref": "#/components/schemas/StorageBucketInfo"
+     },
+     "vpcConnector": {
+      "$ref": "#/components/schemas/VpcConnectorInfo"
+     },
+     "vpnGateway": {
+      "$ref": "#/components/schemas/VpnGatewayInfo"
+     },
+     "vpnTunnel": {
+      "$ref": "#/components/schemas/VpnTunnelInfo"
+     }
+    },
+    "type": "object"
+   },
+   "StorageBucketInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "bucket": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Trace": {
+    "additionalProperties": false,
+    "properties": {
+     "endpointInfo": {
+      "$ref": "#/components/schemas/EndpointInfo"
+     },
+     "forwardTraceId": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "steps": {
+      "items": {
+       "$ref": "#/components/schemas/Step"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "VpcConnectorInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "location": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VpnGatewayInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "ipAddress": {
+      "type": "string"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "region": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     },
+     "vpnTunnelUri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VpnTunnelInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "networkUri": {
+      "type": "string"
+     },
+     "region": {
+      "type": "string"
+     },
+     "remoteGateway": {
+      "type": "string"
+     },
+     "remoteGatewayIp": {
+      "type": "string"
+     },
+     "routingType": {
+      "enum": [
+       "ROUTING_TYPE_UNSPECIFIED",
+       "ROUTE_BASED",
+       "POLICY_BASED",
+       "DYNAMIC"
+      ],
+      "type": "string"
+     },
+     "sourceGateway": {
+      "type": "string"
+     },
+     "sourceGatewayIp": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Network Management API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Connectivity tests are stored test definitions only: no reachability analysis or probing runs, so reachabilityDetails, returnReachabilityDetails and probingDetails stay absent and rerun is not implemented. Source and destination endpoints are recorded as given and not resolved. VPC Flow Logs configurations and network monitoring providers are not implemented. Long-running operations complete synchronously and remain readable through operations.get/list.",
+  "title": "Network Intelligence Center (Network Management) (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/global/connectivityTests": {
+   "get": {
+    "operationId": "networkmanagement.projects.locations.global.connectivityTests.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListConnectivityTestsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.connectivityTests.list",
+    "tags": [
+     "Network Intelligence Center (Network Management)"
+    ]
+   },
+   "post": {
+    "operationId": "networkmanagement.projects.locations.global.connectivityTests.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "testId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConnectivityTest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.connectivityTests.create",
+    "tags": [
+     "Network Intelligence Center (Network Management)"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/global/connectivityTests/{connectivityTestsId}": {
+   "delete": {
+    "operationId": "networkmanagement.projects.locations.global.connectivityTests.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectivityTestsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.connectivityTests.delete",
+    "tags": [
+     "Network Intelligence Center (Network Management)"
+    ]
+   },
+   "get": {
+    "operationId": "networkmanagement.projects.locations.global.connectivityTests.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectivityTestsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectivityTest"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.connectivityTests.get",
+    "tags": [
+     "Network Intelligence Center (Network Management)"
+    ]
+   },
+   "patch": {
+    "operationId": "networkmanagement.projects.locations.global.connectivityTests.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "connectivityTestsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConnectivityTest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.connectivityTests.patch",
+    "tags": [
+     "Network Intelligence Center (Network Management)"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/global/operations": {
+   "get": {
+    "operationId": "networkmanagement.projects.locations.global.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.operations.list",
+    "tags": [
+     "Network Intelligence Center (Network Management)"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/global/operations/{operationsId}": {
+   "get": {
+    "operationId": "networkmanagement.projects.locations.global.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.global.operations.get",
+    "tags": [
+     "Network Intelligence Center (Network Management)"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/networkmanagement"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Network Management API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Connectivity tests are stored test definitions only: no reachability analysis or probing runs, so reachabilityDetails, returnReachabilityDetails and probingDetails stay absent and rerun is not implemented. Source and destination endpoints are recorded as given and not resolved. VPC Flow Logs configurations and network monitoring providers are not implemented. Long-running operations complete synchronously and remain readable through operations.get/list.",
+   "name": "Network Intelligence Center (Network Management)"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/networkmanagement.v1.json",
+  "sha256": "5fb90540112240de0e7d92fea0e3811fa67cb186dd43014bb4d54b6244fc246e",
+  "license": "Apache-2.0",
+  "revision": "20260724"
+ }
+}

@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"encoding/xml"
@@ -52,11 +53,63 @@ func NewStackStore(db *sql.DB) (*StackStore, error) {
 		return nil, err
 	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_cfn_stacks(region TEXT NOT NULL,name TEXT NOT NULL,id TEXT NOT NULL UNIQUE,document TEXT NOT NULL,PRIMARY KEY(region,name)); CREATE TABLE IF NOT EXISTS aws_cfn_ownership(namespace TEXT NOT NULL,kind TEXT NOT NULL,physical_id TEXT NOT NULL,stack_id TEXT NOT NULL REFERENCES aws_cfn_stacks(id) ON DELETE RESTRICT,PRIMARY KEY(namespace,kind,physical_id));`)
+	if err == nil {
+		err = initStackEvents(db)
+	}
 	return &StackStore{db}, err
 }
 func taggedYAML(n *yaml.Node) (any, error) {
+	nodes := 0
+	return stackTaggedYAMLNode(n, 0, &nodes)
+}
+func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
+	if n == nil || depth > stackConditionalDepth || *nodes >= stackConditionalNodes {
+		return nil, fmt.Errorf("template exceeds local depth/node bound")
+	}
+	*nodes++
 	if n.Kind == yaml.DocumentNode {
-		return taggedYAML(n.Content[0])
+		if len(n.Content) != 1 {
+			return nil, fmt.Errorf("invalid template document")
+		}
+		return stackTaggedYAMLNode(n.Content[0], depth+1, nodes)
+	}
+	if n.Tag == "!Equals" || n.Tag == "!If" || n.Tag == "!Select" {
+		if n.Kind != yaml.SequenceNode {
+			return nil, fmt.Errorf("intrinsic shorthand requires a sequence")
+		}
+		values := []any{}
+		for _, child := range n.Content {
+			value, err := stackTaggedYAMLNode(child, depth+1, nodes)
+			if err != nil {
+				return nil, err
+			}
+			values = append(values, value)
+		}
+		key := "Fn::Equals"
+		if n.Tag == "!If" {
+			key = "Fn::If"
+		} else if n.Tag == "!Select" {
+			key = "Fn::Select"
+		}
+		return map[string]any{key: values}, nil
+	}
+	if n.Tag == "!Base64" || n.Tag == "!GetAZs" {
+		if n.Kind == yaml.ScalarNode && n.Value == "" && n.Style&(yaml.DoubleQuotedStyle|yaml.SingleQuotedStyle|yaml.LiteralStyle|yaml.FoldedStyle) == 0 {
+			return nil, fmt.Errorf("Base64/GetAZs requires an explicit operand")
+		}
+		if n.Kind != yaml.ScalarNode && n.Kind != yaml.MappingNode {
+			return nil, fmt.Errorf("Base64/GetAZs shorthand requires a scalar or mapping")
+		}
+		copy := *n
+		copy.Tag = "!!str"
+		if n.Kind == yaml.MappingNode {
+			copy.Tag = "!!map"
+		}
+		value, err := stackTaggedYAMLNode(&copy, depth+1, nodes)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]any{"Fn::" + n.Tag[1:]: value}, nil
 	}
 	if strings.HasPrefix(n.Tag, "!") && !strings.HasPrefix(n.Tag, "!!") && n.Kind != yaml.ScalarNode {
 		return nil, fmt.Errorf("intrinsic shorthand must be scalar")
@@ -81,7 +134,7 @@ func taggedYAML(n *yaml.Node) (any, error) {
 			if _, ok := m[k]; ok {
 				return nil, fmt.Errorf("duplicate template key %s", k)
 			}
-			v, e := taggedYAML(n.Content[i+1])
+			v, e := stackTaggedYAMLNode(n.Content[i+1], depth+1, nodes)
 			if e != nil {
 				return nil, e
 			}
@@ -91,7 +144,7 @@ func taggedYAML(n *yaml.Node) (any, error) {
 	case yaml.SequenceNode:
 		a := []any{}
 		for _, c := range n.Content {
-			v, e := taggedYAML(c)
+			v, e := stackTaggedYAMLNode(c, depth+1, nodes)
 			if e != nil {
 				return nil, e
 			}
@@ -112,9 +165,24 @@ func taggedYAML(n *yaml.Node) (any, error) {
 func object(v any) map[string]any { m, _ := v.(map[string]any); return m }
 func stringValue(v any) string    { s, _ := v.(string); return s }
 
-var subExpression = regexp.MustCompile(`\$\{([^}]+)\}`)
-
 func resolve(v any, refs map[string]string, attributes map[string]string) (any, error) {
+	nodes := 0
+	return stackResolveValue(v, refs, attributes, 1, &nodes)
+}
+
+func stackResolveValue(v any, refs, attributes map[string]string, depth int, nodes *int) (result any, err error) {
+	*nodes++
+	if depth > stackConditionalDepth || *nodes > stackConditionalNodes {
+		return nil, fmt.Errorf("resolved value exceeds local depth/node bound")
+	}
+	defer func() {
+		if text, ok := result.(string); ok && len(text) > stackIntrinsicStringBytes {
+			result, err = nil, fmt.Errorf("resolved string exceeds local byte bound")
+		}
+	}()
+	next := func(value any) (any, error) {
+		return stackResolveValue(value, refs, attributes, depth+1, nodes)
+	}
 	switch x := v.(type) {
 	case string:
 		return x, nil
@@ -125,7 +193,7 @@ func resolve(v any, refs map[string]string, attributes map[string]string) (any, 
 	case []any:
 		r := []any{}
 		for _, c := range x {
-			v, e := resolve(c, refs, attributes)
+			v, e := next(c)
 			if e != nil {
 				return nil, e
 			}
@@ -157,29 +225,85 @@ func resolve(v any, refs map[string]string, attributes map[string]string) (any, 
 			if !valid || len(x) != 1 {
 				return nil, fmt.Errorf("only scalar Fn::Sub is supported")
 			}
-			var failed string
-			out := subExpression.ReplaceAllStringFunc(source, func(match string) string {
-				key := match[2 : len(match)-1]
-				if value, ok := refs[key]; ok {
-					return value
-				}
-				if value, ok := attributes[key]; ok {
-					return value
-				}
-				failed = key
-				return ""
-			})
-			if failed != "" {
-				return nil, fmt.Errorf("unknown substitution %s", failed)
+			return stackResolveSub(source, refs, attributes)
+		}
+		for _, key := range []string{"Fn::Select", "Fn::GetAZs", "Fn::Base64"} {
+			raw, ok := x[key]
+			if !ok {
+				continue
 			}
-			return out, nil
+			if len(x) != 1 {
+				return nil, fmt.Errorf("intrinsic must have exactly one key")
+			}
+			if err := stackValueIntrinsicShape(key, raw); err != nil {
+				return nil, err
+			}
+			switch key {
+			case "Fn::Base64":
+				value, err := next(raw)
+				if err != nil {
+					return nil, err
+				}
+				text, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("Base64 input must resolve to a string")
+				}
+				if base64.StdEncoding.EncodedLen(len(text)) > stackIntrinsicStringBytes {
+					return nil, fmt.Errorf("Base64 result exceeds local byte bound")
+				}
+				return base64.StdEncoding.EncodeToString([]byte(text)), nil
+			case "Fn::GetAZs":
+				value, err := next(raw)
+				if err != nil {
+					return nil, err
+				}
+				region, ok := value.(string)
+				if !ok {
+					return nil, fmt.Errorf("GetAZs region must resolve to a string")
+				}
+				if region == "" {
+					region = refs["AWS::Region"]
+				}
+				return localAvailabilityZones(region)
+			case "Fn::Select":
+				args := raw.([]any)
+				// Validate the index before resolving the list, preserving the
+				// lossless numeric carrier without accepting arbitrary numbers
+				// as ordinary template values.
+				indexValue := args[0]
+				if _, isRef := indexValue.(map[string]any); isRef {
+					var err error
+					indexValue, err = next(indexValue)
+					if err != nil {
+						return nil, err
+					}
+				}
+				index, err := stackSelectIndex(indexValue)
+				if err != nil {
+					return nil, err
+				}
+				value, err := next(args[1])
+				if err != nil {
+					return nil, err
+				}
+				list, ok := value.([]any)
+				if !ok || index >= len(list) {
+					return nil, fmt.Errorf("Select requires a list with an in-range index")
+				}
+				for _, item := range list {
+					if item == nil {
+						return nil, fmt.Errorf("Select list cannot contain null")
+					}
+				}
+				return list[index], nil
+			}
 		}
 		r := map[string]any{}
 		for k, c := range x {
 			if strings.HasPrefix(k, "Fn::") {
 				return nil, fmt.Errorf("unsupported intrinsic %s", k)
 			}
-			value, e := resolve(c, refs, attributes)
+			value, e := next(c)
 			if e != nil {
 				return nil, e
 			}
@@ -235,8 +359,12 @@ func resourceOrder(resources map[string]any) ([]string, error) {
 							add(stringValue(item))
 						}
 					case "Fn::Sub":
-						for _, match := range subExpression.FindAllStringSubmatch(stringValue(item), -1) {
-							add(match[1])
+						// The compiler has already validated substitution syntax.
+						parts, _ := stackSubParts(stringValue(item))
+						for _, part := range parts {
+							if part.name != "" && !part.escaped {
+								add(part.name)
+							}
 						}
 					default:
 						walk(item)
@@ -307,7 +435,7 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 	template := object(value)
 	for k := range template {
 		switch k {
-		case "AWSTemplateFormatVersion", "Description", "Parameters", "Resources", "Outputs":
+		case "AWSTemplateFormatVersion", "Description", "Parameters", "Conditions", "Resources", "Outputs":
 		default:
 			return fail("Unsupported template section: " + k)
 		}
@@ -323,7 +451,7 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 			return fail("Unsupported resource type: " + kind)
 		}
 		for k := range r {
-			if k != "Type" && k != "Properties" && k != "DependsOn" {
+			if k != "Type" && k != "Properties" && k != "DependsOn" && k != "Condition" {
 				return fail("Unsupported resource attribute: " + k)
 			}
 		}
@@ -337,47 +465,67 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 	refs := map[string]string{"AWS::Region": region, "AWS::AccountId": "000000000000", "AWS::StackName": name, "AWS::StackId": id, "AWS::Partition": "aws", "AWS::URLSuffix": "amazonaws.com"}
 	attrs := map[string]string{}
 	definitions := object(template["Parameters"])
-	for key := range parameters {
-		if _, ok := definitions[key]; !ok {
-			return fail("Unknown template parameter: " + key)
-		}
+	if _, exists := template["Parameters"]; exists && definitions == nil {
+		return fail("Parameters must be an object.")
 	}
-	for key, raw := range definitions {
-		definition := object(raw)
-		for field := range definition {
-			switch field {
-			case "Type", "Default", "Description", "NoEcho", "AllowedPattern", "MinLength", "MaxLength", "ConstraintDescription":
-			default:
-				return fail("Unsupported parameter constraint: " + field)
-			}
-		}
-		if stringValue(definition["Type"]) != "String" {
-			return fail("Only String template parameters are supported.")
-		}
-		v, ok := parameters[key]
-		if !ok {
-			v, ok = definition["Default"].(string)
-		}
-		if !ok {
-			return fail("Missing required parameter: " + key)
-		}
-		if pattern, ok := definition["AllowedPattern"].(string); ok {
-			re, e := regexp.Compile("^(?:" + pattern + ")$")
-			if e != nil || !re.MatchString(v) {
-				return fail("Parameter constraint failed: " + key)
-			}
-		}
-		for field, minimum := range map[string]bool{"MinLength": true, "MaxLength": false} {
-			if raw, ok := definition[field]; ok {
-				n, e := strconv.Atoi(stringValue(raw))
-				if e != nil || n < 0 || minimum && len(v) < n || !minimum && len(v) > n {
-					return fail("Parameter length constraint failed: " + key)
-				}
-			}
-		}
-		refs[key] = v
-		record.Parameters[key] = v
+	values, e := stackParameterValues(definitions, parameters)
+	if e != nil {
+		return fail(e.Error())
 	}
+	for key, value := range values {
+		refs[key] = value
+		record.Parameters[key] = value
+	}
+	conditionDefinitions := object(template["Conditions"])
+	if _, exists := template["Conditions"]; exists && conditionDefinitions == nil {
+		return fail("Conditions must be an object.")
+	}
+	conditions, e := stackConditionValues(conditionDefinitions, refs)
+	if e != nil {
+		return fail(e.Error())
+	}
+	enabled := map[string]bool{}
+	for key, raw := range resources {
+		if !stackConditionalName.MatchString(key) {
+			return fail("Invalid resource logical ID.")
+		}
+		if _, exists := refs[key]; exists {
+			return fail("Resource logical ID conflicts with parameter.")
+		}
+		selected, err := stackConditionalEnabled(object(raw), conditions)
+		if err != nil {
+			return fail(err.Error())
+		}
+		enabled[key] = selected
+	}
+	// Compile every declaration purely before filtering the native record. This
+	// prevents conditions from hiding unsupported resource types/properties.
+	prepared := map[string]any{}
+	for key, raw := range resources {
+		r := object(raw)
+		selected, omit, err := stackSelectConditional(r["Properties"], conditions)
+		if err != nil || omit {
+			return fail("Invalid conditional resource properties.")
+		}
+		if err = stackConditionalLinks(r["Properties"], resources, refs, enabled, false); err != nil {
+			return fail(err.Error())
+		}
+		if err = stackConditionalLinks(selected, resources, refs, enabled, enabled[key]); err != nil {
+			return fail(err.Error())
+		}
+		if err = stackConditionalDependency(r["DependsOn"], resources, enabled, enabled[key]); err != nil {
+			return fail(err.Error())
+		}
+		copy := map[string]any{}
+		for field, value := range r {
+			if field != "Condition" {
+				copy[field] = value
+			}
+		}
+		copy["Properties"] = selected
+		prepared[key] = copy
+	}
+	resources = prepared
 	keys, err := resourceOrder(resources)
 	if err != nil {
 		return fail(err.Error())
@@ -498,15 +646,50 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 		if kind == "AWS::ApiGateway::Stage" {
 			refs[key] = stringValue(properties["StageName"])
 		}
-		record.Resources = append(record.Resources, StackResource{LogicalID: key, Type: kind, PhysicalID: physical, Properties: properties})
+		if enabled[key] {
+			record.Resources = append(record.Resources, StackResource{LogicalID: key, Type: kind, PhysicalID: physical, Properties: properties})
+		}
 	}
-	for key, raw := range object(template["Outputs"]) {
-		for field := range object(raw) {
-			if field != "Value" && field != "Description" {
+	outputs := object(template["Outputs"])
+	if _, exists := template["Outputs"]; exists && outputs == nil {
+		return fail("Outputs must be an object.")
+	}
+	for key, raw := range outputs {
+		output, ok := raw.(map[string]any)
+		if !ok {
+			return fail("Output must be an object.")
+		}
+		if _, exists := output["Value"]; !exists {
+			return fail("Output requires Value.")
+		}
+		if raw, exists := output["Description"]; exists {
+			if _, ok := raw.(string); !ok {
+				return fail("Output Description must be a string.")
+			}
+		}
+		for field := range output {
+			if field != "Value" && field != "Description" && field != "Condition" {
 				return fail("Unsupported output attribute: " + field)
 			}
 		}
-		v, e := resolve(object(raw)["Value"], refs, attrs)
+		selected, e := stackConditionalEnabled(output, conditions)
+		if e != nil {
+			return fail(e.Error())
+		}
+		projected, omit, e := stackSelectConditional(output["Value"], conditions)
+		if e != nil || omit {
+			return fail("Invalid conditional output value.")
+		}
+		if e = stackConditionalLinks(output["Value"], resources, refs, enabled, false); e != nil {
+			return fail(e.Error())
+		}
+		if !selected {
+			continue
+		}
+		if e = stackConditionalLinks(projected, resources, refs, enabled, true); e != nil {
+			return fail(e.Error())
+		}
+		v, e := resolve(projected, refs, attrs)
 		if e != nil {
 			return fail(e.Error())
 		}
@@ -538,12 +721,24 @@ func (s *StackStore) Create(record StackRecord) error {
 	if _, err = tx.Exec("INSERT INTO aws_cfn_stacks VALUES(?,?,?,?)", record.Region, record.Name, record.ID, string(document)); err != nil {
 		return ssmFailure{"AlreadyExistsException", "Stack already exists."}
 	}
+	if err = beginStackEvents(tx, record); err != nil {
+		return err
+	}
+	if err = appendStackEvent(tx, record, nil, "CREATE_IN_PROGRESS"); err != nil {
+		return err
+	}
 	for _, r := range record.Resources {
+		if err = appendStackEvent(tx, record, &r, "CREATE_IN_PROGRESS"); err != nil {
+			return err
+		}
 		if stackAPIKind(r.Type) {
 			if err = claimStackAPI(tx, record, r); err != nil {
 				return err
 			}
 			if err = createStackAPI(context.Background(), tx, record, r); err != nil {
+				return err
+			}
+			if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
 				return err
 			}
 			continue
@@ -595,8 +790,14 @@ func (s *StackStore) Create(record StackRecord) error {
 		if err != nil {
 			return ssmFailure{"AlreadyExistsException", "A resource already exists or its creation was rejected."}
 		}
+		if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
+			return err
+		}
 	}
 	if err = saveStackAPIFingerprints(tx, &record); err != nil {
+		return err
+	}
+	if err = finishStackEvents(tx, record, false); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -664,8 +865,17 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 	if err = checkStackAPIFingerprints(tx, records[0]); err != nil {
 		return err
 	}
+	if err = beginStackEvents(tx, records[0]); err != nil {
+		return err
+	}
+	if err = appendStackEvent(tx, records[0], nil, "DELETE_IN_PROGRESS"); err != nil {
+		return err
+	}
 	for i := len(records[0].Resources) - 1; i >= 0; i-- {
 		r := records[0].Resources[i]
+		if err = appendStackEvent(tx, records[0], &r, "DELETE_IN_PROGRESS"); err != nil {
+			return err
+		}
 		namespace := stackResourceNamespace(region, r.Type)
 		var owned int
 		if err = tx.QueryRow("SELECT count(*) FROM aws_cfn_ownership WHERE namespace=? AND kind=? AND physical_id=? AND stack_id=?", namespace, r.Type, r.PhysicalID, records[0].ID).Scan(&owned); err != nil {
@@ -695,12 +905,54 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		if err != nil {
 			return err
 		}
+		if err = appendStackEvent(tx, records[0], &r, "DELETE_COMPLETE"); err != nil {
+			return err
+		}
 	}
 	if _, err = tx.Exec("DELETE FROM aws_cfn_ownership WHERE stack_id=?", records[0].ID); err != nil {
 		return err
 	}
-	if _, err = tx.Exec("DELETE FROM aws_cfn_stacks WHERE id=?", records[0].ID); err != nil {
+	result, err := tx.Exec("DELETE FROM aws_cfn_stacks WHERE id=?", records[0].ID)
+	if err != nil {
 		return err
+	}
+	removed, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if removed != 1 {
+		return errors.New("stack cleanup did not remove exactly the selected stack")
+	}
+	// Event completion and retention can trigger further writes. Finish them
+	// before the final acknowledgement checks; only commit may follow those.
+	if err = finishStackEvents(tx, records[0], true); err != nil {
+		return err
+	}
+	var remainingStack, remainingClaims int
+	if err = tx.QueryRow("SELECT (SELECT count(*) FROM aws_cfn_stacks WHERE id=?),(SELECT count(*) FROM aws_cfn_ownership WHERE stack_id=?)", records[0].ID, records[0].ID).Scan(&remainingStack, &remainingClaims); err != nil {
+		return err
+	}
+	if remainingStack != 0 || remainingClaims != 0 {
+		return errors.New("stack cleanup postcondition failed")
+	}
+	// Verify physical effects after every cleanup write. A trigger on a later
+	// resource/claim/stack/event/history write must not resurrect a resource.
+	for _, resource := range records[0].Resources {
+		var remaining int
+		switch resource.Type {
+		case "AWS::SSM::Parameter":
+			err = tx.QueryRow("SELECT count(*) FROM aws_ssm_parameters WHERE region=? AND name=?", region, resource.PhysicalID).Scan(&remaining)
+		case "AWS::S3::Bucket":
+			err = tx.QueryRow("SELECT count(*) FROM buckets WHERE name=?", resource.PhysicalID).Scan(&remaining)
+		default:
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		if remaining != 0 {
+			return errors.New("stack physical resource cleanup postcondition failed")
+		}
 	}
 	return tx.Commit()
 }
@@ -775,8 +1027,8 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	action := form.Get("Action")
-	if action != "CreateStack" && action != "DescribeStacks" && action != "DeleteStack" {
-		cfnError(w, ssmFailure{"NotImplemented", "Only CreateStack, DescribeStacks and DeleteStack are supported."})
+	if action != "CreateStack" && action != "DescribeStacks" && action != "DeleteStack" && action != "DescribeStackEvents" {
+		cfnError(w, ssmFailure{"NotImplemented", "Only CreateStack, DescribeStacks, DescribeStackEvents and DeleteStack are supported."})
 		return
 	}
 	if form.Get("Version") != "2010-05-15" {
@@ -817,6 +1069,11 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 				fail("CreateStack-only field.")
 				return
 			}
+		case "NextToken":
+			if action != "DescribeStackEvents" {
+				fail("NextToken is supported only by DescribeStackEvents.")
+				return
+			}
 		case "Action", "Version", "StackName":
 		default:
 			if action != "CreateStack" || !regexp.MustCompile(`^Parameters\.member\.[0-9]+\.(ParameterKey|ParameterValue)$|^Capabilities\.member\.[0-9]+$|^Tags\.member\.[0-9]+\.(Key|Value)$`).MatchString(key) {
@@ -826,7 +1083,8 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// Exercise IAM permission is not permission to read host-private answers.
-	if action == "DescribeStacks" && r.Header.Get("X-Simulator-Access-Role") == "participant" {
+	_, nativeSDK := SDKIdentityFromContext(r.Context())
+	if (action == "DescribeStacks" || action == "DescribeStackEvents") && r.Header.Get("X-Simulator-Access-Role") == "participant" && !nativeSDK {
 		cfnError(w, ssmFailure{"AccessDenied", "Stack outputs are reserved for the host."})
 		return
 	}
@@ -839,7 +1097,10 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 	var policy core.Policy
 	if principal != core.Administrator {
 		var found bool
-		policy, found, err = g.Identities.Policy(principal)
+		policy, found = SDKPolicyFromContext(r.Context())
+		if !found {
+			policy, found, err = g.Identities.Policy(principal)
+		}
 		if err != nil {
 			cfnError(w, err)
 			return
@@ -918,6 +1179,18 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		cfnResponse(w, action, "<StackId>"+xmlText(record.ID)+"</StackId>")
+	case "DescribeStackEvents":
+		events, token, e := g.Stacks.Events(region, name, form.Get("NextToken"), authorize)
+		if e != nil {
+			cfnError(w, e)
+			return
+		}
+		result, e := stackEventsXML(events, token)
+		if e != nil {
+			cfnError(w, e)
+			return
+		}
+		cfnResponse(w, action, result)
 	case "DescribeStacks":
 		if name == "" {
 			if err = authorize("*"); err != nil {

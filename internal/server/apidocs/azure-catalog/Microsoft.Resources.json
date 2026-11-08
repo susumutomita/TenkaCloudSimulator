@@ -1,0 +1,607 @@
+{
+ "components": {
+  "schemas": {
+   "Resource": {
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "systemData": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/systemData"
+       }
+      ],
+      "readOnly": true
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceGroup": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/TrackedResource"
+     }
+    ],
+    "properties": {
+     "managedBy": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ResourceGroupProperties"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceGroupListResult": {
+    "properties": {
+     "nextLink": {
+      "format": "uri",
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/ResourceGroup"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "value"
+    ],
+    "type": "object"
+   },
+   "ResourceGroupPatchable": {
+    "properties": {
+     "managedBy": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/ResourceGroupProperties"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceGroupProperties": {
+    "properties": {
+     "provisioningState": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TrackedResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "location": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "location"
+    ],
+    "type": "object"
+   },
+   "systemData": {
+    "properties": {
+     "createdAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "createdByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "lastModifiedBy": {
+      "type": "string"
+     },
+     "lastModifiedByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     }
+    },
+    "readOnly": true,
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Microsoft.Resources api-version 2025-04-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. One synthetic subscription per environment; resource groups hold only the catalog resources below. Deleting a resource group synchronously deletes every catalog resource in it, unless another resource outside it still references one; forceDeletionTypes and $filter are refused. Export template, move and the generic Resources_* operations are not implemented (HTTP 501).",
+  "title": "Resource groups (Microsoft.Resources, simulator catalog)",
+  "version": "2025-04-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/subscriptions/{subscriptionId}/resourcegroups": {
+   "get": {
+    "operationId": "ResourceGroups_List",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-04-01",
+       "enum": [
+        "2025-04-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "$top",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceGroupListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ResourceGroups_List",
+    "tags": [
+     "Resource groups"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}": {
+   "delete": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "ResourceGroups_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-04-01",
+       "enum": [
+        "2025-04-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ResourceGroups_Delete",
+    "tags": [
+     "Resource groups"
+    ]
+   },
+   "get": {
+    "operationId": "ResourceGroups_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-04-01",
+       "enum": [
+        "2025-04-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceGroup"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ResourceGroups_Get",
+    "tags": [
+     "Resource groups"
+    ]
+   },
+   "head": {
+    "operationId": "ResourceGroups_CheckExistence",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-04-01",
+       "enum": [
+        "2025-04-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "Official 404 response."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ResourceGroups_CheckExistence",
+    "tags": [
+     "Resource groups"
+    ]
+   },
+   "patch": {
+    "operationId": "ResourceGroups_Update",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-04-01",
+       "enum": [
+        "2025-04-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ResourceGroupPatchable"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceGroup"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ResourceGroups_Update",
+    "tags": [
+     "Resource groups"
+    ]
+   },
+   "put": {
+    "operationId": "ResourceGroups_CreateOrUpdate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-04-01",
+       "enum": [
+        "2025-04-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ResourceGroup"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceGroup"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceGroup"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "ResourceGroups_CreateOrUpdate",
+    "tags": [
+     "Resource groups"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/azure-arm"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Microsoft.Resources api-version 2025-04-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. One synthetic subscription per environment; resource groups hold only the catalog resources below. Deleting a resource group synchronously deletes every catalog resource in it, unless another resource outside it still references one; forceDeletionTypes and $filter are refused. Export template, move and the generic Resources_* operations are not implemented (HTTP 501).",
+   "name": "Resource groups"
+  }
+ ],
+ "x-simulator-source": {
+  "repository": "github.com/Azure/azure-rest-api-specs",
+  "commit": "8254fa29b6360b48084554122a7c49f6c4237d84",
+  "license": "MIT",
+  "files": [
+   {
+    "path": "specification/common-types/resource-management/v3/types.json",
+    "sha256": "8f69ddbcdd8f3df61a156a129e70db08b3a03f2ec710de07f30273ec27492de3"
+   },
+   {
+    "path": "specification/resources/resource-manager/Microsoft.Resources/deployments/stable/2025-04-01/deployments.json",
+    "sha256": "65ab0762e17c23943f8247bfac9d62b1a80d526bbdf64fc24700a7599abc78aa"
+   },
+   {
+    "path": "specification/resources/resource-manager/Microsoft.Resources/resources/stable/2025-04-01/resources.json",
+    "sha256": "399d827f9a8e5f82b89922f2155c2f8c34017a5764c3e2c492f743ee9a23fe62"
+   }
+  ]
+ }
+}

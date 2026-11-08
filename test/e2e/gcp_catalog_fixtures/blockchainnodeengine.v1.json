@@ -1,0 +1,142 @@
+{
+ "api": "blockchainnodeengine.v1",
+ "steps": [
+  {
+   "call": "projects.locations.blockchainNodes.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "blockchainNodeId": "fixture-eth"
+   },
+   "body": {
+    "blockchainType": "ETHEREUM",
+    "ethereumDetails": {
+     "network": "TESTNET_SEPOLIA",
+     "nodeType": "FULL",
+     "executionClient": "GETH",
+     "consensusClient": "LIGHTHOUSE"
+    }
+   },
+   "save": {
+    "op_node": "name",
+    "node": "response.name"
+   },
+   "expect": {
+    "done": true,
+    "response.state": "RUNNING"
+   }
+  },
+  {
+   "call": "projects.locations.blockchainNodes.get",
+   "args": {
+    "name": "${node}"
+   },
+   "expect": {
+    "ethereumDetails.network": "TESTNET_SEPOLIA"
+   }
+  },
+  {
+   "call": "projects.locations.blockchainNodes.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "blockchainNodes#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.blockchainNodes.patch",
+   "args": {
+    "name": "${node}",
+    "updateMask": "labels"
+   },
+   "body": {
+    "labels": {
+     "team": "a"
+    }
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.blockchainNodes.patch",
+   "args": {
+    "name": "${node}",
+    "updateMask": "blockchainType"
+   },
+   "body": {
+    "blockchainType": "ETHEREUM"
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.locations.operations.get",
+   "args": {
+    "name": "${op_node}"
+   },
+   "expect": {
+    "response.state": "RUNNING"
+   }
+  },
+  {
+   "call": "projects.locations.operations.list",
+   "args": {
+    "name": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "operations#count": 2
+   }
+  },
+  {
+   "call": "projects.locations.blockchainNodes.list",
+   "args": {
+    "parent": "projects/other-project/locations/us-central1"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.locations.blockchainNodes.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "blockchainNodes#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.locations.blockchainNodes.get",
+   "args": {
+    "name": "${node}"
+   },
+   "expect": {
+    "labels.team": "a"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.locations.blockchainNodes.delete",
+   "args": {
+    "name": "${node}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.blockchainNodes.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "blockchainNodes#count": 0
+   }
+  }
+ ]
+}

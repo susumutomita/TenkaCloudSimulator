@@ -1,0 +1,24 @@
+{
+ "client": "acm-pca",
+ "steps": [
+  {"op": "create_certificate_authority", "args": {"CertificateAuthorityConfiguration": {"KeyAlgorithm": "RSA_2048", "SigningAlgorithm": "SHA256WITHRSA", "Subject": {"CommonName": "fixture.example", "Organization": "Fixture"}}, "CertificateAuthorityType": "ROOT", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"ca": "CertificateAuthorityArn"}},
+  {"op": "describe_certificate_authority", "args": {"CertificateAuthorityArn": "${ca}"}, "expect": {"CertificateAuthority.Status": "PENDING_CERTIFICATE", "CertificateAuthority.Type": "ROOT", "CertificateAuthority.Arn": "${ca}", "CertificateAuthority.CertificateAuthorityConfiguration.Subject.CommonName": "fixture.example"}},
+  {"op": "list_certificate_authorities", "args": {}, "expect": {"CertificateAuthorities#count": 1}},
+  {"op": "list_certificate_authorities", "args": {"ResourceOwner": "OTHER_ACCOUNTS"}, "expect": {"CertificateAuthorities#count": 0}},
+  {"op": "tag_certificate_authority", "args": {"CertificateAuthorityArn": "${ca}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "list_tags", "args": {"CertificateAuthorityArn": "${ca}"}, "expect": {"Tags#count": 2}},
+  {"op": "create_certificate_authority", "args": {"CertificateAuthorityConfiguration": {"KeyAlgorithm": "RSA_2048", "SigningAlgorithm": "SHA256WITHRSA", "Subject": {"CommonName": "again.example"}}, "CertificateAuthorityType": "ROOT", "IdempotencyToken": "fixture"}, "error": "InvalidArgsException", "status": 400},
+  {"op": "get_certificate_authority_csr", "args": {"CertificateAuthorityArn": "${ca}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_certificate_authority", "args": {"CertificateAuthorityArn": "arn:aws:acm-pca:us-east-1:000000000000:certificate-authority/00000000-0000-0000-0000-000000000000"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_certificate_authorities", "args": {}, "expect": {"CertificateAuthorities#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_certificate_authority", "args": {"CertificateAuthorityArn": "${ca}"}, "expect": {"CertificateAuthority.Status": "PENDING_CERTIFICATE"}}
+ ],
+ "cleanup": [
+  {"op": "delete_certificate_authority", "args": {"CertificateAuthorityArn": "${ca}"}},
+  {"op": "list_certificate_authorities", "args": {}, "expect": {"CertificateAuthorities#count": 0}}
+ ]
+}

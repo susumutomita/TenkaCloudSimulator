@@ -1,0 +1,1154 @@
+{
+ "components": {
+  "schemas": {
+   "ActionsRequired": {
+    "enum": [
+     "None",
+     "Recreate"
+    ],
+    "type": "string"
+   },
+   "AzureADAuthenticationAsArmPolicy": {
+    "properties": {
+     "status": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectionStatus": {
+    "enum": [
+     "Approved",
+     "Pending",
+     "Rejected",
+     "Disconnected"
+    ],
+    "type": "string"
+   },
+   "EncryptionProperty": {
+    "properties": {
+     "keyVaultProperties": {
+      "$ref": "#/components/schemas/KeyVaultProperties"
+     },
+     "status": {
+      "$ref": "#/components/schemas/EncryptionStatus"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionStatus": {
+    "enum": [
+     "enabled",
+     "disabled"
+    ],
+    "type": "string"
+   },
+   "ExportPolicy": {
+    "properties": {
+     "status": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IPRule": {
+    "properties": {
+     "action": {
+      "enum": [
+       "Allow"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "value"
+    ],
+    "type": "object"
+   },
+   "IdentityProperties": {
+    "properties": {
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tenantId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "$ref": "#/components/schemas/ResourceIdentityType"
+     },
+     "userAssignedIdentities": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/UserIdentityProperties"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "KeyVaultProperties": {
+    "properties": {
+     "identity": {
+      "type": "string"
+     },
+     "keyIdentifier": {
+      "type": "string"
+     },
+     "keyRotationEnabled": {
+      "readOnly": true,
+      "type": "boolean"
+     },
+     "lastKeyRotationTimestamp": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "versionedKeyIdentifier": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkRuleSet": {
+    "properties": {
+     "defaultAction": {
+      "enum": [
+       "Allow",
+       "Deny"
+      ],
+      "type": "string"
+     },
+     "ipRules": {
+      "items": {
+       "$ref": "#/components/schemas/IPRule"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "defaultAction"
+    ],
+    "type": "object"
+   },
+   "Policies": {
+    "properties": {
+     "azureADAuthenticationAsArmPolicy": {
+      "$ref": "#/components/schemas/AzureADAuthenticationAsArmPolicy"
+     },
+     "exportPolicy": {
+      "$ref": "#/components/schemas/ExportPolicy"
+     },
+     "quarantinePolicy": {
+      "$ref": "#/components/schemas/QuarantinePolicy"
+     },
+     "retentionPolicy": {
+      "$ref": "#/components/schemas/RetentionPolicy"
+     },
+     "trustPolicy": {
+      "$ref": "#/components/schemas/TrustPolicy"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpoint": {
+    "properties": {
+     "id": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointConnection": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/ProxyResource"
+     }
+    ],
+    "properties": {
+     "properties": {
+      "$ref": "#/components/schemas/PrivateEndpointConnectionProperties"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointConnectionProperties": {
+    "properties": {
+     "privateEndpoint": {
+      "$ref": "#/components/schemas/PrivateEndpoint"
+     },
+     "privateLinkServiceConnectionState": {
+      "$ref": "#/components/schemas/PrivateLinkServiceConnectionState"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "type": "object"
+   },
+   "PrivateLinkServiceConnectionState": {
+    "properties": {
+     "actionsRequired": {
+      "$ref": "#/components/schemas/ActionsRequired"
+     },
+     "description": {
+      "type": "string"
+     },
+     "status": {
+      "$ref": "#/components/schemas/ConnectionStatus"
+     }
+    },
+    "type": "object"
+   },
+   "ProvisioningState": {
+    "enum": [
+     "Creating",
+     "Updating",
+     "Deleting",
+     "Succeeded",
+     "Failed",
+     "Canceled"
+    ],
+    "type": "string"
+   },
+   "ProxyResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "type": "object"
+   },
+   "PublicNetworkAccess": {
+    "enum": [
+     "Enabled",
+     "Disabled"
+    ],
+    "type": "string"
+   },
+   "QuarantinePolicy": {
+    "properties": {
+     "status": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Registry": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/TrackedResource"
+     }
+    ],
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/IdentityProperties"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/RegistryProperties"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/Sku"
+     }
+    },
+    "required": [
+     "sku"
+    ],
+    "type": "object"
+   },
+   "RegistryListResult": {
+    "properties": {
+     "nextLink": {
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/Registry"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RegistryProperties": {
+    "properties": {
+     "adminUserEnabled": {
+      "type": "boolean"
+     },
+     "anonymousPullEnabled": {
+      "type": "boolean"
+     },
+     "creationDate": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "dataEndpointEnabled": {
+      "type": "boolean"
+     },
+     "dataEndpointHostNames": {
+      "items": {
+       "type": "string"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "encryption": {
+      "$ref": "#/components/schemas/EncryptionProperty"
+     },
+     "loginServer": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "networkRuleBypassAllowedForTasks": {
+      "type": "boolean"
+     },
+     "networkRuleBypassOptions": {
+      "enum": [
+       "AzureServices",
+       "None"
+      ],
+      "type": "string"
+     },
+     "networkRuleSet": {
+      "$ref": "#/components/schemas/NetworkRuleSet"
+     },
+     "policies": {
+      "$ref": "#/components/schemas/Policies"
+     },
+     "privateEndpointConnections": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateEndpointConnection"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "provisioningState": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/ProvisioningState"
+       }
+      ],
+      "readOnly": true
+     },
+     "publicNetworkAccess": {
+      "enum": [
+       "Enabled",
+       "Disabled"
+      ],
+      "type": "string"
+     },
+     "roleAssignmentMode": {
+      "enum": [
+       "AbacRepositoryPermissions",
+       "LegacyRegistryPermissions"
+      ],
+      "type": "string"
+     },
+     "status": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/Status"
+       }
+      ],
+      "readOnly": true
+     },
+     "zoneRedundancy": {
+      "enum": [
+       "Enabled",
+       "Disabled"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RegistryPropertiesUpdateParameters": {
+    "properties": {
+     "adminUserEnabled": {
+      "type": "boolean"
+     },
+     "anonymousPullEnabled": {
+      "type": "boolean"
+     },
+     "dataEndpointEnabled": {
+      "type": "boolean"
+     },
+     "encryption": {
+      "$ref": "#/components/schemas/EncryptionProperty"
+     },
+     "networkRuleBypassAllowedForTasks": {
+      "type": "boolean"
+     },
+     "networkRuleBypassOptions": {
+      "enum": [
+       "AzureServices",
+       "None"
+      ],
+      "type": "string"
+     },
+     "networkRuleSet": {
+      "$ref": "#/components/schemas/NetworkRuleSet"
+     },
+     "policies": {
+      "$ref": "#/components/schemas/Policies"
+     },
+     "publicNetworkAccess": {
+      "$ref": "#/components/schemas/PublicNetworkAccess"
+     },
+     "roleAssignmentMode": {
+      "$ref": "#/components/schemas/RoleAssignmentMode"
+     }
+    },
+    "type": "object"
+   },
+   "RegistryUpdateParameters": {
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/IdentityProperties"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/RegistryPropertiesUpdateParameters"
+     },
+     "sku": {
+      "$ref": "#/components/schemas/Sku"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "Resource": {
+    "properties": {
+     "id": {
+      "format": "arm-id",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "systemData": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/systemData"
+       }
+      ],
+      "readOnly": true
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceIdentityType": {
+    "enum": [
+     "SystemAssigned",
+     "UserAssigned",
+     "SystemAssigned, UserAssigned",
+     "None"
+    ],
+    "type": "string"
+   },
+   "RetentionPolicy": {
+    "properties": {
+     "days": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "lastUpdatedTime": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RoleAssignmentMode": {
+    "enum": [
+     "AbacRepositoryPermissions",
+     "LegacyRegistryPermissions"
+    ],
+    "type": "string"
+   },
+   "Sku": {
+    "properties": {
+     "name": {
+      "$ref": "#/components/schemas/SkuName"
+     },
+     "tier": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/SkuTier"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "SkuName": {
+    "enum": [
+     "Classic",
+     "Basic",
+     "Standard",
+     "Premium"
+    ],
+    "type": "string"
+   },
+   "SkuTier": {
+    "enum": [
+     "Classic",
+     "Basic",
+     "Standard",
+     "Premium"
+    ],
+    "type": "string"
+   },
+   "Status": {
+    "properties": {
+     "displayStatus": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "message": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "timestamp": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TrackedResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "properties": {
+     "location": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "location"
+    ],
+    "type": "object"
+   },
+   "TrustPolicy": {
+    "properties": {
+     "status": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "Notary"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UserIdentityProperties": {
+    "properties": {
+     "clientId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "systemData": {
+    "properties": {
+     "createdAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "createdByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "lastModifiedBy": {
+      "type": "string"
+     },
+     "lastModifiedByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     }
+    },
+    "readOnly": true,
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Microsoft.ContainerRegistry api-version 2025-11-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Registry metadata only: no image, repository, login server, token or admin credential exists, even when adminUserEnabled is true. Credential listing, imports, replications, webhooks, tasks and every other operation are not implemented (HTTP 501).",
+  "title": "Container Registry (Microsoft.ContainerRegistry, simulator catalog)",
+  "version": "2025-11-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/subscriptions/{subscriptionId}/providers/Microsoft.ContainerRegistry/registries": {
+   "get": {
+    "operationId": "Registries_List",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-11-01",
+       "enum": [
+        "2025-11-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RegistryListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Registries_List",
+    "tags": [
+     "Container Registry"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries": {
+   "get": {
+    "operationId": "Registries_ListByResourceGroup",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-11-01",
+       "enum": [
+        "2025-11-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RegistryListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Registries_ListByResourceGroup",
+    "tags": [
+     "Container Registry"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}": {
+   "delete": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "Registries_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-11-01",
+       "enum": [
+        "2025-11-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "registryName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Official 200 response."
+     },
+     "202": {
+      "description": "Official 202 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Registries_Delete",
+    "tags": [
+     "Container Registry"
+    ]
+   },
+   "get": {
+    "operationId": "Registries_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-11-01",
+       "enum": [
+        "2025-11-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "registryName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Registry"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Registries_Get",
+    "tags": [
+     "Container Registry"
+    ]
+   },
+   "patch": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "Registries_Update",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-11-01",
+       "enum": [
+        "2025-11-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "registryName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RegistryUpdateParameters"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Registry"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Registry"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Registries_Update",
+    "tags": [
+     "Container Registry"
+    ]
+   },
+   "put": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "Registries_Create",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2025-11-01",
+       "enum": [
+        "2025-11-01"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "registryName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Registry"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Registry"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "201": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Registry"
+        }
+       }
+      },
+      "description": "Official 201 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "Registries_Create",
+    "tags": [
+     "Container Registry"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/azure-arm"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Microsoft.ContainerRegistry api-version 2025-11-01 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Registry metadata only: no image, repository, login server, token or admin credential exists, even when adminUserEnabled is true. Credential listing, imports, replications, webhooks, tasks and every other operation are not implemented (HTTP 501).",
+   "name": "Container Registry"
+  }
+ ],
+ "x-simulator-source": {
+  "repository": "github.com/Azure/azure-rest-api-specs",
+  "commit": "8254fa29b6360b48084554122a7c49f6c4237d84",
+  "license": "MIT",
+  "files": [
+   {
+    "path": "specification/common-types/resource-management/v6/types.json",
+    "sha256": "5bdcf9b5ed1ea563367452e265e7ad60b411b1fbbbc20b8ba3ab7854d1ca624f"
+   },
+   {
+    "path": "specification/containerregistry/resource-manager/Microsoft.ContainerRegistry/Registry/stable/2025-11-01/containerregistry.json",
+    "sha256": "7b63547d42348b82ffdb21a6f42b1fed891c0b790113a0bbc043f1297339a4c4"
+   }
+  ]
+ }
+}

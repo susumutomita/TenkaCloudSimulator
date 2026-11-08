@@ -1,0 +1,52 @@
+{
+ "client": "location",
+ "inject_host_prefix": false,
+ "steps": [
+  {"op": "create_map", "args": {"MapName": "fixture-map", "Configuration": {"Style": "VectorEsriNavigation"}, "Description": "streets", "Tags": {"team": "a"}}, "save": {"map": "MapArn"}, "expect": {"MapName": "fixture-map", "MapArn": "arn:aws:geo:us-east-1:000000000000:map/fixture-map"}},
+  {"op": "describe_map", "args": {"MapName": "fixture-map"}, "expect": {"DataSource": "Esri", "Configuration.Style": "VectorEsriNavigation", "PricingPlan": "RequestBasedUsage", "Tags": {"team": "a"}}},
+  {"op": "list_maps", "args": {}, "expect": {"Entries#count": 1, "Entries[0].DataSource": "Esri"}},
+  {"op": "update_map", "args": {"MapName": "fixture-map", "Description": "updated"}, "expect": {"MapArn": "${map}"}},
+  {"op": "create_map", "args": {"MapName": "fixture-map", "Configuration": {"Style": "VectorEsriNavigation"}}, "error": "ConflictException"},
+  {"op": "create_map", "args": {"MapName": "unknown-style", "Configuration": {"Style": "Watercolor"}}, "error": "ValidationException"},
+  {"op": "create_place_index", "args": {"IndexName": "fixture-index", "DataSource": "Here", "DataSourceConfiguration": {"IntendedUse": "Storage"}}, "expect": {"IndexArn": "arn:aws:geo:us-east-1:000000000000:place-index/fixture-index"}},
+  {"op": "create_place_index", "args": {"IndexName": "other-index", "DataSource": "Unknown"}, "error": "ValidationException"},
+  {"op": "describe_place_index", "args": {"IndexName": "fixture-index"}, "expect": {"DataSource": "Here", "DataSourceConfiguration.IntendedUse": "Storage"}},
+  {"op": "list_place_indexes", "args": {}, "expect": {"Entries#count": 1}},
+  {"op": "update_place_index", "args": {"IndexName": "fixture-index", "DataSourceConfiguration": {"IntendedUse": "SingleUse"}}},
+  {"op": "create_route_calculator", "args": {"CalculatorName": "fixture-routes", "DataSource": "Grab"}, "expect": {"CalculatorArn": "arn:aws:geo:us-east-1:000000000000:route-calculator/fixture-routes"}},
+  {"op": "describe_route_calculator", "args": {"CalculatorName": "fixture-routes"}, "expect": {"DataSource": "Grab"}},
+  {"op": "list_route_calculators", "args": {}, "expect": {"Entries#count": 1}},
+  {"op": "update_route_calculator", "args": {"CalculatorName": "fixture-routes", "Description": "routes"}},
+  {"op": "create_tracker", "args": {"TrackerName": "fixture-tracker", "PositionFiltering": "DistanceBased"}, "expect": {"TrackerArn": "arn:aws:geo:us-east-1:000000000000:tracker/fixture-tracker"}},
+  {"op": "create_tracker", "args": {"TrackerName": "asset-tracker", "PricingPlan": "MobileAssetTracking"}, "error": "ValidationException"},
+  {"op": "describe_tracker", "args": {"TrackerName": "fixture-tracker"}, "expect": {"PositionFiltering": "DistanceBased", "EventBridgeEnabled": false}},
+  {"op": "list_trackers", "args": {}, "expect": {"Entries#count": 1}},
+  {"op": "update_tracker", "args": {"TrackerName": "fixture-tracker", "EventBridgeEnabled": true}},
+  {"op": "create_geofence_collection", "args": {"CollectionName": "fixture-fences"}, "expect": {"CollectionArn": "arn:aws:geo:us-east-1:000000000000:geofence-collection/fixture-fences"}},
+  {"op": "describe_geofence_collection", "args": {"CollectionName": "fixture-fences"}, "expect": {"GeofenceCount": 0}},
+  {"op": "list_geofence_collections", "args": {}, "expect": {"Entries#count": 1}},
+  {"op": "update_geofence_collection", "args": {"CollectionName": "fixture-fences", "Description": "fences"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${map}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${map}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${map}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "search_place_index_for_text", "args": {"IndexName": "fixture-index", "Text": "Tokyo"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_map", "args": {"MapName": "ghost"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_maps", "args": {}, "expect": {"Entries#count": 0}},
+  {"op": "list_trackers", "args": {}, "expect": {"Entries#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_map", "args": {"MapName": "fixture-map"}, "expect": {"Description": "updated"}},
+  {"op": "describe_tracker", "args": {"TrackerName": "fixture-tracker"}, "expect": {"EventBridgeEnabled": true}},
+  {"op": "describe_place_index", "args": {"IndexName": "fixture-index"}, "expect": {"DataSourceConfiguration.IntendedUse": "SingleUse"}}
+ ],
+ "cleanup": [
+  {"op": "delete_map", "args": {"MapName": "fixture-map"}},
+  {"op": "delete_place_index", "args": {"IndexName": "fixture-index"}},
+  {"op": "delete_route_calculator", "args": {"CalculatorName": "fixture-routes"}},
+  {"op": "delete_tracker", "args": {"TrackerName": "fixture-tracker"}},
+  {"op": "delete_geofence_collection", "args": {"CollectionName": "fixture-fences"}},
+  {"op": "list_maps", "args": {}, "expect": {"Entries#count": 0}}
+ ]
+}

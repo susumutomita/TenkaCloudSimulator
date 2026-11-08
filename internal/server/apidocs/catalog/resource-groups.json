@@ -1,0 +1,933 @@
+{
+ "components": {
+  "schemas": {
+   "Group": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationTag": {
+      "additionalProperties": {
+       "maxLength": 1600,
+       "minLength": 12,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "Criticality": {
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "Description": {
+      "maxLength": 1024,
+      "type": "string"
+     },
+     "DisplayName": {
+      "maxLength": 300,
+      "minLength": 0,
+      "type": "string"
+     },
+     "GroupArn": {
+      "maxLength": 1600,
+      "minLength": 12,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Owner": {
+      "maxLength": 300,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "GroupArn",
+     "Name"
+    ],
+    "type": "object"
+   },
+   "GroupConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Configuration": {
+      "items": {
+       "$ref": "#/components/schemas/GroupConfigurationItem"
+      },
+      "maxItems": 2,
+      "type": "array"
+     },
+     "FailureReason": {
+      "type": "string"
+     },
+     "ProposedConfiguration": {
+      "items": {
+       "$ref": "#/components/schemas/GroupConfigurationItem"
+      },
+      "maxItems": 2,
+      "type": "array"
+     },
+     "Status": {
+      "enum": [
+       "UPDATING",
+       "UPDATE_COMPLETE",
+       "UPDATE_FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GroupConfigurationItem": {
+    "additionalProperties": false,
+    "properties": {
+     "Parameters": {
+      "items": {
+       "$ref": "#/components/schemas/GroupConfigurationParameter"
+      },
+      "type": "array"
+     },
+     "Type": {
+      "maxLength": 40,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type"
+    ],
+    "type": "object"
+   },
+   "GroupConfigurationParameter": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Values": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "GroupFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "enum": [
+       "resource-type",
+       "configuration-type",
+       "owner",
+       "display-name",
+       "criticality"
+      ],
+      "type": "string"
+     },
+     "Values": {
+      "items": {
+       "maxLength": 300,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Values"
+    ],
+    "type": "object"
+   },
+   "GroupIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "Criticality": {
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "Description": {
+      "maxLength": 1024,
+      "type": "string"
+     },
+     "DisplayName": {
+      "maxLength": 300,
+      "minLength": 0,
+      "type": "string"
+     },
+     "GroupArn": {
+      "maxLength": 1600,
+      "minLength": 12,
+      "type": "string"
+     },
+     "GroupName": {
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Owner": {
+      "maxLength": 300,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceQuery": {
+    "additionalProperties": false,
+    "properties": {
+     "Query": {
+      "maxLength": 4096,
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "TAG_FILTERS_1_0",
+       "CLOUDFORMATION_STACK_1_0"
+      ],
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type",
+     "Query"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Resource Groups API (2017-11-27). Every other official operation returns HTTP 501 UnknownOperationException. Groups are stored without membership: resource queries and service configurations are refused, and resource searches, group membership, tag-sync tasks and group lifecycle events return UnknownOperationException with HTTP 501. Groups are identified by the Group member; the deprecated GroupName member and ListGroups filters are refused. Tag, Untag and GetTags responses omit the echoed Arn and Keys members.",
+  "title": "AWS Resource Groups (simulator catalog)",
+  "version": "2017-11-27"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/delete-group": {
+   "post": {
+    "operationId": "resource-groupsDeleteGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-groups"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Group": {
+          "maxLength": 1600,
+          "minLength": 1,
+          "type": "string"
+         },
+         "GroupName": {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Group": {
+           "$ref": "#/components/schemas/Group"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteGroup",
+    "tags": [
+     "AWS Resource Groups"
+    ]
+   }
+  },
+  "/get-group": {
+   "post": {
+    "operationId": "resource-groupsGetGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-groups"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Group": {
+          "maxLength": 1600,
+          "minLength": 1,
+          "type": "string"
+         },
+         "GroupName": {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Group": {
+           "$ref": "#/components/schemas/Group"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetGroup",
+    "tags": [
+     "AWS Resource Groups"
+    ]
+   }
+  },
+  "/groups": {
+   "post": {
+    "operationId": "resource-groupsCreateGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-groups"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Configuration": {
+          "items": {
+           "$ref": "#/components/schemas/GroupConfigurationItem"
+          },
+          "maxItems": 2,
+          "type": "array"
+         },
+         "Criticality": {
+          "maximum": 10,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "Description": {
+          "maxLength": 1024,
+          "type": "string"
+         },
+         "DisplayName": {
+          "maxLength": 300,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Owner": {
+          "maxLength": 300,
+          "minLength": 0,
+          "type": "string"
+         },
+         "ResourceQuery": {
+          "$ref": "#/components/schemas/ResourceQuery"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Group": {
+           "$ref": "#/components/schemas/Group"
+          },
+          "GroupConfiguration": {
+           "$ref": "#/components/schemas/GroupConfiguration"
+          },
+          "ResourceQuery": {
+           "$ref": "#/components/schemas/ResourceQuery"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateGroup",
+    "tags": [
+     "AWS Resource Groups"
+    ]
+   }
+  },
+  "/groups-list": {
+   "post": {
+    "operationId": "resource-groupsListGroups",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-groups"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 8192,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Filters": {
+          "items": {
+           "$ref": "#/components/schemas/GroupFilter"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "GroupIdentifiers": {
+           "items": {
+            "$ref": "#/components/schemas/GroupIdentifier"
+           },
+           "type": "array"
+          },
+          "Groups": {
+           "items": {
+            "$ref": "#/components/schemas/Group"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 8192,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListGroups",
+    "tags": [
+     "AWS Resource Groups"
+    ]
+   }
+  },
+  "/resources/{Arn}/tags": {
+   "get": {
+    "operationId": "resource-groupsGetTags",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-groups"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Arn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "maxLength": 1600,
+           "minLength": 12,
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetTags",
+    "tags": [
+     "AWS Resource Groups"
+    ]
+   },
+   "patch": {
+    "operationId": "resource-groupsUntag",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-groups"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Arn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Keys": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "Keys"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "maxLength": 1600,
+           "minLength": 12,
+           "type": "string"
+          },
+          "Keys": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "Untag",
+    "tags": [
+     "AWS Resource Groups"
+    ]
+   },
+   "put": {
+    "operationId": "resource-groupsTag",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-groups"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Arn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "maxLength": 1600,
+           "minLength": 12,
+           "type": "string"
+          },
+          "Tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "Tag",
+    "tags": [
+     "AWS Resource Groups"
+    ]
+   }
+  },
+  "/update-group": {
+   "post": {
+    "operationId": "resource-groupsUpdateGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-groups"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Criticality": {
+          "maximum": 10,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "Description": {
+          "maxLength": 1024,
+          "type": "string"
+         },
+         "DisplayName": {
+          "maxLength": 300,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Group": {
+          "maxLength": 1600,
+          "minLength": 1,
+          "type": "string"
+         },
+         "GroupName": {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Owner": {
+          "maxLength": 300,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Group": {
+           "$ref": "#/components/schemas/Group"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateGroup",
+    "tags": [
+     "AWS Resource Groups"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Resource Groups API (2017-11-27). Every other official operation returns HTTP 501 UnknownOperationException. Groups are stored without membership: resource queries and service configurations are refused, and resource searches, group membership, tag-sync tasks and group lifecycle events return UnknownOperationException with HTTP 501. Groups are identified by the Group member; the deprecated GroupName member and ListGroups filters are refused. Tag, Untag and GetTags responses omit the echoed Arn and Keys members.",
+   "name": "AWS Resource Groups"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/resource-groups/2017-11-27/service-2.json",
+  "sha256": "fe1b10a28f93c31b99f1cd1a861694cd8f013a925da6bec8ab6cd34ddc3ebaec",
+  "license": "Apache-2.0"
+ }
+}

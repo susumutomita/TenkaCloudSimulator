@@ -1,0 +1,1116 @@
+{
+ "components": {
+  "schemas": {
+   "AddTagsToCertificateRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "CertificateArn",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "CertificateDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "CertificateAuthorityArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DomainName": {
+      "maxLength": 253,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DomainValidationOptions": {
+      "items": {
+       "$ref": "#/components/schemas/DomainValidation"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ExtendedKeyUsages": {
+      "items": {
+       "$ref": "#/components/schemas/ExtendedKeyUsage"
+      },
+      "type": "array"
+     },
+     "FailureReason": {
+      "enum": [
+       "NO_AVAILABLE_CONTACTS",
+       "ADDITIONAL_VERIFICATION_REQUIRED",
+       "DOMAIN_NOT_ALLOWED",
+       "INVALID_PUBLIC_DOMAIN",
+       "DOMAIN_VALIDATION_DENIED",
+       "CAA_ERROR",
+       "PCA_LIMIT_EXCEEDED",
+       "PCA_INVALID_ARN",
+       "PCA_INVALID_STATE",
+       "PCA_REQUEST_FAILED",
+       "PCA_NAME_CONSTRAINTS_VALIDATION",
+       "PCA_RESOURCE_NOT_FOUND",
+       "PCA_INVALID_ARGS",
+       "PCA_INVALID_DURATION",
+       "PCA_ACCESS_DENIED",
+       "SLR_NOT_FOUND",
+       "OTHER"
+      ],
+      "type": "string"
+     },
+     "ImportedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "InUseBy": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "IssuedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Issuer": {
+      "type": "string"
+     },
+     "KeyAlgorithm": {
+      "enum": [
+       "RSA_1024",
+       "RSA_2048",
+       "RSA_3072",
+       "RSA_4096",
+       "EC_prime256v1",
+       "EC_secp384r1",
+       "EC_secp521r1"
+      ],
+      "type": "string"
+     },
+     "KeyUsages": {
+      "items": {
+       "$ref": "#/components/schemas/KeyUsage"
+      },
+      "type": "array"
+     },
+     "ManagedBy": {
+      "enum": [
+       "CLOUDFRONT"
+      ],
+      "type": "string"
+     },
+     "NotAfter": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "NotBefore": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Options": {
+      "$ref": "#/components/schemas/CertificateOptions"
+     },
+     "RenewalEligibility": {
+      "enum": [
+       "ELIGIBLE",
+       "INELIGIBLE"
+      ],
+      "type": "string"
+     },
+     "RenewalSummary": {
+      "$ref": "#/components/schemas/RenewalSummary"
+     },
+     "RevocationReason": {
+      "enum": [
+       "UNSPECIFIED",
+       "KEY_COMPROMISE",
+       "CA_COMPROMISE",
+       "AFFILIATION_CHANGED",
+       "SUPERCEDED",
+       "SUPERSEDED",
+       "CESSATION_OF_OPERATION",
+       "CERTIFICATE_HOLD",
+       "REMOVE_FROM_CRL",
+       "PRIVILEGE_WITHDRAWN",
+       "A_A_COMPROMISE"
+      ],
+      "type": "string"
+     },
+     "RevokedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Serial": {
+      "type": "string"
+     },
+     "SignatureAlgorithm": {
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "PENDING_VALIDATION",
+       "ISSUED",
+       "INACTIVE",
+       "EXPIRED",
+       "VALIDATION_TIMED_OUT",
+       "REVOKED",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "Subject": {
+      "type": "string"
+     },
+     "SubjectAlternativeNames": {
+      "items": {
+       "maxLength": 253,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Type": {
+      "enum": [
+       "IMPORTED",
+       "AMAZON_ISSUED",
+       "PRIVATE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CertificateOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateTransparencyLoggingPreference": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "Export": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CertificateSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DomainName": {
+      "maxLength": 253,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ExportOption": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "Exported": {
+      "type": "boolean"
+     },
+     "ExtendedKeyUsages": {
+      "items": {
+       "enum": [
+        "TLS_WEB_SERVER_AUTHENTICATION",
+        "TLS_WEB_CLIENT_AUTHENTICATION",
+        "CODE_SIGNING",
+        "EMAIL_PROTECTION",
+        "TIME_STAMPING",
+        "OCSP_SIGNING",
+        "IPSEC_END_SYSTEM",
+        "IPSEC_TUNNEL",
+        "IPSEC_USER",
+        "ANY",
+        "NONE",
+        "CUSTOM"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "HasAdditionalSubjectAlternativeNames": {
+      "type": "boolean"
+     },
+     "ImportedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "InUse": {
+      "type": "boolean"
+     },
+     "IssuedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "KeyAlgorithm": {
+      "enum": [
+       "RSA_1024",
+       "RSA_2048",
+       "RSA_3072",
+       "RSA_4096",
+       "EC_prime256v1",
+       "EC_secp384r1",
+       "EC_secp521r1"
+      ],
+      "type": "string"
+     },
+     "KeyUsages": {
+      "items": {
+       "enum": [
+        "DIGITAL_SIGNATURE",
+        "NON_REPUDIATION",
+        "KEY_ENCIPHERMENT",
+        "DATA_ENCIPHERMENT",
+        "KEY_AGREEMENT",
+        "CERTIFICATE_SIGNING",
+        "CRL_SIGNING",
+        "ENCIPHER_ONLY",
+        "DECIPHER_ONLY",
+        "ANY",
+        "CUSTOM"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ManagedBy": {
+      "enum": [
+       "CLOUDFRONT"
+      ],
+      "type": "string"
+     },
+     "NotAfter": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "NotBefore": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "RenewalEligibility": {
+      "enum": [
+       "ELIGIBLE",
+       "INELIGIBLE"
+      ],
+      "type": "string"
+     },
+     "RevokedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Status": {
+      "enum": [
+       "PENDING_VALIDATION",
+       "ISSUED",
+       "INACTIVE",
+       "EXPIRED",
+       "VALIDATION_TIMED_OUT",
+       "REVOKED",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "SubjectAlternativeNameSummaries": {
+      "items": {
+       "maxLength": 253,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Type": {
+      "enum": [
+       "IMPORTED",
+       "AMAZON_ISSUED",
+       "PRIVATE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteCertificateRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "CertificateArn"
+    ],
+    "type": "object"
+   },
+   "DescribeCertificateRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "CertificateArn"
+    ],
+    "type": "object"
+   },
+   "DescribeCertificateResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Certificate": {
+      "$ref": "#/components/schemas/CertificateDetail"
+     }
+    },
+    "type": "object"
+   },
+   "DomainValidation": {
+    "additionalProperties": false,
+    "properties": {
+     "DomainName": {
+      "maxLength": 253,
+      "minLength": 1,
+      "type": "string"
+     },
+     "HttpRedirect": {
+      "$ref": "#/components/schemas/HttpRedirect"
+     },
+     "ResourceRecord": {
+      "$ref": "#/components/schemas/ResourceRecord"
+     },
+     "ValidationDomain": {
+      "maxLength": 253,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ValidationEmails": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ValidationMethod": {
+      "enum": [
+       "EMAIL",
+       "DNS",
+       "HTTP"
+      ],
+      "type": "string"
+     },
+     "ValidationStatus": {
+      "enum": [
+       "PENDING_VALIDATION",
+       "SUCCESS",
+       "FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "DomainName"
+    ],
+    "type": "object"
+   },
+   "DomainValidationOption": {
+    "additionalProperties": false,
+    "properties": {
+     "DomainName": {
+      "maxLength": 253,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ValidationDomain": {
+      "maxLength": 253,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DomainName",
+     "ValidationDomain"
+    ],
+    "type": "object"
+   },
+   "ExpiryEventsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "DaysBeforeExpiry": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ExtendedKeyUsage": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "enum": [
+       "TLS_WEB_SERVER_AUTHENTICATION",
+       "TLS_WEB_CLIENT_AUTHENTICATION",
+       "CODE_SIGNING",
+       "EMAIL_PROTECTION",
+       "TIME_STAMPING",
+       "OCSP_SIGNING",
+       "IPSEC_END_SYSTEM",
+       "IPSEC_TUNNEL",
+       "IPSEC_USER",
+       "ANY",
+       "NONE",
+       "CUSTOM"
+      ],
+      "type": "string"
+     },
+     "OID": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Filters": {
+    "additionalProperties": false,
+    "properties": {
+     "exportOption": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "extendedKeyUsage": {
+      "items": {
+       "enum": [
+        "TLS_WEB_SERVER_AUTHENTICATION",
+        "TLS_WEB_CLIENT_AUTHENTICATION",
+        "CODE_SIGNING",
+        "EMAIL_PROTECTION",
+        "TIME_STAMPING",
+        "OCSP_SIGNING",
+        "IPSEC_END_SYSTEM",
+        "IPSEC_TUNNEL",
+        "IPSEC_USER",
+        "ANY",
+        "NONE",
+        "CUSTOM"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "keyTypes": {
+      "items": {
+       "enum": [
+        "RSA_1024",
+        "RSA_2048",
+        "RSA_3072",
+        "RSA_4096",
+        "EC_prime256v1",
+        "EC_secp384r1",
+        "EC_secp521r1"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "keyUsage": {
+      "items": {
+       "enum": [
+        "DIGITAL_SIGNATURE",
+        "NON_REPUDIATION",
+        "KEY_ENCIPHERMENT",
+        "DATA_ENCIPHERMENT",
+        "KEY_AGREEMENT",
+        "CERTIFICATE_SIGNING",
+        "CRL_SIGNING",
+        "ENCIPHER_ONLY",
+        "DECIPHER_ONLY",
+        "ANY",
+        "CUSTOM"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "managedBy": {
+      "enum": [
+       "CLOUDFRONT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetAccountConfigurationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ExpiryEvents": {
+      "$ref": "#/components/schemas/ExpiryEventsConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "HttpRedirect": {
+    "additionalProperties": false,
+    "properties": {
+     "RedirectFrom": {
+      "type": "string"
+     },
+     "RedirectTo": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "KeyUsage": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "enum": [
+       "DIGITAL_SIGNATURE",
+       "NON_REPUDIATION",
+       "KEY_ENCIPHERMENT",
+       "DATA_ENCIPHERMENT",
+       "KEY_AGREEMENT",
+       "CERTIFICATE_SIGNING",
+       "CRL_SIGNING",
+       "ENCIPHER_ONLY",
+       "DECIPHER_ONLY",
+       "ANY",
+       "CUSTOM"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListCertificatesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateStatuses": {
+      "items": {
+       "enum": [
+        "PENDING_VALIDATION",
+        "ISSUED",
+        "INACTIVE",
+        "EXPIRED",
+        "VALIDATION_TIMED_OUT",
+        "REVOKED",
+        "FAILED"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Includes": {
+      "$ref": "#/components/schemas/Filters"
+     },
+     "MaxItems": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 10000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SortBy": {
+      "enum": [
+       "CREATED_AT"
+      ],
+      "type": "string"
+     },
+     "SortOrder": {
+      "enum": [
+       "ASCENDING",
+       "DESCENDING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListCertificatesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateSummaryList": {
+      "items": {
+       "$ref": "#/components/schemas/CertificateSummary"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 10000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForCertificateRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "CertificateArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForCertificateResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PutAccountConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ExpiryEvents": {
+      "$ref": "#/components/schemas/ExpiryEventsConfiguration"
+     },
+     "IdempotencyToken": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "IdempotencyToken"
+    ],
+    "type": "object"
+   },
+   "RenewalSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "DomainValidationOptions": {
+      "items": {
+       "$ref": "#/components/schemas/DomainValidation"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     },
+     "RenewalStatus": {
+      "enum": [
+       "PENDING_AUTO_RENEWAL",
+       "PENDING_VALIDATION",
+       "SUCCESS",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "RenewalStatusReason": {
+      "enum": [
+       "NO_AVAILABLE_CONTACTS",
+       "ADDITIONAL_VERIFICATION_REQUIRED",
+       "DOMAIN_NOT_ALLOWED",
+       "INVALID_PUBLIC_DOMAIN",
+       "DOMAIN_VALIDATION_DENIED",
+       "CAA_ERROR",
+       "PCA_LIMIT_EXCEEDED",
+       "PCA_INVALID_ARN",
+       "PCA_INVALID_STATE",
+       "PCA_REQUEST_FAILED",
+       "PCA_NAME_CONSTRAINTS_VALIDATION",
+       "PCA_RESOURCE_NOT_FOUND",
+       "PCA_INVALID_ARGS",
+       "PCA_INVALID_DURATION",
+       "PCA_ACCESS_DENIED",
+       "SLR_NOT_FOUND",
+       "OTHER"
+      ],
+      "type": "string"
+     },
+     "UpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "RenewalStatus",
+     "DomainValidationOptions",
+     "UpdatedAt"
+    ],
+    "type": "object"
+   },
+   "RequestCertificateRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateAuthorityArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "DomainName": {
+      "maxLength": 253,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DomainValidationOptions": {
+      "items": {
+       "$ref": "#/components/schemas/DomainValidationOption"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "IdempotencyToken": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "KeyAlgorithm": {
+      "enum": [
+       "RSA_1024",
+       "RSA_2048",
+       "RSA_3072",
+       "RSA_4096",
+       "EC_prime256v1",
+       "EC_secp384r1",
+       "EC_secp521r1"
+      ],
+      "type": "string"
+     },
+     "ManagedBy": {
+      "enum": [
+       "CLOUDFRONT"
+      ],
+      "type": "string"
+     },
+     "Options": {
+      "$ref": "#/components/schemas/CertificateOptions"
+     },
+     "SubjectAlternativeNames": {
+      "items": {
+       "maxLength": 253,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     },
+     "ValidationMethod": {
+      "enum": [
+       "EMAIL",
+       "DNS",
+       "HTTP"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "DomainName"
+    ],
+    "type": "object"
+   },
+   "RequestCertificateResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceRecord": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "CNAME"
+      ],
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Type",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key"
+    ],
+    "type": "object"
+   },
+   "UpdateCertificateOptionsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Options": {
+      "$ref": "#/components/schemas/CertificateOptions"
+     }
+    },
+    "required": [
+     "CertificateArn",
+     "Options"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Certificate Manager API (2015-12-08). Every other official operation returns HTTP 501 UnknownOperationException. Requested certificates stay PENDING_VALIDATION with RSA_2048 keys: no key pair, certificate body, domain validation record, validation email or renewal is produced, and no DNS, HTTP or email system is contacted. ValidationMethod, IdempotencyToken, CertificateAuthorityArn (private issuance), ManagedBy and other key algorithms are refused; ImportCertificate (private keys), ExportCertificate, GetCertificate, RenewCertificate, RevokeCertificate and ResendValidationEmail return UnknownOperationException with HTTP 501. ListCertificates returns every stored certificate in creation order; its Includes, CertificateStatuses, SortBy and SortOrder members are refused. RemoveTagsFromCertificate is not implemented because its key/value removal list has no catalog tag binding; AddTagsToCertificate and ListTagsForCertificate are. PutAccountConfiguration stores ExpiryEvents on every call; its idempotency token is accepted but no earlier result is replayed, and no expiry event is ever emitted.",
+  "title": "AWS Certificate Manager (simulator catalog)",
+  "version": "2015-12-08"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "acmJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "CertificateManager.AddTagsToCertificate",
+        "CertificateManager.DeleteCertificate",
+        "CertificateManager.DescribeCertificate",
+        "CertificateManager.GetAccountConfiguration",
+        "CertificateManager.ListCertificates",
+        "CertificateManager.ListTagsForCertificate",
+        "CertificateManager.PutAccountConfiguration",
+        "CertificateManager.RequestCertificate",
+        "CertificateManager.UpdateCertificateOptions"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "AddTagsToCertificate": {
+         "summary": "X-Amz-Target: CertificateManager.AddTagsToCertificate",
+         "value": {}
+        },
+        "DeleteCertificate": {
+         "summary": "X-Amz-Target: CertificateManager.DeleteCertificate",
+         "value": {}
+        },
+        "DescribeCertificate": {
+         "summary": "X-Amz-Target: CertificateManager.DescribeCertificate",
+         "value": {}
+        },
+        "GetAccountConfiguration": {
+         "summary": "X-Amz-Target: CertificateManager.GetAccountConfiguration",
+         "value": {}
+        },
+        "ListCertificates": {
+         "summary": "X-Amz-Target: CertificateManager.ListCertificates",
+         "value": {}
+        },
+        "ListTagsForCertificate": {
+         "summary": "X-Amz-Target: CertificateManager.ListTagsForCertificate",
+         "value": {}
+        },
+        "PutAccountConfiguration": {
+         "summary": "X-Amz-Target: CertificateManager.PutAccountConfiguration",
+         "value": {}
+        },
+        "RequestCertificate": {
+         "summary": "X-Amz-Target: CertificateManager.RequestCertificate",
+         "value": {}
+        },
+        "UpdateCertificateOptions": {
+         "summary": "X-Amz-Target: CertificateManager.UpdateCertificateOptions",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS Certificate Manager JSON 1.1 operations",
+    "tags": [
+     "AWS Certificate Manager"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Certificate Manager API (2015-12-08). Every other official operation returns HTTP 501 UnknownOperationException. Requested certificates stay PENDING_VALIDATION with RSA_2048 keys: no key pair, certificate body, domain validation record, validation email or renewal is produced, and no DNS, HTTP or email system is contacted. ValidationMethod, IdempotencyToken, CertificateAuthorityArn (private issuance), ManagedBy and other key algorithms are refused; ImportCertificate (private keys), ExportCertificate, GetCertificate, RenewCertificate, RevokeCertificate and ResendValidationEmail return UnknownOperationException with HTTP 501. ListCertificates returns every stored certificate in creation order; its Includes, CertificateStatuses, SortBy and SortOrder members are refused. RemoveTagsFromCertificate is not implemented because its key/value removal list has no catalog tag binding; AddTagsToCertificate and ListTagsForCertificate are. PutAccountConfiguration stores ExpiryEvents on every call; its idempotency token is accepted but no earlier result is replayed, and no expiry event is ever emitted.",
+   "name": "AWS Certificate Manager"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/acm/2015-12-08/service-2.json",
+  "sha256": "3e0deaa356a6a01faed5be2c473222d63c8a42be1a660c07819c342b27540b02",
+  "license": "Apache-2.0"
+ }
+}

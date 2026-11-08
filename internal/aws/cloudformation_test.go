@@ -28,7 +28,7 @@ func TestCompileTemplateRejectsUnsupportedSemantics(t *testing.T) {
 			}
 		})
 	}
-	for _, parameter := range []map[string]any{{"Type": "Number"}, {"Type": "String"}, {"Type": "String", "Default": "x", "AllowedPattern": "["}, {"Type": "String", "Default": "x", "AllowedPattern": "abc"}, {"Type": "String", "Default": "x", "MinLength": "bad"}, {"Type": "String", "Default": "x", "MaxLength": "0"}, {"Type": "String", "Default": "x", "AllowedValues": []any{"x"}}} {
+	for _, parameter := range []map[string]any{{"Type": "Number"}, {"Type": "String"}, {"Type": "String", "Default": "x", "AllowedPattern": "["}, {"Type": "String", "Default": "x", "AllowedPattern": "abc"}, {"Type": "String", "Default": "x", "MinLength": "bad"}, {"Type": "String", "Default": "x", "MaxLength": "0"}, {"Type": "String", "Default": "x", "AllowedValues": []any{}}} {
 		p := parameter
 		cases = append(cases, func(m map[string]any) { m["Parameters"] = map[string]any{"Input": p} })
 	}

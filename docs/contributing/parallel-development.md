@@ -40,6 +40,32 @@ A useful claim is one paragraph:
 > Issue, owner, status; base SHA and branch/worktree; owned files and excluded
 > shared files; dependencies and agreed interface; acceptance checks; next handoff.
 
+## Maintain the authorized parallel capacity
+
+When the user requests maximum parallel development, the integration owner checks
+actual agent state at work start, each handoff or failure, and periodic progress
+reviews. Record the check time, available slot limit, active owners and concrete
+work, vacant slots and reasons in the development roster. Count the integration
+owner as a slot. Track externally hosted workers separately and label unconfirmed
+activity explicitly.
+
+Refill a completed or failed worker with an independent, authorized Issue scope
+as soon as ownership, dependencies and edit boundaries have been checked. An
+assignment needs an acknowledgement and observed work before it counts as active.
+A task list, reserved Issue or waiting process is not evidence of active coding.
+Do not create filler work, duplicate another owner, bypass a denial, or abandon
+integration and review merely to fill slots. If no safe independent scope fits,
+record the dependency or capacity constraint and continue available work.
+
+Agent slots and machine resources are separate limits. Reserve CPU and memory for
+expensive build, race, browser and model-checking runs; keep their combined budget
+within the observed machine capacity. Source review and implementation may continue
+while a worker awaits that reservation. Report such a wait explicitly. Release a
+reservation when its command finishes and give the next eligible worker a turn.
+A platform failure or permission restriction can prevent full occupancy; report
+the actual state and recover available work rather than promising an unconditional
+number of running agents.
+
 ## Keep concurrent edits independent
 
 Each writer uses a dedicated branch/worktree. Preserve unrelated work, existing

@@ -1,0 +1,39 @@
+{
+  "provenanceSchemaVersion": 2,
+  "historicalAdaptation": {
+    "upstream": "https://github.com/sivchari/kumo",
+    "commit": "ce37a8fb406ecb96b5619204f645c26302b651a5",
+    "license": "MIT",
+    "copyright": "Copyright (c) 2025 sivchari",
+    "sourceFiles": {
+      "internal/service/kms/types.go": "040c02ac77622295dab4919036cc2b49bcc9f710116e148ae356df104ea31db9"
+    },
+    "licenseSha256": "02f8d83277fea29291727639f45ddafcbcbf7cbc2d92ea1297eb84f0b8ee9fe2",
+    "status": "Bounded local KMS adapter under validation; not AWS portable ciphertext or an AWS security boundary",
+    "modifications": [
+      "Selected symmetric key metadata wire fields only; no upstream storage or cryptography copied",
+      "Strict bounded JSON 1.1 native protocol, exact IAM key ARN and immutable default delegation policy",
+      "Private provider SQLite material and state; no new external modules",
+      "Go standard AES-256-GCM with random nonce, versioned local blob and canonical authenticated key/region/context binding",
+      "Local encryption counter enforces standard-library 2^32 encryptions-per-key ceiling"
+    ]
+  },
+  "historicalRuntimeFiles": {
+    "internal/aws/kms_types.go": {
+      "sourceCommit": "1b34ed4e5fe7c9a314194c10bd2d0261ec7efb98",
+      "gitBlob": "3e302d61f622724a05d28c41d52b0b4335ec7f38",
+      "sha256": "7853b7463b96c8122ef0d274dd84bc8dce64923336a9c00f490d21ca8811f172"
+    }
+  },
+  "replacement": {
+    "currentKumoCode": false,
+    "status": "accepted",
+    "reviewedReplacementIdentity": {
+      "sourceCommit": "9e86ff993296fc09f2d3c5adf113871b9e612711",
+      "receiptSha256": "4fbc8630c29dba9882d0baaf0feba1904ab85499252da7881dff8106d12f31cb"
+    },
+    "paths": [
+      "internal/aws/kms_types.go"
+    ]
+  }
+}

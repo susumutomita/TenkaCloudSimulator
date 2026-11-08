@@ -1,0 +1,22 @@
+{
+ "client": "account",
+ "steps": [
+  {"op": "put_alternate_contact", "args": {"AlternateContactType": "OPERATIONS", "EmailAddress": "ops@example.com", "Name": "Fixture Ops", "PhoneNumber": "+1 555 0100", "Title": "On call"}},
+  {"op": "get_alternate_contact", "args": {"AlternateContactType": "OPERATIONS"}, "expect": {"AlternateContact.Title": "On call", "AlternateContact.EmailAddress": "ops@example.com"}},
+  {"op": "put_alternate_contact", "args": {"AlternateContactType": "OPERATIONS", "EmailAddress": "ops@example.com", "Name": "Fixture Ops", "PhoneNumber": "+1 555 0100", "Title": "Operations lead"}},
+  {"op": "get_alternate_contact", "args": {"AlternateContactType": "OPERATIONS"}, "expect": {"AlternateContact.Title": "Operations lead"}},
+  {"op": "put_alternate_contact", "args": {"AccountId": "000000000000", "AlternateContactType": "BILLING", "EmailAddress": "bill@example.com", "Name": "Bill", "PhoneNumber": "+1 555 0101", "Title": "Billing"}, "error": "ValidationException", "status": 400},
+  {"op": "get_contact_information", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_alternate_contact", "args": {"AlternateContactType": "BILLING"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "get_alternate_contact", "args": {"AlternateContactType": "OPERATIONS"}, "error": "ResourceNotFoundException"}
+ ],
+ "after_restart": [
+  {"op": "get_alternate_contact", "args": {"AlternateContactType": "OPERATIONS"}, "expect": {"AlternateContact.Name": "Fixture Ops"}}
+ ],
+ "cleanup": [
+  {"op": "delete_alternate_contact", "args": {"AlternateContactType": "OPERATIONS"}},
+  {"op": "get_alternate_contact", "args": {"AlternateContactType": "OPERATIONS"}, "error": "ResourceNotFoundException"}
+ ]
+}

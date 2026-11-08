@@ -1,0 +1,137 @@
+{
+ "api": "workloadmanager.v1",
+ "steps": [
+  {
+   "call": "projects.locations.evaluations.create",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1",
+    "evaluationId": "fixture-sap"
+   },
+   "body": {
+    "evaluationType": "SAP",
+    "description": "SAP",
+    "ruleNames": [
+     "projects/tenkacloud-local/locations/us-central1/rules/r1"
+    ]
+   },
+   "save": {
+    "op_evaluation": "name",
+    "evaluation": "response.name"
+   },
+   "expect": {
+    "done": true,
+    "response.resourceStatus.state": "ACTIVE"
+   }
+  },
+  {
+   "call": "projects.locations.evaluations.get",
+   "args": {
+    "name": "${evaluation}"
+   },
+   "expect": {
+    "evaluationType": "SAP"
+   }
+  },
+  {
+   "call": "projects.locations.evaluations.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "evaluations#count": 1
+   }
+  },
+  {
+   "call": "projects.locations.evaluations.patch",
+   "args": {
+    "name": "${evaluation}",
+    "updateMask": "labels"
+   },
+   "body": {
+    "labels": {
+     "team": "a"
+    }
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.evaluations.executions.run",
+   "args": {
+    "name": "${evaluation}",
+    "body": {}
+   },
+   "error": "UNIMPLEMENTED",
+   "status": 501
+  },
+  {
+   "call": "projects.locations.operations.get",
+   "args": {
+    "name": "${op_evaluation}"
+   },
+   "expect": {
+    "response.evaluationType": "SAP"
+   }
+  },
+  {
+   "call": "projects.locations.operations.list",
+   "args": {
+    "name": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "operations#count": 2
+   }
+  },
+  {
+   "call": "projects.locations.evaluations.list",
+   "args": {
+    "parent": "projects/other-project/locations/us-central1"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.locations.evaluations.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "evaluations#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.locations.evaluations.get",
+   "args": {
+    "name": "${evaluation}"
+   },
+   "expect": {
+    "labels.team": "a"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.locations.evaluations.delete",
+   "args": {
+    "name": "${evaluation}"
+   },
+   "expect": {
+    "done": true
+   }
+  },
+  {
+   "call": "projects.locations.evaluations.list",
+   "args": {
+    "parent": "projects/tenkacloud-local/locations/us-central1"
+   },
+   "expect": {
+    "evaluations#count": 0
+   }
+  }
+ ]
+}

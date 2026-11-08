@@ -1,0 +1,536 @@
+{
+ "components": {
+  "schemas": {
+   "AdapterOverview": {
+    "additionalProperties": false,
+    "properties": {
+     "AdapterId": {
+      "maxLength": 1011,
+      "minLength": 12,
+      "type": "string"
+     },
+     "AdapterName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "FeatureTypes": {
+      "items": {
+       "enum": [
+        "TABLES",
+        "FORMS",
+        "QUERIES",
+        "SIGNATURES",
+        "LAYOUT"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CreateAdapterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AdapterName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AutoUpdate": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "ClientRequestToken": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "FeatureTypes": {
+      "items": {
+       "enum": [
+        "TABLES",
+        "FORMS",
+        "QUERIES",
+        "SIGNATURES",
+        "LAYOUT"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "AdapterName",
+     "FeatureTypes"
+    ],
+    "type": "object"
+   },
+   "CreateAdapterResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "AdapterId": {
+      "maxLength": 1011,
+      "minLength": 12,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteAdapterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AdapterId": {
+      "maxLength": 1011,
+      "minLength": 12,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AdapterId"
+    ],
+    "type": "object"
+   },
+   "DeleteAdapterResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GetAdapterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AdapterId": {
+      "maxLength": 1011,
+      "minLength": 12,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AdapterId"
+    ],
+    "type": "object"
+   },
+   "GetAdapterResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "AdapterId": {
+      "maxLength": 1011,
+      "minLength": 12,
+      "type": "string"
+     },
+     "AdapterName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AutoUpdate": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "FeatureTypes": {
+      "items": {
+       "enum": [
+        "TABLES",
+        "FORMS",
+        "QUERIES",
+        "SIGNATURES",
+        "LAYOUT"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ListAdaptersRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AfterCreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "BeforeCreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "MaxResults": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListAdaptersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Adapters": {
+      "items": {
+       "$ref": "#/components/schemas/AdapterOverview"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceARN"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "ResourceARN",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceARN",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateAdapterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AdapterId": {
+      "maxLength": 1011,
+      "minLength": 12,
+      "type": "string"
+     },
+     "AdapterName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AutoUpdate": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AdapterId"
+    ],
+    "type": "object"
+   },
+   "UpdateAdapterResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "AdapterId": {
+      "maxLength": 1011,
+      "minLength": 12,
+      "type": "string"
+     },
+     "AdapterName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AutoUpdate": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "FeatureTypes": {
+      "items": {
+       "enum": [
+        "TABLES",
+        "FORMS",
+        "QUERIES",
+        "SIGNATURES",
+        "LAYOUT"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Textract API (2018-06-27). Every other official operation returns HTTP 501 UnknownOperationException. Adapters are stored configuration with no adapter versions: nothing is trained, evaluated or applied to a document, so CreateAdapterVersion and the other adapter version operations return UnknownOperationException with HTTP 501. Document text detection, analysis, expense, identity and lending operations and their asynchronous jobs return UnknownOperationException with HTTP 501. ListAdapters refuses creation time filters.",
+  "title": "Amazon Textract (simulator catalog)",
+  "version": "2018-06-27"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "textractJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "Textract.CreateAdapter",
+        "Textract.DeleteAdapter",
+        "Textract.GetAdapter",
+        "Textract.ListAdapters",
+        "Textract.ListTagsForResource",
+        "Textract.TagResource",
+        "Textract.UntagResource",
+        "Textract.UpdateAdapter"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateAdapter": {
+         "summary": "X-Amz-Target: Textract.CreateAdapter",
+         "value": {}
+        },
+        "DeleteAdapter": {
+         "summary": "X-Amz-Target: Textract.DeleteAdapter",
+         "value": {}
+        },
+        "GetAdapter": {
+         "summary": "X-Amz-Target: Textract.GetAdapter",
+         "value": {}
+        },
+        "ListAdapters": {
+         "summary": "X-Amz-Target: Textract.ListAdapters",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: Textract.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: Textract.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: Textract.UntagResource",
+         "value": {}
+        },
+        "UpdateAdapter": {
+         "summary": "X-Amz-Target: Textract.UpdateAdapter",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon Textract JSON 1.1 operations",
+    "tags": [
+     "Amazon Textract"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Textract API (2018-06-27). Every other official operation returns HTTP 501 UnknownOperationException. Adapters are stored configuration with no adapter versions: nothing is trained, evaluated or applied to a document, so CreateAdapterVersion and the other adapter version operations return UnknownOperationException with HTTP 501. Document text detection, analysis, expense, identity and lending operations and their asynchronous jobs return UnknownOperationException with HTTP 501. ListAdapters refuses creation time filters.",
+   "name": "Amazon Textract"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/textract/2018-06-27/service-2.json",
+  "sha256": "34f6593bbb1b5078ada998f86947d04f560c7427f4ddf2ee0bc6af59912a14e0",
+  "license": "Apache-2.0"
+ }
+}

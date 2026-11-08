@@ -1,0 +1,20 @@
+{
+ "client": "securitylake",
+ "steps": [
+  {"op": "create_data_lake_exception_subscription", "args": {"notificationEndpoint": "arn:aws:sqs:us-east-1:000000000000:lake-exceptions", "subscriptionProtocol": "sqs", "exceptionTimeToLive": 7}},
+  {"op": "get_data_lake_exception_subscription", "args": {}, "expect": {"subscriptionProtocol": "sqs", "exceptionTimeToLive": 7}},
+  {"op": "update_data_lake_exception_subscription", "args": {"notificationEndpoint": "security@example.com", "subscriptionProtocol": "email", "exceptionTimeToLive": 30}},
+  {"op": "create_data_lake_exception_subscription", "args": {"notificationEndpoint": "arn:aws:sqs:us-east-1:000000000000:other", "subscriptionProtocol": "sqs"}, "error": "ConflictException"},
+  {"op": "create_data_lake", "args": {"configurations": [{"region": "us-east-1"}], "metaStoreManagerRoleArn": "arn:aws:iam::000000000000:role/lake"}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "get_data_lake_exception_subscription", "args": {}, "expect": {}}
+ ],
+ "after_restart": [
+  {"op": "get_data_lake_exception_subscription", "args": {}, "expect": {"notificationEndpoint": "security@example.com", "exceptionTimeToLive": 30}}
+ ],
+ "cleanup": [
+  {"op": "delete_data_lake_exception_subscription", "args": {}},
+  {"op": "delete_data_lake_exception_subscription", "args": {}, "error": "ResourceNotFoundException", "status": 404}
+ ]
+}

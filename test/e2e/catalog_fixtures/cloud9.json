@@ -1,0 +1,25 @@
+{
+ "client": "cloud9",
+ "steps": [
+  {"op": "create_environment_ec2", "args": {"name": "fixture-ide", "instanceType": "t3.small", "imageId": "amazonlinux-2023-x86_64", "ownerArn": "arn:aws:iam::000000000000:user/fixture", "automaticStopTimeMinutes": 30, "tags": [{"Key": "team", "Value": "a"}]}, "save": {"env": "environmentId"}},
+  {"op": "describe_environments", "args": {"environmentIds": ["${env}"]}, "save": {"envArn": "environments[0].arn"}, "expect": {"environments[0].lifecycle.status": "CREATED", "environments[0].type": "ec2", "environments[0].arn": "arn:aws:cloud9:us-east-1:000000000000:environment:${env}"}},
+  {"op": "list_environments", "args": {}, "expect": {"environmentIds": ["${env}"]}},
+  {"op": "update_environment", "args": {"environmentId": "${env}", "description": "Fixture workspace"}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${envArn}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${envArn}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${envArn}"}, "expect": {"Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "create_environment_ec2", "args": {"name": "fixture-owner", "instanceType": "t3.small", "imageId": "amazonlinux-2023-x86_64"}, "error": "BadRequestException", "status": 400},
+  {"op": "describe_environment_status", "args": {"environmentId": "${env}"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_environments", "args": {"environmentIds": ["0123456789abcdef0123456789abcdef"]}, "error": "NotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "list_environments", "args": {}, "expect": {"environmentIds#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_environments", "args": {"environmentIds": ["${env}"]}, "expect": {"environments[0].description": "Fixture workspace", "environments[0].ownerArn": "arn:aws:iam::000000000000:user/fixture"}}
+ ],
+ "cleanup": [
+  {"op": "delete_environment", "args": {"environmentId": "${env}"}},
+  {"op": "list_environments", "args": {}, "expect": {"environmentIds#count": 0}}
+ ]
+}

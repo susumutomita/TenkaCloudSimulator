@@ -1,0 +1,30 @@
+{
+ "client": "codeartifact",
+ "steps": [
+  {"op": "create_domain", "args": {"domain": "fixture-domain", "tags": [{"key": "team", "value": "a"}]}, "save": {"domain": "domain.arn"}, "expect": {"domain.status": "Active", "domain.owner": "000000000000", "domain.arn": "arn:aws:codeartifact:us-east-1:000000000000:domain/fixture-domain"}},
+  {"op": "describe_domain", "args": {"domain": "fixture-domain", "domainOwner": "000000000000"}, "expect": {"domain.name": "fixture-domain"}},
+  {"op": "list_domains", "args": {}, "expect": {"domains#count": 1}},
+  {"op": "create_repository", "args": {"domain": "fixture-domain", "repository": "fixture-repo", "description": "first"}, "save": {"repo": "repository.arn"}, "expect": {"repository.domainName": "fixture-domain", "repository.arn": "arn:aws:codeartifact:us-east-1:000000000000:repository/fixture-domain/fixture-repo"}},
+  {"op": "describe_repository", "args": {"domain": "fixture-domain", "repository": "fixture-repo"}, "expect": {"repository.description": "first", "repository.administratorAccount": "000000000000"}},
+  {"op": "list_repositories_in_domain", "args": {"domain": "fixture-domain"}, "expect": {"repositories#count": 1}},
+  {"op": "update_repository", "args": {"domain": "fixture-domain", "repository": "fixture-repo", "description": "second"}, "expect": {"repository.description": "second"}},
+  {"op": "create_repository", "args": {"domain": "fixture-domain", "repository": "fixture-mirror", "upstreams": [{"repositoryName": "fixture-repo"}]}, "error": "ValidationException"},
+  {"op": "delete_domain", "args": {"domain": "fixture-domain"}, "error": "ConflictException"},
+  {"op": "tag_resource", "args": {"resourceArn": "${repo}", "tags": [{"key": "k", "value": "v"}]}},
+  {"op": "untag_resource", "args": {"resourceArn": "${repo}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${domain}"}, "expect": {"tags[0].key": "team"}},
+  {"op": "get_authorization_token", "args": {"domain": "fixture-domain"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_repository", "args": {"domain": "fixture-domain", "repository": "missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_domains", "args": {}, "expect": {"domains#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_repository", "args": {"domain": "fixture-domain", "repository": "fixture-repo"}, "expect": {"repository.description": "second"}}
+ ],
+ "cleanup": [
+  {"op": "delete_repository", "args": {"domain": "fixture-domain", "repository": "fixture-repo"}, "expect": {"repository.name": "fixture-repo"}},
+  {"op": "delete_domain", "args": {"domain": "fixture-domain"}, "expect": {"domain.status": "Deleted"}},
+  {"op": "list_domains", "args": {}, "expect": {"domains#count": 0}}
+ ]
+}

@@ -1,0 +1,31 @@
+{
+ "client": "lexv2-models",
+ "steps": [
+  {"op": "create_bot", "args": {"botName": "FixtureBot", "roleArn": "arn:aws:iam::000000000000:role/fixture-lex", "dataPrivacy": {"childDirected": false}, "idleSessionTTLInSeconds": 300, "description": "Orders flowers", "botTags": {"team": "a"}}, "save": {"bot": "botId"}, "expect": {"botStatus": "Available", "botTags.team": "a"}},
+  {"op": "describe_bot", "args": {"botId": "${bot}"}, "expect": {"botName": "FixtureBot", "botStatus": "Available", "description": "Orders flowers"}},
+  {"op": "list_bots", "args": {}, "expect": {"botSummaries#count": 1, "botSummaries[0].botId": "${bot}"}},
+  {"op": "update_bot", "args": {"botId": "${bot}", "botName": "FixtureBot", "roleArn": "arn:aws:iam::000000000000:role/fixture-lex", "dataPrivacy": {"childDirected": false}, "idleSessionTTLInSeconds": 600, "description": "Orders flowers"}, "expect": {"idleSessionTTLInSeconds": 600}},
+  {"op": "create_bot_locale", "args": {"botId": "${bot}", "botVersion": "DRAFT", "localeId": "en_US", "nluIntentConfidenceThreshold": 0.4}, "expect": {"botLocaleStatus": "NotBuilt", "botVersion": "DRAFT"}},
+  {"op": "describe_bot_locale", "args": {"botId": "${bot}", "botVersion": "DRAFT", "localeId": "en_US"}, "expect": {"botLocaleStatus": "NotBuilt", "nluIntentConfidenceThreshold": 0.4}},
+  {"op": "list_bot_locales", "args": {"botId": "${bot}", "botVersion": "DRAFT"}, "expect": {"botLocaleSummaries#count": 1, "botLocaleSummaries[0].localeId": "en_US"}},
+  {"op": "update_bot_locale", "args": {"botId": "${bot}", "botVersion": "DRAFT", "localeId": "en_US", "nluIntentConfidenceThreshold": 0.5, "description": "US English"}, "expect": {"description": "US English"}},
+  {"op": "tag_resource", "args": {"resourceARN": "arn:aws:lex:us-east-1:000000000000:bot/${bot}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceARN": "arn:aws:lex:us-east-1:000000000000:bot/${bot}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceARN": "arn:aws:lex:us-east-1:000000000000:bot/${bot}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "describe_bot_locale", "args": {"botId": "${bot}", "botVersion": "1", "localeId": "en_US"}, "error": "ResourceNotFoundException", "status": 404},
+  {"op": "build_bot_locale", "args": {"botId": "${bot}", "botVersion": "DRAFT", "localeId": "en_US"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_bot", "args": {"botId": "MISSING123"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_bots", "args": {}, "expect": {"botSummaries#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_bot", "args": {"botId": "${bot}"}, "expect": {"idleSessionTTLInSeconds": 600}},
+  {"op": "describe_bot_locale", "args": {"botId": "${bot}", "botVersion": "DRAFT", "localeId": "en_US"}, "expect": {"nluIntentConfidenceThreshold": 0.5}}
+ ],
+ "cleanup": [
+  {"op": "delete_bot_locale", "args": {"botId": "${bot}", "botVersion": "DRAFT", "localeId": "en_US"}, "expect": {"botLocaleStatus": "Deleting"}},
+  {"op": "delete_bot", "args": {"botId": "${bot}"}, "expect": {"botStatus": "Deleting"}},
+  {"op": "list_bots", "args": {}, "expect": {"botSummaries#count": 0}}
+ ]
+}

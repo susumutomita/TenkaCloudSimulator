@@ -1,0 +1,33 @@
+{
+ "client": "memorydb",
+ "steps": [
+  {"op": "create_parameter_group", "args": {"ParameterGroupName": "fixture-params", "Family": "memorydb_redis7", "Description": "fixture", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"params": "ParameterGroup.ARN"}, "expect": {"ParameterGroup.Name": "fixture-params"}},
+  {"op": "describe_parameter_groups", "args": {"ParameterGroupName": "fixture-params"}, "expect": {"ParameterGroups#count": 1, "ParameterGroups[0].Family": "memorydb_redis7"}},
+  {"op": "create_subnet_group", "args": {"SubnetGroupName": "fixture-subnets", "SubnetIds": ["subnet-0a1b2c3d"]}, "save": {"subnets": "SubnetGroup.ARN"}, "expect": {"SubnetGroup.Subnets[0].Identifier": "subnet-0a1b2c3d"}},
+  {"op": "update_subnet_group", "args": {"SubnetGroupName": "fixture-subnets", "Description": "two", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b"]}, "expect": {"SubnetGroup.Subnets#count": 2}},
+  {"op": "describe_subnet_groups", "args": {}, "expect": {"SubnetGroups#count": 1, "SubnetGroups[0].Description": "two"}},
+  {"op": "create_user", "args": {"UserName": "fixture-app", "AuthenticationMode": {"Type": "iam"}, "AccessString": "on ~app:* +@read"}, "save": {"user": "User.ARN"}, "expect": {"User.Authentication.Type": "iam", "User.Status": "active"}},
+  {"op": "update_user", "args": {"UserName": "fixture-app", "AccessString": "on ~* +@all"}, "expect": {"User.AccessString": "on ~* +@all"}},
+  {"op": "describe_users", "args": {"UserName": "fixture-app"}, "expect": {"Users#count": 1}},
+  {"op": "create_user", "args": {"UserName": "fixture-secret", "AuthenticationMode": {"Type": "password", "Passwords": ["correct-horse-battery-staple"]}, "AccessString": "on ~* +@all"}, "error": "InvalidParameterValueException"},
+  {"op": "tag_resource", "args": {"ResourceArn": "${user}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${user}", "TagKeys": ["stage"]}},
+  {"op": "list_tags", "args": {"ResourceArn": "${params}"}, "expect": {"TagList": [{"Key": "team", "Value": "a"}]}},
+  {"op": "create_cluster", "args": {"ClusterName": "fixture", "NodeType": "db.t4g.small", "ACLName": "open-access"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "delete_parameter_group", "args": {"ParameterGroupName": "missing"}, "error": "ParameterGroupNotFoundFault"}
+ ],
+ "isolation": [
+  {"op": "describe_parameter_groups", "args": {}, "expect": {"ParameterGroups#count": 0}},
+  {"op": "describe_users", "args": {}, "expect": {"Users#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_users", "args": {"UserName": "fixture-app"}, "expect": {"Users[0].AccessString": "on ~* +@all"}}
+ ],
+ "cleanup": [
+  {"op": "delete_user", "args": {"UserName": "fixture-app"}, "expect": {"User.Name": "fixture-app"}},
+  {"op": "delete_subnet_group", "args": {"SubnetGroupName": "fixture-subnets"}},
+  {"op": "delete_parameter_group", "args": {"ParameterGroupName": "fixture-params"}},
+  {"op": "describe_parameter_groups", "args": {}, "expect": {"ParameterGroups#count": 0}},
+  {"op": "describe_subnet_groups", "args": {}, "expect": {"SubnetGroups#count": 0}}
+ ]
+}

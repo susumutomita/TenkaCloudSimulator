@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -34,11 +35,27 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	remote := flags.Bool("allow-remote", false, "Allow binding beyond loopback; use only in an isolated trusted network")
 	tokenFile := flags.String("token-file", "simulator-token", "Private local operator access-token file (created with mode 0600)")
 	unsafe := flags.Bool("unsafe-no-auth", false, "Development-only: disable access tokens on numeric loopback")
+	showToken := flags.Bool("show-token", false, "Display the operator token only on an interactive terminal with CI unset")
+	cloudOwner := flags.String("cloud-storage-owner", "simulator-admin", "Trusted exercise owner of the local GCP project and Azure account (not an AWS IAM grant)")
+	sakuraOptions, err := registerSakuraFlags(flags)
+	if err != nil {
+		return err
+	}
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
 	if flags.NArg() != 0 {
 		return fmt.Errorf("unexpected positional arguments")
+	}
+	if !regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`).MatchString(*cloudOwner) {
+		return fmt.Errorf("--cloud-storage-owner must contain 1–64 ASCII letters, digits, underscores or hyphens")
+	}
+	cloudConfig := server.DefaultCloudStorageConfig()
+	cloudConfig.GCPOwner = *cloudOwner
+	cloudConfig.AzureOwner = *cloudOwner
+	sakuraScope, err := validateSakuraFlags(*sakuraOptions, *unsafe)
+	if err != nil {
+		return err
 	}
 	host, _, err := net.SplitHostPort(*listen)
 	if err != nil {
@@ -48,6 +65,9 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	if !*remote && (ip == nil || !ip.IsLoopback()) {
 		return fmt.Errorf("non-loopback binding requires --allow-remote; use a trusted authenticated host proxy")
 	}
+	if *unsafe && *showToken {
+		return fmt.Errorf("--show-token requires authentication; it cannot be combined with --unsafe-no-auth")
+	}
 	if *unsafe && *remote {
 		return fmt.Errorf("--unsafe-no-auth cannot be combined with --allow-remote")
 	}
@@ -55,7 +75,7 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	if err != nil {
 		return err
 	}
-	handler, closeState, err := server.New(*statePath)
+	handler, closeState, err := server.NewWithProviders(*statePath, server.ProviderConfig{CloudStorage: cloudConfig, SakuraDisks: sakuraScope})
 	if err != nil {
 		_ = l.Close()
 		return err
@@ -73,6 +93,11 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 			return err
 		}
 		fmt.Fprintf(output, "Operator token file: %s (never share with participants)\n", *tokenFile)
+		if *showToken && interactiveTokenOutput(output) {
+			fmt.Fprintf(output, "Operator access token: %s\n", token)
+		} else {
+			fmt.Fprintln(output, "Sign in using the operator token saved in that file.")
+		}
 	}
 	srv := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 32 << 10}
 	done := make(chan error, 1)

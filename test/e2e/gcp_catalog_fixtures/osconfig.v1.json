@@ -1,0 +1,142 @@
+{
+ "api": "osconfig.v1",
+ "steps": [
+  {
+   "call": "projects.patchDeployments.create",
+   "args": {
+    "parent": "projects/tenkacloud-local",
+    "patchDeploymentId": "fixture-weekly"
+   },
+   "body": {
+    "instanceFilter": {
+     "all": true
+    },
+    "recurringSchedule": {
+     "timeZone": {
+      "id": "Asia/Tokyo"
+     },
+     "frequency": "WEEKLY",
+     "timeOfDay": {
+      "hours": 3
+     },
+     "weekly": {
+      "dayOfWeek": "SUNDAY"
+     }
+    }
+   },
+   "save": {
+    "deployment": "name"
+   },
+   "expect": {
+    "state": "ACTIVE"
+   }
+  },
+  {
+   "call": "projects.patchDeployments.get",
+   "args": {
+    "name": "${deployment}"
+   },
+   "expect": {
+    "recurringSchedule.frequency": "WEEKLY"
+   }
+  },
+  {
+   "call": "projects.patchDeployments.list",
+   "args": {
+    "parent": "projects/tenkacloud-local"
+   },
+   "expect": {
+    "patchDeployments#count": 1
+   }
+  },
+  {
+   "call": "projects.patchDeployments.patch",
+   "args": {
+    "name": "${deployment}",
+    "updateMask": "description"
+   },
+   "body": {
+    "description": "Fixture"
+   },
+   "expect": {
+    "description": "Fixture"
+   }
+  },
+  {
+   "call": "projects.patchDeployments.create",
+   "args": {
+    "parent": "projects/tenkacloud-local",
+    "patchDeploymentId": "both"
+   },
+   "body": {
+    "instanceFilter": {
+     "all": true
+    },
+    "oneTimeSchedule": {
+     "executeTime": "2026-12-01T00:00:00Z"
+    },
+    "recurringSchedule": {
+     "frequency": "DAILY"
+    }
+   },
+   "error": "INVALID_ARGUMENT",
+   "status": 400
+  },
+  {
+   "call": "projects.patchDeployments.pause",
+   "args": {
+    "name": "${deployment}",
+    "body": {}
+   },
+   "error": "UNIMPLEMENTED",
+   "status": 501
+  },
+  {
+   "call": "projects.patchDeployments.list",
+   "args": {
+    "parent": "projects/other-project"
+   },
+   "error": "PERMISSION_DENIED",
+   "status": 403
+  }
+ ],
+ "isolation": [
+  {
+   "call": "projects.patchDeployments.list",
+   "args": {
+    "parent": "projects/tenkacloud-local"
+   },
+   "expect": {
+    "patchDeployments#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "call": "projects.patchDeployments.get",
+   "args": {
+    "name": "${deployment}"
+   },
+   "expect": {
+    "description": "Fixture"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "call": "projects.patchDeployments.delete",
+   "args": {
+    "name": "${deployment}"
+   }
+  },
+  {
+   "call": "projects.patchDeployments.list",
+   "args": {
+    "parent": "projects/tenkacloud-local"
+   },
+   "expect": {
+    "patchDeployments#count": 0
+   }
+  }
+ ]
+}

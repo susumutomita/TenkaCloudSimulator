@@ -1,0 +1,225 @@
+{
+ "client": "athena",
+ "steps": [
+  {
+   "op": "create_work_group",
+   "args": {
+    "Name": "fixture-analysts",
+    "Description": "Fixture analysts",
+    "Configuration": {
+     "ResultConfiguration": {
+      "OutputLocation": "s3://fixture-results/athena/"
+     },
+     "EnforceWorkGroupConfiguration": true,
+     "BytesScannedCutoffPerQuery": 10000000
+    },
+    "Tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ]
+   }
+  },
+  {
+   "op": "get_work_group",
+   "args": {
+    "WorkGroup": "fixture-analysts"
+   },
+   "expect": {
+    "WorkGroup.State": "ENABLED",
+    "WorkGroup.Configuration.ResultConfiguration.OutputLocation": "s3://fixture-results/athena/"
+   }
+  },
+  {
+   "op": "list_work_groups",
+   "args": {},
+   "expect": {
+    "WorkGroups#count": 1,
+    "WorkGroups[0].Name": "fixture-analysts"
+   }
+  },
+  {
+   "op": "update_work_group",
+   "args": {
+    "WorkGroup": "fixture-analysts",
+    "State": "DISABLED",
+    "Description": "Paused"
+   }
+  },
+  {
+   "op": "update_work_group",
+   "args": {
+    "WorkGroup": "fixture-analysts",
+    "ConfigurationUpdates": {
+     "EnforceWorkGroupConfiguration": false
+    }
+   },
+   "error": "InvalidRequestException"
+  },
+  {
+   "op": "create_data_catalog",
+   "args": {
+    "Name": "fixture_glue",
+    "Type": "GLUE",
+    "Description": "Account catalog",
+    "Parameters": {
+     "catalog-id": "000000000000"
+    },
+    "Tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ]
+   }
+  },
+  {
+   "op": "create_data_catalog",
+   "args": {
+    "Name": "fixture_federated",
+    "Type": "FEDERATED"
+   },
+   "error": "InvalidRequestException"
+  },
+  {
+   "op": "get_data_catalog",
+   "args": {
+    "Name": "fixture_glue"
+   },
+   "expect": {
+    "DataCatalog.Type": "GLUE",
+    "DataCatalog.Parameters.catalog-id": "000000000000"
+   }
+  },
+  {
+   "op": "list_data_catalogs",
+   "args": {},
+   "expect": {
+    "DataCatalogsSummary#count": 1,
+    "DataCatalogsSummary[0].CatalogName": "fixture_glue"
+   }
+  },
+  {
+   "op": "update_data_catalog",
+   "args": {
+    "Name": "fixture_glue",
+    "Type": "GLUE",
+    "Description": "Updated catalog"
+   }
+  },
+  {
+   "op": "tag_resource",
+   "args": {
+    "ResourceARN": "arn:aws:athena:us-east-1:000000000000:workgroup/fixture-analysts",
+    "Tags": [
+     {
+      "Key": "cost",
+      "Value": "lab"
+     }
+    ]
+   }
+  },
+  {
+   "op": "untag_resource",
+   "args": {
+    "ResourceARN": "arn:aws:athena:us-east-1:000000000000:workgroup/fixture-analysts",
+    "TagKeys": [
+     "team"
+    ]
+   }
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "ResourceARN": "arn:aws:athena:us-east-1:000000000000:workgroup/fixture-analysts"
+   },
+   "expect": {
+    "Tags#count": 1,
+    "Tags[0].Key": "cost"
+   }
+  },
+  {
+   "op": "start_query_execution",
+   "args": {
+    "QueryString": "SELECT 1",
+    "WorkGroup": "fixture-analysts"
+   },
+   "error": "UnknownOperationException",
+   "status": 501
+  },
+  {
+   "op": "list_tags_for_resource",
+   "args": {
+    "ResourceARN": "arn:aws:athena:us-east-1:000000000000:workgroup/fixture-missing"
+   },
+   "error": "ResourceNotFoundException"
+  }
+ ],
+ "isolation": [
+  {
+   "op": "list_work_groups",
+   "args": {},
+   "expect": {
+    "WorkGroups#count": 0
+   }
+  },
+  {
+   "op": "list_data_catalogs",
+   "args": {},
+   "expect": {
+    "DataCatalogsSummary#count": 0
+   }
+  }
+ ],
+ "after_restart": [
+  {
+   "op": "get_work_group",
+   "args": {
+    "WorkGroup": "fixture-analysts"
+   },
+   "expect": {
+    "WorkGroup.State": "DISABLED",
+    "WorkGroup.Description": "Paused"
+   }
+  },
+  {
+   "op": "get_data_catalog",
+   "args": {
+    "Name": "fixture_glue"
+   },
+   "expect": {
+    "DataCatalog.Description": "Updated catalog"
+   }
+  }
+ ],
+ "cleanup": [
+  {
+   "op": "delete_work_group",
+   "args": {
+    "WorkGroup": "fixture-analysts",
+    "RecursiveDeleteOption": true
+   }
+  },
+  {
+   "op": "delete_data_catalog",
+   "args": {
+    "Name": "fixture_glue"
+   }
+  },
+  {
+   "op": "list_work_groups",
+   "args": {},
+   "expect": {
+    "WorkGroups#count": 0
+   }
+  },
+  {
+   "op": "list_data_catalogs",
+   "args": {},
+   "expect": {
+    "DataCatalogsSummary#count": 0
+   }
+  }
+ ]
+}

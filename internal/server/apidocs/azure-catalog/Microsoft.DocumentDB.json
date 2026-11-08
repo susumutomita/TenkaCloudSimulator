@@ -1,0 +1,1706 @@
+{
+ "components": {
+  "schemas": {
+   "ARMResourceProperties": {
+    "properties": {
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "identity": {
+      "$ref": "#/components/schemas/ManagedServiceIdentity"
+     },
+     "location": {
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AccountKeyMetadata": {
+    "properties": {
+     "generationTime": {
+      "format": "date-time",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AnalyticalStorageConfiguration": {
+    "properties": {
+     "schemaType": {
+      "$ref": "#/components/schemas/AnalyticalStorageSchemaType"
+     }
+    },
+    "type": "object"
+   },
+   "AnalyticalStorageSchemaType": {
+    "enum": [
+     "WellDefined",
+     "FullFidelity"
+    ],
+    "type": "string"
+   },
+   "ApiProperties": {
+    "properties": {
+     "serverVersion": {
+      "$ref": "#/components/schemas/ServerVersion"
+     }
+    },
+    "type": "object"
+   },
+   "BackupPolicy": {
+    "discriminator": {
+     "mapping": {
+      "Continuous": "#/components/schemas/ContinuousModeBackupPolicy",
+      "Periodic": "#/components/schemas/PeriodicModeBackupPolicy"
+     },
+     "propertyName": "type"
+    },
+    "properties": {
+     "migrationState": {
+      "$ref": "#/components/schemas/BackupPolicyMigrationState"
+     },
+     "type": {
+      "$ref": "#/components/schemas/BackupPolicyType"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "BackupPolicyMigrationState": {
+    "properties": {
+     "startTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "status": {
+      "$ref": "#/components/schemas/BackupPolicyMigrationStatus"
+     },
+     "targetType": {
+      "$ref": "#/components/schemas/BackupPolicyType"
+     }
+    },
+    "type": "object"
+   },
+   "BackupPolicyMigrationStatus": {
+    "enum": [
+     "Invalid",
+     "InProgress",
+     "Completed",
+     "Failed"
+    ],
+    "type": "string"
+   },
+   "BackupPolicyType": {
+    "enum": [
+     "Periodic",
+     "Continuous"
+    ],
+    "type": "string"
+   },
+   "BackupStorageRedundancy": {
+    "enum": [
+     "Geo",
+     "Local",
+     "Zone"
+    ],
+    "type": "string"
+   },
+   "Capability": {
+    "properties": {
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Capacity": {
+    "properties": {
+     "totalThroughputLimit": {
+      "format": "int32",
+      "minimum": -1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectorOffer": {
+    "enum": [
+     "Small"
+    ],
+    "type": "string"
+   },
+   "ConsistencyPolicy": {
+    "properties": {
+     "defaultConsistencyLevel": {
+      "$ref": "#/components/schemas/DefaultConsistencyLevel"
+     },
+     "maxIntervalInSeconds": {
+      "format": "int32",
+      "maximum": 86400,
+      "minimum": 5,
+      "type": "integer"
+     },
+     "maxStalenessPrefix": {
+      "format": "int64",
+      "maximum": 2147483647,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "defaultConsistencyLevel"
+    ],
+    "type": "object"
+   },
+   "ContinuousModeBackupPolicy": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/BackupPolicy"
+     }
+    ],
+    "properties": {
+     "continuousModeProperties": {
+      "$ref": "#/components/schemas/ContinuousModeProperties"
+     }
+    },
+    "type": "object"
+   },
+   "ContinuousModeProperties": {
+    "properties": {
+     "tier": {
+      "$ref": "#/components/schemas/ContinuousTier"
+     }
+    },
+    "type": "object"
+   },
+   "ContinuousTier": {
+    "enum": [
+     "Continuous7Days",
+     "Continuous30Days"
+    ],
+    "type": "string"
+   },
+   "CorsPolicy": {
+    "properties": {
+     "allowedHeaders": {
+      "type": "string"
+     },
+     "allowedMethods": {
+      "type": "string"
+     },
+     "allowedOrigins": {
+      "type": "string"
+     },
+     "exposedHeaders": {
+      "type": "string"
+     },
+     "maxAgeInSeconds": {
+      "format": "int64",
+      "maximum": 2147483647,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "allowedOrigins"
+    ],
+    "type": "object"
+   },
+   "DatabaseAccountCreateUpdateParameters": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/ARMResourceProperties"
+     }
+    ],
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/ManagedServiceIdentity"
+     },
+     "kind": {
+      "enum": [
+       "GlobalDocumentDB",
+       "MongoDB",
+       "Parse"
+      ],
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/DatabaseAccountCreateUpdateProperties"
+     }
+    },
+    "required": [
+     "properties"
+    ],
+    "type": "object"
+   },
+   "DatabaseAccountCreateUpdateProperties": {
+    "properties": {
+     "analyticalStorageConfiguration": {
+      "$ref": "#/components/schemas/AnalyticalStorageConfiguration"
+     },
+     "apiProperties": {
+      "$ref": "#/components/schemas/ApiProperties"
+     },
+     "backupPolicy": {
+      "$ref": "#/components/schemas/BackupPolicy"
+     },
+     "capabilities": {
+      "items": {
+       "$ref": "#/components/schemas/Capability"
+      },
+      "type": "array"
+     },
+     "capacity": {
+      "$ref": "#/components/schemas/Capacity"
+     },
+     "connectorOffer": {
+      "$ref": "#/components/schemas/ConnectorOffer"
+     },
+     "consistencyPolicy": {
+      "$ref": "#/components/schemas/ConsistencyPolicy"
+     },
+     "cors": {
+      "items": {
+       "$ref": "#/components/schemas/CorsPolicy"
+      },
+      "type": "array"
+     },
+     "createMode": {
+      "enum": [
+       "Default",
+       "Restore"
+      ],
+      "type": "string"
+     },
+     "customerManagedKeyStatus": {
+      "type": "string"
+     },
+     "databaseAccountOfferType": {
+      "enum": [
+       "Standard"
+      ],
+      "type": "string"
+     },
+     "defaultIdentity": {
+      "type": "string"
+     },
+     "defaultPriorityLevel": {
+      "$ref": "#/components/schemas/DefaultPriorityLevel"
+     },
+     "disableKeyBasedMetadataWriteAccess": {
+      "type": "boolean"
+     },
+     "disableLocalAuth": {
+      "type": "boolean"
+     },
+     "enableAnalyticalStorage": {
+      "type": "boolean"
+     },
+     "enableAutomaticFailover": {
+      "type": "boolean"
+     },
+     "enableBurstCapacity": {
+      "type": "boolean"
+     },
+     "enableCassandraConnector": {
+      "type": "boolean"
+     },
+     "enableFreeTier": {
+      "type": "boolean"
+     },
+     "enableMultipleWriteLocations": {
+      "type": "boolean"
+     },
+     "enablePartitionMerge": {
+      "type": "boolean"
+     },
+     "enablePerRegionPerPartitionAutoscale": {
+      "type": "boolean"
+     },
+     "enablePriorityBasedExecution": {
+      "type": "boolean"
+     },
+     "enforceHierarchicalPartitionKeyIdLastLevel": {
+      "type": "boolean"
+     },
+     "ipRules": {
+      "items": {
+       "$ref": "#/components/schemas/IpAddressOrRange"
+      },
+      "type": "array"
+     },
+     "isVirtualNetworkFilterEnabled": {
+      "type": "boolean"
+     },
+     "keyVaultKeyUri": {
+      "type": "string"
+     },
+     "keysMetadata": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/DatabaseAccountKeysMetadata"
+       }
+      ],
+      "readOnly": true
+     },
+     "locations": {
+      "items": {
+       "$ref": "#/components/schemas/Location"
+      },
+      "type": "array"
+     },
+     "minimalTlsVersion": {
+      "$ref": "#/components/schemas/MinimalTlsVersion"
+     },
+     "networkAclBypass": {
+      "$ref": "#/components/schemas/NetworkAclBypass"
+     },
+     "networkAclBypassResourceIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "publicNetworkAccess": {
+      "$ref": "#/components/schemas/PublicNetworkAccess"
+     },
+     "restoreParameters": {
+      "$ref": "#/components/schemas/RestoreParameters"
+     },
+     "virtualNetworkRules": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualNetworkRule"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "databaseAccountOfferType",
+     "locations"
+    ],
+    "type": "object"
+   },
+   "DatabaseAccountGetProperties": {
+    "properties": {
+     "analyticalStorageConfiguration": {
+      "$ref": "#/components/schemas/AnalyticalStorageConfiguration"
+     },
+     "apiProperties": {
+      "$ref": "#/components/schemas/ApiProperties"
+     },
+     "backupPolicy": {
+      "$ref": "#/components/schemas/BackupPolicy"
+     },
+     "capabilities": {
+      "items": {
+       "$ref": "#/components/schemas/Capability"
+      },
+      "type": "array"
+     },
+     "capacity": {
+      "$ref": "#/components/schemas/Capacity"
+     },
+     "connectorOffer": {
+      "$ref": "#/components/schemas/ConnectorOffer"
+     },
+     "consistencyPolicy": {
+      "$ref": "#/components/schemas/ConsistencyPolicy"
+     },
+     "cors": {
+      "items": {
+       "$ref": "#/components/schemas/CorsPolicy"
+      },
+      "type": "array"
+     },
+     "createMode": {
+      "enum": [
+       "Default",
+       "Restore"
+      ],
+      "type": "string"
+     },
+     "customerManagedKeyStatus": {
+      "type": "string"
+     },
+     "databaseAccountOfferType": {
+      "enum": [
+       "Standard"
+      ],
+      "readOnly": true,
+      "type": "string"
+     },
+     "defaultIdentity": {
+      "type": "string"
+     },
+     "defaultPriorityLevel": {
+      "$ref": "#/components/schemas/DefaultPriorityLevel"
+     },
+     "disableKeyBasedMetadataWriteAccess": {
+      "type": "boolean"
+     },
+     "disableLocalAuth": {
+      "type": "boolean"
+     },
+     "documentEndpoint": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "enableAnalyticalStorage": {
+      "type": "boolean"
+     },
+     "enableAutomaticFailover": {
+      "type": "boolean"
+     },
+     "enableBurstCapacity": {
+      "type": "boolean"
+     },
+     "enableCassandraConnector": {
+      "type": "boolean"
+     },
+     "enableFreeTier": {
+      "type": "boolean"
+     },
+     "enableMultipleWriteLocations": {
+      "type": "boolean"
+     },
+     "enablePartitionMerge": {
+      "type": "boolean"
+     },
+     "enablePerRegionPerPartitionAutoscale": {
+      "type": "boolean"
+     },
+     "enablePriorityBasedExecution": {
+      "type": "boolean"
+     },
+     "enforceHierarchicalPartitionKeyIdLastLevel": {
+      "type": "boolean"
+     },
+     "failoverPolicies": {
+      "items": {
+       "$ref": "#/components/schemas/FailoverPolicy"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "instanceId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "ipRules": {
+      "items": {
+       "$ref": "#/components/schemas/IpAddressOrRange"
+      },
+      "type": "array"
+     },
+     "isVirtualNetworkFilterEnabled": {
+      "type": "boolean"
+     },
+     "keyVaultKeyUri": {
+      "type": "string"
+     },
+     "keyVaultKeyUriVersion": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "keysMetadata": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/DatabaseAccountKeysMetadata"
+       }
+      ],
+      "readOnly": true
+     },
+     "locations": {
+      "items": {
+       "$ref": "#/components/schemas/Location"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "minimalTlsVersion": {
+      "$ref": "#/components/schemas/MinimalTlsVersion"
+     },
+     "networkAclBypass": {
+      "$ref": "#/components/schemas/NetworkAclBypass"
+     },
+     "networkAclBypassResourceIds": {
+      "items": {
+       "format": "arm-id",
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "privateEndpointConnections": {
+      "items": {
+       "$ref": "#/components/schemas/PrivateEndpointConnection"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "provisioningState": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "publicNetworkAccess": {
+      "$ref": "#/components/schemas/PublicNetworkAccess"
+     },
+     "readLocations": {
+      "items": {
+       "$ref": "#/components/schemas/Location"
+      },
+      "readOnly": true,
+      "type": "array"
+     },
+     "restoreParameters": {
+      "$ref": "#/components/schemas/RestoreParameters"
+     },
+     "virtualNetworkRules": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualNetworkRule"
+      },
+      "type": "array"
+     },
+     "writeLocations": {
+      "items": {
+       "$ref": "#/components/schemas/Location"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseAccountGetResults": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/ProxyResource"
+     }
+    ],
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/ManagedServiceIdentity"
+     },
+     "kind": {
+      "enum": [
+       "GlobalDocumentDB",
+       "MongoDB",
+       "Parse"
+      ],
+      "type": "string"
+     },
+     "location": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/DatabaseAccountGetProperties"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseAccountKeysMetadata": {
+    "properties": {
+     "primaryMasterKey": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/AccountKeyMetadata"
+       }
+      ],
+      "readOnly": true
+     },
+     "primaryReadonlyMasterKey": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/AccountKeyMetadata"
+       }
+      ],
+      "readOnly": true
+     },
+     "secondaryMasterKey": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/AccountKeyMetadata"
+       }
+      ],
+      "readOnly": true
+     },
+     "secondaryReadonlyMasterKey": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/AccountKeyMetadata"
+       }
+      ],
+      "readOnly": true
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseAccountUpdateParameters": {
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/ManagedServiceIdentity"
+     },
+     "location": {
+      "type": "string"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/DatabaseAccountUpdateProperties"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseAccountUpdateProperties": {
+    "properties": {
+     "analyticalStorageConfiguration": {
+      "$ref": "#/components/schemas/AnalyticalStorageConfiguration"
+     },
+     "apiProperties": {
+      "$ref": "#/components/schemas/ApiProperties"
+     },
+     "backupPolicy": {
+      "$ref": "#/components/schemas/BackupPolicy"
+     },
+     "capabilities": {
+      "items": {
+       "$ref": "#/components/schemas/Capability"
+      },
+      "type": "array"
+     },
+     "capacity": {
+      "$ref": "#/components/schemas/Capacity"
+     },
+     "connectorOffer": {
+      "$ref": "#/components/schemas/ConnectorOffer"
+     },
+     "consistencyPolicy": {
+      "$ref": "#/components/schemas/ConsistencyPolicy"
+     },
+     "cors": {
+      "items": {
+       "$ref": "#/components/schemas/CorsPolicy"
+      },
+      "type": "array"
+     },
+     "customerManagedKeyStatus": {
+      "type": "string"
+     },
+     "defaultIdentity": {
+      "type": "string"
+     },
+     "defaultPriorityLevel": {
+      "$ref": "#/components/schemas/DefaultPriorityLevel"
+     },
+     "disableKeyBasedMetadataWriteAccess": {
+      "type": "boolean"
+     },
+     "disableLocalAuth": {
+      "type": "boolean"
+     },
+     "enableAnalyticalStorage": {
+      "type": "boolean"
+     },
+     "enableAutomaticFailover": {
+      "type": "boolean"
+     },
+     "enableBurstCapacity": {
+      "type": "boolean"
+     },
+     "enableCassandraConnector": {
+      "type": "boolean"
+     },
+     "enableFreeTier": {
+      "type": "boolean"
+     },
+     "enableMultipleWriteLocations": {
+      "type": "boolean"
+     },
+     "enablePartitionMerge": {
+      "type": "boolean"
+     },
+     "enablePerRegionPerPartitionAutoscale": {
+      "type": "boolean"
+     },
+     "enablePriorityBasedExecution": {
+      "type": "boolean"
+     },
+     "enforceHierarchicalPartitionKeyIdLastLevel": {
+      "type": "boolean"
+     },
+     "ipRules": {
+      "items": {
+       "$ref": "#/components/schemas/IpAddressOrRange"
+      },
+      "type": "array"
+     },
+     "isVirtualNetworkFilterEnabled": {
+      "type": "boolean"
+     },
+     "keyVaultKeyUri": {
+      "type": "string"
+     },
+     "keysMetadata": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/DatabaseAccountKeysMetadata"
+       }
+      ],
+      "readOnly": true
+     },
+     "locations": {
+      "items": {
+       "$ref": "#/components/schemas/Location"
+      },
+      "type": "array"
+     },
+     "minimalTlsVersion": {
+      "$ref": "#/components/schemas/MinimalTlsVersion"
+     },
+     "networkAclBypass": {
+      "$ref": "#/components/schemas/NetworkAclBypass"
+     },
+     "networkAclBypassResourceIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "publicNetworkAccess": {
+      "$ref": "#/components/schemas/PublicNetworkAccess"
+     },
+     "virtualNetworkRules": {
+      "items": {
+       "$ref": "#/components/schemas/VirtualNetworkRule"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseAccountsListResult": {
+    "properties": {
+     "nextLink": {
+      "type": "string"
+     },
+     "value": {
+      "items": {
+       "$ref": "#/components/schemas/DatabaseAccountGetResults"
+      },
+      "readOnly": true,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DatabaseRestoreResource": {
+    "properties": {
+     "collectionNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "databaseName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DefaultConsistencyLevel": {
+    "enum": [
+     "Eventual",
+     "Session",
+     "BoundedStaleness",
+     "Strong",
+     "ConsistentPrefix"
+    ],
+    "type": "string"
+   },
+   "DefaultPriorityLevel": {
+    "enum": [
+     "High",
+     "Low"
+    ],
+    "type": "string"
+   },
+   "FailoverPolicy": {
+    "properties": {
+     "failoverPriority": {
+      "format": "int32",
+      "minimum": 0,
+      "type": "integer"
+     },
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "locationName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GremlinDatabaseRestoreResource": {
+    "properties": {
+     "databaseName": {
+      "type": "string"
+     },
+     "graphNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "IpAddressOrRange": {
+    "properties": {
+     "ipAddressOrRange": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Location": {
+    "properties": {
+     "documentEndpoint": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "failoverPriority": {
+      "format": "int32",
+      "minimum": 0,
+      "type": "integer"
+     },
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "isZoneRedundant": {
+      "type": "boolean"
+     },
+     "locationName": {
+      "type": "string"
+     },
+     "provisioningState": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ManagedServiceIdentity": {
+    "properties": {
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "tenantId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "type": {
+      "$ref": "#/components/schemas/ResourceIdentityType"
+     },
+     "userAssignedIdentities": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/ManagedServiceIdentityUserAssignedIdentities"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ManagedServiceIdentityUserAssignedIdentities": {
+    "properties": {
+     "clientId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "principalId": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MinimalTlsVersion": {
+    "enum": [
+     "Tls",
+     "Tls11",
+     "Tls12"
+    ],
+    "type": "string"
+   },
+   "NetworkAclBypass": {
+    "enum": [
+     "None",
+     "AzureServices"
+    ],
+    "type": "string"
+   },
+   "PeriodicModeBackupPolicy": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/BackupPolicy"
+     }
+    ],
+    "properties": {
+     "periodicModeProperties": {
+      "$ref": "#/components/schemas/PeriodicModeProperties"
+     }
+    },
+    "type": "object"
+   },
+   "PeriodicModeProperties": {
+    "properties": {
+     "backupIntervalInMinutes": {
+      "format": "int32",
+      "minimum": 0,
+      "type": "integer"
+     },
+     "backupRetentionIntervalInHours": {
+      "format": "int32",
+      "minimum": 0,
+      "type": "integer"
+     },
+     "backupStorageRedundancy": {
+      "$ref": "#/components/schemas/BackupStorageRedundancy"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointConnection": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/ProxyResource"
+     }
+    ],
+    "properties": {
+     "properties": {
+      "$ref": "#/components/schemas/PrivateEndpointConnectionProperties"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointConnectionProperties": {
+    "properties": {
+     "groupId": {
+      "type": "string"
+     },
+     "privateEndpoint": {
+      "$ref": "#/components/schemas/PrivateEndpointProperty"
+     },
+     "privateLinkServiceConnectionState": {
+      "$ref": "#/components/schemas/PrivateLinkServiceConnectionStateProperty"
+     },
+     "provisioningState": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateEndpointProperty": {
+    "properties": {
+     "id": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PrivateLinkServiceConnectionStateProperty": {
+    "properties": {
+     "actionsRequired": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "status": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProxyResource": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/Resource"
+     }
+    ],
+    "type": "object"
+   },
+   "PublicNetworkAccess": {
+    "enum": [
+     "Enabled",
+     "Disabled",
+     "SecuredByPerimeter"
+    ],
+    "type": "string"
+   },
+   "Resource": {
+    "properties": {
+     "id": {
+      "format": "arm-id",
+      "readOnly": true,
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "systemData": {
+      "allOf": [
+       {
+        "$ref": "#/components/schemas/systemData"
+       }
+      ],
+      "readOnly": true
+     },
+     "type": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceIdentityType": {
+    "enum": [
+     "SystemAssigned",
+     "UserAssigned",
+     "SystemAssigned,UserAssigned",
+     "None"
+    ],
+    "type": "string"
+   },
+   "RestoreMode": {
+    "enum": [
+     "PointInTime"
+    ],
+    "type": "string"
+   },
+   "RestoreParameters": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/RestoreParametersBase"
+     }
+    ],
+    "properties": {
+     "databasesToRestore": {
+      "items": {
+       "$ref": "#/components/schemas/DatabaseRestoreResource"
+      },
+      "type": "array"
+     },
+     "gremlinDatabasesToRestore": {
+      "items": {
+       "$ref": "#/components/schemas/GremlinDatabaseRestoreResource"
+      },
+      "type": "array"
+     },
+     "restoreMode": {
+      "$ref": "#/components/schemas/RestoreMode"
+     },
+     "restoreSource": {
+      "type": "string"
+     },
+     "restoreTimestampInUtc": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "sourceBackupLocation": {
+      "type": "string"
+     },
+     "tablesToRestore": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "RestoreParametersBase": {
+    "properties": {
+     "restoreSource": {
+      "type": "string"
+     },
+     "restoreTimestampInUtc": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "restoreWithTtlDisabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ServerVersion": {
+    "enum": [
+     "3.2",
+     "3.6",
+     "4.0",
+     "4.2",
+     "5.0",
+     "6.0",
+     "7.0"
+    ],
+    "type": "string"
+   },
+   "VirtualNetworkRule": {
+    "properties": {
+     "id": {
+      "format": "arm-id",
+      "type": "string"
+     },
+     "ignoreMissingVNetServiceEndpoint": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "systemData": {
+    "properties": {
+     "createdAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "createdByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     },
+     "lastModifiedAt": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "lastModifiedBy": {
+      "type": "string"
+     },
+     "lastModifiedByType": {
+      "enum": [
+       "User",
+       "Application",
+       "ManagedIdentity",
+       "Key"
+      ],
+      "type": "string"
+     }
+    },
+    "readOnly": true,
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Microsoft.DocumentDB api-version 2026-03-15 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Account metadata only: no database engine, document endpoint, container, key, connection string or failover exists. Locations must be distinct simulator regions with failover priorities 0..n-1; createMode Restore, restore parameters and customer-managed keys are refused. Databases, containers, keys, regional failover and every other operation are not implemented (HTTP 501).",
+  "title": "Azure Cosmos DB (Microsoft.DocumentDB, simulator catalog)",
+  "version": "2026-03-15"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/subscriptions/{subscriptionId}/providers/Microsoft.DocumentDB/databaseAccounts": {
+   "get": {
+    "operationId": "DatabaseAccounts_List",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-15",
+       "enum": [
+        "2026-03-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DatabaseAccountsListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "DatabaseAccounts_List",
+    "tags": [
+     "Azure Cosmos DB"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts": {
+   "get": {
+    "operationId": "DatabaseAccounts_ListByResourceGroup",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-15",
+       "enum": [
+        "2026-03-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DatabaseAccountsListResult"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "DatabaseAccounts_ListByResourceGroup",
+    "tags": [
+     "Azure Cosmos DB"
+    ]
+   }
+  },
+  "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{accountName}": {
+   "delete": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "DatabaseAccounts_Delete",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-15",
+       "enum": [
+        "2026-03-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "202": {
+      "description": "Official 202 response."
+     },
+     "204": {
+      "description": "Official 204 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "DatabaseAccounts_Delete",
+    "tags": [
+     "Azure Cosmos DB"
+    ]
+   },
+   "get": {
+    "operationId": "DatabaseAccounts_Get",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-15",
+       "enum": [
+        "2026-03-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DatabaseAccountGetResults"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "DatabaseAccounts_Get",
+    "tags": [
+     "Azure Cosmos DB"
+    ]
+   },
+   "patch": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "DatabaseAccounts_Update",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-15",
+       "enum": [
+        "2026-03-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DatabaseAccountUpdateParameters"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DatabaseAccountGetResults"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "DatabaseAccounts_Update",
+    "tags": [
+     "Azure Cosmos DB"
+    ]
+   },
+   "put": {
+    "description": "Long-running in Azure; the simulator completes it synchronously with provisioningState Succeeded.",
+    "operationId": "DatabaseAccounts_CreateOrUpdate",
+    "parameters": [
+     {
+      "in": "query",
+      "name": "api-version",
+      "required": true,
+      "schema": {
+       "default": "2026-03-15",
+       "enum": [
+        "2026-03-15"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "subscriptionId",
+      "required": true,
+      "schema": {
+       "default": "00000000-0000-4000-8000-000000000001",
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceGroupName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "accountName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DatabaseAccountCreateUpdateParameters"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DatabaseAccountGetResults"
+        }
+       }
+      },
+      "description": "Official 200 response."
+     },
+     "400": {
+      "description": "ARM error envelope: InvalidRequestContent, InvalidApiVersionParameter, MissingApiVersionParameter, LocationNotAvailableForResourceType, PropertyChangeNotAllowed or a reviewed semantic code."
+     },
+     "401": {
+      "description": "AuthenticationFailed: a valid simulator access token is required."
+     },
+     "403": {
+      "description": "AuthorizationFailed for a subscription or subject other than the configured local owner."
+     },
+     "404": {
+      "description": "ResourceNotFound, ResourceGroupNotFound or ParentResourceNotFound."
+     },
+     "409": {
+      "description": "Conflict, QuotaExceeded, InvalidResourceLocation or an in-use reference."
+     }
+    },
+    "summary": "DatabaseAccounts_CreateOrUpdate",
+    "tags": [
+     "Azure Cosmos DB"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/azure-arm"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Microsoft.DocumentDB api-version 2026-03-15 swagger. Every other official operation of this api-version returns HTTP 501 NotImplemented. Account metadata only: no database engine, document endpoint, container, key, connection string or failover exists. Locations must be distinct simulator regions with failover priorities 0..n-1; createMode Restore, restore parameters and customer-managed keys are refused. Databases, containers, keys, regional failover and every other operation are not implemented (HTTP 501).",
+   "name": "Azure Cosmos DB"
+  }
+ ],
+ "x-simulator-source": {
+  "repository": "github.com/Azure/azure-rest-api-specs",
+  "commit": "8254fa29b6360b48084554122a7c49f6c4237d84",
+  "license": "MIT",
+  "files": [
+   {
+    "path": "specification/common-types/resource-management/v6/types.json",
+    "sha256": "5bdcf9b5ed1ea563367452e265e7ad60b411b1fbbbc20b8ba3ab7854d1ca624f"
+   },
+   {
+    "path": "specification/cosmos-db/resource-manager/Microsoft.DocumentDB/DocumentDB/stable/2026-03-15/openapi.json",
+    "sha256": "8e2ae27e14553e04b3152de7aec4cf5e4b8cb551242a94d17fca69b82b74ae9b"
+   }
+  ]
+ }
+}

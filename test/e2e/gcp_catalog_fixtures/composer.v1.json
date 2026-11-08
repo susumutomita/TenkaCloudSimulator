@@ -1,0 +1,26 @@
+{
+ "api": "composer.v1",
+ "steps": [
+  {"call": "projects.locations.environments.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "body": {"name": "projects/tenkacloud-local/locations/us-central1/environments/fixture", "config": {"softwareConfig": {"imageVersion": "composer-3-airflow-2.10.5"}, "environmentSize": "ENVIRONMENT_SIZE_SMALL"}, "labels": {"team": "a"}}, "save": {"op": "name", "environment": "response.name"}, "expect": {"done": true, "response.state": "RUNNING"}},
+  {"call": "projects.locations.operations.get", "args": {"name": "${op}"}, "expect": {"response.name": "projects/tenkacloud-local/locations/us-central1/environments/fixture"}},
+  {"call": "projects.locations.operations.list", "args": {"name": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"operations#count": 1}},
+  {"call": "projects.locations.environments.get", "args": {"name": "${environment}"}, "expect": {"config.softwareConfig.imageVersion": "composer-3-airflow-2.10.5"}},
+  {"call": "projects.locations.environments.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"environments#count": 1}},
+  {"call": "projects.locations.environments.patch", "args": {"name": "${environment}", "updateMask": "labels"}, "body": {"labels": {"team": "a", "env": "dev"}}},
+  {"call": "projects.locations.environments.create", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "body": {"name": "projects/tenkacloud-local/locations/us-central1/environments/broken", "state": "ERROR"}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.environments.patch", "args": {"name": "${environment}", "updateMask": "config.nodeCount"}, "body": {"config": {"nodeCount": 4}}, "error": "INVALID_ARGUMENT", "status": 400},
+  {"call": "projects.locations.environments.executeAirflowCommand", "args": {"environment": "${environment}", "body": {"command": "dags", "subcommand": "list"}}, "error": "UNIMPLEMENTED", "status": 501},
+  {"call": "projects.locations.environments.get", "args": {"name": "projects/tenkacloud-local/locations/us-central1/environments/missing"}, "error": "NOT_FOUND", "status": 404},
+  {"call": "projects.locations.environments.list", "args": {"parent": "projects/other-project/locations/us-central1"}, "error": "PERMISSION_DENIED", "status": 403}
+ ],
+ "isolation": [
+  {"call": "projects.locations.environments.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"environments#count": 0}}
+ ],
+ "after_restart": [
+  {"call": "projects.locations.environments.get", "args": {"name": "${environment}"}, "expect": {"labels.env": "dev", "state": "RUNNING"}}
+ ],
+ "cleanup": [
+  {"call": "projects.locations.environments.delete", "args": {"name": "${environment}"}},
+  {"call": "projects.locations.environments.list", "args": {"parent": "projects/tenkacloud-local/locations/us-central1"}, "expect": {"environments#count": 0}}
+ ]
+}

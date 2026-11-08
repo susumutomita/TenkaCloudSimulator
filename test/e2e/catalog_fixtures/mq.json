@@ -1,0 +1,23 @@
+{
+ "client": "mq",
+ "steps": [
+  {"op": "create_configuration", "args": {"Name": "fixture-config", "EngineType": "ACTIVEMQ", "EngineVersion": "5.18", "Tags": {"team": "a"}}, "save": {"config": "Id", "arn": "Arn"}, "expect": {"AuthenticationStrategy": "SIMPLE", "LatestRevision.Revision": 1}},
+  {"op": "describe_configuration", "args": {"ConfigurationId": "${config}"}, "expect": {"Arn": "${arn}", "EngineType": "ACTIVEMQ", "EngineVersion": "5.18", "Tags": {"team": "a"}}},
+  {"op": "list_configurations", "args": {}, "expect": {"Configurations#count": 1, "Configurations[0].Id": "${config}"}},
+  {"op": "create_tags", "args": {"ResourceArn": "${arn}", "Tags": {"stage": "dev"}}},
+  {"op": "delete_tags", "args": {"ResourceArn": "${arn}", "TagKeys": ["stage"]}},
+  {"op": "list_tags", "args": {"ResourceArn": "${arn}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "list_brokers", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "describe_configuration", "args": {"ConfigurationId": "c-00000000000000000000000000000000"}, "error": "NotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_configurations", "args": {}, "expect": {"Configurations#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_configuration", "args": {"ConfigurationId": "${config}"}, "expect": {"Name": "fixture-config"}}
+ ],
+ "cleanup": [
+  {"op": "delete_configuration", "args": {"ConfigurationId": "${config}"}, "expect": {"ConfigurationId": "${config}"}},
+  {"op": "list_configurations", "args": {}, "expect": {"Configurations#count": 0}}
+ ]
+}

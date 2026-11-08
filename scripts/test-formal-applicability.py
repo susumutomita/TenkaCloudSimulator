@@ -17,6 +17,42 @@ from formal_applicability import GateError, RECORD, changes, disposition, git, i
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class LandingPresentationBoundaryTests(unittest.TestCase):
+    def test_only_named_static_landing_documents_are_presentation(self):
+        for path in ('internal/server/landing/index.html', 'internal/server/landing/landing.css'):
+            self.assertEqual(disposition(path), 'presentation')
+        for path in ('internal/server/landing/landing.mjs',
+                     'internal/server/landing/topology-canvas.mjs',
+                     'internal/server/landing/topology-data.mjs',
+                     'internal/server/landing/unknown.html',
+                     'internal/server/landing/unknown.css',
+                     'internal/server/landing.go'):
+            self.assertIsNone(disposition(path), path)
+
+
+class ReleaseClassificationTests(unittest.TestCase):
+    def test_release_validation_classification_is_exact(self):
+        for name in ('build-release.py', 'verify-release.py', 'verify-release-tag.py'):
+            self.assertEqual(disposition('scripts/' + name), 'validation-tooling')
+        for path in ('scripts/build-release-other.py', 'scripts/verify-release-wrapper.py',
+                     'internal/aws/release.go'):
+            self.assertIsNone(disposition(path), path)
+
+
+class STSFixtureClassificationTests(unittest.TestCase):
+    def test_exact_sts_fixture_and_helper_classification(self):
+        self.assertEqual(disposition('scripts/check-sts-formal-candidate.py'), 'validation-tooling')
+        self.assertEqual(disposition('internal/aws/testdata/sts-original/hello-world.yaml'), 'test-support')
+        for name in ('README.md', 'LICENSE'):
+            self.assertEqual(disposition('internal/aws/testdata/sts-original/' + name), 'documentation')
+        for path in ('scripts/check-sts-other.py',
+                     'internal/aws/testdata/sts-original/other.yaml',
+                     'internal/aws/testdata/sts-original/hello-world.go',
+                     'internal/aws/testdata/sts-original/helper.py',
+                     'internal/aws/sts_roles.go', 'internal/server/access_sdk.go'):
+            self.assertIsNone(disposition(path), path)
+
+
 class ApplicabilityTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix='formal-applicability-unit-')
@@ -69,6 +105,33 @@ class ApplicabilityTests(unittest.TestCase):
 
     def write_record(self, record):
         (self.root / RECORD).write_text(json.dumps(record, indent=2) + '\n')
+
+    def test_dynamodb_optional_sdk_fixture_classification_is_exact(self):
+        self.assertEqual(disposition('internal/aws/testdata/dynamodb_size_sdk.py'), 'test-support')
+        for path in ('internal/aws/testdata/other_sdk.py',
+                     'internal/aws/testdata/dynamodb_size_sdk.go',
+                     'internal/aws/dynamodb_size.go',
+                     'internal/aws/dynamodb_number.go',
+                     'internal/aws/dynamodb_store.go'):
+            self.assertIsNone(disposition(path), path)
+
+    def test_japanese_readme_is_bound_without_accepting_runtime_lookalikes(self):
+        self.prepare('README.ja.md')
+        evidence = validate_record(self.root, self.base)
+        self.assertEqual(evidence['changes'][0]['path'], 'README.ja.md')
+        self.assertEqual(evidence['changes'][0]['disposition'], 'documentation')
+        self.prepare('README.ja.go')
+        with self.assertRaisesRegex(GateError, 'unclassified implementation/state path'):
+            validate_record(self.root, self.base)
+
+    def test_native_provenance_validator_classification_is_exact(self):
+        self.prepare('scripts/check-native-provenance.py')
+        evidence = validate_record(self.root, self.base)
+        self.assertEqual(evidence['changes'][0]['disposition'], 'validation-tooling')
+        self.assertIsNone(disposition('scripts/check-native-provenance-wrapper.py'))
+        self.prepare('internal/aws/check-native-provenance.go')
+        with self.assertRaisesRegex(GateError, 'unclassified implementation/state path'):
+            validate_record(self.root, self.base)
 
     def test_exact_modeled_change_and_known_documentation(self):
         self.prepare()

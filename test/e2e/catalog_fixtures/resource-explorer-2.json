@@ -1,0 +1,33 @@
+{
+ "client": "resource-explorer-2",
+ "steps": [
+  {"op": "create_index", "args": {"Tags": {"team": "a"}}, "save": {"index": "Arn"}, "expect": {"State": "ACTIVE"}},
+  {"op": "list_indexes", "args": {}, "expect": {"Indexes#count": 1, "Indexes[0].Type": "LOCAL", "Indexes[0].Region": "us-east-1"}},
+  {"op": "update_index_type", "args": {"Arn": "${index}", "Type": "AGGREGATOR"}, "expect": {"Type": "AGGREGATOR"}},
+  {"op": "create_view", "args": {"ViewName": "fixture-view", "Filters": {"FilterString": "service:s3"}, "Tags": {"team": "a"}}, "save": {"view": "View.ViewArn"}, "expect": {"View.Owner": "000000000000", "View.Scope": "arn:aws:iam::000000000000:root"}},
+  {"op": "get_view", "args": {"ViewArn": "${view}"}, "expect": {"View.Filters.FilterString": "service:s3", "Tags": {"team": "a"}}},
+  {"op": "list_views", "args": {}, "expect": {"Views": ["${view}"]}},
+  {"op": "batch_get_view", "args": {"ViewArns": ["${view}", "${view}-missing"]}, "expect": {"Views#count": 1, "Errors[0].ViewArn": "${view}-missing"}},
+  {"op": "update_view", "args": {"ViewArn": "${view}", "IncludedProperties": [{"Name": "tags"}]}, "expect": {"View.IncludedProperties[0].Name": "tags"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${view}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${view}", "tagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${view}"}, "expect": {"Tags": {"k": "v"}}},
+  {"op": "create_view", "args": {"ViewName": "org-view", "Scope": "arn:aws:organizations::000000000000:organization/o-fixture"}, "error": "ValidationException", "status": 400},
+  {"op": "search", "args": {"QueryString": "service:s3"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_view", "args": {"ViewArn": "arn:aws:resource-explorer-2:us-east-1:000000000000:view/missing/00000000-0000-0000-0000-000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_indexes", "args": {}, "expect": {"Indexes#count": 0}},
+  {"op": "list_views", "args": {}, "expect": {"Views#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_view", "args": {"ViewArn": "${view}"}, "expect": {"View.IncludedProperties[0].Name": "tags"}},
+  {"op": "list_indexes", "args": {"Type": "AGGREGATOR"}, "expect": {"Indexes#count": 1}}
+ ],
+ "cleanup": [
+  {"op": "delete_view", "args": {"ViewArn": "${view}"}, "expect": {"ViewArn": "${view}"}},
+  {"op": "delete_index", "args": {"Arn": "${index}"}, "expect": {"State": "DELETED"}},
+  {"op": "list_indexes", "args": {}, "expect": {"Indexes#count": 0}},
+  {"op": "list_views", "args": {}, "expect": {"Views#count": 0}}
+ ]
+}

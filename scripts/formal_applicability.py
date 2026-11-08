@@ -21,17 +21,23 @@ FORMAL_INFRA = {'formal/models.json', 'formal/tla2tools.sha256',
                 'scripts/test-formal-gate.py', 'scripts/test-formal-applicability.py',
                 'scripts/formal_module_metadata.py'}
 KNOWN_VALIDATION = {
+    'scripts/check-sts-formal-candidate.py',
+    'scripts/build-release.py', 'scripts/verify-release.py', 'scripts/verify-release-tag.py',
     'scripts/build-vulndb-snapshot.py', 'scripts/catalog-matrix.py',
     'scripts/check-assets.py', 'scripts/check-coverage.py', 'scripts/check-cross-build.py',
+    'scripts/check-native-provenance.py',
     'scripts/get-audit-tools.py', 'scripts/test-coverage-gate.py', 'scripts/update-go-notices.py',
     'scripts/requirements-test.txt',
 }
 NONFORMAL = {
-    'documentation': ['README.md', 'SECURITY.md', 'AGENTS.md', 'docs/**', 'formal/README.md',
+    'documentation': ['internal/aws/testdata/sts-original/README.md',
+                      'internal/aws/testdata/sts-original/LICENSE', 'README.md', 'README.ja.md', 'SECURITY.md', 'AGENTS.md', 'docs/**', 'formal/README.md',
                       'LICENSE', 'NOTICE', 'third_party/**', 'internal/legal/assets/**'],
     'presentation': ['tools/console/**', 'tools/scalar/**', 'internal/server/web/**',
-                     'internal/server/apidocs/**'],
-    'test-support': ['test/**', '*_test.go', 'scripts/test-*.py'],
+                     'internal/server/apidocs/**',
+                     'internal/server/landing/index.html', 'internal/server/landing/landing.css'],
+    'test-support': ['internal/aws/testdata/sts-original/hello-world.yaml', 'test/**', '*_test.go', 'scripts/test-*.py',
+                     'internal/aws/testdata/dynamodb_size_sdk.py'],
     'build-metadata': ['Makefile', '.gitignore', '.gitattributes', '.github/CODEOWNERS',
                        '.github/PULL_REQUEST_TEMPLATE.md'],
 }

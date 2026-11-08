@@ -5,13 +5,16 @@ on:
   pull_request:
   merge_group:
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:
   formal:
     name: Formal validation
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Budget the complete serial registry plus negative/applicability guards.
+    # Per-TLC-case deadlines, invariants and counterexample requirements are unchanged.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
@@ -34,7 +37,8 @@ jobs:
         env:
           PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
         run: |
-          curl --fail --location https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar --output /tmp/tla2tools.jar
+          python3 test/ci/tla_download.py
+          timeout --kill-after=5s 95s curl --fail --location --retry 3 --retry-delay 2 --retry-max-time 60 --connect-timeout 10 --max-time 30 https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar --output /tmp/tla2tools.jar
           TLA_JAR=/tmp/tla2tools.jar python3 scripts/check-formal.py --merge-gate
       - name: Retain exact formal evidence
         if: always()

@@ -1,0 +1,3157 @@
+{
+ "components": {
+  "schemas": {
+   "AlertPolicyCheck": {
+    "additionalProperties": false,
+    "properties": {
+     "alertPolicies": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "id": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "Analysis": {
+    "additionalProperties": false,
+    "properties": {
+     "customChecks": {
+      "items": {
+       "$ref": "#/components/schemas/CustomCheck"
+      },
+      "type": "array"
+     },
+     "duration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "googleCloud": {
+      "$ref": "#/components/schemas/GoogleCloudAnalysis"
+     }
+    },
+    "type": "object"
+   },
+   "AnthosCluster": {
+    "additionalProperties": false,
+    "properties": {
+     "membership": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AssociatedEntities": {
+    "additionalProperties": false,
+    "properties": {
+     "anthosClusters": {
+      "items": {
+       "$ref": "#/components/schemas/AnthosCluster"
+      },
+      "type": "array"
+     },
+     "gkeClusters": {
+      "items": {
+       "$ref": "#/components/schemas/GkeCluster"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Canary": {
+    "additionalProperties": false,
+    "properties": {
+     "canaryDeployment": {
+      "$ref": "#/components/schemas/CanaryDeployment"
+     },
+     "customCanaryDeployment": {
+      "$ref": "#/components/schemas/CustomCanaryDeployment"
+     },
+     "runtimeConfig": {
+      "$ref": "#/components/schemas/RuntimeConfig"
+     }
+    },
+    "type": "object"
+   },
+   "CanaryDeployment": {
+    "additionalProperties": false,
+    "properties": {
+     "analysis": {
+      "$ref": "#/components/schemas/Analysis"
+     },
+     "percentages": {
+      "items": {
+       "format": "int32",
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "postdeploy": {
+      "$ref": "#/components/schemas/Postdeploy"
+     },
+     "predeploy": {
+      "$ref": "#/components/schemas/Predeploy"
+     },
+     "verify": {
+      "type": "boolean"
+     },
+     "verifyConfig": {
+      "$ref": "#/components/schemas/Verify"
+     }
+    },
+    "type": "object"
+   },
+   "CloudRunConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "automaticTrafficControl": {
+      "type": "boolean"
+     },
+     "canaryRevisionTags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "priorRevisionTags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "stableRevisionTags": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CloudRunLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "location": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ContainerTask": {
+    "additionalProperties": false,
+    "properties": {
+     "args": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "command": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "env": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "image": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CustomCanaryDeployment": {
+    "additionalProperties": false,
+    "properties": {
+     "phaseConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/PhaseConfig"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CustomCheck": {
+    "additionalProperties": false,
+    "properties": {
+     "frequency": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "task": {
+      "$ref": "#/components/schemas/Task"
+     }
+    },
+    "type": "object"
+   },
+   "CustomTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "customTargetType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CustomTargetSkaffoldActions": {
+    "additionalProperties": false,
+    "properties": {
+     "deployAction": {
+      "type": "string"
+     },
+     "includeSkaffoldModules": {
+      "items": {
+       "$ref": "#/components/schemas/SkaffoldModules"
+      },
+      "type": "array"
+     },
+     "renderAction": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CustomTargetTasks": {
+    "additionalProperties": false,
+    "properties": {
+     "deploy": {
+      "$ref": "#/components/schemas/Task"
+     },
+     "render": {
+      "$ref": "#/components/schemas/Task"
+     }
+    },
+    "type": "object"
+   },
+   "CustomTargetType": {
+    "additionalProperties": false,
+    "properties": {
+     "annotations": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "customActions": {
+      "$ref": "#/components/schemas/CustomTargetSkaffoldActions"
+     },
+     "customTargetTypeId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "tasks": {
+      "$ref": "#/components/schemas/CustomTargetTasks"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Date": {
+    "additionalProperties": false,
+    "properties": {
+     "day": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "month": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "year": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DefaultPool": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactStorage": {
+      "type": "string"
+     },
+     "serviceAccount": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeliveryPipeline": {
+    "additionalProperties": false,
+    "properties": {
+     "annotations": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "condition": {
+      "$ref": "#/components/schemas/PipelineCondition"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "serialPipeline": {
+      "$ref": "#/components/schemas/SerialPipeline"
+     },
+     "suspended": {
+      "type": "boolean"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeliveryPipelineAttribute": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "DeployParameters": {
+    "additionalProperties": false,
+    "properties": {
+     "matchTargetLabels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "values": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "DeployPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "annotations": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "rules": {
+      "items": {
+       "$ref": "#/components/schemas/PolicyRule"
+      },
+      "type": "array"
+     },
+     "selectors": {
+      "items": {
+       "$ref": "#/components/schemas/DeployPolicyResourceSelector"
+      },
+      "type": "array"
+     },
+     "suspended": {
+      "type": "boolean"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeployPolicyResourceSelector": {
+    "additionalProperties": false,
+    "properties": {
+     "deliveryPipeline": {
+      "$ref": "#/components/schemas/DeliveryPipelineAttribute"
+     },
+     "target": {
+      "$ref": "#/components/schemas/TargetAttribute"
+     }
+    },
+    "type": "object"
+   },
+   "ExecutionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactStorage": {
+      "type": "string"
+     },
+     "defaultPool": {
+      "$ref": "#/components/schemas/DefaultPool"
+     },
+     "executionTimeout": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "privatePool": {
+      "$ref": "#/components/schemas/PrivatePool"
+     },
+     "serviceAccount": {
+      "type": "string"
+     },
+     "usages": {
+      "items": {
+       "enum": [
+        "EXECUTION_ENVIRONMENT_USAGE_UNSPECIFIED",
+        "RENDER",
+        "DEPLOY",
+        "VERIFY",
+        "PREDEPLOY",
+        "POSTDEPLOY",
+        "ANALYSIS"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "verbose": {
+      "type": "boolean"
+     },
+     "workerPool": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GatewayServiceMesh": {
+    "additionalProperties": false,
+    "properties": {
+     "deployment": {
+      "type": "string"
+     },
+     "httpRoute": {
+      "type": "string"
+     },
+     "podSelectorLabel": {
+      "type": "string"
+     },
+     "routeDestinations": {
+      "$ref": "#/components/schemas/RouteDestinations"
+     },
+     "routeUpdateWaitTime": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "service": {
+      "type": "string"
+     },
+     "stableCutbackDuration": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GkeCluster": {
+    "additionalProperties": false,
+    "properties": {
+     "cluster": {
+      "type": "string"
+     },
+     "dnsEndpoint": {
+      "type": "boolean"
+     },
+     "internalIp": {
+      "type": "boolean"
+     },
+     "proxyUrl": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GoogleCloudAnalysis": {
+    "additionalProperties": false,
+    "properties": {
+     "alertPolicyChecks": {
+      "items": {
+       "$ref": "#/components/schemas/AlertPolicyCheck"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "KubernetesConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "gatewayServiceMesh": {
+      "$ref": "#/components/schemas/GatewayServiceMesh"
+     },
+     "serviceNetworking": {
+      "$ref": "#/components/schemas/ServiceNetworking"
+     }
+    },
+    "type": "object"
+   },
+   "ListCustomTargetTypesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "customTargetTypes": {
+      "items": {
+       "$ref": "#/components/schemas/CustomTargetType"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListDeliveryPipelinesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "deliveryPipelines": {
+      "items": {
+       "$ref": "#/components/schemas/DeliveryPipeline"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListDeployPoliciesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "deployPolicies": {
+      "items": {
+       "$ref": "#/components/schemas/DeployPolicy"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTargetsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "targets": {
+      "items": {
+       "$ref": "#/components/schemas/Target"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MultiTarget": {
+    "additionalProperties": false,
+    "properties": {
+     "targetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "OneTimeWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "endDate": {
+      "$ref": "#/components/schemas/Date"
+     },
+     "endTime": {
+      "$ref": "#/components/schemas/TimeOfDay"
+     },
+     "startDate": {
+      "$ref": "#/components/schemas/Date"
+     },
+     "startTime": {
+      "$ref": "#/components/schemas/TimeOfDay"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PhaseConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "analysis": {
+      "$ref": "#/components/schemas/Analysis"
+     },
+     "percentage": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "phaseId": {
+      "type": "string"
+     },
+     "postdeploy": {
+      "$ref": "#/components/schemas/Postdeploy"
+     },
+     "predeploy": {
+      "$ref": "#/components/schemas/Predeploy"
+     },
+     "profiles": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "verify": {
+      "type": "boolean"
+     },
+     "verifyConfig": {
+      "$ref": "#/components/schemas/Verify"
+     }
+    },
+    "type": "object"
+   },
+   "PipelineCondition": {
+    "additionalProperties": false,
+    "properties": {
+     "pipelineReadyCondition": {
+      "$ref": "#/components/schemas/PipelineReadyCondition"
+     },
+     "targetsPresentCondition": {
+      "$ref": "#/components/schemas/TargetsPresentCondition"
+     },
+     "targetsTypeCondition": {
+      "$ref": "#/components/schemas/TargetsTypeCondition"
+     }
+    },
+    "type": "object"
+   },
+   "PipelineReadyCondition": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "type": "boolean"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PolicyRule": {
+    "additionalProperties": false,
+    "properties": {
+     "rolloutRestriction": {
+      "$ref": "#/components/schemas/RolloutRestriction"
+     }
+    },
+    "type": "object"
+   },
+   "Postdeploy": {
+    "additionalProperties": false,
+    "properties": {
+     "actions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "tasks": {
+      "items": {
+       "$ref": "#/components/schemas/Task"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Predeploy": {
+    "additionalProperties": false,
+    "properties": {
+     "actions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "tasks": {
+      "items": {
+       "$ref": "#/components/schemas/Task"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PrivatePool": {
+    "additionalProperties": false,
+    "properties": {
+     "artifactStorage": {
+      "type": "string"
+     },
+     "serviceAccount": {
+      "type": "string"
+     },
+     "workerPool": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RolloutRestriction": {
+    "additionalProperties": false,
+    "properties": {
+     "actions": {
+      "items": {
+       "enum": [
+        "ROLLOUT_ACTIONS_UNSPECIFIED",
+        "ADVANCE",
+        "APPROVE",
+        "CANCEL",
+        "CREATE",
+        "IGNORE_JOB",
+        "RETRY_JOB",
+        "ROLLBACK",
+        "TERMINATE_JOBRUN"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "id": {
+      "type": "string"
+     },
+     "invokers": {
+      "items": {
+       "enum": [
+        "INVOKER_UNSPECIFIED",
+        "USER",
+        "DEPLOY_AUTOMATION"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "timeWindows": {
+      "$ref": "#/components/schemas/TimeWindows"
+     }
+    },
+    "type": "object"
+   },
+   "RouteDestinations": {
+    "additionalProperties": false,
+    "properties": {
+     "destinationIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "propagateService": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "RuntimeConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudRun": {
+      "$ref": "#/components/schemas/CloudRunConfig"
+     },
+     "kubernetes": {
+      "$ref": "#/components/schemas/KubernetesConfig"
+     }
+    },
+    "type": "object"
+   },
+   "SerialPipeline": {
+    "additionalProperties": false,
+    "properties": {
+     "stages": {
+      "items": {
+       "$ref": "#/components/schemas/Stage"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceNetworking": {
+    "additionalProperties": false,
+    "properties": {
+     "deployment": {
+      "type": "string"
+     },
+     "disablePodOverprovisioning": {
+      "type": "boolean"
+     },
+     "podSelectorLabel": {
+      "type": "string"
+     },
+     "service": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SkaffoldGCBRepoSource": {
+    "additionalProperties": false,
+    "properties": {
+     "path": {
+      "type": "string"
+     },
+     "ref": {
+      "type": "string"
+     },
+     "repository": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SkaffoldGCSSource": {
+    "additionalProperties": false,
+    "properties": {
+     "path": {
+      "type": "string"
+     },
+     "source": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SkaffoldGitSource": {
+    "additionalProperties": false,
+    "properties": {
+     "path": {
+      "type": "string"
+     },
+     "ref": {
+      "type": "string"
+     },
+     "repo": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SkaffoldModules": {
+    "additionalProperties": false,
+    "properties": {
+     "configs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "git": {
+      "$ref": "#/components/schemas/SkaffoldGitSource"
+     },
+     "googleCloudBuildRepo": {
+      "$ref": "#/components/schemas/SkaffoldGCBRepoSource"
+     },
+     "googleCloudStorage": {
+      "$ref": "#/components/schemas/SkaffoldGCSSource"
+     }
+    },
+    "type": "object"
+   },
+   "Stage": {
+    "additionalProperties": false,
+    "properties": {
+     "deployParameters": {
+      "items": {
+       "$ref": "#/components/schemas/DeployParameters"
+      },
+      "type": "array"
+     },
+     "profiles": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "strategy": {
+      "$ref": "#/components/schemas/Strategy"
+     },
+     "targetId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Standard": {
+    "additionalProperties": false,
+    "properties": {
+     "analysis": {
+      "$ref": "#/components/schemas/Analysis"
+     },
+     "postdeploy": {
+      "$ref": "#/components/schemas/Postdeploy"
+     },
+     "predeploy": {
+      "$ref": "#/components/schemas/Predeploy"
+     },
+     "verify": {
+      "type": "boolean"
+     },
+     "verifyConfig": {
+      "$ref": "#/components/schemas/Verify"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Strategy": {
+    "additionalProperties": false,
+    "properties": {
+     "canary": {
+      "$ref": "#/components/schemas/Canary"
+     },
+     "standard": {
+      "$ref": "#/components/schemas/Standard"
+     }
+    },
+    "type": "object"
+   },
+   "Target": {
+    "additionalProperties": false,
+    "properties": {
+     "annotations": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "anthosCluster": {
+      "$ref": "#/components/schemas/AnthosCluster"
+     },
+     "associatedEntities": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/AssociatedEntities"
+      },
+      "type": "object"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     },
+     "customTarget": {
+      "$ref": "#/components/schemas/CustomTarget"
+     },
+     "deployParameters": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "description": {
+      "type": "string"
+     },
+     "etag": {
+      "type": "string"
+     },
+     "executionConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/ExecutionConfig"
+      },
+      "type": "array"
+     },
+     "gke": {
+      "$ref": "#/components/schemas/GkeCluster"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "multiTarget": {
+      "$ref": "#/components/schemas/MultiTarget"
+     },
+     "name": {
+      "type": "string"
+     },
+     "requireApproval": {
+      "type": "boolean"
+     },
+     "run": {
+      "$ref": "#/components/schemas/CloudRunLocation"
+     },
+     "targetId": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "uid": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TargetAttribute": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "TargetsPresentCondition": {
+    "additionalProperties": false,
+    "properties": {
+     "missingTargets": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "status": {
+      "type": "boolean"
+     },
+     "updateTime": {
+      "format": "google-datetime",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TargetsTypeCondition": {
+    "additionalProperties": false,
+    "properties": {
+     "errorDetails": {
+      "type": "string"
+     },
+     "status": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "Task": {
+    "additionalProperties": false,
+    "properties": {
+     "container": {
+      "$ref": "#/components/schemas/ContainerTask"
+     }
+    },
+    "type": "object"
+   },
+   "TimeOfDay": {
+    "additionalProperties": false,
+    "properties": {
+     "hours": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minutes": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "nanos": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "seconds": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "TimeWindows": {
+    "additionalProperties": false,
+    "properties": {
+     "oneTimeWindows": {
+      "items": {
+       "$ref": "#/components/schemas/OneTimeWindow"
+      },
+      "type": "array"
+     },
+     "timeZone": {
+      "type": "string"
+     },
+     "weeklyWindows": {
+      "items": {
+       "$ref": "#/components/schemas/WeeklyWindow"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Verify": {
+    "additionalProperties": false,
+    "properties": {
+     "tasks": {
+      "items": {
+       "$ref": "#/components/schemas/Task"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "WeeklyWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "daysOfWeek": {
+      "items": {
+       "enum": [
+        "DAY_OF_WEEK_UNSPECIFIED",
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+        "SUNDAY"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "endTime": {
+      "$ref": "#/components/schemas/TimeOfDay"
+     },
+     "startTime": {
+      "$ref": "#/components/schemas/TimeOfDay"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Cloud Deploy API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Delivery pipelines, targets, custom target types and deploy policies are configuration metadata: no release, rollout, render, deploy job, verification or automation runs, and no GKE, Cloud Run, Anthos or custom target is contacted. Pipeline conditions are not computed, and pipeline, target and policy references are stored as given. allowMissing is refused. Long-running operations complete synchronously and remain readable through operations.get/list.",
+  "title": "Cloud Deploy (simulator catalog)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/projects/{projectsId}/locations/{locationsId}/customTargetTypes": {
+   "get": {
+    "operationId": "clouddeploy.projects.locations.customTargetTypes.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListCustomTargetTypesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.customTargetTypes.list",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "post": {
+    "operationId": "clouddeploy.projects.locations.customTargetTypes.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "customTargetTypeId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CustomTargetType"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.customTargetTypes.create",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/customTargetTypes/{customTargetTypesId}": {
+   "delete": {
+    "operationId": "clouddeploy.projects.locations.customTargetTypes.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "customTargetTypesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.customTargetTypes.delete",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "get": {
+    "operationId": "clouddeploy.projects.locations.customTargetTypes.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "customTargetTypesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CustomTargetType"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.customTargetTypes.get",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "patch": {
+    "operationId": "clouddeploy.projects.locations.customTargetTypes.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "customTargetTypesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CustomTargetType"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.customTargetTypes.patch",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/deliveryPipelines": {
+   "get": {
+    "operationId": "clouddeploy.projects.locations.deliveryPipelines.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListDeliveryPipelinesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.deliveryPipelines.list",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "post": {
+    "operationId": "clouddeploy.projects.locations.deliveryPipelines.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "deliveryPipelineId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DeliveryPipeline"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.deliveryPipelines.create",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/deliveryPipelines/{deliveryPipelinesId}": {
+   "delete": {
+    "operationId": "clouddeploy.projects.locations.deliveryPipelines.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "deliveryPipelinesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "force",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.deliveryPipelines.delete",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "get": {
+    "operationId": "clouddeploy.projects.locations.deliveryPipelines.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "deliveryPipelinesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeliveryPipeline"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.deliveryPipelines.get",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "patch": {
+    "operationId": "clouddeploy.projects.locations.deliveryPipelines.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "deliveryPipelinesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DeliveryPipeline"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.deliveryPipelines.patch",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/deployPolicies": {
+   "get": {
+    "operationId": "clouddeploy.projects.locations.deployPolicies.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListDeployPoliciesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.deployPolicies.list",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "post": {
+    "operationId": "clouddeploy.projects.locations.deployPolicies.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "deployPolicyId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DeployPolicy"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.deployPolicies.create",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/deployPolicies/{deployPoliciesId}": {
+   "delete": {
+    "operationId": "clouddeploy.projects.locations.deployPolicies.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "deployPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.deployPolicies.delete",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "get": {
+    "operationId": "clouddeploy.projects.locations.deployPolicies.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "deployPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeployPolicy"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.deployPolicies.get",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "patch": {
+    "operationId": "clouddeploy.projects.locations.deployPolicies.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "deployPoliciesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DeployPolicy"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.deployPolicies.patch",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations": {
+   "get": {
+    "operationId": "clouddeploy.projects.locations.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.list",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "clouddeploy.projects.locations.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.operations.get",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/targets": {
+   "get": {
+    "operationId": "clouddeploy.projects.locations.targets.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "orderBy",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTargetsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.targets.list",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "post": {
+    "operationId": "clouddeploy.projects.locations.targets.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "targetId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Target"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.targets.create",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   }
+  },
+  "/v1/projects/{projectsId}/locations/{locationsId}/targets/{targetsId}": {
+   "delete": {
+    "operationId": "clouddeploy.projects.locations.targets.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "targetsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "etag",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.targets.delete",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "get": {
+    "operationId": "clouddeploy.projects.locations.targets.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "targetsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Target"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.targets.get",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   },
+   "patch": {
+    "operationId": "clouddeploy.projects.locations.targets.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "projectsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "targetsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "allowMissing",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "requestId",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "validateOnly",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Target"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS or ABORTED."
+     }
+    },
+    "summary": "projects.locations.targets.patch",
+    "tags": [
+     "Cloud Deploy"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/clouddeploy"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Cloud Deploy API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Delivery pipelines, targets, custom target types and deploy policies are configuration metadata: no release, rollout, render, deploy job, verification or automation runs, and no GKE, Cloud Run, Anthos or custom target is contacted. Pipeline conditions are not computed, and pipeline, target and policy references are stored as given. allowMissing is refused. Long-running operations complete synchronously and remain readable through operations.get/list.",
+   "name": "Cloud Deploy"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/clouddeploy.v1.json",
+  "sha256": "22c61768320d882c3bd3105d216032800dc6cfda9d8bad511a15f4d0a1a5eb75",
+  "license": "Apache-2.0",
+  "revision": "20260722"
+ }
+}

@@ -1,0 +1,30 @@
+{
+ "client": "bedrock-agentcore-control",
+ "steps": [
+  {"op": "create_workload_identity", "args": {"name": "fixture-agent", "allowedResourceOauth2ReturnUrls": ["https://example.com/callback"], "tags": {"team": "a"}}, "save": {"identity": "workloadIdentityArn"}, "expect": {"workloadIdentityArn": "arn:aws:bedrock-agentcore:us-east-1:000000000000:workload-identity-directory/default/workload-identity/fixture-agent"}},
+  {"op": "get_workload_identity", "args": {"name": "fixture-agent"}, "expect": {"allowedResourceOauth2ReturnUrls[0]": "https://example.com/callback"}},
+  {"op": "list_workload_identities", "args": {}, "expect": {"workloadIdentities#count": 1, "workloadIdentities[0].name": "fixture-agent"}},
+  {"op": "update_workload_identity", "args": {"name": "fixture-agent", "allowedResourceOauth2ReturnUrls": ["https://example.com/a", "https://example.com/b"]}, "expect": {"allowedResourceOauth2ReturnUrls#count": 2}},
+  {"op": "get_token_vault", "args": {}, "expect": {"tokenVaultId": "default", "kmsConfiguration.keyType": "ServiceManagedKey"}},
+  {"op": "set_token_vault_cmk", "args": {"kmsConfiguration": {"keyType": "CustomerManagedKey", "kmsKeyArn": "arn:aws:kms:us-east-1:000000000000:key/00000000-0000-0000-0000-000000000000"}}, "expect": {"tokenVaultId": "default", "kmsConfiguration.keyType": "CustomerManagedKey"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${identity}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${identity}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${identity}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "set_token_vault_cmk", "args": {"kmsConfiguration": {"keyType": "CustomerManagedKey"}}, "error": "ValidationException", "status": 400},
+  {"op": "list_memories", "args": {}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_workload_identity", "args": {"name": "missing-agent"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_workload_identities", "args": {}, "expect": {"workloadIdentities#count": 0}},
+  {"op": "get_token_vault", "args": {}, "expect": {"kmsConfiguration.keyType": "ServiceManagedKey"}}
+ ],
+ "after_restart": [
+  {"op": "get_workload_identity", "args": {"name": "fixture-agent"}, "expect": {"allowedResourceOauth2ReturnUrls[1]": "https://example.com/b"}},
+  {"op": "get_token_vault", "args": {"tokenVaultId": "default"}, "expect": {"kmsConfiguration.keyType": "CustomerManagedKey"}}
+ ],
+ "cleanup": [
+  {"op": "delete_workload_identity", "args": {"name": "fixture-agent"}},
+  {"op": "set_token_vault_cmk", "args": {"kmsConfiguration": {"keyType": "ServiceManagedKey"}}},
+  {"op": "list_workload_identities", "args": {}, "expect": {"workloadIdentities#count": 0}}
+ ]
+}
