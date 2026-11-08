@@ -1,5 +1,16 @@
 # Development roster
 
+## WAF console acceptance synchronization, 2026-11-08
+
+Claimed by the WAF console acceptance owner on base `92b39a9`, dedicated branch
+`fix/waf-console-save-evidence`. Scope: `test/e2e/wafv2_console.py` and focused
+WAF lifecycle regression coverage; no runtime, generated bundle, workflow or
+model changes. The first rule save currently reads SDK state immediately after
+an asynchronous browser click. Verify the exact UpdateWebACL acknowledgement and
+refreshed UI before inspecting native state, retaining all semantic assertions.
+Formal and browser resources remain owned by integration; full gates and actual
+browser evidence are pending a coordinated handoff.
+
 ## WAF PR #50 integration, 2026-11-08
 
 Issue #38/#42: the original `feat/waf-integration-20261104` branch is being

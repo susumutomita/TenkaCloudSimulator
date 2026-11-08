@@ -36,7 +36,16 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  def get():return waf.get_web_acl(Name='dummy-console-waf',Id=identifier,Scope='REGIONAL')
  # Exact original statement semantics. boto3 uses bytes while native wire JSON uses base64.
  statement={'AndStatement':{'Statements':[{'ByteMatchStatement':{'SearchString':'L3dwLWpzb24vYmF0Y2gvdjE=','FieldToMatch':{'UriPath':{}},'PositionalConstraint':'ENDS_WITH','TextTransformations':[{'Priority':0,'Type':'NONE'}]}},{'SqliMatchStatement':{'FieldToMatch':{'Body':{'OversizeHandling':'CONTINUE'}},'TextTransformations':[{'Priority':0,'Type':'URL_DECODE'}]}}]}}
- page.get_by_role('button',name='Add rule',exact=True).click();page.get_by_label('Rule name',exact=True).fill('batch-sqli');page.get_by_label('Statement JSON',exact=True).fill(json.dumps(statement));page.get_by_role('button',name='Save',exact=True).click()
+ page.get_by_role('button',name='Add rule',exact=True).click();page.get_by_label('Rule name',exact=True).fill('batch-sqli');page.get_by_label('Statement JSON',exact=True).fill(json.dumps(statement))
+ # A click returns before the async React handler commits the native write.
+ # Observe this operation's acknowledgement, then its refreshed rule table.
+ with page.expect_response(lambda response: response.url==endpoint+'/' and response.request.headers.get('x-amz-target')=='AWSWAF_20190729.UpdateWebACL') as update_response:
+  page.get_by_role('button',name='Save',exact=True).click()
+ assert update_response.value.status==200,update_response.value.text()
+ assert update_response.value.json()['NextLockToken']
+ expect(page.get_by_role('heading',name='dummy-console-waf',exact=True)).to_be_visible()
+ expect(page.get_by_text('Rule saved.',exact=True)).to_be_visible()
+ expect(page.get_by_role('radio',name='Select batch-sqli',exact=True)).to_be_visible()
  original=get()['WebACL'];rule=original['Rules'][0];assert rule['Action']=={'Count':{}} and rule['Statement']['AndStatement']['Statements'][0]['ByteMatchStatement']['SearchString']==b'/wp-json/batch/v1'
  page.get_by_role('radio',name='Select batch-sqli',exact=True).check();page.get_by_role('button',name='Edit rule',exact=True).click();choose(page,'Action','Block')
  # A second SDK session changes the same object while the browser holds its old token.
@@ -44,7 +53,15 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  page.get_by_role('button',name='Save',exact=True).click();expect(page.get_by_text('Web ACL changed in another session',exact=True)).to_be_visible();assert get()['WebACL']['Rules'][0]['Action']=={'Count':{}}
  page.get_by_role('button',name='Reload latest web ACL',exact=True).click();page.get_by_role('radio',name='Select batch-sqli',exact=True).check();page.get_by_role('button',name='Edit rule',exact=True).click();choose(page,'Action','Block')
  # Keyboard activates the actual save button; no evaluate() state mutation.
- page.get_by_role('button',name='Save',exact=True).focus();page.keyboard.press('Enter');expect(page.get_by_text('Rule saved.',exact=True)).to_be_visible()
+ page.get_by_role('button',name='Save',exact=True).focus()
+ # The previous success notice can still be visible in the edit form. It is
+ # insufficient evidence for this distinct write, including keyboard activation.
+ with page.expect_response(lambda response: response.url==endpoint+'/' and response.request.headers.get('x-amz-target')=='AWSWAF_20190729.UpdateWebACL') as update_response:
+  page.keyboard.press('Enter')
+ assert update_response.value.status==200,update_response.value.text()
+ assert update_response.value.json()['NextLockToken']
+ expect(page.get_by_role('heading',name='dummy-console-waf',exact=True)).to_be_visible()
+ expect(page.get_by_text('Rule saved.',exact=True)).to_be_visible()
  saved=get()['WebACL'];assert saved['Rules'][0]['Action']=={'Block':{}};assert saved['Rules'][0]['Statement']==rule['Statement'];assert saved['VisibilityConfig']==original['VisibilityConfig'];assert saved['Description']=='Changed in another session'
  assert_reflow(page);page.screenshot(path=str(REPORTS/'wafv2-rules-desktop.png'),full_page=True);page.set_viewport_size({'width':390,'height':844});assert_reflow(page);page.screenshot(path=str(REPORTS/'wafv2-rules-mobile.png'),full_page=True);page.set_viewport_size({'width':1440,'height':1000})
  axe=os.environ.get('AXE_SCRIPT_PATH')
