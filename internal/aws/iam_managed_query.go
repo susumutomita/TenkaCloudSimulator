@@ -72,7 +72,7 @@ func iamManagedQueryDecodeMarker(raw string, expected iamManagedQueryMarker) (ia
 		if !iamManagedQueryCursorVersion.MatchString(marker.After) {
 			return expected, invalid
 		}
-	} else if !iamInlineName.MatchString(marker.After) || marker.After != strings.ToLower(marker.After) {
+	} else if (!iamInlineName.MatchString(marker.After) && !(expected.Action == "ListAttachedRolePolicies" && marker.After == strings.ToLower(iamSSMCoreKey))) || marker.After != strings.ToLower(marker.After) {
 		return expected, invalid
 	}
 	return marker, nil
@@ -82,7 +82,7 @@ func iamManagedQueryEncodeMarker(marker iamManagedQueryMarker) string {
 	return base64.RawURLEncoding.EncodeToString(data)
 }
 func iamManagedQueryARN(raw string) bool {
-	return strings.HasPrefix(raw, iamManagedQueryPolicyPrefix) && iamInlineName.MatchString(strings.TrimPrefix(raw, iamManagedQueryPolicyPrefix))
+	return raw == iamSSMCoreARN || strings.HasPrefix(raw, iamManagedQueryPolicyPrefix) && iamInlineName.MatchString(strings.TrimPrefix(raw, iamManagedQueryPolicyPrefix))
 }
 func iamManagedQueryVersionLess(a, b string) bool {
 	a = strings.TrimPrefix(a, "v")
@@ -327,6 +327,9 @@ func (g *Gateway) serveIAMManaged(w http.ResponseWriter, r *http.Request, action
 		if truncated {
 			policies = policies[:max]
 			marker.After = strings.ToLower(policies[len(policies)-1].PolicyName)
+			if policies[len(policies)-1].PolicyArn == iamSSMCoreARN {
+				marker.After = strings.ToLower(iamSSMCoreKey)
+			}
 			next = iamManagedQueryEncodeMarker(marker)
 		}
 		iamResponse(w, action, struct {

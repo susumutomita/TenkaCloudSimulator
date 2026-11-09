@@ -1130,9 +1130,38 @@ BASE_INVARIANTS['IAMInstanceProfiles'] = {'AttachmentAuthority', 'SingleRole', '
 REQUIRED_MUTANTS['IAMInstanceProfiles'] = {'IgnorePassRole', 'RemovePeerMembership', 'DeletePopulatedProfile', 'BindWrongProfileGeneration', 'ReuseProfileIdentity', 'IgnoreProfileGeneration', 'DeleteAttachedRole', 'IgnoreRoleGeneration', 'AllowMultipleRoles', 'BindWrongRoleGeneration', 'IgnoreActionAuthorization', 'CommitStorageFailure'}
 REQUIRED_SOURCE_SCOPES['IAMInstanceProfiles'] = {'internal/aws/iam_query.go', 'internal/aws/iam_roles.go', 'internal/server/server.go', 'internal/aws/iam_instance_profiles_query.go', 'internal/aws/iam_instance_profiles.go'}
 
+# Bounded guest-command observation/ownership policy; no runtime refinement claim.
+BASE_MODELS.add('GuestCommandLifecycle')
+BASE_INVARIANTS['GuestCommandLifecycle'] = {'TerminalPublicationEvidence', 'TypeOK', 'AbandonDoesNotStop', 'RejectedCannotRun', 'StaleAbandonFrame', 'StartingAbortDefersCleanup', 'PollBound', 'UnsentCloses', 'CorrelationGuard', 'ExitEvidence', 'QuarantineSticky', 'NoClosedAdmission', 'TerminalObservationsSticky', 'CleanupOnlyPossible', 'StartEvidence', 'ExclusiveAdmission', 'CleanupRequired'}
+REQUIRED_MUTANTS['GuestCommandLifecycle'] = {'PublishPendingAsExit', 'PretendAbandonStopsGuest', 'IgnorePollCorrelation', 'ResetClosedOnResolution', 'DiscardExitEvidence', 'IgnoreStartCorrelation', 'InventCleanupForRejected', 'CleanupBeforeClassification', 'IgnorePollBudget', 'ReuseUnsentTransport', 'RetargetStaleAbandon', 'IgnoreStartingAbort', 'OmitCleanup', 'RejectMayRun', 'AllowConcurrentStart', 'AcceptLatePoll', 'AdmitAfterClose'}
+REQUIRED_SOURCE_SCOPES['GuestCommandLifecycle'] = {'internal/workload/qga/protocol.go', 'internal/workload/guestcommand/driver.go', 'internal/workload/qga/client.go'}
+
+
+BASE_MODELS.add('CFNNativeIAMTransaction')
+BASE_INVARIANTS['CFNNativeIAMTransaction'] = {'FailureAtomic', 'SingleRole', 'PendingFrame', 'PeerFrame', 'FinalCleanupACK', 'TypeOK', 'ZeroPolicyImplicitDeny', 'RequestedStateACK', 'AdmissionSound'}
+REQUIRED_MUTANTS['CFNNativeIAMTransaction'] = {'BypassSupported', 'PublishPendingWrite', 'CommitPeerMutation', 'BypassRoleGeneration', 'BypassActionAllowed', 'SkipCapturedIdentity', 'BypassCanonicalOwner', 'SkipRequestedMetadata', 'SkipRequestedPolicies', 'SkipFinalPhysicalACK', 'TrustObservedFingerprint', 'BypassPassAllowed', 'BypassNoExternalDependency', 'CommitRefusal', 'SkipRequestedMembership', 'BypassProfileGeneration', 'BypassNative'}
+REQUIRED_SOURCE_SCOPES['CFNNativeIAMTransaction'] = {'internal/aws/cloudformation_conditions_link.go', 'internal/aws/s3_cloudformation.go', 'internal/aws/iam_instance_profiles.go', 'internal/aws/iam_roles.go', 'internal/aws/cloudformation.go', 'internal/aws/iam_cloudformation.go'}
+
+BASE_MODELS.add('IAMBuiltinPinTransaction')
+BASE_INVARIANTS['IAMBuiltinPinTransaction'] = {'NormalRequestCompletes', 'AdmissionSound', 'RetiredRoleFinalACK', 'PinPreserved', 'CustomerFrame', 'PendingFrame', 'AggregateExact', 'RequestedStateACK', 'FailureAtomic', 'TypeOK', 'RequestedAttachmentACK'}
+REQUIRED_MUTANTS['IAMBuiltinPinTransaction'] = {'AdoptObservedAttachmentAndAggregate', 'TrustObservedPin', 'SkipFinalRecords', 'BypassInitialPinValid', 'ChangeSameNameCustomer', 'PinBeforeEventsOnly', 'SkipPinValidation', 'BypassReadOnly', 'CommitRefusal', 'RejectNormalDetach', 'PublishPendingWrite', 'PinOnlyWhileRoleLive', 'SkipRequestedEdges', 'BypassFreshRole', 'SkipRoleFrame', 'SkipExactAggregate', 'SkipRetiredCFNRequestedPin', 'PinOnlyWhileAttached', 'BypassAuthorized', 'ForgetNativeDetachedTarget', 'TrustObservedEdges'}
+REQUIRED_SOURCE_SCOPES['IAMBuiltinPinTransaction'] = {'internal/aws/iam_cloudformation.go', 'internal/aws/s3_cloudformation.go', 'internal/aws/cloudformation.go', 'internal/aws/iam_managed.go', 'internal/aws/iam_builtin.go', 'internal/aws/iam_managed_query.go', 'internal/aws/iam_roles.go'}
+
+
+BASE_MODELS.add('DurableGuestLease')
+BASE_INVARIANTS['DurableGuestLease'] = {'ObservationEvidence', 'AuthoritativeObservation', 'ReadFence', 'ExternalOutsideTransaction', 'BackendDuplicateSuppression', 'BackendImmutableMapping', 'CrashDurability', 'RetainedBudget', 'FailedACKRetainsPending', 'BackendMonotone', 'IntentBeforeDispatch', 'CASFence', 'PendingInvisible', 'NoReplacement', 'TombstoneRetained', 'NoRedispatch', 'ObservationEnvelopeExact', 'BackendPayloadIdentity', 'CleanupSurvivesProfile', 'TypeOK', 'NoFalseStopped', 'UnknownNeverRetires', 'RetainedLeaseUnique', 'AdmissionCurrentRows'}
+REQUIRED_MUTANTS['DurableGuestLease'] = {'SkipReadFence', 'IgnorePrimaryQuota', 'SkipObservedAction', 'EchoRequestedEnvelopeState', 'SkipObservedLease', 'SkipReadLease', 'AcceptConflictingPayload', 'SkipObservedLeaseBinding', 'RequireRecreatedProfileForCleanup', 'AliasBackendMapping', 'OmitDurableIntentWrite', 'IgnoreRetainedQuota', 'SkipReadOp', 'DispatchUncommitted', 'RepeatBackendEffect', 'ReplaceLiveRecord', 'ReplaceRetiredRecord', 'ReplayAfterReopen', 'LoseDBOnReopen', 'SkipObservedOp', 'SkipObservedState', 'ResumeStaleBackendEffect', 'SkipNonemptyObservedLease', 'SkipObservedFence', 'StaleAdmissionSnapshot', 'AliasRetiredLease', 'SkipReadOwner', 'EchoRequestAsObservation', 'ObserveInsideTransaction', 'PublishRollback', 'IgnoreCAS', 'AcknowledgeFailedWrite'}
+REQUIRED_SOURCE_SCOPES['DurableGuestLease'] = {'internal/aws/ec2_guest_lease.go', 'internal/workload/guestlease/lease.go'}
+
+
+BASE_MODELS.add('SSMDurableCommands')
+BASE_INVARIANTS['SSMDurableCommands'] = {'AllTargets', 'BackendDeduplication', 'BackendLeaseFence', 'CASFence', 'CompleteEvidence', 'CrashDurability', 'ExactObservation', 'ImmutableIdentity', 'IntentBeforeDispatch', 'NoRedispatch', 'RestartNoDispatch', 'ScopedPagination', 'SnapshotImmutable', 'TerminalImmutable', 'TypeOK'}
+REQUIRED_MUTANTS['SSMDurableCommands'] = {'AnyTargetSuccess', 'BackendDuplicateEffect', 'BackendIgnoresLease', 'CrashLosesIntent', 'DispatchBeforeCommit', 'LivePagination', 'MutableAuthority', 'ObservationAuthority', 'ObservationLease', 'ObservationRequest', 'ObservationStarted', 'ObservationToken', 'PageExpiry', 'PageFilter', 'PageScope', 'PageSize', 'RepeatDispatch', 'RestartDispatch', 'StaleCAS', 'SuccessCleanup', 'SuccessExit', 'SuccessTruncated', 'TerminalRewrite'}
+REQUIRED_SOURCE_SCOPES['SSMDurableCommands'] = {'internal/aws/ssm_commands.go', 'internal/aws/ssm_commands_list.go', 'internal/workload/guestcommand/durable.go'}
 
 class GateError(ValueError):
     pass
+
 
 
 def digest(data):

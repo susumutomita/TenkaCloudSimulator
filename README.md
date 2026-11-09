@@ -81,7 +81,9 @@ console, CloudFormation adapter or Challenge integration.
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
-  [SSM value parameters](docs/cloudformation-ssm-parameters.md).
+  [SSM value parameters](docs/cloudformation-ssm-parameters.md),
+  [native IAM profiles](docs/cloudformation-iam-profiles.md),
+  [pinned SSM policy](docs/iam-ssm-managed-policy.md).
 - **Other clouds:** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).

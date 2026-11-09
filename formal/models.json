@@ -7956,6 +7956,1398 @@
      "expect_invariant": "DisplayHasResponse"
     }
    ]
+  },
+  {
+   "id": "GuestCommandLifecycle",
+   "model": "formal/GuestCommandLifecycle.tla",
+   "config": "formal/GuestCommandLifecycle.cfg",
+   "bounds": "Two sequential job identities, one active command, two admitted polls per job; four start classifications, four poll classifications, Boolean reply correlation and nondeterministic abandonment before/during/after transport calls.",
+   "properties": [
+    "TypeOK",
+    "ExclusiveAdmission",
+    "ExitEvidence",
+    "RejectedCannotRun",
+    "CleanupRequired",
+    "CleanupOnlyPossible",
+    "QuarantineSticky",
+    "NoClosedAdmission",
+    "PollBound",
+    "StaleAbandonFrame",
+    "TerminalObservationsSticky",
+    "CorrelationGuard",
+    "StartingAbortDefersCleanup",
+    "AbandonDoesNotStop",
+    "StartEvidence",
+    "UnsentCloses",
+    "TerminalPublicationEvidence"
+   ],
+   "limits": "Finite observation/ownership safety abstraction, not Go refinement, byte-parser verification, cryptographic nonce strength, wall-clock scheduling, real guest containment, crash persistence, PTY, SSM, Battle availability, liveness or unbounded histories. Authorized exclusive transport and opaque unique job identities are assumed.",
+   "source_scope": [
+    "internal/workload/qga/client.go",
+    "internal/workload/qga/protocol.go",
+    "internal/workload/guestcommand/driver.go"
+   ],
+   "mutants": [
+    {
+     "id": "AllowConcurrentStart",
+     "edits": [
+      {
+       "old": "~d.closed /\\ d.active = 0",
+       "new": "~d.closed /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExclusiveAdmission"
+    },
+    {
+     "id": "AdmitAfterClose",
+     "edits": [
+      {
+       "old": "~d.closed /\\ d.active = 0",
+       "new": "TRUE /\\ d.active = 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoClosedAdmission"
+    },
+    {
+     "id": "DiscardExitEvidence",
+     "edits": [
+      {
+       "old": "!.jobs[k].proof = TRUE",
+       "new": "!.jobs[k].proof = FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExitEvidence"
+    },
+    {
+     "id": "RejectMayRun",
+     "edits": [
+      {
+       "old": "!.jobs[k].mayRun = possible",
+       "new": "!.jobs[k].mayRun = TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RejectedCannotRun"
+    },
+    {
+     "id": "OmitCleanup",
+     "edits": [
+      {
+       "old": "!.jobs[k].cleanup = uncertain",
+       "new": "!.jobs[k].cleanup = FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CleanupRequired"
+    },
+    {
+     "id": "InventCleanupForRejected",
+     "edits": [
+      {
+       "old": "!.jobs[k].cleanup = uncertain",
+       "new": "!.jobs[k].cleanup = TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CleanupOnlyPossible"
+    },
+    {
+     "id": "ResetClosedOnResolution",
+     "edits": [
+      {
+       "old": "!.closed = @ \\/ uncertain \\/ (outcome = \"unsent\"),",
+       "new": "!.closed = uncertain \\/ (outcome = \"unsent\"),",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "QuarantineSticky"
+    },
+    {
+     "id": "IgnorePollBudget",
+     "edits": [
+      {
+       "old": "d.jobs[k].polls < MaxPolls",
+       "new": "d.jobs[k].polls <= MaxPolls",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PollBound"
+    },
+    {
+     "id": "RetargetStaleAbandon",
+     "edits": [
+      {
+       "old": "IF d.active = k\n",
+       "new": "IF d.active # 0\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StaleAbandonFrame"
+    },
+    {
+     "id": "AcceptLatePoll",
+     "edits": [
+      {
+       "old": "IF d.jobs[k].phase # \"accepted\" THEN cleared",
+       "new": "IF FALSE THEN cleared",
+       "count": 1
+      },
+      {
+       "old": "!.jobs[k].phase = outcome, !.jobs[k].proof = TRUE,",
+       "new": "!.jobs[k].phase = outcome, !.jobs[k].proof = TRUE, !.jobs[k].cleanup = FALSE,",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TerminalObservationsSticky"
+    },
+    {
+     "id": "IgnoreStartCorrelation",
+     "edits": [
+      {
+       "old": "outcome = \"unknown\" \\/ ~correlated \\/ old.abort",
+       "new": "outcome = \"unknown\" \\/ old.abort",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CorrelationGuard"
+    },
+    {
+     "id": "CleanupBeforeClassification",
+     "edits": [
+      {
+       "old": "!.jobs[d.active].abort = TRUE",
+       "new": "!.jobs[d.active].abort = TRUE, !.jobs[d.active].cleanup = TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CleanupOnlyPossible"
+    },
+    {
+     "id": "IgnoreStartingAbort",
+     "edits": [
+      {
+       "old": "outcome = \"unknown\" \\/ ~correlated \\/ old.abort",
+       "new": "outcome = \"unknown\" \\/ ~correlated",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StartEvidence"
+    },
+    {
+     "id": "ReuseUnsentTransport",
+     "edits": [
+      {
+       "old": "@ \\/ uncertain \\/ (outcome = \"unsent\")",
+       "new": "@ \\/ uncertain",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UnsentCloses"
+    },
+    {
+     "id": "PretendAbandonStopsGuest",
+     "edits": [
+      {
+       "old": "THEN Quarantined(d, d.active) ELSE d",
+       "new": "THEN [d EXCEPT !.closed = TRUE, !.active = 0, !.jobs[d.active].phase = \"exited\", !.jobs[d.active].mayRun = FALSE, !.jobs[d.active].proof = TRUE] ELSE d",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AbandonDoesNotStop"
+    },
+    {
+     "id": "IgnorePollCorrelation",
+     "edits": [
+      {
+       "old": "ELSE IF ~correlated \\/ outcome = \"error\" THEN",
+       "new": "ELSE IF outcome = \"error\" THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CorrelationGuard"
+    },
+    {
+     "id": "PublishPendingAsExit",
+     "expect_invariant": "TerminalPublicationEvidence",
+     "edits": [
+      {
+       "old": "              ELSE cleared\n",
+       "new": "              ELSE [cleared EXCEPT !.active = 0, !.jobs[k].phase = \"exited\", !.jobs[k].proof = TRUE, !.jobs[k].mayRun = FALSE]\n",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "CFNNativeIAMTransaction",
+   "model": "formal/CFNNativeIAMTransaction.tla",
+   "config": "formal/CFNNativeIAMTransaction.cfg",
+   "bounds": "One target role/profile pair, one peer frame; generations 1 and 2; zero or one requested Read policy plus one injected Allow policy; four selection modes; Create/Delete/ClearPolicy and sixteen single faults. One finite transaction per behavior.",
+   "properties": [
+    "TypeOK",
+    "AdmissionSound",
+    "ZeroPolicyImplicitDeny",
+    "SingleRole",
+    "FinalCleanupACK",
+    "PeerFrame",
+    "RequestedStateACK",
+    "FailureAtomic",
+    "PendingFrame"
+   ],
+   "limits": "Requested-state transaction specification, not a Go refinement proof. Abstract canonical names/trust/action admission, set-valued policy semantics, SQL transaction isolation and one fault at a time; no parser/ARN proof, arbitrary interleavings, crashes, EC2/SSM/Battle execution or full legacy CFN semantics. See docs/formal-cfn-native-iam-transaction.md.",
+   "source_scope": [
+    "internal/aws/iam_cloudformation.go",
+    "internal/aws/cloudformation.go",
+    "internal/aws/iam_roles.go",
+    "internal/aws/iam_instance_profiles.go",
+    "internal/aws/cloudformation_conditions_link.go",
+    "internal/aws/s3_cloudformation.go"
+   ],
+   "mutants": [
+    {
+     "id": "BypassNative",
+     "edits": [
+      {
+       "old": "Admission == /\\ Native",
+       "new": "Admission == /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "BypassActionAllowed",
+     "edits": [
+      {
+       "old": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ NoExternalDependency /\\ Supported",
+       "new": "Admission == /\\ Native /\\ TRUE /\\ PassAllowed /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ NoExternalDependency /\\ Supported",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "BypassPassAllowed",
+     "edits": [
+      {
+       "old": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ NoExternalDependency /\\ Supported",
+       "new": "Admission == /\\ Native /\\ ActionAllowed /\\ TRUE /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ NoExternalDependency /\\ Supported",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "BypassCanonicalOwner",
+     "edits": [
+      {
+       "old": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ NoExternalDependency /\\ Supported",
+       "new": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ TRUE\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ NoExternalDependency /\\ Supported",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "BypassRoleGeneration",
+     "edits": [
+      {
+       "old": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ NoExternalDependency /\\ Supported",
+       "new": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ CanonicalOwner\n             /\\ TRUE /\\ ProfileGeneration /\\ NoExternalDependency /\\ Supported",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "BypassProfileGeneration",
+     "edits": [
+      {
+       "old": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ NoExternalDependency /\\ Supported",
+       "new": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ TRUE /\\ NoExternalDependency /\\ Supported",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "BypassNoExternalDependency",
+     "edits": [
+      {
+       "old": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ NoExternalDependency /\\ Supported",
+       "new": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ TRUE /\\ Supported",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "BypassSupported",
+     "edits": [
+      {
+       "old": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ NoExternalDependency /\\ Supported",
+       "new": "Admission == /\\ Native /\\ ActionAllowed /\\ PassAllowed /\\ CanonicalOwner\n             /\\ RoleGeneration /\\ ProfileGeneration /\\ NoExternalDependency /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipRequestedPolicies",
+     "edits": [
+      {
+       "old": "Accept == /\\ RequestedPolicies /\\ RequestedMembership /\\ RequestedMetadata\n          /\\ CapturedIdentity /\\ FinalPhysicalACK",
+       "new": "Accept == /\\ TRUE /\\ RequestedMembership /\\ RequestedMetadata\n          /\\ CapturedIdentity /\\ FinalPhysicalACK",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ZeroPolicyImplicitDeny"
+    },
+    {
+     "id": "SkipRequestedMembership",
+     "edits": [
+      {
+       "old": "Accept == /\\ RequestedPolicies /\\ RequestedMembership /\\ RequestedMetadata\n          /\\ CapturedIdentity /\\ FinalPhysicalACK",
+       "new": "Accept == /\\ RequestedPolicies /\\ TRUE /\\ RequestedMetadata\n          /\\ CapturedIdentity /\\ FinalPhysicalACK",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SingleRole"
+    },
+    {
+     "id": "SkipRequestedMetadata",
+     "edits": [
+      {
+       "old": "Accept == /\\ RequestedPolicies /\\ RequestedMembership /\\ RequestedMetadata\n          /\\ CapturedIdentity /\\ FinalPhysicalACK",
+       "new": "Accept == /\\ RequestedPolicies /\\ RequestedMembership /\\ TRUE\n          /\\ CapturedIdentity /\\ FinalPhysicalACK",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RequestedStateACK"
+    },
+    {
+     "id": "SkipCapturedIdentity",
+     "edits": [
+      {
+       "old": "Accept == /\\ RequestedPolicies /\\ RequestedMembership /\\ RequestedMetadata\n          /\\ CapturedIdentity /\\ FinalPhysicalACK",
+       "new": "Accept == /\\ RequestedPolicies /\\ RequestedMembership /\\ RequestedMetadata\n          /\\ TRUE /\\ FinalPhysicalACK",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RequestedStateACK"
+    },
+    {
+     "id": "SkipFinalPhysicalACK",
+     "edits": [
+      {
+       "old": "Accept == /\\ RequestedPolicies /\\ RequestedMembership /\\ RequestedMetadata\n          /\\ CapturedIdentity /\\ FinalPhysicalACK",
+       "new": "Accept == /\\ RequestedPolicies /\\ RequestedMembership /\\ RequestedMetadata\n          /\\ CapturedIdentity /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FinalCleanupACK"
+    },
+    {
+     "id": "CommitPeerMutation",
+     "edits": [
+      {
+       "old": "/\\ data'=work /\\ outcome'=\"Success\"",
+       "new": "/\\ data'=[work EXCEPT !.peer=\"Changed\"] /\\ outcome'=\"Success\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PeerFrame"
+    },
+    {
+     "id": "TrustObservedFingerprint",
+     "edits": [
+      {
+       "old": "RequestedPolicies == work.inline=Wanted.inline /\\ work.aggregate=Wanted.aggregate /\\ work.managed=Wanted.managed",
+       "new": "RequestedPolicies == work.inline=fingerprint.inline /\\ work.aggregate=fingerprint.aggregate",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ZeroPolicyImplicitDeny"
+    },
+    {
+     "id": "CommitRefusal",
+     "edits": [
+      {
+       "old": "/\\ data'=Before /\\ outcome'=\"Refused\"",
+       "new": "/\\ data'=work /\\ outcome'=\"Refused\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureAtomic"
+    },
+    {
+     "id": "PublishPendingWrite",
+     "edits": [
+      {
+       "old": "Write == /\\ phase=\"Admitted\" /\\ work'=Wanted /\\ phase'=\"Written\"\n         /\\ UNCHANGED <<op,mode,requested,fault,admitted,data,fingerprint,outcome>>",
+       "new": "Write == /\\ phase=\"Admitted\" /\\ data'=Wanted /\\ work'=Wanted /\\ phase'=\"Written\"\n         /\\ UNCHANGED <<op,mode,requested,fault,admitted,fingerprint,outcome>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PendingFrame"
+    }
+   ]
+  },
+  {
+   "id": "IAMBuiltinPinTransaction",
+   "model": "formal/IAMBuiltinPinTransaction.tla",
+   "config": "formal/IAMBuiltinPinTransaction.cfg",
+   "bounds": "One fixed builtin pin (exact25 action names, only v2), one independent same-name customer-policy frame, one role and attachment generation; seven operations, requested attachment and inline-deny Booleans; 25 normal/single-fault choices; one transaction per behavior.",
+   "properties": [
+    "TypeOK",
+    "AdmissionSound",
+    "PinPreserved",
+    "RequestedAttachmentACK",
+    "AggregateExact",
+    "RetiredRoleFinalACK",
+    "CustomerFrame",
+    "RequestedStateACK",
+    "FailureAtomic",
+    "PendingFrame",
+    "NormalRequestCompletes"
+   ],
+   "limits": "Finite requested-state specification, not Go refinement. Exact serialized document/metadata are pin atoms; no SQL/parser proof, concurrent transactions, arbitrary trigger peer writes, customer-policy algorithm replacement, SSM handler/agent or Battle execution claim. See docs/formal-iam-builtin-pin-transaction.md.",
+   "source_scope": [
+    "internal/aws/iam_builtin.go",
+    "internal/aws/iam_managed.go",
+    "internal/aws/iam_managed_query.go",
+    "internal/aws/iam_roles.go",
+    "internal/aws/iam_cloudformation.go",
+    "internal/aws/cloudformation.go",
+    "internal/aws/s3_cloudformation.go"
+   ],
+   "mutants": [
+    {
+     "id": "BypassReadOnly",
+     "edits": [
+      {
+       "old": "Admission == /\\ ReadOnly /\\ Authorized /\\ FreshRole /\\ InitialPinValid",
+       "new": "Admission == /\\ TRUE /\\ Authorized /\\ FreshRole /\\ InitialPinValid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "BypassAuthorized",
+     "edits": [
+      {
+       "old": "Admission == /\\ ReadOnly /\\ Authorized /\\ FreshRole /\\ InitialPinValid",
+       "new": "Admission == /\\ ReadOnly /\\ TRUE /\\ FreshRole /\\ InitialPinValid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "BypassFreshRole",
+     "edits": [
+      {
+       "old": "Admission == /\\ ReadOnly /\\ Authorized /\\ FreshRole /\\ InitialPinValid",
+       "new": "Admission == /\\ ReadOnly /\\ Authorized /\\ TRUE /\\ InitialPinValid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "BypassInitialPinValid",
+     "edits": [
+      {
+       "old": "Admission == /\\ ReadOnly /\\ Authorized /\\ FreshRole /\\ InitialPinValid",
+       "new": "Admission == /\\ ReadOnly /\\ Authorized /\\ FreshRole /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipPinValidation",
+     "edits": [
+      {
+       "old": "FinalPin == ~NeedsPin \\/ (work.pin=Pin /\\ work.pin=Before.pin)",
+       "new": "FinalPin == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PinPreserved"
+    },
+    {
+     "id": "PinOnlyWhileAttached",
+     "edits": [
+      {
+       "old": "FinalPin == ~NeedsPin \\/ (work.pin=Pin /\\ work.pin=Before.pin)",
+       "new": "FinalPin == work.edge={} \\/ ~NeedsPin \\/ (work.pin=Pin /\\ work.pin=Before.pin)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PinPreserved"
+    },
+    {
+     "id": "PinOnlyWhileRoleLive",
+     "edits": [
+      {
+       "old": "FinalPin == ~NeedsPin \\/ (work.pin=Pin /\\ work.pin=Before.pin)",
+       "new": "FinalPin == ~work.role \\/ ~NeedsPin \\/ (work.pin=Pin /\\ work.pin=Before.pin)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PinPreserved"
+    },
+    {
+     "id": "TrustObservedPin",
+     "edits": [
+      {
+       "old": "FinalPin == ~NeedsPin \\/ (work.pin=Pin /\\ work.pin=Before.pin)",
+       "new": "FinalPin == ~NeedsPin \\/ work.pin=observed.pin",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PinPreserved"
+    },
+    {
+     "id": "PinBeforeEventsOnly",
+     "edits": [
+      {
+       "old": "FinalPin == ~NeedsPin \\/ (work.pin=Pin /\\ work.pin=Before.pin)",
+       "new": "FinalPin == ~NeedsPin \\/ (observed.pin=Pin /\\ observed.pin=Before.pin)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PinPreserved"
+    },
+    {
+     "id": "ForgetNativeDetachedTarget",
+     "edits": [
+      {
+       "old": "FinalPin == ~NeedsPin \\/ (work.pin=Pin /\\ work.pin=Before.pin)",
+       "new": "FinalPin == op=\"NativeDetach\" \\/ ~NeedsPin \\/ (work.pin=Pin /\\ work.pin=Before.pin)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PinPreserved"
+    },
+    {
+     "id": "SkipRetiredCFNRequestedPin",
+     "edits": [
+      {
+       "old": "FinalPin == ~NeedsPin \\/ (work.pin=Pin /\\ work.pin=Before.pin)",
+       "new": "FinalPin == op=\"CFNDelete\" \\/ ~NeedsPin \\/ (work.pin=Pin /\\ work.pin=Before.pin)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PinPreserved"
+    },
+    {
+     "id": "SkipRequestedEdges",
+     "edits": [
+      {
+       "old": "Accept == /\\ FinalPin /\\ RequestedEdges /\\ ExactAggregate /\\ RoleFrame /\\ FinalRecords",
+       "new": "Accept == /\\ FinalPin /\\ TRUE /\\ ExactAggregate /\\ RoleFrame /\\ FinalRecords",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RequestedAttachmentACK"
+    },
+    {
+     "id": "SkipExactAggregate",
+     "edits": [
+      {
+       "old": "Accept == /\\ FinalPin /\\ RequestedEdges /\\ ExactAggregate /\\ RoleFrame /\\ FinalRecords",
+       "new": "Accept == /\\ FinalPin /\\ RequestedEdges /\\ TRUE /\\ RoleFrame /\\ FinalRecords",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AggregateExact"
+    },
+    {
+     "id": "SkipRoleFrame",
+     "edits": [
+      {
+       "old": "Accept == /\\ FinalPin /\\ RequestedEdges /\\ ExactAggregate /\\ RoleFrame /\\ FinalRecords",
+       "new": "Accept == /\\ FinalPin /\\ RequestedEdges /\\ ExactAggregate /\\ TRUE /\\ FinalRecords",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RequestedStateACK"
+    },
+    {
+     "id": "SkipFinalRecords",
+     "edits": [
+      {
+       "old": "Accept == /\\ FinalPin /\\ RequestedEdges /\\ ExactAggregate /\\ RoleFrame /\\ FinalRecords",
+       "new": "Accept == /\\ FinalPin /\\ RequestedEdges /\\ ExactAggregate /\\ RoleFrame /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RetiredRoleFinalACK"
+    },
+    {
+     "id": "TrustObservedEdges",
+     "edits": [
+      {
+       "old": "RequestedEdges == work.edge=Wanted.edge /\\ work.edgeGen=Wanted.edgeGen",
+       "new": "RequestedEdges == work.edge=observed.edge /\\ work.edgeGen=observed.edgeGen",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RequestedAttachmentACK"
+    },
+    {
+     "id": "ChangeSameNameCustomer",
+     "edits": [
+      {
+       "old": "/\\ data'=work /\\ outcome'=\"Success\"",
+       "new": "/\\ data'=[work EXCEPT !.customer=(IF @=1 THEN 2 ELSE 1)] /\\ outcome'=\"Success\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CustomerFrame"
+    },
+    {
+     "id": "CommitRefusal",
+     "edits": [
+      {
+       "old": "/\\ data'=Before /\\ outcome'=\"Refused\"",
+       "new": "/\\ data'=work /\\ outcome'=\"Refused\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureAtomic"
+    },
+    {
+     "id": "PublishPendingWrite",
+     "edits": [
+      {
+       "old": "Write == /\\ phase=\"Admitted\" /\\ work'=Wanted /\\ phase'=\"Written\"\n         /\\ UNCHANGED <<op,requestedBuiltin,inlineDeny,fault,admitted,data,observed,outcome>>",
+       "new": "Write == /\\ phase=\"Admitted\" /\\ data'=Wanted /\\ work'=Wanted /\\ phase'=\"Written\"\n         /\\ UNCHANGED <<op,requestedBuiltin,inlineDeny,fault,admitted,observed,outcome>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PendingFrame"
+    },
+    {
+     "id": "RejectNormalDetach",
+     "edits": [
+      {
+       "old": "ReadOnly == op # \"MutateBuiltin\"",
+       "new": "ReadOnly == op # \"MutateBuiltin\" /\\ op # \"NativeDetach\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NormalRequestCompletes"
+    },
+    {
+     "id": "AdoptObservedAttachmentAndAggregate",
+     "edits": [
+      {
+       "old": "RequestedEdges == work.edge=Wanted.edge /\\ work.edgeGen=Wanted.edgeGen",
+       "new": "RequestedEdges == work.edge=observed.edge /\\ work.edgeGen=observed.edgeGen",
+       "count": 1
+      },
+      {
+       "old": "ExactAggregate == work.allow=WantedAllow /\\ work.deny=WantedDeny /\\ work.decision=Decision(WantedAllow,WantedDeny)",
+       "new": "ExactAggregate == work.allow=observed.allow /\\ work.deny=observed.deny /\\ work.decision=observed.decision",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RequestedAttachmentACK"
+    }
+   ]
+  },
+  {
+   "id": "DurableGuestLease",
+   "model": "formal/DurableGuestLease.tla",
+   "config": "formal/DurableGuestLease.cfg",
+   "bounds": "Three independent operation-boundary seeds (acquire/contain/release), three possible record keys and quota two abstracting 1024, one retained peer tombstone, one competing admission snapshot/commit, two delayed backend continuations, two concurrent reconciliation snapshots with one summarized subsequent Advance, one crash/reopen, two profile incarnations, nineteen single-fault input/envelope classes.",
+   "properties": [
+    "TypeOK",
+    "IntentBeforeDispatch",
+    "ExternalOutsideTransaction",
+    "NoRedispatch",
+    "PendingInvisible",
+    "CrashDurability",
+    "ReadFence",
+    "CASFence",
+    "FailedACKRetainsPending",
+    "RetainedLeaseUnique",
+    "ObservationEnvelopeExact",
+    "UnknownNeverRetires",
+    "ObservationEvidence",
+    "NoFalseStopped",
+    "BackendDuplicateSuppression",
+    "BackendMonotone",
+    "BackendImmutableMapping",
+    "BackendPayloadIdentity",
+    "TombstoneRetained",
+    "CleanupSurvivesProfile",
+    "AuthoritativeObservation",
+    "RetainedBudget",
+    "NoReplacement",
+    "AdmissionCurrentRows"
+   ],
+   "limits": "Conditional finite contract model, not Go/SQLite/QEMU refinement, physical containment or backend durability evidence. No fairness or liveness theorem, actual randomness, arbitrary concurrency, real backend or public EC2/SSM capability. See docs/formal-durable-guest-lease.md.",
+   "source_scope": [
+    "internal/aws/ec2_guest_lease.go",
+    "internal/workload/guestlease/lease.go"
+   ],
+   "mutants": [
+    {
+     "id": "DispatchUncommitted",
+     "edits": [
+      {
+       "old": "s.durable /\\ ~s.tx /\\ ~s.crashed /\\ s.dispatches=0",
+       "new": "~s.crashed /\\ s.dispatches=0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IntentBeforeDispatch"
+    },
+    {
+     "id": "OmitDurableIntentWrite",
+     "edits": [
+      {
+       "old": "!.db=IF admitted THEN s.work ELSE @",
+       "new": "!.db=@",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IntentBeforeDispatch"
+    },
+    {
+     "id": "ObserveInsideTransaction",
+     "edits": [
+      {
+       "old": "s.committed /\\ ~s.crashed /\\ ~s.tx /\\ ~s.observing",
+       "new": "(s.committed \\/ s.tx) /\\ ~s.crashed /\\ ~s.observing",
+       "count": 1
+      },
+      {
+       "old": "s.expected=s.db",
+       "new": "(s.expected=s.db \\/ s.tx)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExternalOutsideTransaction"
+    },
+    {
+     "id": "ReplayAfterReopen",
+     "edits": [
+      {
+       "old": "s.dispatches=0",
+       "new": "(s.dispatches=0 \\/ (s.reopened /\\ s.dispatches=1))",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoRedispatch"
+    },
+    {
+     "id": "PublishRollback",
+     "edits": [
+      {
+       "old": "s EXCEPT !.tx=FALSE] /\\ Save(\"rollback\")",
+       "new": "s EXCEPT !.tx=FALSE, !.db=s.work] /\\ Save(\"rollback\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PendingInvisible"
+    },
+    {
+     "id": "LoseDBOnReopen",
+     "edits": [
+      {
+       "old": "!.crashed=FALSE, !.reopened=TRUE",
+       "new": "!.crashed=FALSE, !.reopened=TRUE, !.db=Prior(s.op)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CrashDurability"
+    },
+    {
+     "id": "SkipReadOwner",
+     "edits": [
+      {
+       "old": "s.expected.owner=s.db.owner",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReadFence"
+    },
+    {
+     "id": "SkipReadFence",
+     "edits": [
+      {
+       "old": "s.expected.fence=s.db.fence",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReadFence"
+    },
+    {
+     "id": "SkipReadOp",
+     "edits": [
+      {
+       "old": "s.expected.op=s.db.op",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReadFence"
+    },
+    {
+     "id": "SkipReadLease",
+     "edits": [
+      {
+       "old": "s.expected.lease=s.db.lease",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReadFence"
+    },
+    {
+     "id": "IgnoreCAS",
+     "edits": [
+      {
+       "old": "exact == s.db=s.snapshot",
+       "new": "exact == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CASFence"
+    },
+    {
+     "id": "AcknowledgeFailedWrite",
+     "edits": [
+      {
+       "old": "final == s.fault#\"ack\"",
+       "new": "final == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailedACKRetainsPending"
+    },
+    {
+     "id": "AliasRetiredLease",
+     "edits": [
+      {
+       "old": "unique == s.ackWork.lease#s.peer",
+       "new": "unique == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RetainedLeaseUnique"
+    },
+    {
+     "id": "SkipObservedFence",
+     "edits": [
+      {
+       "old": "s.envelope.intent.fence=s.snapshot.fence",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ObservationEnvelopeExact"
+    },
+    {
+     "id": "SkipObservedOp",
+     "edits": [
+      {
+       "old": "s.envelope.intent.op=s.snapshot.op",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ObservationEnvelopeExact"
+    },
+    {
+     "id": "SkipObservedAction",
+     "edits": [
+      {
+       "old": "s.envelope.intent.action=s.snapshot.action",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ObservationEnvelopeExact"
+    },
+    {
+     "id": "SkipObservedLease",
+     "edits": [
+      {
+       "old": "s.envelope.intent.lease=s.snapshot.lease",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ObservationEnvelopeExact"
+    },
+    {
+     "id": "SkipObservedState",
+     "edits": [
+      {
+       "old": "s.envelope.state=s.snapshot.op",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ObservationEnvelopeExact"
+    },
+    {
+     "id": "SkipNonemptyObservedLease",
+     "edits": [
+      {
+       "old": "s.envelope.lease#0",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ObservationEnvelopeExact"
+    },
+    {
+     "id": "SkipObservedLeaseBinding",
+     "edits": [
+      {
+       "old": "(s.snapshot.op=1 \\/ s.envelope.lease=s.snapshot.lease)",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ObservationEnvelopeExact"
+    },
+    {
+     "id": "EchoRequestAsObservation",
+     "edits": [
+      {
+       "old": "!.observed=IF s.fault=\"unknown\" THEN 0 ELSE s.backend,",
+       "new": "!.observed=s.op,",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthoritativeObservation"
+    },
+    {
+     "id": "RepeatBackendEffect",
+     "edits": [
+      {
+       "old": "duplicate == s.effects>0",
+       "new": "duplicate == FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BackendDuplicateSuppression"
+    },
+    {
+     "id": "ResumeStaleBackendEffect",
+     "edits": [
+      {
+       "old": "fresh == s.op >= s.high",
+       "new": "fresh == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BackendMonotone"
+    },
+    {
+     "id": "AliasBackendMapping",
+     "edits": [
+      {
+       "old": "THEN 1 ELSE @]",
+       "new": "THEN 2 ELSE @]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BackendImmutableMapping"
+    },
+    {
+     "id": "AcceptConflictingPayload",
+     "edits": [
+      {
+       "old": "s'=s /\\ Save(\"conflict\")",
+       "new": "s'=[s EXCEPT !.payload=0] /\\ Save(\"conflict\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BackendPayloadIdentity"
+    },
+    {
+     "id": "IgnoreRetainedQuota",
+     "edits": [
+      {
+       "old": "room == Cardinality(Retained(s.records))<2",
+       "new": "room == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RetainedBudget"
+    },
+    {
+     "id": "ReplaceRetiredRecord",
+     "edits": [
+      {
+       "old": "unused == s.records[s.otherTarget]=0",
+       "new": "unused == (s.records[s.otherTarget]=0 \\/ s.otherTarget=2)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TombstoneRetained"
+    },
+    {
+     "id": "StaleAdmissionSnapshot",
+     "edits": [
+      {
+       "old": "room == Cardinality(Retained(s.records))<2",
+       "new": "room == Cardinality(Retained(s.otherSnapshot))<2",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RetainedBudget"
+    },
+    {
+     "id": "RequireRecreatedProfileForCleanup",
+     "edits": [
+      {
+       "old": "final == s.fault#\"ack\"",
+       "new": "final == s.fault#\"ack\" /\\ s.profileNow=1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CleanupSurvivesProfile"
+    },
+    {
+     "id": "EchoRequestedEnvelopeState",
+     "edits": [
+      {
+       "old": "!.envelope=Envelope(s.op,s.fault,IF s.fault=\"unknown\" THEN 0 ELSE s.backend,s.mapping)",
+       "new": "!.envelope=Envelope(s.op,s.fault,IF s.fault=\"none\" THEN s.op ELSE IF s.fault=\"unknown\" THEN 0 ELSE s.backend,s.mapping)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ObservationEvidence"
+    },
+    {
+     "id": "IgnorePrimaryQuota",
+     "edits": [
+      {
+       "old": "s.records[1]=0 /\\ Cardinality(Retained(s.records))<2",
+       "new": "s.records[1]=0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RetainedBudget"
+    },
+    {
+     "id": "ReplaceLiveRecord",
+     "edits": [
+      {
+       "old": "unused == s.records[s.otherTarget]=0",
+       "new": "unused == (s.records[s.otherTarget]=0 \\/ s.otherTarget=1)",
+       "count": 1
+      },
+      {
+       "old": "room == Cardinality(Retained(s.records))<2",
+       "new": "room == (Cardinality(Retained(s.records))<2 \\/ s.otherTarget=1)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoReplacement"
+    }
+   ]
+  },
+  {
+   "id": "SSMDurableCommands",
+   "model": "formal/SSMDurableCommands.tla",
+   "config": "formal/SSMDurableCommands.cfg",
+   "bounds": "Three independent finite scenarios: one command/two targets/two delayed deliveries; one observation with competing terminal CAS and nine faults; two frozen entries plus one append, two authority/filter/page-size values and expiry.",
+   "properties": [
+    "TypeOK",
+    "IntentBeforeDispatch",
+    "NoRedispatch",
+    "RestartNoDispatch",
+    "CrashDurability",
+    "BackendDeduplication",
+    "BackendLeaseFence",
+    "ImmutableIdentity",
+    "ExactObservation",
+    "CompleteEvidence",
+    "TerminalImmutable",
+    "CASFence",
+    "AllTargets",
+    "SnapshotImmutable",
+    "ScopedPagination"
+   ],
+   "limits": "Conditional on unimplemented DurableBackend contract. Atomic persistence, exact identity comparison and authoritative observation are abstractions, not SQL durability, UUID/hash guarantees, runtime execution, IAM/protocol implementation, liveness, full pagination encoding or a Go refinement proof.",
+   "source_scope": [
+    "internal/aws/ssm_commands.go",
+    "internal/aws/ssm_commands_list.go",
+    "internal/workload/guestcommand/durable.go"
+   ],
+   "mutants": [
+    {
+     "id": "DispatchBeforeCommit",
+     "edits": [
+      {
+       "old": "Dispatch(t) == /\\ s.committed",
+       "new": "Dispatch(t) == /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IntentBeforeDispatch"
+    },
+    {
+     "id": "RepeatDispatch",
+     "edits": [
+      {
+       "old": "/\\ s.dispatch[t]=0",
+       "new": "/\\ s.dispatch[t]<=1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoRedispatch"
+    },
+    {
+     "id": "RestartDispatch",
+     "edits": [
+      {
+       "old": "Dispatch(t) == /\\ s.committed /\\ s.live /\\ ~s.restarted",
+       "new": "Dispatch(t) == /\\ s.committed /\\ s.live",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RestartNoDispatch"
+    },
+    {
+     "id": "CrashLosesIntent",
+     "edits": [
+      {
+       "old": "!.live=FALSE, !.observing=FALSE",
+       "new": "!.live=FALSE, !.observing=FALSE, !.committed=FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CrashDurability"
+    },
+    {
+     "id": "BackendDuplicateEffect",
+     "edits": [
+      {
+       "old": "s.held /\\ s.effects[t]=0",
+       "new": "s.held",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BackendDeduplication"
+    },
+    {
+     "id": "BackendIgnoresLease",
+     "edits": [
+      {
+       "old": "s.held /\\ s.effects[t]=0",
+       "new": "s.effects[t]=0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BackendLeaseFence"
+    },
+    {
+     "id": "MutableAuthority",
+     "edits": [
+      {
+       "old": "!.committed=TRUE]",
+       "new": "!.committed=TRUE, !.identity.authority=2]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ImmutableIdentity"
+    },
+    {
+     "id": "ObservationAuthority",
+     "edits": [
+      {
+       "old": "good == Envelope(s.fault)=s.identity",
+       "new": "good == (Envelope(s.fault)=s.identity \\/ s.fault=\"authority\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactObservation"
+    },
+    {
+     "id": "ObservationLease",
+     "edits": [
+      {
+       "old": "good == Envelope(s.fault)=s.identity",
+       "new": "good == (Envelope(s.fault)=s.identity \\/ s.fault=\"lease\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactObservation"
+    },
+    {
+     "id": "ObservationRequest",
+     "edits": [
+      {
+       "old": "good == Envelope(s.fault)=s.identity",
+       "new": "good == (Envelope(s.fault)=s.identity \\/ s.fault=\"request\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactObservation"
+    },
+    {
+     "id": "ObservationToken",
+     "edits": [
+      {
+       "old": "good == Envelope(s.fault)=s.identity",
+       "new": "good == (Envelope(s.fault)=s.identity \\/ s.fault=\"token\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactObservation"
+    },
+    {
+     "id": "ObservationStarted",
+     "edits": [
+      {
+       "old": "/\\ s.fault#\"started\"\n                   /\\",
+       "new": "/\\ TRUE\n                   /\\",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactObservation"
+    },
+    {
+     "id": "SuccessCleanup",
+     "edits": [
+      {
+       "old": "s.fault \\notin {\"cleanup\",\"truncated\",\"exit\"})",
+       "new": "(s.fault \\notin {\"cleanup\",\"truncated\",\"exit\"} \\/ s.fault=\"cleanup\"))",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CompleteEvidence"
+    },
+    {
+     "id": "SuccessTruncated",
+     "edits": [
+      {
+       "old": "s.fault \\notin {\"cleanup\",\"truncated\",\"exit\"})",
+       "new": "(s.fault \\notin {\"cleanup\",\"truncated\",\"exit\"} \\/ s.fault=\"truncated\"))",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CompleteEvidence"
+    },
+    {
+     "id": "SuccessExit",
+     "edits": [
+      {
+       "old": "s.fault \\notin {\"cleanup\",\"truncated\",\"exit\"})",
+       "new": "(s.fault \\notin {\"cleanup\",\"truncated\",\"exit\"} \\/ s.fault=\"exit\"))",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CompleteEvidence"
+    },
+    {
+     "id": "StaleCAS",
+     "edits": [
+      {
+       "old": "accepted == good /\\ s.version=s.snapshot",
+       "new": "accepted == good /\\ (s.version=s.snapshot \\/ result=2)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CASFence"
+    },
+    {
+     "id": "TerminalRewrite",
+     "edits": [
+      {
+       "old": "accepted == good /\\ s.version=s.snapshot",
+       "new": "accepted == good /\\ (s.version=s.snapshot \\/ (s.terminalSeen /\\ result#2))",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TerminalImmutable"
+    },
+    {
+     "id": "AnyTargetSuccess",
+     "edits": [
+      {
+       "old": "/\\ (\\A t \\in Targets: s.status[t]=2)",
+       "new": "/\\ (\\E t \\in Targets: s.status[t]=2)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllTargets"
+    },
+    {
+     "id": "LivePagination",
+     "edits": [
+      {
+       "old": "!.returned=IF allowed THEN s.frozen ELSE {}",
+       "new": "!.returned=IF allowed THEN s.items ELSE {}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SnapshotImmutable"
+    },
+    {
+     "id": "PageScope",
+     "edits": [
+      {
+       "old": "a=s.pageScope",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ScopedPagination"
+    },
+    {
+     "id": "PageFilter",
+     "edits": [
+      {
+       "old": "f=s.pageFilter",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ScopedPagination"
+    },
+    {
+     "id": "PageSize",
+     "edits": [
+      {
+       "old": "z=s.pageSize",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ScopedPagination"
+    },
+    {
+     "id": "PageExpiry",
+     "edits": [
+      {
+       "old": "/\\ ~s.expired\n    IN",
+       "new": "/\\ TRUE\n    IN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ScopedPagination"
+    }
+   ]
   }
  ]
 }

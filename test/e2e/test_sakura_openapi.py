@@ -34,13 +34,13 @@ def preserved(spec):
     # Exact main d166f56 projections plus reviewed bounded S3 multipart queries,
     # descriptions, regional/auth headers and object POST, then the seven native
     # IAM profile examples/action fields at root and the AWS alias. The reviewed
-    # profile addition changes only those IAM paths. The bounded Lambda Tail
-    # extension changes only Invoke description/request/response headers; all
-    # other paths and components stay exact.
+    # profile and pinned SSM builtin additions change only IAM descriptions and
+    # PolicyArn fields. Lambda Tail changes only Invoke description/request/response
+    # headers. All other paths and components stay exact.
     # The independent paths digest excludes only the two existing Sakura paths.
     original_paths = {path:value for path,value in spec['paths'].items() if path not in (COLLECTION,ITEM)}
     assert len(original_paths)==34
-    assert digest(original_paths)=='91b11dc23d3a4bccd118b4c2ba2a67f8198e1db383f5367bbedb4c1a04b612dd', 'Existing paths/operations/response examples changed'
+    assert digest(original_paths)=='378c3fd3366f4b824a0f74e613e45edf1663eda1d4281134e3f3fe03732676b0', 'Existing paths/operations/response examples changed'
     original = copy.deepcopy(spec['components'])
     original.pop('securitySchemes',None)
     for group in ('schemas','parameters'):
@@ -191,6 +191,19 @@ class SakuraReference(unittest.TestCase):
         ):
             broken=copy.deepcopy(self.spec)
             change(broken['paths'])
+            with self.assertRaises(AssertionError):preserved(broken)
+
+    def test_builtin_extension_cannot_hide_other_contract_changes(self):
+        form='application/x-www-form-urlencoded'
+        for change in (
+            lambda spec: spec['paths']['/2015-03-31/functions/{FunctionName}/invocations']['post']['responses'].update({'299': {'description': 'invented'}}),
+            lambda spec: spec['paths']['/_simulator/providers/aws/']['post']['requestBody']['content'][form]['schema']['oneOf'][10]['properties']['PolicyArn'].update(pattern='.*'),
+            lambda spec: spec['paths']['/_simulator/providers/aws/']['post']['requestBody']['content'][form]['schema']['oneOf'][11]['properties']['Scope'].update(enum=['Local','AWS','All']),
+            lambda spec: spec['components']['schemas'].update(UnreviewedBuiltin={'type':'string'}),
+            lambda spec: spec['paths']['/']['post']['responses'].update({'299': {'description':'invented'}}),
+        ):
+            broken=copy.deepcopy(self.spec)
+            change(broken)
             with self.assertRaises(AssertionError):preserved(broken)
 
 

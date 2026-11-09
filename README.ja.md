@@ -77,7 +77,9 @@ Python 3.12のみ、ゲストメモリ128 MiB、タイムアウト1〜30秒で�
 - **認可・シークレット：** [IAM](docs/iam.md)、[native SDK / STS](docs/sts-native.md)、
   [Secrets Manager](docs/secrets-manager.md)、[KMS](docs/kms.md)。
 - **構成の作成：** [CloudFormation](docs/cloudformation-rest.md)、
-  [SSM値パラメータ](docs/cloudformation-ssm-parameters.md)。
+  [SSM値パラメータ](docs/cloudformation-ssm-parameters.md)、
+  [native IAM profile](docs/cloudformation-iam-profiles.md)、
+  [固定SSM policy](docs/iam-ssm-managed-policy.md)。
 - **他クラウド：** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md)、
   [Google Cloudの画面](docs/gcp-console.md)、[Azureの画面](docs/azure-console.md)、
   [任意で有効化するSakura Disk構成メタデータ](docs/sakura.md)。

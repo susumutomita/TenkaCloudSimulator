@@ -68,11 +68,11 @@ iam.delete_policy(PolicyArn=policy['Arn'])
 
 ## 既存identity/CloudFormationとの互換性
 
-Local identitiesは以前のJSON control APIを保持する。既存CFNのAWS::IAM::Roleも従来のidentity方式で、trust/managed policy ARNはメタデータのみ。これらをnative roleへ暗黙移行しない。IAM画面のLocal identitiesから旧データを管理でき、Lambda ARNの手入力も維持する。
+Local identitiesは以前のJSON control APIを保持する。従来の1-inline-policy CFN roleはidentity方式を保持し、trust/managed policy ARNはメタデータのみ。[native CFN role/profile構成](cloudformation-iam-profiles.md)と新規zero-inline service-trust roleはnative IAMを共有する。これらをnative roleへ暗黙移行しない。IAM画面のLocal identitiesから旧データを管理でき、Lambda ARNの手入力も維持する。
 
 native role名と旧identity/CFN ownershipの採用を相互に拒否する。旧JSON APIのPUT/DELETEはnative active/retired名へ409を返す。所有確認と変更は同一transactionで、同時CreateRoleとの競合でも片方だけ成功する。削除後のnative名も予約を残し、legacy identityを作って削除済みroleの信頼検査を回避できない。inline policy更新と実行identityのaggregate更新も単一transaction、失敗時rollback。
 
-DeleteRoleはinline policyまたはmanaged attachmentが残るとDeleteConflict。先にDeleteRolePolicyとDetachRolePolicyを実行する。ロールを削除しても既存関数の定義は残り、次回Invokeが拒否される。AWSの全関連サービスの削除制約は再現しない。AWS-managed policies、STS、users/groupsへのattachment、resource policies、boundaries/SCP、tags、advanced trust Conditionsは未実装。
+DeleteRoleはinline policyまたはmanaged attachmentが残るとDeleteConflict。先にDeleteRolePolicyとDetachRolePolicyを実行する。ロールを削除しても既存関数の定義は残り、次回Invokeが拒否される。AWSの全関連サービスの削除制約は再現しない。一般AWS-managed catalog、users/groupsへのattachment、resource policies、boundaries/SCP、tags、advanced trust Conditionsは未実装。
 
 チーム分離は引き続き1チーム1プロセス・SQLite・token authority。role名/ARNだけでtenant分離しない。実SDK、実Lambda、二重プロセス、権限拒否、削除、PC/スマホの実ブラウザを検証する。
 
@@ -92,3 +92,7 @@ permission and target trust are required for AssumeRole. This does not implement
 federation, real AWS authentication, permissions boundaries or general IAM
 conditions. CFn-owned legacy roles remain separate from native IAM listings but
 can be resolved by STS from their actual owned stack records.
+
+## 固定AWS管理ポリシーの限定対応
+
+[AmazonSSMManagedInstanceCore v2](iam-ssm-managed-policy.md)だけはnative IAMの読取・attach/detach・権限合成に対応する。変更不可。ListPoliciesはScope=Localのcustomer policyのみ。SSM実行・agent・session・EC2資格情報やBattle対応を意味しない。

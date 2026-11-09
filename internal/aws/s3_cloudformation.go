@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
@@ -131,6 +132,9 @@ func stackResourceNamespace(region, kind string) string {
 		return "lambda:" + region
 	} // Older readers must fail ownership validation, never interpret a function as an IAM role.
 
+	if kind == "AWS::IAM::InstanceProfile" {
+		return "iam-instance-profile"
+	}
 	if kind == "AWS::IAM::Role" || kind == "AWS::S3::Bucket" {
 		return ""
 	}
@@ -171,12 +175,46 @@ func stackResourcePermissions(record StackRecord, deleting bool, authorize func(
 			} else {
 				actions = []string{"ssm:PutParameter"}
 			}
+		case "AWS::IAM::InstanceProfile":
+			if r.NativeIAM == nil {
+				return fmt.Errorf("native instance profile marker missing")
+			}
+			resource = iamInstanceProfileARN + r.PhysicalID
+			if deleting {
+				actions = []string{"iam:DeleteInstanceProfile"}
+			} else {
+				actions = []string{"iam:CreateInstanceProfile"}
+			}
+			if r.NativeIAM.RoleName != "" {
+				if deleting {
+					actions = append(actions, "iam:RemoveRoleFromInstanceProfile")
+				} else {
+					actions = append(actions, "iam:AddRoleToInstanceProfile")
+					if err := authorize("iam:PassRole", "arn:aws:iam::000000000000:role/"+r.NativeIAM.RoleName); err != nil {
+						return err
+					}
+				}
+			}
 		case "AWS::IAM::Role":
 			resource = "arn:aws:iam::000000000000:role/" + r.PhysicalID
 			if deleting {
 				actions = []string{"iam:DeleteRolePolicy", "iam:DeleteRole"}
 			} else {
 				actions = []string{"iam:CreateRole", "iam:PutRolePolicy"}
+			}
+			if r.NativeIAM != nil {
+				if deleting {
+					actions = []string{"iam:DeleteRole"}
+				} else {
+					actions = []string{"iam:CreateRole"}
+				}
+				if policies, ok := r.Properties["Policies"].([]any); ok && len(policies) > 0 {
+					if deleting {
+						actions = append(actions, "iam:DeleteRolePolicy")
+					} else {
+						actions = append(actions, "iam:PutRolePolicy")
+					}
+				}
 			}
 			if managed, ok := r.Properties["ManagedPolicyArns"].([]any); ok && len(managed) > 0 {
 				if deleting {

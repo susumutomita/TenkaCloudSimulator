@@ -31,3 +31,5 @@ Native IAMはAWS layerのrole/inline-policy tablesを所有し、信頼先とagg
 SDK bridgeはAWS layerの固定shimとrole-bound closureが所有し、runtimeにはAWS service/action、DB、tokenや問題IDを渡さない。guest stdoutのbounded JSON交換は権限の根拠ではなく、各native handlerでIAMを再評価する。S3は直接S3 handlerへdispatchし、bucket/keyがLambda protocol pathに似ていても別serviceへ解釈しない。
 
 CloudFormationのSSM値パラメータは生成済みStack ARNと全source GetParameters権限を検査後、同一read transactionで同region/nameのString値を取得する。入力keyとresolved valueを別に保存し、Ref/条件には値を渡す。native create前にread transactionを閉じ、以降のsource更新・削除で保存snapshotを更新しない。matching ClientRequestToken再送は既存Stack認可後、sourceを再取得しない。[対応範囲](../cloudformation-ssm-parameters.md)。
+
+CFNの[native IAM role/profile構成](../cloudformation-iam-profiles.md)はactive profile参照または新規zero-inline role形で選択する。従来の1-inline metadata-only roleと保存済legacy stackは暗黙移行しない。canonical external roleの認可・generation確認・作成は同一write transaction内で行う。保存したgeneration/fingerprintと最後のevent/history書込後のretirement・child不在を照合し、drift・外部依存・ignored writeで全体をrollbackする。profile CFN対応はEC2/SSM実行や元Battle対応を意味しない。
