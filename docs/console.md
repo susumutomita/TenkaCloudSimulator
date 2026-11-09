@@ -167,3 +167,23 @@ Python構文検査は成功。実SDK作成104イベント、ページ追加、�
 E2E fixtureの明示SSM Nameとこの証跡だけで、runtime/埋込assetsは同一。
 実際のE2E native fixtureも104件、100+4件のページ、削除世代の取得を通過した。
 これはブラウザ実行の代替ではない。make e2eと公開HEADのhosted CIは未完了。
+
+
+## Favorite service shortcuts
+
+The AWS shell starts with no pinned services. In the Services menu or its search
+results, use a service's star to add or remove it from Favorites. The quickbar
+shows only these selected services, and disappears when none are selected.
+Favorites survive reloads in the same browser and local simulator origin; they
+are not synchronized to AWS, other browsers, or another local port. Only public
+service IDs are stored. If browser storage is unavailable, the console explains
+that the preference lasts only while the page remains open.
+
+This follows the AWS [favorites quickbar](https://docs.aws.amazon.com/awsconsolehelpdocs/latest/gsg/add-fave.html)
+and [add/remove star](https://docs.aws.amazon.com/awsconsolehelpdocs/latest/gsg/add-fave-services.html)
+interaction. Drag reordering and AWS account-level synchronization are not
+implemented. The simulator's existing capability and participant-session filter
+still applies to Services, search and Favorites. A scoped Parameter Store handoff
+continues to show only Console Home and Systems Manager, even if this browser
+previously pinned S3. This is a session-scope restriction, not dynamic IAM-policy
+discovery; stars never grant API permission or change the session.

@@ -48,8 +48,56 @@ with running(authenticated=True) as (endpoint,operator), sync_playwright() as p:
  assert not any(request[1]==endpoint+'/' for request in requests),'home issued a resource API request'
  assert 'local-practice-value' not in page.content()
  audit_state('participant-console-home')
+ # Favorites start empty; pinning does not request resources or expand scope.
+ favorites=page.get_by_role('navigation',name='Favorites bar',exact=True)
+ expect(favorites).to_have_count(0)
  page.get_by_role('button',name='Services',exact=True).click()
  expect(page.get_by_role('menuitem',name='S3',exact=True)).to_have_count(0)
+ pin=page.get_by_role('menuitemcheckbox',name='Add to favorites: Systems Manager',exact=True)
+ pin.focus();page.keyboard.press('Space')
+ expect(page.get_by_role('menuitemcheckbox',name='Remove from favorites: Systems Manager',exact=True)).to_be_checked()
+ expect(favorites.get_by_role('button',name='Systems Manager',exact=True)).to_be_visible()
+ assert not any(request[1]==endpoint+'/' for request in requests),'pinning fetched a resource'
+ # The open Services menu, including its star controls, remains keyboard/axe usable.
+ for width in (1440,390):
+  page.set_viewport_size({'width':width,'height':1000})
+  trigger=page.get_by_role('button',name='Services',exact=True)
+  if trigger.get_attribute('aria-expanded')!='true':trigger.click()
+  assert_reflow(page);page.evaluate(axe)
+  audit=page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})")
+  assert not audit['violations'],[v['id'] for v in audit['violations']]
+  page.screenshot(path=str(REPORTS/('participant-favorites-menu-'+str(width)+'.png')),full_page=True)
+ page.set_viewport_size({'width':1440,'height':1000});page.reload()
+ expect(page.get_by_role('heading',name='Console Home',exact=True)).to_be_visible()
+ expect(favorites.get_by_role('button',name='Systems Manager',exact=True)).to_be_visible()
+ # Two real tabs synchronize local changes without writing queued stale events back.
+ second=context.new_page()
+ second.on('request',lambda request:requests.append((request.method,request.url,request.post_data,request.headers.get('x-amz-target',''))))
+ second.goto(endpoint+'/_simulator/console/#/home')
+ expect(second.get_by_role('navigation',name='Favorites bar',exact=True).get_by_role('button',name='Systems Manager',exact=True)).to_be_visible()
+ second.get_by_role('button',name='Services',exact=True).click()
+ second.get_by_role('menuitemcheckbox',name='Remove from favorites: Systems Manager',exact=True).click()
+ expect(favorites).to_have_count(0)
+ page.get_by_role('button',name='Services',exact=True).click()
+ page.get_by_role('menuitemcheckbox',name='Add to favorites: Systems Manager',exact=True).click()
+ expect(second.get_by_role('navigation',name='Favorites bar',exact=True).get_by_role('button',name='Systems Manager',exact=True)).to_be_visible()
+ for tab in (page,second):
+  stored=tab.evaluate("""async()=>{const key='tenkacloud.console.awsFavorites.v1';window.dispatchEvent(new StorageEvent('storage',{key,newValue:'[]',storageArea:localStorage,url:location.href}));await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));return localStorage.getItem(key)}""")
+  assert json.loads(stored)==['ssm'],'a queued storage event overwrote newer favorites'
+  expect(tab.get_by_role('navigation',name='Favorites bar',exact=True).get_by_role('button',name='Systems Manager',exact=True)).to_be_visible()
+ second.close()
+ page.get_by_role('button',name='Favorites',exact=True).click()
+ page.get_by_role('menuitemcheckbox',name='Remove from favorites: Systems Manager',exact=True).click()
+ expect(favorites).to_have_count(0)
+ expect(page.get_by_text('No favorites yet. Select the star next to a service in All services or search results.',exact=True)).to_be_visible()
+ expect(page.get_by_role('searchbox',name='Search services in AWS',exact=True)).to_be_focused()
+ # A stale or manipulated preference never exposes a service hidden by this session.
+ page.evaluate("localStorage.setItem('tenkacloud.console.awsFavorites.v1',JSON.stringify(['s3']))")
+ page.reload();expect(page.get_by_role('heading',name='Console Home',exact=True)).to_be_visible()
+ expect(favorites).to_have_count(0)
+ page.get_by_role('button',name='Services',exact=True).click()
+ expect(page.get_by_role('menuitem',name='S3',exact=True)).to_have_count(0)
+ page.get_by_role('menuitemcheckbox',name='Add to favorites: Systems Manager',exact=True).click()
  page.get_by_role('menuitem',name='Systems Manager',exact=True).click()
  expect(page.get_by_role('link',name=name,exact=True)).to_be_visible()
  expect(page.get_by_label('Value',exact=True)).to_have_count(0)
@@ -117,4 +165,4 @@ with running(authenticated=True) as (endpoint,operator), sync_playwright() as p:
  ssm.delete_parameter(Name=name);ssm.delete_parameter(Name=other)
  assert not errors,errors
  browser.close()
- print(json.dumps({'participantSTSHandoffGUI':True,'fragmentErased':True,'homeAndListDoNotReadValues':True,'manualNavigationAndHistory':True,'embeddedReferenceLoaded':True,'ownParameterListDetailRefresh':True,'crossResourceDenied':True,'enumerationDenied':True,'readonlyDenied':True,'allowedWrite':True,'replayDenied':True,'roleDeletionRevokesBrowser':True,'axeWidths':[1440,390],'browserErrors':0,'scope':'Simulator GUI; host answer submission tested separately'}))
+ print(json.dumps({'participantSTSHandoffGUI':True,'favoritesPinUnpinReload':True,'twoTabFavoritesNoStaleEcho':True,'hiddenServicesRemainHidden':True,'fragmentErased':True,'homeAndListDoNotReadValues':True,'manualNavigationAndHistory':True,'embeddedReferenceLoaded':True,'ownParameterListDetailRefresh':True,'crossResourceDenied':True,'enumerationDenied':True,'readonlyDenied':True,'allowedWrite':True,'replayDenied':True,'roleDeletionRevokesBrowser':True,'axeWidths':[1440,390],'browserErrors':0,'scope':'Simulator GUI; host answer submission tested separately'}))
