@@ -148,3 +148,11 @@
 
 /* Catalog descriptions keep official JSON members readable without wrapping AWS identifiers. */
 .catalog-json { margin: 0; max-height: 24rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.875rem; }
+
+/* Favorites are explicitly selected; discovery never grants service access. */
+.cloud-global-nav--aws { margin-left: auto; }
+.aws-service-row { display: flex; align-items: flex-start; gap: 4px; }
+.aws-service-row .aws-service-entry { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.cloud-service-panel .aws-service-favorite { width: 40px; min-height: 44px; flex: 0 0 40px; padding: 8px 4px; font-size: 23px; text-align: center; color: #e7e9ec; }
+.cloud-service-panel .aws-service-favorite[aria-checked="true"] { color: #80c9ff; }
+.cloud-favorites-notice { background: #f1faff; color: #17212e; padding: 8px 16px; }
