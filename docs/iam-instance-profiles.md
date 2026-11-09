@@ -3,8 +3,9 @@
 This bounded local Query/XML lifecycle stores instance profiles in the same
 SQLite database as native IAM roles. It does not run EC2 instances, issue
 credentials, expose instance metadata, or implement SSM Session Manager. An EC2
-service trust document alone does not enable execution. CloudFormation instance
-profiles, tags, non-root paths and EC2 profile associations remain unsupported.
+service trust document alone does not enable execution. A bounded
+[CloudFormation role/profile composition](cloudformation-iam-profiles.md) shares
+this state. Tags, non-root paths and EC2 profile associations remain unsupported.
 
 ## API contract
 
@@ -62,8 +63,8 @@ Ignored, aborted or invalidated writes fail rather than report success. Malforme
 persisted profile identity/date, role identity/trust and stale membership fail
 closed. Retired records are not garbage-collected by this API.
 
-The only integration hooks are IAM initialization of the two tables, Query
-operation dispatch, and the native role-delete membership check. No provider-neutral
+Integration hooks include IAM table initialization, Query dispatch, native
+role-delete membership checks and transaction-aware CloudFormation composition. No provider-neutral
 core, legacy identity authority, execution capability or public catalog
 availability is changed by this module. The integration advertises the seven
 implemented operations in capabilities and the local API reference. Downgrading binaries against the
@@ -90,5 +91,5 @@ recreation. Upgrade tests reconstruct the pre-profile native-role schema and
 check additive initialization without executing an older binary. They do not establish real
 AWS compatibility, full SDK coverage, EC2 execution or Session Manager behavior.
 Whole-repository gates, SDK process tests, API-reference integration and
-finite-model checking are separate integration-owner acceptance checks. An
+finite-model checking are separate acceptance checks. An
 instance-profile console is not implemented.

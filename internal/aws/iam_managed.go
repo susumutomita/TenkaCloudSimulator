@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -19,7 +20,7 @@ import (
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 )
 
-// Customer managed policies are local IAM state, never an AWS-managed ARN grant.
+// Customer policies and one pinned read-only AWS-managed policy share aggregation.
 type IAMManagedPolicy struct {
 	PolicyName       string    `xml:"PolicyName"`
 	PolicyID         string    `xml:"PolicyId"`
@@ -132,6 +133,9 @@ type iamManagedRecord struct {
 func iamManagedRead(ctx context.Context, tx *sql.Tx, arn string) (iamManagedRecord, error) {
 	var p iamManagedRecord
 	name, e := iamManagedARNName(arn)
+	if arn == iamSSMCoreARN {
+		name, e = iamSSMCoreKey, nil
+	}
 	if e != nil {
 		return p, e
 	}
@@ -144,7 +148,7 @@ func iamManagedRead(ctx context.Context, tx *sql.Tx, arn string) (iamManagedReco
 	if e != nil {
 		return p, e
 	}
-	p.Arn = iamManagedPrefix + p.PolicyName
+	p.Arn = iamManagedKeyARN(p.PolicyName)
 	if p.Arn != arn {
 		return p, ssmFailure{"NoSuchEntity", "The exact customer policy ARN does not exist."}
 	}
@@ -155,7 +159,7 @@ func iamManagedRead(ctx context.Context, tx *sql.Tx, arn string) (iamManagedReco
 		return p, iamManagedBad()
 	}
 	p.UpdateDate, e = time.Parse(time.RFC3339Nano, updated)
-	if e != nil || deleted != 0 || !iamManagedName.MatchString(p.PolicyName) || !iamManagedID.MatchString(p.PolicyID) || p.Path != "/" || !iamManagedText(p.Description, 1000) || p.UpdateDate.Before(p.CreateDate) || p.defaultNumber < 1 || p.next <= p.defaultNumber {
+	if e != nil || deleted != 0 || !(iamManagedName.MatchString(p.PolicyName) || arn == iamSSMCoreARN && p.PolicyName == iamSSMCoreKey) || !iamManagedID.MatchString(p.PolicyID) || p.Path != "/" || !iamManagedText(p.Description, 1000) || p.UpdateDate.Before(p.CreateDate) || p.defaultNumber < 1 || p.next <= p.defaultNumber {
 		return p, iamManagedBad()
 	}
 	rows, e := tx.QueryContext(ctx, `SELECT version_number,document,created FROM aws_iam_managed_policy_versions WHERE policy_name=? AND policy_id=? ORDER BY version_number`, p.PolicyName, p.PolicyID)
@@ -216,6 +220,12 @@ func iamManagedRead(ctx context.Context, tx *sql.Tx, arn string) (iamManagedReco
 	if p.AttachmentCount > 1000 {
 		return p, iamManagedBad()
 	}
+	if arn == iamSSMCoreARN {
+		if p.PolicyName != iamSSMCoreKey || p.PolicyID != iamSSMCoreID || p.Description != iamSSMCoreDescription || created != iamSSMCoreCreated || updated != iamSSMCoreUpdated || p.defaultNumber != 2 || p.next != 3 || len(p.versions) != 1 || p.versions[0].Document != iamSSMCoreDocument || p.versions[0].CreateDate.Format(time.RFC3339) != iamSSMCoreUpdated {
+			return p, iamManagedBad()
+		}
+		p.PolicyName = iamSSMCoreName
+	}
 	return p, nil
 }
 func iamManagedRole(ctx context.Context, tx *sql.Tx, name string) (IAMRole, error) {
@@ -259,7 +269,7 @@ func (s *IAMRoleStore) CreateManagedPolicy(ctx context.Context, name, path, desc
 	}
 	existing := e == nil
 	var total int
-	if e = tx.QueryRowContext(ctx, `SELECT count(*) FROM aws_iam_managed_policies`).Scan(&total); e != nil {
+	if e = tx.QueryRowContext(ctx, `SELECT count(*) FROM aws_iam_managed_policies WHERE name NOT LIKE '/%'`).Scan(&total); e != nil {
 		return IAMManagedPolicy{}, e
 	}
 	if total >= 1000 && !existing {
@@ -311,7 +321,7 @@ func (s *IAMRoleStore) ManagedPolicies(ctx context.Context, afterName string, li
 		return nil, e
 	}
 	defer tx.Rollback()
-	rows, e := tx.QueryContext(ctx, `SELECT name FROM aws_iam_managed_policies WHERE deleted=0 AND name>? COLLATE NOCASE ORDER BY name COLLATE NOCASE LIMIT ?`, afterName, limit)
+	rows, e := tx.QueryContext(ctx, `SELECT name FROM aws_iam_managed_policies WHERE deleted=0 AND name NOT LIKE '/%' AND name>? COLLATE NOCASE ORDER BY name COLLATE NOCASE LIMIT ?`, afterName, limit)
 	if e != nil {
 		return nil, e
 	}
@@ -403,6 +413,9 @@ func iamManagedSyncAttached(ctx context.Context, tx *sql.Tx, p iamManagedRecord)
 	return nil
 }
 func (s *IAMRoleStore) CreateManagedPolicyVersion(ctx context.Context, arn, document string, setDefault bool) (IAMManagedPolicyVersion, error) {
+	if e := iamManagedReadOnly(arn); e != nil {
+		return IAMManagedPolicyVersion{}, e
+	}
 	if e := iamManagedDocument(document); e != nil {
 		return IAMManagedPolicyVersion{}, e
 	}
@@ -441,6 +454,9 @@ func (s *IAMRoleStore) CreateManagedPolicyVersion(ctx context.Context, arn, docu
 	return IAMManagedPolicyVersion{VersionID: "v" + strconv.FormatInt(number, 10), IsDefaultVersion: setDefault, CreateDate: now, Document: document}, tx.Commit()
 }
 func (s *IAMRoleStore) SetDefaultManagedPolicyVersion(ctx context.Context, arn, id string) error {
+	if e := iamManagedReadOnly(arn); e != nil {
+		return e
+	}
 	n, e := iamManagedVersionNumber(id)
 	if e != nil {
 		return e
@@ -470,6 +486,9 @@ func (s *IAMRoleStore) SetDefaultManagedPolicyVersion(ctx context.Context, arn, 
 	return tx.Commit()
 }
 func (s *IAMRoleStore) DeleteManagedPolicyVersion(ctx context.Context, arn, id string) error {
+	if e := iamManagedReadOnly(arn); e != nil {
+		return e
+	}
 	n, e := iamManagedVersionNumber(id)
 	if e != nil {
 		return e
@@ -499,6 +518,9 @@ func (s *IAMRoleStore) DeleteManagedPolicyVersion(ctx context.Context, arn, id s
 	return tx.Commit()
 }
 func (s *IAMRoleStore) DeleteManagedPolicy(ctx context.Context, arn string) error {
+	if e := iamManagedReadOnly(arn); e != nil {
+		return e
+	}
 	tx, e := s.db.BeginTx(ctx, nil)
 	if e != nil {
 		return e
@@ -549,7 +571,7 @@ func iamManagedRolePolicies(ctx context.Context, tx *sql.Tx, role IAMRole) ([]ia
 		if ref.roleID != role.RoleID {
 			return nil, iamManagedBad()
 		}
-		p, e := iamManagedRead(ctx, tx, iamManagedPrefix+ref.name)
+		p, e := iamManagedRead(ctx, tx, iamManagedKeyARN(ref.name))
 		if e != nil {
 			var failure ssmFailure
 			if errors.As(e, &failure) {
@@ -557,7 +579,7 @@ func iamManagedRolePolicies(ctx context.Context, tx *sql.Tx, role IAMRole) ([]ia
 			}
 			return nil, e
 		}
-		if p.PolicyID != ref.id || p.PolicyName != ref.name {
+		if p.PolicyID != ref.id || iamManagedKey(p) != ref.name {
 			return nil, iamManagedBad()
 		}
 		result = append(result, p)
@@ -591,6 +613,12 @@ func (s *IAMRoleStore) iamManagedAttachment(ctx context.Context, roleName, arn s
 		return e
 	}
 	defer tx.Rollback()
+	if e = iamManagedAttachmentTx(ctx, tx, roleName, arn, attach, expectedRoleID); e != nil {
+		return e
+	}
+	return tx.Commit()
+}
+func iamManagedAttachmentTx(ctx context.Context, tx *sql.Tx, roleName, arn string, attach bool, expectedRoleID []string) error {
 	role, e := iamManagedRole(ctx, tx, roleName)
 	if e != nil {
 		return e
@@ -606,13 +634,29 @@ func (s *IAMRoleStore) iamManagedAttachment(ctx context.Context, roleName, arn s
 	if e != nil {
 		return e
 	}
+	frame, e := iamInlineMutationFrame(ctx, tx, role)
+	if e != nil {
+		return e
+	}
+	expected := map[string]iamManagedRecord{}
+	for _, v := range all {
+		v.AttachmentCount = 0
+		expected[v.Arn] = v
+	}
+	target := p
+	target.AttachmentCount = 0
+	if attach {
+		expected[p.Arn] = target
+	} else {
+		delete(expected, p.Arn)
+	}
 	exists := false
 	for _, v := range all {
-		exists = exists || v.PolicyID == p.PolicyID
+		exists = exists || v.PolicyID == p.PolicyID && v.Arn == p.Arn
 	}
 	// Valid-parent duplicate attach / absent detach are deliberate local no-ops.
 	if exists == attach {
-		return tx.Commit()
+		return nil
 	}
 	if attach {
 		var total int
@@ -622,9 +666,9 @@ func (s *IAMRoleStore) iamManagedAttachment(ctx context.Context, roleName, arn s
 		if len(all) >= 20 || total >= 20000 {
 			return ssmFailure{"LimitExceeded", "Local roles support20 managed policies and20000 total attachments."}
 		}
-		e = iamExactlyOne(tx.ExecContext(ctx, `INSERT INTO aws_iam_role_managed_policies(role_name,role_id,policy_name,policy_id) VALUES(?,?,?,?)`, role.RoleName, role.RoleID, p.PolicyName, p.PolicyID))
+		e = iamExactlyOne(tx.ExecContext(ctx, `INSERT INTO aws_iam_role_managed_policies(role_name,role_id,policy_name,policy_id) VALUES(?,?,?,?)`, role.RoleName, role.RoleID, iamManagedKey(p), p.PolicyID))
 	} else {
-		e = iamExactlyOne(tx.ExecContext(ctx, `DELETE FROM aws_iam_role_managed_policies WHERE role_name=? AND role_id=? AND policy_name=? AND policy_id=?`, role.RoleName, role.RoleID, p.PolicyName, p.PolicyID))
+		e = iamExactlyOne(tx.ExecContext(ctx, `DELETE FROM aws_iam_role_managed_policies WHERE role_name=? AND role_id=? AND policy_name=? AND policy_id=?`, role.RoleName, role.RoleID, iamManagedKey(p), p.PolicyID))
 	}
 	if e != nil {
 		return e
@@ -632,10 +676,39 @@ func (s *IAMRoleStore) iamManagedAttachment(ctx context.Context, roleName, arn s
 	if e = iamSyncPolicy(ctx, tx, role.RoleName); e != nil {
 		return e
 	}
-	return tx.Commit()
+	after, e := iamManagedRole(ctx, tx, role.RoleName)
+	if e != nil {
+		return e
+	}
+	if after != role {
+		return iamManagedBad()
+	}
+	observed, e := iamInlineMutationFrame(ctx, tx, role)
+	if e != nil {
+		return e
+	}
+	actual := map[string]iamManagedRecord{}
+	for _, v := range observed.managed {
+		v.AttachmentCount = 0
+		actual[v.Arn] = v
+	}
+	if !reflect.DeepEqual(expected, actual) || !reflect.DeepEqual(frame.inline, observed.inline) {
+		return iamManagedBad()
+	}
+	// The detached target is no longer in observed.managed. Its policy and
+	// versions remain independently owned state and must survive this mutation.
+	preserved, e := iamManagedRead(ctx, tx, arn)
+	if e != nil {
+		return e
+	}
+	preserved.AttachmentCount = 0
+	if !reflect.DeepEqual(target, preserved) {
+		return iamManagedBad()
+	}
+	return nil
 }
 func (s *IAMRoleStore) AttachedRolePolicies(ctx context.Context, roleName, afterName string, limit int, expectedRoleID ...string) (IAMRole, []IAMAttachedPolicy, error) {
-	if limit < 1 || limit > 1001 || afterName != "" && !iamManagedName.MatchString(afterName) {
+	if limit < 1 || limit > 1001 || afterName != "" && !iamManagedName.MatchString(afterName) && afterName != strings.ToLower(iamSSMCoreKey) {
 		return IAMRole{}, nil, ssmFailure{"InvalidInput", "Use a bounded attached-policy page."}
 	}
 	tx, e := s.db.BeginTx(ctx, nil)
@@ -656,7 +729,7 @@ func (s *IAMRoleStore) AttachedRolePolicies(ctx context.Context, roleName, after
 	}
 	list := []IAMAttachedPolicy{}
 	for _, p := range all {
-		if strings.ToLower(p.PolicyName) > strings.ToLower(afterName) && len(list) < limit {
+		if strings.ToLower(iamManagedKey(p)) > strings.ToLower(afterName) && len(list) < limit {
 			list = append(list, IAMAttachedPolicy{PolicyName: p.PolicyName, PolicyArn: p.Arn})
 		}
 	}

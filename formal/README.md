@@ -623,3 +623,13 @@ limits are in `formal/models.json` and [the multipart contract](../docs/s3-multi
 SANY and limited seeded simulation/control checks passed locally; exhaustive BFS
 could not start because the sandbox denies TLC RMI listeners. Exact-HEAD hosted
 validation remains required. It does not prove Go/SQLite/React refinement.
+
+`CFNNativeIAMTransaction` specifies bounded native IAM/CFN composition admission,
+request-derived authority, generation/frame preservation and final post-event
+acknowledgement. See [the correspondence boundary](../docs/formal-cfn-native-iam-transaction.md).
+Its observed fingerprint is deliberately not a requested-state oracle; known
+pre-fix source counterexamples are not certified by a passing model.
+
+`IAMBuiltinPinTransaction` adds the bounded readonly builtin pin and native/CFN
+attachment transaction boundary without replacing customer-managed policy or
+no-builtin CFN models. See [its source correspondence and verification status](../docs/formal-iam-builtin-pin-transaction.md).

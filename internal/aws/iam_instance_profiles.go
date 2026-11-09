@@ -125,6 +125,18 @@ func (s *IAMRoleStore) GetInstanceProfile(ctx context.Context, name string, expe
 	return p, tx.Commit()
 }
 func (s *IAMRoleStore) CreateInstanceProfile(ctx context.Context, name string) (IAMInstanceProfile, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return IAMInstanceProfile{}, err
+	}
+	defer tx.Rollback()
+	value, err := iamCreateInstanceProfileTx(ctx, tx, name, "")
+	if err != nil {
+		return IAMInstanceProfile{}, err
+	}
+	return value, tx.Commit()
+}
+func iamCreateInstanceProfileTx(ctx context.Context, tx *sql.Tx, name, stackID string) (IAMInstanceProfile, error) {
 	if !iamInlineName.MatchString(name) {
 		return IAMInstanceProfile{}, ssmFailure{"ValidationError", "Use a root-path instance profile name of 1–128 IAM name characters."}
 	}
@@ -133,11 +145,9 @@ func (s *IAMRoleStore) CreateInstanceProfile(ctx context.Context, name string) (
 		return IAMInstanceProfile{}, err
 	}
 	id = "AIPA" + strings.ToUpper(id[:16])
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
+	if err = iamStackNameAvailable(ctx, tx, "AWS::IAM::InstanceProfile", name, stackID); err != nil {
 		return IAMInstanceProfile{}, err
 	}
-	defer tx.Rollback()
 	var count, active int
 	if err = tx.QueryRowContext(ctx, `SELECT count(*) FROM aws_iam_instance_profiles`).Scan(&count); err != nil {
 		return IAMInstanceProfile{}, err
@@ -171,7 +181,7 @@ func (s *IAMRoleStore) CreateInstanceProfile(ctx context.Context, name string) (
 	if p.InstanceProfileID != id || p.InstanceProfileName != name || p.CreateDate.Format(time.RFC3339Nano) != created || len(p.Roles) != 0 {
 		return IAMInstanceProfile{}, iamProfileBad()
 	}
-	return p, tx.Commit()
+	return p, nil
 }
 func iamProfileErrorCode(err error) string {
 	if e, ok := err.(ssmFailure); ok {
@@ -188,6 +198,12 @@ func (s *IAMRoleStore) DeleteInstanceProfile(ctx context.Context, name, id strin
 		return err
 	}
 	defer tx.Rollback()
+	if err = iamDeleteInstanceProfileTx(ctx, tx, name, id); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func iamDeleteInstanceProfileTx(ctx context.Context, tx *sql.Tx, name, id string) error {
 	p, err := iamProfileRead(ctx, tx, name, false)
 	if err != nil {
 		return err
@@ -212,7 +228,7 @@ func (s *IAMRoleStore) DeleteInstanceProfile(ctx context.Context, name, id strin
 	if deleted != 1 || retired.InstanceProfileID != id || retired.InstanceProfileName != p.InstanceProfileName || !retired.CreateDate.Equal(p.CreateDate) {
 		return iamProfileBad()
 	}
-	return tx.Commit()
+	return nil
 }
 func (s *IAMRoleStore) ChangeInstanceProfileRole(ctx context.Context, name, id, roleName, roleID string, add bool) error {
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -220,6 +236,12 @@ func (s *IAMRoleStore) ChangeInstanceProfileRole(ctx context.Context, name, id, 
 		return err
 	}
 	defer tx.Rollback()
+	if err = iamChangeInstanceProfileRoleTx(ctx, tx, name, id, roleName, roleID, add); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func iamChangeInstanceProfileRoleTx(ctx context.Context, tx *sql.Tx, name, id, roleName, roleID string, add bool) error {
 	p, err := iamProfileRead(ctx, tx, name, false)
 	if err != nil {
 		return err
@@ -255,10 +277,10 @@ func (s *IAMRoleStore) ChangeInstanceProfileRole(ctx context.Context, name, id, 
 	if err != nil {
 		return err
 	}
-	if after.InstanceProfileID != id || add && (len(after.Roles) != 1 || after.Roles[0].RoleID != roleID) || !add && len(after.Roles) != 0 {
+	if after.InstanceProfileID != id || after.InstanceProfileName != p.InstanceProfileName || !after.CreateDate.Equal(p.CreateDate) || add && (len(after.Roles) != 1 || after.Roles[0] != role) || !add && len(after.Roles) != 0 {
 		return iamProfileBad()
 	}
-	return tx.Commit()
+	return nil
 }
 func (s *IAMRoleStore) ListInstanceProfiles(ctx context.Context, after string, limit int, roleName, roleID string) ([]IAMInstanceProfile, error) {
 	if limit < 1 || limit > 1001 || after != "" && !iamInlineName.MatchString(after) {

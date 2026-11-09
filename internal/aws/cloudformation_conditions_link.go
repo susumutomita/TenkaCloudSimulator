@@ -33,7 +33,7 @@ func stackConditionalLinks(value any, resources map[string]any, refs map[string]
 				return fmt.Errorf("unknown attribute resource")
 			}
 			kind := stringValue(object(resource)["Type"])
-			valid := field == "Arn" && (kind == "AWS::IAM::Role" || kind == "AWS::S3::Bucket" || kind == "AWS::Lambda::Function") || field == "Value" && kind == "AWS::SSM::Parameter" || field == "RootResourceId" && kind == "AWS::ApiGateway::RestApi"
+			valid := field == "Arn" && (kind == "AWS::IAM::Role" || kind == "AWS::IAM::InstanceProfile" || kind == "AWS::S3::Bucket" || kind == "AWS::Lambda::Function") || field == "Value" && kind == "AWS::SSM::Parameter" || field == "RootResourceId" && kind == "AWS::ApiGateway::RestApi"
 			if !valid {
 				return fmt.Errorf("unsupported resource attribute reference")
 			}
