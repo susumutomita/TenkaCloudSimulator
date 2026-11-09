@@ -33,6 +33,52 @@ class FormalGateTests(unittest.TestCase):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, target)
 
+    def test_lambda_log_tail_registry_controls_and_scope_are_mandatory(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'LambdaLogTailDisclosure')
+        self.assertEqual(set(entry['properties']), {'TypeOK', 'ResponseOptIn', 'ResponseSync', 'ResponseAuthorized', 'TailBound', 'DisplayCurrent', 'DisplayHasResponse'})
+        self.assertEqual(len(entry['mutants']), 11)
+        self.assertIn('internal/server/web/app.js', entry['source_scope'])
+        self.assertIn('internal/server/server.go', entry['source_scope'])
+        model_path, config_path = self.root / entry['model'], self.root / entry['config']
+        source, config = model_path.read_bytes(), config_path.read_bytes()
+        removed = json.loads(original)
+        removed['models'] = [m for m in removed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(removed)); model_path.unlink(); config_path.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model_path.write_bytes(source); config_path.write_bytes(config)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            config_path.write_text(config.decode().replace('INVARIANT '+prop+'\n', ''))
+            path.write_text(json.dumps(changed))
+            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+        config_path.write_bytes(config)
+        for scope in [[p for p in entry['source_scope'] if p != removed] for removed in entry['source_scope']] + [entry['source_scope']+['internal/core/store.go']]:
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == entry['id'])['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.subTest(scope=scope), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        for control in entry['mutants']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['mutants'] = [m for m in target['mutants'] if m['id'] != control['id']]
+            path.write_text(json.dumps(changed))
+            with self.subTest(control=control['id']), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                load_registry(self.root)
+            broken = json.loads(json.dumps(control))
+            broken['edits'][0]['old'] += 'missing-anchor'
+            with self.subTest(anchor=control['id']), self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                apply_mutant(source.decode(), entry['id'], broken)
+        path.write_text(original)
+        load_registry(self.root)
+
     def test_sts_registry_guards_and_source_scope_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -217,7 +263,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'IAMInstanceProfiles', 'S3MultipartState', 'ConsoleHandoff', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'SNSAdmission', 'SNSLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'CatalogResourceLifecycle', 'CatalogConsoleEpoch', 'LoginInputIntent', 'STSSessionLifecycle', 'CFNEventHistory'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'LambdaLogTailDisclosure', 'IAMInstanceProfiles', 'S3MultipartState', 'ConsoleHandoff', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'SNSAdmission', 'SNSLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'CatalogResourceLifecycle', 'CatalogConsoleEpoch', 'LoginInputIntent', 'STSSessionLifecycle', 'CFNEventHistory'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:

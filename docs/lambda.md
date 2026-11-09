@@ -21,21 +21,27 @@ SDKは同一endpointのdummy TCSIM署名scopeでlambdaへ振り分ける。unsig
 
 InvokeはRequestResponseとDryRunのみ。Python例外はHTTP200 + `X-Amz-Function-Error: Unhandled`でJSONのerrorType/errorMessageを返す。サービスの認可・入力・保存エラーは適切なHTTPエラー。ZIP更新はRevisionIdの楽観lockを実装し、削除後に同名関数が再作成されても古いrole/environmentを復活させない。
 
+同期Invokeで明示的に`X-Amz-Log-Type: Tail`を指定すると、`X-Amz-Log-Result`に実際に捕捉したguest出力の末尾最大4096 bytesをbase64で返す。省略または`None`では返さない。IAMは同じ`lambda:InvokeFunction`で、metadata読取権限やCloudWatch権限を付与しない。DryRunでのTail、async/Event、client contextは未対応として拒否する。ログに機密値が含まれる可能性があるため、要求・表示は明示的に行う。
+
+Tailは従来の先頭64 KiBの内部Logsとは独立し、内部SDK交換・result frameを除外する。stdoutの後にstderrを連結するため、両者の時系列順は再現しない。UTF-8文字の途中から始まる場合があり、表示側は不正な先頭bytesを置換して復号する。関数例外・timeout・sandbox失敗時も上限内で捕捉済みの出力のみを返す。guest内の未flush出力は回収できず、開始前の失敗には出力がない。AWSのSTART/END/REPORT行の生成、永続ログ保存、CloudWatch Logsへの自動配送は行わない。
+
 空のInvoke bodyは`{}`として扱う。Create時のTagsは保存し、追加のlambda:TagResourceを要求する。Tagsの一覧/変更APIやtag条件のIAM評価は未対応。現在のcontextはfunction_name/function_version/invoked_function_arnのみ。
 
 ## 制限と実行境界
 
 - 4 region、100 functions/process、ZIP合計8 MiB。ZIP 256 KiB、展開1 MiB/64 entries、regular Python sourceのみ。危険なpath、symlink、重複、破損ZIP、展開量超過を拒否する。
-- MemorySize128 MiBのWASM linear memory、実行1–30秒、同時2 sandbox、event/result/stdout/stderr各256 KiB、収集log64 KiB。queue待ちも実行期限に含む。Go runtime/JIT/embedded assets等を含むOS process全体のRSS上限ではない。
+- MemorySize128 MiBのWASM linear memory、実行1–30秒、同時2 sandbox、event/result/stdout/stderr各256 KiB、内部Logsは先頭64 KiB、明示要求のTailは末尾4096 bytes。queue待ちも実行期限に含む。Go runtime/JIT/embedded assets等を含むOS process全体のRSS上限ではない。
 - 初回は固定interpreterをGo内でcompileする。待機は関数の実行時間とは別で、最大2分またはrequest/終了cancelまで。固定モジュールのJIT自体は終了後に後処理する場合があるが、終了処理は待たず、閉じたstoreへruntimeを公開しない。guestは終了後に開始しない。通常の実行ごとに独立したcold sandboxを作り、module globalsや/tmpのwarm保持は実装しない。
 - ホストfilesystem、process作成、socket、ホストenvironmentを渡さない。読取専用のstdlib・当該ZIPと固定のlocal SDK shimを提供する。日時は実時計、sleepは期限で中断できる相対時刻待機。外部native extension、ctypes/SSL、pip install、upstream boto3 package、任意networkは利用不可。
-- Versions/aliases、async/Event、log tail/CloudWatch、client context、layers/images、VPC、KMS、resource policy/Function URL、source-download URL、UpdateFunctionConfiguration、GetFunction等は未対応。未知fieldsを黙って受理しない。
+- Versions/aliases、async/Event、CloudWatch Logsへの自動配送、client context、layers/images、VPC、KMS、resource policy/Function URL、source-download URL、UpdateFunctionConfiguration、GetFunction等は未対応。未知fieldsを黙って受理しない。
 
 CPythonは変更していない。WASIの絶対時刻poll非対応に合わせ、configureのclock_nanosleep検出を無効にして標準nanosleep fallbackを使用する。stdlibは517ファイルの選択subset。原文license、ソースcommentの権利表示、WASI libc/LLVM/SQLiteの通知と固定commit/hashを同梱する。[再構築](../tools/python/README.md)。
 
 ## Cloudscape画面と検証
 
 Lambda→Functions→Create function（Author from scratch、Python 3.12、既存local role）→Test。Services→IAM→Roles→Create roleでローカルroleを作り、LambdaのPermissions→Existing roleから選べる。初期policyは明示Denyでservice権限なし。Code tabからZIPをDeployし、同じnative API/SDKで読戻す。Configurationは実設定を表示する。Invokeのみ許可された参加者には、一覧/configurationを許可せず、hostから渡された名前のTestを用意する。inline code editor、monitoring、role自動作成等は未再現。実AWSログイン済み画面とのpixel一致は未検証。
+
+Test の「このテストのログ末尾を取得」を明示的に選ぶと、その同期呼び出しの実出力を表示する。既定では要求しない。選択解除、入力変更、新しい呼び出し、関数やサービスの移動で以前の表示を消し、遅れて返った別の呼び出し結果を破棄する。中断は表示と待機を取り消すもので、既に実行した関数の副作用を巻き戻す保証はない。CloudWatch の永続履歴や Monitor tab の対応を意味しない。
 
 実バイナリを空cwd/PATHで起動するE2Eは、ブラウザ作成/実行/ZIP更新/削除、SDKのcode hash/readback、参加者Invoke/metadata拒否、別processの同名関数とtoken分離を検証する。Go race testsはSQL/hashの実Python実行、host capability拒否、deadline/heap/output bounds、concurrent cold isolation、SQLite失敗rollback/破損fail-closedを検証する。
 
