@@ -29,6 +29,7 @@ var assets embed.FS
 const MaxCodeBytes = 256 << 10
 const MaxExpandedBytes = 1 << 20
 const MaxOutputBytes = 256 << 10
+const MaxLogTailBytes = 4 << 10
 
 var compilationCache = wazero.NewCompilationCache()
 var handlerName = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)+$`)
@@ -58,6 +59,10 @@ type Result struct {
 	Payload       json.RawMessage
 	FunctionError bool
 	Logs          string
+	// LogTail contains the last captured bytes, stdout followed by stderr, not
+	// chronological interleaving. It can begin inside a UTF-8 character. Reserved
+	// protocol frames are excluded; unflushed guest buffers cannot be recovered.
+	LogTail []byte
 }
 
 func ValidateCode(code []byte, handler string) (*zip.Reader, error) {
@@ -230,35 +235,76 @@ func (r *Runtime) Run(ctx context.Context, in Invocation) (Result, error) {
 		config = config.WithEnv(key, value)
 	}
 	_, err = r.runtime.InstantiateModule(ctx, r.module, config)
+	// Capture before finish so a timeout or failed exchange retains bounded pending
+	// guest output too. Protocol frames are never exposed through the tail.
+	var pending []byte
+	if exchange != nil {
+		pending = exchange.pending[:min(len(exchange.pending), MaxOutputBytes-output.Len())]
+	}
+	tail := capturedLogTail(output.Bytes(), pending, stderr.Bytes())
 	if ctx.Err() != nil {
-		return Result{Logs: output.String()[:min(output.Len(), 64<<10)]}, ctx.Err()
+		return Result{Logs: output.String()[:min(output.Len(), 64<<10)], LogTail: tail}, ctx.Err()
 	}
 	if exchange != nil {
 		if e := exchange.finish(); e != nil {
-			return Result{}, errors.New("Local capability exchange exceeded its protocol limits")
+			return Result{LogTail: tail}, errors.New("Local capability exchange exceeded its protocol limits")
 		}
 	}
 	if output.exceeded || stderr.exceeded {
-		return Result{}, errors.New("Function output exceeded 256 KiB")
+		return Result{LogTail: tail}, errors.New("Function output exceeded 256 KiB")
 	}
 	if err != nil {
-		return Result{}, fmt.Errorf("Python sandbox exited before returning: %w", err)
+		return Result{LogTail: tail}, fmt.Errorf("Python sandbox exited before returning: %w", err)
 	}
 	marker := []byte("\x1eTCSIM_RESULT ")
 	index := bytes.LastIndex(output.Bytes(), marker)
 	if index < 0 {
-		return Result{}, errors.New("Python sandbox returned no result")
+		return Result{LogTail: tail}, errors.New("Python sandbox returned no result")
 	}
 	var response struct {
 		Payload json.RawMessage `json:"payload"`
 		Error   bool            `json:"error"`
 	}
 	if json.Unmarshal(output.Bytes()[index+len(marker):], &response) != nil || response.Payload == nil {
-		return Result{}, errors.New("Python sandbox returned an invalid result")
+		return Result{LogTail: tail}, errors.New("Python sandbox returned an invalid result")
 	}
 	logs := string(output.Bytes()[:index]) + stderr.String()
 	if len(logs) > 64<<10 {
 		logs = logs[:64<<10]
 	}
-	return Result{response.Payload, response.Error, logs}, nil
+	return Result{Payload: response.Payload, FunctionError: response.Error, Logs: logs, LogTail: tail}, nil
+}
+
+// capturedLogTail uses the full bounded capture, never the legacy Logs prefix.
+// Frame markers are reserved even when guest code prints them. Drop the marker
+// and the remainder of that line, including incomplete frames on cancellation.
+func capturedLogTail(stdout, pending, stderr []byte) []byte {
+	output := append(append([]byte(nil), stdout...), pending...)
+	var tail []byte
+	for _, stream := range [][]byte{output, stderr} {
+		for len(stream) > 0 {
+			end := bytes.IndexByte(stream, '\n')
+			if end < 0 {
+				end = len(stream)
+			} else {
+				end++
+			}
+			line := stream[:end]
+			stream = stream[end:]
+			for _, marker := range [][]byte{exchangeMarker, []byte("\x1eTCSIM_RESULT ")} {
+				if index := bytes.Index(line, marker); index >= 0 {
+					line = line[:index]
+				}
+			}
+			if len(line) >= MaxLogTailBytes {
+				tail = append(tail[:0], line[len(line)-MaxLogTailBytes:]...)
+			} else {
+				if excess := len(tail) + len(line) - MaxLogTailBytes; excess > 0 {
+					tail = tail[excess:]
+				}
+				tail = append(tail, line...)
+			}
+		}
+	}
+	return tail
 }

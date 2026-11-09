@@ -3405,7 +3405,7 @@
         "tags": [
           "Lambda Python functions"
         ],
-        "description": "IAM lambda:InvokeFunction on the actual ARN. Event JSON max256 KiB; HTTP200 with X-Amz-Function-Error: Unhandled on function exception. DryRun is HTTP204. Network, SDK, layers, async, aliases, log tail and client context unsupported.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
+        "description": "IAM lambda:InvokeFunction on the actual ARN. Event JSON max256 KiB; HTTP200 with X-Amz-Function-Error: Unhandled on function exception. DryRun is HTTP204. Explicit synchronous X-Amz-Log-Type: Tail returns the last 4096 captured guest-output bytes as base64 in X-Amz-Log-Result, including captured output on function errors or timeout. Omitted/None returns no log header. Stdout precedes stderr, not chronological interleaving; UTF-8 may be split. Internal protocol frames are excluded. No synthetic AWS START/END/REPORT lines, log persistence or automatic CloudWatch Logs delivery. DryRun with Tail, async, aliases and client context are unsupported. Host network remains unavailable; the execution-role SDK is a bounded local subset.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
         "parameters": [
           {
             "name": "X-Simulator-Service",
@@ -3457,11 +3457,27 @@
             }
           },
           {
+            "name": "X-Amz-Log-Type",
+            "in": "header",
+            "description": "Explicit opt-in for synchronous guest output, which may contain sensitive values. Tail with DryRun is unsupported.",
+            "schema": {
+              "type": "string",
+              "enum": ["None", "Tail"],
+              "default": "None"
+            }
+          },
+          {
             "$ref": "#/components/parameters/SimulatorToken"
           }
         ],
         "responses": {
           "200": {
+            "headers": {
+              "X-Amz-Log-Result": {
+                "description": "Only for explicit synchronous Tail: base64 of at most 4096 raw captured output bytes. May start inside a UTF-8 character.",
+                "schema": {"type": "string"}
+              }
+            },
             "description": "JSON returned by the actual Python handler; shape depends on your code and may be an object, array or primitive. A function exception can still return HTTP200: check x-amz-function-error and the error payload. This differs from a protocol/IAM error such as403.",
             "content": {
               "application/json": {

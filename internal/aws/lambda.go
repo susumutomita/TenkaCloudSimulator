@@ -596,8 +596,9 @@ func (g *Gateway) serveLambda(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		kind := r.Header.Get("X-Amz-Invocation-Type")
-		if kind != "" && kind != "RequestResponse" && kind != "DryRun" || r.Header.Get("X-Amz-Log-Type") != "" && r.Header.Get("X-Amz-Log-Type") != "None" || r.Header.Get("X-Amz-Client-Context") != "" {
-			lambdaError(w, ssmFailure{"NotImplementedException", "Only synchronous or DryRun invocation without log tail/client context is supported."})
+		logType := r.Header.Get("X-Amz-Log-Type")
+		if kind != "" && kind != "RequestResponse" && kind != "DryRun" || logType != "" && logType != "None" && logType != "Tail" || kind == "DryRun" && logType == "Tail" || r.Header.Get("X-Amz-Client-Context") != "" {
+			lambdaError(w, ssmFailure{"NotImplementedException", "Only synchronous invocation (optional Tail) or DryRun without Tail is supported; client context is unsupported."})
 			return
 		}
 		f, e := g.Lambdas.get(region, name)
@@ -637,6 +638,9 @@ func (g *Gateway) serveLambda(w http.ResponseWriter, r *http.Request) {
 		}
 		if result.FunctionError {
 			w.Header().Set("X-Amz-Function-Error", "Unhandled")
+		}
+		if logType == "Tail" {
+			w.Header().Set("X-Amz-Log-Result", base64.StdEncoding.EncodeToString(result.LogTail))
 		}
 		w.Header().Set("X-Amz-Executed-Version", "$LATEST")
 		w.Header().Set("Content-Type", "application/json")

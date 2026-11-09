@@ -7636,6 +7636,158 @@
      "expect_invariant": "PeerFrame"
     }
    ]
+  },
+  {
+   "id": "LambdaLogTailDisclosure",
+   "model": "formal/LambdaLogTailDisclosure.tla",
+   "config": "formal/LambdaLogTailDisclosure.cfg",
+   "bounds": "One request, two contexts, two epochs, three invocation kinds, Boolean opt-in and Invoke permission, and three abstract sizes: empty, within 4096 bytes, and overflow.",
+   "properties": [
+    "TypeOK",
+    "ResponseOptIn",
+    "ResponseSync",
+    "ResponseAuthorized",
+    "TailBound",
+    "DisplayCurrent",
+    "DisplayHasResponse"
+   ],
+   "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness.",
+   "source_scope": [
+    "internal/workload/python/runtime.go",
+    "internal/workload/python/runtime_log_tail_test.go",
+    "internal/aws/lambda.go",
+    "internal/aws/lambda_log_tail_test.go",
+    "internal/server/lambda_test.go",
+    "tools/console/src/lambda.jsx",
+    "tools/console/src/lambda-invoke.mjs",
+    "test/console/lambda-invoke.test.mjs",
+    "test/e2e/lambda_log_tail_console.py",
+    "internal/server/web/app.js",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "SkipOptIn",
+     "edits": [
+      {
+       "old": "exposed' = (optIn /\\ kind = \"Sync\" /\\ allowed) (* ResponseAdmission *)",
+       "new": "exposed' = (kind = \"Sync\" /\\ allowed) (* ResponseAdmission *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResponseOptIn"
+    },
+    {
+     "id": "SkipSync",
+     "edits": [
+      {
+       "old": "exposed' = (optIn /\\ kind = \"Sync\" /\\ allowed) (* ResponseAdmission *)",
+       "new": "exposed' = (optIn /\\ allowed) (* ResponseAdmission *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResponseSync"
+    },
+    {
+     "id": "SkipInvokePermission",
+     "edits": [
+      {
+       "old": "exposed' = (optIn /\\ kind = \"Sync\" /\\ allowed) (* ResponseAdmission *)",
+       "new": "exposed' = (optIn /\\ kind = \"Sync\") (* ResponseAdmission *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResponseAuthorized"
+    },
+    {
+     "id": "SkipTailCap",
+     "edits": [
+      {
+       "old": "(IF capturedSize > 1 THEN 1 ELSE capturedSize) (* TailCap *)",
+       "new": "capturedSize (* TailCap *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TailBound"
+    },
+    {
+     "id": "AcceptOldEpoch",
+     "edits": [
+      {
+       "old": "/\\ epoch = 0 (* DisplayEpoch *)",
+       "new": "/\\ TRUE (* DisplayEpoch *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DisplayCurrent"
+    },
+    {
+     "id": "AcceptUnmounted",
+     "edits": [
+      {
+       "old": "/\\ alive (* DisplayAlive *)",
+       "new": "/\\ TRUE (* DisplayAlive *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DisplayCurrent"
+    },
+    {
+     "id": "SkipContextInvalidation",
+     "edits": [
+      {
+       "old": "epoch' = 1 (* ContextInvalidation *)",
+       "new": "epoch' = epoch (* ContextInvalidation *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DisplayCurrent"
+    },
+    {
+     "id": "KeepOnEpoch",
+     "edits": [
+      {
+       "old": "visible' = FALSE (* ClearEpoch *)",
+       "new": "visible' = visible (* ClearEpoch *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DisplayCurrent"
+    },
+    {
+     "id": "KeepOnContext",
+     "edits": [
+      {
+       "old": "visible' = FALSE (* ClearContext *)",
+       "new": "visible' = visible (* ClearContext *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DisplayCurrent"
+    },
+    {
+     "id": "KeepOnUnmount",
+     "edits": [
+      {
+       "old": "visible' = FALSE (* ClearUnmount *)",
+       "new": "visible' = visible (* ClearUnmount *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DisplayCurrent"
+    },
+    {
+     "id": "DisplayWithoutResponse",
+     "edits": [
+      {
+       "old": "Display == /\\ phase = \"Ready\" /\\ exposed",
+       "new": "Display == /\\ phase = \"Ready\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DisplayHasResponse"
+    }
+   ]
   }
  ]
 }

@@ -1,342 +1,329 @@
 {
   "version": 1,
-  "base_sha": "1a36d62daf12878fc5f16ce2a37d2c0f44cd67ed",
+  "base_sha": "3d575ac645de4f1b36d644879a714374f5f6d9d4",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "f5874fec0525dd1d8c185e85b963a3e58ad2ba327c0d6c01c217c9221ef6a6b3",
+      "path": "docs/formal-lambda-log-tail.md",
+      "sha256": "239e0700bcebf0d63d4e294cd6e7481fcea85e7439fec116a1e9f9079241cf07",
+      "models": [],
       "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
+      "reason": "Documents the implemented opt-in bounded log-tail behavior, disclosure UI and explicit unsupported scope; does not claim completed runtime or browser validation."
     },
     {
-      "path": "README.md",
-      "sha256": "03ff4a23923040d1e3faf9f5e147f2fd72904623d334eac4ea64375041e3ade3",
+      "path": "docs/lambda.md",
+      "sha256": "82fef72ff859b326a96067612533023f808a4ce623f01ab07d7ed7ee4ae14d5e",
+      "models": [],
       "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
+      "reason": "Documents the implemented opt-in bounded log-tail behavior, disclosure UI and explicit unsupported scope; does not claim completed runtime or browser validation."
     },
     {
-      "path": "docs/design/0011-contained-linux-execution.md",
-      "sha256": "6bda54f11f5fee92a28506d43854bd86b9b7265bdda242b560d3e465671d1e59",
-      "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
-    },
-    {
-      "path": "docs/development-status.md",
-      "sha256": "37db4c60e6792c2ce126073b29eee4e8c8a1ab2537c0bcbd99f73ed45da0872d",
-      "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-iam-instance-profiles.md",
-      "sha256": "2b4b21b2003eca998caed8b55c2132cf1dba02fe661a66248cad7c13b91e953d",
-      "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
-    },
-    {
-      "path": "docs/iam-instance-profiles.md",
-      "sha256": "4335e697a606eae0c2e35dcae349ec883d4a729c31284ba36d15f48cbf548d8c",
-      "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
-    },
-    {
-      "path": "docs/iam.md",
-      "sha256": "9a06ce785171cec8f26b8254efaa45c684c3385aa79909227d8ef29ac89a499e",
-      "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
-    },
-    {
-      "path": "formal/IAMInstanceProfiles.cfg",
-      "sha256": "13d76f59fa82e4bfbed75e3865385c7d627f33a06885880691665a8c3b0eccf1",
-      "disposition": "modeled",
-      "reason": "Adds the bounded native instance-profile lifecycle or its admission/registration correspondence while preserving existing contracts. The new model checks action and PassRole authorization, captured generations, one-role membership, dependency deletion, failure frames and peer preservation. Concrete Go/SQL/HTTP/SDK behavior is tested separately; this is not a refinement or guest-execution proof.",
+      "path": "formal/LambdaLogTailDisclosure.cfg",
+      "sha256": "5998309e77450ff4fdac16f8888fd51f1152f869728ac7b7456ab26e3eb9366e",
       "models": [
         {
-          "id": "IAMInstanceProfiles",
+          "id": "LambdaLogTailDisclosure",
           "properties": [
-            "TypeOK",
-            "AuthorizationRequired",
-            "PassRoleRequired",
-            "ProfileGenerationGuard",
-            "RoleGenerationGuard",
-            "FailureFrame",
-            "SingleRole",
-            "AttachmentAuthority",
-            "FreshProfileIdentity",
-            "PeerFrame",
-            "RemovalExact"
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
           ],
-          "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history."
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
         }
-      ]
+      ],
+      "disposition": "modeled",
+      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
     },
     {
-      "path": "formal/IAMInstanceProfiles.tla",
-      "sha256": "ed79df127322c68c92afc304a131d13eb117bd8064fd8a92b9d2f4c9a22606d4",
-      "disposition": "modeled",
-      "reason": "Adds the bounded native instance-profile lifecycle or its admission/registration correspondence while preserving existing contracts. The new model checks action and PassRole authorization, captured generations, one-role membership, dependency deletion, failure frames and peer preservation. Concrete Go/SQL/HTTP/SDK behavior is tested separately; this is not a refinement or guest-execution proof.",
+      "path": "formal/LambdaLogTailDisclosure.tla",
+      "sha256": "9c0c67ec3eabe7f2de9e2d82e2733b4e586c338bb08acce801f6a10adf4417cf",
       "models": [
         {
-          "id": "IAMInstanceProfiles",
+          "id": "LambdaLogTailDisclosure",
           "properties": [
-            "TypeOK",
-            "AuthorizationRequired",
-            "PassRoleRequired",
-            "ProfileGenerationGuard",
-            "RoleGenerationGuard",
-            "FailureFrame",
-            "SingleRole",
-            "AttachmentAuthority",
-            "FreshProfileIdentity",
-            "PeerFrame",
-            "RemovalExact"
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
           ],
-          "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history."
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
         }
-      ]
+      ],
+      "disposition": "modeled",
+      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
     },
     {
       "path": "formal/models.json",
-      "sha256": "5ab7373d3c5d2fd463d5c666251e42dac13a30cb5fb6c54e4e3196e274882c8c",
+      "sha256": "fa33ae7e2c155b5d18206a8e2d5a34fe387beb15008dd614e5f1a9783e659105",
+      "models": [],
       "disposition": "formal-infrastructure",
-      "reason": "Registers the additional profile model and all twelve required sensitivity controls, preserving all sixty upstream models, invariants, source scopes and thresholds. The exact registry expectation is expanded, not weakened.",
-      "models": []
+      "reason": "Registers and protects the additional bounded disclosure specification, exact source scopes and all required sensitivity controls while preserving existing models."
     },
     {
-      "path": "internal/aws/iam_instance_profiles.go",
-      "sha256": "0c5f922f42914218099a10ccc48e21c88bb346e996d03cddc8dd735154f2a3b7",
-      "disposition": "modeled",
-      "reason": "Adds the bounded native instance-profile lifecycle or its admission/registration correspondence while preserving existing contracts. The new model checks action and PassRole authorization, captured generations, one-role membership, dependency deletion, failure frames and peer preservation. Concrete Go/SQL/HTTP/SDK behavior is tested separately; this is not a refinement or guest-execution proof.",
+      "path": "internal/aws/lambda.go",
+      "sha256": "f6793a30e370518951b21fd7ed4fec29254ea7df3177e2b1e7068e421683e848",
       "models": [
         {
-          "id": "IAMInstanceProfiles",
+          "id": "LambdaLogTailDisclosure",
           "properties": [
-            "TypeOK",
-            "AuthorizationRequired",
-            "PassRoleRequired",
-            "ProfileGenerationGuard",
-            "RoleGenerationGuard",
-            "FailureFrame",
-            "SingleRole",
-            "AttachmentAuthority",
-            "FreshProfileIdentity",
-            "PeerFrame",
-            "RemovalExact"
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
           ],
-          "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history."
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
         }
-      ]
+      ],
+      "disposition": "modeled",
+      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
     },
     {
-      "path": "internal/aws/iam_instance_profiles_query.go",
-      "sha256": "1e8cdd3112e4f0e924d35e8d42988ad62a3f6b436649933c32cf661a4756b994",
-      "disposition": "modeled",
-      "reason": "Adds the bounded native instance-profile lifecycle or its admission/registration correspondence while preserving existing contracts. The new model checks action and PassRole authorization, captured generations, one-role membership, dependency deletion, failure frames and peer preservation. Concrete Go/SQL/HTTP/SDK behavior is tested separately; this is not a refinement or guest-execution proof.",
+      "path": "internal/aws/lambda_log_tail_test.go",
+      "sha256": "f481600323605cda9b8aab45a8250e2e66236dda1612bd40b7ea0d6cc6247676",
       "models": [
         {
-          "id": "IAMInstanceProfiles",
+          "id": "LambdaLogTailDisclosure",
           "properties": [
-            "TypeOK",
-            "AuthorizationRequired",
-            "PassRoleRequired",
-            "ProfileGenerationGuard",
-            "RoleGenerationGuard",
-            "FailureFrame",
-            "SingleRole",
-            "AttachmentAuthority",
-            "FreshProfileIdentity",
-            "PeerFrame",
-            "RemovalExact"
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
           ],
-          "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history."
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
         }
-      ]
-    },
-    {
-      "path": "internal/aws/iam_instance_profiles_query_test.go",
-      "sha256": "eccd1f3ce7cad2eb465cbff3049eb9a954de011f13673e351dfc4db3f5b34385",
-      "disposition": "test-support",
-      "reason": "Adds instance-profile documentation, validation or reviewed source metadata while preserving all existing service behavior and strict acceptance requirements.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/iam_instance_profiles_test.go",
-      "sha256": "4497b5f3623c62e0cf6325c88f1c9a6882a607f06ecc2b1c5fa9b11a683255bf",
-      "disposition": "test-support",
-      "reason": "Adds instance-profile documentation, validation or reviewed source metadata while preserving all existing service behavior and strict acceptance requirements.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/iam_query.go",
-      "sha256": "1da4105ffdc0e831c347d1656e9680593d532227719d37e42883940a66fd8958",
+      ],
       "disposition": "modeled",
-      "reason": "Adds the bounded native instance-profile lifecycle or its admission/registration correspondence while preserving existing contracts. The new model checks action and PassRole authorization, captured generations, one-role membership, dependency deletion, failure frames and peer preservation. Concrete Go/SQL/HTTP/SDK behavior is tested separately; this is not a refinement or guest-execution proof.",
-      "models": [
-        {
-          "id": "IAMInstanceProfiles",
-          "properties": [
-            "TypeOK",
-            "AuthorizationRequired",
-            "PassRoleRequired",
-            "ProfileGenerationGuard",
-            "RoleGenerationGuard",
-            "FailureFrame",
-            "SingleRole",
-            "AttachmentAuthority",
-            "FreshProfileIdentity",
-            "PeerFrame",
-            "RemovalExact"
-          ],
-          "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/iam_roles.go",
-      "sha256": "e1332560c541c97f708c1fd9c2201f6b5f5bebe8bca3dace31e51c359bcc49c6",
-      "disposition": "modeled",
-      "reason": "Adds the bounded native instance-profile lifecycle or its admission/registration correspondence while preserving existing contracts. The new model checks action and PassRole authorization, captured generations, one-role membership, dependency deletion, failure frames and peer preservation. Concrete Go/SQL/HTTP/SDK behavior is tested separately; this is not a refinement or guest-execution proof.",
-      "models": [
-        {
-          "id": "IAMInstanceProfiles",
-          "properties": [
-            "TypeOK",
-            "AuthorizationRequired",
-            "PassRoleRequired",
-            "ProfileGenerationGuard",
-            "RoleGenerationGuard",
-            "FailureFrame",
-            "SingleRole",
-            "AttachmentAuthority",
-            "FreshProfileIdentity",
-            "PeerFrame",
-            "RemovalExact"
-          ],
-          "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history."
-        }
-      ]
+      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "eceec66649184747ff748628f46676a3f6decbd1d712ad81ba239a1f276553b7",
+      "sha256": "a6712cfbadadfbccbe9861b2169fa2cd7f8c1425b300b67ad373fe1823b5102a",
+      "models": [],
       "disposition": "presentation",
-      "reason": "Adds instance-profile documentation, validation or reviewed source metadata while preserving all existing service behavior and strict acceptance requirements.",
-      "models": []
+      "reason": "Describes native synchronous LogType Tail and bounded X-Amz-Log-Result headers; does not change request dispatch or authority."
     },
     {
-      "path": "internal/server/iam_native_test.go",
-      "sha256": "9d32f47edb5eed569d0f7ba87e3305987d324e32460851cb790afa11807b0789",
-      "disposition": "test-support",
-      "reason": "Adds instance-profile documentation, validation or reviewed source metadata while preserving all existing service behavior and strict acceptance requirements.",
-      "models": []
+      "path": "internal/server/lambda_test.go",
+      "sha256": "ee1d6ecc1774bd66835b03e0d1693413b009ab2697978233b9f708af75c37796",
+      "models": [
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Native HTTP tests bind explicit Tail response admission to the current Lambda contract. A separate regression preserves the public main IAM instance-profile capability metadata while adding bounded Tail metadata; the finite Tail model does not prove IAM discovery or native execution."
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "b5c6e55ba11d72dbb27bd991179e39c2a813a36f19c00196d2f497e1a705296c",
-      "disposition": "modeled",
-      "reason": "Adds the bounded native instance-profile lifecycle or its admission/registration correspondence while preserving existing contracts. The new model checks action and PassRole authorization, captured generations, one-role membership, dependency deletion, failure frames and peer preservation. Concrete Go/SQL/HTTP/SDK behavior is tested separately; this is not a refinement or guest-execution proof.",
+      "sha256": "ffbf961120969486f3cbbb2b5a4a3f8685a10ac51bef11f150c0deed4691282b",
       "models": [
         {
-          "id": "IAMInstanceProfiles",
+          "id": "LambdaLogTailDisclosure",
           "properties": [
-            "TypeOK",
-            "AuthorizationRequired",
-            "PassRoleRequired",
-            "ProfileGenerationGuard",
-            "RoleGenerationGuard",
-            "FailureFrame",
-            "SingleRole",
-            "AttachmentAuthority",
-            "FreshProfileIdentity",
-            "PeerFrame",
-            "RemovalExact"
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
           ],
-          "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history."
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
         }
-      ]
+      ],
+      "disposition": "modeled",
+      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "63225d7f83140ba3e1f673edb282ba61e40a434d891fc1d72d3ee0427569b33d",
+      "models": [
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+    },
+    {
+      "path": "internal/workload/python/runtime.go",
+      "sha256": "9e1108583bc6b02a0e10b5e7191ce5e35e3a58b19f691ed08972319cc71d2fee",
+      "models": [
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+    },
+    {
+      "path": "internal/workload/python/runtime_log_tail_test.go",
+      "sha256": "b8fe3cbf9735eefe8c13f1713bb863e7a5aadbd103d98cbe0336c2465e272ce4",
+      "models": [
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "581a79924f0beb4b595172dfb4496b9fccc6a1f3deb5c0f5557793d599e85e39",
+      "sha256": "4041551b6e575a094dd6fc28c856c7cbd7f2846baaa1a3c6a726165b60b9e39a",
+      "models": [],
       "disposition": "formal-infrastructure",
-      "reason": "Registers the additional profile model and all twelve required sensitivity controls, preserving all sixty upstream models, invariants, source scopes and thresholds. The exact registry expectation is expanded, not weakened.",
-      "models": []
+      "reason": "Registers and protects the additional bounded disclosure specification, exact source scopes and all required sensitivity controls while preserving existing models."
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "b7fafab73c57f2076286c87138dc1efc2b8ae1042bab0b5bce26d483679fcd7b",
+      "sha256": "a36c01fc2d82bec27ac571123b56e34dec74be3d7824a505a9e4a4a178110916",
+      "models": [],
       "disposition": "formal-infrastructure",
-      "reason": "Registers the additional profile model and all twelve required sensitivity controls, preserving all sixty upstream models, invariants, source scopes and thresholds. The exact registry expectation is expanded, not weakened.",
-      "models": []
+      "reason": "Registers and protects the additional bounded disclosure specification, exact source scopes and all required sensitivity controls while preserving existing models."
+    },
+    {
+      "path": "test/console/lambda-invoke.test.mjs",
+      "sha256": "b917b12defe1be3c3ffa4a3e02084b321ea24f184f3cc6a264c5d645272ef5d4",
+      "models": [
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "fc56b68ce27c12e44dce6eeb191b69ff593bee3512fc49e6da17f35bf0cf1fbe",
+      "sha256": "4e8392fdb9a5bd7487e8705e08b4fa0de7b6f1649bd143d15067997564e92e18",
+      "models": [],
       "disposition": "test-support",
-      "reason": "Adds instance-profile documentation, validation or reviewed source metadata while preserving all existing service behavior and strict acceptance requirements.",
-      "models": []
+      "reason": "Registers mandatory real-binary console acceptance for explicit log tails without skipping existing tests."
     },
     {
-      "path": "test/e2e/iam_instance_profiles.py",
-      "sha256": "85fc63ac855a3d9b3b874932d2cbb3913f3c63b1700bcb65060b31de714d1230",
-      "disposition": "test-support",
-      "reason": "Adds instance-profile documentation, validation or reviewed source metadata while preserving all existing service behavior and strict acceptance requirements.",
-      "models": []
+      "path": "test/e2e/lambda_log_tail_console.py",
+      "sha256": "31228b0ddfbd9d27df3814acecf8e99a93b56fe3c30b97fb16878b3efc2cbe65",
+      "models": [
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Console acceptance exercises explicit Tail disclosure and stale-request clearing. Its loopback setup uses the existing PUT policy API and explicit deny-all fixtures; native SDK verification checks those setup and revocation paths separately from browser acceptance. No production authorization or test assertion is weakened."
     },
     {
-      "path": "test/e2e/iam_managed_reference.py",
-      "sha256": "1c2f7d5f890df8d5a35d5b03eb9cc3628c49d880e7a210c61e64dcbe903b48de",
-      "disposition": "test-support",
-      "reason": "Adds instance-profile documentation, validation or reviewed source metadata while preserving all existing service behavior and strict acceptance requirements.",
-      "models": []
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "18c89ad2565543cd5c716721c42aee448516742afd28b768ad19f6b75ae10a45",
+      "models": [],
+      "disposition": "presentation",
+      "reason": "Reproducible build provenance for the official-component console bundle; no independent runtime authority."
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "3d3719bf5c88cece6df8e91ce9385b19298ab80f7a06b0911cf07de356af89fa",
-      "disposition": "test-support",
-      "reason": "Updates the exact preserved OpenAPI path digest only for the reviewed seven-operation IAM profile extension, with negative controls for each profile example, action/name schema, role binding, and existing CreateRole preservation. Components and Sakura projections remain unchanged.",
-      "models": []
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "053c638d9e3fd699ecb69d4d1e05cb79d7fdb7e6351cf53ac88e8cf0d7b618d1",
+      "models": [],
+      "disposition": "presentation",
+      "reason": "Reproducible build provenance for the official-component console bundle; no independent runtime authority."
     },
     {
-      "path": "third_party/independent-native-source.json",
-      "sha256": "8bc83aa4d564d96403c7a02bb65a83c20285cd9ef2623f648a6fffb963353214",
-      "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
+      "path": "tools/console/src/lambda-invoke.mjs",
+      "sha256": "90193b4fcd63fb0e829682788d1d8be27d740aaebb5c179a5c1a009b2695cc5c",
+      "models": [
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
     },
     {
-      "path": "third_party/kumo-apigateway.json",
-      "sha256": "ed950c5ece27ef6cf66c052b998ca11c05bb33a2645f532d1f0b7edb87a3fa35",
-      "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
-    },
-    {
-      "path": "third_party/kumo-cloudwatch-logs.json",
-      "sha256": "c844486b1ffd6a4d8cf1956af037a27eebe79c2ec6ea2477fef05c1356b0be3a",
-      "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
-    },
-    {
-      "path": "third_party/kumo-iam.json",
-      "sha256": "db86ee4f7806eb6610a8df3ff8a0cf862a8a46d069428e276b7fcae98881a798",
-      "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
-    },
-    {
-      "path": "third_party/kumo-kms.json",
-      "sha256": "28a43318277bd60d6de9fe67c5c57918fa3de5154666a550f2d571ec9772d53c",
-      "disposition": "documentation",
-      "reason": "Documents actual instance-profile scope, verified guest proof, accepted finite bounds, missing VM/SSM/scoring integration and remaining full-gate requirements; no execution authority is conferred.",
-      "models": []
+      "path": "tools/console/src/lambda.jsx",
+      "sha256": "974e38ea401bf3044d54054a64d26d99cd9c78fa85b6dfc94d9f0f23b32660f7",
+      "models": [
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
     }
   ]
 }
