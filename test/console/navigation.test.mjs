@@ -31,7 +31,7 @@ test('English/Japanese filtering is provider scoped and never mutates capabiliti
 test('existing hashes and aliases roundtrip; unknown routes do not claim S3 support',()=>{
   for(const s of SERVICES) assert.equal(serviceFromHash('#'+hashForService(s.id)),s.id);
   for(const [alias,id] of [['parameters','ssm'],['stacks','cfn'],['functions','lambda'],['roles','iam']])assert.equal(serviceFromHash('#/'+alias),id);
-  assert.equal(serviceFromHash(''),'s3');
+  assert.equal(serviceFromHash(''),'home');
   for(const bad of ['#/unknown','#/gcp-storage-fake','#/azure-blob-fake','#account'])assert.equal(serviceFromHash(bad),null);
   assert.equal(hashForService('unknown'),null);assert.equal(providerForService('unknown'),null);
 });
@@ -171,4 +171,19 @@ test('regional WAF discovery is capability-gated and stays in AWS navigation',()
   assert.equal(hashForService('wafv2'),'/wafv2');
   assert.equal(providerForService('wafv2'),'aws');
   assert.equal(JSON.stringify(enabled),before);
+
+});
+
+test('neutral home and scoped participant discovery do not invent resource authority',()=>{
+  for(const route of ['', '#', '#/', '#/home', '#/home?region=us-east-1'])assert.equal(serviceFromHash(route),'home');
+  assert.equal(hashForService('home'),'/home');
+  assert.equal(providerForService('home'),'aws');
+  assert.equal(serviceAvailable('home',capabilities),true);
+  assert.equal(serviceAvailable('home',null),false);
+  assert.equal(PROVIDERS.find(p=>p.id==='aws').defaultService,'home');
+  const scoped={...capabilities,consoleScope:{parameterName:'/team/value',region:'us-east-1'}};
+  assert.deepEqual(servicesForProvider('aws',scoped).map(s=>s.id),['ssm']);
+  for(const id of SERVICES.filter(s=>s.id!=='ssm').map(s=>s.id))assert.equal(serviceAvailable(id,scoped),false);
+  assert.equal(serviceAvailable('home',scoped),true);
+  assert.equal(serviceAvailable('ssm',{...scoped,services:{}}),false);
 });

@@ -1,24 +1,24 @@
 {
   "version": 1,
-  "base_sha": "74985ee93a1ab38c9b1101ffdd3a2c8c3430e01b",
+  "base_sha": "3d575ac645de4f1b36d644879a714374f5f6d9d4",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "38c48efedd88a45915642bbe4eafa28b3ab50538498126e5acc19f9998037756",
+      "sha256": "2cad91757250c4d7a9d95617179fb772dd715a35a875239360404ed82748016f",
       "disposition": "formal-infrastructure",
       "reason": "Registers both WAF models and required properties/controls without dropping or weakening current-main checks.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "8bcc846d06b48a551bc2a9d636a801e29b34827cf239ba6d2eb2da16ba613e21",
+      "sha256": "4d3f355cbd8d5767f388cdbea48cdf0e2693ce7422150aab54f47e583a983de6",
       "disposition": "documentation",
       "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
       "models": []
     },
     {
       "path": "docs/ci.md",
-      "sha256": "415bee7c505350fcaf39788ea0df71547456062846926591d36f3b114d786a91",
+      "sha256": "cef9adaf1d83f003720c7026ab126de72c4c665c515c34660947179ef193d4e1",
       "disposition": "documentation",
       "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
       "models": []
@@ -26,13 +26,6 @@
     {
       "path": "docs/console-wafv2-reference.md",
       "sha256": "44577ad511a1f7c277e21ead4323024b7671e2235324f5610fdb345aede908c1",
-      "disposition": "documentation",
-      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
-      "models": []
-    },
-    {
-      "path": "docs/development-status.md",
-      "sha256": "50a49f53810773d55349cc00756b0915e72d571ebde638d4161576bfed77fdcc",
       "disposition": "documentation",
       "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
       "models": []
@@ -138,7 +131,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "b48010a07090b426bb4d028df20925fb27af237945dd069fa0eb89da1e7bcbc1",
+      "sha256": "09eeeb37887a86af43182e7c56764a2eff84a7e74951bffd03bd9e6e32950ec7",
       "disposition": "formal-infrastructure",
       "reason": "Registers both WAF models and required properties/controls without dropping or weakening current-main checks.",
       "models": []
@@ -235,7 +228,7 @@
     },
     {
       "path": "internal/aws/s3.go",
-      "sha256": "4092443e985a41c48cc1f750111733730b1c66717ae11774ece59e86a541ce89",
+      "sha256": "faee97e9b74c51a43b1535085ffb9becdabf6a06a57428c271b12a3e6b535ac9",
       "disposition": "modeled",
       "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
       "models": [
@@ -253,7 +246,7 @@
     },
     {
       "path": "internal/aws/ssm.go",
-      "sha256": "ddf818e6dc3d8f2e5193fd36f146d3b05d10d052e70328d51250f49af2c96133",
+      "sha256": "50a3c6704196ed5d885d6511bfe53d36164dea9d3071626e666baad58e1781a8",
       "disposition": "modeled",
       "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
       "models": [
@@ -431,8 +424,15 @@
       "models": []
     },
     {
+      "path": "internal/server/s3_multipart_capabilities_test.go",
+      "sha256": "430981c6897155f058badb050170768de59eeef196056658eb103687c38fbf64",
+      "disposition": "test-support",
+      "reason": "Checks both capability operation lists include all six implemented multipart actions and rejects the contradictory blanket unsupported claim. No runtime behavior or formal invariant is changed.",
+      "models": []
+    },
+    {
       "path": "internal/server/server.go",
-      "sha256": "e5d8e4d89d3bc200a706d88ff6aa82a60e5ff17c992d9b30e2913b254891de66",
+      "sha256": "05af8872c266f81b8536c0c9e26069257f06bb6d14091fd98b5668fc5b2f2cce",
       "disposition": "modeled",
       "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
       "models": [
@@ -457,7 +457,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "92cc1433b1edfc4019e6fdaba2aba8b2f24bd68b6f39e16e274d37958fd2e72d",
+      "sha256": "30ed6e13bd83435b12fa5c00d6951dacf46a6ae2ba755199c557d90441605385",
       "disposition": "modeled",
       "reason": "Adds the WAF view while preserving current-main session/navigation and epoch behavior. Existing model bindings cover retained shell behavior, not the new WAF editor; native browser tests remain a separate required check.",
       "models": [
@@ -496,7 +496,7 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "3714bef171dd56b984c583575aba18bf74f0b8d379ecf9f55a9f85b577e8e1c8",
+      "sha256": "718311192371814d62960ef5fbb41c216a47fe1e7276caa039958e9e280073b9",
       "disposition": "formal-infrastructure",
       "reason": "Registers both WAF models and required properties/controls without dropping or weakening current-main checks.",
       "models": []
@@ -510,14 +510,14 @@
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "e8cde75ca41c740e3225104b7afaadfd41b2eeb212b0bb08289f74a4911c1f63",
+      "sha256": "06b9bb88b887d8d37647b2350fe616ffea7cf834de36feeb572c205fb2397c24",
       "disposition": "formal-infrastructure",
       "reason": "Registers both WAF models and required properties/controls without dropping or weakening current-main checks.",
       "models": []
     },
     {
       "path": "test/console/navigation.test.mjs",
-      "sha256": "68b88023394d303aac55aa696b65925bafd0c9d7dfb74ef10688c255618048b9",
+      "sha256": "b462112cc859ed7f81030cb42b98470610c256916696bfb9e92dbfa1a2be50bc",
       "disposition": "test-support",
       "reason": "Preserves exact module-metadata validation with negative controls, or tests capability-gated WAF console navigation; no runtime/model checks are removed.",
       "models": []
@@ -530,8 +530,22 @@
       "sha256": "ec342f3d27c8a90ca0d0899fa4d16a03ff6dabb8d9b4d385904c8653f8df06d9"
     },
     {
+      "path": "test/console/waf-presentation.test.mjs",
+      "sha256": "33b978622abad77ceaf8f559b1afbb9f34792014c7010c25ebd00f1fbe6db79e",
+      "disposition": "test-support",
+      "reason": "Checks Security category and search discovery while retaining scoped SSM-only participant presentation.",
+      "models": []
+    },
+    {
+      "path": "test/console/waf-sidebar.test.mjs",
+      "sha256": "78787c1d26a1de221ee4fd2747e2f8da093d76c6968bfe5fa96319873fc1a10d",
+      "disposition": "test-support",
+      "reason": "Executes the shipped sidebar expressions with identity selection enabled and disabled; WAF navigation stays independent from identity controls.",
+      "models": []
+    },
+    {
       "path": "test/e2e/check.py",
-      "sha256": "494dcc45289f927c09857b0cd3c79a89bf342e266cc69e71c226b6bf67ac24f2",
+      "sha256": "15826214eb9aab1822cb7226bf3a1d503eab6cd37a89c2750c1eede05ad635a2",
       "disposition": "test-support",
       "reason": "Adds or preserves native WAF/IAM/HTTP/browser regression checks, including the reproduced association authorization race.",
       "models": []
@@ -573,35 +587,42 @@
     },
     {
       "path": "third_party/independent-native-source.json",
-      "sha256": "0dd3eda9c50ac7abd8002dc87ff798040d2c15a026b49809f67aa0b2b8e111b5",
+      "sha256": "45fa1259da70fea3ba7ddc1fd5a7f7f8dc5db6e612be5ac63e9b50f82513c40b",
       "disposition": "documentation",
       "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "eae482ab74159795e770f5772d49eb862390f605013515598102c61ef31d8707",
+      "sha256": "9e5c706c162214960eeb8c7ab05f91668761f73d789324f5471423c9ded3b1c4",
       "disposition": "presentation",
       "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "abf358b445bf560485e1b9161b23f107377bbfd3946806ad84046dd1037f002e",
+      "sha256": "6c49fbfd00f9e8cb17d9af44e2dd8b06bf3df768970651a280f308ea335e845a",
       "disposition": "presentation",
       "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
       "models": []
     },
     {
+      "path": "tools/console/src/console-home.jsx",
+      "sha256": "db403bdbde52b6ce6ab4fd18ea075f1f15c9414a2f358ac0e663bffba7bd84bf",
+      "disposition": "presentation",
+      "reason": "Adds WAF to the existing Security presentation category without granting API or participant authority.",
+      "models": []
+    },
+    {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "144e271cfecbaee52bf1e87484d20252892b7210134c14c71ecccf5205436402",
+      "sha256": "3e340b11281cfccc85940d043b9c00e7e77fd5022298735996b9f26d8429dcfb",
       "disposition": "presentation",
       "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
       "models": []
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "e0aeca716129ce4c7af26b4e1ae3d277749dbcc81193e6b8368a8b460213e472",
+      "sha256": "5bda4b7114d0b753cc92db5e39a15cb31b1952fd196cefe3e80a4c34e8a3c2b7",
       "disposition": "modeled",
       "reason": "Adds the WAF view while preserving current-main session/navigation and epoch behavior. Existing model bindings cover retained shell behavior, not the new WAF editor; native browser tests remain a separate required check.",
       "models": [

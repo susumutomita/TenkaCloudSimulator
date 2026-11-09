@@ -9,7 +9,8 @@ TOKEN = {'name': 'X-Simulator-Token', 'in': 'header', 'schema': {'type': 'string
 REF = {'$ref': '#/components/parameters/Token'}
 
 
-# Exact incoming main e8efc54 operation IDs; independent of candidate enumeration.
+# Exact incoming main d166f56 IDs plus the bounded S3 multipart POST;
+# independent of candidate enumeration.
 NATIVE_OPERATION_IDS = {'AddPermission',
  'AzureCreateContainer',
  'AzureDeleteBlob',
@@ -69,13 +70,33 @@ NATIVE_OPERATION_IDS = {'AddPermission',
  'PutMethod',
  'PutObject',
  'RemovePermission',
+ 'S3MultipartUpload',
  'UpdateFunctionCode',
  'awsRegionalOperation'}
 SAKURA_OPERATION_IDS = {'SakuraListDisks', 'SakuraCreateDisk', 'SakuraGetDisk', 'SakuraUpdateDisk', 'SakuraDeleteDisk'}
 
 def validate_reference_inventory(ids):
-    if len(ids) != 66 or len(set(ids)) != 66 or set(ids) != NATIVE_OPERATION_IDS | SAKURA_OPERATION_IDS:
+    if len(ids) != 67 or len(set(ids)) != 67 or set(ids) != NATIVE_OPERATION_IDS | SAKURA_OPERATION_IDS:
         raise ValueError('native and Sakura operation inventory changed')
+
+
+def validate_multipart_parameters(document):
+    validate_parameter_lists(document)
+    routes = (('/{bucket}', 'get'), ('/{bucket}/{key}', 'get'),
+              ('/{bucket}/{key}', 'put'), ('/{bucket}/{key}', 'delete'), ('/{bucket}/{key}', 'post'))
+    expected_region = {'type': 'string', 'enum': ['us-east-1', 'us-west-2', 'ap-northeast-1', 'eu-west-1'],
+                       'default': 'us-east-1'}
+    for path, method in routes:
+        params = document['paths'][path][method]['parameters']
+        region = [p for p in params if p.get('name') == 'X-Simulator-Region' and p.get('in') == 'header']
+        assert len(region) == 1 and region[0]['schema'] == expected_region and region[0]['required'] is False
+    bucket = document['paths']['/{bucket}']['get']['parameters']
+    assert sum(p.get('name') == 'key-marker' and p.get('in') == 'query' for p in bucket) == 1
+    post = document['paths']['/{bucket}/{key}']['post']['parameters']
+    assert {'$ref': '#/components/parameters/SimulatorToken'} in post
+    assert any(p.get('name') == 'x-simulator-principal' and p.get('in') == 'header' for p in post)
+    flag = [p for p in post if p.get('name') == 'uploads' and p.get('in') == 'query']
+    assert len(flag) == 1 and flag[0]['allowEmptyValue'] is True and flag[0]['schema'] == {'type': 'string', 'enum': ['']}
 
 
 def fixture(parameters):
@@ -84,6 +105,28 @@ def fixture(parameters):
 
 
 class ParameterLists(unittest.TestCase):
+    def test_multipart_headers_auth_flag_and_reused_cursor(self):
+        root = Path(__file__).resolve().parents[2]
+        validate_multipart_parameters(json.loads((root / 'internal/server/apidocs/openapi.json').read_text()))
+
+    def test_multipart_parameter_negative_controls(self):
+        root = Path(__file__).resolve().parents[2]
+        document = json.loads((root / 'internal/server/apidocs/openapi.json').read_text())
+        def region(spec):
+            return next(p for p in spec['paths']['/{bucket}/{key}']['post']['parameters'] if p.get('name') == 'X-Simulator-Region')
+        for change in (
+            lambda d: region(d)['schema'].update(default='eu-west-1'),
+            lambda d: region(d)['schema'].update(enum=['us-east-1', 'unknown-region']),
+            lambda d: region(d).update(required=True),
+            lambda d: d['paths']['/{bucket}/{key}']['post']['parameters'].remove({'$ref': '#/components/parameters/SimulatorToken'}),
+            lambda d: next(p for p in d['paths']['/{bucket}/{key}']['post']['parameters'] if p.get('name') == 'uploads').update(allowEmptyValue=False),
+            lambda d: d['paths']['/{bucket}']['get']['parameters'].append({'name':'key-marker','in':'query','schema':{'type':'string'}}),
+        ):
+            broken = copy.deepcopy(document)
+            change(broken)
+            with self.assertRaises((AssertionError, ValueError)):
+                validate_multipart_parameters(broken)
+
     def test_inline_ref_duplicate_rejected(self):
         with self.assertRaisesRegex(ValueError, 'duplicate parameter'):
             validate_parameter_lists(fixture([TOKEN, REF]))
@@ -157,10 +200,10 @@ class ParameterLists(unittest.TestCase):
                  'AzureListBlobs', 'AzureDeleteContainer', 'AzurePutBlob', 'AzureGetBlob',
                  'AzureGetBlobProperties', 'AzureDeleteBlob'}
         validate_reference_inventory(ids)
-        self.assertEqual(len(ids), 66)
-        self.assertEqual(len(set(ids)), 66)
+        self.assertEqual(len(ids), 67)
+        self.assertEqual(len(set(ids)), 67)
         self.assertEqual({name for name in ids if name.startswith(('GCP', 'Azure'))}, added)
-        self.assertEqual(len(set(ids) - added - SAKURA_OPERATION_IDS), 43)
+        self.assertEqual(len(set(ids) - added - SAKURA_OPERATION_IDS), 44)
         for item in repaired['paths'].values():
             for operation in item.values():
                 if isinstance(operation, dict) and {'$ref': '#/components/parameters/SimulatorToken'} in operation.get('parameters', []):
@@ -178,6 +221,9 @@ class ParameterLists(unittest.TestCase):
             ('removed-native', [name for name in good if name != 'ListBuckets']),
             ('wrong-sakura-operation', ['SakuraStartServer' if name == 'SakuraGetDisk' else name for name in good]),
             ('wrong-provider', ['AzureGetDisk' if name == 'SakuraGetDisk' else name for name in good]),
+            ('removed-multipart', [name for name in good if name != 'S3MultipartUpload']),
+            ('wrong-multipart', ['S3UnknownMultipart' if name == 'S3MultipartUpload' else name for name in good]),
+            ('duplicate-multipart', good + ['S3MultipartUpload']),
         ):
             with self.subTest(case=label), self.assertRaisesRegex(ValueError, 'operation inventory changed'):
                 validate_reference_inventory(changed)

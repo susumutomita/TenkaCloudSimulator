@@ -54,7 +54,8 @@ def run():
    source=json.loads(Path('internal/server/apidocs/openapi.json').read_text());assert spec==source,'Embedded served spec differs from source'
    validate_json10_examples(spec)
    ids=[value['operationId'] for path in spec['paths'].values() for method,value in path.items() if method in ('get','post','put','head','delete')]
-   assert len(ids)==66 and len(set(ids))==66 and set(ids)==set(MAIN_OPERATION_IDS)|NEW_IDS
+   assert len(ids)==67 and len(set(ids))==67 and set(ids)==set(MAIN_OPERATION_IDS)|NEW_IDS|{'S3MultipartUpload'}
+   assert spec['paths']['/{bucket}/{key}']['post']['operationId']=='S3MultipartUpload'
    assert set(spec['paths'])==set(MAIN_PATHS)|{COLLECTION,ITEM} and len(spec['paths'])==36
    root=spec['paths']['/']['post'];assert root['operationId']=='awsRegionalOperation'
    assert {'application/x-amz-json-1.0','application/x-amz-json-1.1','application/x-www-form-urlencoded'}<=set(root['requestBody']['content'])
@@ -119,7 +120,7 @@ def run():
     elif operation=='DeleteQueue':assert response=={} and sdk.list_queues().get('QueueUrls',[])==[]
    assert tuple(executed)==OPERATIONS and http_counts['calls']==13==http_counts['responses']
    assert sdk_counts['calls']>0 and sdk_counts['calls']==sdk_counts['sends']==sdk_counts['responses']
-   result={'servedSpecEqualsSource':True,'operationIDsPreserved':66,'pathsPreserved':36,'actualServedTemplatesExecuted':executed,'explicitLiveSubstitution':['QueueUrl','ReceiptHandle'],'MessageIdFromActualResponse':True,'SDKSameSQLiteBytes':True,'nativeReceiptRotationAndStaleRefusal':True,'unsubstitutedFixturePlaceholdersRefused':True,'staticIsNotLiveState':True,'HTTPCounts':http_counts,'SDKCounts':sdk_counts,'receiptAndCredentialValuesOmitted':True,'cleanup':'DELETED','realAWS':False,'uiTested':False}
+   result={'servedSpecEqualsSource':True,'operationIDsPreserved':66,'totalOperationIDs':67,'pathsPreserved':36,'actualServedTemplatesExecuted':executed,'explicitLiveSubstitution':['QueueUrl','ReceiptHandle'],'MessageIdFromActualResponse':True,'SDKSameSQLiteBytes':True,'nativeReceiptRotationAndStaleRefusal':True,'unsubstitutedFixturePlaceholdersRefused':True,'staticIsNotLiveState':True,'HTTPCounts':http_counts,'SDKCounts':sdk_counts,'receiptAndCredentialValuesOmitted':True,'cleanup':'DELETED','realAWS':False,'uiTested':False}
    (REPORTS/'sqs-reference.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
   finally:team.stop()
 

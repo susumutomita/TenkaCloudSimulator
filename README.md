@@ -79,6 +79,11 @@ Press Ctrl+C to stop. Restarting with the same state and token files reuses them
 Omitting `--state` when invoking the CLI creates a fresh in-memory database.
 The startup token is displayed only on a real stdout terminal when the `CI`
 environment variable is absent; redirection or even an empty `CI` suppresses it.
+Hosts can also open an existing participant STS session in the Parameter Store
+GUI using a [one-use console handoff](docs/console-sessions.md#participant-sts-console-handoff-version-1).
+It is restricted to one parameter and current role permissions; participants do
+not need the operator token.
+
 **Account → Sign out** revokes only that browser session. More options:
 [startup](docs/start.md), [sessions](docs/console-sessions.md).
 
@@ -90,7 +95,7 @@ adapter, or Challenge integration.
 
 | Service | Implemented subset | Main exclusions |
 | --- | --- | --- |
-| [S3](docs/s3.md) | Bucket create/list/head/location/delete; object PUT/GET/HEAD/DELETE and ListObjectsV2; versioning and ListObjectVersions; public access block and tags | Multipart uploads, ACLs, general bucket policies, encryption settings; path-style addressing only |
+| [S3](docs/s3.md) | Bucket/object operations, version history, public access block, tags, and [six multipart APIs with a native Management view](docs/s3-multipart.md) | Multipart copy/checksum extensions, ACLs, general bucket policy, encryption, lifecycle and replication; path-style and 8 MiB completed objects only |
 | [SNS](docs/sns.md) | Nine Query/XML operations for Standard-topic metadata, subscriptions and bounded local publish/delivery records; native SDK support | No outbound delivery, SQS adapter, console, CloudFormation or FIFO publication; local immediate confirmation |
 | [SQS](docs/sqs.md) | Standard queues, a Cloudscape console, and 9 JSON 1.0 operations: CreateQueue, GetQueueUrl, ListQueues, GetQueueAttributes, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility | FIFO, batches, DLQ, SNS integration, CloudFormation, function SDK bridge, Challenge integration |
 | [CloudWatch Logs](docs/cloudwatch-logs.md) | Log groups/streams, group deletion, PutLogEvents/GetLogEvents; 7 APIs and a console sharing their state | Metrics, alarms, retention settings, automatic Lambda delivery, CloudFormation, Logs Insights |
@@ -98,7 +103,7 @@ adapter, or Challenge integration.
 | [KMS](docs/kms.md) |12 APIs: symmetric keys, local AES-GCM, Create/List/Update/DeleteAlias, same-Tx alias crypto; SDK and Cloudscape key-detail Aliases | AWS-managed aliases/alias ABAC, tags, grants, custom policies, rotation, key deletion, CloudFormation, other-service encryption; raw SQLite keys are not an HSM or at-rest guarantee |
 | [Systems Manager Parameter Store](docs/console.md) | PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter; current values, versions and overwrite checks | SecureString/KMS, history, labels; Standard String/StringList with text data only |
 | [DynamoDB](docs/dynamodb.md) | Seven JSON 1.0 APIs: CreateTable, ListTables, DescribeTable, DeleteTable, PutItem, GetItem, DeleteItem; Cloudscape table list/create/details/delete and exact-key item writes/reads/deletes. S/N/B keys, optional sort key, partition-key attribute_exists/attribute_not_exists conditions | Query, Scan, item listing, indexes, Streams, CloudFormation, Challenge integration |
-| [IAM](docs/iam.md) | 21 role/inline/trust and customer-managed policy/version/role-attachment Query operations; shared permission union with Deny priority; bounded AWS-principal/ExternalId role trust | AWS-managed catalog, user/group attachments, general Conditions, permissions boundaries, SCPs |
+| [IAM](docs/iam.md) | 28 role/inline/trust, customer-managed policy/version/role-attachment and native instance-profile Query operations; shared permission union with Deny priority; bounded AWS-principal/ExternalId role trust | AWS-managed catalog, user/group attachments, general Conditions, permissions boundaries, SCPs; instance profiles do not execute EC2 or issue credentials |
 | [Native SDK / STS](docs/sts-native.md) | Verified local SigV4 for IAM/STS/CFn/SSM; GetCallerIdentity and AssumeRole, expiry, trust and generation-bound role policy | Other signed services, presigned requests, session policies/tags, federation, real AWS identity and multi-account tenancy |
 | [Lambda](docs/lambda.md) | CreateFunction, ListFunctions, GetFunctionConfiguration, UpdateFunctionCode, Invoke, DeleteFunction, AddPermission/GetPolicy/RemovePermission; Python ZIP execution through CPython 3.12.16/WASI and a bounded S3/SSM SDK bridge | Other languages, asynchronous invocation, Function URLs, arbitrary networking; 128 MiB and 1–30 second timeout |
 | [CloudFormation](docs/cloudformation-rest.md) | CreateStack, DescribeStacks, DescribeStackEvents, DeleteStack; S3 Bucket, SSM Parameter, inline Python Lambda, bounded IAM Role, 5 API Gateway resource types and Lambda Permission; bounded Ref/Sub/GetAtt/DependsOn, String/Number constraints, [local SSM value parameters](docs/cloudformation-ssm-parameters.md), Equals/condition aliases, resource/output Condition and If/NoValue selection | UpdateStack, And/Or/Not, NoEcho secrecy, general resource types, full AWS asynchronous lifecycle, dedicated CloudFormation service roles |
@@ -330,3 +335,7 @@ modules, Cloudscape, Scalar, CPython/WASI and other bundled components ship at
 `/_simulator/licenses/` and must be preserved on redistribution. This is not an
 official AWS service and does not use AWS logos. See the
 [design and handoff guides](docs/handoff/README.md).
+
+## S3 multipart integration, 2026-11-08
+
+This revision adds the S3MultipartState model and five controls while preserving every model and control from current main. Full validation of the integrated revision remains required; earlier execution receipts are historical. See [multipart scope and limits](docs/s3-multipart.md).

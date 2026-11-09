@@ -127,8 +127,9 @@ def run():
         assert root["operationId"] == "awsRegionalOperation"
         ids = [entry["operationId"] for path in spec["paths"].values()
                for entry in path.values() if isinstance(entry, dict) and "operationId" in entry]
-        assert len(ids) == len(set(ids)) == 66, "Document duplicated or omitted a native operation"
-        assert set(ids) == EXPECTED_OPERATION_IDS | NEW_IDS, "Served operation inventory differs from immutable main contract"
+        assert len(ids) == len(set(ids)) == 67, "Document duplicated or omitted a native operation"
+        assert set(ids) == EXPECTED_OPERATION_IDS | NEW_IDS | {'S3MultipartUpload'}, "Served operation inventory differs from immutable main contract"
+        assert spec['paths']['/{bucket}/{key}']['post']['operationId'] == 'S3MultipartUpload', "Multipart addition moved from the native S3 object route"
         assert len(spec["paths"]) == 36 and set(spec["paths"]) == EXPECTED_PATHS | {COLLECTION, ITEM}, "Served path inventory differs from immutable main contract"
         assert not any("secretsmanager" in path.lower() for path in spec["paths"]), "Secrets native API uses the actual shared root"
         names = ["CreateSecret", "DescribeSecret", "ListSecrets", "PutSecretValue",

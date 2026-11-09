@@ -101,6 +101,24 @@ def run_console_language():
                         expect(services).to_have_attribute('aria-expanded', 'false')
                         expect(services).to_be_focused()  # Selection removed the old menu item.
 
+                    def keyboard_catalog_entry_order(provider_name, first_name, second_name):
+                        current = page.locator('html').get_attribute('lang')
+                        services = page.get_by_role('button', name='サービス' if current == 'ja' else 'Services', exact=True)
+                        services.focus(); services.press('Enter')
+                        search = page.get_by_role('searchbox', name=('サービスを検索:' if current == 'ja' else 'Search services in')+' '+provider_name, exact=True)
+                        expect(search).to_be_focused(); search.fill('')
+                        first = page.get_by_role('menuitem', name=first_name, exact=True)
+                        second = page.get_by_role('menuitem', name=second_name, exact=True)
+                        expect(first).to_be_visible(); expect(second).to_be_visible()
+                        # The non-AWS search is nested in the catalog panel. Its
+                        # ArrowDown must not run twice through event bubbling.
+                        search.press('ArrowDown'); expect(first).to_be_focused()
+                        first.press('ArrowDown'); expect(second).to_be_focused()
+                        second.press('ArrowUp'); expect(first).to_be_focused()
+                        first.press('Escape')
+                        expect(services).to_have_attribute('aria-expanded', 'false')
+                        expect(services).to_be_focused()
+
                     page.goto(endpoint+'/_simulator/console/')
                     expect(page.locator('html')).to_have_attribute('lang', 'en')
                     expect(page.get_by_role('heading', name='Open your local sandbox', exact=True)).to_be_visible()
@@ -124,6 +142,7 @@ def run_console_language():
                         assert len(writes) == write_count, 'Presentation changes must not submit native mutations or login requests'
 
                     # A real controlled AWS form survives a user language change.
+                    keyboard_catalog('AWS', 'S3')
                     page.get_by_role('button', name='Create bucket', exact=True).click()
                     draft = 'unsubmitted-aws-'+str(width)
                     page.get_by_label('Bucket name', exact=True).fill(draft)
@@ -138,6 +157,7 @@ def run_console_language():
                     view = page.get_by_role('region', name='Cloud Storage', exact=True)
                     expect(view.get_by_role('heading', name='バケット', exact=True)).to_be_visible()
                     expect(view.get_by_role('button', name=gcp_name, exact=True)).to_be_visible()
+                    keyboard_catalog_entry_order('Google Cloud', 'Cloud Storage', 'Service catalog')
                     keyboard_catalog('Google Cloud', 'Cloud Storage')
                     scope = page.locator('.gcp-console-scope')
                     expect(scope).to_contain_text('tenkacloud-local')
@@ -264,6 +284,8 @@ def run_console_language():
                     expect(page.locator('html')).to_have_attribute('lang', 'ja')
                     expect(page.locator('.azure-blob-view').get_by_role('button', name='+ コンテナー', exact=True)).to_be_visible()
                     provider('AWS')
+                    expect(page.get_by_role('heading', name='コンソールのホーム', exact=True)).to_be_visible()
+                    keyboard_catalog('AWS', 'S3')
                     expect(page.get_by_role('heading', name=re.compile(r'^汎用バケット \(1\)$'))).to_be_visible()
                     locale('en'); page.reload()
                     expect(page.get_by_role('heading', name=re.compile(r'^General purpose buckets \(1\)$'))).to_be_visible()

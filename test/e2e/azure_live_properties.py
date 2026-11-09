@@ -212,7 +212,13 @@ def run_azure_live_properties():
                         # Chromium may already cancel the route on abort. Other
                         # delivery errors are not silently accepted.
                         assert any(word in str(error).lower() for word in ('cancel', 'closed', 'invalid interception', 'already handled')), type(error).__name__
-                    page.get_by_role('navigation', name='Cloud provider', exact=True).get_by_role('button', name='Azure', exact=True).click()
+                    providers = page.get_by_role('navigation', name='Cloud provider', exact=True)
+                    assert providers.evaluate('''nav => [...nav.querySelectorAll('button')].every(button => {
+                        const box = button.getBoundingClientRect();
+                        const hit = document.elementFromPoint(box.x + box.width/2, box.y + box.height/2);
+                        return hit === button || button.contains(hit);
+                    })'''), 'Provider controls must not be overlapped by the Services control'
+                    providers.get_by_role('button', name='Azure', exact=True).click()
                     expect(view.get_by_role('link', name=container, exact=True)).to_be_visible()
                     expect(page.get_by_role('dialog')).to_have_count(0)
                     view.get_by_role('link', name=container, exact=True).click()
@@ -237,7 +243,13 @@ def run_azure_live_properties():
                         route.fulfill(response=response)
                     except Exception as error:
                         assert any(word in str(error).lower() for word in ('cancel', 'closed', 'invalid interception', 'already handled')), type(error).__name__
-                    page.get_by_role('navigation', name='Cloud provider', exact=True).get_by_role('button', name='Azure', exact=True).click()
+                    providers = page.get_by_role('navigation', name='Cloud provider', exact=True)
+                    assert providers.evaluate('''nav => [...nav.querySelectorAll('button')].every(button => {
+                        const box = button.getBoundingClientRect();
+                        const hit = document.elementFromPoint(box.x + box.width/2, box.y + box.height/2);
+                        return hit === button || button.contains(hit);
+                    })'''), 'Provider controls must not be overlapped by the Services control'
+                    providers.get_by_role('button', name='Azure', exact=True).click()
                     expect(view.get_by_role('link', name=container, exact=True)).to_be_visible()
                     expect(page.get_by_role('dialog')).to_have_count(0)
                     expect(view.get_by_text(actual['x-ms-meta-proof'], exact=True)).to_have_count(0)

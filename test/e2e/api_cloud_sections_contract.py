@@ -23,7 +23,7 @@ GetFunctionConfiguration GetIdentityPolicy GetMethod GetObject GetPolicy GetReso
 GetResources GetRestApi GetRestApis GetStage HeadBucket HeadObject IAMRoleQueryOperation
 Invoke InvokeLocalRESTProxyGet InvokeLocalRESTProxyPost ListBuckets ListFunctions
 ListObjectsV2OrGetBucketLocation ListPrincipals PutIdentityPolicy PutIntegration
-PutMethod PutObject RemovePermission UpdateFunctionCode awsRegionalOperation'''.split())
+PutMethod PutObject RemovePermission S3MultipartUpload UpdateFunctionCode awsRegionalOperation'''.split())
 GUIDES = {'Systems Manager Parameter Store', 'CloudFormation stacks', 'KMS service guide',
           'SQS queues', 'CloudWatch Logs', 'Secrets Manager', 'DynamoDB tables and items'}
 SAKURA_TAG = 'Sakura Cloud status'
@@ -77,8 +77,11 @@ def validate_document(document):
     assert 'real VM/block storage' in status and 'not claim console workflow/fidelity' in status
     ops = operations(document)
     ids = [operation['operationId'] for _, _, operation in ops]
-    assert len(document['paths']) == 36 and len(ids) == 66
+    assert len(document['paths']) == 36 and len(ids) == 67
     assert len(ids) == len(set(ids)) and set(ids) == EXPECTED_IDS | NEW_IDS
+    multipart = document['paths']['/{bucket}/{key}']['post']
+    assert multipart['operationId'] == 'S3MultipartUpload'
+    assert multipart['tags'] == ['S3 basic object storage']
     for path, _, operation in ops:
         assert operation.get('tags'), 'An operation must remain discoverable'
         expected = ('Google Cloud' if path.startswith('/_simulator/providers/gcp/') else
@@ -137,6 +140,15 @@ class ContractTests(unittest.TestCase):
 
     def test_duplicate_operation(self):
         self.rejected(lambda d: d['paths']['/']['get'].update(operationId='awsRegionalOperation'))
+
+    def test_multipart_operation_uses_existing_aws_s3_group(self):
+        for tags in (['S3'], ['Google Cloud Storage'], ['SQS queues']):
+            with self.subTest(tags=tags):
+                self.rejected(lambda d: d['paths']['/{bucket}/{key}']['post'].update(tags=tags))
+
+    def test_multipart_operation_cannot_be_removed_or_renamed(self):
+        self.rejected(lambda d: d['paths']['/{bucket}/{key}'].pop('post'))
+        self.rejected(lambda d: d['paths']['/{bucket}/{key}']['post'].update(operationId='S3UnknownMultipart'))
 
     def test_native_projection_ignores_only_navigation_metadata(self):
         baseline = copy.deepcopy(self.document)

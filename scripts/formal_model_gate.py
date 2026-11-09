@@ -10,7 +10,7 @@ import tempfile
 import time
 from pathlib import Path
 
-BASE_MODELS = {'AzureBlobState',
+BASE_MODELS = {'S3MultipartState', 'AzureBlobState',
  'CatalogConsoleEpoch',
  'CatalogResourceLifecycle',
  'AzurePropertiesEpoch',
@@ -61,7 +61,7 @@ BASE_MODELS = {'AzureBlobState',
  'StackOwnership',
  'StartupTokenVisibility',
  'LandingTopologyState', 'LandingAccessAdmission', 'LoginInputIntent'}
-BASE_INVARIANTS = {'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'ReloadOnlyAfterAck', 'OnlyCurrentReplies', 'FailureVisible', 'SingleWriter'},
+BASE_INVARIANTS = {'S3MultipartState': {'TypeOK', 'Budget', 'NoOrphans', 'Cleanup', 'RefusalAtomic'}, 'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'ReloadOnlyAfterAck', 'OnlyCurrentReplies', 'FailureVisible', 'SingleWriter'},
  'CatalogResourceLifecycle': {'PeerFrame', 'QuotaBound', 'FailureFrame', 'FreshIDs', 'TokenOnce', 'GenerationAdvances', 'ChildGuard', 'StaleWriteRejected', 'AuthorizationFirst', 'TokenBinding', 'UniqueNames', 'TypeOK', 'ReplayNoDuplicate'},
  'AzureBlobState': {'BudgetBounded',
                     'ConditionEnforced',
@@ -476,7 +476,7 @@ BASE_INVARIANTS = {'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'R
                           'UnsupportedCanvasHidden'},
  'LoginInputIntent': {'LocaleIntentFrame', 'NoEmptyPOST', 'IntentInvalidatesAsync', 'TypeOK', 'SubmissionSelectionExact', 'NoPOSTWhileBlocked', 'StaleFileCompletionFrame', 'AdoptedValueExact'}}
 # Established controls require an explicit gate-policy change before retirement.
-REQUIRED_MUTANTS = {'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureError', 'ReloadAfterFailedWrite', 'AcceptAfterUnmount', 'AllowConcurrentWrites'},
+REQUIRED_MUTANTS = {'S3MultipartState': {'OmitPartBudget', 'OmitUploadParent', 'RetainCompletedParts', 'PartialFailure', 'OmitUploadBinding'}, 'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureError', 'ReloadAfterFailedWrite', 'AcceptAfterUnmount', 'AllowConcurrentWrites'},
  'CatalogResourceLifecycle': {'AllowDuplicateNames', 'ReplayCommits', 'IgnoreGeneration', 'TokenToFutureID', 'UpdateKeepsGeneration', 'ReplayCreatesRow', 'WritePeerScope', 'ReuseDeletedID', 'IgnoreQuota', 'DeleteParentWithChildren', 'FaultCommits', 'DeniedCommits'},
  'AzureBlobState': {'ContainerDeleteErasesPeer',
                     'ContainerDeleteLeavesBlobs',
@@ -1102,6 +1102,11 @@ REQUIRED_SOURCE_SCOPES['CFNParameterSnapshot'] = {'internal/aws/cloudformation.g
  'internal/aws/cloudformation_conditions.go',
  'internal/aws/cloudformation_ssm_parameters.go'}
 
+BASE_MODELS.add('ConsoleHandoff')
+BASE_INVARIANTS['ConsoleHandoff'] = {'LogoutRejectsReplay', 'TypeOK', 'RedeemRequiresFreshParent', 'OperatorRefused', 'ExactDestination', 'ParentLifetimeBound', 'AttemptConsumesCode', 'UseRequiresFreshAuthority', 'SDKAuthorityPreserved', 'UnrelatedSessionsPreserved', 'OneTimeRedemption'}
+REQUIRED_MUTANTS['ConsoleHandoff'] = {'SkipParameter', 'RevokeSDK', 'SkipRedeemExpiry', 'SkipUseGeneration', 'CachePolicy', 'ExtendHandoff', 'SkipRedeemGeneration', 'SkipCookie', 'SkipRegion', 'SkipBrowserExpiry', 'ReuseCode', 'SkipAction', 'SkipRedeemParent', 'RevokePeer', 'KeepLoggedOutCookie', 'ExtendBrowser', 'IgnoreConsumedCode', 'SkipUseParent', 'GrantBrowserSDK', 'AllowOperator'}
+REQUIRED_SOURCE_SCOPES['ConsoleHandoff'] = {'internal/server/console_handoff.go', 'internal/aws/sts_credentials_test.go', 'internal/server/console_handoff_test.go', 'internal/server/access.go', 'internal/aws/sts_roles.go', 'internal/aws/sts_credentials.go', 'internal/server/server.go', 'internal/aws/ssm.go'}
+
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a
@@ -1110,6 +1115,13 @@ CFG_KEYWORDS = {'CONSTANT', 'CONSTANTS', 'CONSTRAINT', 'CONSTRAINTS',
                 'ACTION_CONSTRAINT', 'ACTION_CONSTRAINTS', 'INVARIANT', 'INVARIANTS',
                 'INIT', 'NEXT', 'VIEW', 'SYMMETRY', 'SPECIFICATION', 'PROPERTY',
                 'PROPERTIES', 'TYPE', 'TYPE_CONSTRAINT', 'CHECK_DEADLOCK'}
+
+
+# Native instance profile membership, admission and retained-generation contract.
+BASE_MODELS.add('IAMInstanceProfiles')
+BASE_INVARIANTS['IAMInstanceProfiles'] = {'AttachmentAuthority', 'SingleRole', 'ProfileGenerationGuard', 'TypeOK', 'FailureFrame', 'PassRoleRequired', 'FreshProfileIdentity', 'PeerFrame', 'RemovalExact', 'RoleGenerationGuard', 'AuthorizationRequired'}
+REQUIRED_MUTANTS['IAMInstanceProfiles'] = {'IgnorePassRole', 'RemovePeerMembership', 'DeletePopulatedProfile', 'BindWrongProfileGeneration', 'ReuseProfileIdentity', 'IgnoreProfileGeneration', 'DeleteAttachedRole', 'IgnoreRoleGeneration', 'AllowMultipleRoles', 'BindWrongRoleGeneration', 'IgnoreActionAuthorization', 'CommitStorageFailure'}
+REQUIRED_SOURCE_SCOPES['IAMInstanceProfiles'] = {'internal/aws/iam_query.go', 'internal/aws/iam_roles.go', 'internal/server/server.go', 'internal/aws/iam_instance_profiles_query.go', 'internal/aws/iam_instance_profiles.go'}
 
 
 class GateError(ValueError):

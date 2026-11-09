@@ -469,7 +469,14 @@
                       "GetRolePolicy",
                       "DeleteRolePolicy",
                       "ListRolePolicies",
-                      "UpdateAssumeRolePolicy"
+                      "UpdateAssumeRolePolicy",
+                      "CreateInstanceProfile",
+                      "GetInstanceProfile",
+                      "ListInstanceProfiles",
+                      "DeleteInstanceProfile",
+                      "AddRoleToInstanceProfile",
+                      "RemoveRoleFromInstanceProfile",
+                      "ListInstanceProfilesForRole"
                     ]
                   },
                   "Version": {
@@ -534,6 +541,12 @@
                       "CAPABILITY_NAMED_IAM"
                     ],
                     "description": "CreateStack only; acknowledgement does not grant permissions."
+                  },
+                  "InstanceProfileName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_+=,.@-]+$"
                   }
                 }
               },
@@ -738,6 +751,63 @@
                     "Version": "2010-05-08",
                     "RoleName": "practice-executor",
                     "MaxItems": 100
+                  }
+                },
+                "CreateInstanceProfile": {
+                  "summary": "CreateInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "CreateInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "GetInstanceProfile": {
+                  "summary": "GetInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "GetInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "ListInstanceProfiles": {
+                  "summary": "ListInstanceProfiles (IAM service header required)",
+                  "value": {
+                    "Action": "ListInstanceProfiles",
+                    "Version": "2010-05-08"
+                  }
+                },
+                "DeleteInstanceProfile": {
+                  "summary": "DeleteInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "DeleteInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "AddRoleToInstanceProfile": {
+                  "summary": "AddRoleToInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "AddRoleToInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "RemoveRoleFromInstanceProfile": {
+                  "summary": "RemoveRoleFromInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "RemoveRoleFromInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "ListInstanceProfilesForRole": {
+                  "summary": "ListInstanceProfilesForRole (IAM service header required)",
+                  "value": {
+                    "Action": "ListInstanceProfilesForRole",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor"
                   }
                 }
               }
@@ -1683,7 +1753,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Versions mode only: next key cursor from NextKeyMarker. Keep filters unchanged. Not a ListObjectsV2 continuation token."
+            "description": "ListObjectVersions and ListMultipartUploads key cursor. For multipart upload IDs use the same live upload-id-marker; restart if that upload was removed."
           },
           {
             "name": "version-id-marker",
@@ -1705,6 +1775,49 @@
           },
           {
             "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "uploads",
+            "in": "query",
+            "required": false,
+            "description": "Empty flag selects ListMultipartUploads; prefix/max-uploads/key-marker/upload-id-marker supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "max-uploads",
+            "in": "query",
+            "required": false,
+            "description": "Multipart listing page limit 0\u20131000.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "upload-id-marker",
+            "in": "query",
+            "required": false,
+            "description": "Multipart upload cursor, requires key-marker.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "description": "Multipart operations require the bucket region. SDK signing scope may supply the same region.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
           }
         ],
         "responses": {
@@ -1958,7 +2071,7 @@
       "put": {
         "operationId": "PutObject",
         "summary": "Upload or replace an object",
-        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Requires s3:PutObject on arn:aws:s3:::bucket/key. Maximum 8 MiB; atomic replacement. No multipart, ACLs, encryption configuration or custom metadata.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
+        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Requires s3:PutObject on arn:aws:s3:::bucket/key. Maximum 8 MiB; atomic replacement. Multipart parts use uploadId and partNumber; no multipart copy, ACLs, encryption configuration or custom metadata.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission. Multipart subset: uploadId selects UploadPart with partNumber.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -1990,6 +2103,40 @@
           },
           {
             "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "uploadId",
+            "in": "query",
+            "required": false,
+            "description": "Multipart only. Use an actual upload ID and the documented native operation.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "partNumber",
+            "in": "query",
+            "required": false,
+            "description": "Multipart only. Use an actual upload ID and the documented native operation.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "description": "Multipart operations require the bucket region. SDK signing scope may supply the same region.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
           }
         ],
         "responses": {
@@ -2079,7 +2226,7 @@
       "get": {
         "operationId": "GetObject",
         "summary": "Download an object",
-        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Requires s3:GetObject. Supports a single standard HTTP byte range and ETag conditions.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
+        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Requires s3:GetObject. Supports a single standard HTTP byte range and ETag conditions.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission. Multipart subset: uploadId selects ListParts with optional pagination.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -2112,6 +2259,49 @@
           },
           {
             "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "uploadId",
+            "in": "query",
+            "required": false,
+            "description": "Multipart only. Use an actual upload ID and the documented native operation.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "part-number-marker",
+            "in": "query",
+            "required": false,
+            "description": "Multipart only. Use an actual upload ID and the documented native operation.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "max-parts",
+            "in": "query",
+            "required": false,
+            "description": "Multipart only. Use an actual upload ID and the documented native operation.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "description": "Multipart operations require the bucket region. SDK signing scope may supply the same region.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
           }
         ],
         "responses": {
@@ -2309,7 +2499,7 @@
       "delete": {
         "operationId": "DeleteObject",
         "summary": "Delete an object",
-        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Requires s3:DeleteObject. Deleting an absent key is idempotent when its bucket exists.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.",
+        "description": "**Static examples below are sample documentation, not your current state.** Click **Test Request**, then **Send** to execute this operation. The client shows the live HTTP status, headers and body. Requires s3:DeleteObject. Deleting an absent key is idempotent when its bucket exists.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission. Multipart subset: uploadId selects AbortMultipartUpload.",
         "tags": [
           "S3 basic object storage"
         ],
@@ -2333,6 +2523,31 @@
           },
           {
             "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "uploadId",
+            "in": "query",
+            "required": false,
+            "description": "Multipart only. Use an actual upload ID and the documented native operation.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "description": "Multipart operations require the bucket region. SDK signing scope may supply the same region.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
           }
         ],
         "responses": {
@@ -2388,6 +2603,99 @@
           },
           "401": {
             "$ref": "#/components/responses/HostAccessRequired"
+          }
+        }
+      },
+      "post": {
+        "operationId": "S3MultipartUpload",
+        "tags": [
+          "S3 basic object storage"
+        ],
+        "summary": "Start or complete a bounded multipart upload",
+        "description": "POST with ?uploads and an empty body starts an upload. POST with ?uploadId=actual-id and CompleteMultipartUpload XML combines stored parts atomically. Object limit 8 MiB; nonfinal parts at least 5 MiB. Unsupported encryption/checksum/conditional extensions fail explicitly. See docs/s3-multipart.md.",
+        "parameters": [
+          {
+            "name": "uploads",
+            "in": "query",
+            "required": false,
+            "description": "Empty flag for CreateMultipartUpload. Mutually exclusive with uploadId.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                ""
+              ]
+            },
+            "allowEmptyValue": true
+          },
+          {
+            "name": "uploadId",
+            "in": "query",
+            "required": false,
+            "description": "Actual ID returned by CreateMultipartUpload; identifies the exact bucket/key/upload.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-simulator-principal",
+            "in": "header",
+            "required": false,
+            "description": "Optional exercise identity, not authentication. Omit for the session-bound identity. Only the operator may select another identity; unknown names deny.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "name": "X-Simulator-Region",
+            "in": "header",
+            "required": false,
+            "description": "Multipart operations require the bucket region. SDK signing scope may supply the same region.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "us-east-1",
+                "us-west-2",
+                "ap-northeast-1",
+                "eu-west-1"
+              ],
+              "default": "us-east-1"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/xml": {
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "Complete": {
+                  "summary": "Static template: replace with actual part ETags",
+                  "value": "<CompleteMultipartUpload><Part><PartNumber>1</PartNumber><ETag>&quot;actual-stored-part-md5&quot;</ETag></Part></CompleteMultipartUpload>"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "InitiateMultipartUploadResult or CompleteMultipartUploadResult XML from current state."
+          },
+          "400": {
+            "description": "Malformed/invalid part, order, minimum size, scope, or limit."
+          },
+          "403": {
+            "description": "s3:PutObject denied."
+          },
+          "404": {
+            "description": "NoSuchBucket or NoSuchUpload."
+          },
+          "501": {
+            "description": "Unsupported options."
           }
         }
       }
@@ -3281,7 +3589,7 @@
         "tags": [
           "IAM roles"
         ],
-        "description": "Global native IAM Query/XML on the existing AWS provider alias. Roles, inline policies, customer-managed policy versions and attachments share SQLite with native SDKs, Lambda and the console. Select one of 21 static request templates; use Test Request \u2192 Send for live state. Root-path customer policies only. ListPolicies requires explicit Scope=Local; AWS default All, AWS catalog, OnlyAttached/PolicyUsageFilter and nonroot paths return501. GetPolicyVersion and role-policy document responses are RFC3986 encoded once; CreatePolicyVersion/ListPolicyVersions omit Document. Default switches atomically update every attached role; effective permissions union inline and attached default versions with explicit Deny priority. Default versions cannot be deleted, attached or multi-version policies cannot be deleted, and attached roles cannot be deleted. No STS, users/groups, boundaries, advanced Conditions or AWS-managed grants. CFN ManagedPolicyArns remain metadata. See docs/iam.md and capabilities for exact local bounds.\n\nStatic examples use dummy names/ARNs and never represent current state. Execute CreateRole/CreatePolicy first, then attach their returned ARN; create v2 before selecting or deleting it, detach and delete nondefault versions before cleanup. SDK/console/live requests use the same state. Browser requests use your signed-in session. curl/SDK need the host-issued X-Simulator-Token; dummy AWS signing keys are not login credentials. Host401 means sign in; IAM403 means current identity lacks permission.",
+        "description": "Global native IAM Query/XML on the existing AWS provider alias. Roles, inline policies, customer-managed policy versions and attachments share SQLite with native SDKs, Lambda and the console. Select one of 21 static request templates; use Test Request \u2192 Send for live state. Root-path customer policies only. ListPolicies requires explicit Scope=Local; AWS default All, AWS catalog, OnlyAttached/PolicyUsageFilter and nonroot paths return501. GetPolicyVersion and role-policy document responses are RFC3986 encoded once; CreatePolicyVersion/ListPolicyVersions omit Document. Default switches atomically update every attached role; effective permissions union inline and attached default versions with explicit Deny priority. Default versions cannot be deleted, attached or multi-version policies cannot be deleted, and attached roles cannot be deleted. No STS, users/groups, boundaries, advanced Conditions or AWS-managed grants. CFN ManagedPolicyArns remain metadata. See docs/iam.md and capabilities for exact local bounds.\n\nStatic examples use dummy names/ARNs and never represent current state. Execute CreateRole/CreatePolicy first, then attach their returned ARN; create v2 before selecting or deleting it, detach and delete nondefault versions before cleanup. SDK/console/live requests use the same state. Browser requests use your signed-in session. curl/SDK need the host-issued X-Simulator-Token; dummy AWS signing keys are not login credentials. Host401 means sign in; IAM403 means current identity lacks permission.\nSeven native instance-profile operations share the same IAM state. Root paths only, one native role per profile, at most1000 active/retired profile names. AddRoleToInstanceProfile additionally requires iam:PassRole on the canonical role ARN. Attached roles and populated profiles cannot be deleted. Recreated profiles receive fresh IDs; callers and pagination are generation-bound. Tags, EC2 association, credentials, CloudFormation, a profile console and Session Manager are not provided by this lifecycle. See docs/iam-instance-profiles.md.\n",
         "parameters": [
           {
             "name": "X-Simulator-Service",
@@ -4099,6 +4407,269 @@
                         "description": "Return the exact previous Marker. Parent generation/context checked; no snapshot guarantee."
                       }
                     }
+                  },
+                  {
+                    "title": "CreateInstanceProfile",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "InstanceProfileName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "CreateInstanceProfile"
+                        ],
+                        "default": "CreateInstanceProfile"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "InstanceProfileName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9_+=,.@-]+$"
+                      },
+                      "Path": {
+                        "type": "string",
+                        "enum": [
+                          "/"
+                        ],
+                        "description": "Only the root path is supported."
+                      }
+                    }
+                  },
+                  {
+                    "title": "GetInstanceProfile",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "InstanceProfileName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "GetInstanceProfile"
+                        ],
+                        "default": "GetInstanceProfile"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "InstanceProfileName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9_+=,.@-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "ListInstanceProfiles",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "ListInstanceProfiles"
+                        ],
+                        "default": "ListInstanceProfiles"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "PathPrefix": {
+                        "type": "string",
+                        "enum": [
+                          "/"
+                        ],
+                        "description": "Only the root path prefix is supported."
+                      },
+                      "Marker": {
+                        "type": "string",
+                        "description": "Use the opaque marker returned by the same list operation and parent role incarnation."
+                      },
+                      "MaxItems": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1000
+                      }
+                    }
+                  },
+                  {
+                    "title": "DeleteInstanceProfile",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "InstanceProfileName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "DeleteInstanceProfile"
+                        ],
+                        "default": "DeleteInstanceProfile"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "InstanceProfileName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9_+=,.@-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "AddRoleToInstanceProfile",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "InstanceProfileName",
+                      "RoleName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "AddRoleToInstanceProfile"
+                        ],
+                        "default": "AddRoleToInstanceProfile"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "InstanceProfileName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9_+=,.@-]+$"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "RemoveRoleFromInstanceProfile",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "InstanceProfileName",
+                      "RoleName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "RemoveRoleFromInstanceProfile"
+                        ],
+                        "default": "RemoveRoleFromInstanceProfile"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "InstanceProfileName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9_+=,.@-]+$"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      }
+                    }
+                  },
+                  {
+                    "title": "ListInstanceProfilesForRole",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "Action",
+                      "Version",
+                      "RoleName"
+                    ],
+                    "properties": {
+                      "Action": {
+                        "type": "string",
+                        "enum": [
+                          "ListInstanceProfilesForRole"
+                        ],
+                        "default": "ListInstanceProfilesForRole"
+                      },
+                      "Version": {
+                        "type": "string",
+                        "enum": [
+                          "2010-05-08"
+                        ],
+                        "default": "2010-05-08"
+                      },
+                      "RoleName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9_-]+$"
+                      },
+                      "Marker": {
+                        "type": "string",
+                        "description": "Use the opaque marker returned by the same list operation and parent role incarnation."
+                      },
+                      "MaxItems": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1000
+                      }
+                    }
                   }
                 ],
                 "discriminator": {
@@ -4290,6 +4861,63 @@
                     "Version": "2010-05-08",
                     "RoleName": "practice-executor",
                     "MaxItems": 100
+                  }
+                },
+                "CreateInstanceProfile": {
+                  "summary": "CreateInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "CreateInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "GetInstanceProfile": {
+                  "summary": "GetInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "GetInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "ListInstanceProfiles": {
+                  "summary": "ListInstanceProfiles (IAM service header required)",
+                  "value": {
+                    "Action": "ListInstanceProfiles",
+                    "Version": "2010-05-08"
+                  }
+                },
+                "DeleteInstanceProfile": {
+                  "summary": "DeleteInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "DeleteInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile"
+                  }
+                },
+                "AddRoleToInstanceProfile": {
+                  "summary": "AddRoleToInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "AddRoleToInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "RemoveRoleFromInstanceProfile": {
+                  "summary": "RemoveRoleFromInstanceProfile (IAM service header required)",
+                  "value": {
+                    "Action": "RemoveRoleFromInstanceProfile",
+                    "Version": "2010-05-08",
+                    "InstanceProfileName": "practice-instance-profile",
+                    "RoleName": "practice-executor"
+                  }
+                },
+                "ListInstanceProfilesForRole": {
+                  "summary": "ListInstanceProfilesForRole (IAM service header required)",
+                  "value": {
+                    "Action": "ListInstanceProfilesForRole",
+                    "Version": "2010-05-08",
+                    "RoleName": "practice-executor"
                   }
                 }
               }
@@ -11260,7 +11888,7 @@
         "tags": [
           "Sakura Disk configuration"
         ],
-        "description": "**Static examples are documentation, not current saved state.** This is opt-in local Disk configuration metadata only. The provider is disabled by default; authenticated requests then receive plain-text404 Provider not implemented. The host must enable --enable-sakura-disks with all four fixed scope flags, establish its opaque token/session, and attach a typed Actor bound to the configured exercise owner. The fixed public dummy Basic marker is required AFTER owner authorization and grants nothing. Never use real Sakura keys. No implicit owner/operator bypass, real Sakura IAM, VM, boot/block storage, Availability, billing, server attachment, copies/resize, Object Storage or AppRun. Create/Read/Update/Delete/List share actual SQLite state; no simulator success for unsupported options. Mutating bodies are strict UTF-8 JSON at most64KiB; duplicate/case-ambiguous keys and unsupported fields are refused. Integer lexical forms and Unicode/encoding rules are stricter than structural JSON Schema. Error envelopes differ for host authentication and disabled provider. No authenticated real-console or live cloud differential equivalence is claimed. The no-query default works with Test Request→Send. Optional paging uses an UNNAMED raw/once-encoded JSON query object, not From/Count form parameters: append ?%7B%22From%22%3A0%2C%22Count%22%3A1%7D manually. The standard OpenAPI query builder cannot represent that syntax. Count omitted/0 means remaining rows up to100; query bound8KiB. No Filter/Sort parameters.",
+        "description": "**Static examples are documentation, not current saved state.** This is opt-in local Disk configuration metadata only. The provider is disabled by default; authenticated requests then receive plain-text404 Provider not implemented. The host must enable --enable-sakura-disks with all four fixed scope flags, establish its opaque token/session, and attach a typed Actor bound to the configured exercise owner. The fixed public dummy Basic marker is required AFTER owner authorization and grants nothing. Never use real Sakura keys. No implicit owner/operator bypass, real Sakura IAM, VM, boot/block storage, Availability, billing, server attachment, copies/resize, Object Storage or AppRun. Create/Read/Update/Delete/List share actual SQLite state; no simulator success for unsupported options. Mutating bodies are strict UTF-8 JSON at most64KiB; duplicate/case-ambiguous keys and unsupported fields are refused. Integer lexical forms and Unicode/encoding rules are stricter than structural JSON Schema. Error envelopes differ for host authentication and disabled provider. No authenticated real-console or live cloud differential equivalence is claimed. The no-query default works with Test Request\u2192Send. Optional paging uses an UNNAMED raw/once-encoded JSON query object, not From/Count form parameters: append ?%7B%22From%22%3A0%2C%22Count%22%3A1%7D manually. The standard OpenAPI query builder cannot represent that syntax. Count omitted/0 means remaining rows up to100; query bound8KiB. No Filter/Sort parameters.",
         "security": [
           {
             "SakuraDummyProtocolMarker": []

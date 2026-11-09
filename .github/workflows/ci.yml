@@ -127,6 +127,11 @@ jobs:
             reports/login-first-native-observer-status.json
             reports/login-second-native-clear-failure.json
             reports/login-second-native-clear-observer-status.json
+            reports/cloudformation-events-*.png
+            reports/participant-console-home-*.png
+            reports/participant-ssm-list-*.png
+            reports/login-paste-*.png
+            reports/language-login-ja-*.png
           if-no-files-found: warn
           retention-days: 14
       - name: Run the actual platform hello-world lifecycle and participant browser

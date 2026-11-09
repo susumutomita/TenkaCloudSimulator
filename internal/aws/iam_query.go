@@ -119,6 +119,9 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 	for operation, operationFields := range iamManagedQueryFields {
 		fields[operation] = operationFields
 	}
+	for operation, operationFields := range iamInstanceProfileQueryFields {
+		fields[operation] = operationFields
+	}
 	allowed, ok := fields[action]
 	if !ok {
 		iamError(w, ssmFailure{"NotImplemented", "Only the declared native role and inline-policy Query operations are implemented."})
@@ -137,6 +140,10 @@ func (g *Gateway) serveIAM(w http.ResponseWriter, r *http.Request) {
 			iamError(w, ssmFailure{"NotImplemented", "Unsupported IAM field: " + name})
 			return
 		}
+	}
+	if _, profile := iamInstanceProfileQueryFields[action]; profile {
+		g.serveIAMInstanceProfiles(w, r, action, input)
+		return
 	}
 	if _, managed := iamManagedQueryFields[action]; managed {
 		g.serveIAMManaged(w, r, action, input)

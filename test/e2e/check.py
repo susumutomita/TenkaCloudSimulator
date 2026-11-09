@@ -66,11 +66,21 @@ def sdk(endpoint,principal=None):
  client=boto3.client('s3',endpoint_url=endpoint,region_name='us-east-1',aws_access_key_id='TCSIMEXAMPLE',aws_secret_access_key='simulator-only',config=Config(s3={'addressing_style':'path'},retries={'max_attempts':0},request_checksum_calculation='when_required',response_checksum_validation='when_required'))
  if principal:client.meta.events.register('before-sign.s3',lambda request,**kwargs:request.headers.add_header('x-simulator-principal',principal))
  return client
+def open_service(page,name):
+ page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name=name,exact=True).click()
 def submit(page):
  dialog=page.get_by_role('dialog')
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_iam_instance_profiles_sdk_isolation_restart_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_instance_profiles.py'))],check=True,timeout=180)
+ def test_cloudformation_events_real_console_history(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_events_console.py'))],check=True,timeout=180)
+ def test_s3_multipart_served_reference_examples(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart_docs.py'))],check=True,timeout=120)
+ def test_s3_multipart_native_persistence_and_console(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart.py'))],check=True)
  def test_sts_native_sdk_original_hello_world(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('sts_sdk.py'))],check=True,timeout=180)
  def test_sns_native_admission_persistence_and_isolation(self):
@@ -180,7 +190,7 @@ def handler(event,context):
     if request_route.request.url.startswith(endpoint+'/'):request_route.continue_()
     else:outside.append(request_route.request.url);request_route.abort()
    context.route('**/*',route)
-   page.goto(endpoint+'/_simulator/console/');page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click();page.get_by_role('link',name='version-evidence',exact=True).click()
+   page.goto(endpoint+'/_simulator/console/');page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click();open_service(page,'S3');page.get_by_role('link',name='version-evidence',exact=True).click()
    page.get_by_role('tab',name='Properties',exact=True).click();page.get_by_role('button',name='Edit',exact=True).click();page.get_by_role('radio',name='Enable',exact=True).check();page.get_by_role('button',name='Save changes',exact=True).click();expect(page.get_by_text('Changes saved.',exact=True)).to_be_visible()
    self.assertEqual(c.get_bucket_versioning(Bucket='version-evidence')['Status'],'Enabled')
    page.screenshot(path=str(REPORTS/'s3-versioning-properties.png'),full_page=True)
@@ -242,7 +252,7 @@ def handler(event,context):
     if r.request.url.startswith(endpoint+'/'):r.continue_()
     else:outside.append(r.request.url);r.abort()
    context.route('**/*',route)
-   page.goto(endpoint+'/_simulator/console/');page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click()
+   page.goto(endpoint+'/_simulator/console/');page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click();open_service(page,'S3')
    page.get_by_role('button',name='us-east-1',exact=True).click();page.get_by_role('menuitem',name='ap-northeast-1',exact=True).click();page.get_by_role('link',name='browser-evidence',exact=True).click();page.get_by_role('tab',name='Properties',exact=True).click()
    expect(page.get_by_role('table',name='Bucket tags',exact=True)).to_contain_text('TenkaCloud:NamePrefix')
    page.get_by_role('button',name='Edit tags',exact=True).click();page.get_by_role('button',name='Add tag',exact=True).click();page.get_by_placeholder('Enter key',exact=True).last.fill('Environment');page.get_by_placeholder('Enter value',exact=True).last.fill('practice');held=[]
@@ -299,6 +309,9 @@ def handler(event,context):
     f=client('cloudformation',endpoint,token);c=client('lambda',endpoint,token)
     result=c.invoke(FunctionName='cfn-inline-app',Payload=b'null');self.assertNotIn('FunctionError',result);self.assertEqual(json.loads(result['Payload'].read()),{'answer':42,'value':'team-one','event':None})
     f.delete_stack(StackName='inline-practice');self.assertEqual(c.list_functions()['Functions'],[])
+ def test_console_participant_sts_handoff(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('console_handoff.py'))],check=True,timeout=180)
+
  def test_console_account_sign_out_revokes_browser_session_only(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('console_logout.py'))],check=True)
 
@@ -393,7 +406,7 @@ def handler(event,context):
     if request_route.request.url.startswith(endpoint+'/'):request_route.continue_()
     else:outside.append(request_route.request.url);request_route.abort()
    context.route('**/*',route)
-   page.goto(endpoint+'/_simulator/console/');expect(page.get_by_role('heading',name='No buckets yet',exact=True)).to_be_visible()
+   page.goto(endpoint+'/_simulator/console/#/s3');expect(page.get_by_role('heading',name='No buckets yet',exact=True)).to_be_visible()
    page.get_by_role('button',name='Create bucket',exact=True).first.click();page.get_by_label('Bucket name',exact=True).fill('ui-practice');submit(page);expect(page.get_by_role('link',name='ui-practice',exact=True)).to_be_visible()
    c=sdk(endpoint);self.assertEqual(c.list_buckets()['Buckets'][0]['Name'],'ui-practice')
    c.create_bucket(Bucket='sdk-created');page.get_by_role('button',name='Refresh resources').click();expect(page.get_by_role('link',name='sdk-created',exact=True)).to_be_visible()
@@ -470,7 +483,7 @@ def handler(event,context):
    c.put_object(Bucket='other-bucket',Key='victim',Body=b'other sentinel')
    executable=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium')
    browser=p.chromium.launch(**({'executable_path':executable} if executable else {}),args=['--no-sandbox'])
-   page=browser.new_page();page.goto(endpoint+'/_simulator/console/')
+   page=browser.new_page();page.goto(endpoint+'/_simulator/console/#/s3')
    page.get_by_role('link',name='dot-practice',exact=True).click()
    for key in ['a/../victim','a/./victim','../other-bucket/victim','a//victim']:
     c.put_object(Bucket='dot-practice',Key=key,Body=b'original literal bytes');page.get_by_role('button',name='Refresh resources',exact=True).click()
@@ -520,12 +533,30 @@ def handler(event,context):
   with running() as endpoint,sync_playwright() as p:
    c=sdk(endpoint);c.create_bucket(Bucket='east-region-bucket');c.create_bucket(Bucket='tokyo-region-bucket',CreateBucketConfiguration={'LocationConstraint':'ap-northeast-1'});c.put_object(Bucket='east-region-bucket',Key='sentinel',Body=b'east unchanged')
    executable=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium')
-   browser=p.chromium.launch(**({'executable_path':executable} if executable else {}),args=['--no-sandbox']);page=browser.new_page(viewport={'width':1440,'height':1000});page.goto(endpoint+'/_simulator/console/');page.get_by_role('link',name='east-region-bucket',exact=True).click();expect(page.get_by_role('link',name='sentinel',exact=True)).to_be_visible()
+   browser=p.chromium.launch(**({'executable_path':executable} if executable else {}),args=['--no-sandbox']);page=browser.new_page(viewport={'width':1440,'height':1000});page.goto(endpoint+'/_simulator/console/#/s3');page.get_by_role('link',name='east-region-bucket',exact=True).click();expect(page.get_by_role('link',name='sentinel',exact=True)).to_be_visible()
    page.get_by_role('button',name='us-east-1',exact=True).click();page.get_by_role('menuitem',name='ap-northeast-1',exact=True).click();expect(page.get_by_role('heading',name='General purpose buckets',exact=False)).to_be_visible();expect(page.get_by_role('link',name='east-region-bucket',exact=True)).to_have_count(0);page.get_by_role('link',name='tokyo-region-bucket',exact=True).click()
    page.get_by_role('button',name='Upload',exact=True).first.click();page.get_by_label('Choose a file').set_input_files({'name':'new-region.txt','mimeType':'text/plain','buffer':b'tokyo only'});submit(page);expect(page.get_by_role('link',name='new-region.txt',exact=True)).to_be_visible()
    self.assertEqual(c.get_object(Bucket='tokyo-region-bucket',Key='new-region.txt')['Body'].read(),b'tokyo only');self.assertEqual(c.get_object(Bucket='east-region-bucket',Key='sentinel')['Body'].read(),b'east unchanged')
    with self.assertRaises(ClientError):c.get_object(Bucket='east-region-bucket',Key='new-region.txt')
    browser.close()
+ def test_ssm_detail_history_refresh_save_and_delete(self):
+  with running() as endpoint,sync_playwright() as p:
+   client=boto3.client('ssm',endpoint_url=endpoint,region_name='us-east-1',aws_access_key_id='TCSIMLOCAL',aws_secret_access_key='dummy',config=Config(retries={'max_attempts':0}))
+   name='/navigation/lifecycle';client.put_parameter(Name=name,Type='String',Value='initial',Description='preserve existing description')
+   browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),args=['--no-sandbox']);page=browser.new_page(viewport={'width':1440,'height':1000});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+   page.goto(endpoint+'/_simulator/console/#/parameters?region=us-east-1');page.get_by_role('link',name=name,exact=True).click();expect(page.get_by_label('Value',exact=True)).to_have_value('initial')
+   page.get_by_role('button',name='Edit parameter',exact=True).click();expect(page.get_by_label('Description',exact=True)).to_have_value('preserve existing description');page.get_by_role('button',name='Cancel',exact=True).click()
+   client.put_parameter(Name=name,Type='String',Value='sdk-updated',Overwrite=True)
+   page.get_by_role('button',name='Refresh parameter',exact=True).click();expect(page.get_by_label('Value',exact=True)).to_have_value('sdk-updated')
+   page.get_by_role('button',name='Edit parameter',exact=True).click();page.get_by_label('Value',exact=True).fill('console-updated');page.get_by_role('button',name='Save changes',exact=True).click()
+   expect(page.locator('[data-analytics-alert="success"]').get_by_text('Parameter saved.',exact=True)).to_be_visible();expect(page.get_by_label('Value',exact=True)).to_have_value('console-updated');self.assertEqual(client.get_parameter(Name=name)['Parameter']['Value'],'console-updated');self.assertEqual(client.describe_parameters()['Parameters'][0]['Description'],'preserve existing description')
+   page.reload();expect(page.get_by_label('Value',exact=True)).to_have_value('console-updated')
+   page.get_by_role('button',name='us-east-1',exact=True).click();page.get_by_role('menuitem',name='ap-northeast-1',exact=True).click();expect(page.get_by_label('Value',exact=True)).to_have_count(0);expect(page.get_by_role('heading',name='No parameters yet',exact=True)).to_be_visible();self.assertIn('region=ap-northeast-1',page.url);self.assertNotIn('parameter=',page.url)
+   page.goto(endpoint+'/_simulator/console/#/parameters?region=us-east-1');page.get_by_role('link',name=name,exact=True).click();expect(page.get_by_label('Value',exact=True)).to_have_value('console-updated')
+   page.get_by_role('button',name='Delete parameter',exact=True).click();page.get_by_label('Type '+name+' to confirm',exact=True).fill(name);page.get_by_role('button',name='Delete permanently',exact=True).click()
+   expect(page.locator('[data-analytics-alert="success"]').get_by_text('Resource deleted.',exact=True)).to_be_visible();expect(page.get_by_role('heading',name='No parameters yet',exact=True)).to_be_visible();self.assertNotIn('parameter=',page.url)
+   with self.assertRaises(ClientError):client.get_parameter(Name=name)
+   self.assertEqual(errors,[]);browser.close()
  def test_service_navigation_dismisses_resource_forms(self):
   with running() as endpoint,sync_playwright() as p:
    c=sdk(endpoint);c.create_bucket(Bucket='navigation-bucket');c.put_object(Bucket='navigation-bucket',Key='sentinel',Body=b'unchanged')
@@ -545,7 +576,7 @@ def handler(event,context):
        page.get_by_label('Value',exact=True).fill('must not save')
       if route=='menu':page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='Systems Manager' if destination=='ssm' else 'S3',exact=True).click()
       else:page.evaluate('(hash)=>{location.hash=hash}', '/parameters' if destination=='ssm' else '/s3')
-      expect(page.get_by_role('heading',name='Parameters' if destination=='ssm' else 'General purpose buckets',exact=False)).to_be_visible();expect(page.get_by_label('Bucket name',exact=True)).to_have_count(0);expect(page.get_by_label('Object key',exact=True)).to_have_count(0);expect(page.get_by_label('Value',exact=True)).to_have_count(0)
+      expect(page.get_by_role('heading',name='My parameters' if destination=='ssm' else 'General purpose buckets',exact=False)).to_be_visible();expect(page.get_by_label('Bucket name',exact=True)).to_have_count(0);expect(page.get_by_label('Object key',exact=True)).to_have_count(0);expect(page.get_by_label('Value',exact=True)).to_have_count(0)
       if destination=='ssm':
        page.get_by_role('button',name='Create parameter',exact=True).first.click();expect(page.get_by_label('Name',exact=True)).to_have_value('');expect(page.get_by_label('Value',exact=True)).to_have_value('');name='/navigation/'+route+'-'+kind;page.get_by_label('Name',exact=True).fill(name);page.get_by_label('Value',exact=True).fill('correct destination');submit(page);expect(page.get_by_role('link',name=name,exact=True)).to_be_visible();self.assertEqual(ssm.get_parameter(Name=name)['Parameter']['Value'],'correct destination')
       self.assertEqual([b['Name'] for b in c.list_buckets()['Buckets']],['navigation-bucket']);self.assertEqual([o['Key'] for o in c.list_objects_v2(Bucket='navigation-bucket')['Contents']],['sentinel']);self.assertEqual(c.get_object(Bucket='navigation-bucket',Key='sentinel')['Body'].read(),b'unchanged');self.assertEqual(ssm.get_parameter(Name='/navigation/existing')['Parameter']['Value'],'unchanged')

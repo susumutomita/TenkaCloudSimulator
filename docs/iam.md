@@ -1,8 +1,8 @@
 # IAM roles と実行権限
 
-IAM Query/XMLの21操作を実装する。既存ロールの9操作に加え、カスタマー管理ポリシーの`CreatePolicy`、`GetPolicy`、`ListPolicies`、`DeletePolicy`、`CreatePolicyVersion`、`GetPolicyVersion`、`ListPolicyVersions`、`SetDefaultPolicyVersion`、`DeletePolicyVersion`、`AttachRolePolicy`、`DetachRolePolicy`、`ListAttachedRolePolicies`を提供する。既存操作は`CreateRole`、`GetRole`、`ListRoles`、`DeleteRole`、`PutRolePolicy`、`GetRolePolicy`、`DeleteRolePolicy`、`ListRolePolicies`、`UpdateAssumeRolePolicy`。root POST、Version `2010-05-08`、`X-Simulator-Service: iam`でルーティングする。ダミーTCSIM署名のSDKはIAM scopeで自動振分け。実AWS資格情報・session tokenは使わない。認証はCLIのlocal tokenで行う。
+IAM Query/XMLの28操作を実装する。7つの[instance profile操作](iam-instance-profiles.md)はnative roleと同じSQLite状態を使い、EC2実行や資格情報発行は行わない。既存ロールの9操作に加え、カスタマー管理ポリシーの`CreatePolicy`、`GetPolicy`、`ListPolicies`、`DeletePolicy`、`CreatePolicyVersion`、`GetPolicyVersion`、`ListPolicyVersions`、`SetDefaultPolicyVersion`、`DeletePolicyVersion`、`AttachRolePolicy`、`DetachRolePolicy`、`ListAttachedRolePolicies`を提供する。既存操作は`CreateRole`、`GetRole`、`ListRoles`、`DeleteRole`、`PutRolePolicy`、`GetRolePolicy`、`DeleteRolePolicy`、`ListRolePolicies`、`UpdateAssumeRolePolicy`。root POST、Version `2010-05-08`、`X-Simulator-Service: iam`でルーティングする。ダミーTCSIM署名のSDKはIAM scopeで自動振分け。実AWS資格情報・session tokenは使わない。認証はCLIのlocal tokenで行う。
 
-ScalarにはIAM roles専用のPOST `/_simulator/providers/aws/` があり、IAM headerを初期入力した21操作の静的リクエスト例を選べる。新しい状態や別APIではなく既存AWS provider aliasで、root POSTと同一処理。従来root POSTの操作例も保持する。例そのものをHTTP送信するテストで、作成・読取・一覧・更新・削除の既存9操作を検証する。追加12操作は専用SDKライフサイクルで検証する。boto3はURL-encoded policyを辞書へ復元する。ネイティブSDK、コンソール、Lambdaは同じSQLiteのロール・inline policyを共有する。
+ScalarにはIAM roles専用のPOST `/_simulator/providers/aws/` があり、IAM headerを初期入力した28操作の静的リクエスト例を選べる。新しい状態や別APIではなく既存AWS provider aliasで、root POSTと同一処理。従来root POSTの操作例も保持する。例そのものをHTTP送信するテストで、作成・読取・一覧・更新・削除の既存9操作を検証する。追加12操作は専用SDKライフサイクルで検証する。boto3はURL-encoded policyを辞書へ復元する。ネイティブSDK、コンソール、Lambdaは同じSQLiteのロール・inline policyを共有する。
 
 ## コンソール
 

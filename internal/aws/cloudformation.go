@@ -919,7 +919,7 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 			if core.Code(err) == "NoSuchBucket" {
 				err = nil
 			} else if core.Code(err) == "BucketNotEmpty" {
-				return ssmFailure{"ValidationError", "S3 bucket retains objects, versions or delete markers; empty it explicitly before DeleteStack."}
+				return ssmFailure{"ValidationError", "S3 bucket retains objects, versions, delete markers or multipart uploads; empty it explicitly before DeleteStack."}
 			}
 		} else if r.Type == "AWS::IAM::Role" {
 			_, err = tx.Exec("DELETE FROM identity_policies WHERE name=?", r.PhysicalID)

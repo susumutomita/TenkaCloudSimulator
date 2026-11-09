@@ -7147,6 +7147,336 @@
    ]
   },
   {
+   "id": "S3MultipartState",
+   "model": "formal/S3MultipartState.tla",
+   "config": "formal/S3MultipartState.cfg",
+   "bounds": "Two upload/key scopes, two part slots, part charges 0..2, object charge 0..2, shared budget 3; latest refusal captures target active membership, both part charges and previous object charge.",
+   "properties": [
+    "TypeOK",
+    "Budget",
+    "NoOrphans",
+    "Cleanup",
+    "RefusalAtomic"
+   ],
+   "limits": "Finite atomic transaction abstraction only; does not execute Go/SQLite/HTTP/React, prove refinement, MD5 integrity, IAM parsing, version selection, ordering/minimum sizes, timestamps, random IDs, OS isolation, or real AWS parity. Scope labels abstract bucket/key/upload binding. Actual Go fault, SDK, persistence and browser tests cover those boundaries.",
+   "source_scope": [
+    "internal/aws/s3_multipart.go",
+    "internal/aws/s3_multipart_http.go",
+    "internal/aws/s3_versions.go",
+    "internal/aws/s3.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "OmitPartBudget",
+     "edits": [
+      {
+       "old": "GuardBudget == TRUE",
+       "new": "GuardBudget == FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "Budget"
+    },
+    {
+     "id": "OmitUploadParent",
+     "edits": [
+      {
+       "old": "GuardParent == TRUE",
+       "new": "GuardParent == FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOrphans"
+    },
+    {
+     "id": "RetainCompletedParts",
+     "edits": [
+      {
+       "old": "ReleaseParts == TRUE",
+       "new": "ReleaseParts == FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOrphans"
+    },
+    {
+     "id": "PartialFailure",
+     "edits": [
+      {
+       "old": "AtomicFailure == TRUE",
+       "new": "AtomicFailure == FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RefusalAtomic"
+    },
+    {
+     "id": "OmitUploadBinding",
+     "edits": [
+      {
+       "old": "GuardScope == TRUE",
+       "new": "GuardScope == FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RefusalAtomic"
+    }
+   ]
+  },
+  {
+   "id": "ConsoleHandoff",
+   "model": "formal/ConsoleHandoff.tla",
+   "config": "formal/ConsoleHandoff.cfg",
+   "bounds": "One opaque handoff, two redemption attempts, one bound browser and one unrelated live browser; time0..3, parent expiry2, handoff TTL1, browser TTL1 or3, two role generations, policy Boolean, two parameters/regions, Get/Put/Delete actions.",
+   "properties": [
+    "TypeOK",
+    "OperatorRefused",
+    "ParentLifetimeBound",
+    "OneTimeRedemption",
+    "AttemptConsumesCode",
+    "RedeemRequiresFreshParent",
+    "UseRequiresFreshAuthority",
+    "ExactDestination",
+    "LogoutRejectsReplay",
+    "UnrelatedSessionsPreserved",
+    "SDKAuthorityPreserved"
+   ],
+   "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes.",
+   "source_scope": [
+    "internal/server/console_handoff.go",
+    "internal/server/access.go",
+    "internal/aws/sts_credentials.go",
+    "internal/server/console_handoff_test.go",
+    "internal/aws/sts_credentials_test.go",
+    "internal/aws/sts_roles.go",
+    "internal/server/server.go",
+    "internal/aws/ssm.go"
+   ],
+   "mutants": [
+    {
+     "id": "AllowOperator",
+     "edits": [
+      {
+       "old": "who = \"participant\" (* ParticipantOnly *)",
+       "new": "TRUE (* ParticipantOnly *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OperatorRefused"
+    },
+    {
+     "id": "ExtendHandoff",
+     "edits": [
+      {
+       "old": "Min(now + 1, 2) (* HandoffBound *)",
+       "new": "now + 3 (* HandoffBound *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ParentLifetimeBound"
+    },
+    {
+     "id": "ExtendBrowser",
+     "edits": [
+      {
+       "old": "Min(now + ttl, 2) ELSE browserDeadline",
+       "new": "now + 3 ELSE browserDeadline",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ParentLifetimeBound"
+    },
+    {
+     "id": "ReuseCode",
+     "edits": [
+      {
+       "old": "available' = FALSE (* ConsumeEveryAttempt *)",
+       "new": "available' = available (* ConsumeEveryAttempt *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttemptConsumesCode"
+    },
+    {
+     "id": "IgnoreConsumedCode",
+     "edits": [
+      {
+       "old": "ok == available /\\",
+       "new": "ok == TRUE /\\",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OneTimeRedemption"
+    },
+    {
+     "id": "SkipRedeemExpiry",
+     "edits": [
+      {
+       "old": "now < handoffDeadline (* RedeemExpiry *)",
+       "new": "TRUE (* RedeemExpiry *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RedeemRequiresFreshParent"
+    },
+    {
+     "id": "SkipRedeemParent",
+     "edits": [
+      {
+       "old": "LiveParent (* RedeemParent *)",
+       "new": "TRUE (* RedeemParent *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RedeemRequiresFreshParent"
+    },
+    {
+     "id": "SkipCookie",
+     "edits": [
+      {
+       "old": "\"self\" \\in active (* CookieLive *)",
+       "new": "TRUE (* CookieLive *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresFreshAuthority"
+    },
+    {
+     "id": "SkipBrowserExpiry",
+     "edits": [
+      {
+       "old": "now < browserDeadline (* BrowserExpiry *)",
+       "new": "TRUE (* BrowserExpiry *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresFreshAuthority"
+    },
+    {
+     "id": "SkipUseParent",
+     "edits": [
+      {
+       "old": "LiveParent (* UseParent *)",
+       "new": "TRUE (* UseParent *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresFreshAuthority"
+    },
+    {
+     "id": "CachePolicy",
+     "edits": [
+      {
+       "old": "permission (* FreshPolicy *)",
+       "new": "TRUE (* FreshPolicy *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresFreshAuthority"
+    },
+    {
+     "id": "SkipParameter",
+     "edits": [
+      {
+       "old": "p = \"own\" (* ExactParameter *)",
+       "new": "TRUE (* ExactParameter *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDestination"
+    },
+    {
+     "id": "SkipRegion",
+     "edits": [
+      {
+       "old": "r = \"east\" (* ExactRegion *)",
+       "new": "TRUE (* ExactRegion *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDestination"
+    },
+    {
+     "id": "SkipAction",
+     "edits": [
+      {
+       "old": "a \\in {\"Get\",\"Put\"} (* ExactAction *)",
+       "new": "TRUE (* ExactAction *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDestination"
+    },
+    {
+     "id": "KeepLoggedOutCookie",
+     "edits": [
+      {
+       "old": "active \\ {\"self\"} (* LocalRevocation *)",
+       "new": "active (* LocalRevocation *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LogoutRejectsReplay"
+    },
+    {
+     "id": "RevokePeer",
+     "edits": [
+      {
+       "old": "active \\ {\"self\"} (* LocalRevocation *)",
+       "new": "{} (* LocalRevocation *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UnrelatedSessionsPreserved"
+    },
+    {
+     "id": "RevokeSDK",
+     "edits": [
+      {
+       "old": "sdk' = sdk (* SDKFrame *)",
+       "new": "sdk' = {} (* SDKFrame *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SDKAuthorityPreserved"
+    },
+    {
+     "id": "GrantBrowserSDK",
+     "edits": [
+      {
+       "old": "sdk' = sdk (* SDKFrame *)",
+       "new": "sdk' = sdk \\cup {\"browser\"} (* SDKFrame *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SDKAuthorityPreserved"
+    },
+    {
+     "id": "SkipUseGeneration",
+     "edits": [
+      {
+       "old": "LiveParent (* UseParent *)",
+       "new": "(parent /\\ now < 2)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UseRequiresFreshAuthority"
+    },
+    {
+     "id": "SkipRedeemGeneration",
+     "edits": [
+      {
+       "old": "LiveParent (* RedeemParent *)",
+       "new": "(parent /\\ now < 2)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RedeemRequiresFreshParent"
+    }
+   ]
+  },
+  {
    "id": "WAFRequestEvaluation",
    "model": "formal/WAFRequestEvaluation.tla",
    "config": "formal/WAFRequestEvaluation.cfg",
@@ -7311,6 +7641,167 @@
       }
      ],
      "expect_invariant": "NoUnauthorizedDelete"
+    }
+   ]
+  },
+  {
+   "id": "IAMInstanceProfiles",
+   "model": "formal/IAMInstanceProfiles.tla",
+   "config": "formal/IAMInstanceProfiles.cfg",
+   "bounds": "Two profile names and two role names, two retained generations, four API-reachable seeds, at most two additional arbitrary lifecycle requests; Boolean action/PassRole authorization, captured-generation validity and storage success.",
+   "properties": [
+    "TypeOK",
+    "AuthorizationRequired",
+    "PassRoleRequired",
+    "ProfileGenerationGuard",
+    "RoleGenerationGuard",
+    "FailureFrame",
+    "SingleRole",
+    "AttachmentAuthority",
+    "FreshProfileIdentity",
+    "PeerFrame",
+    "RemovalExact"
+   ],
+   "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history.",
+   "source_scope": [
+    "internal/aws/iam_instance_profiles.go",
+    "internal/aws/iam_instance_profiles_query.go",
+    "internal/aws/iam_roles.go",
+    "internal/aws/iam_query.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "IgnoreActionAuthorization",
+     "edits": [
+      {
+       "old": "IF ~q.allowed THEN \"Denied\"",
+       "new": "IF FALSE THEN \"Denied\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizationRequired"
+    },
+    {
+     "id": "IgnorePassRole",
+     "edits": [
+      {
+       "old": "ELSE IF q.op = \"AddRole\" /\\ ~q.passRole THEN \"Denied\"",
+       "new": "ELSE IF FALSE THEN \"Denied\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PassRoleRequired"
+    },
+    {
+     "id": "IgnoreProfileGeneration",
+     "edits": [
+      {
+       "old": "ELSE IF q.op \\in ProfileOps /\\ ~q.freshP THEN \"StaleProfile\"",
+       "new": "ELSE IF FALSE THEN \"StaleProfile\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ProfileGenerationGuard"
+    },
+    {
+     "id": "IgnoreRoleGeneration",
+     "edits": [
+      {
+       "old": "ELSE IF q.op \\in RoleOps /\\ ~q.freshR THEN \"StaleRole\"",
+       "new": "ELSE IF FALSE THEN \"StaleRole\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RoleGenerationGuard"
+    },
+    {
+     "id": "CommitStorageFailure",
+     "edits": [
+      {
+       "old": "IF result = \"Accepted\" THEN Candidate(s, q) ELSE s",
+       "new": "IF result \\in {\"Accepted\", \"StorageError\"} THEN Candidate(s, q) ELSE s",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureFrame"
+    },
+    {
+     "id": "AllowMultipleRoles",
+     "edits": [
+      {
+       "old": "(q.op = \"AddRole\" /\\ ForProfile(s, q.p) # {})",
+       "new": "(q.op = \"AddRole\" /\\ FALSE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SingleRole"
+    },
+    {
+     "id": "DeletePopulatedProfile",
+     "edits": [
+      {
+       "old": "(q.op = \"DeleteProfile\" /\\ ForProfile(s, q.p) # {})",
+       "new": "(q.op = \"DeleteProfile\" /\\ FALSE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttachmentAuthority"
+    },
+    {
+     "id": "DeleteAttachedRole",
+     "edits": [
+      {
+       "old": "(q.op = \"DeleteRole\" /\\ ForRole(s, q.r) # {})",
+       "new": "(q.op = \"DeleteRole\" /\\ FALSE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttachmentAuthority"
+    },
+    {
+     "id": "BindWrongProfileGeneration",
+     "edits": [
+      {
+       "old": "Edge(q.p, s.profiles[q.p].gen, q.r, s.roles[q.r].gen)",
+       "new": "Edge(q.p, 0, q.r, s.roles[q.r].gen)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttachmentAuthority"
+    },
+    {
+     "id": "BindWrongRoleGeneration",
+     "edits": [
+      {
+       "old": "Edge(q.p, s.profiles[q.p].gen, q.r, s.roles[q.r].gen)",
+       "new": "Edge(q.p, s.profiles[q.p].gen, q.r, 0)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttachmentAuthority"
+    },
+    {
+     "id": "ReuseProfileIdentity",
+     "edits": [
+      {
+       "old": "NewProfileGeneration(s, p) == s.profiles[p].gen + 1",
+       "new": "NewProfileGeneration(s, p) == 1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FreshProfileIdentity"
+    },
+    {
+     "id": "RemovePeerMembership",
+     "edits": [
+      {
+       "old": "!.edges = @ \\ SameRole(s, q.p, q.r)",
+       "new": "!.edges = {}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PeerFrame"
     }
    ]
   }
