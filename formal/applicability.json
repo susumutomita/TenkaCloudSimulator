@@ -272,6 +272,13 @@
       "reason": "Console acceptance exercises explicit Tail disclosure and stale-request clearing. Its loopback setup uses the existing PUT policy API and explicit deny-all fixtures; native SDK verification checks those setup and revocation paths separately from browser acceptance. No production authorization or test assertion is weakened."
     },
     {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "effa518767addf3180381a9cc5569369f16de965413e1a532800dc83e36b9185",
+      "models": [],
+      "disposition": "test-support",
+      "reason": "Updates the exact whole-path OpenAPI preservation fingerprint for the reviewed bounded Lambda Invoke Tail description and request/response headers. Adds negative controls for Tail disclosure and unrelated Invoke authentication/response changes while retaining all existing preservation checks."
+    },
+    {
       "path": "tools/console/bundle-digests.json",
       "sha256": "18c89ad2565543cd5c716721c42aee448516742afd28b768ad19f6b75ae10a45",
       "models": [],
