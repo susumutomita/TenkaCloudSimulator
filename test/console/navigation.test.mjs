@@ -159,6 +159,20 @@ test('the Azure Resource Manager route is capability-gated and its resource type
   assert.equal(JSON.stringify(enabled),before);
 });
 
+test('regional WAF discovery is capability-gated and stays in AWS navigation',()=>{
+  const enabled={...capabilities,services:{...capabilities.services,wafv2:{scope:'REGIONAL'}}};
+  const before=JSON.stringify(enabled);
+  assert.equal(serviceAvailable('wafv2',capabilities),false);
+  assert.equal(serviceAvailable('wafv2',enabled),true);
+  assert.deepEqual(servicesForProvider('aws',enabled,'WAF').map(s=>s.id),['wafv2']);
+  assert.deepEqual(servicesForProvider('aws',enabled,'ウェブACL').map(s=>s.id),['wafv2']);
+  assert.deepEqual(servicesForProvider('gcp',enabled,'WAF'),[]);
+  assert.equal(serviceFromHash('#/wafv2'),'wafv2');
+  assert.equal(hashForService('wafv2'),'/wafv2');
+  assert.equal(providerForService('wafv2'),'aws');
+  assert.equal(JSON.stringify(enabled),before);
+
+});
 
 test('neutral home and scoped participant discovery do not invent resource authority',()=>{
   for(const route of ['', '#', '#/', '#/home', '#/home?region=us-east-1'])assert.equal(serviceFromHash(route),'home');

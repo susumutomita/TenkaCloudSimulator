@@ -1,350 +1,663 @@
 {
   "version": 1,
-  "base_sha": "3d575ac645de4f1b36d644879a714374f5f6d9d4",
+  "base_sha": "cc4f9ae346031cd10ce19ea10913fa6ca289328a",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "f1edf2cd1963f8012dbcb54626e2a9cbfd7f2af4d80a55088f13e1ef525f45e2",
-      "models": [],
-      "disposition": "documentation",
-      "reason": "Replaces lengthy front-page service and historical test narration with concise onboarding, explicit Lambda Tail use, links to detailed guides, and preserved security, compatibility and provenance limits. No implementation or model behavior changes."
+      "path": ".github/workflows/ci.yml",
+      "sha256": "2cad91757250c4d7a9d95617179fb772dd715a35a875239360404ed82748016f",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers both WAF models and required properties/controls without dropping or weakening current-main checks.",
+      "models": []
     },
     {
       "path": "README.md",
-      "sha256": "806e1b672f2ea5aded992c34b80957b8938519b45798cb9a9e3ac729ad5fe805",
-      "models": [],
+      "sha256": "7037899a860aff384bd60f3da4ef014b02b0c8c078325283b1cab8981874574a",
       "disposition": "documentation",
-      "reason": "Replaces lengthy front-page service and historical test narration with concise onboarding, explicit Lambda Tail use, links to detailed guides, and preserved security, compatibility and provenance limits. No implementation or model behavior changes."
+      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
+      "models": []
     },
     {
-      "path": "docs/formal-lambda-log-tail.md",
-      "sha256": "239e0700bcebf0d63d4e294cd6e7481fcea85e7439fec116a1e9f9079241cf07",
-      "models": [],
+      "path": "docs/ci.md",
+      "sha256": "1a64d80f5ba70112275e2f477012be734a5d2c62895c0f199df5c8d1c93a8be2",
       "disposition": "documentation",
-      "reason": "Documents the implemented opt-in bounded log-tail behavior, disclosure UI and explicit unsupported scope; does not claim completed runtime or browser validation."
+      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
+      "models": []
     },
     {
-      "path": "docs/lambda.md",
-      "sha256": "82fef72ff859b326a96067612533023f808a4ce623f01ab07d7ed7ee4ae14d5e",
-      "models": [],
+      "path": "docs/console-wafv2-reference.md",
+      "sha256": "44577ad511a1f7c277e21ead4323024b7671e2235324f5610fdb345aede908c1",
       "disposition": "documentation",
-      "reason": "Documents the implemented opt-in bounded log-tail behavior, disclosure UI and explicit unsupported scope; does not claim completed runtime or browser validation."
+      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
+      "models": []
     },
     {
-      "path": "formal/LambdaLogTailDisclosure.cfg",
-      "sha256": "5998309e77450ff4fdac16f8888fd51f1152f869728ac7b7456ab26e3eb9366e",
+      "path": "docs/wafv2.md",
+      "sha256": "d0b7bac57d61ce208f854ed3c4f20cef8259fa7e618314b60760c96fcc0d7e26",
+      "disposition": "documentation",
+      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
+      "models": []
+    },
+    {
+      "path": "formal/WAFAssociationAuthorization.cfg",
+      "sha256": "56a99cf1f5c1feca8efbf2b7417226c4c3efe6011a15e53d770766500003a225",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
       "models": [
         {
-          "id": "LambdaLogTailDisclosure",
+          "id": "WAFAssociationAuthorization",
           "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
+            "CheckedAssociationStable",
+            "NoUnauthorizedRead",
+            "NoUnauthorizedDelete",
+            "StagePermissionRequired",
+            "DeniedLeavesState"
           ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+          "limits": "A finite transaction/authorization abstraction. The lock represents the shared immediate SQLite transaction; it does not prove SQL locking, context cancellation, IAM parsing, credential security or HTTP implementation refinement."
         }
-      ],
-      "disposition": "modeled",
-      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+      ]
     },
     {
-      "path": "formal/LambdaLogTailDisclosure.tla",
-      "sha256": "9c0c67ec3eabe7f2de9e2d82e2733b4e586c338bb08acce801f6a10adf4417cf",
+      "path": "formal/WAFAssociationAuthorization.tla",
+      "sha256": "856139f514c5d1b1f1c3a6c2f72ea6eb3c2bc3764d48fb5ea08a24ea9bb9282c",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
       "models": [
         {
-          "id": "LambdaLogTailDisclosure",
+          "id": "WAFAssociationAuthorization",
           "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
+            "CheckedAssociationStable",
+            "NoUnauthorizedRead",
+            "NoUnauthorizedDelete",
+            "StagePermissionRequired",
+            "DeniedLeavesState"
           ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+          "limits": "A finite transaction/authorization abstraction. The lock represents the shared immediate SQLite transaction; it does not prove SQL locking, context cancellation, IAM parsing, credential security or HTTP implementation refinement."
         }
-      ],
+      ]
+    },
+    {
+      "path": "formal/WAFRequestEvaluation.cfg",
+      "sha256": "15a6482238b2887d17e7625522efb33fa15b7c8deac5380506c09652d576e46e",
       "disposition": "modeled",
-      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/WAFRequestEvaluation.md",
+      "sha256": "c8677767ed5fb11581621c4fcd19dc291ccb9d351cc86dd3727f9cb72e4eeedd",
+      "disposition": "modeled",
+      "reason": "Documents the bounded WAF model, sensitivity controls and implementation correspondence limits without claiming refinement.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/WAFRequestEvaluation.tla",
+      "sha256": "3ff7dc9cd294d31448586856b60a92f7d1c7e0128ae9e119e49e55c264f981b7",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "fa33ae7e2c155b5d18206a8e2d5a34fe387beb15008dd614e5f1a9783e659105",
-      "models": [],
+      "sha256": "11305596fac875c780cfde53bd10ed44f89d55e1d919345aea2f2f9c5170da4f",
       "disposition": "formal-infrastructure",
-      "reason": "Registers and protects the additional bounded disclosure specification, exact source scopes and all required sensitivity controls while preserving existing models."
+      "reason": "Registers both WAF models and required properties/controls without dropping or weakening current-main checks.",
+      "models": []
     },
     {
-      "path": "internal/aws/lambda.go",
-      "sha256": "f6793a30e370518951b21fd7ed4fec29254ea7df3177e2b1e7068e421683e848",
+      "path": "go.mod",
+      "sha256": "776bb813c810537a3625b5ab4dcf47082b1c9b31c5446d2f219b9ff7cc54da98",
+      "disposition": "modeled",
+      "reason": "Pins the SQLi detector runtime dependency. The model treats matcher results as arbitrary inputs; it does not validate dependency implementation, vulnerabilities or AWS detector parity.",
       "models": [
         {
-          "id": "LambdaLogTailDisclosure",
+          "id": "WAFRequestEvaluation",
           "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
           ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
         }
-      ],
-      "disposition": "modeled",
-      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+      ]
     },
     {
-      "path": "internal/aws/lambda_log_tail_test.go",
-      "sha256": "f481600323605cda9b8aab45a8250e2e66236dda1612bd40b7ea0d6cc6247676",
+      "path": "go.sum",
+      "sha256": "9c2f6f9c226c71b797cf2d2c164e01d9638853024a188b93ac58035321f35d5f",
+      "disposition": "modeled",
+      "reason": "Pins the SQLi detector runtime dependency. The model treats matcher results as arbitrary inputs; it does not validate dependency implementation, vulnerabilities or AWS detector parity.",
       "models": [
         {
-          "id": "LambdaLogTailDisclosure",
+          "id": "WAFRequestEvaluation",
           "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
           ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
         }
-      ],
+      ]
+    },
+    {
+      "path": "internal/aws/apigateway_deployments.go",
+      "sha256": "acfc6c6d131b1e9d1387e7a8e64940db72d29ef01e267611cfa13de9562b4f90",
       "disposition": "modeled",
-      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
-    },
-    {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "a6712cfbadadfbccbe9861b2169fa2cd7f8c1425b300b67ad373fe1823b5102a",
-      "models": [],
-      "disposition": "presentation",
-      "reason": "Describes native synchronous LogType Tail and bounded X-Amz-Log-Result headers; does not change request dispatch or authority."
-    },
-    {
-      "path": "internal/server/lambda_test.go",
-      "sha256": "ee1d6ecc1774bd66835b03e0d1693413b009ab2697978233b9f708af75c37796",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
       "models": [
         {
-          "id": "LambdaLogTailDisclosure",
+          "id": "WAFRequestEvaluation",
           "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
           ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
         }
-      ],
+      ]
+    },
+    {
+      "path": "internal/aws/apigateway_invoke.go",
+      "sha256": "0a1e1b6129a070ee11c9c83aa58cefcb2c7b8cd5371a316ea2c94cb4f74a4499",
       "disposition": "modeled",
-      "reason": "Native HTTP tests bind explicit Tail response admission to the current Lambda contract. A separate regression preserves the public main IAM instance-profile capability metadata while adding bounded Tail metadata; the finite Tail model does not prove IAM discovery or native execution."
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/apigateway_store.go",
+      "sha256": "b2204db90cfafb5c799bacee99fc6b0a9ff578ec6017fcafef7b354f2f92401f",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "faee97e9b74c51a43b1535085ffb9becdabf6a06a57428c271b12a3e6b535ac9",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "50a3c6704196ed5d885d6511bfe53d36164dea9d3071626e666baad58e1781a8",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/wafv2_authorization_test.go",
+      "sha256": "060895bd5205ebed891c8ddc0c9f02a64c2abd4158f5258c37da65ddd2c1cfd9",
+      "disposition": "test-support",
+      "reason": "Adds or preserves native WAF/IAM/HTTP/browser regression checks, including the reproduced association authorization race.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/wafv2_dispatch.go",
+      "sha256": "4d534acdc1310934b55b939af32098da1753438bc2fb074c583a9c1bf0d1cbfc",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/wafv2_dispatch_test.go",
+      "sha256": "2296723fcb91de508eaf2bd8ff123a5244dfbc0901a18333745a74d1dc31cc0f",
+      "disposition": "test-support",
+      "reason": "Adds or preserves native WAF/IAM/HTTP/browser regression checks, including the reproduced association authorization race.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/wafv2_faults_test.go",
+      "sha256": "cced0d75eda115da38e8cbafc673b6f960d31f514fbf0f458340bd2ff58944c4",
+      "disposition": "test-support",
+      "reason": "Adds or preserves native WAF/IAM/HTTP/browser regression checks, including the reproduced association authorization race.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/wafv2_http.go",
+      "sha256": "88425b02299c6d803e14d79828ae83657344cf778cea3f21a4a92ea6990f0011",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        },
+        {
+          "id": "WAFAssociationAuthorization",
+          "properties": [
+            "CheckedAssociationStable",
+            "NoUnauthorizedRead",
+            "NoUnauthorizedDelete",
+            "StagePermissionRequired",
+            "DeniedLeavesState"
+          ],
+          "limits": "A finite transaction/authorization abstraction. The lock represents the shared immediate SQLite transaction; it does not prove SQL locking, context cancellation, IAM parsing, credential security or HTTP implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/wafv2_match.go",
+      "sha256": "111d8375ba682ea3f7938ad677dbfc275321b1f8bbb6032c566543ba4ec9a8eb",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/wafv2_store.go",
+      "sha256": "d9a75bb16dddd348b8bd303210fa2ff0f89ec3e700a24a6e0af1b98191c02937",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        },
+        {
+          "id": "WAFAssociationAuthorization",
+          "properties": [
+            "CheckedAssociationStable",
+            "NoUnauthorizedRead",
+            "NoUnauthorizedDelete",
+            "StagePermissionRequired",
+            "DeniedLeavesState"
+          ],
+          "limits": "A finite transaction/authorization abstraction. The lock represents the shared immediate SQLite transaction; it does not prove SQL locking, context cancellation, IAM parsing, credential security or HTTP implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/wafv2_test.go",
+      "sha256": "b7772974987be4f7a64aeef918d503390f0c92de4c09ccdedb2ca0ceb63ae803",
+      "disposition": "test-support",
+      "reason": "Adds or preserves native WAF/IAM/HTTP/browser regression checks, including the reproduced association authorization race.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/wafv2_types.go",
+      "sha256": "ecdac2b168943f6f23d1c0bc552d6e78de2b59c8a0ea8695b822c833db1a30db",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
+      "models": [
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/legal/assets/GO-NOTICES.txt",
+      "sha256": "60ad04107708e9e7ec91fab355fc6970528fc8c92c1801ff55e54cd3097bd435",
+      "disposition": "documentation",
+      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
+      "models": []
+    },
+    {
+      "path": "internal/legal/assets/LIBINJECTION-COPYING.txt",
+      "sha256": "d0732bc23658db5b9749e3f9cd4fe0f9b3e132b5955adccb08821845fe2a21c8",
+      "disposition": "documentation",
+      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
+      "models": []
+    },
+    {
+      "path": "internal/legal/assets/LIBINJECTION-PROVENANCE.txt",
+      "sha256": "4f31bb8f53748cb6f65ac10870c0150c154161e5fbafd0b3687808ef74840ea1",
+      "disposition": "documentation",
+      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
+      "models": []
+    },
+    {
+      "path": "internal/server/s3_multipart_capabilities_test.go",
+      "sha256": "430981c6897155f058badb050170768de59eeef196056658eb103687c38fbf64",
+      "disposition": "test-support",
+      "reason": "Checks both capability operation lists include all six implemented multipart actions and rejects the contradictory blanket unsupported claim. No runtime behavior or formal invariant is changed.",
+      "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "ffbf961120969486f3cbbb2b5a4a3f8685a10ac51bef11f150c0deed4691282b",
+      "sha256": "8a69e591c09b1f9eba650273b7330b976b954a0df5b9e6f7c568aa0d2a6dd681",
+      "disposition": "modeled",
+      "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
       "models": [
         {
-          "id": "LambdaLogTailDisclosure",
+          "id": "WAFRequestEvaluation",
           "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
           ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
         }
-      ],
-      "disposition": "modeled",
-      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+      ]
+    },
+    {
+      "path": "internal/server/wafv2_test.go",
+      "sha256": "02975cae587c5024a2d71954989fe0edee0a34e54bb31e38db2b2d37f8f7c00b",
+      "disposition": "test-support",
+      "reason": "Adds or preserves native WAF/IAM/HTTP/browser regression checks, including the reproduced association authorization race.",
+      "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "63225d7f83140ba3e1f673edb282ba61e40a434d891fc1d72d3ee0427569b33d",
+      "sha256": "600350defc1acdb4c950e9d522f2c4634813f8ffe2a5d64b9d6a48b95e411365",
+      "disposition": "modeled",
+      "reason": "Adds the WAF view while preserving current-main session/navigation and epoch behavior. Existing model bindings cover retained shell behavior, not the new WAF editor; native browser tests remain a separate required check.",
       "models": [
         {
-          "id": "LambdaLogTailDisclosure",
+          "id": "CatalogConsoleEpoch",
           "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
           ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model."
+        },
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
         }
-      ],
-      "disposition": "modeled",
-      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+      ]
     },
     {
-      "path": "internal/workload/python/runtime.go",
-      "sha256": "9e1108583bc6b02a0e10b5e7191ce5e35e3a58b19f691ed08972319cc71d2fee",
-      "models": [
-        {
-          "id": "LambdaLogTailDisclosure",
-          "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
-          ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
-        }
-      ],
-      "disposition": "modeled",
-      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
-    },
-    {
-      "path": "internal/workload/python/runtime_log_tail_test.go",
-      "sha256": "b8fe3cbf9735eefe8c13f1713bb863e7a5aadbd103d98cbe0336c2465e272ce4",
-      "models": [
-        {
-          "id": "LambdaLogTailDisclosure",
-          "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
-          ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
-        }
-      ],
-      "disposition": "modeled",
-      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+      "path": "scripts/formal_applicability.py",
+      "sha256": "3d6a529e8a54ecfbb192e7d89db5523d0a13bd63dc038d1d6a7c9212fa72d2fe",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserves exact module-metadata validation with negative controls, or tests capability-gated WAF console navigation; no runtime/model checks are removed.",
+      "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "4041551b6e575a094dd6fc28c856c7cbd7f2846baaa1a3c6a726165b60b9e39a",
-      "models": [],
+      "sha256": "66844017eaf8a3d5a625b257dc0a41b6fb976f961ff6ced2a46dd96b9e653780",
       "disposition": "formal-infrastructure",
-      "reason": "Registers and protects the additional bounded disclosure specification, exact source scopes and all required sensitivity controls while preserving existing models."
+      "reason": "Registers both WAF models and required properties/controls without dropping or weakening current-main checks.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "77cd3437e7c2c6e983a016ba85ca17294c0c395e535e0cce186f63379cce2b23",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserves exact module-metadata validation with negative controls, or tests capability-gated WAF console navigation; no runtime/model checks are removed.",
+      "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "a36c01fc2d82bec27ac571123b56e34dec74be3d7824a505a9e4a4a178110916",
-      "models": [],
+      "sha256": "f674d015151cb44dc551064505e539612b6832c3191f58127732ee9ea6c6c624",
       "disposition": "formal-infrastructure",
-      "reason": "Registers and protects the additional bounded disclosure specification, exact source scopes and all required sensitivity controls while preserving existing models."
+      "reason": "Registers both WAF models and required properties/controls without dropping or weakening current-main checks.",
+      "models": []
     },
     {
-      "path": "test/console/lambda-invoke.test.mjs",
-      "sha256": "b917b12defe1be3c3ffa4a3e02084b321ea24f184f3cc6a264c5d645272ef5d4",
-      "models": [
-        {
-          "id": "LambdaLogTailDisclosure",
-          "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
-          ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
-        }
-      ],
-      "disposition": "modeled",
-      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+      "path": "test/console/navigation.test.mjs",
+      "sha256": "b462112cc859ed7f81030cb42b98470610c256916696bfb9e92dbfa1a2be50bc",
+      "disposition": "test-support",
+      "reason": "Preserves exact module-metadata validation with negative controls, or tests capability-gated WAF console navigation; no runtime/model checks are removed.",
+      "models": []
+    },
+    {
+      "path": "test/console/waf-lifecycle.test.mjs",
+      "disposition": "test-support",
+      "reason": "Executes the shipped WAF mutation/unmount boundary with deterministic callbacks to check parent-saving cleanup and stale-completion isolation; not a browser acceptance claim.",
+      "models": [],
+      "sha256": "ec342f3d27c8a90ca0d0899fa4d16a03ff6dabb8d9b4d385904c8653f8df06d9"
+    },
+    {
+      "path": "test/console/waf-presentation.test.mjs",
+      "sha256": "33b978622abad77ceaf8f559b1afbb9f34792014c7010c25ebd00f1fbe6db79e",
+      "disposition": "test-support",
+      "reason": "Checks Security category and search discovery while retaining scoped SSM-only participant presentation.",
+      "models": []
+    },
+    {
+      "path": "test/console/waf-sidebar.test.mjs",
+      "sha256": "78787c1d26a1de221ee4fd2747e2f8da093d76c6968bfe5fa96319873fc1a10d",
+      "disposition": "test-support",
+      "reason": "Executes the shipped sidebar expressions with identity selection enabled and disabled; WAF navigation stays independent from identity controls.",
+      "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "4e8392fdb9a5bd7487e8705e08b4fa0de7b6f1649bd143d15067997564e92e18",
-      "models": [],
+      "sha256": "6280d14dc39dec56c6fce604b058a91df03e24272bc8d97086c7d876735145b2",
       "disposition": "test-support",
-      "reason": "Registers mandatory real-binary console acceptance for explicit log tails without skipping existing tests."
+      "reason": "Adds or preserves native WAF/IAM/HTTP/browser regression checks, including the reproduced association authorization race.",
+      "models": []
     },
     {
-      "path": "test/e2e/lambda_log_tail_console.py",
-      "sha256": "31228b0ddfbd9d27df3814acecf8e99a93b56fe3c30b97fb16878b3efc2cbe65",
-      "models": [
-        {
-          "id": "LambdaLogTailDisclosure",
-          "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
-          ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
-        }
-      ],
-      "disposition": "modeled",
-      "reason": "Console acceptance exercises explicit Tail disclosure and stale-request clearing. Its loopback setup uses the existing PUT policy API and explicit deny-all fixtures; native SDK verification checks those setup and revocation paths separately from browser acceptance. No production authorization or test assertion is weakened."
+      "path": "test/e2e/wafv2_console.py",
+      "sha256": "46e1f47ad4b8880170f968c9b0d87a4ea6e88e823e97fa0a28b2a06fe37e929e",
+      "disposition": "test-support",
+      "reason": "Adds or preserves native WAF/IAM/HTTP/browser regression checks, including the reproduced association authorization race.",
+      "models": []
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "effa518767addf3180381a9cc5569369f16de965413e1a532800dc83e36b9185",
-      "models": [],
+      "path": "test/e2e/wafv2_original_http.py",
+      "sha256": "3b32f1c58270149741b90ba1db4b344b663a1b834a7b0be30ca8c5d8d804a704",
       "disposition": "test-support",
-      "reason": "Updates the exact whole-path OpenAPI preservation fingerprint for the reviewed bounded Lambda Invoke Tail description and request/response headers. Adds negative controls for Tail disclosure and unrelated Invoke authentication/response changes while retaining all existing preservation checks."
+      "reason": "Adds or preserves native WAF/IAM/HTTP/browser regression checks, including the reproduced association authorization race.",
+      "models": []
+    },
+    {
+      "path": "third_party/GO-NOTICES.txt",
+      "sha256": "60ad04107708e9e7ec91fab355fc6970528fc8c92c1801ff55e54cd3097bd435",
+      "disposition": "documentation",
+      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
+      "models": []
+    },
+    {
+      "path": "third_party/LIBINJECTION-COPYING.txt",
+      "sha256": "d0732bc23658db5b9749e3f9cd4fe0f9b3e132b5955adccb08821845fe2a21c8",
+      "disposition": "documentation",
+      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
+      "models": []
+    },
+    {
+      "path": "third_party/LIBINJECTION-PROVENANCE.txt",
+      "sha256": "4f31bb8f53748cb6f65ac10870c0150c154161e5fbafd0b3687808ef74840ea1",
+      "disposition": "documentation",
+      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
+      "models": []
+    },
+    {
+      "path": "third_party/independent-native-source.json",
+      "sha256": "45fa1259da70fea3ba7ddc1fd5a7f7f8dc5db6e612be5ac63e9b50f82513c40b",
+      "disposition": "documentation",
+      "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
+      "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "18c89ad2565543cd5c716721c42aee448516742afd28b768ad19f6b75ae10a45",
-      "models": [],
+      "sha256": "c7340ec2440aff00850c4883f1c67d2c673a392007f0a5a4405a1f346caf004a",
       "disposition": "presentation",
-      "reason": "Reproducible build provenance for the official-component console bundle; no independent runtime authority."
+      "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
+      "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "053c638d9e3fd699ecb69d4d1e05cb79d7fdb7e6351cf53ac88e8cf0d7b618d1",
-      "models": [],
+      "sha256": "677901495b3357d3b236d7ca3922c383ebf3ad162173472af4035ecfe1e484b9",
       "disposition": "presentation",
-      "reason": "Reproducible build provenance for the official-component console bundle; no independent runtime authority."
+      "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
+      "models": []
     },
     {
-      "path": "tools/console/src/lambda-invoke.mjs",
-      "sha256": "90193b4fcd63fb0e829682788d1d8be27d740aaebb5c179a5c1a009b2695cc5c",
-      "models": [
-        {
-          "id": "LambdaLogTailDisclosure",
-          "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
-          ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
-        }
-      ],
-      "disposition": "modeled",
-      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+      "path": "tools/console/src/console-home.jsx",
+      "sha256": "db403bdbde52b6ce6ab4fd18ea075f1f15c9414a2f358ac0e663bffba7bd84bf",
+      "disposition": "presentation",
+      "reason": "Adds WAF to the existing Security presentation category without granting API or participant authority.",
+      "models": []
     },
     {
-      "path": "tools/console/src/lambda.jsx",
-      "sha256": "974e38ea401bf3044d54054a64d26d99cd9c78fa85b6dfc94d9f0f23b32660f7",
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "3e340b11281cfccc85940d043b9c00e7e77fd5022298735996b9f26d8429dcfb",
+      "disposition": "presentation",
+      "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "5bda4b7114d0b753cc92db5e39a15cb31b1952fd196cefe3e80a4c34e8a3c2b7",
+      "disposition": "modeled",
+      "reason": "Adds the WAF view while preserving current-main session/navigation and epoch behavior. Existing model bindings cover retained shell behavior, not the new WAF editor; native browser tests remain a separate required check.",
       "models": [
         {
-          "id": "LambdaLogTailDisclosure",
+          "id": "BrowserSessions",
           "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
           ],
-          "limits": "Finite one-request response admission, three size classes and current mounted epoch abstraction only. Does not establish exact bytes/frame filtering/base64/UTF-8, parser/HTTP/IAM implementation, WASI containment, React scheduling, repeated requests, cancellation completion, SQL, liveness or Go/JS refinement. Server capability metadata and generated Lambda bundle portions only; unrelated service contracts remain unchanged."
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        },
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model."
         }
-      ],
-      "disposition": "modeled",
-      "reason": "Implements or validates bounded explicit Lambda invocation-tail disclosure and current mounted invocation display. Existing unrelated service state and authority are unchanged."
+      ]
+    },
+    {
+      "path": "tools/console/src/wafv2.jsx",
+      "sha256": "1f0e2be542e388217033d14ad91f1cd254e6a17aacd0f6774ae55515020528c9",
+      "disposition": "presentation",
+      "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
+      "models": []
     }
   ]
 }

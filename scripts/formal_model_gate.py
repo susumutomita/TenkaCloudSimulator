@@ -1024,6 +1024,47 @@ REQUIRED_SOURCE_SCOPES['CFNEventHistory'] = {'internal/aws/cloudformation.go',
  'internal/aws/cloudformation_events_cleanup_order_test.go',
  'internal/aws/cloudformation_events_test.go'}
 
+
+# WAF ordered evaluation and association authorization are mandatory.
+BASE_MODELS.add('WAFRequestEvaluation')
+BASE_INVARIANTS['WAFRequestEvaluation'] = {'CountContinues',
+ 'FirstTerminatingRuleWins',
+ 'NoAssociationOrphans',
+ 'TypeOK',
+ 'UnassociatedAllows'}
+REQUIRED_MUTANTS['WAFRequestEvaluation'] = {'CountTerminates',
+ 'DeleteAssociatedACL',
+ 'DeleteAssociatedStage',
+ 'EarlyDefault',
+ 'ReversedOrder'}
+REQUIRED_SOURCE_SCOPES['WAFRequestEvaluation'] = {'formal/WAFRequestEvaluation.md',
+ 'go.mod',
+ 'go.sum',
+ 'internal/aws/apigateway_deployments.go',
+ 'internal/aws/apigateway_invoke.go',
+ 'internal/aws/apigateway_store.go',
+ 'internal/aws/s3.go',
+ 'internal/aws/ssm.go',
+ 'internal/aws/wafv2_dispatch.go',
+ 'internal/aws/wafv2_http.go',
+ 'internal/aws/wafv2_match.go',
+ 'internal/aws/wafv2_store.go',
+ 'internal/aws/wafv2_types.go',
+ 'internal/server/server.go'}
+BASE_MODELS.add('WAFAssociationAuthorization')
+BASE_INVARIANTS['WAFAssociationAuthorization'] = {'CheckedAssociationStable',
+ 'DeniedLeavesState',
+ 'NoUnauthorizedDelete',
+ 'NoUnauthorizedRead',
+ 'StagePermissionRequired',
+ 'TypeOK'}
+REQUIRED_MUTANTS['WAFAssociationAuthorization'] = {'AllowPrivateACL',
+ 'AllowPrivateDelete',
+ 'ReleaseBeforeUse',
+ 'SkipStagePermission',
+ 'WriterIgnoresTransaction'}
+REQUIRED_SOURCE_SCOPES['WAFAssociationAuthorization'] = {'internal/aws/wafv2_http.go', 'internal/aws/wafv2_store.go'}
+
 # Bounded local CloudFormation SSM snapshot requirements.
 BASE_MODELS.add('CFNParameterSnapshot')
 BASE_INVARIANTS['CFNParameterSnapshot'] = {'AdmissionExact',

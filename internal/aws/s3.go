@@ -35,6 +35,7 @@ var sequence atomic.Uint64
 var Regions = []string{"us-east-1", "us-west-2", "ap-northeast-1", "eu-west-1"}
 
 type Gateway struct {
+	WAF               *WAFStore
 	SNS               *SNSStore
 	QueueFanout       SNSQueueFanout
 	Secrets           *SecretStore

@@ -157,6 +157,8 @@ jobs:
       - name: Inspect console flow, keyboard behavior, and accessible contrast
         run: |
           AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make audit PYTHON=/tmp/simulator-tests/bin/python
+          AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_console.py
+          CHALLENGE_ROOT=/tmp/simulator-challenges AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_original_http.py
       - name: Finite state model check and deletion-guard mutation
         run: |
           python3 test/ci/tla_download.py

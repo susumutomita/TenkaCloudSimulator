@@ -452,7 +452,7 @@
    "id": "SQSStorageBudget",
    "model": "formal/SQSStorageBudget.tla",
    "config": "formal/SQSStorageBudget.cfg",
-   "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1–2 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
+   "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1\u20132 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
    "properties": [
     "TypeOK",
     "FailedSendPreservesRows",
@@ -644,7 +644,7 @@
    "id": "ProviderActor",
    "model": "formal/ProviderActor.tla",
    "config": "formal/ProviderActor.cfg",
-   "bounds": "64 request combinations: authentication2 × credential roles2 × exercise selections4 × spoofed wire roles2 × capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
+   "bounds": "64 request combinations: authentication2 \u00d7 credential roles2 \u00d7 exercise selections4 \u00d7 spoofed wire roles2 \u00d7 capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
    "properties": [
     "TypeOK",
     "NoActorOnRejected",
@@ -848,7 +848,7 @@
    "id": "AzureBlobState",
    "model": "formal/AzureBlobState.tla",
    "config": "formal/AzureBlobState.cfg",
-   "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1–2, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
+   "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1\u20132, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
    "properties": [
     "TypeOK",
     "NoUnauthorizedMutation",
@@ -4373,7 +4373,7 @@
    "id": "KMSAliasesViewEpoch",
    "model": "formal/KMSAliasesViewEpoch.tla",
    "config": "formal/KMSAliasesViewEpoch.cfg",
-   "bounds": "Two context incarnations A→B/unmount; two known customer keys per context; one alias; initial successful list and initial picker lookup normalized as reachable seed/completion. At most two subsequent ListAliases requests and two selected-target metadata requests, one form intent per context, one submitted write, one acknowledged read-only retry. Native backend outcomes abstract Success/Failure. No second normal write; request count0..2 admits replay mutant.",
+   "bounds": "Two context incarnations A\u2192B/unmount; two known customer keys per context; one alias; initial successful list and initial picker lookup normalized as reachable seed/completion. At most two subsequent ListAliases requests and two selected-target metadata requests, one form intent per context, one submitted write, one acknowledged read-only retry. Native backend outcomes abstract Success/Failure. No second normal write; request count0..2 admits replay mutant.",
    "properties": [
     "TypeOK",
     "CurrentListOutcome",
@@ -4990,7 +4990,7 @@
    "id": "CFNConditionAdmission",
    "model": "formal/CFNConditionAdmission.tla",
    "config": "formal/CFNConditionAdmission.cfg",
-   "bounds": "13 defect scenarios × 2 equality results × 3 then arms × 3 else arms = 234 immutable inputs; 6 deterministic compilation phases, no request loops",
+   "bounds": "13 defect scenarios \u00d7 2 equality results \u00d7 3 then arms \u00d7 3 else arms = 234 immutable inputs; 6 deterministic compilation phases, no request loops",
    "properties": [
     "TypeOK",
     "ParameterAdmission",
@@ -7473,6 +7473,174 @@
       }
      ],
      "expect_invariant": "RedeemRequiresFreshParent"
+    }
+   ]
+  },
+  {
+   "id": "WAFRequestEvaluation",
+   "model": "formal/WAFRequestEvaluation.tla",
+   "config": "formal/WAFRequestEvaluation.cfg",
+   "bounds": "Three rules with unique priorities, Count/Allow/Block actions, arbitrary matches and two default actions; one ACL and one API stage.",
+   "properties": [
+    "TypeOK",
+    "NoAssociationOrphans",
+    "CountContinues",
+    "FirstTerminatingRuleWins",
+    "UnassociatedAllows"
+   ],
+   "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement.",
+   "source_scope": [
+    "internal/aws/wafv2_types.go",
+    "internal/aws/wafv2_store.go",
+    "internal/aws/wafv2_match.go",
+    "internal/aws/wafv2_http.go",
+    "internal/aws/wafv2_dispatch.go",
+    "internal/aws/apigateway_invoke.go",
+    "internal/aws/apigateway_deployments.go",
+    "internal/aws/apigateway_store.go",
+    "internal/aws/s3.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go",
+    "go.mod",
+    "go.sum",
+    "formal/WAFRequestEvaluation.md"
+   ],
+   "mutants": [
+    {
+     "id": "CountTerminates",
+     "edits": [
+      {
+       "old": "/\\ counted' = Append(counted, CurrentRule) /\\ pc' = pc + 1",
+       "new": "/\\ counted' = Append(counted, CurrentRule) /\\ pc' = pc + 1 /\\ phase' = \"done\"",
+       "count": 1
+      },
+      {
+       "old": "/\\ UNCHANGED <<configuration, lifecycle, phase, snapshotAssociated,\n                            decision, terminating>>",
+       "new": "/\\ UNCHANGED <<configuration, lifecycle, snapshotAssociated,\n                            decision, terminating>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FirstTerminatingRuleWins"
+    },
+    {
+     "id": "ReversedOrder",
+     "edits": [
+      {
+       "old": "CurrentRule == RuleAt(pc)",
+       "new": "CurrentRule == RuleAt(RuleCount + 1 - pc)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CountContinues"
+    },
+    {
+     "id": "EarlyDefault",
+     "edits": [
+      {
+       "old": "FinishDefault == /\\ phase = \"evaluating\" /\\ pc > RuleCount",
+       "new": "FinishDefault == /\\ phase = \"evaluating\" /\\ pc >= RuleCount",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FirstTerminatingRuleWins"
+    },
+    {
+     "id": "DeleteAssociatedACL",
+     "edits": [
+      {
+       "old": "DeleteACL == /\\ aclExists /\\ ~associated",
+       "new": "DeleteACL == /\\ aclExists /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoAssociationOrphans"
+    },
+    {
+     "id": "DeleteAssociatedStage",
+     "edits": [
+      {
+       "old": "DeleteStage == /\\ stageExists /\\ ~associated",
+       "new": "DeleteStage == /\\ stageExists /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoAssociationOrphans"
+    }
+   ]
+  },
+  {
+   "id": "WAFAssociationAuthorization",
+   "model": "formal/WAFAssociationAuthorization.tla",
+   "config": "formal/WAFAssociationAuthorization.cfg",
+   "bounds": "One stage, two ACLs (readable public and denied private), one get/delete request, a competing association writer, and Boolean stage permission.",
+   "properties": [
+    "TypeOK",
+    "CheckedAssociationStable",
+    "NoUnauthorizedRead",
+    "NoUnauthorizedDelete",
+    "StagePermissionRequired",
+    "DeniedLeavesState"
+   ],
+   "limits": "A finite transaction/authorization abstraction. The lock represents the shared immediate SQLite transaction; it does not prove SQL locking, context cancellation, IAM parsing, credential security or HTTP implementation refinement.",
+   "source_scope": [
+    "internal/aws/wafv2_store.go",
+    "internal/aws/wafv2_http.go"
+   ],
+   "mutants": [
+    {
+     "id": "ReleaseBeforeUse",
+     "edits": [
+      {
+       "old": "locked' = TRUE",
+       "new": "locked' = FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CheckedAssociationStable"
+    },
+    {
+     "id": "WriterIgnoresTransaction",
+     "edits": [
+      {
+       "old": "Reassociate(next) == /\\ ~locked",
+       "new": "Reassociate(next) == /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CheckedAssociationStable"
+    },
+    {
+     "id": "AllowPrivateACL",
+     "edits": [
+      {
+       "old": "(association \\in {None, \"public\"})",
+       "new": "((association \\in {None, \"public\"}) \\/ kind = \"get\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoUnauthorizedRead"
+    },
+    {
+     "id": "SkipStagePermission",
+     "edits": [
+      {
+       "old": "(kind = \"get\" \\/ stageAllowed)",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StagePermissionRequired"
+    },
+    {
+     "id": "AllowPrivateDelete",
+     "edits": [
+      {
+       "old": "(association \\in {None, \"public\"})",
+       "new": "((association \\in {None, \"public\"}) \\/ kind = \"delete\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoUnauthorizedDelete"
     }
    ]
   },

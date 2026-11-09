@@ -223,7 +223,7 @@ func (s *APIGatewayStore) Stage(ctx context.Context, region, api, name string) (
 func (s *APIGatewayStore) DeleteStage(ctx context.Context, region, api, name string) error {
 	result, err := s.db.ExecContext(ctx, "DELETE FROM aws_apigateway_stages WHERE region=? AND api_id=? AND name=?", region, api, name)
 	if err != nil {
-		return err
+		return wafDeletionError(err)
 	}
 	count, err := result.RowsAffected()
 	if err != nil {

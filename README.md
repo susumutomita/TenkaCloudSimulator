@@ -79,7 +79,7 @@ console, CloudFormation adapter or Challenge integration.
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
   [SQS](docs/sqs.md), [SNS](docs/sns.md), [CloudWatch Logs](docs/cloudwatch-logs.md).
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
-  [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md).
+  [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
   [SSM value parameters](docs/cloudformation-ssm-parameters.md).
 - **Other clouds:** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md),

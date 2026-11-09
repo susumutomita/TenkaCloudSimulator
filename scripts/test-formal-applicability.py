@@ -333,6 +333,16 @@ class ApplicabilityTests(unittest.TestCase):
         self.assertEqual(validate_record(self.root, self.base)['changes'][0]['disposition'], 'build-metadata')
         self.assertIsNone(disposition('go.mod'))  # Not a general allowlist.
 
+    def test_modeled_dependency_annotation_is_metadata_but_versions_are_not(self):
+        registry = json.loads((self.root / 'formal/models.json').read_text())
+        self.assertTrue(any('go.mod' in model['source_scope'] for model in registry['models']))
+        after = self.module_baseline()
+        self.module_record(after)
+        self.assertEqual(validate_record(self.root, self.base)['changes'][0]['disposition'], 'build-metadata')
+        self.module_record(after.replace(b'v1.2.3', b'v1.2.4'))
+        with self.assertRaisesRegex(GateError, 'not a recognized require-annotation'):
+            validate_record(self.root, self.base)
+
     def test_module_semantic_and_unknown_changes_are_rejected(self):
         after = self.module_baseline()
         variants = {

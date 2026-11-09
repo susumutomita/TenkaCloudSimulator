@@ -9,6 +9,7 @@ import {hashForService, servicesForProvider} from './console-navigation.mjs';
 
 // Presentation only. These categories and original glyphs confer no API access.
 export const SERVICE_PRESENTATION = Object.freeze({
+  wafv2: {category:'security', color:'red', icon:'key', en:'Manage regional web ACLs', ja:'リージョンのウェブACLを管理'},
   s3: {category:'storage', color:'green', icon:'storage', en:'Store and manage objects', ja:'オブジェクトを保存・管理'},
   ssm: {category:'management', color:'pink', icon:'settings', en:'Manage systems and configuration', ja:'システムと設定を管理'},
   lambda: {category:'compute', color:'orange', icon:'compute', en:'Run functions', ja:'関数を実行'},

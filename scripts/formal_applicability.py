@@ -169,10 +169,16 @@ def validate_record(root, base, registry=None):
                 require(isinstance(binding['limits'], str) and binding['limits'].strip(), 'binding must acknowledge what is not modeled')
         else:
             kind = disposition(path)
+            module_metadata_only = False
             if path == 'go.mod' and item['disposition'] == 'build-metadata':
-                require(module_metadata_change(root, base), 'go.mod is not a recognized require-annotation/grouping-only change with unchanged go.sum')
+                # A dependency can be model-scoped while a later exact
+                # require regrouping/indirect annotation changes no dependency.
+                # Keep the immutable parser and unchanged-go.sum check; versions,
+                # additions, directives, mode changes and other paths still fail.
+                module_metadata_only = module_metadata_change(root, base)
+                require(module_metadata_only, 'go.mod is not a recognized require-annotation/grouping-only change with unchanged go.sum')
                 kind = 'build-metadata'
-            require(not any(path in m['source_scope'] or path in (m['model'], m['config']) for m in [*models.values(), *prior.values()]), 'declared state/model scope requires a modeled disposition: ' + path)
+            require(module_metadata_only or not any(path in m['source_scope'] or path in (m['model'], m['config']) for m in [*models.values(), *prior.values()]), 'declared state/model scope requires a modeled disposition: ' + path)
             require(kind is not None, 'unclassified implementation/state path requires a model: ' + path)
             require(item['disposition'] == kind and not item['models'], 'nonformal disposition mismatch: ' + path)
         evidence.append(item)
