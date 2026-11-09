@@ -34,11 +34,13 @@ def preserved(spec):
     # Exact main d166f56 projections plus reviewed bounded S3 multipart queries,
     # descriptions, regional/auth headers and object POST, then the seven native
     # IAM profile examples/action fields at root and the AWS alias. The reviewed
-    # profile addition changes only those IAM paths; components stay exact.
+    # profile addition changes only those IAM paths. The bounded Lambda Tail
+    # extension changes only Invoke description/request/response headers; all
+    # other paths and components stay exact.
     # The independent paths digest excludes only the two existing Sakura paths.
     original_paths = {path:value for path,value in spec['paths'].items() if path not in (COLLECTION,ITEM)}
     assert len(original_paths)==34
-    assert digest(original_paths)=='50a9c8466265b7801276684d19318acf17f312ec6c20afd81baba382f0a17d5b', 'Existing paths/operations/response examples changed'
+    assert digest(original_paths)=='91b11dc23d3a4bccd118b4c2ba2a67f8198e1db383f5367bbedb4c1a04b612dd', 'Existing paths/operations/response examples changed'
     original = copy.deepcopy(spec['components'])
     original.pop('securitySchemes',None)
     for group in ('schemas','parameters'):
@@ -190,6 +192,27 @@ class SakuraReference(unittest.TestCase):
             broken=copy.deepcopy(self.spec)
             change(broken['paths'])
             with self.assertRaises(AssertionError):preserved(broken)
+
+
+    def test_log_tail_extension_cannot_hide_unreviewed_reference_changes(self):
+        path='/2015-03-31/functions/{FunctionName}/invocations'
+        def log_type(op):
+            return next(p for p in op['parameters'] if p.get('name')=='X-Amz-Log-Type')
+        for label,change in (
+            ('missing opt-in header', lambda op: op['parameters'].remove(log_type(op))),
+            ('default disclosure', lambda op: log_type(op)['schema'].update(default='Tail')),
+            ('lost None option', lambda op: log_type(op)['schema']['enum'].remove('None')),
+            ('missing result header', lambda op: op['responses']['200']['headers'].pop('X-Amz-Log-Result')),
+            ('unbounded output claim', lambda op: op.update(description=op['description'].replace('4096','8192'))),
+            ('wrong result encoding', lambda op: op['responses']['200']['headers']['X-Amz-Log-Result']['schema'].update(type='object')),
+            ('lost host authentication', lambda op: op['parameters'].remove({'$ref':'#/components/parameters/SimulatorToken'})),
+            ('changed native operation', lambda op: op.update(operationId='UnreviewedInvoke')),
+            ('changed response contract', lambda op: op['responses']['200'].update(description='Unreviewed response')),
+        ):
+            broken=copy.deepcopy(self.spec)
+            change(broken['paths'][path]['post'])
+            with self.subTest(change=label),self.assertRaises(AssertionError):
+                preserved(broken)
 
 
 if __name__=='__main__':unittest.main()

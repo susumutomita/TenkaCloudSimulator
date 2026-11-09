@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "3d575ac645de4f1b36d644879a714374f5f6d9d4",
+  "base_sha": "cc4f9ae346031cd10ce19ea10913fa6ca289328a",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
@@ -11,14 +11,14 @@
     },
     {
       "path": "README.md",
-      "sha256": "4d3f355cbd8d5767f388cdbea48cdf0e2693ce7422150aab54f47e583a983de6",
+      "sha256": "7037899a860aff384bd60f3da4ef014b02b0c8c078325283b1cab8981874574a",
       "disposition": "documentation",
       "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
       "models": []
     },
     {
       "path": "docs/ci.md",
-      "sha256": "cef9adaf1d83f003720c7026ab126de72c4c665c515c34660947179ef193d4e1",
+      "sha256": "1a64d80f5ba70112275e2f477012be734a5d2c62895c0f199df5c8d1c93a8be2",
       "disposition": "documentation",
       "reason": "Documents the bounded WAF feature, dependency rights and exact integration evidence without expanding supported problem lifecycle.",
       "models": []
@@ -131,7 +131,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "09eeeb37887a86af43182e7c56764a2eff84a7e74951bffd03bd9e6e32950ec7",
+      "sha256": "11305596fac875c780cfde53bd10ed44f89d55e1d919345aea2f2f9c5170da4f",
       "disposition": "formal-infrastructure",
       "reason": "Registers both WAF models and required properties/controls without dropping or weakening current-main checks.",
       "models": []
@@ -432,7 +432,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "05af8872c266f81b8536c0c9e26069257f06bb6d14091fd98b5668fc5b2f2cce",
+      "sha256": "8a69e591c09b1f9eba650273b7330b976b954a0df5b9e6f7c568aa0d2a6dd681",
       "disposition": "modeled",
       "reason": "Integrates ordered WAF decisions, resource guards and transaction-bound authorization while preserving current-main provider, runtime and session boundaries.",
       "models": [
@@ -457,7 +457,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "30ed6e13bd83435b12fa5c00d6951dacf46a6ae2ba755199c557d90441605385",
+      "sha256": "600350defc1acdb4c950e9d522f2c4634813f8ffe2a5d64b9d6a48b95e411365",
       "disposition": "modeled",
       "reason": "Adds the WAF view while preserving current-main session/navigation and epoch behavior. Existing model bindings cover retained shell behavior, not the new WAF editor; native browser tests remain a separate required check.",
       "models": [
@@ -496,7 +496,7 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "718311192371814d62960ef5fbb41c216a47fe1e7276caa039958e9e280073b9",
+      "sha256": "66844017eaf8a3d5a625b257dc0a41b6fb976f961ff6ced2a46dd96b9e653780",
       "disposition": "formal-infrastructure",
       "reason": "Registers both WAF models and required properties/controls without dropping or weakening current-main checks.",
       "models": []
@@ -510,7 +510,7 @@
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "06b9bb88b887d8d37647b2350fe616ffea7cf834de36feeb572c205fb2397c24",
+      "sha256": "f674d015151cb44dc551064505e539612b6832c3191f58127732ee9ea6c6c624",
       "disposition": "formal-infrastructure",
       "reason": "Registers both WAF models and required properties/controls without dropping or weakening current-main checks.",
       "models": []
@@ -545,7 +545,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "15826214eb9aab1822cb7226bf3a1d503eab6cd37a89c2750c1eede05ad635a2",
+      "sha256": "6280d14dc39dec56c6fce604b058a91df03e24272bc8d97086c7d876735145b2",
       "disposition": "test-support",
       "reason": "Adds or preserves native WAF/IAM/HTTP/browser regression checks, including the reproduced association authorization race.",
       "models": []
@@ -594,14 +594,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "9e5c706c162214960eeb8c7ab05f91668761f73d789324f5471423c9ded3b1c4",
+      "sha256": "c7340ec2440aff00850c4883f1c67d2c673a392007f0a5a4405a1f346caf004a",
       "disposition": "presentation",
       "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "6c49fbfd00f9e8cb17d9af44e2dd8b06bf3df768970651a280f308ea335e845a",
+      "sha256": "677901495b3357d3b236d7ca3922c383ebf3ad162173472af4035ecfe1e484b9",
       "disposition": "presentation",
       "reason": "Rebuilds the current-main console with the WAF view; presentation is independently tested and not claimed as a Go/SQL refinement.",
       "models": []

@@ -1107,6 +1107,13 @@ BASE_INVARIANTS['ConsoleHandoff'] = {'LogoutRejectsReplay', 'TypeOK', 'RedeemReq
 REQUIRED_MUTANTS['ConsoleHandoff'] = {'SkipParameter', 'RevokeSDK', 'SkipRedeemExpiry', 'SkipUseGeneration', 'CachePolicy', 'ExtendHandoff', 'SkipRedeemGeneration', 'SkipCookie', 'SkipRegion', 'SkipBrowserExpiry', 'ReuseCode', 'SkipAction', 'SkipRedeemParent', 'RevokePeer', 'KeepLoggedOutCookie', 'ExtendBrowser', 'IgnoreConsumedCode', 'SkipUseParent', 'GrantBrowserSDK', 'AllowOperator'}
 REQUIRED_SOURCE_SCOPES['ConsoleHandoff'] = {'internal/server/console_handoff.go', 'internal/aws/sts_credentials_test.go', 'internal/server/console_handoff_test.go', 'internal/server/access.go', 'internal/aws/sts_roles.go', 'internal/aws/sts_credentials.go', 'internal/server/server.go', 'internal/aws/ssm.go'}
 
+
+# Bounded opt-in Lambda response and UI request-lifetime disclosure contract.
+BASE_MODELS.add('LambdaLogTailDisclosure')
+BASE_INVARIANTS['LambdaLogTailDisclosure'] = {'TypeOK', 'DisplayCurrent', 'DisplayHasResponse', 'TailBound', 'ResponseAuthorized', 'ResponseSync', 'ResponseOptIn'}
+REQUIRED_MUTANTS['LambdaLogTailDisclosure'] = {'AcceptOldEpoch', 'SkipOptIn', 'KeepOnEpoch', 'KeepOnUnmount', 'AcceptUnmounted', 'KeepOnContext', 'SkipSync', 'SkipInvokePermission', 'SkipTailCap', 'SkipContextInvalidation', 'DisplayWithoutResponse'}
+REQUIRED_SOURCE_SCOPES['LambdaLogTailDisclosure'] = {'internal/workload/python/runtime_log_tail_test.go', 'internal/aws/lambda_log_tail_test.go', 'tools/console/src/lambda-invoke.mjs', 'internal/server/server.go', 'test/e2e/lambda_log_tail_console.py', 'test/console/lambda-invoke.test.mjs', 'internal/server/lambda_test.go', 'internal/server/web/app.js', 'internal/aws/lambda.go', 'internal/workload/python/runtime.go', 'tools/console/src/lambda.jsx'}
+
 IDENTIFIER = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 
 # TLC1.7.4 ModelConfig.ALL_KEYWORDS. A directive cannot masquerade as a

@@ -3,6 +3,7 @@ package server
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http/httptest"
@@ -167,7 +168,7 @@ func TestLambdaValidationAndServiceDispatch(t *testing.T) {
 		method, path string
 		code         int
 		headers      map[string]string
-	}{{"GET", functionRoot + "?MaxItems=0", 400, nil}, {"GET", functionRoot + "?MaxItems=10001", 400, nil}, {"GET", functionRoot + "?MaxItems=x", 400, nil}, {"GET", functionRoot + "?Marker=bad/name", 400, nil}, {"GET", functionRoot + "?MaxItems=1&MaxItems=2", 400, nil}, {"GET", functionRoot + "?unknown=x", 400, nil}, {"GET", functionRoot + "?Qualifier=$LATEST", 501, nil}, {"GET", functionRoot + "/sample/configuration?Qualifier=1", 501, nil}, {"DELETE", functionRoot + "/sample?Qualifier=$LATEST", 501, nil}, {"GET", functionRoot + "/sample/code", 501, nil}, {"POST", functionRoot + "/sample/invocations", 501, map[string]string{"X-Amz-Invocation-Type": "Event"}}, {"POST", functionRoot + "/sample/invocations", 501, map[string]string{"X-Amz-Log-Type": "Tail"}}, {"POST", functionRoot + "/sample/invocations", 501, map[string]string{"X-Amz-Client-Context": "e30="}}, {"GET", functionRoot, 403, map[string]string{"Authorization": "AWS4-HMAC-SHA256 Credential=AKIAEXAMPLE/date/us-east-1/lambda/aws4_request"}}, {"GET", functionRoot, 501, map[string]string{"X-Amz-Security-Token": "dummy"}}, {"GET", functionRoot, 400, map[string]string{"X-Simulator-Region": "unsupported"}}, {"GET", functionRoot, 400, map[string]string{"X-Simulator-Region": "ap-northeast-1", "Authorization": "AWS4-HMAC-SHA256 Credential=TCSIMLOCAL/date/us-east-1/lambda/aws4_request"}}, {"GET", functionRoot, 400, map[string]string{"X-Amz-Target": "AmazonSSM.DescribeParameters"}}, {"GET", "/unsupported", 501, nil}, {"GET", functionRoot + "/bad!name/configuration", 400, nil}, {"GET", functionRoot + "/sample/code/extra", 400, nil}, {"GET", functionRoot + "/sample/configuration?Marker=x", 400, nil}} {
+	}{{"GET", functionRoot + "?MaxItems=0", 400, nil}, {"GET", functionRoot + "?MaxItems=10001", 400, nil}, {"GET", functionRoot + "?MaxItems=x", 400, nil}, {"GET", functionRoot + "?Marker=bad/name", 400, nil}, {"GET", functionRoot + "?MaxItems=1&MaxItems=2", 400, nil}, {"GET", functionRoot + "?unknown=x", 400, nil}, {"GET", functionRoot + "?Qualifier=$LATEST", 501, nil}, {"GET", functionRoot + "/sample/configuration?Qualifier=1", 501, nil}, {"DELETE", functionRoot + "/sample?Qualifier=$LATEST", 501, nil}, {"GET", functionRoot + "/sample/code", 501, nil}, {"POST", functionRoot + "/sample/invocations", 501, map[string]string{"X-Amz-Invocation-Type": "Event"}}, {"POST", functionRoot + "/sample/invocations", 501, map[string]string{"X-Amz-Log-Type": "Unknown"}}, {"POST", functionRoot + "/sample/invocations", 501, map[string]string{"X-Amz-Log-Type": "Tail", "X-Amz-Invocation-Type": "DryRun"}}, {"POST", functionRoot + "/sample/invocations", 501, map[string]string{"X-Amz-Client-Context": "e30="}}, {"GET", functionRoot, 403, map[string]string{"Authorization": "AWS4-HMAC-SHA256 Credential=AKIAEXAMPLE/date/us-east-1/lambda/aws4_request"}}, {"GET", functionRoot, 501, map[string]string{"X-Amz-Security-Token": "dummy"}}, {"GET", functionRoot, 400, map[string]string{"X-Simulator-Region": "unsupported"}}, {"GET", functionRoot, 400, map[string]string{"X-Simulator-Region": "ap-northeast-1", "Authorization": "AWS4-HMAC-SHA256 Credential=TCSIMLOCAL/date/us-east-1/lambda/aws4_request"}}, {"GET", functionRoot, 400, map[string]string{"X-Amz-Target": "AmazonSSM.DescribeParameters"}}, {"GET", "/unsupported", 501, nil}, {"GET", functionRoot + "/bad!name/configuration", 400, nil}, {"GET", functionRoot + "/sample/code/extra", 400, nil}, {"GET", functionRoot + "/sample/configuration?Marker=x", 400, nil}} {
 		lambdaCall(t, s, entry.method, entry.path, nil, entry.code, entry.headers)
 	}
 	headers := map[string]string{"X-Simulator-Service": "lambda"}
@@ -214,4 +215,105 @@ func TestLambdaPersistenceAndFunctionQuota(t *testing.T) {
 	}
 	lambdaCall(t, s, "POST", functionRoot, lambdaInput(t, "over-quota", source), 429, nil)
 	lambdaCall(t, s, "PUT", functionRoot+"/persisted/code", map[string]any{"ZipFile": lambdaZIP(t, source)}, 200, nil)
+}
+
+func TestLambdaLogTailHTTPOptInAndIAM(t *testing.T) {
+	s := instance(t)
+	lambdaRole(t, s)
+	lambdaCall(t, s, "POST", functionRoot, lambdaInput(t, "tail", "def handler(event, context):\n    print('visible guest log')\n    return {'value':'payload-only'}\n"), 201, nil)
+	status(t, s, "PUT", "/_simulator/v1/iam/principals/tail-reader/policy", `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"lambda:InvokeFunction","Resource":"arn:aws:lambda:us-east-1:000000000000:function:tail"}]}`, 200, nil)
+	operator := strings.Repeat("a", 64)
+	access, err := NewAccess(s.Config.Handler, operator, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	authenticated := httptest.NewServer(access)
+	defer authenticated.Close()
+	tokens := map[string]string{}
+	for _, principal := range []string{"tail-reader", "executor"} {
+		response, data := call(t, authenticated, "POST", "/_simulator/v1/access", fmt.Sprintf(`{"Principal":%q}`, principal), map[string]string{"X-Simulator-Token": operator})
+		var issued struct{ AccessToken string }
+		if response.StatusCode != 200 || json.Unmarshal(data, &issued) != nil || issued.AccessToken == "" {
+			t.Fatalf("participant issuance: %d %s", response.StatusCode, data)
+		}
+		tokens[principal] = issued.AccessToken
+	}
+	for _, tc := range []struct {
+		logs, principal string
+		status          int
+		tail            bool
+	}{
+		{"", "tail-reader", 200, false}, {"None", "tail-reader", 200, false}, {"Tail", "tail-reader", 200, true}, {"Tail", "executor", 403, false},
+	} {
+		response, data := call(t, authenticated, "POST", functionRoot+"/tail/invocations", "{}", map[string]string{"X-Simulator-Service": "lambda", "X-Simulator-Token": tokens[tc.principal], "X-Amz-Log-Type": tc.logs})
+		if response.StatusCode != tc.status {
+			t.Fatalf("status=%d body=%s", response.StatusCode, data)
+		}
+		values := response.Header.Values("X-Amz-Log-Result")
+		if (len(values) > 0) != tc.tail {
+			t.Fatal("incorrect log disclosure", tc)
+		}
+		if tc.tail {
+			decoded, err := base64.StdEncoding.DecodeString(values[0])
+			if err != nil || !bytes.Contains(decoded, []byte("visible guest log")) || bytes.Contains(decoded, []byte("payload-only")) || bytes.Contains(decoded, []byte("TCSIM_")) {
+				t.Fatalf("unexpected tail=%q err=%v", decoded, err)
+			}
+		}
+	}
+	for _, headers := range []map[string]string{
+		{"X-Simulator-Service": "lambda", "X-Amz-Log-Type": "Tail"},
+		{"X-Simulator-Service": "lambda", "X-Amz-Log-Type": "Tail", "X-Simulator-Token": tokens["tail-reader"], "X-Simulator-Principal": "simulator-admin"},
+	} {
+		response, _ := call(t, authenticated, "POST", functionRoot+"/tail/invocations", "{}", headers)
+		if (response.StatusCode != 401 && response.StatusCode != 403) || len(response.Header.Values("X-Amz-Log-Result")) != 0 {
+			t.Fatal("invalid access exposed invocation/logs", response.StatusCode)
+		}
+	}
+
+}
+
+func TestLambdaLogTailCapabilitiesPreserveInstanceProfiles(t *testing.T) {
+	s := instance(t)
+	var capabilities struct {
+		Services map[string]map[string]any `json:"services"`
+	}
+	if err := json.Unmarshal(status(t, s, "GET", "/_simulator/v1/capabilities", "", 200, nil), &capabilities); err != nil {
+		t.Fatal(err)
+	}
+	iam := capabilities.Services["iam"]
+	for key, want := range map[string]any{
+		"instanceProfiles": true, "instanceProfilePath": "/",
+		"instanceProfileClaimsLimit": float64(1000), "rolesPerInstanceProfile": float64(1),
+		"instanceProfileCredentials": false, "instanceProfileCloudFormation": false, "instanceProfileConsole": false,
+	} {
+		if got, present := iam[key]; !present || got != want {
+			t.Errorf("IAM capability %s = %v (present=%v), want %v", key, got, present, want)
+		}
+	}
+	operations, ok := iam["operations"].([]any)
+	if !ok {
+		t.Fatal("IAM operations are missing")
+	}
+	for _, want := range []string{"CreateInstanceProfile", "GetInstanceProfile", "ListInstanceProfiles", "DeleteInstanceProfile", "AddRoleToInstanceProfile", "RemoveRoleFromInstanceProfile", "ListInstanceProfilesForRole"} {
+		found := false
+		for _, operation := range operations {
+			found = found || operation == want
+		}
+		if !found {
+			t.Errorf("IAM operation %s is missing", want)
+		}
+	}
+	tail, ok := capabilities.Services["lambda"]["invokeLogTail"].(map[string]any)
+	if !ok {
+		t.Fatal("Lambda log-tail capability is missing")
+	}
+	for key, want := range map[string]any{
+		"request": "explicit synchronous LogType=Tail only", "maxBytes": float64(4096),
+		"encoding": "base64 of raw bytes; UTF-8 may be split", "ordering": "stdout then stderr, not interleaved",
+		"internalFrames": false, "cloudWatchDelivery": false, "persistence": false,
+	} {
+		if got, present := tail[key]; !present || got != want {
+			t.Errorf("Lambda tail capability %s = %v (present=%v), want %v", key, got, present, want)
+		}
+	}
 }
