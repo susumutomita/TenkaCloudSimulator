@@ -284,7 +284,8 @@ func TestLambdaLogTailCapabilitiesPreserveInstanceProfiles(t *testing.T) {
 	for key, want := range map[string]any{
 		"instanceProfiles": true, "instanceProfilePath": "/",
 		"instanceProfileClaimsLimit": float64(1000), "rolesPerInstanceProfile": float64(1),
-		"instanceProfileCredentials": false, "instanceProfileCloudFormation": false, "instanceProfileConsole": false,
+		// Native CFN profile composition is implemented; credentials and console remain unsupported.
+		"instanceProfileCredentials": false, "instanceProfileCloudFormation": true, "instanceProfileConsole": false,
 	} {
 		if got, present := iam[key]; !present || got != want {
 			t.Errorf("IAM capability %s = %v (present=%v), want %v", key, got, present, want)

@@ -33,6 +33,137 @@ class FormalGateTests(unittest.TestCase):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, target)
 
+    def test_ssm_durable_command_required_contract(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SSMDurableCommands')
+        self.assertEqual(len(entry['properties']), 15)
+        self.assertEqual(len(entry['mutants']), 23)
+        config = self.root / entry['config']
+        cfg = config.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == entry['id'])
+                target[field].remove(item)
+                if field == 'properties':
+                    config.write_text(cfg.replace('INVARIANT ' + item + '\n', ''))
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                path.write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config.write_text(cfg)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(changed))
+        (self.root / entry['model']).unlink()
+        config.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_ssm_durable_command_domains_and_mutation_anchors(self):
+        entry = next(m for m in json.loads((self.root / 'formal/models.json').read_text())['models']
+                     if m['id'] == 'SSMDurableCommands')
+        source = (self.root / entry['model']).read_text()
+        for anchor in ('Targets == {1,2}', '"dispatch","reconcile","page"',
+                       's.version=s.snapshot', '!.frozen=s.items',
+                       'last.before.version=last.before.snapshot',
+                       'last.before.restarted', 's.status=last.before.status'):
+            self.assertIn(anchor, source)
+        for mutant in entry['mutants']:
+            with self.subTest(mutant=mutant['id']):
+                self.assertNotEqual(source, apply_mutant(source, entry['id'], mutant))
+                broken = json.loads(json.dumps(mutant))
+                broken['edits'][0]['old'] += 'missing-anchor'
+                with self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                    apply_mutant(source, entry['id'], broken)
+
+    def test_durable_guest_lease_required_contract(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'DurableGuestLease')
+        config = self.root / entry['config']
+        cfg = config.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == entry['id'])
+                target[field].remove(item)
+                if field == 'properties':
+                    config.write_text(cfg.replace('INVARIANT ' + item + '\n', ''))
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                path.write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config.write_text(cfg)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(changed))
+        with self.assertRaises(GateError):
+            load_registry(self.root)
+
+    def test_durable_guest_lease_domains_and_mutation_anchors(self):
+        entry = next(m for m in json.loads((self.root / 'formal/models.json').read_text())['models']
+                     if m['id'] == 'DurableGuestLease')
+        source = (self.root / entry['model']).read_text()
+        config = (self.root / entry['config']).read_text()
+        self.assertIn('CONSTANT Ops = {1, 2, 3}', config)
+        self.assertIn('ASSUME Ops = {1, 2, 3}', source)
+        for domain in ('"owner"', '"region"', '"instance"', '"deployment"', '"profile"',
+                       '"record"', '"operation"', '"lease"', '"unknown"', '"alias"', '"ack"',
+                       '"obs-owner"', '"obs-fence"', '"obs-operation"', '"obs-action"',
+                       '"obs-requestlease"', '"obs-lease"', '"obs-state"'):
+            self.assertIn(domain, source)
+        for anchor in ('!.queue=2', 'ConcurrentAdvance ==', 'Crash ==', 'Reopen ==',
+                       'InitialRecords(op)', 'OtherBegin(k) ==', 'OtherCommit ==',
+                       'room == Cardinality(Retained(s.records))<2',
+                       'last.before.db=last.before.work', 's.expected=s.db', 'exact == s.db=s.snapshot'):
+            self.assertIn(anchor, source)
+        for mutant in entry['mutants']:
+            with self.subTest(mutant=mutant['id']):
+                self.assertNotEqual(source, apply_mutant(source, entry['id'], mutant))
+                broken = json.loads(json.dumps(mutant))
+                broken['edits'][0]['old'] += 'missing-anchor'
+                with self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                    apply_mutant(source, entry['id'], broken)
+
+    def test_guest_command_registry_guards_and_source_scope_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        baseline = json.loads(original)
+        entry = next(m for m in baseline['models'] if m['id'] == 'GuestCommandLifecycle')
+        model_path, config_path = self.root / entry['model'], self.root / entry['config']
+        model_bytes, config_bytes = model_path.read_bytes(), config_path.read_bytes()
+        removed = json.loads(original)
+        removed['models'] = [m for m in removed['models'] if m['id'] != 'GuestCommandLifecycle']
+        path.write_text(json.dumps(removed))
+        model_path.unlink(); config_path.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        model_path.write_bytes(model_bytes); config_path.write_bytes(config_bytes)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == 'GuestCommandLifecycle')
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            path.write_text(json.dumps(changed))
+            config_path.write_text(config_bytes.decode().replace('INVARIANT ' + prop + '\n', ''))
+            with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+        config_path.write_bytes(config_bytes)
+        for scope in (entry['source_scope'][1:], entry['source_scope'] + ['internal/core/store.go']):
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == 'GuestCommandLifecycle')['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        path.write_text(original)
+        source = model_bytes.decode()
+        for mutant in entry['mutants']:
+            broken = json.loads(json.dumps(mutant))
+            broken['edits'][0]['old'] += 'missing-anchor'
+            with self.subTest(mutant=mutant['id']), self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                apply_mutant(source, entry['id'], broken)
     def test_waf_models_controls_and_scopes_cannot_be_removed(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -295,7 +426,9 @@ class FormalGateTests(unittest.TestCase):
 
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
-        self.assertEqual({model['id'] for model in registry['models']}, {'LambdaLogTailDisclosure', 'IAMInstanceProfiles', 'WAFRequestEvaluation', 'WAFAssociationAuthorization', 'S3MultipartState', 'ConsoleHandoff', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNFinalCleanupACK', 'SQSStorageBudget', 'SecretsRevealEpoch', 'AzureBlobState', 'ProjectAuthority', 'RESTRouteMatching', 'KMSAliasCatalog', 'SakuraDiskMetadata', 'SQSConsoleEpoch', 'ProviderActor', 'DynamoDBAdmission', 'IAMManagedPolicies', 'AzurePropertiesTarget', 'StartupTokenVisibility', 'RESTDeploymentSnapshot', 'KMSProtocolAdmission', 'KMSAliasesViewEpoch', 'NativeIAMOwnership', 'DynamoDBConsoleEpoch', 'SSMParameterState', 'AzurePropertiesEpoch', 'SecretMetadataViewEpoch', 'DynamoDBLifecycle', 'SakuraDiskAdmission', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'BrowserSessions', 'SecretVersionListing', 'SakuraDisksViewEpoch', 'KMSAliasCrypto', 'StackOwnership', 'SecretsDisclosureChannels', 'RESTProxyEventBoundary', 'NativeWireProjection', 'SQSLifecycle', 'BlobRange', 'KMSBootstrapTransaction', 'SecretsVersionLifecycle', 'SNSAdmission', 'SNSLifecycle', 'ObjectStore', 'LandingAccessAdmission', 'LandingTopologyState', 'GCPStorageState', 'KMSKeyState', 'SakuraStartupAdmission', 'S3Versions', 'ProviderPath', 'SecretsMutationRefresh', 'CatalogResourceLifecycle', 'CatalogConsoleEpoch', 'LoginInputIntent', 'STSSessionLifecycle', 'CFNEventHistory'})
+        # Keep this inventory independent of the implementation's required set.
+        # A newly registered model must be reviewed and named here explicitly.
+        self.assertEqual({model['id'] for model in registry['models']}, {'SSMDurableCommands', 'SakuraDiskMetadata', 'DynamoDBAdmission', 'CFNFinalCleanupACK', 'SecretVersionListing', 'ProviderPath', 'CatalogConsoleEpoch', 'SakuraDiskAdmission', 'CFNConditionMemoDepth', 'WAFRequestEvaluation', 'LoginInputIntent', 'SakuraDisksViewEpoch', 'CloudWatchLogsViewEpoch', 'SakuraStartupAdmission', 'ProviderActor', 'S3MultipartState', 'StartupTokenVisibility', 'DynamoDBConsoleEpoch', 'IAMInstanceProfiles', 'CFNConditionAdmission', 'BrowserSessions', 'KMSKeyState', 'ProjectAuthority', 'BlobRange', 'KMSAliasesViewEpoch', 'SQSConsoleEpoch', 'SecretsRevealEpoch', 'LandingAccessAdmission', 'RESTRouteMatching', 'CFNPhysicalResourceACK', 'WAFAssociationAuthorization', 'SNSAdmission', 'IAMManagedPolicies', 'AzurePropertiesEpoch', 'NativeWireProjection', 'DurableGuestLease', 'CFNParameterSnapshot', 'CatalogResourceLifecycle', 'RESTDeploymentSnapshot', 'SQSLifecycle', 'SQSStorageBudget', 'SecretsDisclosureChannels', 'KMSAliasCatalog', 'SecretsVersionLifecycle', 'KMSAliasCrypto', 'ConsoleHandoff', 'IAMBuiltinPinTransaction', 'SNSLifecycle', 'LandingTopologyState', 'CFNEventHistory', 'CloudWatchLogsLifecycle', 'GuestCommandLifecycle', 'SSMParameterState', 'STSSessionLifecycle', 'SecretMetadataViewEpoch', 'SecretsMutationRefresh', 'RESTProxyEventBoundary', 'CFNNativeIAMTransaction', 'KMSProtocolAdmission', 'S3Versions', 'StackOwnership', 'AzureBlobState', 'KMSBootstrapTransaction', 'LambdaLogTailDisclosure', 'GCPStorageState', 'NativeIAMOwnership', 'AzurePropertiesTarget', 'DynamoDBLifecycle', 'ObjectStore'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -1613,6 +1746,193 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         entry = next(m for m in json.loads(original)['models'] if m['id'] == 'CFNConditionAdmission')
         for scope in ([], ['internal/aws/cloudformation_conditions.go'], ['internal/server/server.go']):
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.subTest(scope=scope):
+                with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+        path.write_text(original)
+        for control in entry['mutants']:
+            expected = control['expect_invariant']
+            validate_result(12, 'Invariant '+expected+' is violated.', expected)
+            for code, text in ((12, 'Invariant TypeOK is violated.'),
+                               (0, 'No error has been found.'),
+                               (1, 'Semantic errors: placeholder')):
+                with self.subTest(control=control['id'], code=code):
+                    with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
+                        validate_result(code, text, expected)
+
+
+    def test_iam_builtin_pin_exact_action_domain(self):
+        import re
+        model = (self.root / 'formal/IAMBuiltinPinTransaction.tla').read_text()
+        action_block = model.split('PinnedActions == {', 1)[1].split('}\nProbeAction', 1)[0]
+        actual = re.findall(r'"([^"\n]+)"', action_block)
+        expected = {
+            'ssm:DescribeAssociation', 'ssm:GetDeployablePatchSnapshotForInstance',
+            'ssm:GetDocument', 'ssm:DescribeDocument', 'ssm:GetManifest',
+            'ssm:GetParameter', 'ssm:GetParameters', 'ssm:ListAssociations',
+            'ssm:ListInstanceAssociations', 'ssm:PutInventory', 'ssm:PutComplianceItems',
+            'ssm:PutConfigurePackageResult', 'ssm:UpdateAssociationStatus',
+            'ssm:UpdateInstanceAssociationStatus', 'ssm:UpdateInstanceInformation',
+            'ssmmessages:CreateControlChannel', 'ssmmessages:CreateDataChannel',
+            'ssmmessages:OpenControlChannel', 'ssmmessages:OpenDataChannel',
+            'ec2messages:AcknowledgeMessage', 'ec2messages:DeleteMessage',
+            'ec2messages:FailMessage', 'ec2messages:GetEndpoint',
+            'ec2messages:GetMessages', 'ec2messages:SendReply',
+        }
+        self.assertEqual(len(actual), 25)
+        self.assertEqual(set(actual), expected)
+        source = (self.root / 'internal/aws/iam_builtin.go').read_text()
+        raw = source.split('const iamSSMCoreDocument = `', 1)[1].split('`', 1)[0]
+        policy = json.loads(raw)
+        actions = [a for statement in policy['Statement'] for a in statement['Action']]
+        self.assertEqual(len(actions), 25)
+        self.assertEqual(set(actions), expected)
+        self.assertTrue(all(x['Effect'] == 'Allow' and x['Resource'] == '*'
+                            for x in policy['Statement']))
+        self.assertIn('const iamSSMCoreARN = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"', source)
+
+
+    def test_iam_builtin_pin_transaction_model_and_every_property_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'IAMBuiltinPinTransaction')
+        tla, cfg = self.root / entry['model'], self.root / entry['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        removed = json.loads(original)
+        removed['models'] = [m for m in removed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(removed)); tla.unlink(); cfg.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        tla.write_bytes(source); cfg.write_bytes(config)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            cfg.write_text('\n'.join(line for line in config.decode().splitlines()
+                                     if line != 'INVARIANT '+prop)+'\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(property=prop):
+                with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+        cfg.write_bytes(config); path.write_text(original)
+
+
+    def test_iam_builtin_pin_transaction_each_control_rejects_removal_and_placeholder(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'IAMBuiltinPinTransaction')
+        for control in entry['mutants']:
+            for fault in ('remove', 'noop', 'stale', 'wrong-invariant'):
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == entry['id'])
+                candidate = next(m for m in target['mutants'] if m['id'] == control['id'])
+                if fault == 'remove':
+                    target['mutants'].remove(candidate)
+                    error = 'required mutation control was removed'
+                elif fault == 'noop':
+                    candidate['edits'][0]['new'] = candidate['edits'][0]['old']
+                    error = 'mutation must change a nonempty exact anchor'
+                elif fault == 'stale':
+                    candidate['edits'][0]['old'] += ' absent anchor'
+                    error = 'mutation anchor count mismatch'
+                else:
+                    candidate['expect_invariant'] = 'UncheckedPlaceholder'
+                    error = 'mutant expects unchecked invariant'
+                path.write_text(json.dumps(changed))
+                with self.subTest(control=control['id'], fault=fault):
+                    with self.assertRaisesRegex(GateError, error):
+                        load_registry(self.root)
+        path.write_text(original)
+
+
+    def test_iam_builtin_pin_transaction_exact_scope_and_semantic_oracles_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'IAMBuiltinPinTransaction')
+        for scope in ([], ['internal/aws/cloudformation.go'], ['internal/server/server.go']):
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['source_scope'] = scope
+            path.write_text(json.dumps(changed))
+            with self.subTest(scope=scope):
+                with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+        path.write_text(original)
+        for control in entry['mutants']:
+            expected = control['expect_invariant']
+            validate_result(12, 'Invariant '+expected+' is violated.', expected)
+            for code, text in ((12, 'Invariant TypeOK is violated.'),
+                               (0, 'No error has been found.'),
+                               (1, 'Semantic errors: placeholder')):
+                with self.subTest(control=control['id'], code=code):
+                    with self.assertRaisesRegex(GateError, 'required invariant counterexample'):
+                        validate_result(code, text, expected)
+
+
+    def test_cfn_native_iam_transaction_model_and_every_property_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'CFNNativeIAMTransaction')
+        tla, cfg = self.root / entry['model'], self.root / entry['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        removed = json.loads(original)
+        removed['models'] = [m for m in removed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(removed)); tla.unlink(); cfg.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+        tla.write_bytes(source); cfg.write_bytes(config)
+        for prop in entry['properties']:
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == entry['id'])
+            target['properties'].remove(prop)
+            target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != prop]
+            cfg.write_text('\n'.join(line for line in config.decode().splitlines()
+                                     if line != 'INVARIANT '+prop)+'\n')
+            path.write_text(json.dumps(changed))
+            with self.subTest(property=prop):
+                with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+        cfg.write_bytes(config); path.write_text(original)
+
+
+    def test_cfn_native_iam_transaction_each_control_rejects_removal_and_placeholder(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'CFNNativeIAMTransaction')
+        for control in entry['mutants']:
+            for fault in ('remove', 'noop', 'stale', 'wrong-invariant'):
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == entry['id'])
+                candidate = next(m for m in target['mutants'] if m['id'] == control['id'])
+                if fault == 'remove':
+                    target['mutants'].remove(candidate)
+                    error = 'required mutation control was removed'
+                elif fault == 'noop':
+                    candidate['edits'][0]['new'] = candidate['edits'][0]['old']
+                    error = 'mutation must change a nonempty exact anchor'
+                elif fault == 'stale':
+                    candidate['edits'][0]['old'] += ' absent anchor'
+                    error = 'mutation anchor count mismatch'
+                else:
+                    candidate['expect_invariant'] = 'UncheckedPlaceholder'
+                    error = 'mutant expects unchecked invariant'
+                path.write_text(json.dumps(changed))
+                with self.subTest(control=control['id'], fault=fault):
+                    with self.assertRaisesRegex(GateError, error):
+                        load_registry(self.root)
+        path.write_text(original)
+
+
+    def test_cfn_native_iam_transaction_exact_scope_and_semantic_oracles_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'CFNNativeIAMTransaction')
+        for scope in ([], ['internal/aws/cloudformation.go'], ['internal/server/server.go']):
             changed = json.loads(original)
             target = next(m for m in changed['models'] if m['id'] == entry['id'])
             target['source_scope'] = scope

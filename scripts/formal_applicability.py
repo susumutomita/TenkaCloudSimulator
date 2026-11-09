@@ -36,7 +36,7 @@ NONFORMAL = {
     'presentation': ['tools/console/**', 'tools/scalar/**', 'internal/server/web/**',
                      'internal/server/apidocs/**',
                      'internal/server/landing/index.html', 'internal/server/landing/landing.css'],
-    'test-support': ['internal/aws/testdata/sts-original/hello-world.yaml', 'test/**', '*_test.go', 'scripts/test-*.py',
+    'test-support': ['internal/aws/testdata/hello-world-battle-iam-fragment.yaml', 'internal/aws/testdata/sts-original/hello-world.yaml', 'test/**', '*_test.go', 'scripts/test-*.py',
                      'internal/aws/testdata/dynamodb_size_sdk.py'],
     'build-metadata': ['Makefile', '.gitignore', '.gitattributes', '.github/CODEOWNERS',
                        '.github/PULL_REQUEST_TEMPLATE.md'],

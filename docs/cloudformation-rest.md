@@ -68,12 +68,17 @@ The caller still needs cloudformation actions and underlying API Gateway
 POST/PUT/DELETE, Lambda AddPermission/RemovePermission, Lambda Create/Delete,
 iam:PassRole, SSM Put/Delete and IAM role/inline-policy actions. CAPABILITY_IAM
 acknowledges role creation; it does not grant permissions. Native role trust
-validation is unchanged. Existing CFN roles retain their documented legacy
-metadata-only trust behavior; arbitrary managed-policy permissions are not added.
-CFN-created IAM roles remain legacy aggregate identities: native IAM GetRole/
-ListRoles and the native role picker do not return them. Migrating that IAM
-visibility is still pending. API Gateway, Lambda and SSM resources do share their
-actual native SQLite state and existing console views.
+validation is unchanged. Existing one-inline CFN roles retain their documented
+legacy metadata-only trust behavior unless selected by an active same-template
+instance profile; persisted legacy records are never migrated. The bounded
+[native IAM role/profile composition](cloudformation-iam-profiles.md) also supports
+new zero-inline service-trust roles and AWS::IAM::InstanceProfile with Ref/Arn.
+Native compositions share IAM GetRole/ListRoles/GetInstanceProfile state;
+legacy identities remain absent from those native views. Native compositions can
+attach the exact pinned AmazonSSMManagedInstanceCore v2 builtin; legacy references
+remain metadata-only. No general AWS-managed policy catalog is provided.
+API Gateway, Lambda and SSM resources continue to
+share their actual native SQLite state and existing console views.
 
 No UpdateStack/change sets, authorizers, API Gateway v2, WAF, custom resources,
 guest HTTP networking, active browser application hosting or full problem grading
@@ -159,11 +164,16 @@ are operator-only. AWS NoEcho itself also excludes Outputs from masking; see the
 Legacy participant tokens are host-issued local role-bound credentials, not STS;
 native CFN rejects their stack-output reads. Separately, bounded native STS
 sessions use SigV4 and the actual assumed role policy; the original Hello World
-viewer role has no stack-output or event-history permission. CFN roles retain the
-legacy aggregate model,
-so native IAM GetRole/ListRoles do not expose them. Trust and allowed
-ManagedPolicyArns metadata do not grant AWS sign-in, federation, managed-policy
-or external-account authority. Host coordination, private-output filtering and
+viewer role has no stack-output or event-history permission. Legacy CFN roles
+retain the legacy aggregate model and remain absent from native
+IAM GetRole/ListRoles. Native role/profile compositions share native IAM state
+and can attach the exact read-only builtin
+`arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore` pinned to default v2.
+Legacy ManagedPolicyArns references remain metadata-only. Neither path grants
+AWS sign-in, federation or external-account authority. The builtin permission
+document adds no EC2 runtime, SSM agent, commands or Session Manager execution.
+See [the bounded builtin contract](iam-ssm-managed-policy.md). Host coordination,
+private-output filtering and
 actual crypto-battle scoring remain outside this simulator acceptance.
 
 A separate candidate check now verifies every selected SSM parameter (region/name) and S3 bucket (global name) is absent at the very end of the same deletion transaction, after all resource, ownership and stack cleanup writes. It detects ignored physical DELETEs and late reinsertion, rolling back on failure. Existing missing-resource and nonempty-bucket behavior is preserved. This does not change the standalone native S3 DeleteBucket API or promise acknowledgement checks for other resource types. The 196 native/scoped model receipts are historical inputs; the current combined 429-case formal suite passed at `c298972`; 61 E2E/start checks subsequently passed at docs-only `414c902`; exact-head hosted CI for this publication candidate remains pending.

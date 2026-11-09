@@ -31,6 +31,7 @@ type StackStore struct{ db *sql.DB }
 type StackResource struct {
 	LogicalID, Type, PhysicalID string
 	Properties                  map[string]any
+	NativeIAM                   *stackNativeIAM   `json:",omitempty"`
 	StateHash                   string            `json:",omitempty"`
 	StateParts                  map[string]string `json:",omitempty"`
 }
@@ -454,7 +455,7 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 	for _, value := range resources {
 		r := object(value)
 		kind := stringValue(r["Type"])
-		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::S3::Bucket" && kind != "AWS::Lambda::Function" && !stackAPIKind(kind) {
+		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::IAM::InstanceProfile" && kind != "AWS::S3::Bucket" && kind != "AWS::Lambda::Function" && !stackAPIKind(kind) {
 			return fail("Unsupported resource type: " + kind)
 		}
 		for k := range r {
@@ -554,6 +555,7 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 	if err != nil {
 		return fail(err.Error())
 	}
+	var declaredRoles []StackResource
 	for _, key := range keys {
 		raw := object(resources[key])
 		kind := stringValue(raw["Type"])
@@ -567,6 +569,7 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 			return fail("Resource Properties must be an object.")
 		}
 		physical := ""
+		var nativeIAM *stackNativeIAM
 		if stackAPIKind(kind) {
 			physical, e = compileStackAPI(region, id, key, kind, properties, attrs)
 			if e != nil {
@@ -613,66 +616,31 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 				return StackRecord{}, e
 			}
 			attrs[key+".Arn"] = "arn:aws:s3:::" + physical
-		} else {
-			if capabilities != "CAPABILITY_IAM" && capabilities != "CAPABILITY_NAMED_IAM" {
-				return fail("Acknowledge CAPABILITY_IAM for identity-policy resources.")
-			}
-			for k := range properties {
-				switch k {
-				case "RoleName", "AssumeRolePolicyDocument", "Policies", "Tags", "MaxSessionDuration", "ManagedPolicyArns":
-				default:
-					return fail("Unsupported role property: " + k)
-				}
-			}
-			// Sign-in/trust metadata is retained for catalog fidelity, never evaluated as authorization.
-			if managed, exists := properties["ManagedPolicyArns"]; exists {
-				list, ok := managed.([]any)
-				if !ok {
-					return fail("ManagedPolicyArns must be an array.")
-				}
-				for _, arn := range list {
-					if stringValue(arn) != "arn:aws:iam::aws:policy/SignInLocalDevelopmentAccess" && stringValue(arn) != "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" {
-						return fail("Managed policy permissions are unsupported.")
-					}
-				}
-			}
-			physical = stringValue(properties["RoleName"])
-			if physical == "" {
-				base := name + "-" + key
-				if len(base) > 47 {
-					base = base[:47]
-				}
-				// IAM is global. Include this unique stack ID (and logical ID),
-				// not just a region-scoped stack name, in generated role names.
-				sum := sha256.Sum256([]byte(id + "\x00" + key))
-				physical = base + "-" + hex.EncodeToString(sum[:8])
-			} else if capabilities != "CAPABILITY_NAMED_IAM" {
-				return fail("Explicit RoleName requires CAPABILITY_NAMED_IAM.")
-			}
-			if !regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`).MatchString(physical) || physical == core.Administrator {
-				return fail("Role name must be 1–64 non-reserved local identity characters.")
-			}
-			policies, ok := properties["Policies"].([]any)
-			if !ok || len(policies) != 1 {
-				return fail("Exactly one inline identity policy is supported per role.")
-			}
-			encoded, e := json.Marshal(object(policies[0])["PolicyDocument"])
+		} else if kind == "AWS::IAM::InstanceProfile" {
+			physical, nativeIAM, e = compileStackNativeIAM(name, id, key, kind, capabilities, properties)
 			if e != nil {
-				return fail("Invalid identity policy.")
-			}
-			if _, e = core.ParsePolicy(encoded); e != nil {
 				return fail(e.Error())
 			}
-			properties["SimulatorPolicy"] = string(encoded)
+			attrs[key+".Arn"] = iamInstanceProfileARN + physical
+		} else {
+			physical = stackIAMRolePhysicalName(name, id, key, properties)
 			attrs[key+".Arn"] = "arn:aws:iam::000000000000:role/" + physical
 		}
+
 		refs[key] = physical
 		if kind == "AWS::ApiGateway::Stage" {
 			refs[key] = stringValue(properties["StageName"])
 		}
-		if enabled[key] {
-			record.Resources = append(record.Resources, StackResource{LogicalID: key, Type: kind, PhysicalID: physical, Properties: properties})
+		compiled := StackResource{LogicalID: key, Type: kind, PhysicalID: physical, Properties: properties, NativeIAM: nativeIAM}
+		if kind == "AWS::IAM::Role" {
+			declaredRoles = append(declaredRoles, compiled)
 		}
+		if enabled[key] {
+			record.Resources = append(record.Resources, compiled)
+		}
+	}
+	if e := compileStackIAMRoles(&record, declaredRoles, capabilities); e != nil {
+		return fail(e.Error())
 	}
 	outputs := object(template["Outputs"])
 	if _, exists := template["Outputs"]; exists && outputs == nil {
@@ -726,11 +694,31 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 	return record, nil
 }
 func (s *StackStore) Create(record StackRecord) error {
+	return s.createChecked(record, nil)
+}
+func (s *StackStore) createChecked(record StackRecord, authorize func(string, string) error) error {
+	// Admission/generation snapshots belong to this attempt. A rolled-back
+	// creation must not mutate a caller's reusable compiled record.
+	record.Resources = append([]StackResource(nil), record.Resources...)
+	for i := range record.Resources {
+		if state := record.Resources[i].NativeIAM; state != nil {
+			copy := *state
+			record.Resources[i].NativeIAM = &copy
+		}
+	}
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
+	if err = admitStackIAM(tx, &record); err != nil {
+		return err
+	}
+	if authorize != nil {
+		if err = stackResourcePermissions(record, false, authorize); err != nil {
+			return err
+		}
+	}
 	var count int
 	if err = tx.QueryRow("SELECT count(*) FROM aws_cfn_stacks").Scan(&count); err != nil {
 		return err
@@ -751,9 +739,20 @@ func (s *StackStore) Create(record StackRecord) error {
 	if err = appendStackEvent(tx, record, nil, "CREATE_IN_PROGRESS"); err != nil {
 		return err
 	}
-	for _, r := range record.Resources {
+	for index := range record.Resources {
+		r := record.Resources[index]
 		if err = appendStackEvent(tx, record, &r, "CREATE_IN_PROGRESS"); err != nil {
 			return err
+		}
+		if r.NativeIAM != nil {
+			if err = createStackIAM(tx, record, &r); err != nil {
+				return err
+			}
+			record.Resources[index] = r
+			if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
+				return err
+			}
+			continue
 		}
 		if stackAPIKind(r.Type) {
 			if err = claimStackAPI(tx, record, r); err != nil {
@@ -824,6 +823,12 @@ func (s *StackStore) Create(record StackRecord) error {
 	if err = finishStackEvents(tx, record, false); err != nil {
 		return err
 	}
+	if err = checkStackIAM(tx, record, "created"); err != nil {
+		return err
+	}
+	if err = checkStackIAMDocument(tx, record); err != nil {
+		return err
+	}
 	return tx.Commit()
 }
 
@@ -886,6 +891,9 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 			return err
 		}
 	}
+	if err = checkStackIAM(tx, records[0], "before-delete"); err != nil {
+		return err
+	}
 	if err = checkStackAPIFingerprints(tx, records[0]); err != nil {
 		return err
 	}
@@ -908,7 +916,9 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		if owned != 1 {
 			return ssmFailure{"ValidationError", "Stack resource ownership changed; deletion refused."}
 		}
-		if stackAPIKind(r.Type) {
+		if r.NativeIAM != nil {
+			err = deleteStackIAM(tx, r)
+		} else if stackAPIKind(r.Type) {
 			err = deleteStackAPI(context.Background(), tx, region, r)
 		} else if r.Type == "AWS::SSM::Parameter" {
 			_, err = tx.Exec("DELETE FROM aws_ssm_parameters WHERE region=? AND name=?", region, r.PhysicalID)
@@ -922,6 +932,13 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 				return ssmFailure{"ValidationError", "S3 bucket retains objects, versions, delete markers or multipart uploads; empty it explicitly before DeleteStack."}
 			}
 		} else if r.Type == "AWS::IAM::Role" {
+			var native int
+			if err = tx.QueryRow("SELECT count(*) FROM aws_iam_roles WHERE name=?", r.PhysicalID).Scan(&native); err != nil {
+				return err
+			}
+			if native != 0 {
+				return ssmFailure{"ValidationError", "Legacy stack cleanup cannot adopt native IAM ownership."}
+			}
 			_, err = tx.Exec("DELETE FROM identity_policies WHERE name=?", r.PhysicalID)
 		} else {
 			return ssmFailure{"ValidationError", "Unsupported stored stack resource type."}
@@ -958,6 +975,9 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 	}
 	if remainingStack != 0 || remainingClaims != 0 {
 		return errors.New("stack cleanup postcondition failed")
+	}
+	if err = checkStackIAM(tx, records[0], "deleted"); err != nil {
+		return err
 	}
 	// Verify physical effects after every cleanup write. A trigger on a later
 	// resource/claim/stack/event/history write must not resurrect a resource.
@@ -1206,10 +1226,7 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			record.Tags, record.ClientToken, record.RequestHash = tags, clientToken, requestHash
 			if err = authorize(record.ID); err == nil {
-				err = stackResourcePermissions(record, false, authorizeAction)
-				if err == nil {
-					err = g.Stacks.Create(record)
-				}
+				err = g.Stacks.createChecked(record, authorizeAction)
 			}
 		}
 		if err != nil {

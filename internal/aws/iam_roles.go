@@ -15,6 +15,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"reflect"
 	"regexp"
 	"strings"
 	"time"
@@ -136,6 +137,9 @@ func NewIAMRoleStore(db *sql.DB) (*IAMRoleStore, error) {
  document TEXT NOT NULL, PRIMARY KEY(role_name,name));`)
 	if err == nil {
 		err = iamManagedSchema(db)
+	}
+	if err == nil {
+		err = iamBuiltinSchema(db)
 	}
 	if err == nil {
 		err = iamInstanceProfileSchema(db)
@@ -365,14 +369,20 @@ func iamExecutionRole(ctx context.Context, query interface {
 	return nil
 }
 func (s *IAMRoleStore) Create(ctx context.Context, name, trust, description string, duration int) (IAMRole, error) {
-	// Match CreateRole's documented description character range before XML output.
-	if !utf8.ValidString(description) || utf8.RuneCountInString(description) > 1000 {
-		return IAMRole{}, ssmFailure{"ValidationError", "Description must use at most1000 permitted IAM characters."}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return IAMRole{}, err
 	}
-	for _, r := range description {
-		if r != '\t' && r != '\n' && r != '\r' && !(r >= 0x20 && r <= 0x7e) && !(r >= 0xa1 && r <= 0xff) {
-			return IAMRole{}, ssmFailure{"ValidationError", "Description contains characters outside the documented IAM range."}
-		}
+	defer tx.Rollback()
+	value, err := iamCreateRoleTx(ctx, tx, name, trust, description, duration, "")
+	if err != nil {
+		return IAMRole{}, err
+	}
+	return value, tx.Commit()
+}
+func iamCreateRoleTx(ctx context.Context, tx *sql.Tx, name, trust, description string, duration int, stackID string) (IAMRole, error) {
+	if err := iamRoleDescription(description); err != nil {
+		return IAMRole{}, err
 	}
 
 	if !iamRoleName.MatchString(name) || strings.EqualFold(name, core.Administrator) || duration < 3600 || duration > 43200 {
@@ -385,11 +395,6 @@ func (s *IAMRoleStore) Create(ctx context.Context, name, trust, description stri
 	if err != nil {
 		return IAMRole{}, err
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return IAMRole{}, err
-	}
-	defer tx.Rollback()
 	var active, total int
 	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_iam_roles WHERE name=? AND deleted=0", name).Scan(&active); err != nil {
 		return IAMRole{}, err
@@ -407,7 +412,7 @@ func (s *IAMRoleStore) Create(ctx context.Context, name, trust, description stri
 		return IAMRole{}, err
 	}
 	if claimsTable != 0 {
-		if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_cfn_ownership WHERE kind='AWS::IAM::Role' AND lower(physical_id)=lower(?)", name).Scan(&claims); err != nil {
+		if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_cfn_ownership WHERE kind='AWS::IAM::Role' AND lower(physical_id)=lower(?) AND stack_id<>?", name, stackID).Scan(&claims); err != nil {
 			return IAMRole{}, err
 		}
 		if claims != 0 {
@@ -424,9 +429,16 @@ func (s *IAMRoleStore) Create(ctx context.Context, name, trust, description stri
 	if total >= 1000 && retired == 0 {
 		return IAMRole{}, ssmFailure{"LimitExceeded", "Local active and retired native role claims are limited to1000."}
 	}
+	var children int
+	if err = tx.QueryRowContext(ctx, "SELECT (SELECT count(*) FROM aws_iam_role_policies WHERE role_name=?)+(SELECT count(*) FROM aws_iam_role_managed_policies WHERE role_name=?)+(SELECT count(*) FROM aws_iam_instance_profile_roles WHERE role_name=?)", name, name, name).Scan(&children); err != nil {
+		return IAMRole{}, err
+	}
+	if children != 0 {
+		return IAMRole{}, iamManagedBad()
+	}
 	created := time.Now().UTC().Format(time.RFC3339Nano)
-	_, err = tx.ExecContext(ctx, `INSERT INTO aws_iam_roles(name,role_id,trust,created,description,duration,deleted) VALUES(?,?,?,?,?,?,0)
- ON CONFLICT(name) DO UPDATE SET name=excluded.name,role_id=excluded.role_id,trust=excluded.trust,created=excluded.created,description=excluded.description,duration=excluded.duration,deleted=0`, name, "AROA"+strings.ToUpper(id[:16]), trust, created, description, duration)
+	err = iamExactlyOne(tx.ExecContext(ctx, `INSERT INTO aws_iam_roles(name,role_id,trust,created,description,duration,deleted) VALUES(?,?,?,?,?,?,0)
+ ON CONFLICT(name) DO UPDATE SET name=excluded.name,role_id=excluded.role_id,trust=excluded.trust,created=excluded.created,description=excluded.description,duration=excluded.duration,deleted=0`, name, "AROA"+strings.ToUpper(id[:16]), trust, created, description, duration))
 	if err != nil {
 		return IAMRole{}, err
 	}
@@ -437,7 +449,22 @@ func (s *IAMRoleStore) Create(ctx context.Context, name, trust, description stri
 	if err != nil {
 		return role, err
 	}
-	return role, tx.Commit()
+	if role.RoleName != name || role.RoleID != "AROA"+strings.ToUpper(id[:16]) || role.AssumeRolePolicyDocument != trust || role.CreateDate.Format(time.RFC3339Nano) != created || role.Description != description || role.MaxSessionDuration != duration {
+		return IAMRole{}, iamManagedBad()
+	}
+	// CreateRole creates an empty role. Triggers must not smuggle policies or
+	// membership into its new incarnation before the caller receives it.
+	if err = tx.QueryRowContext(ctx, `SELECT
+      (SELECT count(*) FROM aws_iam_role_policies WHERE role_name=?)+
+      (SELECT count(*) FROM aws_iam_role_managed_policies WHERE role_name=?)+
+      (SELECT count(*) FROM aws_iam_instance_profile_roles WHERE role_name=?)+
+      (SELECT count(*) FROM identity_policies WHERE lower(name)=lower(?))`, name, name, name, name).Scan(&children); err != nil {
+		return IAMRole{}, err
+	}
+	if children != 0 {
+		return IAMRole{}, iamManagedBad()
+	}
+	return role, nil
 }
 func iamSyncPolicy(ctx context.Context, tx *sql.Tx, name string) error {
 	rows, err := tx.QueryContext(ctx, "SELECT document FROM aws_iam_role_policies WHERE role_name=? ORDER BY name", name)
@@ -501,22 +528,31 @@ func iamSyncPolicy(ctx context.Context, tx *sql.Tx, name string) error {
 		}
 	}
 	if len(p.Statement) == 0 {
-		result, e := tx.ExecContext(ctx, "DELETE FROM identity_policies WHERE name=?", name)
-		if lookup == sql.ErrNoRows {
-			if e != nil {
-				return e
-			}
-			n, e := result.RowsAffected()
-			if e != nil {
-				return e
-			}
-			if n != 0 {
-				return iamManagedBad()
-			}
-			return nil
+		result, err := tx.ExecContext(ctx, "DELETE FROM identity_policies WHERE name=?", name)
+		if err != nil {
+			return err
 		}
-		return iamExactlyOne(result, e)
+		removed, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		expected := int64(1)
+		if lookup == sql.ErrNoRows {
+			expected = 0
+		}
+		if removed != expected {
+			return iamManagedBad()
+		}
+		var remaining int
+		if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM identity_policies WHERE lower(name)=lower(?)", name).Scan(&remaining); err != nil {
+			return err
+		}
+		if remaining != 0 {
+			return iamManagedBad()
+		}
+		return nil
 	}
+
 	var identities, existing int
 	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM identity_policies").Scan(&identities); err != nil {
 		return err
@@ -547,6 +583,17 @@ func iamSyncPolicy(ctx context.Context, tx *sql.Tx, name string) error {
 	return nil
 }
 func (s *IAMRoleStore) PutPolicy(ctx context.Context, name, policyName, document string, expectedRoleID ...string) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if err = iamPutRolePolicyTx(ctx, tx, name, policyName, document, expectedRoleID...); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func iamPutRolePolicyTx(ctx context.Context, tx *sql.Tx, name, policyName, document string, expectedRoleID ...string) error {
 	if !iamInlineName.MatchString(policyName) || len(document) > 32<<10 {
 		return ssmFailure{"MalformedPolicyDocument", "Use a named inline policy of at most32KiB."}
 	}
@@ -556,11 +603,6 @@ func (s *IAMRoleStore) PutPolicy(ctx context.Context, name, policyName, document
 	}
 	// Preserve the validated wire document; aggregate authorization is normalized separately.
 	data := []byte(document)
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
 	role, err := iamReadRole(ctx, tx, name, false)
 	if err != nil {
 		return err
@@ -568,6 +610,12 @@ func (s *IAMRoleStore) PutPolicy(ctx context.Context, name, policyName, document
 	if err = iamManagedExpectedRole(role, expectedRoleID); err != nil {
 		return err
 	}
+	frame, err := iamInlineMutationFrame(ctx, tx, role)
+	if err != nil {
+		return err
+	}
+
+	frame.inline[policyName] = document
 	err = iamExactlyOne(tx.ExecContext(ctx, "INSERT INTO aws_iam_role_policies(role_name,name,document) VALUES(?,?,?) ON CONFLICT(role_name,name) DO UPDATE SET document=excluded.document", role.RoleName, policyName, string(data)))
 	if err != nil {
 		return err
@@ -575,7 +623,25 @@ func (s *IAMRoleStore) PutPolicy(ctx context.Context, name, policyName, document
 	if err = iamSyncPolicy(ctx, tx, role.RoleName); err != nil {
 		return err
 	}
-	return tx.Commit()
+	var saved string
+	if err = tx.QueryRowContext(ctx, "SELECT document FROM aws_iam_role_policies WHERE role_name=? AND name=?", role.RoleName, policyName).Scan(&saved); err != nil {
+		return err
+	}
+	after, err := iamReadRole(ctx, tx, role.RoleName, false)
+	if err != nil {
+		return err
+	}
+	if after != role || saved != document {
+		return iamManagedBad()
+	}
+	actual, err := iamInlineMutationFrame(ctx, tx, role)
+	if err != nil {
+		return err
+	}
+	if !reflect.DeepEqual(frame, actual) {
+		return iamManagedBad()
+	}
+	return nil
 }
 func (s *IAMRoleStore) Policy(ctx context.Context, name, policyName string, expectedRoleID ...string) (string, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -609,6 +675,12 @@ func (s *IAMRoleStore) DeletePolicy(ctx context.Context, name, policyName string
 		return err
 	}
 	defer tx.Rollback()
+	if err = iamDeleteRolePolicyTx(ctx, tx, name, policyName, expectedRoleID...); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func iamDeleteRolePolicyTx(ctx context.Context, tx *sql.Tx, name, policyName string, expectedRoleID ...string) error {
 	role, err := iamReadRole(ctx, tx, name, false)
 	if err != nil {
 		return err
@@ -616,6 +688,11 @@ func (s *IAMRoleStore) DeletePolicy(ctx context.Context, name, policyName string
 	if err = iamManagedExpectedRole(role, expectedRoleID); err != nil {
 		return err
 	}
+	frame, err := iamInlineMutationFrame(ctx, tx, role)
+	if err != nil {
+		return err
+	}
+
 	var present int
 	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_iam_role_policies WHERE role_name=? AND name=?", role.RoleName, policyName).Scan(&present); err != nil {
 		return err
@@ -623,6 +700,7 @@ func (s *IAMRoleStore) DeletePolicy(ctx context.Context, name, policyName string
 	if present == 0 {
 		return ssmFailure{"NoSuchEntity", "Inline policy does not exist."}
 	}
+	delete(frame.inline, policyName)
 	result, err := tx.ExecContext(ctx, "DELETE FROM aws_iam_role_policies WHERE role_name=? AND name=?", role.RoleName, policyName)
 	if err != nil {
 		return err
@@ -637,7 +715,25 @@ func (s *IAMRoleStore) DeletePolicy(ctx context.Context, name, policyName string
 	if err = iamSyncPolicy(ctx, tx, role.RoleName); err != nil {
 		return err
 	}
-	return tx.Commit()
+	var remaining int
+	if err = tx.QueryRowContext(ctx, "SELECT count(*) FROM aws_iam_role_policies WHERE role_name=? AND name=?", role.RoleName, policyName).Scan(&remaining); err != nil {
+		return err
+	}
+	after, err := iamReadRole(ctx, tx, role.RoleName, false)
+	if err != nil {
+		return err
+	}
+	if after != role || remaining != 0 {
+		return iamManagedBad()
+	}
+	actual, err := iamInlineMutationFrame(ctx, tx, role)
+	if err != nil {
+		return err
+	}
+	if !reflect.DeepEqual(frame, actual) {
+		return iamManagedBad()
+	}
+	return nil
 }
 func (s *IAMRoleStore) UpdateTrust(ctx context.Context, name, trust string, expectedRoleID ...string) error {
 	if _, err := iamTrust(trust); err != nil {
@@ -666,6 +762,12 @@ func (s *IAMRoleStore) Delete(ctx context.Context, name string, expectedRoleID .
 		return err
 	}
 	defer tx.Rollback()
+	if err = iamDeleteRoleTx(ctx, tx, name, expectedRoleID...); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+func iamDeleteRoleTx(ctx context.Context, tx *sql.Tx, name string, expectedRoleID ...string) error {
 	role, err := iamReadRole(ctx, tx, name, false)
 	if err != nil {
 		return err
@@ -705,5 +807,66 @@ func (s *IAMRoleStore) Delete(ctx context.Context, name string, expectedRoleID .
 	if err = iamExactlyOne(tx.ExecContext(ctx, "UPDATE aws_iam_roles SET deleted=1 WHERE name=? AND role_id=? AND deleted=0", role.RoleName, role.RoleID)); err != nil {
 		return err
 	}
-	return tx.Commit()
+	after, err := iamReadRole(ctx, tx, role.RoleName, true)
+	if err != nil {
+		return err
+	}
+	var deleted, children int
+	err = tx.QueryRowContext(ctx, `SELECT deleted,
+      (SELECT count(*) FROM aws_iam_role_policies WHERE role_name=?)+
+      (SELECT count(*) FROM aws_iam_role_managed_policies WHERE role_name=?)+
+      (SELECT count(*) FROM identity_policies WHERE lower(name)=lower(?))+
+      (SELECT count(*) FROM aws_iam_instance_profile_roles WHERE role_name=?)
+      FROM aws_iam_roles WHERE name=?`, role.RoleName, role.RoleName, role.RoleName, role.RoleName, role.RoleName).Scan(&deleted, &children)
+	if err != nil {
+		return err
+	}
+	if after != role || deleted != 1 || children != 0 {
+		return iamManagedBad()
+	}
+	return nil
+}
+
+func iamRoleDescription(description string) error {
+	// Match CreateRole's documented description character range before XML output.
+	if !utf8.ValidString(description) || utf8.RuneCountInString(description) > 1000 {
+		return ssmFailure{"ValidationError", "Description must use at most1000 permitted IAM characters."}
+	}
+	for _, r := range description {
+		if r != '\t' && r != '\n' && r != '\r' && !(r >= 0x20 && r <= 0x7e) && !(r >= 0xa1 && r <= 0xff) {
+			return ssmFailure{"ValidationError", "Description contains characters outside the documented IAM range."}
+		}
+	}
+
+	return nil
+}
+
+// Inline updates own one named policy only. Preserve the other inline policies
+// and current managed-policy state instead of adopting trigger-added authority.
+type iamInlineFrame struct {
+	inline  map[string]string
+	managed []iamManagedRecord
+}
+
+func iamInlineMutationFrame(ctx context.Context, tx *sql.Tx, role IAMRole) (iamInlineFrame, error) {
+	frame := iamInlineFrame{inline: map[string]string{}}
+	rows, err := tx.QueryContext(ctx, "SELECT name,document FROM aws_iam_role_policies WHERE role_name=?", role.RoleName)
+	if err != nil {
+		return frame, err
+	}
+	for rows.Next() {
+		var name, document string
+		if err = rows.Scan(&name, &document); err != nil {
+			rows.Close()
+			return frame, err
+		}
+		frame.inline[name] = document
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return frame, err
+	}
+	frame.managed, err = iamManagedRolePolicies(ctx, tx, role)
+	return frame, err
 }

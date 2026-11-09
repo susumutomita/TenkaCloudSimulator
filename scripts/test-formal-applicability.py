@@ -40,6 +40,14 @@ class ReleaseClassificationTests(unittest.TestCase):
 
 
 class STSFixtureClassificationTests(unittest.TestCase):
+    def test_exact_hello_battle_iam_fixture_classification(self):
+        self.assertEqual(disposition('internal/aws/testdata/hello-world-battle-iam-fragment.yaml'), 'test-support')
+        for path in ('internal/aws/testdata/hello-world-battle-iam-fragment.go',
+                     'internal/aws/testdata/hello-world-battle-other.yaml',
+                     'internal/aws/testdata/hello-world-battle-iam-fragment.yaml.go',
+                     'internal/aws/hello-world-battle-iam-fragment.yaml'):
+            self.assertIsNone(disposition(path))
+
     def test_exact_sts_fixture_and_helper_classification(self):
         self.assertEqual(disposition('scripts/check-sts-formal-candidate.py'), 'validation-tooling')
         self.assertEqual(disposition('internal/aws/testdata/sts-original/hello-world.yaml'), 'test-support')

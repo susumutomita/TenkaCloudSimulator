@@ -73,6 +73,10 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_iam_ssm_builtin_sdk_pin_authority_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('iam_ssm_builtin.py'))],check=True,timeout=180)
+ def test_cfn_iam_profiles_sdk_composition_restart_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('cfn_iam_profiles.py'))],check=True,timeout=180)
  def test_lambda_log_tail_explicit_console(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('lambda_log_tail_console.py'))],check=True,timeout=180)
  def test_iam_instance_profiles_sdk_isolation_restart_and_cleanup(self):
