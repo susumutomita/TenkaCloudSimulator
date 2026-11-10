@@ -111,6 +111,20 @@
       "disposition": "test-support",
       "reason": "Adds native deletion, isolation, failure rollback, restart and stale-cursor regressions and extends actual two-process SDK coverage without dropping the original group-recreation regression.",
       "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "0a66c9f06746b6452e46e4d518c172d2a775409b138e9412b953f8663e8abcbb",
+      "disposition": "test-support",
+      "reason": "Preserves every inherited OpenAPI snapshot and detector while explicitly validating the reviewed DeleteLogStream schema/example/union addition. Adds strict request and missing/altered-extension mutation regressions for the stale CI inventory.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "f4e8a8c9db39be5c499448473f3cba32496478fd39c2ffd2c00a6b58d2b9d63c",
+      "disposition": "test-support",
+      "reason": "Preserves every inherited OpenAPI snapshot and detector while explicitly validating the reviewed DeleteLogStream schema/example/union addition. Adds strict request and missing/altered-extension mutation regressions for the stale CI inventory.",
+      "models": []
     }
   ]
 }

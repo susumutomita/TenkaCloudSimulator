@@ -31,6 +31,20 @@ def operations(spec):
 
 
 def preserved(spec):
+    # Validate the three reviewed DeleteLogStream additions exactly, then remove
+    # only those additions from a copy. Every pre-existing digest below is kept
+    # unchanged. This projection was checked against public main36e72c4 in full.
+    spec = copy.deepcopy(spec)
+    media = spec['paths']['/']['post']['requestBody']['content'][JSON11]
+    assert len(media['examples']) == 29
+    example = media['examples'].pop('LogsDeleteLogStream', None)
+    assert digest(example) == '4cdfa75bc2b88d7b001a0ac6b79335cbf71f149bcfc119d35f17dd9b2612ac9d', 'DeleteLogStream example changed'
+    schema = spec['components']['schemas'].pop('LogsDeleteLogStreamRequest', None)
+    assert digest(schema) == '6f9dfb1a9f99ef42ef8438e1d16f2460734216168877c7fe7792c416aa93d736', 'DeleteLogStream schema changed'
+    ref = {'$ref': '#/components/schemas/LogsDeleteLogStreamRequest'}
+    union = media['schema']['anyOf']
+    assert union.count(ref) == 1 and union[-1] == ref, 'DeleteLogStream union binding changed'
+    union.pop()
     # Exact main d166f56 projections plus reviewed bounded S3 multipart queries,
     # descriptions, regional/auth headers and object POST, then the seven native
     # IAM profile examples/action fields at root and the AWS alias. The reviewed
@@ -92,6 +106,26 @@ class SakuraReference(unittest.TestCase):
 
     def test_all_existing_operations_components_and_28_templates_are_exact(self):
         preserved(self.spec)
+
+    def test_log_stream_addition_cannot_hide_missing_or_changed_contracts(self):
+        def media(spec):
+            return spec['paths']['/']['post']['requestBody']['content'][JSON11]
+        for label, change in (
+            ('missing example', lambda spec: media(spec)['examples'].pop('LogsDeleteLogStream')),
+            ('wrong target', lambda spec: media(spec)['examples']['LogsDeleteLogStream'].update(summary='wrong target')),
+            ('changed static resource', lambda spec: media(spec)['examples']['LogsDeleteLogStream']['value'].update(logStreamName='different')),
+            ('missing schema', lambda spec: spec['components']['schemas'].pop('LogsDeleteLogStreamRequest')),
+            ('relaxed schema', lambda spec: spec['components']['schemas']['LogsDeleteLogStreamRequest'].update(additionalProperties=True)),
+            ('missing required field', lambda spec: spec['components']['schemas']['LogsDeleteLogStreamRequest']['required'].remove('logStreamName')),
+            ('missing union branch', lambda spec: media(spec)['schema']['anyOf'].pop()),
+            ('duplicate union branch', lambda spec: media(spec)['schema']['anyOf'].append({'$ref':'#/components/schemas/LogsDeleteLogStreamRequest'})),
+            ('changed inherited stream operation', lambda spec: media(spec)['examples']['LogsCreateLogStream']['value'].update(logStreamName='changed')),
+            ('unreviewed component', lambda spec: spec['components']['schemas'].update(UnreviewedLogsExtension={'type':'string'})),
+        ):
+            broken=copy.deepcopy(self.spec)
+            change(broken)
+            with self.subTest(change=label),self.assertRaises(AssertionError):
+                preserved(broken)
 
     def test_five_native_routes_scope_auth_and_nonform_query(self):
         native_shape(self.spec)
