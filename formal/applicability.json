@@ -81,6 +81,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/route53_failures_test.go",
+      "sha256": "20d2896494145ee7c3cf49ffb367ccee36ba4fa27305b74c1ef2a2f23e96eb40",
+      "disposition": "test-support",
+      "reason": "Adds strict HTTP rejection, unavailable identity/database refusal and storage-trigger rollback regressions asserting complete persisted state preservation. No runtime or coverage policy changes.",
+      "models": []
+    },
+    {
       "path": "internal/aws/route53_http.go",
       "sha256": "f9e324ae22c65224fe3ac89e7de287f3da606bd3a1fdcd32395cca3dcb679d35",
       "disposition": "modeled",
