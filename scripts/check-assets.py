@@ -1,5 +1,5 @@
 """Verify vendored bundle identity and local API-reference wiring without npm."""
-import hashlib,json
+import hashlib,json,runpy
 from pathlib import Path
 metadata=json.loads(Path('third_party/scalar.json').read_text())
 assert hashlib.sha256(Path('internal/server/apidocs/scalar.js').read_bytes()).hexdigest()==metadata['bundleSha256']
@@ -13,7 +13,9 @@ assert not any(item['name']=='@replit/codemirror-css-color-picker' for item in i
 assert all(item.get('noticeEvidence') for item in inventory)
 spec=json.loads(Path('internal/server/apidocs/openapi.json').read_text())
 assert spec['openapi']=='3.1.0' and spec['servers']==[{'url':'/','description':'This simulator only'}]
-operations=[v['operationId'] for p in spec['paths'].values() for k,v in p.items() if k in ['get','post','put','head','delete']]
+route53_contract=runpy.run_path('test/e2e/route53_openapi.py')
+inherited_spec=route53_contract['project_before_route53'](spec)
+operations=[v['operationId'] for p in inherited_spec['paths'].values() for k,v in p.items() if k in ['get','post','put','head','delete']]
 expected_legacy={'S3MultipartUpload','Capabilities','CreateBucket','CreateFunction','DeleteBucket','DeleteFunction','DeleteIdentityPolicy','DeleteObject','GetFunctionConfiguration','GetIdentityPolicy','GetObject','HeadBucket','HeadObject','IAMRoleQueryOperation','Invoke','ListBuckets','ListFunctions','ListObjectsV2OrGetBucketLocation','ListPrincipals','PutIdentityPolicy','PutObject','UpdateFunctionCode','awsRegionalOperation'}
 expected_rest={'CreateRestApi','GetRestApis','GetRestApi','DeleteRestApi','GetResources','CreateResource','GetResource','DeleteResource','PutMethod','GetMethod','PutIntegration','CreateDeployment','GetDeployment','CreateStage','GetStage','DeleteStage','InvokeLocalRESTProxyGet','InvokeLocalRESTProxyPost','AddPermission','GetPolicy','RemovePermission'}
 expected_multicloud={'GCPDownloadObject', 'AzureGetContainerProperties', 'GCPUploadObject', 'AzureDeleteContainer', 'AzureDeleteBlob', 'GCPListObjects', 'GCPDeleteBucket', 'GCPGetBucket', 'GCPGetObject', 'AzureCreateContainer', 'AzureListBlobs', 'GCPCreateBucket', 'AzureGetBlobProperties', 'GCPDeleteObject', 'AzureListContainers', 'GCPListBuckets', 'AzurePutBlob', 'AzureGetBlob'}

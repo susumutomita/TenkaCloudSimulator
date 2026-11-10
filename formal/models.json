@@ -9489,6 +9489,97 @@
      "expect_invariant": "RefusalUnchanged"
     }
    ]
+  },
+  {
+   "id": "Route53AtomicBatch",
+   "model": "formal/Route53AtomicBatch.tla",
+   "config": "formal/Route53AtomicBatch.cfg",
+   "bounds": "Two teams, binary pair values and sentinel, one staged batch, at most two commits.",
+   "properties": [
+    "TypeOK",
+    "AtomicPair",
+    "PreserveSentinel",
+    "OnlyAuthorizedValid",
+    "OtherTeamUnchanged",
+    "PendingInvisible"
+   ],
+   "limits": "Atomic batch/authority/team frame abstraction only; no Go/SQL/XML/DNS, receipt retention, quota, pagination, crash or liveness proof. Native and SDK tests independently cover implementation boundaries.",
+   "source_scope": [
+    "internal/aws/route53_store.go",
+    "internal/aws/route53_http.go",
+    "internal/aws/route53_dispatch.go",
+    "internal/aws/s3.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "ExposePendingState",
+     "edits": [
+      {
+       "old": "/\\ UNCHANGED <<zones, records, receipts, commits>>\nCommit(p)",
+       "new": "/\\ records' = [records EXCEPT ![t].first = target, ![t].second = target]\n    /\\ UNCHANGED <<zones, receipts, commits>>\nCommit(p)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PendingInvisible"
+    },
+    {
+     "id": "OmitAuthorization",
+     "edits": [
+      {
+       "old": "/\\ p.authorized /\\ p.valid",
+       "new": "/\\ p.valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyAuthorizedValid"
+    },
+    {
+     "id": "OmitValidation",
+     "edits": [
+      {
+       "old": "/\\ p.authorized /\\ p.valid",
+       "new": "/\\ p.authorized",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyAuthorizedValid"
+    },
+    {
+     "id": "HalfBatch",
+     "edits": [
+      {
+       "old": "![p.team].second = p.value",
+       "new": "![p.team].second = 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AtomicPair"
+    },
+    {
+     "id": "ChangeSentinel",
+     "edits": [
+      {
+       "old": "![p.team].second = p.value]",
+       "new": "![p.team].second = p.value, ![p.team].sentinel = 0]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreserveSentinel"
+    },
+    {
+     "id": "ChangeOtherTeam",
+     "edits": [
+      {
+       "old": "records' = [records EXCEPT ![p.team].first = p.value,\n                                 ![p.team].second = p.value]",
+       "new": "records' = [t \\in Teams |-> [first |-> p.value, second |-> p.value, sentinel |-> 1]]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OtherTeamUnchanged"
+    }
+   ]
   }
  ]
 }

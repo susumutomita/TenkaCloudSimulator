@@ -3476,7 +3476,10 @@
             "description": "Explicit opt-in for synchronous guest output, which may contain sensitive values. Tail with DryRun is unsupported.",
             "schema": {
               "type": "string",
-              "enum": ["None", "Tail"],
+              "enum": [
+                "None",
+                "Tail"
+              ],
               "default": "None"
             }
           },
@@ -3489,7 +3492,9 @@
             "headers": {
               "X-Amz-Log-Result": {
                 "description": "Only for explicit synchronous Tail: base64 of at most 4096 raw captured output bytes. May start inside a UTF-8 character.",
-                "schema": {"type": "string"}
+                "schema": {
+                  "type": "string"
+                }
               }
             },
             "description": "JSON returned by the actual Python handler; shape depends on your code and may be an object, array or primitive. A function exception can still return HTTP200: check x-amz-function-error and the error payload. This differs from a protocol/IAM error such as403.",
@@ -13272,6 +13277,428 @@
           }
         }
       }
+    },
+    "/2013-04-01/hostedzone": {
+      "post": {
+        "operationId": "CreateHostedZone",
+        "summary": "CreateHostedZone",
+        "tags": [
+          "Route53 public hosted zones"
+        ],
+        "description": "Public ASCII zone only; requires route53:CreateHostedZone and ec2:DescribeVpcs on *. Same CallerReference returns HostedZoneAlreadyExists. Simulator-owned NS/SOA are not real delegation. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Successful native XML response.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native ErrorResponse XML with Error/Code and Error/Message. IAM 403, missing resources 404, invalid requests 400.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/xml": {
+              "schema": {
+                "type": "string",
+                "description": "Native Route53 XML, not JSON. Examples are static documentation."
+              },
+              "example": "<CreateHostedZoneRequest xmlns=\"https://route53.amazonaws.com/doc/2013-04-01/\"><Name>example.test</Name><CallerReference>unique-exercise-reference</CallerReference></CreateHostedZoneRequest>"
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "ListHostedZones",
+        "summary": "ListHostedZones",
+        "tags": [
+          "Route53 public hosted zones"
+        ],
+        "description": "Requires route53:ListHostedZones on *. Live ID-ordered pages; stale or foreign markers fail. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "maxitems",
+            "in": "query",
+            "required": false,
+            "description": "Page size, 1..100.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "required": false,
+            "description": "NextMarker from previous response.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful native XML response.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native ErrorResponse XML with Error/Code and Error/Message. IAM 403, missing resources 404, invalid requests 400.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/2013-04-01/hostedzone/{Id}": {
+      "get": {
+        "operationId": "GetHostedZone",
+        "summary": "GetHostedZone",
+        "tags": [
+          "Route53 public hosted zones"
+        ],
+        "description": "Requires route53:GetHostedZone on selected hostedzone ARN. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "description": "Hosted zone ID returned by CreateHostedZone, without /hostedzone/ prefix.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful native XML response.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native ErrorResponse XML with Error/Code and Error/Message. IAM 403, missing resources 404, invalid requests 400.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteHostedZone",
+        "summary": "DeleteHostedZone",
+        "tags": [
+          "Route53 public hosted zones"
+        ],
+        "description": "Requires route53:DeleteHostedZone on selected hostedzone ARN. Delete all non-default RRsets first. Atomic cleanup and INSYNC receipt. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "description": "Hosted zone ID returned by CreateHostedZone, without /hostedzone/ prefix.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful native XML response.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native ErrorResponse XML with Error/Code and Error/Message. IAM 403, missing resources 404, invalid requests 400.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/2013-04-01/hostedzone/{Id}/rrset": {
+      "get": {
+        "operationId": "ListResourceRecordSets",
+        "summary": "ListResourceRecordSets",
+        "tags": [
+          "Route53 public hosted zones"
+        ],
+        "description": "Requires route53:ListResourceRecordSets on selected hostedzone ARN. Reversed-label/numeric-type live ordering; name/type continuation is not a snapshot. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "description": "Hosted zone ID returned by CreateHostedZone, without /hostedzone/ prefix.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxitems",
+            "in": "query",
+            "required": false,
+            "description": "Page size, 1..100.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "Start record name.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Start type; requires name.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful native XML response.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native ErrorResponse XML with Error/Code and Error/Message. IAM 403, missing resources 404, invalid requests 400.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "ChangeResourceRecordSets",
+        "summary": "ChangeResourceRecordSets",
+        "tags": [
+          "Route53 public hosted zones"
+        ],
+        "description": "Requires route53:ChangeResourceRecordSets on selected hostedzone ARN. Atomic batch, 1..100 CREATE/UPSERT/DELETE changes; simple A/AAAA/CNAME/TXT/MX only, TTL required. DELETE exactly matches canonical saved RRset. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "description": "Hosted zone ID returned by CreateHostedZone, without /hostedzone/ prefix.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful native XML response.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native ErrorResponse XML with Error/Code and Error/Message. IAM 403, missing resources 404, invalid requests 400.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/xml": {
+              "schema": {
+                "type": "string",
+                "description": "Native Route53 XML, not JSON. Examples are static documentation."
+              },
+              "example": "<ChangeResourceRecordSetsRequest xmlns=\"https://route53.amazonaws.com/doc/2013-04-01/\"><ChangeBatch><Changes><Change><Action>CREATE</Action><ResourceRecordSet><Name>www.example.test</Name><Type>A</Type><TTL>60</TTL><ResourceRecords><ResourceRecord><Value>192.0.2.1</Value></ResourceRecord></ResourceRecords></ResourceRecordSet></Change></Changes></ChangeBatch></ChangeResourceRecordSetsRequest>"
+            }
+          }
+        }
+      }
+    },
+    "/2013-04-01/change/{Id}": {
+      "get": {
+        "operationId": "GetChange",
+        "summary": "GetChange",
+        "tags": [
+          "Route53 public hosted zones"
+        ],
+        "description": "Requires route53:GetChange on selected change ARN. Immediate local INSYNC, not actual DNS propagation. Evicted receipts return NoSuchChange. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "description": "Change ID without /change/ prefix; only newest 10000 receipts retained.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful native XML response.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native ErrorResponse XML with Error/Code and Error/Message. IAM 403, missing resources 404, invalid requests 400.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/2013-04-01/testdnsanswer": {
+      "get": {
+        "operationId": "TestDNSAnswer",
+        "summary": "TestDNSAnswer",
+        "tags": [
+          "Route53 public hosted zones"
+        ],
+        "description": "Requires route53:TestDNSAnswer on *. Answers actual local zone snapshot; NXDOMAIN, empty NOERROR and bounded in-zone CNAME traversal. Cycles return SERVFAIL; external targets fail unsupported rather than querying DNS. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
+        "parameters": [
+          {
+            "name": "hostedzoneid",
+            "in": "query",
+            "required": true,
+            "description": "Public hosted zone ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recordname",
+            "in": "query",
+            "required": true,
+            "description": "Name within selected zone.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recordtype",
+            "in": "query",
+            "required": true,
+            "description": "Supported DNS type.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful native XML response.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Native ErrorResponse XML with Error/Code and Error/Message. IAM 403, missing resources 404, invalid requests 400.",
+            "content": {
+              "text/xml": {
+                "schema": {
+                  "type": "string",
+                  "description": "Native Route53 XML, not JSON. Examples are static documentation."
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -16804,6 +17231,10 @@
     {
       "name": "Sakura Disk configuration",
       "description": "Five actual local API1.1 Disk metadata operations. **Static examples, not saved state.** Enable the provider on the host first; use real returned Disk IDs. The Basic Auth fields take public TCSIMSAKURA / dummy-local-only only; host cookie or X-Simulator-Token remains independently required. Exact subset/deviations: docs/sakura.md; primary public Disk API https://manual.sakura.ad.jp/cloud-api/1.1/disk/ ."
+    },
+    {
+      "name": "Route53 public hosted zones",
+      "description": "Bounded public zones and saved-state answers only. No external DNS, private VPC zones, aliases, routing policies, console or CloudFormation."
     }
   ],
   "x-tagGroups": [
@@ -16821,7 +17252,8 @@
         "CloudWatch Logs",
         "Secrets Manager",
         "DynamoDB tables and items",
-        "KMS local symmetric keys"
+        "KMS local symmetric keys",
+        "Route53 public hosted zones"
       ]
     },
     {

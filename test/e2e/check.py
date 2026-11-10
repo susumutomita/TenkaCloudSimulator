@@ -73,6 +73,12 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_route53_reference_contract_detectors(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_openapi.py"))],check=True,timeout=60)
+
+ def test_route53_native_public_zone_sdk(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name("route53.py"))],check=True,timeout=180)
+
  def test_sns_sqs_native_fanout_restart_and_isolation(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('sns_sqs_fanout.py'))],check=True,timeout=180)
  def test_scalar_aws_json_live_response_display(self):

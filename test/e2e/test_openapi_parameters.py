@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import unittest
 from openapi_parameters import validate_parameter_lists
+from route53_openapi import project_before_route53
 
 TOKEN = {'name': 'X-Simulator-Token', 'in': 'header', 'schema': {'type': 'string'}}
 REF = {'$ref': '#/components/parameters/Token'}
@@ -192,7 +193,8 @@ class ParameterLists(unittest.TestCase):
         root = Path(__file__).resolve().parents[2]
         repaired = json.loads((root / 'internal/server/apidocs/openapi.json').read_text())
         validate_parameter_lists(repaired)
-        ids = [op['operationId'] for path in repaired['paths'].values() for op in path.values()
+        inherited = project_before_route53(repaired)
+        ids = [op['operationId'] for path in inherited['paths'].values() for op in path.values()
                if isinstance(op, dict) and 'operationId' in op]
         added = {'GCPDownloadObject', 'GCPListBuckets', 'GCPCreateBucket', 'GCPGetBucket', 'GCPDeleteBucket',
                  'GCPListObjects', 'GCPGetObject', 'GCPDeleteObject', 'GCPUploadObject',

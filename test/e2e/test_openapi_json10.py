@@ -5,6 +5,7 @@ from pathlib import Path
 import unittest
 
 from jsonschema import ValidationError
+from route53_openapi import validate_route53
 from openapi_json10 import (DYNAMODB_OPERATIONS, MEDIA, request_schema,
                             validate_json10_examples, validate_json10_response, validator)
 
@@ -14,6 +15,9 @@ class SharedJSON10Schemas(unittest.TestCase):
     def setUpClass(cls):
         root = Path(__file__).resolve().parents[2]
         cls.spec = json.loads((root / 'internal/server/apidocs/openapi.json').read_text())
+
+    def test_route53_extension_is_exact_and_does_not_replace_shared_root(self):
+        validate_route53(self.spec)
 
     def examples(self):
         return self.spec['paths']['/']['post']['requestBody']['content'][MEDIA]['examples']

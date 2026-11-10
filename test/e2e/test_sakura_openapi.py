@@ -11,6 +11,7 @@ import unittest
 
 from jsonschema import ValidationError
 from openapi_json10 import validator
+from route53_openapi import project_before_route53
 
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/disk'
@@ -31,6 +32,7 @@ def operations(spec):
 
 
 def preserved(spec):
+    spec = project_before_route53(spec)
     # Validate the three reviewed DeleteLogStream additions exactly, then remove
     # only those additions from a copy. Every pre-existing digest below is kept
     # unchanged. This projection was checked against public main36e72c4 in full.

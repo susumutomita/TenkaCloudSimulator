@@ -1,338 +1,290 @@
 {
   "version": 1,
-  "base_sha": "c2254986bcbc6cc7b67aa33f37444b09555d8b02",
+  "base_sha": "1ea676eec2587e0df00629bcf26c23a6dd6e4681",
   "changes": [
     {
-      "path": "docs/development-status.md",
-      "sha256": "a38df9b136096aab342b0de730d4c42c73211d9f3aeb17f89bc5058149cc6871",
+      "path": "docs/route53.md",
+      "sha256": "b7789d5ae2cf3abed7bc83a85a67c4c27cdbd6d5c17b80786954e6a545f3dd46",
       "disposition": "documentation",
-      "reason": "Records the bounded native fanout scope, current ownership, official references, explicit deviations and pending validation without changing existing dated evidence.",
+      "reason": "Documents supported Route53 operations, persistence semantics, bounds, IAM requirements and official API references.",
       "models": []
     },
     {
-      "path": "docs/sns.md",
-      "sha256": "d78d2b88b15cbbc25192fec0475273d5840c8bd3c81371652758e27a15dc9e78",
-      "disposition": "documentation",
-      "reason": "Records the bounded native fanout scope, current ownership, official references, explicit deviations and pending validation without changing existing dated evidence.",
-      "models": []
-    },
-    {
-      "path": "formal/README.md",
-      "sha256": "04c60b50c80887b881826a43ab5a6127b4fc57adfc495cdeb8eb58cdf048f2cd",
-      "disposition": "documentation",
-      "reason": "Records the bounded native fanout scope, current ownership, official references, explicit deviations and pending validation without changing existing dated evidence.",
-      "models": []
-    },
-    {
-      "path": "formal/SNSQueueFanout.cfg",
-      "sha256": "3dbc267fa1b983a055a7c9ad73bfca9de6c53a01c5f7febb250ba255cee99283",
+      "path": "formal/Route53AtomicBatch.cfg",
+      "sha256": "11895517d6254f5d9dfb7782e7f9d3a24b3fd2e24ffbd0460ab6b6656057eb55",
       "disposition": "modeled",
-      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "reason": "Adds bounded Route53 native persistence and atomic batches, immutable caller authority, conflict-safe dispatch and additive composition. Existing unrelated services and authority paths remain intact.",
       "models": [
         {
-          "id": "SNSQueueFanout",
+          "id": "Route53AtomicBatch",
           "properties": [
-            "TypeOK",
-            "Authorized",
-            "ParentPresent",
-            "DestinationsExist",
-            "CountBounded",
-            "BytesBounded",
-            "DurableAck",
-            "AuditExact",
-            "RecipientsExact",
-            "RefusalUnchanged"
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+          "limits": "Finite two-team binary-value batch abstraction, not Go/SQL/XML/DNS/receipt-retention/quota/pagination or liveness proof. Native, composed-server, SDK and fault tests provide separate implementation evidence."
         }
       ]
     },
     {
-      "path": "formal/SNSQueueFanout.tla",
-      "sha256": "c2398223d0419d9eb270436c32faf44a6f59d7a4ce9a6f116f08c2038f8a9eda",
+      "path": "formal/Route53AtomicBatch.tla",
+      "sha256": "9e84eb0c4fe17d8dfd2070ca6d0bd03d97f4691489af9ab862d5c6949d9750fc",
       "disposition": "modeled",
-      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "reason": "Adds bounded Route53 native persistence and atomic batches, immutable caller authority, conflict-safe dispatch and additive composition. Existing unrelated services and authority paths remain intact.",
       "models": [
         {
-          "id": "SNSQueueFanout",
+          "id": "Route53AtomicBatch",
           "properties": [
-            "TypeOK",
-            "Authorized",
-            "ParentPresent",
-            "DestinationsExist",
-            "CountBounded",
-            "BytesBounded",
-            "DurableAck",
-            "AuditExact",
-            "RecipientsExact",
-            "RefusalUnchanged"
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+          "limits": "Finite two-team binary-value batch abstraction, not Go/SQL/XML/DNS/receipt-retention/quota/pagination or liveness proof. Native, composed-server, SDK and fault tests provide separate implementation evidence."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "befab00a3c90fa3daa570bbcbcee6ebddc9e1cbeb81ea87b7e207548085b1d92",
+      "sha256": "3fc205106ad2d439ed58afe5823100f063f2e749b00449d9ad25a32985a21a8c",
       "disposition": "formal-infrastructure",
-      "reason": "Adds native SNS queue fanout obligations while retaining the merged CloudWatch stream deletion obligation and every other registered model and invariant.",
+      "reason": "Registers Route53 invariants, six mandatory sensitivity controls and source scopes while preserving all prior models and controls.",
       "models": []
     },
     {
-      "path": "internal/aws/sns.go",
-      "sha256": "0ef78c66b6c3a8724bc12b383192ac7ef7363542b43bf8b13db0a18dd3aa6d3e",
+      "path": "internal/aws/route53_dispatch.go",
+      "sha256": "4ae5572d764688222a76f175448691c93f2bc4deaa84c248cdf9ea2cec0f75b0",
       "disposition": "modeled",
-      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "reason": "Adds bounded Route53 native persistence and atomic batches, immutable caller authority, conflict-safe dispatch and additive composition. Existing unrelated services and authority paths remain intact.",
       "models": [
         {
-          "id": "SNSQueueFanout",
+          "id": "Route53AtomicBatch",
           "properties": [
-            "TypeOK",
-            "Authorized",
-            "ParentPresent",
-            "DestinationsExist",
-            "CountBounded",
-            "BytesBounded",
-            "DurableAck",
-            "AuditExact",
-            "RecipientsExact",
-            "RefusalUnchanged"
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
-        },
-        {
-          "id": "SNSAdmission",
-          "properties": [
-            "TypeOK",
-            "NoUnauthorizedEffect",
-            "NoFIFOPublish",
-            "NoRegionMismatch",
-            "NoSuccessOnRefusal",
-            "NoRejectedMutation"
-          ],
-          "limits": "Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence."
+          "limits": "Finite two-team binary-value batch abstraction, not Go/SQL/XML/DNS/receipt-retention/quota/pagination or liveness proof. Native, composed-server, SDK and fault tests provide separate implementation evidence."
         }
       ]
     },
     {
-      "path": "internal/aws/sns_sqs_fanout.go",
-      "sha256": "35cae564439e8806655bc054ced87d774d4092ae02909342dac05e2ce7262624",
+      "path": "internal/aws/route53_dispatch_test.go",
+      "sha256": "ba0d1efe9e3d4e9c521d990d5379c98f1cec76a9ccce20365572de3d789ed73d",
+      "disposition": "test-support",
+      "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/route53_http.go",
+      "sha256": "f9e324ae22c65224fe3ac89e7de287f3da606bd3a1fdcd32395cca3dcb679d35",
       "disposition": "modeled",
-      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "reason": "Adds bounded Route53 native persistence and atomic batches, immutable caller authority, conflict-safe dispatch and additive composition. Existing unrelated services and authority paths remain intact.",
       "models": [
         {
-          "id": "SNSQueueFanout",
+          "id": "Route53AtomicBatch",
           "properties": [
-            "TypeOK",
-            "Authorized",
-            "ParentPresent",
-            "DestinationsExist",
-            "CountBounded",
-            "BytesBounded",
-            "DurableAck",
-            "AuditExact",
-            "RecipientsExact",
-            "RefusalUnchanged"
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+          "limits": "Finite two-team binary-value batch abstraction, not Go/SQL/XML/DNS/receipt-retention/quota/pagination or liveness proof. Native, composed-server, SDK and fault tests provide separate implementation evidence."
         }
       ]
     },
     {
-      "path": "internal/aws/sns_sqs_fanout_test.go",
-      "sha256": "d75df7662d291dd4e64be392df813f8e15bf0887900d34e7fa7e623a45277a93",
+      "path": "internal/aws/route53_review_test.go",
+      "sha256": "1cb80fd5a3ef59d737e84c794143cef440e3fbad63669887276a0a83099eec7e",
+      "disposition": "test-support",
+      "reason": "Adds independent Route53 review regression and fail-closed formal inventory/property/control/source-scope removal tests. Existing IDs, controls and thresholds are preserved.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/route53_store.go",
+      "sha256": "ec920edac1329ca3de2ad9c01b5cafb67c90897cd3285bcb0139cba6fbee86b3",
       "disposition": "modeled",
-      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "reason": "Adds bounded Route53 native persistence and atomic batches, immutable caller authority, conflict-safe dispatch and additive composition. Existing unrelated services and authority paths remain intact.",
       "models": [
         {
-          "id": "SNSQueueFanout",
+          "id": "Route53AtomicBatch",
           "properties": [
-            "TypeOK",
-            "Authorized",
-            "ParentPresent",
-            "DestinationsExist",
-            "CountBounded",
-            "BytesBounded",
-            "DurableAck",
-            "AuditExact",
-            "RecipientsExact",
-            "RefusalUnchanged"
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+          "limits": "Finite two-team binary-value batch abstraction, not Go/SQL/XML/DNS/receipt-retention/quota/pagination or liveness proof. Native, composed-server, SDK and fault tests provide separate implementation evidence."
         }
       ]
     },
     {
-      "path": "internal/aws/sns_store.go",
-      "sha256": "a35c3b743b864fbf650431b545b58c4e890f36b31cecf2f9d6b7efca6f29ff29",
+      "path": "internal/aws/route53_test.go",
+      "sha256": "9123dcfaaa3c9a548332fd1745d5340f4df16048bc68c8ee8748b9ab6cf43c70",
+      "disposition": "test-support",
+      "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "2b5fc60b08b93c5501fe348e3811747958e496bddd5aa2c036782b9aa5bc1443",
       "disposition": "modeled",
-      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "reason": "Adds bounded Route53 native persistence and atomic batches, immutable caller authority, conflict-safe dispatch and additive composition. Existing unrelated services and authority paths remain intact.",
       "models": [
         {
-          "id": "SNSQueueFanout",
+          "id": "Route53AtomicBatch",
           "properties": [
-            "TypeOK",
-            "Authorized",
-            "ParentPresent",
-            "DestinationsExist",
-            "CountBounded",
-            "BytesBounded",
-            "DurableAck",
-            "AuditExact",
-            "RecipientsExact",
-            "RefusalUnchanged"
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
-        },
-        {
-          "id": "SNSLifecycle",
-          "properties": [
-            "TypeOK",
-            "NoOrphans",
-            "MessageCountBounded",
-            "ByteBudgetBounded",
-            "DeliveryBudgetBounded",
-            "DurableAck",
-            "PublishRecipientsExact",
-            "PeerFrame",
-            "NoDanglingDeliveredMessage",
-            "DeleteAckEmpty",
-            "DeleteRetryAcknowledged"
-          ],
-          "limits": "Atomic state transitions assume transaction rollback and model validated existing state. Captured post-operation ACK and frozen-delete ownership, globally bounded count/abstract byte/delivery budgets and target/peer frames only. Not SQL/driver/crash/Go refinement, UUID allocation, schema migration, UTF-8 byte calculation, quotas at real cardinality, IAM or outbound delivery. Delivery audit may outlive Unsubscribe, but not its stored message or topic. Ignored/vanishing/late-reinsert native SQLite faults and two-host SDK checks are separate executable obligations."
+          "limits": "Finite two-team binary-value batch abstraction, not Go/SQL/XML/DNS/receipt-retention/quota/pagination or liveness proof. Native, composed-server, SDK and fault tests provide separate implementation evidence."
         }
       ]
     },
     {
-      "path": "internal/aws/sqs_store.go",
-      "sha256": "f8eb116ae9ea46b157e493552744a4fa94c17855fb2ee1935f731d62abb87596",
+      "path": "internal/aws/ssm.go",
+      "sha256": "f511d876138aea53e1ed1baa27433a332cac59565a194f501678e6eb966d343e",
       "disposition": "modeled",
-      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "reason": "Adds bounded Route53 native persistence and atomic batches, immutable caller authority, conflict-safe dispatch and additive composition. Existing unrelated services and authority paths remain intact.",
       "models": [
         {
-          "id": "SNSQueueFanout",
+          "id": "Route53AtomicBatch",
           "properties": [
-            "TypeOK",
-            "Authorized",
-            "ParentPresent",
-            "DestinationsExist",
-            "CountBounded",
-            "BytesBounded",
-            "DurableAck",
-            "AuditExact",
-            "RecipientsExact",
-            "RefusalUnchanged"
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
-        },
-        {
-          "id": "SQSLifecycle",
-          "properties": [
-            "TypeOK",
-            "NoOrphans",
-            "AuthorizedMutations",
-            "ScopedMutation",
-            "FailedMutationAtomic",
-            "IdempotentCreateUnchanged",
-            "ReceiveOnlyEligible",
-            "FreshReceipt",
-            "ReceiptMutationCurrent",
-            "ChangeOnlyInflight"
-          ],
-          "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence."
-        },
-        {
-          "id": "SQSStorageBudget",
-          "properties": [
-            "TypeOK",
-            "FailedSendPreservesRows",
-            "ForeignRowsPreserved",
-            "LiveRowsPreserved",
-            "BudgetAccountsPhysical",
-            "PhysicalRowCap",
-            "PayloadByteCap",
-            "ReadRemovesOwnExpired",
-            "DeleteScopeExact",
-            "MaintenanceNotBudgetBlocked"
-          ],
-          "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure."
+          "limits": "Finite two-team binary-value batch abstraction, not Go/SQL/XML/DNS/receipt-retention/quota/pagination or liveness proof. Native, composed-server, SDK and fault tests provide separate implementation evidence."
         }
       ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "9988f529f84b2e92209c3d33970354919b5e2fe27b4cd35933a20bc563bc6c2f",
+      "disposition": "presentation",
+      "reason": "Adds exactly five Route53 REST/XML paths and eight operation contracts, without changing inherited paths/components or enabling a console.",
+      "models": []
+    },
+    {
+      "path": "internal/server/route53_composition_test.go",
+      "sha256": "50d4cd746854793a5eb66d0a125bb1d72301c5601565008af7fbec4bd3e853c8",
+      "disposition": "test-support",
+      "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
+      "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "745004f01fb7eeaeb59f2d91c906ad7ab3685f46b5d0f4aeebc298dff61fa404",
+      "sha256": "8fc7799ec9949ffaddd7cd06a4d966274e8549d26f42c9977ceea7e38c909529",
       "disposition": "modeled",
-      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "reason": "Adds bounded Route53 native persistence and atomic batches, immutable caller authority, conflict-safe dispatch and additive composition. Existing unrelated services and authority paths remain intact.",
       "models": [
         {
-          "id": "SNSQueueFanout",
+          "id": "Route53AtomicBatch",
           "properties": [
-            "TypeOK",
-            "Authorized",
-            "ParentPresent",
-            "DestinationsExist",
-            "CountBounded",
-            "BytesBounded",
-            "DurableAck",
-            "AuditExact",
-            "RecipientsExact",
-            "RefusalUnchanged"
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+          "limits": "Finite two-team binary-value batch abstraction, not Go/SQL/XML/DNS/receipt-retention/quota/pagination or liveness proof. Native, composed-server, SDK and fault tests provide separate implementation evidence."
         }
       ]
     },
     {
-      "path": "internal/server/sns_test.go",
-      "sha256": "c9ee1c2bef6d6fdfd1c8f04e9f841c3dc61fa1e38957600d08b6d209478bcb35",
-      "disposition": "modeled",
-      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
-      "models": [
-        {
-          "id": "SNSQueueFanout",
-          "properties": [
-            "TypeOK",
-            "Authorized",
-            "ParentPresent",
-            "DestinationsExist",
-            "CountBounded",
-            "BytesBounded",
-            "DurableAck",
-            "AuditExact",
-            "RecipientsExact",
-            "RefusalUnchanged"
-          ],
-          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
-        }
-      ]
+      "path": "scripts/check-assets.py",
+      "sha256": "d0f2aeb5451842a2e1e895d830ecd840433d93c7e69e53a7338d36c68d6016a5",
+      "disposition": "validation-tooling",
+      "reason": "Preserves all existing asset and legacy operation checks while validating the exact Route53 extension before its bounded projection. Missing and changed contracts are rejected by dedicated assets-path detectors.",
+      "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "6fcef885b416a973b14d9ddce1c2643d0e55642b3781c80252520d8176c66a8e",
+      "sha256": "536c419d2cdfbe69f17b690fa373a38c016c714116c25ff501fb2b352d2a5567",
       "disposition": "formal-infrastructure",
-      "reason": "Requires native SNS fanout invariant controls while retaining the merged CloudWatch deletion cascade control and every existing mandatory control.",
+      "reason": "Registers Route53 invariants, six mandatory sensitivity controls and source scopes while preserving all prior models and controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "d69ae6885ce6b4cfe8d2577c4e886af80a4b6e792f06668a01d9bc0a11a34a60",
+      "sha256": "77f510501eaba174aa01223e6b2dbb3e36d9d59819f79a519b4a661f1d569b73",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the native SNS queue fanout model, required invariants and controls; preserves every existing registered entry and strengthens missing-obligation regression coverage.",
+      "reason": "Adds independent Route53 review regression and fail-closed formal inventory/property/control/source-scope removal tests. Existing IDs, controls and thresholds are preserved.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-native-provenance.py",
+      "sha256": "e4f82f8507b5819ed668d2b34a4b6661ba2d04d36bf08e4e5724482715ae6796",
+      "disposition": "test-support",
+      "reason": "Requires each exact approved Route53 assets adapter once before unchanged original prefix digest, with missing/changed/duplicate adapter refusal tests. Actual provenance manifests, identities and hashes remain unchanged.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "c69724ab83c5c6b8ab495eb6bf35d7b9f41b9a45f15d6b113cd6a368b6be5ede",
+      "sha256": "506a844a97e42147ce6240d49fbdf28a31008890105dd318b1cfe0cba544bec3",
       "disposition": "test-support",
-      "reason": "Adds real SDK fanout, isolation, authorization refusal, restart and cleanup acceptance without removing an inherited test.",
+      "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
       "models": []
     },
     {
-      "path": "test/e2e/sns_sqs_fanout.py",
-      "sha256": "c07f5cf6baee30fdbd26c519f96466d3d4ff338f9cb3d9790791c824b16e5e64",
+      "path": "test/e2e/cloudwatch_logs.py",
+      "sha256": "dcb857f9ffa54b77113130b0be574a35a29578b16b5f9eff3417dceb7540d1dc",
       "disposition": "test-support",
-      "reason": "Adds real SDK fanout, isolation, authorization refusal, restart and cleanup acceptance without removing an inherited test.",
+      "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/route53.py",
+      "sha256": "f0134664c3dbf2dceec8f7c0fb98355ccffe5ff335d7e74fa989a845e55f4712",
+      "disposition": "test-support",
+      "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/route53_openapi.py",
+      "sha256": "7fc9a7acb14fa55ea45da6462fe4b7a3129e4585ea6af3643a7ec5380f134e9c",
+      "disposition": "test-support",
+      "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "599baf2381778968db40223a0a11eccd0c822971449b3e66aae2baf816010bcf",
+      "disposition": "test-support",
+      "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_parameters.py",
+      "sha256": "4206c251b79d7d9a32ebcba685dd482581f37ba84d96d9e9fefeabe3f778cd2e",
+      "disposition": "test-support",
+      "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_route53_openapi.py",
+      "sha256": "0d0d78cdf7a8844d761e3ab8a431892977387ea3254e23ea752f683b512f760e",
+      "disposition": "test-support",
+      "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "a5591308dd9690b8b16095445337f64d32c87c28c72d54c7dd97218b4068ae06",
+      "disposition": "test-support",
+      "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
       "models": []
     }
   ]
