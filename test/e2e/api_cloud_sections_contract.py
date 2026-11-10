@@ -6,6 +6,7 @@ import argparse
 import copy
 import json
 from pathlib import Path
+from route53_openapi import project_before_route53
 import unittest
 
 from test_sakura_openapi import NEW_IDS, COLLECTION, ITEM
@@ -75,9 +76,10 @@ def validate_document(document):
     status = tags_by_name[SAKURA_TAG].get('description', '')
     assert 'Disk configuration API only' in status and 'disabled by default' in status
     assert 'real VM/block storage' in status and 'not claim console workflow/fidelity' in status
+    inherited = project_before_route53(document)
     ops = operations(document)
-    ids = [operation['operationId'] for _, _, operation in ops]
-    assert len(document['paths']) == 36 and len(ids) == 67
+    ids = [operation['operationId'] for _, _, operation in operations(inherited)]
+    assert len(inherited['paths']) == 36 and len(ids) == 67
     assert len(ids) == len(set(ids)) and set(ids) == EXPECTED_IDS | NEW_IDS
     multipart = document['paths']['/{bucket}/{key}']['post']
     assert multipart['operationId'] == 'S3MultipartUpload'

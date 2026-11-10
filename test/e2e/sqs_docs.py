@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+from route53_openapi import project_before_route53
 import tempfile
 import urllib.request
 import urllib.error
@@ -25,6 +26,14 @@ OPERATIONS=('CreateQueue','ListQueues','GetQueueUrl','GetQueueAttributes',
 MAIN_OPERATION_IDS=('AddPermission', 'AzureCreateContainer', 'AzureDeleteBlob', 'AzureDeleteContainer', 'AzureGetBlob', 'AzureGetBlobProperties', 'AzureGetContainerProperties', 'AzureListBlobs', 'AzureListContainers', 'AzurePutBlob', 'Capabilities', 'CreateBucket', 'CreateDeployment', 'CreateFunction', 'CreateResource', 'CreateRestApi', 'CreateStage', 'DeleteBucket', 'DeleteFunction', 'DeleteIdentityPolicy', 'DeleteObject', 'DeleteResource', 'DeleteRestApi', 'DeleteStage', 'GCPCreateBucket', 'GCPDeleteBucket', 'GCPDeleteObject', 'GCPDownloadObject', 'GCPGetBucket', 'GCPGetObject', 'GCPListBuckets', 'GCPListObjects', 'GCPUploadObject', 'GetDeployment', 'GetFunctionConfiguration', 'GetIdentityPolicy', 'GetMethod', 'GetObject', 'GetPolicy', 'GetResource', 'GetResources', 'GetRestApi', 'GetRestApis', 'GetStage', 'HeadBucket', 'HeadObject', 'IAMRoleQueryOperation', 'Invoke', 'InvokeLocalRESTProxyGet', 'InvokeLocalRESTProxyPost', 'ListBuckets', 'ListFunctions', 'ListObjectsV2OrGetBucketLocation', 'ListPrincipals', 'PutIdentityPolicy', 'PutIntegration', 'PutMethod', 'PutObject', 'RemovePermission', 'UpdateFunctionCode', 'awsRegionalOperation')
 MAIN_PATHS=('/', '/2015-03-31/functions', '/2015-03-31/functions/{FunctionName}', '/2015-03-31/functions/{FunctionName}/code', '/2015-03-31/functions/{FunctionName}/configuration', '/2015-03-31/functions/{FunctionName}/invocations', '/2015-03-31/functions/{FunctionName}/policy', '/2015-03-31/functions/{FunctionName}/policy/{StatementId}', '/_simulator/providers/aws/', '/_simulator/providers/aws/_execute-api/{Region}/{RestApiId}/{StageName}/{ProxyPath}', '/_simulator/providers/azure/{StorageAccount}', '/_simulator/providers/azure/{StorageAccount}/{ContainerName}', '/_simulator/providers/azure/{StorageAccount}/{ContainerName}/{BlobName}', '/_simulator/providers/gcp/download/storage/v1/b/{BucketName}/o/{ObjectName}', '/_simulator/providers/gcp/storage/v1/b', '/_simulator/providers/gcp/storage/v1/b/{BucketName}', '/_simulator/providers/gcp/storage/v1/b/{BucketName}/o', '/_simulator/providers/gcp/storage/v1/b/{BucketName}/o/{ObjectName}', '/_simulator/providers/gcp/upload/storage/v1/b/{BucketName}/o', '/_simulator/v1/capabilities', '/_simulator/v1/iam/principals', '/_simulator/v1/iam/principals/{principal}/policy', '/restapis', '/restapis/{RestApiId}', '/restapis/{RestApiId}/deployments', '/restapis/{RestApiId}/deployments/{DeploymentId}', '/restapis/{RestApiId}/resources', '/restapis/{RestApiId}/resources/{ResourceId}', '/restapis/{RestApiId}/resources/{ResourceId}/methods/{HttpMethod}', '/restapis/{RestApiId}/resources/{ResourceId}/methods/{HttpMethod}/integration', '/restapis/{RestApiId}/stages', '/restapis/{RestApiId}/stages/{StageName}', '/{bucket}', '/{bucket}/{key}')
 REPORTS=Path(os.environ.get('SIMULATOR_REPORTS','reports')).resolve()
+
+
+def validate_reference_contract(spec):
+    inherited = project_before_route53(spec)
+    ids=[value['operationId'] for path in inherited['paths'].values() for method,value in path.items() if method in ('get','post','put','head','delete')]
+    assert len(ids)==67 and len(set(ids))==67 and set(ids)==set(MAIN_OPERATION_IDS)|NEW_IDS|{'S3MultipartUpload'}
+    assert spec['paths']['/{bucket}/{key}']['post']['operationId']=='S3MultipartUpload'
+    assert set(inherited['paths'])==set(MAIN_PATHS)|{COLLECTION,ITEM} and len(inherited['paths'])==36
 
 
 def run():
@@ -53,10 +62,7 @@ def run():
    spec=wire('/_simulator/docs/openapi.json');caps=wire('/_simulator/v1/capabilities')
    source=json.loads(Path('internal/server/apidocs/openapi.json').read_text());assert spec==source,'Embedded served spec differs from source'
    validate_json10_examples(spec)
-   ids=[value['operationId'] for path in spec['paths'].values() for method,value in path.items() if method in ('get','post','put','head','delete')]
-   assert len(ids)==67 and len(set(ids))==67 and set(ids)==set(MAIN_OPERATION_IDS)|NEW_IDS|{'S3MultipartUpload'}
-   assert spec['paths']['/{bucket}/{key}']['post']['operationId']=='S3MultipartUpload'
-   assert set(spec['paths'])==set(MAIN_PATHS)|{COLLECTION,ITEM} and len(spec['paths'])==36
+   validate_reference_contract(spec)
    root=spec['paths']['/']['post'];assert root['operationId']=='awsRegionalOperation'
    assert {'application/x-amz-json-1.0','application/x-amz-json-1.1','application/x-www-form-urlencoded'}<=set(root['requestBody']['content'])
    # JSON 1.0 is shared with DynamoDB. Keep the complete SQS contract while

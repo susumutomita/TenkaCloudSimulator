@@ -75,6 +75,7 @@ def submit(page):
 class Conformance(unittest.TestCase):
  def test_route53_reference_contract_detectors(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_openapi.py"))],check=True,timeout=60)
+  subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_reference_adapters.py"))],check=True,timeout=60)
 
  def test_route53_native_public_zone_sdk(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("route53.py"))],check=True,timeout=180)

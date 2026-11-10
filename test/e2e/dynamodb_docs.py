@@ -1,6 +1,7 @@
 """Mandatory seven SERVED DynamoDB templates against the real binary and SDK."""
 import json
 from pathlib import Path
+from route53_openapi import project_before_route53
 import tempfile
 import urllib.error
 import urllib.parse
@@ -12,6 +13,13 @@ from openapi_json10 import validate_json10_examples,validate_json10_response
 from test_sakura_openapi import OLD_IDS,NEW_IDS,COLLECTION,ITEM
 
 OPERATIONS=('CreateTable','ListTables','DescribeTable','PutItem','GetItem','DeleteItem','DeleteTable')
+
+
+def validate_reference_contract(spec):
+    inherited = project_before_route53(spec)
+    ids=[v['operationId'] for p in inherited['paths'].values() for m,v in p.items() if m in ('get','post','put','head','delete')]
+    assert len(ids)==len(set(ids))==67 and set(ids)==OLD_IDS|NEW_IDS|{'S3MultipartUpload'} and len(inherited['paths'])==36 and {COLLECTION,ITEM} <= set(inherited['paths']),'Main API paths/IDs changed'
+    assert spec['paths']['/{bucket}/{key}']['post']['operationId']=='S3MultipartUpload','Multipart addition moved from the native S3 object route'
 
 
 def run():
@@ -40,9 +48,7 @@ def run():
             spec=request('/_simulator/docs/openapi.json')
             assert spec==json.loads(Path('internal/server/apidocs/openapi.json').read_text()),'Embedded/source reference mismatch'
             schema_examples=validate_json10_examples(spec)
-            ids=[v['operationId'] for p in spec['paths'].values() for m,v in p.items() if m in ('get','post','put','head','delete')]
-            assert len(ids)==len(set(ids))==67 and set(ids)==OLD_IDS|NEW_IDS|{'S3MultipartUpload'} and len(spec['paths'])==36 and {COLLECTION,ITEM} <= set(spec['paths']),'Main API paths/IDs changed'
-            assert spec['paths']['/{bucket}/{key}']['post']['operationId']=='S3MultipartUpload','Multipart addition moved from the native S3 object route'
+            validate_reference_contract(spec)
             caps=request('/_simulator/v1/capabilities');assert set(caps['services']['dynamodb']['operations'])==set(OPERATIONS)
             examples=spec['paths']['/']['post']['requestBody']['content']['application/x-amz-json-1.0']['examples']
             sdk=client(team);put=examples['DynamoDBPutItem']['value'];name=put['TableName'];key=examples['DynamoDBGetItem']['value']['Key']

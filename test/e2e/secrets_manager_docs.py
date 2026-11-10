@@ -8,6 +8,7 @@ import json
 import urllib.error
 import urllib.request
 
+from route53_openapi import project_before_route53
 from check import running
 from secrets_manager import client
 from test_sakura_openapi import NEW_IDS, COLLECTION, ITEM
@@ -117,6 +118,16 @@ EXPECTED_PATHS = frozenset({
 })
 
 
+def validate_reference_contract(spec):
+    inherited = project_before_route53(spec)
+    ids = [entry["operationId"] for path in inherited["paths"].values()
+           for entry in path.values() if isinstance(entry, dict) and "operationId" in entry]
+    assert len(ids) == len(set(ids)) == 67, "Document duplicated or omitted a native operation"
+    assert set(ids) == EXPECTED_OPERATION_IDS | NEW_IDS | {'S3MultipartUpload'}, "Served operation inventory differs from immutable main contract"
+    assert spec['paths']['/{bucket}/{key}']['post']['operationId'] == 'S3MultipartUpload', "Multipart addition moved from the native S3 object route"
+    assert len(inherited["paths"]) == 36 and set(inherited["paths"]) == EXPECTED_PATHS | {COLLECTION, ITEM}, "Served path inventory differs from immutable main contract"
+
+
 def run():
     with running(authenticated=True) as (endpoint, token):
         req = urllib.request.Request(endpoint+"/_simulator/docs/openapi.json",
@@ -125,12 +136,7 @@ def run():
             spec = json.load(response)
         root = spec["paths"]["/"]["post"]
         assert root["operationId"] == "awsRegionalOperation"
-        ids = [entry["operationId"] for path in spec["paths"].values()
-               for entry in path.values() if isinstance(entry, dict) and "operationId" in entry]
-        assert len(ids) == len(set(ids)) == 67, "Document duplicated or omitted a native operation"
-        assert set(ids) == EXPECTED_OPERATION_IDS | NEW_IDS | {'S3MultipartUpload'}, "Served operation inventory differs from immutable main contract"
-        assert spec['paths']['/{bucket}/{key}']['post']['operationId'] == 'S3MultipartUpload', "Multipart addition moved from the native S3 object route"
-        assert len(spec["paths"]) == 36 and set(spec["paths"]) == EXPECTED_PATHS | {COLLECTION, ITEM}, "Served path inventory differs from immutable main contract"
+        validate_reference_contract(spec)
         assert not any("secretsmanager" in path.lower() for path in spec["paths"]), "Secrets native API uses the actual shared root"
         names = ["CreateSecret", "DescribeSecret", "ListSecrets", "PutSecretValue",
                  "GetSecretValue", "UpdateSecretVersionStage", "DeleteSecret"]
