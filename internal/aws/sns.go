@@ -28,9 +28,8 @@ var (
 	snsFIFOTopicName  = regexp.MustCompile(`^[A-Za-z0-9_-]{1,251}\.fifo$`)
 	snsAttributeField = regexp.MustCompile(`^Attributes\.entry\.([1-9][0-9]*)\.(key|value)$`)
 	// Protocols whose subscriptions are stored as locally confirmed.
-	// "sqs" is handled separately: it is only accepted when a
-	// SNSQueueFanout adapter is wired (see below), and is otherwise
-	// rejected explicitly instead of silently simulating queue delivery.
+	// "sqs" is handled separately by the same-database native transaction
+	// or an explicitly supplied legacy test/composition callback.
 	snsProtocols = map[string]bool{
 		"http": true, "https": true, "email": true, "email-json": true,
 		"sms": true, "lambda": true, "application": true, "firehose": true,
@@ -44,12 +43,9 @@ func isSNS(r *http.Request) bool {
 	return strings.Contains(r.Header.Get("Authorization"), "/sns/aws4_request")
 }
 
-// SNSQueueFanout is the contract SNS needs from the SQS workstream to
-// deliver published messages into queues. The SQS branch owns SQSStore;
-// an adapter in the composition layer (see docs/sns.md) implements this
-// interface with SQSStore.GetQueue/Send. A nil Gateway.QueueFanout means
-// no adapter is wired in this build, and sqs subscriptions are then
-// rejected explicitly instead of being silently accepted.
+// SNSQueueFanout is the historical, nontransactional compatibility callback.
+// The composed server uses the same-database native transaction instead. This
+// callback cannot roll back earlier deliveries and must not be wired there.
 type SNSQueueFanout interface {
 	QueueExists(region, queueName string) (bool, error)
 	DeliverToQueue(region, queueName, body string) error
@@ -348,8 +344,23 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 	if principal == "" {
 		principal = core.Administrator
 	}
+	var nativeDecision func(string, string) string
+	if g.nativeSNSQueues() {
+		var err error
+		nativeDecision, err = g.snsAuthorizationSnapshot(r.Context(), principal)
+		if err != nil {
+			snsError(w, err)
+			return
+		}
+	}
 	authorize := func(resource string) bool {
-		decision, err := g.Identities.DecisionContext(r.Context(), principal, "sns:"+action, resource)
+		var decision string
+		var err error
+		if nativeDecision != nil {
+			decision = nativeDecision("sns:"+action, resource)
+		} else {
+			decision, err = g.Identities.DecisionContext(r.Context(), principal, "sns:"+action, resource)
+		}
 		if err != nil {
 			snsError(w, err)
 			return false
@@ -499,7 +510,7 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 		protocol := strings.ToLower(form.Get("Protocol"))
 		endpoint := form.Get("Endpoint")
 		if protocol == "sqs" {
-			if g.QueueFanout == nil {
+			if !g.nativeSNSQueues() && g.QueueFanout == nil {
 				snsError(w, ssmFailure{"InvalidParameterException", "SNS-to-SQS fanout is not integrated in this build: no SQS fanout adapter is wired, so the subscription was not created."})
 				return
 			}
@@ -508,14 +519,16 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 				snsError(w, ssmFailure{"InvalidParameterException", "SQS endpoints must be a queue ARN in this region: arn:aws:sqs:" + region + ":000000000000:<queue>."})
 				return
 			}
-			exists, err := g.QueueFanout.QueueExists(region, queueName)
-			if err != nil {
-				snsError(w, err)
-				return
-			}
-			if !exists {
-				snsError(w, ssmFailure{"NotFoundException", "Queue does not exist: " + queueName})
-				return
+			if !g.nativeSNSQueues() {
+				exists, err := g.QueueFanout.QueueExists(region, queueName)
+				if err != nil {
+					snsError(w, err)
+					return
+				}
+				if !exists {
+					snsError(w, ssmFailure{"NotFoundException", "Queue does not exist: " + queueName})
+					return
+				}
 			}
 		} else if !snsProtocols[protocol] {
 			snsError(w, ssmFailure{"InvalidParameterException", "Unsupported subscription protocol: " + protocol})
@@ -532,9 +545,20 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 		if !authorize(arn) {
 			return
 		}
-		sub, err := g.SNS.Subscribe(topic, protocol, endpoint)
+		var sub SNSSubscription
+		var err error
+		if protocol == "sqs" && g.nativeSNSQueues() {
+			queueAllowed := snsQueueAuthorization(nativeDecision)
+			if authErr := queueAllowed(endpoint); authErr != nil {
+				snsFanoutError(w, authErr)
+				return
+			}
+			sub, err = g.SNS.subscribeQueue(r.Context(), g.Queues, topic, endpoint)
+		} else {
+			sub, err = g.SNS.Subscribe(topic, protocol, endpoint)
+		}
 		if err != nil {
-			snsError(w, err)
+			snsFanoutError(w, err)
 			return
 		}
 		snsResponse(w, action, struct {
@@ -616,6 +640,16 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 			snsError(w, ssmFailure{"InvalidParameterException", "FIFO publication, ordering and deduplication are unsupported; no message was recorded."})
 			return
 		}
+		if g.nativeSNSQueues() {
+			queueAllowed := snsQueueAuthorization(nativeDecision)
+			id, err := g.SNS.publishQueues(r.Context(), g.Queues, topic, message, subject, queueAllowed)
+			if err != nil {
+				snsFanoutError(w, err)
+				return
+			}
+			snsResponse(w, action, struct{ MessageId string }{id})
+			return
+		}
 		subs, err := g.SNS.ListSubscriptionsByTopic(r.Context(), arn)
 		if err != nil {
 			snsError(w, err)
@@ -636,7 +670,7 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 				if err := g.QueueFanout.DeliverToQueue(topic.Region, queueName, envelope); err != nil {
 					// SQLite publish records are not committed on failure. Earlier
 					// callback effects cannot be rolled back by this interface;
-					// the standalone service intentionally wires no adapter.
+					// the composed server uses the native transaction instead.
 					snsError(w, err)
 					return
 				}

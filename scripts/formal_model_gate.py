@@ -1159,6 +1159,11 @@ BASE_INVARIANTS['SSMDurableCommands'] = {'AllTargets', 'BackendDeduplication', '
 REQUIRED_MUTANTS['SSMDurableCommands'] = {'AnyTargetSuccess', 'BackendDuplicateEffect', 'BackendIgnoresLease', 'CrashLosesIntent', 'DispatchBeforeCommit', 'LivePagination', 'MutableAuthority', 'ObservationAuthority', 'ObservationLease', 'ObservationRequest', 'ObservationStarted', 'ObservationToken', 'PageExpiry', 'PageFilter', 'PageScope', 'PageSize', 'RepeatDispatch', 'RestartDispatch', 'StaleCAS', 'SuccessCleanup', 'SuccessExit', 'SuccessTruncated', 'TerminalRewrite'}
 REQUIRED_SOURCE_SCOPES['SSMDurableCommands'] = {'internal/aws/ssm_commands.go', 'internal/aws/ssm_commands_list.go', 'internal/workload/guestcommand/durable.go'}
 
+BASE_MODELS.add('SNSQueueFanout')
+BASE_INVARIANTS['SNSQueueFanout'] = {'Authorized', 'TypeOK', 'ParentPresent', 'BytesBounded', 'DurableAck', 'AuditExact', 'RecipientsExact', 'DestinationsExist', 'CountBounded', 'RefusalUnchanged'}
+REQUIRED_MUTANTS['SNSQueueFanout'] = {'SkipQueueParent', 'SkipPayloadBytes', 'DropAuditRow', 'SkipTopicParent', 'SkipQueueAuthorization', 'DropQueueDelivery', 'SkipMessageCount', 'PartialDeliveryOnFailure', 'IgnoreCommitFailure'}
+REQUIRED_SOURCE_SCOPES['SNSQueueFanout'] = {'internal/server/server.go', 'internal/aws/sqs_store.go', 'internal/server/sns_test.go', 'internal/aws/sns_store.go', 'internal/aws/sns_sqs_fanout_test.go', 'internal/aws/sns.go', 'internal/aws/sns_sqs_fanout.go'}
+
 class GateError(ValueError):
     pass
 

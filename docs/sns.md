@@ -15,7 +15,7 @@ simulator runs with `--state`.
 | ListTopics | Per region, scoped `NextToken` pagination bound to operation, region and topic (page size 100). |
 | GetTopicAttributes | TopicArn, Owner, DisplayName, subscription counts, FifoTopic. |
 | DeleteTopic | Removes the topic, subscriptions, messages and all delivery records in one transaction, including history from removed subscriptions. A valid, authorized deletion of an absent topic succeeds without changing state; retries are idempotent. |
-| Subscribe | Protocols: http, https, email, email-json, sms, lambda, application, firehose. Duplicate (topic, protocol, endpoint) returns the existing subscription. |
+| Subscribe | Protocols: sqs, http, https, email, email-json, sms, lambda, application, firehose. SQS requires a same-region Standard queue and caller SendMessage permission. Duplicate (topic, protocol, endpoint) returns the existing subscription. |
 | Unsubscribe | Unknown subscription ARN is `NotFound`. |
 | ListSubscriptions / ListSubscriptionsByTopic | `NextToken` pagination (page size 100). |
 | Publish | Message up to 256 KiB UTF-8, optional Subject (fewer than 100 Unicode characters; no line breaks or controls). Standard topics only; FIFO publication is explicitly refused. Returns a MessageId. |
@@ -44,25 +44,41 @@ unimplemented operations (HTTP 400), `NotFound` (404),
 ## Deliberate deviations — read before relying on behavior
 
 - **No outbound delivery.** Publish records the message and one local
-  delivery row per current subscription of the topic. Nothing is sent to
+  delivery row per current subscription of the topic. SQS subscriptions additionally
+  enqueue a real local SQS message in the same SQLite transaction. Nothing is sent to
   email, HTTP, SMS, Lambda or any other endpoint; the simulator never makes
   outbound cloud calls. Subscription "confirmation" is local and immediate:
   there is no pending-confirmation flow and `SubscriptionsPending` is 0.
-- **SNS-to-SQS fanout: contract defined, adapter wiring pending.** SNS
-  defines the `SNSQueueFanout` interface (`QueueExists` /
-  `DeliverToQueue`) in `internal/aws/sns.go`. When a fanout adapter is
-  wired into the Gateway, `Subscribe` with protocol `sqs` validates the
-  queue ARN (same region, simulator account) and queue existence, and
-  `Publish` delivers the standard SNS notification envelope JSON
-  (Type/MessageId/TopicArn/Subject/Message/Timestamp) into each subscribed
-  queue before recording the publish; a failed queue delivery fails the
-  Publish and records no SNS message. This callback interface cannot roll back
-  an earlier queue delivery when a later callback or SNS commit fails, and is
-  not an atomic fanout integration. Keep it disabled in the standalone service. This behavior is covered by Go tests
-  against a stub fanout. The standalone SNS branch wires no adapter
-  (`Gateway.QueueFanout == nil`), so sqs subscriptions there are rejected
-  with `InvalidParameter` saying fanout is not integrated in
-  this build.
+- **Atomic native SNS-to-SQS fanout.** The composed server supports Standard
+  topics and Standard queues in the same simulator process, region and fixed
+  account. Subscribe validates the live queue inside its transaction. Publish
+  takes one current subscription snapshot and commits every destination message
+  together with the SNS message/delivery rows. Missing queues, quota errors,
+  cancelled requests and persistence faults fail the whole publication; no
+  preceding enqueue or scoped expiry cleanup remains after rollback. This
+  synchronous all-or-nothing contract is a local deviation from AWS delivery
+  retries, not a claim of distributed AWS transaction semantics.
+- **Stricter local authorization.** In addition to the documented SNS action,
+  Subscribe and Publish require the caller's `sqs:SendMessage` permission on each
+  queue ARN. One immutable identity-policy snapshot covers the complete request;
+  an explicit Deny rejects the entire fanout. Real AWS uses queue resource policy
+  permissions for the SNS service principal. Those policies and service-trust
+  conditions are not implemented here, and the simulator does not silently grant
+  them. Ordinary SQS ReceiveMessage/DeleteMessage authorization is unchanged.
+- Queue messages contain Type, MessageId, TopicArn, Message, Timestamp and optional
+  Subject JSON fields. MessageId matches the SNS result; SQS assigns its own
+  independent message ID. Signatures, certificate/unsubscribe URLs, raw delivery,
+  attributes, filters, FIFO and dead-letter/retry workflows remain unsupported.
+  The escaped envelope must fit the existing SQS body limit. A message valid for
+  SNS alone can therefore be rejected when its envelope is too large for SQS.
+- Queue delay and retention follow the native SQS store. Deleting a queue leaves
+  its SNS subscription in place; Publish fails until the queue is recreated or
+  the subscription is removed. A recreated same-name queue has the same ARN and
+  can receive later publications. Unsubscribe and DeleteTopic never erase messages
+  already delivered to SQS. Other regions, processes and SQLite databases receive
+  no writes. The historical callback interface remains a compatibility/test seam;
+  the composed server selects the same-database native transaction instead and
+  never uses its nontransactional delivery callback.
 
 - SNS-to-Lambda invocation is likewise not performed; `lambda` protocol
   subscriptions are stored (endpoint must be a Lambda function ARN) and
@@ -105,9 +121,8 @@ FIFO topic metadata can still be created/read/deleted, but Publish refuses FIFO
 topics because ordering/deduplication/group semantics are not implemented.
 
 The service has no SNS console, CloudFormation adapter or real cloud delivery.
-SDK/HTTP operations are the supported workflow. The disabled queue callback
-requires a separate transaction-aware contract and native SQS verification
-before it can be advertised as supported fanout.
+SDK/HTTP operations are the supported workflow. The native queue transaction is independently covered by real SDK and SQLite fault
+regressions; the legacy callback is not an atomic integration contract.
 
 Real AWS credentials, session tokens and presigned requests are rejected,
 consistent with the other services.
@@ -132,3 +147,23 @@ classes (`InvalidParameterException`, `NotFoundException`,
 local simulator quota error, not a modeled SNS error. DeleteTopic still validates
 ARN/region and IAM authorization for absent topics; storage read/commit errors
 remain failures. Unsubscribe retains its existing missing-subscription error.
+
+## Native fanout sources and acceptance
+
+The bounded wire shape follows [Subscribe](https://docs.aws.amazon.com/sns/latest/api/API_Subscribe.html),
+[Publish](https://docs.aws.amazon.com/sns/latest/api/API_Publish.html) and the
+[notification envelope](https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html).
+The [AWS queue subscription guide](https://docs.aws.amazon.com/sns/latest/dg/subscribe-sqs-queue-to-sns-topic.html)
+describes service-principal resource policies, which are deliberately excluded
+from this stricter local authorization model. These sources were checked on
+2026-11-10; no real AWS operation or differential cloud test was performed.
+
+Local checkpoint `7a1e022` passed all targeted SNS/SQS normal and race tests,
+composed-server SNS tests, AWS/server vet and build. Its real boto3 driver passed
+53 calls/sends/responses, envelope correlation, complete refusal, two-process
+isolation, restart and cleanup; the inherited SNS SDK checks also passed. The
+bounded fanout baseline and nine controls passed with immutable before/after
+inputs. Independent source review identified and verified the fix for a mixed
+policy-snapshot defect. These focused results do not replace full quality,
+coverage, all E2E or complete formal acceptance, which remain pending. No SNS
+console or CloudFormation support is added by this increment.

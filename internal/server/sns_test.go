@@ -32,14 +32,22 @@ func TestSNSWireLifecycleThroughServer(t *testing.T) {
 	if !strings.Contains(body, "<MessageId>") {
 		t.Fatal(body)
 	}
-	// SQS fanout must be an explicit error, never a silent success.
-	body = snsForm(t, s, url.Values{"Action": {"Subscribe"}, "TopicArn": {topicArn}, "Protocol": {"sqs"}, "Endpoint": {"arn:aws:sqs:us-east-1:000000000000:q"}}, 400, nil)
-	if !strings.Contains(body, "not integrated") {
+	// A missing destination fails; an existing local queue receives real data.
+	body = snsForm(t, s, url.Values{"Action": {"Subscribe"}, "TopicArn": {topicArn}, "Protocol": {"sqs"}, "Endpoint": {"arn:aws:sqs:us-east-1:000000000000:q"}}, 404, nil)
+	if !strings.Contains(body, "NotFound") {
 		t.Fatal(body)
 	}
+	queue := sqsCall(t, s, "CreateQueue", map[string]any{"QueueName": "q"}, 200, nil)["QueueUrl"]
+	snsForm(t, s, url.Values{"Action": {"Subscribe"}, "TopicArn": {topicArn}, "Protocol": {"sqs"}, "Endpoint": {"arn:aws:sqs:us-east-1:000000000000:q"}}, 200, nil)
+	snsForm(t, s, url.Values{"Action": {"Publish"}, "TopicArn": {topicArn}, "Message": {"actual queue delivery"}}, 200, nil)
+	received := sqsCall(t, s, "ReceiveMessage", map[string]any{"QueueUrl": queue}, 200, nil)
+	messages, _ := received["Messages"].([]any)
+	if len(messages) != 1 || !strings.Contains(messages[0].(map[string]any)["Body"].(string), "actual queue delivery") {
+		t.Fatal(received)
+	}
 	caps := string(status(t, s, "GET", "/_simulator/v1/capabilities", "", 200, nil))
-	if !strings.Contains(caps, `"sns"`) || !strings.Contains(caps, `"sqsFanout":false`) {
-		t.Fatal("capabilities do not declare the SNS subset and its SQS limit")
+	if !strings.Contains(caps, `"sns"`) || !strings.Contains(caps, `"sqsFanout":true`) {
+		t.Fatal("capabilities do not declare the SNS subset and its native SQS fanout")
 	}
 	// IAM: a principal allowed only ListTopics cannot publish.
 	policy := `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["sns:ListTopics"],"Resource":"*"}]}`

@@ -240,7 +240,23 @@ func (s *SQSStore) Send(region string, q SQSQueue, body string, attrs map[string
 		return SQSMessage{}, err
 	}
 	defer tx.Rollback()
-	q, err = sqsQueueTx(tx, region, q.Name)
+	m, err := sqsSendTx(tx, region, q.Name, body, attrs, delaySeconds)
+	if err != nil {
+		return SQSMessage{}, err
+	}
+	return m, tx.Commit()
+}
+
+// sqsSendTx permits native SNS fanout to preserve the normal queue admission,
+// expiry and quota rules in the same transaction as the SNS audit records.
+func sqsSendTx(tx *sql.Tx, region, name, body string, attrs map[string]SQSMessageAttribute, delaySeconds int) (SQSMessage, error) {
+	if err := validateSQSBody(body); err != nil {
+		return SQSMessage{}, err
+	}
+	if delaySeconds < -1 || delaySeconds > 900 {
+		return SQSMessage{}, sqsFailure{"InvalidParameterValue", "DelaySeconds must be 0–900 or the internal default sentinel."}
+	}
+	q, err := sqsQueueTx(tx, region, name)
 	if err != nil {
 		return SQSMessage{}, err
 	}
@@ -279,7 +295,7 @@ func (s *SQSStore) Send(region string, q SQSQueue, body string, attrs map[string
 	} else if affected != 1 {
 		return SQSMessage{}, errors.New("SQS send did not persist exactly one message")
 	}
-	return m, tx.Commit()
+	return m, nil
 }
 
 // Receive atomically claims up to maxN currently visible messages: each gets a
