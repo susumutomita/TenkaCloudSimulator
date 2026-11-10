@@ -11,6 +11,21 @@ Scalar.createApiReference("#reference", {
   agent: { disabled: true },
   proxyUrl: "",
   persistAuth: false,
+  // AWS JSON 1.0/1.1 are JSON despite lacking the standard +json suffix.
+  // Use Scalar's display decoder, not a fetch/header rewrite. Keep the raw
+  // text (including whitespace and large numbers) and its original MIME type.
+  plugins: [() => ({
+    name: "simulator-aws-json",
+    extensions: [],
+    apiClientPlugins: [{
+      name: "simulator-aws-json",
+      responseBody: [{
+        mimeTypes: ["application/x-amz-json-1.0", "application/x-amz-json-1.1"],
+        language: "json",
+        decode: (bytes) => new TextDecoder("utf-8", { ignoreBOM: true }).decode(bytes),
+      }],
+    }],
+  })],
   customFetch: SimulatorS3ResponseGuide.wrapFetch((input, init) => {
     const url = new URL(
       typeof input === "string"

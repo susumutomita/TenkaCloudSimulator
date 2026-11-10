@@ -1,5 +1,24 @@
 # Development roster
 
+## API reference AWS JSON display, 2026-11-10
+
+Implemented locally by the API reference owner on `fix/api-docs-aws-json-20261110`,
+worktree `simulator-api-docs-json-20261110`, based on main `cc30d5e`.
+Owns the first-party Scalar configuration, dedicated decoder/browser tests,
+minimal existing test-gate wiring and API reference documentation. Battle and
+Bedrock work, native protocol handlers, dependency locks and bundled Scalar
+assets are excluded. The supported Scalar response-body plugin adds JSON1.0/1.1
+text display without rewriting native headers or parsing/reserializing values.
+Acceptance covers both media types, MIME parameters/case, exact text/large
+numbers, hostile markup, native SSM GetParameter using a local cookie, repeated
+requests and unchanged binary downloads. Node configuration/decoder tests pass
+(5 new, 4 existing); asset/notice checks and 23 provenance regressions pass.
+The dedicated live-response helper is syntax-checked and registered in the
+existing E2E suite, but not executed here. Full quality/E2E gates are pending;
+local Chromium remains blocked by the reported socket restriction and is not
+retried or replaced through another channel. No model/state contract changes;
+normal full CI, independent review and exact-HEAD checks are required before merge.
+
 ## Hello World Battle recovery and IAM integration, 2026-11-09
 
 Status: in progress. The continuation owner is integrating the existing

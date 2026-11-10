@@ -35,6 +35,18 @@ XML/bytes from static examples. Inspect actual returned IDs, QueueUrls,
 ReceiptHandles and ciphertext before reusing them; placeholders are not real
 resources.
 
+## AWS JSON response display
+
+The live response body displays `application/x-amz-json-1.0` and
+`application/x-amz-json-1.1` as JSON text, including SSM GetParameter results.
+The original Content-Type, status and API bytes remain unchanged. This uses the
+embedded Scalar response-body extension, without replacing the native response
+or treating every unknown MIME type as JSON. For valid UTF-8 AWS JSON, text is
+not parsed and serialized again, so large numeric literals and whitespace are
+preserved in the display and download. HTML-like values
+are shown as text in Scalar's read-only code editor. Binary response downloads
+retain their existing behavior.
+
 ## Other clouds and unavailable services
 
 GCP and Azure retain their separately implemented provider paths and synthetic

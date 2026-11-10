@@ -74,7 +74,7 @@ jobs:
       - name: Check immutable release packaging and refusal regressions
         run: python3 test/ci/release_pipeline.py
       - name: Check native token input regression cases
-        run: node --test test/console/login-native-input.test.mjs
+        run: node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
       - name: Run Go quality gates and compile all supported targets
         run: make before-commit cross-check
       - name: Generate coverage views and enforce both 90% floors
