@@ -8,6 +8,7 @@ synthetic; no real cloud service, browser credential or user data is used.
 """
 import json
 import os
+import re
 import shutil
 import urllib.parse
 import urllib.request
@@ -98,7 +99,10 @@ def run():
                 page.get_by_role('button', name=f'Test Request ({method.lower()} {path})', exact=True).click()
                 with page.expect_response(lambda response: response.request.method == method
                         and urllib.parse.urlsplit(response.url).path == path) as received:
-                    page.get_by_role('button').filter(has_text='Send Request').last.click()
+                    # The initial empty-response CTA disappears after a request.
+                    # The address-bar action keeps this accessible name on repeats.
+                    page.get_by_role('button', name=re.compile(
+                        rf'^Send {method.lower()} request to ')).click()
                 return received.value
             def response_body():
                 # Scalar inherits this class onto the nested disclosure panel.
@@ -118,7 +122,7 @@ def run():
                 return body
             # Regression for the reported operation/region with only a browser
             # session cookie. Repeat after a native write to reject static output.
-            for current in [value, 'second-live-value']:
+            for read_number, current in enumerate([value, 'second-live-value'], start=1):
                 if current != value:
                     native('POST', '/', json.dumps({'Name': name, 'Type': 'String', 'Value': current, 'Overwrite': True}).encode(), ssm_headers)
                 response = send('POST', '/')
@@ -127,6 +131,7 @@ def run():
                 assert response.json()['Parameter']['Value'] == current
                 assert not response.request.headers.get('x-simulator-token')
                 check_text(current)
+                print(f'Scalar native GetParameter JSON display passed: read {read_number}', flush=True)
                 page.get_by_role('button', name='Close Client', exact=True).click()
             for key, content_type, raw, text in cases:
                 response = send('GET', '/docs-json-bucket/' + key)
@@ -140,6 +145,7 @@ def run():
                 with page.expect_download() as downloaded:
                     body.get_by_role('link', name='Download Response Body', exact=True).click()
                 assert Path(downloaded.value.path()).read_bytes() == raw
+                print(f'Scalar native response display and exact download passed: {key}', flush=True)
                 page.get_by_role('button', name='Close Client', exact=True).click()
             assert not errors and not outside, (errors, outside)
             context.close()
