@@ -111,15 +111,36 @@ class SharedJSON10Schemas(unittest.TestCase):
             'SSMGetParameter', 'KMSCreateKey', 'KMSDescribeKey', 'KMSListKeys',
             'KMSEnableKey', 'KMSDisableKey', 'KMSGetKeyPolicy', 'KMSEncrypt', 'KMSDecrypt',
             'LogsCreateLogGroup', 'LogsDescribeLogGroups', 'LogsDeleteLogGroup',
-            'LogsCreateLogStream', 'LogsDescribeLogStreams', 'LogsPutLogEvents', 'LogsGetLogEvents',
+            'LogsCreateLogStream', 'LogsDeleteLogStream', 'LogsDescribeLogStreams', 'LogsPutLogEvents', 'LogsGetLogEvents',
             'CreateSecret', 'DescribeSecret', 'ListSecrets', 'PutSecretValue',
             'GetSecretValue', 'UpdateSecretVersionStage', 'DeleteSecret',
             'KMSCreateAlias', 'KMSListAliases', 'KMSUpdateAlias', 'KMSDeleteAlias',
             'ListSecretVersionIds',
         })
-        self.assertEqual(len(media['examples']), 28)
+        self.assertEqual(len(media['examples']), 29)
         for example in media['examples'].values():
             shared.validate(example['value'])
+
+    def test_delete_log_stream_template_has_exact_target_and_strict_request(self):
+        media = self.spec['paths']['/']['post']['requestBody']['content']['application/x-amz-json-1.1']
+        example = media['examples']['LogsDeleteLogStream']
+        ref = {'$ref': '#/components/schemas/LogsDeleteLogStreamRequest'}
+        self.assertEqual(example['x-request-schema'], ref)
+        self.assertIn('X-Amz-Target: Logs_20140328.DeleteLogStream', example['summary'])
+        self.assertEqual(media['schema']['anyOf'].count(ref), 1)
+        strict = validator(self.spec, ref)
+        strict.validate(example['value'])
+        for required in ('logGroupName', 'logStreamName'):
+            missing = copy.deepcopy(example['value'])
+            del missing[required]
+            for invalid in (missing, {**example['value'], required: None},
+                            {**example['value'], required: ''},
+                            {**example['value'], required: True},
+                            {**example['value'], required: 'x' * 513}):
+                with self.subTest(required=required, invalid=invalid), self.assertRaises(ValidationError):
+                    strict.validate(invalid)
+        with self.assertRaises(ValidationError):
+            strict.validate({**example['value'], 'UnsupportedSetting': True})
 
 
     def test_alias_templates_match_each_literal_target_schema(self):

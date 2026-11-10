@@ -73,13 +73,13 @@ def verify_served_reference(endpoint, token, sdk):
     assert set(spec["paths"]) == MAIN_PATHS | {COLLECTION, ITEM} and len(spec["paths"]) == 36, "Existing main path inventory changed"
     assert not any("logs" in path.lower() for path in spec["paths"]), "Do not invent a Logs URL"
     examples = spec["paths"]["/"]["post"]["requestBody"]["content"]["application/x-amz-json-1.1"]["examples"]
-    required = {"CreateLogGroup", "DescribeLogGroups", "DeleteLogGroup", "CreateLogStream", "DescribeLogStreams", "PutLogEvents", "GetLogEvents"}
+    required = {"CreateLogGroup", "DescribeLogGroups", "DeleteLogGroup", "CreateLogStream", "DeleteLogStream", "DescribeLogStreams", "PutLogEvents", "GetLogEvents"}
     capabilities = read("/_simulator/v1/capabilities")["services"]["logs"]
     assert set(capabilities["operations"]) == required
     assert all(capabilities[feature] is False for feature in ("metrics", "alarms", "cloudFormation", "automaticLambdaDelivery"))
     # Use the actual served static examples, replacing the documented timestamp
     # template with the current clock. A static example is not preexisting state.
-    for op in ("CreateLogGroup", "DescribeLogGroups", "CreateLogStream", "DescribeLogStreams", "PutLogEvents", "GetLogEvents", "DeleteLogGroup"):
+    for op in ("CreateLogGroup", "DescribeLogGroups", "CreateLogStream", "DescribeLogStreams", "PutLogEvents", "GetLogEvents", "DeleteLogStream", "DeleteLogGroup"):
         body = json.loads(json.dumps(examples["Logs" + op]["value"]))
         if op == "PutLogEvents":
             assert body["logEvents"][0]["timestamp"] == 0
@@ -91,13 +91,13 @@ def verify_served_reference(endpoint, token, sdk):
             assert response.status == 200
             raw = response.read()
             result = json.loads(raw) if raw else None
-        if op in ("CreateLogGroup", "CreateLogStream", "DeleteLogGroup"):
+        if op in ("CreateLogGroup", "CreateLogStream", "DeleteLogStream", "DeleteLogGroup"):
             assert result is None, "Native Logs control success has an empty body"
         if op == "GetLogEvents":
             assert [item["message"] for item in result["events"]] == ["reference-native-bytes"]
             assert sdk.get_log_events(logGroupName=body["logGroupName"], logStreamName=body["logStreamName"], startFromHead=True)["events"] == result["events"]
     assert sdk.describe_log_groups()["logGroups"] == []
-    return {"servedOpenAPI": True, "operationIDsPreserved": 67, "pathsPreserved": 36, "sharedRootExamplesExecuted": 7,
+    return {"servedOpenAPI": True, "operationIDsPreserved": 67, "pathsPreserved": 36, "sharedRootExamplesExecuted": 8,
             "staticTimestampExplicitlyReplaced": True, "SDKSameSQLiteBytes": True, "cleanup": "DELETED"}
 
 
@@ -175,13 +175,27 @@ def run():
                 end = sdk.get_log_events(logGroupName=group, logStreamName=stream,
                                         startFromHead=True, nextToken=page["nextForwardToken"])
                 assert end["events"] == [] and end["nextForwardToken"] == page["nextForwardToken"]
+                sdk.create_log_stream(logGroupName=group, logStreamName="survivor")
+                sdk.put_log_events(logGroupName=group, logStreamName="survivor",
+                                   logEvents=[{"timestamp": now, "message": "preserved"}])
+                sdk.delete_log_stream(logGroupName=group, logStreamName=stream)
+                assert [item["logStreamName"] for item in sdk.describe_log_streams(logGroupName=group)["logStreams"]] == ["survivor"]
+                assert sdk.describe_log_groups()["logGroups"][0]["storedBytes"] == len("preserved")
+                error("ResourceNotFoundException", lambda: sdk.delete_log_stream(logGroupName=group, logStreamName=stream))
+                error("ResourceNotFoundException", lambda: sdk.get_log_events(logGroupName=group, logStreamName=stream))
+                sdk.create_log_stream(logGroupName=group, logStreamName=stream)
+                error("InvalidParameterException", lambda: sdk.get_log_events(
+                    logGroupName=group, logStreamName=stream, startFromHead=True, nextToken=token_after_first))
+                # Preserve the independent group deletion/recreation regression.
+                new_stream_cursor = sdk.get_log_events(logGroupName=group, logStreamName=stream,
+                                                       startFromHead=True)["nextForwardToken"]
                 sdk.delete_log_group(logGroupName=group)
                 assert sdk.describe_log_groups()["logGroups"] == []
                 error("ResourceNotFoundException", lambda: sdk.get_log_events(logGroupName=group, logStreamName=stream))
                 sdk.create_log_group(logGroupName=group)
                 sdk.create_log_stream(logGroupName=group, logStreamName=stream)
                 error("InvalidParameterException", lambda: sdk.get_log_events(
-                    logGroupName=group, logStreamName=stream, startFromHead=True, nextToken=token_after_first))
+                    logGroupName=group, logStreamName=stream, startFromHead=True, nextToken=new_stream_cursor))
                 sdk.delete_log_group(logGroupName=group)
                 assert sdk.describe_log_groups()["logGroups"] == []
             with running(db=other_state, authenticated=True) as (endpoint, token):
@@ -190,7 +204,7 @@ def run():
 
         counts = {key: sum(item[key] for _, item in audit) for key in ("calls", "sends", "responses")}
         operations = {name for _, item in audit for name in item["operations"]}
-        required = {"CreateLogGroup", "DescribeLogGroups", "DeleteLogGroup", "CreateLogStream", "DescribeLogStreams", "PutLogEvents", "GetLogEvents"}
+        required = {"CreateLogGroup", "DescribeLogGroups", "DeleteLogGroup", "CreateLogStream", "DeleteLogStream", "DescribeLogStreams", "PutLogEvents", "GetLogEvents"}
         assert operations == required, operations
         assert counts["calls"] > 0 and counts["calls"] == counts["sends"] == counts["responses"], counts
         print(json.dumps({"nativeSDK": "boto3 " + boto3.__version__, "operations": sorted(operations), "counts": counts,

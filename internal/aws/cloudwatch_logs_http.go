@@ -102,7 +102,7 @@ func logsUniqueJSON(dec *json.Decoder, depth int) error {
 	return err
 }
 
-// ServeHTTP handles only the seven bounded Logs JSON operations. The trusted
+// ServeHTTP handles only the bounded Logs JSON operations. The trusted
 // Gateway supplies region and an IAM callback; HTTP/team authentication remains
 // server middleware. Every request, including continuation requests, reauthorizes.
 func (s *CloudWatchLogsStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region string, authorize func(action, resource string) error) {
@@ -136,7 +136,7 @@ func (s *CloudWatchLogsStore) ServeHTTP(w http.ResponseWriter, r *http.Request, 
 	op := strings.TrimPrefix(r.Header.Get("X-Amz-Target"), "Logs_20140328.")
 	allowed := map[string][]string{
 		"CreateLogGroup": {"logGroupName", "logGroupClass"}, "DescribeLogGroups": {"logGroupNamePrefix", "logGroupClass", "nextToken", "limit"}, "DeleteLogGroup": {"logGroupName"},
-		"CreateLogStream": {"logGroupName", "logStreamName"}, "DescribeLogStreams": {"logGroupName", "logStreamNamePrefix", "orderBy", "descending", "nextToken", "limit"},
+		"CreateLogStream": {"logGroupName", "logStreamName"}, "DeleteLogStream": {"logGroupName", "logStreamName"}, "DescribeLogStreams": {"logGroupName", "logStreamNamePrefix", "orderBy", "descending", "nextToken", "limit"},
 		"PutLogEvents": {"logGroupName", "logStreamName", "logEvents", "sequenceToken"}, "GetLogEvents": {"logGroupName", "logStreamName", "startTime", "endTime", "startFromHead", "nextToken", "limit", "unmask"},
 	}
 	fields, ok := allowed[op]
@@ -179,7 +179,7 @@ func (s *CloudWatchLogsStore) ServeHTTP(w http.ResponseWriter, r *http.Request, 
 		fail(logsInvalid("Invalid or missing logGroupName."))
 		return
 	}
-	if op == "CreateLogStream" || op == "PutLogEvents" || op == "GetLogEvents" {
+	if op == "CreateLogStream" || op == "DeleteLogStream" || op == "PutLogEvents" || op == "GetLogEvents" {
 		if !validLogsStream(input.LogStreamName) {
 			fail(logsInvalid("Invalid or missing logStreamName."))
 			return
@@ -218,7 +218,7 @@ func (s *CloudWatchLogsStore) ServeHTTP(w http.ResponseWriter, r *http.Request, 
 	if op == "DescribeLogGroups" {
 		resource = "*"
 	}
-	if op == "CreateLogStream" || op == "PutLogEvents" || op == "GetLogEvents" {
+	if op == "CreateLogStream" || op == "DeleteLogStream" || op == "PutLogEvents" || op == "GetLogEvents" {
 		resource = logsStreamARN(region, input.LogGroupName, input.LogStreamName)
 	}
 	if authorize == nil {
@@ -240,6 +240,8 @@ func (s *CloudWatchLogsStore) ServeHTTP(w http.ResponseWriter, r *http.Request, 
 		err = s.CreateGroup(ctx, region, input.LogGroupName)
 	case "DeleteLogGroup":
 		err = s.DeleteGroup(ctx, region, input.LogGroupName)
+	case "DeleteLogStream":
+		err = s.DeleteStream(ctx, region, input.LogGroupName, input.LogStreamName)
 	case "CreateLogStream":
 		err = s.CreateStream(ctx, region, input.LogGroupName, input.LogStreamName)
 	case "DescribeLogGroups":

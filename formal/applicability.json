@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "36e72c4bb7674ea394d55a7eeb9ac9fa3778450c",
+  "base_sha": "c2254986bcbc6cc7b67aa33f37444b09555d8b02",
   "changes": [
     {
       "path": "docs/development-status.md",
@@ -73,9 +73,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "65ef52ff24d9e430f58726ae9bbc068c4695dc4de5ef218854d69a9f3ebbea75",
+      "sha256": "befab00a3c90fa3daa570bbcbcee6ebddc9e1cbeb81ea87b7e207548085b1d92",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the native SNS queue fanout model, required invariants and controls; preserves every existing registered entry and strengthens missing-obligation regression coverage.",
+      "reason": "Adds native SNS queue fanout obligations while retaining the merged CloudWatch stream deletion obligation and every other registered model and invariant.",
       "models": []
     },
     {
@@ -261,7 +261,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "e7a25508a6859d1d6ffc4525346548c587dec3ee1630fe1724c8d5e5f0bbdb78",
+      "sha256": "745004f01fb7eeaeb59f2d91c906ad7ab3685f46b5d0f4aeebc298dff61fa404",
       "disposition": "modeled",
       "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
       "models": [
@@ -309,9 +309,9 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "25faedf1867c85e2679f652080705334b575c106dffbc0216abf62a4db3c3646",
+      "sha256": "6fcef885b416a973b14d9ddce1c2643d0e55642b3781c80252520d8176c66a8e",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the native SNS queue fanout model, required invariants and controls; preserves every existing registered entry and strengthens missing-obligation regression coverage.",
+      "reason": "Requires native SNS fanout invariant controls while retaining the merged CloudWatch deletion cascade control and every existing mandatory control.",
       "models": []
     },
     {

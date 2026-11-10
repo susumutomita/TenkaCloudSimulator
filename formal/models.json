@@ -1573,7 +1573,7 @@
     "OnlyAcceptedWrites",
     "TokenAuthority"
    ],
-   "limits": "Finite safety only; no liveness or implementation refinement. Models transaction atomicity and database identity as abstract steps, not SQLite faults, HMAC cryptography or OS process isolation. Byte/time limits, sorting, page convergence, expiry and real IAM documents require native/SDK tests. Captured read receipts preserve the authorization context when later resource generations change. Shared source scope covers only the added Logs field/dispatch/construction seam; not all other service dispatch or server lifecycle/authentication.",
+   "limits": "Finite safety only; no liveness or implementation refinement. Models transaction atomicity and database identity as abstract steps, not SQLite faults, HMAC cryptography or OS process isolation. Byte/time limits, sorting, page convergence, expiry and real IAM documents require native/SDK tests. Captured read receipts preserve the authorization context when later resource generations change. Shared source scope covers only the added Logs field/dispatch/construction seam; not all other service dispatch or server lifecycle/authentication. Stream deletion and later recreation are included: the abstract incarnation advances at deletion, while native code assigns a fresh random generation at recreation. Reads are disallowed while absent; native regressions verify cursor rejection and SQL failure rollback.",
    "source_scope": [
     "internal/aws/cloudwatch_logs_store.go",
     "internal/aws/cloudwatch_logs_query.go",
@@ -1581,7 +1581,8 @@
     "internal/aws/cloudwatch_logs_dispatch.go",
     "internal/aws/s3.go",
     "internal/aws/ssm.go",
-    "internal/server/server.go"
+    "internal/server/server.go",
+    "internal/aws/cloudwatch_logs_delete_stream.go"
    ],
    "mutants": [
     {
@@ -1633,6 +1634,17 @@
      "edits": [
       {
        "old": "/\\ events' = {e \\in events : e.team # t}",
+       "new": "/\\ UNCHANGED events",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOrphans"
+    },
+    {
+     "id": "OmitDeleteStreamEventCascade",
+     "edits": [
+      {
+       "old": "/\\ events' = {record \\in events : record.team # t}",
        "new": "/\\ UNCHANGED events",
        "count": 1
       }

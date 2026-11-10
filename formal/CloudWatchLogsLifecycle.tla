@@ -23,6 +23,13 @@ DeleteGroup(t) == /\ t \in groups
                   /\ streams' = streams \ {t}
                   /\ events' = {e \in events : e.team # t}
                   /\ UNCHANGED <<generation, tokens, receipts>>
+\* A stream deletion advances the abstract incarnation immediately. Recreate
+\* makes that incarnation readable; native code instead assigns it on create.
+DeleteStream(t) == /\ t \in streams /\ generation[t] < 2
+                   /\ streams' = streams \ {t}
+                   /\ events' = {record \in events : record.team # t}
+                   /\ generation' = [generation EXCEPT ![t] = @ + 1]
+                   /\ UNCHANGED <<groups, tokens, receipts>>
 IssueToken(t) == /\ t \in streams
                  /\ tokens' = tokens \cup {[team |-> t, gen |-> generation[t]]}
                  /\ UNCHANGED <<groups, streams, events, generation, receipts>>
@@ -32,7 +39,7 @@ ReadToken(t, token) ==
     /\ receipts' = receipts \cup {[requestTeam |-> t, tokenTeam |-> token.team,
                                   activeGen |-> generation[t], tokenGen |-> token.gen]}
     /\ UNCHANGED <<groups, streams, events, generation, tokens>>
-Next == (\E t \in Teams : CreateGroup(t) \/ CreateStream(t) \/ DeleteGroup(t)
+Next == (\E t \in Teams : CreateGroup(t) \/ CreateStream(t) \/ DeleteGroup(t) \/ DeleteStream(t)
           \/ IssueToken(t) \/ (\E a,v \in BOOLEAN : Put(t,a,v))
           \/ (\E token \in tokens : ReadToken(t,token))) \/ UNCHANGED vars
 TypeOK == /\ groups \subseteq Teams /\ streams \subseteq Teams
