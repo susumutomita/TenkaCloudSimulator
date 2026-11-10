@@ -1,54 +1,19 @@
 {
   "version": 1,
-  "base_sha": "cc30d5e15077676a5adec29041e76272e6150d49",
+  "base_sha": "214948ad4cdabc5351ad895e2c8c46b3646f201e",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "700896e1f214f462627e69c2e536b3e3ce3eb7be7943c5b49e079a1b930e4804",
-      "disposition": "formal-infrastructure",
-      "reason": "Adds focused first-party response-decoder tests to the required Node step and the actual Scalar browser regression to the early console acceptance job. The full quality, E2E and formal gates remain intact.",
-      "models": []
-    },
-    {
-      "path": "docs/api-reference.md",
-      "sha256": "9890b67e019340b4f04e8db9b22f365f19a060ff6cace7efd202d402e670b75a",
-      "disposition": "documentation",
-      "reason": "Documents the scoped AWS JSON display change and verification limits.",
-      "models": []
-    },
-    {
       "path": "docs/development-status.md",
-      "sha256": "2150fd2e34ea7514c60434c5cbd3c5f78adbe8683654f80bea0da58017f14934",
+      "sha256": "a0560054565980ca35ba1d6fdbf16a58949fc83e3e481f0939ac894c3325b009",
       "disposition": "documentation",
-      "reason": "Documents the scoped AWS JSON display change and verification limits.",
+      "reason": "Documents the exact public main snapshot, all open Issue links, merged increments and pending acceptance without changing runtime, validation gates or model contracts. Historical roster entries remain unchanged.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/init.js",
-      "sha256": "ae679855d868dd33c580a4a0907e35f2f6c101672efa172648c526c8df80d145",
-      "disposition": "presentation",
-      "reason": "Presentation-only Scalar response-body decoder for the exact AWS JSON1.0 and JSON1.1 MIME types. Native bytes, headers, status, origin filtering and authority are unchanged. JSON is displayed as UTF-8 text without parsing or reserialization; finite state behavior is not changed.",
-      "models": []
-    },
-    {
-      "path": "test/console/api-reference-json.test.mjs",
-      "sha256": "f987e7ece91940f14f27df6f2bf29ab1db50e8214c5e1ba2c1b30adf3635a97c",
-      "disposition": "test-support",
-      "reason": "Adds or registers focused configuration and native browser response-display regressions. These tests do not change runtime state or model bounds; actual browser execution remains an independent gate.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/check.py",
-      "sha256": "a9dbabe61bbcb60ed1bd20962534550983db5af019ac188548310febe76f0435",
-      "disposition": "test-support",
-      "reason": "Adds or registers focused configuration and native browser response-display regressions. These tests do not change runtime state or model bounds; actual browser execution remains an independent gate.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/scalar_aws_json.py",
-      "sha256": "1ad94eea9a2fcca82f6db053e79da460f07369d13c96da6d6cadf29e523b759f",
-      "disposition": "test-support",
-      "reason": "Adds or registers focused configuration and native browser response-display regressions. These tests do not change runtime state or model bounds; actual browser execution remains an independent gate.",
+      "path": "docs/open-issue-progress.md",
+      "sha256": "930f8b178fc87eb9cf71242508ae5425a936a74b1b547a7764c48aca7414cb66",
+      "disposition": "documentation",
+      "reason": "Documents the exact public main snapshot, all open Issue links, merged increments and pending acceptance without changing runtime, validation gates or model contracts. Historical roster entries remain unchanged.",
       "models": []
     }
   ]
