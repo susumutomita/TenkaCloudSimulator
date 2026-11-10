@@ -187,6 +187,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/SecretsListSecretVersionIdsInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogsDeleteLogStreamRequest"
                   }
                 ],
                 "description": "SSM, KMS, CloudWatch Logs or Secrets Manager JSON 1.1 as selected by X-Amz-Target. The generic object alternative preserves SSM and Secrets Manager templates; named KMS and Logs schemas document their bounded shapes. Exact KMS per-target schemas are in x-simulator-kms-operation-schemas; body alone cannot discriminate routing."
@@ -447,6 +450,17 @@
                     "SecretId": "training/version-list",
                     "IncludeDeprecated": true,
                     "MaxResults": 2
+                  }
+                },
+                "LogsDeleteLogStream": {
+                  "summary": "DeleteLogStream \u2014 X-Amz-Target: Logs_20140328.DeleteLogStream; service=logs",
+                  "description": "Static template, not saved state. Permanently deletes this stream and its events, retaining the group and sibling streams.",
+                  "value": {
+                    "logGroupName": "/aws/reference-example",
+                    "logStreamName": "application"
+                  },
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/LogsDeleteLogStreamRequest"
                   }
                 }
               }
@@ -16649,6 +16663,30 @@
         "additionalProperties": false,
         "required": [
           "error"
+        ]
+      },
+      "LogsDeleteLogStreamRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "logGroupName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[.\\-_/#A-Za-z0-9]+$",
+            "description": "Creation rejects reserved aws/ prefix (leading /aws/ is valid)."
+          },
+          "logStreamName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "UTF8 stream name; excludes colon, asterisk and NUL."
+          }
+        },
+        "description": "Bounded DeleteLogStream JSON1.1 payload. Nulls/duplicate keys are rejected; complete byte/time/cross-field semantics are enforced by the native handler.",
+        "required": [
+          "logGroupName",
+          "logStreamName"
         ]
       }
     },
