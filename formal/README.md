@@ -1,5 +1,21 @@
 # Finite state models
 
+## SNS native fanout candidate, 2026-11-10
+
+Based on main `36e72c4`, this source inventory has **70 models and 666 required
+controls (736 executions)**. Every existing entry is preserved. `SNSQueueFanout`
+adds one finite single-publication transaction model and nine controls for queue
+authorization/existence, topic existence, count/byte budgets, commit failure,
+audit acknowledgement, complete fanout and refused-operation rollback. It assumes
+a captured immutable identity policy and subscription set; native tests separately
+exercise policy changes, actual SQLite faults and queue lifecycle. It does not
+prove Go/SQL refinement or AWS resource-policy and asynchronous delivery behavior.
+Local `7a1e022` passed this baseline and all nine registered controls in 10.746
+seconds with the pinned TLC jar and immutable before/after source hashes. The
+whole 736-case aggregate remains pending; this focused receipt does not replace it.
+
+The following inventory notes and receipts are historical for their named sources.
+
 STS/event integration inventory: **57 models / 474 literal-protected controls
 (531 required executions)**. The 55 public-base model entries are preserved
 unchanged. STSSessionLifecycle adds eight guard-removal controls for issuance and

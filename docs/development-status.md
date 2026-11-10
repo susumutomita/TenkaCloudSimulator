@@ -1,5 +1,37 @@
 # Development roster
 
+## SNS-to-SQS follow-up claim, 2026-11-10 06:24 UTC
+
+Issue #49, owner: backlog integration, in progress on
+`feat/sns-sqs-fanout-49-20261110`, based on public main `36e72c4`.
+PR #413 is merged; native SNS and SQS exist, but the nontransactional queue
+callback remains unwired. This follow-up owns the SNS/SQS transaction helpers,
+their native tests and docs, an additive SDK driver and finite fanout model.
+Small server capability, E2E registration and formal-registry changes are
+integration boundaries; Battle, Bedrock, core, runtime and release files are
+excluded. The CloudWatch DeleteLogStream increment is separately in Draft PR #456.
+
+The implemented subset is same-region, same-account Standard queues with JSON
+notification envelopes, all-or-nothing local persistence and explicit refusal
+on missing queues, insufficient IAM, quotas and storage faults. SQS resource
+policies are not implemented. The local subset requires the caller's
+`sqs:SendMessage` permission for every destination in addition to the SNS action,
+and documents this stricter deviation rather than silently assume service trust.
+No network callback, FIFO, retry service, raw-delivery attribute or queue-policy
+support is claimed. Acceptance requires real SNS publish/SQS receive and delete,
+restart, isolation, IAM and fault rollback, plus the normal full quality/E2E/formal
+gates. At 2026-11-10 06:45 UTC, local checkpoint `7a1e022` passed all targeted
+SNS/SQS native tests (7.779s), race tests (18.459s), the composed-server SNS test
+(1.831s), AWS/server vet and build. Real boto3 fanout passed 53 calls/sends/responses,
+two processes/DBs, restart and cleanup, and the inherited SNS SDK suite passed.
+The new finite baseline and nine required controls passed with immutable inputs;
+exact applicability covered 17 paths and the new policy-registry regression passed.
+Independent source review's mixed-policy-snapshot finding was fixed and reviewed;
+additional deterministic order and single-policy-read regression tests passed.
+Full quality/coverage, all E2E, the whole 736-case formal suite and publication
+remain pending. The local heavy-test lane was handed to Battle after these focused
+checks; no full-suite pass or complete Issue #49 acceptance is claimed.
+
 ## Current progress snapshot, 2026-11-10 03:45 UTC
 
 Verified public baseline: [`214948ad`](https://github.com/susumutomita/TenkaCloudSimulator/commit/214948ad4cdabc5351ad895e2c8c46b3646f201e).

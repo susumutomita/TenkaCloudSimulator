@@ -9360,6 +9360,135 @@
      "expect_invariant": "ScopedPagination"
     }
    ]
+  },
+  {
+   "id": "SNSQueueFanout",
+   "model": "formal/SNSQueueFanout.tla",
+   "config": "formal/SNSQueueFanout.cfg",
+   "bounds": "One publication, two queue identities, arbitrary target/live/permission subsets, Boolean live topic and commit outcome, initial message count 0..2, initial abstract bytes 0..3, payload size 1..2. One transition per finite initial witness.",
+   "properties": [
+    "TypeOK",
+    "Authorized",
+    "ParentPresent",
+    "DestinationsExist",
+    "CountBounded",
+    "BytesBounded",
+    "DurableAck",
+    "AuditExact",
+    "RecipientsExact",
+    "RefusalUnchanged"
+   ],
+   "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations.",
+   "source_scope": [
+    "internal/aws/sns_sqs_fanout.go",
+    "internal/aws/sns_sqs_fanout_test.go",
+    "internal/aws/sns.go",
+    "internal/aws/sns_store.go",
+    "internal/aws/sqs_store.go",
+    "internal/server/sns_test.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "SkipQueueAuthorization",
+     "edits": [
+      {
+       "old": "DestinationsAuthorized == targets \\subseteq permitted",
+       "new": "DestinationsAuthorized == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "Authorized"
+    },
+    {
+     "id": "SkipTopicParent",
+     "edits": [
+      {
+       "old": "TopicPresent == topicLive",
+       "new": "TopicPresent == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ParentPresent"
+    },
+    {
+     "id": "SkipQueueParent",
+     "edits": [
+      {
+       "old": "DestinationsPresent == targets \\subseteq liveQueues",
+       "new": "DestinationsPresent == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DestinationsExist"
+    },
+    {
+     "id": "SkipMessageCount",
+     "edits": [
+      {
+       "old": "CountFits == oldCount + Cardinality(targets) <= MaxCount",
+       "new": "CountFits == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CountBounded"
+    },
+    {
+     "id": "SkipPayloadBytes",
+     "edits": [
+      {
+       "old": "BytesFit == oldBytes + payload * Cardinality(targets) <= MaxBytes",
+       "new": "BytesFit == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BytesBounded"
+    },
+    {
+     "id": "IgnoreCommitFailure",
+     "edits": [
+      {
+       "old": "CanCommit == commitOK",
+       "new": "CanCommit == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DurableAck"
+    },
+    {
+     "id": "DropAuditRow",
+     "edits": [
+      {
+       "old": "audit' = Allowed",
+       "new": "audit' = FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuditExact"
+    },
+    {
+     "id": "DropQueueDelivery",
+     "edits": [
+      {
+       "old": "delivered' = IF Allowed THEN targets ELSE {}",
+       "new": "delivered' = {}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RecipientsExact"
+    },
+    {
+     "id": "PartialDeliveryOnFailure",
+     "edits": [
+      {
+       "old": "delivered' = IF Allowed THEN targets ELSE {}",
+       "new": "delivered' = IF Allowed THEN targets ELSE IF oldCount = 0 /\\ oldBytes = 0 THEN {CHOOSE q \\in Queues : TRUE} ELSE {}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RefusalUnchanged"
+    }
+   ]
   }
  ]
 }

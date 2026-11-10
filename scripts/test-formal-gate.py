@@ -33,6 +33,27 @@ class FormalGateTests(unittest.TestCase):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, target)
 
+    def test_native_sns_fanout_inventory_and_boundaries_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SNSQueueFanout')
+        self.assertEqual(len(entry['properties']), 10)
+        self.assertEqual(len(entry['mutants']), 9)
+        load_registry(self.root)
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == entry['id'])
+                target[field].remove(item)
+                path.write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(changed))
+        with self.assertRaises(GateError):
+            load_registry(self.root)
+
     def test_ssm_durable_command_required_contract(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -428,7 +449,7 @@ class FormalGateTests(unittest.TestCase):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'SSMDurableCommands', 'SakuraDiskMetadata', 'DynamoDBAdmission', 'CFNFinalCleanupACK', 'SecretVersionListing', 'ProviderPath', 'CatalogConsoleEpoch', 'SakuraDiskAdmission', 'CFNConditionMemoDepth', 'WAFRequestEvaluation', 'LoginInputIntent', 'SakuraDisksViewEpoch', 'CloudWatchLogsViewEpoch', 'SakuraStartupAdmission', 'ProviderActor', 'S3MultipartState', 'StartupTokenVisibility', 'DynamoDBConsoleEpoch', 'IAMInstanceProfiles', 'CFNConditionAdmission', 'BrowserSessions', 'KMSKeyState', 'ProjectAuthority', 'BlobRange', 'KMSAliasesViewEpoch', 'SQSConsoleEpoch', 'SecretsRevealEpoch', 'LandingAccessAdmission', 'RESTRouteMatching', 'CFNPhysicalResourceACK', 'WAFAssociationAuthorization', 'SNSAdmission', 'IAMManagedPolicies', 'AzurePropertiesEpoch', 'NativeWireProjection', 'DurableGuestLease', 'CFNParameterSnapshot', 'CatalogResourceLifecycle', 'RESTDeploymentSnapshot', 'SQSLifecycle', 'SQSStorageBudget', 'SecretsDisclosureChannels', 'KMSAliasCatalog', 'SecretsVersionLifecycle', 'KMSAliasCrypto', 'ConsoleHandoff', 'IAMBuiltinPinTransaction', 'SNSLifecycle', 'LandingTopologyState', 'CFNEventHistory', 'CloudWatchLogsLifecycle', 'GuestCommandLifecycle', 'SSMParameterState', 'STSSessionLifecycle', 'SecretMetadataViewEpoch', 'SecretsMutationRefresh', 'RESTProxyEventBoundary', 'CFNNativeIAMTransaction', 'KMSProtocolAdmission', 'S3Versions', 'StackOwnership', 'AzureBlobState', 'KMSBootstrapTransaction', 'LambdaLogTailDisclosure', 'GCPStorageState', 'NativeIAMOwnership', 'AzurePropertiesTarget', 'DynamoDBLifecycle', 'ObjectStore'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'SNSQueueFanout', 'SSMDurableCommands', 'SakuraDiskMetadata', 'DynamoDBAdmission', 'CFNFinalCleanupACK', 'SecretVersionListing', 'ProviderPath', 'CatalogConsoleEpoch', 'SakuraDiskAdmission', 'CFNConditionMemoDepth', 'WAFRequestEvaluation', 'LoginInputIntent', 'SakuraDisksViewEpoch', 'CloudWatchLogsViewEpoch', 'SakuraStartupAdmission', 'ProviderActor', 'S3MultipartState', 'StartupTokenVisibility', 'DynamoDBConsoleEpoch', 'IAMInstanceProfiles', 'CFNConditionAdmission', 'BrowserSessions', 'KMSKeyState', 'ProjectAuthority', 'BlobRange', 'KMSAliasesViewEpoch', 'SQSConsoleEpoch', 'SecretsRevealEpoch', 'LandingAccessAdmission', 'RESTRouteMatching', 'CFNPhysicalResourceACK', 'WAFAssociationAuthorization', 'SNSAdmission', 'IAMManagedPolicies', 'AzurePropertiesEpoch', 'NativeWireProjection', 'DurableGuestLease', 'CFNParameterSnapshot', 'CatalogResourceLifecycle', 'RESTDeploymentSnapshot', 'SQSLifecycle', 'SQSStorageBudget', 'SecretsDisclosureChannels', 'KMSAliasCatalog', 'SecretsVersionLifecycle', 'KMSAliasCrypto', 'ConsoleHandoff', 'IAMBuiltinPinTransaction', 'SNSLifecycle', 'LandingTopologyState', 'CFNEventHistory', 'CloudWatchLogsLifecycle', 'GuestCommandLifecycle', 'SSMParameterState', 'STSSessionLifecycle', 'SecretMetadataViewEpoch', 'SecretsMutationRefresh', 'RESTProxyEventBoundary', 'CFNNativeIAMTransaction', 'KMSProtocolAdmission', 'S3Versions', 'StackOwnership', 'AzureBlobState', 'KMSBootstrapTransaction', 'LambdaLogTailDisclosure', 'GCPStorageState', 'NativeIAMOwnership', 'AzurePropertiesTarget', 'DynamoDBLifecycle', 'ObjectStore'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:

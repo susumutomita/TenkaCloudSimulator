@@ -295,11 +295,20 @@ func (s *SNSStore) Subscribe(topic SNSTopic, protocol, endpoint string) (SNSSubs
 		return SNSSubscription{}, err
 	}
 	defer tx.Rollback()
-	if _, err = snsRequireTopic(tx, topic.ARN); err != nil {
+	sub, err := snsSubscribeTx(tx, topic, protocol, endpoint)
+	if err != nil {
+		return SNSSubscription{}, err
+	}
+	return sub, tx.Commit()
+}
+
+// snsSubscribeTx lets native queue admission share the same transaction.
+func snsSubscribeTx(tx *sql.Tx, topic SNSTopic, protocol, endpoint string) (SNSSubscription, error) {
+	if _, err := snsRequireTopic(tx, topic.ARN); err != nil {
 		return SNSSubscription{}, err
 	}
 	var existing SNSSubscription
-	err = tx.QueryRow("SELECT arn,topic_arn,protocol,endpoint FROM aws_sns_subscriptions WHERE topic_arn=? AND protocol=? AND endpoint=?", topic.ARN, protocol, endpoint).
+	err := tx.QueryRow("SELECT arn,topic_arn,protocol,endpoint FROM aws_sns_subscriptions WHERE topic_arn=? AND protocol=? AND endpoint=?", topic.ARN, protocol, endpoint).
 		Scan(&existing.ARN, &existing.TopicARN, &existing.Protocol, &existing.Endpoint)
 	if err == nil {
 		return existing, nil
@@ -325,7 +334,7 @@ func (s *SNSStore) Subscribe(topic SNSTopic, protocol, endpoint string) (SNSSubs
 	if _, err = snsRequireTopic(tx, topic.ARN); err != nil {
 		return SNSSubscription{}, err
 	}
-	return sub, tx.Commit()
+	return sub, nil
 }
 
 func (s *SNSStore) GetSubscription(arn string) (SNSSubscription, error) {
@@ -404,50 +413,59 @@ func (s *SNSStore) PublishWithID(topic SNSTopic, id, message, subject string) (s
 		return "", 0, err
 	}
 	defer tx.Rollback()
-	fifo, err := snsRequireTopic(tx, topic.ARN)
+	count, err := snsPublishTx(tx, topic, id, message, subject)
 	if err != nil {
 		return "", 0, err
 	}
+	return id, count, tx.Commit()
+}
+
+// snsPublishTx records the audit rows without committing the caller's transaction.
+func snsPublishTx(tx *sql.Tx, topic SNSTopic, id, message, subject string) (int, error) {
+	fifo, err := snsRequireTopic(tx, topic.ARN)
+	if err != nil {
+		return 0, err
+	}
 	if fifo {
-		return "", 0, ssmFailure{"InvalidParameterException", "FIFO publication is unsupported."}
+		return 0, ssmFailure{"InvalidParameterException", "FIFO publication is unsupported."}
 	}
 	var count, bytes, deliveries, subCount int
 	if err = tx.QueryRow("SELECT count(*),coalesce(sum(length(CAST(message AS BLOB))+length(CAST(subject AS BLOB))),0) FROM aws_sns_messages").Scan(&count, &bytes); err != nil {
-		return "", 0, err
+		return 0, err
 	}
 	if err = tx.QueryRow("SELECT count(*) FROM aws_sns_deliveries").Scan(&deliveries); err != nil {
-		return "", 0, err
+		return 0, err
 	}
 	if err = tx.QueryRow("SELECT count(*) FROM aws_sns_subscriptions WHERE topic_arn=?", topic.ARN).Scan(&subCount); err != nil {
-		return "", 0, err
+		return 0, err
 	}
 	if count >= maxSNSMessages || len(message)+len(subject) > maxSNSMessageBytes || bytes > maxSNSMessageBytes-len(message)-len(subject) || deliveries > maxSNSDeliveries-subCount {
-		return "", 0, ssmFailure{"LimitExceededException", "Simulator SNS message, byte or delivery limit reached."}
+		return 0, ssmFailure{"LimitExceededException", "Simulator SNS message, byte or delivery limit reached."}
 	}
 	r, err := tx.Exec("INSERT INTO aws_sns_messages VALUES(?,?,?,?,?)", id, topic.ARN, message, subject, float64(time.Now().UnixMilli())/1000)
 	if err = snsAffected(r, err, 1); err != nil {
-		return "", 0, err
+		return 0, err
 	}
 	r, err = tx.Exec("INSERT INTO aws_sns_deliveries(message_id,subscription_arn) SELECT ?,arn FROM aws_sns_subscriptions WHERE topic_arn=?", id, topic.ARN)
 	if err != nil {
-		return "", 0, err
+		return 0, err
 	}
 	if err = snsAffected(r, err, int64(subCount)); err != nil {
-		return "", 0, err
+		return 0, err
 	}
 	if err = snsCount(tx, 1, "SELECT count(*) FROM aws_sns_messages WHERE id=? AND topic_arn=? AND message=? AND subject=?", id, topic.ARN, message, subject); err != nil {
-		return "", 0, err
+		return 0, err
 	}
 	if err = snsCount(tx, subCount, "SELECT count(*) FROM aws_sns_deliveries WHERE message_id=?", id); err != nil {
-		return "", 0, err
+		return 0, err
 	}
 	if err = snsCount(tx, subCount, "SELECT count(*) FROM aws_sns_deliveries d JOIN aws_sns_subscriptions s ON d.subscription_arn=s.arn WHERE d.message_id=? AND s.topic_arn=?", id, topic.ARN); err != nil {
-		return "", 0, err
+		return 0, err
 	}
 	if _, err = snsRequireTopic(tx, topic.ARN); err != nil {
-		return "", 0, err
+		return 0, err
 	}
-	return id, subCount, tx.Commit()
+	return subCount, nil
 }
 
 func (s *SNSStore) ListMessages(ctx context.Context, topicARN string) ([]SNSMessage, error) {

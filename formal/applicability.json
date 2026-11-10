@@ -1,129 +1,338 @@
 {
   "version": 1,
-  "base_sha": "36e72c4bb7674ea394d55a7eeb9ac9fa3778450c",
+  "base_sha": "c2254986bcbc6cc7b67aa33f37444b09555d8b02",
   "changes": [
     {
-      "path": "docs/cloudwatch-logs.md",
-      "sha256": "90d7f444585dd864776139637ff645f41d3f01b47cad9d7292c5a5eabe95f970",
+      "path": "docs/development-status.md",
+      "sha256": "a38df9b136096aab342b0de730d4c42c73211d9f3aeb17f89bc5058149cc6871",
       "disposition": "documentation",
-      "reason": "Documents the bounded operation, unchanged exclusions, ownership and pending or completed verification without claiming broad CloudWatch completion.",
+      "reason": "Records the bounded native fanout scope, current ownership, official references, explicit deviations and pending validation without changing existing dated evidence.",
       "models": []
     },
     {
-      "path": "formal/CloudWatchLogsLifecycle.tla",
-      "sha256": "52cde8f1cf7d29882534e23cf9fd407144e745e16ac3765cdbb5fe4d724f2420",
+      "path": "docs/sns.md",
+      "sha256": "d78d2b88b15cbbc25192fec0475273d5840c8bd3c81371652758e27a15dc9e78",
+      "disposition": "documentation",
+      "reason": "Records the bounded native fanout scope, current ownership, official references, explicit deviations and pending validation without changing existing dated evidence.",
+      "models": []
+    },
+    {
+      "path": "formal/README.md",
+      "sha256": "04c60b50c80887b881826a43ab5a6127b4fc57adfc495cdeb8eb58cdf048f2cd",
+      "disposition": "documentation",
+      "reason": "Records the bounded native fanout scope, current ownership, official references, explicit deviations and pending validation without changing existing dated evidence.",
+      "models": []
+    },
+    {
+      "path": "formal/SNSQueueFanout.cfg",
+      "sha256": "3dbc267fa1b983a055a7c9ad73bfca9de6c53a01c5f7febb250ba255cee99283",
       "disposition": "modeled",
-      "reason": "Adds native DeleteLogStream and its exact capability/dispatch binding. Atomic same-team stream/event removal and generation-bound cursor use are represented in CloudWatchLogsLifecycle; existing unrelated services remain unchanged.",
+      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
       "models": [
         {
-          "id": "CloudWatchLogsLifecycle",
+          "id": "SNSQueueFanout",
           "properties": [
-            "NoOrphans",
-            "TokenAuthority",
-            "OnlyAcceptedWrites"
+            "TypeOK",
+            "Authorized",
+            "ParentPresent",
+            "DestinationsExist",
+            "CountBounded",
+            "BytesBounded",
+            "DurableAck",
+            "AuditExact",
+            "RecipientsExact",
+            "RefusalUnchanged"
           ],
-          "limits": "Finite abstraction with one stream per team and two incarnations. No Go/SQLite refinement, actual IAM/JSON/SQL/cancellation or byte-quota proof; native and SDK regressions independently exercise those boundaries. The server change only adds the declared operation."
+          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+        }
+      ]
+    },
+    {
+      "path": "formal/SNSQueueFanout.tla",
+      "sha256": "c2398223d0419d9eb270436c32faf44a6f59d7a4ce9a6f116f08c2038f8a9eda",
+      "disposition": "modeled",
+      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "models": [
+        {
+          "id": "SNSQueueFanout",
+          "properties": [
+            "TypeOK",
+            "Authorized",
+            "ParentPresent",
+            "DestinationsExist",
+            "CountBounded",
+            "BytesBounded",
+            "DurableAck",
+            "AuditExact",
+            "RecipientsExact",
+            "RefusalUnchanged"
+          ],
+          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "a4f604776bd726ceac379839ebcaacf2beb81ff186d31d8fc700db62383dba1a",
+      "sha256": "befab00a3c90fa3daa570bbcbcee6ebddc9e1cbeb81ea87b7e207548085b1d92",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the new independent Logs stream-deletion source path and adds a required event-cascade sensitivity control while preserving every existing model, invariant and control.",
+      "reason": "Adds native SNS queue fanout obligations while retaining the merged CloudWatch stream deletion obligation and every other registered model and invariant.",
       "models": []
     },
     {
-      "path": "internal/aws/cloudwatch_logs_delete_stream.go",
-      "sha256": "3d3d06204d254aa5ff70f3ac2e83c89f64958c218a02349f6fbf7ab5c2b7f0e5",
+      "path": "internal/aws/sns.go",
+      "sha256": "0ef78c66b6c3a8724bc12b383192ac7ef7363542b43bf8b13db0a18dd3aa6d3e",
       "disposition": "modeled",
-      "reason": "Adds native DeleteLogStream and its exact capability/dispatch binding. Atomic same-team stream/event removal and generation-bound cursor use are represented in CloudWatchLogsLifecycle; existing unrelated services remain unchanged.",
+      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
       "models": [
         {
-          "id": "CloudWatchLogsLifecycle",
+          "id": "SNSQueueFanout",
           "properties": [
-            "NoOrphans",
-            "TokenAuthority",
-            "OnlyAcceptedWrites"
+            "TypeOK",
+            "Authorized",
+            "ParentPresent",
+            "DestinationsExist",
+            "CountBounded",
+            "BytesBounded",
+            "DurableAck",
+            "AuditExact",
+            "RecipientsExact",
+            "RefusalUnchanged"
           ],
-          "limits": "Finite abstraction with one stream per team and two incarnations. No Go/SQLite refinement, actual IAM/JSON/SQL/cancellation or byte-quota proof; native and SDK regressions independently exercise those boundaries. The server change only adds the declared operation."
+          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+        },
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence."
         }
       ]
     },
     {
-      "path": "internal/aws/cloudwatch_logs_delete_stream_test.go",
-      "sha256": "b26b398e48cff8e5234f71009801957c666871677f498b8ef0a65f37d3c828d0",
-      "disposition": "test-support",
-      "reason": "Adds native deletion, isolation, failure rollback, restart and stale-cursor regressions and extends actual two-process SDK coverage without dropping the original group-recreation regression.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudwatch_logs_http.go",
-      "sha256": "13dfe8b8368b3b096a557d0c5c21d73dac89a4eed322507cb32605e3d10b4088",
+      "path": "internal/aws/sns_sqs_fanout.go",
+      "sha256": "35cae564439e8806655bc054ced87d774d4092ae02909342dac05e2ce7262624",
       "disposition": "modeled",
-      "reason": "Adds native DeleteLogStream and its exact capability/dispatch binding. Atomic same-team stream/event removal and generation-bound cursor use are represented in CloudWatchLogsLifecycle; existing unrelated services remain unchanged.",
+      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
       "models": [
         {
-          "id": "CloudWatchLogsLifecycle",
+          "id": "SNSQueueFanout",
           "properties": [
-            "NoOrphans",
-            "TokenAuthority",
-            "OnlyAcceptedWrites"
+            "TypeOK",
+            "Authorized",
+            "ParentPresent",
+            "DestinationsExist",
+            "CountBounded",
+            "BytesBounded",
+            "DurableAck",
+            "AuditExact",
+            "RecipientsExact",
+            "RefusalUnchanged"
           ],
-          "limits": "Finite abstraction with one stream per team and two incarnations. No Go/SQLite refinement, actual IAM/JSON/SQL/cancellation or byte-quota proof; native and SDK regressions independently exercise those boundaries. The server change only adds the declared operation."
+          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
         }
       ]
     },
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "196568a4b9ed0c2c0d033878f884c86d160c90635a7363e5b08f50a72b32caba",
-      "disposition": "presentation",
-      "reason": "Adds the static DeleteLogStream example and strict request schema to the existing native JSON1.1 root endpoint; no route, protocol bytes or authority changes.",
-      "models": []
+      "path": "internal/aws/sns_sqs_fanout_test.go",
+      "sha256": "d75df7662d291dd4e64be392df813f8e15bf0887900d34e7fa7e623a45277a93",
+      "disposition": "modeled",
+      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "models": [
+        {
+          "id": "SNSQueueFanout",
+          "properties": [
+            "TypeOK",
+            "Authorized",
+            "ParentPresent",
+            "DestinationsExist",
+            "CountBounded",
+            "BytesBounded",
+            "DurableAck",
+            "AuditExact",
+            "RecipientsExact",
+            "RefusalUnchanged"
+          ],
+          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_store.go",
+      "sha256": "a35c3b743b864fbf650431b545b58c4e890f36b31cecf2f9d6b7efca6f29ff29",
+      "disposition": "modeled",
+      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "models": [
+        {
+          "id": "SNSQueueFanout",
+          "properties": [
+            "TypeOK",
+            "Authorized",
+            "ParentPresent",
+            "DestinationsExist",
+            "CountBounded",
+            "BytesBounded",
+            "DurableAck",
+            "AuditExact",
+            "RecipientsExact",
+            "RefusalUnchanged"
+          ],
+          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+        },
+        {
+          "id": "SNSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "MessageCountBounded",
+            "ByteBudgetBounded",
+            "DeliveryBudgetBounded",
+            "DurableAck",
+            "PublishRecipientsExact",
+            "PeerFrame",
+            "NoDanglingDeliveredMessage",
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
+          ],
+          "limits": "Atomic state transitions assume transaction rollback and model validated existing state. Captured post-operation ACK and frozen-delete ownership, globally bounded count/abstract byte/delivery budgets and target/peer frames only. Not SQL/driver/crash/Go refinement, UUID allocation, schema migration, UTF-8 byte calculation, quotas at real cardinality, IAM or outbound delivery. Delivery audit may outlive Unsubscribe, but not its stored message or topic. Ignored/vanishing/late-reinsert native SQLite faults and two-host SDK checks are separate executable obligations."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sqs_store.go",
+      "sha256": "f8eb116ae9ea46b157e493552744a4fa94c17855fb2ee1935f731d62abb87596",
+      "disposition": "modeled",
+      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "models": [
+        {
+          "id": "SNSQueueFanout",
+          "properties": [
+            "TypeOK",
+            "Authorized",
+            "ParentPresent",
+            "DestinationsExist",
+            "CountBounded",
+            "BytesBounded",
+            "DurableAck",
+            "AuditExact",
+            "RecipientsExact",
+            "RefusalUnchanged"
+          ],
+          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+        },
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "AuthorizedMutations",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight"
+          ],
+          "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence."
+        },
+        {
+          "id": "SQSStorageBudget",
+          "properties": [
+            "TypeOK",
+            "FailedSendPreservesRows",
+            "ForeignRowsPreserved",
+            "LiveRowsPreserved",
+            "BudgetAccountsPhysical",
+            "PhysicalRowCap",
+            "PayloadByteCap",
+            "ReadRemovesOwnExpired",
+            "DeleteScopeExact",
+            "MaintenanceNotBudgetBlocked"
+          ],
+          "limits": "Finite physical-payload budget abstraction, not Go/SQLite refinement, SQL transaction/crash proof, Unicode/UTF8/string-byte counting, JSON attribute serialization, actual64MiB/10000row arithmetic, file size/SQLite overhead, clock/retention, receipt/IAM authorization or random-ID collision resistance. Row weights abstract persisted body+serialized-attribute bytes; all foreign rows, including expired ones, consume budget. Scopes/parent queues are assumed already valid and trusted; SQSLifecycle/native tests separately handle authority, parent lifetime and receipts. Maintenance enabledness assumes these preconditions, not unauthorized access or liveness/fairness. Charged counters describe successful admission accounting, not a claim that an actual storage-error path computed counters. FailedSendPreservesRows still applies to every rejected/storage-error send. Legacy overcap rows are retained: only new accepted sends must fit both caps, own expired cleanup is explicit/scoped and rollback preserves every row on send failure."
+        }
+      ]
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "2273f8d866a222677e3b3386efa161727a5b044e7c033a6ffe53054197f9a964",
+      "sha256": "745004f01fb7eeaeb59f2d91c906ad7ab3685f46b5d0f4aeebc298dff61fa404",
       "disposition": "modeled",
-      "reason": "Adds native DeleteLogStream and its exact capability/dispatch binding. Atomic same-team stream/event removal and generation-bound cursor use are represented in CloudWatchLogsLifecycle; existing unrelated services remain unchanged.",
+      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
       "models": [
         {
-          "id": "CloudWatchLogsLifecycle",
+          "id": "SNSQueueFanout",
           "properties": [
-            "NoOrphans",
-            "TokenAuthority",
-            "OnlyAcceptedWrites"
+            "TypeOK",
+            "Authorized",
+            "ParentPresent",
+            "DestinationsExist",
+            "CountBounded",
+            "BytesBounded",
+            "DurableAck",
+            "AuditExact",
+            "RecipientsExact",
+            "RefusalUnchanged"
           ],
-          "limits": "Finite abstraction with one stream per team and two incarnations. No Go/SQLite refinement, actual IAM/JSON/SQL/cancellation or byte-quota proof; native and SDK regressions independently exercise those boundaries. The server change only adds the declared operation."
+          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/sns_test.go",
+      "sha256": "c9ee1c2bef6d6fdfd1c8f04e9f841c3dc61fa1e38957600d08b6d209478bcb35",
+      "disposition": "modeled",
+      "reason": "Binds same-database SNS publication and native SQS enqueue to one transaction with captured authority, exact recipients, quotas and final acknowledgements; existing unrelated behavior remains separately modeled and tested.",
+      "models": [
+        {
+          "id": "SNSQueueFanout",
+          "properties": [
+            "TypeOK",
+            "Authorized",
+            "ParentPresent",
+            "DestinationsExist",
+            "CountBounded",
+            "BytesBounded",
+            "DurableAck",
+            "AuditExact",
+            "RecipientsExact",
+            "RefusalUnchanged"
+          ],
+          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "32344386c1b5032e9c8f2905b6072650b037f274cd3602fd38d3a4ac81783d9e",
+      "sha256": "6fcef885b416a973b14d9ddce1c2643d0e55642b3781c80252520d8176c66a8e",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the new independent Logs stream-deletion source path and adds a required event-cascade sensitivity control while preserving every existing model, invariant and control.",
+      "reason": "Requires native SNS fanout invariant controls while retaining the merged CloudWatch deletion cascade control and every existing mandatory control.",
       "models": []
     },
     {
-      "path": "test/e2e/cloudwatch_logs.py",
-      "sha256": "8a368544a3364c31bd5b1d36b6c1f1c9f38d34d33b091fba4137ff9da2080c2b",
-      "disposition": "test-support",
-      "reason": "Adds native deletion, isolation, failure rollback, restart and stale-cursor regressions and extends actual two-process SDK coverage without dropping the original group-recreation regression.",
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "d69ae6885ce6b4cfe8d2577c4e886af80a4b6e792f06668a01d9bc0a11a34a60",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds the native SNS queue fanout model, required invariants and controls; preserves every existing registered entry and strengthens missing-obligation regression coverage.",
       "models": []
     },
     {
-      "path": "test/e2e/test_openapi_json10.py",
-      "sha256": "0a66c9f06746b6452e46e4d518c172d2a775409b138e9412b953f8663e8abcbb",
+      "path": "test/e2e/check.py",
+      "sha256": "c69724ab83c5c6b8ab495eb6bf35d7b9f41b9a45f15d6b113cd6a368b6be5ede",
       "disposition": "test-support",
-      "reason": "Preserves every inherited OpenAPI snapshot and detector while explicitly validating the reviewed DeleteLogStream schema/example/union addition. Adds strict request and missing/altered-extension mutation regressions for the stale CI inventory.",
+      "reason": "Adds real SDK fanout, isolation, authorization refusal, restart and cleanup acceptance without removing an inherited test.",
       "models": []
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "f4e8a8c9db39be5c499448473f3cba32496478fd39c2ffd2c00a6b58d2b9d63c",
+      "path": "test/e2e/sns_sqs_fanout.py",
+      "sha256": "c07f5cf6baee30fdbd26c519f96466d3d4ff338f9cb3d9790791c824b16e5e64",
       "disposition": "test-support",
-      "reason": "Preserves every inherited OpenAPI snapshot and detector while explicitly validating the reviewed DeleteLogStream schema/example/union addition. Adds strict request and missing/altered-extension mutation regressions for the stale CI inventory.",
+      "reason": "Adds real SDK fanout, isolation, authorization refusal, restart and cleanup acceptance without removing an inherited test.",
       "models": []
     }
   ]
