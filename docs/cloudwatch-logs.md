@@ -11,7 +11,7 @@ This increment adds CloudWatch **Logs**, not CloudWatch metrics or alarms. Its A
 and console use provider-owned SQLite tables. It does not deliver Lambda logs
 automatically, provision an agent, enable a Challenge problem, or claim visual
 parity with an authenticated AWS console. The Cloudscape console calls the same
-seven native operations as SDK clients.
+existing seven native operations; DeleteLogStream is additionally available through native SDK/API as SDK clients.
 
 ## Native protocol and supported operations
 
@@ -27,6 +27,7 @@ of the simulator's four supported regions.
 | CreateLogGroup | logGroupName, optional logGroupClass=STANDARD | group ARN |
 | DescribeLogGroups | logGroupNamePrefix, logGroupClass=STANDARD, limit, nextToken | `*` |
 | DeleteLogGroup | logGroupName | group ARN |
+| DeleteLogStream | logGroupName, logStreamName | stream ARN |
 | CreateLogStream | logGroupName, logStreamName | stream ARN |
 | DescribeLogStreams | logGroupName, logStreamNamePrefix, orderBy, descending, limit, nextToken | group ARN |
 | PutLogEvents | logGroupName, logStreamName, logEvents, optional ignored sequenceToken | stream ARN |
@@ -46,6 +47,26 @@ absence/duplicates return AWS-style 400 ResourceNotFoundException or
 ResourceAlreadyExistsException; explicit IAM denial returns 403; internal state
 failures return a sanitized 500 ServiceUnavailableException. Successful create
 and delete operations return an empty HTTP 200 body.
+
+## Delete a stream
+
+DeleteLogStream removes the named stream and its events in one SQLite transaction.
+The group, siblings and other regions remain unchanged. Missing groups/streams
+return ResourceNotFoundException (400); success is HTTP 200 with an empty body.
+Authorization uses `logs:DeleteLogStream` on the exact stream ARN before checking
+existence. Strict field/name admission and the existing four-region scope apply.
+A recreated name gets a new generation and rejects previous event cursors.
+Stored-byte/event/stream quota is released immediately. SQL/cascade failures or
+cancellation roll back and do not acknowledge deletion. Host-owned SQL damage is
+reported as a sanitized 500, not as a missing resource or successful cleanup.
+
+This addition has no new service dependency or console button. Retention,
+metrics/alarms and automatic Lambda delivery remain unsupported. AWS's general
+rate limits and concurrent-update error taxonomy are not simulated.
+
+Primary contracts checked 2026-11-10:
+[DeleteLogStream](https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_DeleteLogStream.html)
+and [Logs IAM actions/resources](https://docs.aws.amazon.com/service-authorization/latest/reference/list_logs.html).
 
 ## Ingestion and retrieval
 

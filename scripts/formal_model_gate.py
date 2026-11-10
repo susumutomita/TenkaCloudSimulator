@@ -548,6 +548,7 @@ REQUIRED_MUTANTS = {'S3MultipartState': {'OmitPartBudget', 'OmitUploadParent', '
                             'ReadBeforeLateCleanup',
                             'SkipSecondResource'},
  'CloudWatchLogsLifecycle': {'AcceptInvalidBatch',
+                             'OmitDeleteStreamEventCascade',
                              'OmitDeleteEventCascade',
                              'OmitPutAuthority',
                              'OmitTokenGeneration',

@@ -1,19 +1,115 @@
 {
   "version": 1,
-  "base_sha": "214948ad4cdabc5351ad895e2c8c46b3646f201e",
+  "base_sha": "36e72c4bb7674ea394d55a7eeb9ac9fa3778450c",
   "changes": [
     {
-      "path": "docs/development-status.md",
-      "sha256": "a0560054565980ca35ba1d6fdbf16a58949fc83e3e481f0939ac894c3325b009",
+      "path": "docs/cloudwatch-logs.md",
+      "sha256": "90d7f444585dd864776139637ff645f41d3f01b47cad9d7292c5a5eabe95f970",
       "disposition": "documentation",
-      "reason": "Documents the exact public main snapshot, all open Issue links, merged increments and pending acceptance without changing runtime, validation gates or model contracts. Historical roster entries remain unchanged.",
+      "reason": "Documents the bounded operation, unchanged exclusions, ownership and pending or completed verification without claiming broad CloudWatch completion.",
       "models": []
     },
     {
-      "path": "docs/open-issue-progress.md",
-      "sha256": "930f8b178fc87eb9cf71242508ae5425a936a74b1b547a7764c48aca7414cb66",
-      "disposition": "documentation",
-      "reason": "Documents the exact public main snapshot, all open Issue links, merged increments and pending acceptance without changing runtime, validation gates or model contracts. Historical roster entries remain unchanged.",
+      "path": "formal/CloudWatchLogsLifecycle.tla",
+      "sha256": "52cde8f1cf7d29882534e23cf9fd407144e745e16ac3765cdbb5fe4d724f2420",
+      "disposition": "modeled",
+      "reason": "Adds native DeleteLogStream and its exact capability/dispatch binding. Atomic same-team stream/event removal and generation-bound cursor use are represented in CloudWatchLogsLifecycle; existing unrelated services remain unchanged.",
+      "models": [
+        {
+          "id": "CloudWatchLogsLifecycle",
+          "properties": [
+            "NoOrphans",
+            "TokenAuthority",
+            "OnlyAcceptedWrites"
+          ],
+          "limits": "Finite abstraction with one stream per team and two incarnations. No Go/SQLite refinement, actual IAM/JSON/SQL/cancellation or byte-quota proof; native and SDK regressions independently exercise those boundaries. The server change only adds the declared operation."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "a4f604776bd726ceac379839ebcaacf2beb81ff186d31d8fc700db62383dba1a",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the new independent Logs stream-deletion source path and adds a required event-cascade sensitivity control while preserving every existing model, invariant and control.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudwatch_logs_delete_stream.go",
+      "sha256": "3d3d06204d254aa5ff70f3ac2e83c89f64958c218a02349f6fbf7ab5c2b7f0e5",
+      "disposition": "modeled",
+      "reason": "Adds native DeleteLogStream and its exact capability/dispatch binding. Atomic same-team stream/event removal and generation-bound cursor use are represented in CloudWatchLogsLifecycle; existing unrelated services remain unchanged.",
+      "models": [
+        {
+          "id": "CloudWatchLogsLifecycle",
+          "properties": [
+            "NoOrphans",
+            "TokenAuthority",
+            "OnlyAcceptedWrites"
+          ],
+          "limits": "Finite abstraction with one stream per team and two incarnations. No Go/SQLite refinement, actual IAM/JSON/SQL/cancellation or byte-quota proof; native and SDK regressions independently exercise those boundaries. The server change only adds the declared operation."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudwatch_logs_delete_stream_test.go",
+      "sha256": "b26b398e48cff8e5234f71009801957c666871677f498b8ef0a65f37d3c828d0",
+      "disposition": "test-support",
+      "reason": "Adds native deletion, isolation, failure rollback, restart and stale-cursor regressions and extends actual two-process SDK coverage without dropping the original group-recreation regression.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudwatch_logs_http.go",
+      "sha256": "13dfe8b8368b3b096a557d0c5c21d73dac89a4eed322507cb32605e3d10b4088",
+      "disposition": "modeled",
+      "reason": "Adds native DeleteLogStream and its exact capability/dispatch binding. Atomic same-team stream/event removal and generation-bound cursor use are represented in CloudWatchLogsLifecycle; existing unrelated services remain unchanged.",
+      "models": [
+        {
+          "id": "CloudWatchLogsLifecycle",
+          "properties": [
+            "NoOrphans",
+            "TokenAuthority",
+            "OnlyAcceptedWrites"
+          ],
+          "limits": "Finite abstraction with one stream per team and two incarnations. No Go/SQLite refinement, actual IAM/JSON/SQL/cancellation or byte-quota proof; native and SDK regressions independently exercise those boundaries. The server change only adds the declared operation."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "196568a4b9ed0c2c0d033878f884c86d160c90635a7363e5b08f50a72b32caba",
+      "disposition": "presentation",
+      "reason": "Adds the static DeleteLogStream example and strict request schema to the existing native JSON1.1 root endpoint; no route, protocol bytes or authority changes.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "2273f8d866a222677e3b3386efa161727a5b044e7c033a6ffe53054197f9a964",
+      "disposition": "modeled",
+      "reason": "Adds native DeleteLogStream and its exact capability/dispatch binding. Atomic same-team stream/event removal and generation-bound cursor use are represented in CloudWatchLogsLifecycle; existing unrelated services remain unchanged.",
+      "models": [
+        {
+          "id": "CloudWatchLogsLifecycle",
+          "properties": [
+            "NoOrphans",
+            "TokenAuthority",
+            "OnlyAcceptedWrites"
+          ],
+          "limits": "Finite abstraction with one stream per team and two incarnations. No Go/SQLite refinement, actual IAM/JSON/SQL/cancellation or byte-quota proof; native and SDK regressions independently exercise those boundaries. The server change only adds the declared operation."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "32344386c1b5032e9c8f2905b6072650b037f274cd3602fd38d3a4ac81783d9e",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the new independent Logs stream-deletion source path and adds a required event-cascade sensitivity control while preserving every existing model, invariant and control.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/cloudwatch_logs.py",
+      "sha256": "8a368544a3364c31bd5b1d36b6c1f1c9f38d34d33b091fba4137ff9da2080c2b",
+      "disposition": "test-support",
+      "reason": "Adds native deletion, isolation, failure rollback, restart and stale-cursor regressions and extends actual two-process SDK coverage without dropping the original group-recreation regression.",
       "models": []
     }
   ]
