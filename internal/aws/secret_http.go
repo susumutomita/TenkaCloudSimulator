@@ -199,6 +199,7 @@ func (s *SecretStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region s
 	allowed := map[string][]string{
 		"CreateSecret":             {"Name", "Description", "ClientRequestToken", "SecretString"},
 		"DescribeSecret":           {"SecretId"},
+		"UpdateSecret":             {"SecretId", "Description", "ClientRequestToken"},
 		"ListSecrets":              {"MaxResults", "NextToken", "SortBy", "SortOrder"},
 		"ListSecretVersionIds":     {"SecretId", "IncludeDeprecated", "MaxResults", "NextToken"},
 		"PutSecretValue":           {"SecretId", "ClientRequestToken", "SecretString", "VersionStages"},
@@ -239,6 +240,16 @@ func (s *SecretStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region s
 	}
 	if op == "CreateSecret" || op == "PutSecretValue" {
 		if input.SecretString == nil {
+			fail(secretInvalid())
+			return
+		}
+	}
+	if op == "UpdateSecret" {
+		if _, present := raw["Description"]; !present {
+			fail(secretInvalid())
+			return
+		}
+		if _, present := raw["ClientRequestToken"]; present && !secretToken(input.ClientRequestToken) {
 			fail(secretInvalid())
 			return
 		}
@@ -292,6 +303,8 @@ func (s *SecretStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region s
 	switch op {
 	case "CreateSecret":
 		output, err = s.Create(ctx, region, input.Name, input.Description, input.ClientRequestToken, newSecretMaterial(*input.SecretString), authorize)
+	case "UpdateSecret":
+		output, err = s.UpdateDescription(ctx, region, input.SecretId, input.Description, authorize)
 	case "DescribeSecret":
 		output, err = s.Describe(ctx, region, input.SecretId, authorize)
 	case "PutSecretValue":

@@ -190,6 +190,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/LogsDeleteLogStreamRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SecretsUpdateSecretInput"
                   }
                 ],
                 "description": "SSM, KMS, CloudWatch Logs or Secrets Manager JSON 1.1 as selected by X-Amz-Target. The generic object alternative preserves SSM and Secrets Manager templates; named KMS and Logs schemas document their bounded shapes. Exact KMS per-target schemas are in x-simulator-kms-operation-schemas; body alone cannot discriminate routing."
@@ -461,6 +464,13 @@
                   },
                   "x-request-schema": {
                     "$ref": "#/components/schemas/LogsDeleteLogStreamRequest"
+                  }
+                },
+                "UpdateSecret": {
+                  "summary": "X-Amz-Target: secretsmanager.UpdateSecret (description only)",
+                  "value": {
+                    "SecretId": "training/metadata-update",
+                    "Description": "Updated practice description"
                   }
                 }
               }
@@ -1173,6 +1183,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/SecretsListSecretVersionIdsOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SecretsUpdateSecretOutput"
                     }
                   ],
                   "description": "Shared JSON1.1 response envelope selected by native target; the generic object preserves other services. Exact ListSecretVersionIds output is documented by the supplementary operation-schema mapping, not a global discriminator."
@@ -1208,6 +1221,13 @@
                           ]
                         }
                       ]
+                    }
+                  },
+                  "UpdateSecret": {
+                    "summary": "Description-only update; no new version",
+                    "value": {
+                      "ARN": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/metadata-update-AbCd12",
+                      "Name": "training/metadata-update"
                     }
                   }
                 }
@@ -1485,6 +1505,24 @@
               ]
             },
             "note": "Supplemental per-target schema, not body-only routing. Existing seven operations retain their contracts."
+          },
+          "secretsmanager.UpdateSecret": {
+            "request": "#/components/schemas/SecretsUpdateSecretInput",
+            "response": "#/components/schemas/SecretsUpdateSecretOutput",
+            "permission": "secretsmanager:UpdateSecret on the resolved saved ARN",
+            "errors": {
+              "400": [
+                "InvalidParameterException",
+                "ResourceNotFoundException"
+              ],
+              "403": [
+                "AccessDeniedException"
+              ],
+              "500": [
+                "InternalServiceError sanitized"
+              ]
+            },
+            "note": "Description only; required even though AWS supports other update fields. Optional token does not create a version. Generic shared-root alternatives do not weaken this per-target contract."
           }
         }
       }
@@ -3476,7 +3514,10 @@
             "description": "Explicit opt-in for synchronous guest output, which may contain sensitive values. Tail with DryRun is unsupported.",
             "schema": {
               "type": "string",
-              "enum": ["None", "Tail"],
+              "enum": [
+                "None",
+                "Tail"
+              ],
               "default": "None"
             }
           },
@@ -3489,7 +3530,9 @@
             "headers": {
               "X-Amz-Log-Result": {
                 "description": "Only for explicit synchronous Tail: base64 of at most 4096 raw captured output bytes. May start inside a UTF-8 character.",
-                "schema": {"type": "string"}
+                "schema": {
+                  "type": "string"
+                }
               }
             },
             "description": "JSON returned by the actual Python handler; shape depends on your code and may be an object, array or primitive. A function exception can still return HTTP200: check x-amz-function-error and the error payload. This differs from a protocol/IAM error such as403.",
@@ -16688,6 +16731,48 @@
           "logGroupName",
           "logStreamName"
         ]
+      },
+      "SecretsUpdateSecretInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "SecretId",
+          "Description"
+        ],
+        "properties": {
+          "SecretId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "Description": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "ClientRequestToken": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 64
+          }
+        },
+        "description": "Metadata only. Description is required in this bounded subset; empty clears. SecretId is an existing local name (up to 512 supported ASCII characters) or full physical ARN in the selected region/account, never a partial ARN. Optional token has no version effect; reuse is a simulator interpretation, not AWS equivalence. Values, SecretBinary, KmsKeyId, Type, stages and rotation are rejected; duplicate/null/unknown fields fail."
+      },
+      "SecretsUpdateSecretOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ARN",
+          "Name"
+        ],
+        "properties": {
+          "ARN": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          }
+        },
+        "description": "Updated physical identity only. No VersionId, version stages, secret value or KMS metadata."
       }
     },
     "responses": {
@@ -16791,7 +16876,7 @@
     },
     {
       "name": "Secrets Manager",
-      "description": "Use JSON 1.1 with `X-Amz-Target: secretsmanager.<operation>`. Eight templates cover the bounded practice-only plaintext subset; no real KMS encryption, rotation or recovery window.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request \u2192 Send for a real local response. No real cloud is contacted. ListSecretVersionIds returns version IDs/stages/creation time only, with its own ARN permission and live DB/region/physical-identity/filter-scoped continuation. No values, KMS or last-access metadata."
+      "description": "Use JSON 1.1 with `X-Amz-Target: secretsmanager.<operation>`. Nine templates cover the bounded practice-only plaintext subset; no real KMS encryption, rotation or recovery window.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request \u2192 Send for a real local response. No real cloud is contacted. ListSecretVersionIds returns version IDs/stages/creation time only, with its own ARN permission and live DB/region/physical-identity/filter-scoped continuation. No values, KMS or last-access metadata."
     },
     {
       "name": "DynamoDB tables and items",

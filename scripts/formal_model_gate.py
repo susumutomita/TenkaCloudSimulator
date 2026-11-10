@@ -1165,6 +1165,16 @@ BASE_INVARIANTS['SNSQueueFanout'] = {'Authorized', 'TypeOK', 'ParentPresent', 'B
 REQUIRED_MUTANTS['SNSQueueFanout'] = {'SkipQueueParent', 'SkipPayloadBytes', 'DropAuditRow', 'SkipTopicParent', 'SkipQueueAuthorization', 'DropQueueDelivery', 'SkipMessageCount', 'PartialDeliveryOnFailure', 'IgnoreCommitFailure'}
 REQUIRED_SOURCE_SCOPES['SNSQueueFanout'] = {'internal/server/server.go', 'internal/aws/sqs_store.go', 'internal/server/sns_test.go', 'internal/aws/sns_store.go', 'internal/aws/sns_sqs_fanout_test.go', 'internal/aws/sns.go', 'internal/aws/sns_sqs_fanout.go'}
 
+BASE_MODELS.add('SecretMetadataUpdate')
+BASE_INVARIANTS['SecretMetadataUpdate'] = {'ValidPresent', 'Authorized', 'VersionPreserved', 'StagePreserved', 'ValuePreserved', 'NoPartialVisibility', 'TypeOK', 'ExactMetadata', 'IdentityPreserved', 'PeerPreserved', 'RefusalUnchanged', 'CreatedPreserved', 'DurableAcknowledgement'}
+REQUIRED_MUTANTS['SecretMetadataUpdate'] = {'FailedRollback', 'CorruptStagePreserved', 'SkipCommitAcknowledgement', 'SkipValidity', 'SkipExistence', 'SkipFinalStateCheck', 'CorruptIdentityPreserved', 'CorruptVersionPreserved', 'ExposeTentativeWrite', 'CorruptValuePreserved', 'SkipAuthorization', 'WrongDescription', 'CorruptPeerPreserved', 'CorruptCreatedPreserved'}
+REQUIRED_SOURCE_SCOPES['SecretMetadataUpdate'] = {'internal/aws/secret_http.go', 'internal/aws/secret_metadata_update.go'}
+
+BASE_MODELS.add('SecretDescriptionWorkflow')
+BASE_INVARIANTS['SecretDescriptionWorkflow'] = {'MetadataIdentity', 'ReadRetriesStayReadOnly', 'AcknowledgmentIdentity', 'TypeOK', 'NoStaleFollowupRead', 'LiveWorkKeepsLatch', 'NoValueRetrieval', 'NoWriteWhileUncertain', 'FreshEmissions', 'AcknowledgedStatusPreserved', 'OnePendingSubmission', 'ServerCommitPreserved', 'UnmountHidesDisplay', 'UncertaintyFence'}
+REQUIRED_MUTANTS['SecretDescriptionWorkflow'] = {'AbortRollsBackServerCommit', 'PublishStaleRead', 'FailedReconciliationClearsFence', 'StaleACKStartsRefresh', 'RetrieveValueOnRefresh', 'ReadRetryResubmitsMutation', 'AcceptMalformedACK', 'StaleWriteUnlocksNewRequest', 'PublishStaleWrite', 'SkipSynchronousLatch', 'SkipEpochCheck', 'AcceptMalformedMetadata', 'AbortSuppressesServerCommit', 'ACKRefreshResubmitsMutation', 'UnmountKeepsDisplay', 'FailedRefreshLosesACK', 'StaleReadUnlocksNewRequest', 'SkipUncertaintyFence'}
+REQUIRED_SOURCE_SCOPES['SecretDescriptionWorkflow'] = {'tools/console/src/secret_description.jsx'}
+
 class GateError(ValueError):
     pass
 
