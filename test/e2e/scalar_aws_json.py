@@ -100,8 +100,16 @@ def run():
                         and urllib.parse.urlsplit(response.url).path == path) as received:
                     page.get_by_role('button').filter(has_text='Send Request').last.click()
                 return received.value
+            def response_body():
+                # Scalar inherits this class onto the nested disclosure panel.
+                # Select its outer response block, which owns the download action,
+                # rather than accepting whichever duplicate happens to come first.
+                body = page.locator('.response-section-content-body').filter(
+                    has=page.get_by_role('link', name='Download Response Body', exact=True))
+                expect(body).to_have_count(1)
+                return body
             def check_text(text):
-                body = page.locator('.response-section-content-body')
+                body = response_body()
                 expect(body).to_be_visible()
                 expect(body).to_contain_text(text)
                 expect(body.get_by_text('Binary file', exact=True)).to_have_count(0)
@@ -124,7 +132,7 @@ def run():
                 response = send('GET', '/docs-json-bucket/' + key)
                 assert response.status == 200 and response.body() == raw
                 assert response.headers['content-type'] == content_type
-                body = page.locator('.response-section-content-body')
+                body = response_body()
                 if text is None:
                     expect(body.get_by_text('Binary file', exact=True)).to_be_visible()
                 else:

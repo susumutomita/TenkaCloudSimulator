@@ -4,9 +4,9 @@
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "ab59cc8e0bd89579ce994e03815abbfb135cd053976346a2fe467629a3cca356",
+      "sha256": "700896e1f214f462627e69c2e536b3e3ce3eb7be7943c5b49e079a1b930e4804",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the focused first-party response-decoder tests to the existing required Node test step. All quality, E2E and formal gates remain unchanged.",
+      "reason": "Adds focused first-party response-decoder tests to the required Node step and the actual Scalar browser regression to the early console acceptance job. The full quality, E2E and formal gates remain intact.",
       "models": []
     },
     {
@@ -46,7 +46,7 @@
     },
     {
       "path": "test/e2e/scalar_aws_json.py",
-      "sha256": "465865963b328a9df83ea9209125bb051c4fda6efc36bae0a511282afeb24334",
+      "sha256": "22aa616a2c16b391024859fecd410937445b88ec427c3ec1dcbf7944bdc719bb",
       "disposition": "test-support",
       "reason": "Adds or registers focused configuration and native browser response-display regressions. These tests do not change runtime state or model bounds; actual browser execution remains an independent gate.",
       "models": []
