@@ -1,190 +1,54 @@
 {
   "version": 1,
-  "base_sha": "0658d81972083c2d68c8174578a9cb51e3189099",
+  "base_sha": "cc30d5e15077676a5adec29041e76272e6150d49",
   "changes": [
     {
-      "path": "docs/console.md",
-      "sha256": "f3aa27f068c7d3a517f839fd8a91ab3227b9d8d1204c1db9e6a85cfc3cb67217",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "700896e1f214f462627e69c2e536b3e3ce3eb7be7943c5b49e079a1b930e4804",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds focused first-party response-decoder tests to the required Node step and the actual Scalar browser regression to the early console acceptance job. The full quality, E2E and formal gates remain intact.",
+      "models": []
+    },
+    {
+      "path": "docs/api-reference.md",
+      "sha256": "9890b67e019340b4f04e8db9b22f365f19a060ff6cace7efd202d402e670b75a",
       "disposition": "documentation",
-      "reason": "Adds and documents local-browser favorite service selection with no default pins; discovery and server authorization remain unchanged. Regression tests check empty state, toggle, persistence failures and scoped-session filtering.",
+      "reason": "Documents the scoped AWS JSON display change and verification limits.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.css",
-      "sha256": "771c0cb40060cf6b614dac6696145800a707eaf0dae8e2b0893ea2b042f13038",
+      "path": "docs/development-status.md",
+      "sha256": "2150fd2e34ea7514c60434c5cbd3c5f78adbe8683654f80bea0da58017f14934",
+      "disposition": "documentation",
+      "reason": "Documents the scoped AWS JSON display change and verification limits.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/init.js",
+      "sha256": "ae679855d868dd33c580a4a0907e35f2f6c101672efa172648c526c8df80d145",
       "disposition": "presentation",
-      "reason": "Adds and documents local-browser favorite service selection with no default pins; discovery and server authorization remain unchanged. Regression tests check empty state, toggle, persistence failures and scoped-session filtering.",
+      "reason": "Presentation-only Scalar response-body decoder for the exact AWS JSON1.0 and JSON1.1 MIME types. Native bytes, headers, status, origin filtering and authority are unchanged. JSON is displayed as UTF-8 text without parsing or reserialization; finite state behavior is not changed.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "061e7a6c0c34c075e09d172d890aeec5b17572fa30c8bbdaf86618b84239438b",
-      "disposition": "modeled",
-      "reason": "Rebuilds the official console with explicit favorite shortcuts while preserving all existing resource views, session/capability filtering, and API authority. Favorites store only public service IDs; browser tests independently verify pin/unpin/reload and hidden-service boundaries.",
-      "models": [
-        {
-          "id": "SecretsRevealEpoch",
-          "properties": [
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
-          ],
-          "limits": "Existing finite view/input invariants cover retained bundled components. These models do not execute or prove the favorites code, browser storage, focus behavior, IAM enforcement or full UI refinement; native/browser tests remain independent requirements."
-        },
-        {
-          "id": "SakuraDisksViewEpoch",
-          "properties": [
-            "AcceptedReadScope",
-            "SuccessfulReadOnly",
-            "RenderedScopeBound",
-            "RenderedResourceBound",
-            "StaleReadFrame",
-            "StaleWriteFrame",
-            "NavigationACKFrame",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryOnly",
-            "SingleWriteSend",
-            "LocaleFrame",
-            "CancelDraftClear"
-          ],
-          "limits": "Existing finite view/input invariants cover retained bundled components. These models do not execute or prove the favorites code, browser storage, focus behavior, IAM enforcement or full UI refinement; native/browser tests remain independent requirements."
-        },
-        {
-          "id": "DynamoDBConsoleEpoch",
-          "properties": [
-            "NoStalePublication",
-            "ReadGenerationVerified",
-            "DisplayedKeyBound",
-            "CancelNoOrphanLoading",
-            "AckClosesDraft",
-            "AckBelongsToCurrentView",
-            "ReadRetryNeverWrites",
-            "SingleSendBeforeACK",
-            "LocalePreservesDraft"
-          ],
-          "limits": "Existing finite view/input invariants cover retained bundled components. These models do not execute or prove the favorites code, browser storage, focus behavior, IAM enforcement or full UI refinement; native/browser tests remain independent requirements."
-        },
-        {
-          "id": "SecretMetadataViewEpoch",
-          "properties": [
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
-          ],
-          "limits": "Existing finite view/input invariants cover retained bundled components. These models do not execute or prove the favorites code, browser storage, focus behavior, IAM enforcement or full UI refinement; native/browser tests remain independent requirements."
-        },
-        {
-          "id": "KMSAliasesViewEpoch",
-          "properties": [
-            "CurrentListOutcome",
-            "NoCachedRowsOnFailure",
-            "CurrentTargetMetadata",
-            "ClosedFormHasNoTarget",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryNeverWrites",
-            "OnlyVerifiedTargetSubmitted",
-            "DeleteRequiresExactConfirmation",
-            "LocalePreservesIntent"
-          ],
-          "limits": "Existing finite view/input invariants cover retained bundled components. These models do not execute or prove the favorites code, browser storage, focus behavior, IAM enforcement or full UI refinement; native/browser tests remain independent requirements."
-        },
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "Existing finite view/input invariants cover retained bundled components. These models do not execute or prove the favorites code, browser storage, focus behavior, IAM enforcement or full UI refinement; native/browser tests remain independent requirements."
-        },
-        {
-          "id": "LoginInputIntent",
-          "properties": [
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
-          ],
-          "limits": "Existing finite view/input invariants cover retained bundled components. These models do not execute or prove the favorites code, browser storage, focus behavior, IAM enforcement or full UI refinement; native/browser tests remain independent requirements."
-        },
-        {
-          "id": "LambdaLogTailDisclosure",
-          "properties": [
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
-          ],
-          "limits": "Existing finite view/input invariants cover retained bundled components. These models do not execute or prove the favorites code, browser storage, focus behavior, IAM enforcement or full UI refinement; native/browser tests remain independent requirements."
-        }
-      ]
-    },
-    {
-      "path": "test/console/favorites.test.mjs",
-      "sha256": "f504d16f139b01a07798ffa06e44040f6e32d56640a53118b2e85bceb8e81db1",
+      "path": "test/console/api-reference-json.test.mjs",
+      "sha256": "f987e7ece91940f14f27df6f2bf29ab1db50e8214c5e1ba2c1b30adf3635a97c",
       "disposition": "test-support",
-      "reason": "Adds and documents local-browser favorite service selection with no default pins; discovery and server authorization remain unchanged. Regression tests check empty state, toggle, persistence failures and scoped-session filtering.",
+      "reason": "Adds or registers focused configuration and native browser response-display regressions. These tests do not change runtime state or model bounds; actual browser execution remains an independent gate.",
       "models": []
     },
     {
-      "path": "test/e2e/console_handoff.py",
-      "sha256": "aec394f22f3b948ad4bc71c80c7d0f85e970805822cece000b4dcf2331b863ad",
+      "path": "test/e2e/check.py",
+      "sha256": "a9dbabe61bbcb60ed1bd20962534550983db5af019ac188548310febe76f0435",
       "disposition": "test-support",
-      "reason": "Adds and documents local-browser favorite service selection with no default pins; discovery and server authorization remain unchanged. Regression tests check empty state, toggle, persistence failures and scoped-session filtering.",
+      "reason": "Adds or registers focused configuration and native browser response-display regressions. These tests do not change runtime state or model bounds; actual browser execution remains an independent gate.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "df5cb6449f66ca626f5d829d67f4969ff56b4595539c3fb4d99af3badc7738cb",
-      "disposition": "presentation",
-      "reason": "Adds and documents local-browser favorite service selection with no default pins; discovery and server authorization remain unchanged. Regression tests check empty state, toggle, persistence failures and scoped-session filtering.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "a21d2eb91f8adeda0f1bd0e8b8c7c70ccf67d1264efb2d5cfd596807411f3485",
-      "disposition": "presentation",
-      "reason": "Adds and documents local-browser favorite service selection with no default pins; discovery and server authorization remain unchanged. Regression tests check empty state, toggle, persistence failures and scoped-session filtering.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/console-favorites.mjs",
-      "sha256": "ae75662d73bba42e3bbe1c96b7aa5667c35f3a0e4206fb1dc12c94fb150e8e04",
-      "disposition": "presentation",
-      "reason": "Adds and documents local-browser favorite service selection with no default pins; discovery and server authorization remain unchanged. Regression tests check empty state, toggle, persistence failures and scoped-session filtering.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/console.css",
-      "sha256": "a0717658b13c6abb35c98830731bab16d7b90ce9ea28fb18e6b557fb274b3883",
-      "disposition": "presentation",
-      "reason": "Adds and documents local-browser favorite service selection with no default pins; discovery and server authorization remain unchanged. Regression tests check empty state, toggle, persistence failures and scoped-session filtering.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/global-navigation.jsx",
-      "sha256": "885dbc4eb3d1530af97bec6c66ee64c8efd0807661efd9455075ba3ebfdc01af",
-      "disposition": "presentation",
-      "reason": "Adds and documents local-browser favorite service selection with no default pins; discovery and server authorization remain unchanged. Regression tests check empty state, toggle, persistence failures and scoped-session filtering.",
+      "path": "test/e2e/scalar_aws_json.py",
+      "sha256": "1ad94eea9a2fcca82f6db053e79da460f07369d13c96da6d6cadf29e523b759f",
+      "disposition": "test-support",
+      "reason": "Adds or registers focused configuration and native browser response-display regressions. These tests do not change runtime state or model bounds; actual browser execution remains an independent gate.",
       "models": []
     }
   ]

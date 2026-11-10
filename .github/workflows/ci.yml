@@ -33,7 +33,9 @@ jobs:
         timeout-minutes: 5
         run: /tmp/simulator-tests/bin/playwright install chromium
       - name: Check native discovery, Japanese operations and desktop/mobile layouts
-        run: /tmp/simulator-tests/bin/python test/e2e/service_locale.py
+        run: |
+          /tmp/simulator-tests/bin/python test/e2e/service_locale.py
+          /tmp/simulator-tests/bin/python test/e2e/scalar_aws_json.py
       - name: Check Secrets disclosure boundaries and actual metadata accessibility
         run: |
           /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-console-audit
@@ -45,6 +47,7 @@ jobs:
           name: service-console-focused-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             reports/service-locale-*.png
+            reports/scalar-aws-json.json
             reports/secrets-metadata-*.png
             reports/secrets-a11y-summary.json
           if-no-files-found: warn
@@ -74,7 +77,7 @@ jobs:
       - name: Check immutable release packaging and refusal regressions
         run: python3 test/ci/release_pipeline.py
       - name: Check native token input regression cases
-        run: node --test test/console/login-native-input.test.mjs
+        run: node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
       - name: Run Go quality gates and compile all supported targets
         run: make before-commit cross-check
       - name: Generate coverage views and enforce both 90% floors
@@ -120,6 +123,7 @@ jobs:
           name: service-console-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             reports/service-locale-*.png
+            reports/scalar-aws-json.json
             reports/secrets-metadata-*.png
             reports/secrets-a11y-summary.json
             reports/landing-topology/**

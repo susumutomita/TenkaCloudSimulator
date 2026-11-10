@@ -73,6 +73,9 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_scalar_aws_json_live_response_display(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('scalar_aws_json.py'))],check=True,timeout=180)
+
  def test_iam_ssm_builtin_sdk_pin_authority_and_cleanup(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('iam_ssm_builtin.py'))],check=True,timeout=180)
  def test_cfn_iam_profiles_sdk_composition_restart_and_cleanup(self):
