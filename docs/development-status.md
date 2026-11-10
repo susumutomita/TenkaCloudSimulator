@@ -1,5 +1,62 @@
 # Development roster
 
+## Current progress snapshot, 2026-11-10 03:45 UTC
+
+Verified public baseline: [`214948ad`](https://github.com/susumutomita/TenkaCloudSimulator/commit/214948ad4cdabc5351ad895e2c8c46b3646f201e).
+The [complete open-Issue progress index](open-issue-progress.md) lists all 264
+open Issues from the three GitHub API pages, without counting pull requests or
+counting parent indexes as additional services. It separates merged increments,
+local candidates, unverified acceptance and dependencies. It is a dated snapshot;
+use the linked live Issue/PR views for subsequent state changes.
+
+- **API reference:** [PR #454](https://github.com/susumutomita/TenkaCloudSimulator/pull/454)
+  is merged. Its tested source is `285df357`; main is `214948ad`. Both full PR-source
+  CI runs passed 83 E2E cases, including the real AWS JSON response display and
+  exact-download regressions. Main Formal validation and its [normal full CI](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/42745070590)
+  also passed: 83 E2E cases, repeated GetParameter display and six exact-download
+  formats were checked again on main. These are separate receipts.
+- **Hello World Battle:** IAM profiles (#448), native IAM/guest-control and durable
+  command prerequisites (#450), bounded CFN intrinsics (#443) and local SSM-value
+  resolution (#445) are merged. The preserved network candidate `e8340d0` is not
+  integrated into main. Offline guest inputs/signatures, real VM transport,
+  SSM execution, original host scoring/recovery and cleanup remain incomplete.
+  Focused source/model or standalone guest results do not enable full Battle.
+- **Bedrock #453:** local candidate `737e266` on `feat/bedrock-local-453`
+  integrates main `214948ad` into `96fca8b`. The previous candidate passed focused
+  inference race/vet and independent source review for bounded local inference
+  and strict JSON handling. Current-HEAD/full gates, a new finite-model candidate,
+  real Ollama, Apple generation and Claude Code acceptance remain open. This
+  extends #162; it does not complete AgentCore #163 or Claude Platform #164.
+- **CloudWatch #58:** the existing native Logs increment is merged. A separate
+  `feat/simulator-backlog-20261110` candidate, based on `214948ad`, implements
+  DeleteLogStream with focused store/HTTP tests, minimal capability/OpenAPI/SDK
+  integration and a lifecycle-model increment. Local candidate `386d984` passed
+  focused native/race checks, its finite baseline plus six controls and source
+  review. Vet/build/native SDK checks are in progress; aggregate gates are not
+  yet run. Its dedicated claim/documentation must be preserved on integration;
+  the progress change does not edit its runtime files.
+- **Other open scopes:** AWS112/GCP40/Azure11 describe different bounded catalog
+  units, not full cloud support or a completion percentage. Open Issues can
+  already contain merged work: S3 multipart (#440), CFN conditions (#434), Sakura
+  Disk (#432), native SNS (#413), Logs, KMS and Secrets Manager are examples.
+  SNS-to-SQS #49, Route53 #241, WP #43 and the remaining cloud scopes still need
+  their own original acceptance. The complete index records what is unresolved.
+
+Progress documentation is maintained on `docs/issue-progress-20261110`, based on
+`214948ad`. It owns only this top-level snapshot, the new Issue index and their
+exact applicability record. Runtime, models, gates, generated assets and other
+owners' branches remain unchanged. Inventory/link/static validation passed;
+aggregate validation remains pending. Normal exact-HEAD CI and Formal validation
+are required before merge. No release
+or deployment is part of this documentation change.
+
+## Historical records below
+
+The following dated records are retained as source-specific history. Statements
+such as “in progress”, “not merged” or old model totals apply to their recorded
+revision and date; they do not override the current snapshot above. Later
+feature branches may add their own dated claims and must be preserved on merge.
+
 ## API reference AWS JSON display, 2026-11-10
 
 Implemented locally by the API reference owner on `fix/api-docs-aws-json-20261110`,
