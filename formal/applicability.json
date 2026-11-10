@@ -436,6 +436,20 @@
       "models": []
     },
     {
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "a26e39d987ee7ed1439300e52cd8bf5f0d78b53e40a2c9449a3778bc54ce15e9",
+      "disposition": "test-support",
+      "reason": "Checks the additive UpdateSecret template against strict metadata-only request and response schemas, including unsupported-field and boundary rejection; no runtime or finite model changes.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "e6311c028f5f593d496ea12caa5eefc8407ce517937cad01187105ca505478f7",
+      "disposition": "test-support",
+      "reason": "Pins and projects only the reviewed UpdateSecret additions while preserving existing contract hashes, with mutation controls for missing, changed, duplicate and unrelated contracts; no runtime or finite model changes.",
+      "models": []
+    },
+    {
       "path": "tools/console/bundle-digests.json",
       "sha256": "b52b9d545b18f0901be427b24275877e3067c2a945752e98d20217d875fbeb66",
       "disposition": "presentation",

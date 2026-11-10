@@ -35,6 +35,23 @@ def preserved(spec):
     # only those additions from a copy. Every pre-existing digest below is kept
     # unchanged. This projection was checked against public main36e72c4 in full.
     spec = copy.deepcopy(spec)
+    # Pin every reviewed UpdateSecret addition before projecting it away. The
+    # pre-existing service digests below remain unchanged and still detect drift.
+    operation = spec['paths']['/']['post']
+    request = operation['requestBody']['content'][JSON11]
+    response = operation['responses']['200']['content'][JSON11]
+    assert len(request['examples']) == 30
+    assert digest(request['examples'].pop('UpdateSecret', None)) == 'db2972742f1e15d728c5410cf10ede226b05831c6a90e8b975c709f09aef04d3', 'UpdateSecret contract changed: UpdateSecret'
+    assert digest(response['examples'].pop('UpdateSecret', None)) == '4fb8eaa8926e8e726ffcc6b6fff0fc8736e5a94f0f431f0475910301c8f4c451', 'UpdateSecret contract changed: UpdateSecret'
+    assert digest(operation['x-simulator-secrets-operation-schemas'].pop('secretsmanager.UpdateSecret', None)) == '5ca666ab206f582e9e17bc57508904904defdfd4a88b57ca7d916552f429bab4', 'UpdateSecret contract changed: secretsmanager.UpdateSecret'
+    assert digest(spec['components']['schemas'].pop('SecretsUpdateSecretInput', None)) == '1fe4604e0dfbc27e581a32d4572717a03b59b10d4b0cf56cb7ca231dc52ad854', 'UpdateSecret contract changed: SecretsUpdateSecretInput'
+    assert digest(spec['components']['schemas'].pop('SecretsUpdateSecretOutput', None)) == '401d72f452a2457dda3bc1248eef42a37d4be07200aafbb02c0b8e2c97d7010b', 'UpdateSecret contract changed: SecretsUpdateSecretOutput'
+    for media, name in ((request, 'SecretsUpdateSecretInput'),
+                        (response, 'SecretsUpdateSecretOutput')):
+        ref = {'$ref': '#/components/schemas/' + name}
+        union = media['schema']['anyOf']
+        assert union.count(ref) == 1 and union[-1] == ref, 'UpdateSecret union binding changed'
+        union.pop()
     media = spec['paths']['/']['post']['requestBody']['content'][JSON11]
     assert len(media['examples']) == 29
     example = media['examples'].pop('LogsDeleteLogStream', None)
@@ -106,6 +123,37 @@ class SakuraReference(unittest.TestCase):
 
     def test_all_existing_operations_components_and_28_templates_are_exact(self):
         preserved(self.spec)
+
+    def test_secret_update_projection_rejects_missing_changed_and_extra_contracts(self):
+        def request(spec):
+            return spec['paths']['/']['post']['requestBody']['content'][JSON11]
+        def response(spec):
+            return spec['paths']['/']['post']['responses']['200']['content'][JSON11]
+        def mapping(spec):
+            return spec['paths']['/']['post']['x-simulator-secrets-operation-schemas']
+        for label, change in (
+            ('missing request', lambda spec: request(spec)['examples'].pop('UpdateSecret')),
+            ('wrong target', lambda spec: request(spec)['examples']['UpdateSecret'].update(summary='wrong')),
+            ('changed request', lambda spec: request(spec)['examples']['UpdateSecret']['value'].update(Description='changed')),
+            ('missing response', lambda spec: response(spec)['examples'].pop('UpdateSecret')),
+            ('version response', lambda spec: response(spec)['examples']['UpdateSecret']['value'].update(VersionId='fake')),
+            ('missing input', lambda spec: spec['components']['schemas'].pop('SecretsUpdateSecretInput')),
+            ('relaxed input', lambda spec: spec['components']['schemas']['SecretsUpdateSecretInput'].update(additionalProperties=True)),
+            ('missing output', lambda spec: spec['components']['schemas'].pop('SecretsUpdateSecretOutput')),
+            ('relaxed output', lambda spec: spec['components']['schemas']['SecretsUpdateSecretOutput'].update(additionalProperties=True)),
+            ('missing mapping', lambda spec: mapping(spec).pop('secretsmanager.UpdateSecret')),
+            ('wrong permission', lambda spec: mapping(spec)['secretsmanager.UpdateSecret'].update(permission='allow all')),
+            ('missing request union', lambda spec: request(spec)['schema']['anyOf'].pop()),
+            ('missing response union', lambda spec: response(spec)['schema']['anyOf'].pop()),
+            ('duplicate request union', lambda spec: request(spec)['schema']['anyOf'].append({'$ref': '#/components/schemas/SecretsUpdateSecretInput'})),
+            ('duplicate response union', lambda spec: response(spec)['schema']['anyOf'].append({'$ref': '#/components/schemas/SecretsUpdateSecretOutput'})),
+            ('changed inherited secret', lambda spec: request(spec)['examples']['DescribeSecret']['value'].update(SecretId='changed')),
+            ('unreviewed schema', lambda spec: spec['components']['schemas'].update(UnreviewedSecretsExtension={'type': 'string'})),
+        ):
+            broken = copy.deepcopy(self.spec)
+            change(broken)
+            with self.subTest(change=label), self.assertRaises(AssertionError):
+                preserved(broken)
 
     def test_log_stream_addition_cannot_hide_missing_or_changed_contracts(self):
         def media(spec):

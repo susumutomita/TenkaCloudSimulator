@@ -115,11 +115,40 @@ class SharedJSON10Schemas(unittest.TestCase):
             'CreateSecret', 'DescribeSecret', 'ListSecrets', 'PutSecretValue',
             'GetSecretValue', 'UpdateSecretVersionStage', 'DeleteSecret',
             'KMSCreateAlias', 'KMSListAliases', 'KMSUpdateAlias', 'KMSDeleteAlias',
-            'ListSecretVersionIds',
+            'ListSecretVersionIds', 'UpdateSecret',
         })
-        self.assertEqual(len(media['examples']), 29)
+        self.assertEqual(len(media['examples']), 30)
         for example in media['examples'].values():
             shared.validate(example['value'])
+
+    def test_update_secret_template_uses_strict_metadata_only_contract(self):
+        operation = self.spec['paths']['/']['post']
+        media = operation['requestBody']['content']['application/x-amz-json-1.1']
+        example = media['examples']['UpdateSecret']
+        mapping = operation['x-simulator-secrets-operation-schemas']['secretsmanager.UpdateSecret']
+        self.assertEqual(example['summary'], 'X-Amz-Target: secretsmanager.UpdateSecret (description only)')
+        strict = validator(self.spec, {'$ref': mapping['request']})
+        strict.validate(example['value'])
+        base = example['value']
+        for description in ('', 'x' * 2048):
+            strict.validate({**base, 'Description': description})
+        for token in ('a' * 32, 'a' * 64):
+            strict.validate({**base, 'ClientRequestToken': token})
+        invalid = [None, [], {}, {'SecretId': base['SecretId']}, {'Description': ''}]
+        invalid += [{**base, 'Description': value} for value in (None, True, 1, 'x' * 2049)]
+        invalid += [{**base, 'SecretId': value} for value in (None, '', True, 'x' * 2049)]
+        invalid += [{**base, 'ClientRequestToken': value} for value in (None, '', 'a' * 31, 'a' * 65)]
+        invalid += [{**base, field: 'unsupported'} for field in
+                    ('SecretString', 'SecretBinary', 'KmsKeyId', 'Type', 'VersionStages', 'UnknownSetting')]
+        for value in invalid:
+            with self.subTest(value=value), self.assertRaises(ValidationError):
+                strict.validate(value)
+        response = operation['responses']['200']['content']['application/x-amz-json-1.1']['examples']['UpdateSecret']['value']
+        output = validator(self.spec, {'$ref': mapping['response']})
+        output.validate(response)
+        for field in ('VersionId', 'VersionStages', 'SecretString', 'SecretBinary', 'KmsKeyId'):
+            with self.subTest(field=field), self.assertRaises(ValidationError):
+                output.validate({**response, field: 'unsupported'})
 
     def test_delete_log_stream_template_has_exact_target_and_strict_request(self):
         media = self.spec['paths']['/']['post']['requestBody']['content']['application/x-amz-json-1.1']
