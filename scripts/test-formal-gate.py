@@ -650,6 +650,46 @@ class FormalGateTests(unittest.TestCase):
         finally:
             path.write_text(original)
 
+    def test_appengine_model_properties_controls_and_source_scopes_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        model = next(m for m in json.loads(original)['models'] if m['id'] == 'AppEngineTraffic')
+        expected_properties = {'AllocationsReferenceVersions', 'ApplicationParent', 'ApplicationPermanent', 'DefaultFirst', 'DenialAtomic', 'OtherTeamUnchanged', 'ServedThroughRouteAndFirewall', 'SplitComplete', 'TypeOK'}
+        expected_controls = {'ChangeOtherTeam', 'DeleteApplication', 'DeleteDefaultService', 'DeleteVersionWithTraffic', 'DeployWithoutApplication', 'FirstVersionWithoutTraffic', 'KeepSplitOfDeletedService', 'OmitDefaultFirst', 'OmitOwnerCheck', 'PartialSplit', 'ServePastFirewall', 'ServeUnroutedVersion', 'SplitNamesMissingVersion'}
+        expected_scope = {'internal/gcp/appengine/apps.go', 'internal/gcp/appengine/deploy.go', 'internal/gcp/appengine/engine.go', 'internal/gcp/appengine/firewall.go', 'internal/gcp/appengine/model.go', 'internal/gcp/appengine/model.json', 'internal/gcp/appengine/openapi.go', 'internal/gcp/appengine/serve.go', 'internal/gcp/appengine/services.go', 'internal/gcp/appengine/store.go', 'internal/gcp/appengine/wsgi.py', 'internal/gcp/storage/source.go', 'internal/server/cloud_storage.go', 'internal/server/server.go', 'tools/gcpmodels/appengine.py'}
+        self.assertEqual(set(model['properties']), expected_properties)
+        self.assertEqual({m['id'] for m in model['mutants']}, expected_controls)
+        self.assertEqual(set(model['source_scope']), expected_scope)
+        cfg = self.root / model['config']
+        config = cfg.read_bytes()
+        try:
+            for prop in sorted(expected_properties):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['properties'].remove(prop)
+                cfg.write_text('\n'.join(line for line in config.decode().splitlines() if line != 'INVARIANT ' + prop) + '\n')
+                path.write_text(json.dumps(registry))
+                with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+            cfg.write_bytes(config)
+            for control in sorted(expected_controls):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['mutants'] = [m for m in target['mutants'] if m['id'] != control]
+                path.write_text(json.dumps(registry))
+                with self.subTest(control=control), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                    load_registry(self.root)
+            for source_path in sorted(expected_scope):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['source_scope'].remove(source_path)
+                path.write_text(json.dumps(registry))
+                with self.subTest(source_scope=source_path), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+        finally:
+            path.write_text(original)
+            cfg.write_bytes(config)
+
     def test_route53_model_properties_six_controls_and_source_scopes_cannot_disappear(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -701,7 +741,7 @@ class FormalGateTests(unittest.TestCase):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'AutoScalingPlanTargets', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'Route53AtomicBatch', 'SSMBatchDeletion', 'SQSBatchDeletion', 'SNSQueueFanout', 'SSMDurableCommands', 'SakuraDiskMetadata', 'DynamoDBAdmission', 'CFNFinalCleanupACK', 'SecretVersionListing', 'ProviderPath', 'CatalogConsoleEpoch', 'SakuraDiskAdmission', 'CFNConditionMemoDepth', 'WAFRequestEvaluation', 'LoginInputIntent', 'SakuraDisksViewEpoch', 'CloudWatchLogsViewEpoch', 'SakuraStartupAdmission', 'ProviderActor', 'S3MultipartState', 'StartupTokenVisibility', 'DynamoDBConsoleEpoch', 'IAMInstanceProfiles', 'CFNConditionAdmission', 'BrowserSessions', 'KMSKeyState', 'ProjectAuthority', 'BlobRange', 'KMSAliasesViewEpoch', 'SQSConsoleEpoch', 'SecretsRevealEpoch', 'LandingAccessAdmission', 'RESTRouteMatching', 'CFNPhysicalResourceACK', 'WAFAssociationAuthorization', 'SNSAdmission', 'IAMManagedPolicies', 'AzurePropertiesEpoch', 'NativeWireProjection', 'DurableGuestLease', 'CFNParameterSnapshot', 'CatalogResourceLifecycle', 'RESTDeploymentSnapshot', 'SQSLifecycle', 'SQSStorageBudget', 'SecretsDisclosureChannels', 'KMSAliasCatalog', 'SecretsVersionLifecycle', 'KMSAliasCrypto', 'ConsoleHandoff', 'IAMBuiltinPinTransaction', 'SNSLifecycle', 'LandingTopologyState', 'CFNEventHistory', 'CloudWatchLogsLifecycle', 'GuestCommandLifecycle', 'SSMParameterState', 'STSSessionLifecycle', 'SecretMetadataViewEpoch', 'SecretsMutationRefresh', 'RESTProxyEventBoundary', 'CFNNativeIAMTransaction', 'KMSProtocolAdmission', 'S3Versions', 'StackOwnership', 'AzureBlobState', 'KMSBootstrapTransaction', 'LambdaLogTailDisclosure', 'GCPStorageState', 'NativeIAMOwnership', 'AzurePropertiesTarget', 'DynamoDBLifecycle', 'ObjectStore'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'AutoScalingPlanTargets', 'AppEngineTraffic', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'Route53AtomicBatch', 'SSMBatchDeletion', 'SQSBatchDeletion', 'SNSQueueFanout', 'SSMDurableCommands', 'SakuraDiskMetadata', 'DynamoDBAdmission', 'CFNFinalCleanupACK', 'SecretVersionListing', 'ProviderPath', 'CatalogConsoleEpoch', 'SakuraDiskAdmission', 'CFNConditionMemoDepth', 'WAFRequestEvaluation', 'LoginInputIntent', 'SakuraDisksViewEpoch', 'CloudWatchLogsViewEpoch', 'SakuraStartupAdmission', 'ProviderActor', 'S3MultipartState', 'StartupTokenVisibility', 'DynamoDBConsoleEpoch', 'IAMInstanceProfiles', 'CFNConditionAdmission', 'BrowserSessions', 'KMSKeyState', 'ProjectAuthority', 'BlobRange', 'KMSAliasesViewEpoch', 'SQSConsoleEpoch', 'SecretsRevealEpoch', 'LandingAccessAdmission', 'RESTRouteMatching', 'CFNPhysicalResourceACK', 'WAFAssociationAuthorization', 'SNSAdmission', 'IAMManagedPolicies', 'AzurePropertiesEpoch', 'NativeWireProjection', 'DurableGuestLease', 'CFNParameterSnapshot', 'CatalogResourceLifecycle', 'RESTDeploymentSnapshot', 'SQSLifecycle', 'SQSStorageBudget', 'SecretsDisclosureChannels', 'KMSAliasCatalog', 'SecretsVersionLifecycle', 'KMSAliasCrypto', 'ConsoleHandoff', 'IAMBuiltinPinTransaction', 'SNSLifecycle', 'LandingTopologyState', 'CFNEventHistory', 'CloudWatchLogsLifecycle', 'GuestCommandLifecycle', 'SSMParameterState', 'STSSessionLifecycle', 'SecretMetadataViewEpoch', 'SecretsMutationRefresh', 'RESTProxyEventBoundary', 'CFNNativeIAMTransaction', 'KMSProtocolAdmission', 'S3Versions', 'StackOwnership', 'AzureBlobState', 'KMSBootstrapTransaction', 'LambdaLogTailDisclosure', 'GCPStorageState', 'NativeIAMOwnership', 'AzurePropertiesTarget', 'DynamoDBLifecycle', 'ObjectStore'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:

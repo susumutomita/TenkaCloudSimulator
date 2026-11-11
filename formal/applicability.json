@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "base_sha": "d096316726049261b1a1f9d5818c469027e04e2b",
+  "base_sha": "66287bb49d39b22b1974b59773096e9d51004627",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "b2a40e637d9ef272f81b4e2f23be262acc71aa274f26f7257acb04755e79ace8",
+      "sha256": "cf52f6a52a5d022deccfeeda6f9f03ea6de7c0d340744f000d027ca0ede0950b",
       "disposition": "documentation",
       "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "edf8ae0c8ceb74ab14cfe771d330f767801103cfbdb8ff1a8dfcb0e65faf5a12",
+      "sha256": "2bb530b14dc4492780a504b34837e56488b6526be8c6bac86bd2cae156207ff8",
       "disposition": "documentation",
       "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
       "models": []
@@ -67,7 +67,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "5faae729974a73d99e410b9eec8bb5b1c2fafd398e4eceecf998527c9700c457",
+      "sha256": "a6409012bf34165b6a9b61d1d78085959ac96a0cf694ed7026cc2e87652ee11f",
       "disposition": "formal-infrastructure",
       "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
       "models": []
@@ -200,7 +200,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "6cc21f5619b8f7f60778a039a73baa942f70b51ef2c5429d452b82aa7b144378",
+      "sha256": "77a4af0ef1a735aa91a466e964faa87aa876a8be49bccc721fabdb883714fa39",
       "disposition": "modeled",
       "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
       "models": [
@@ -221,14 +221,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "b42e3ae0c9e9379c613c17d6881edd9d483e8fdf86fec353bedb4dfbd69fdfac",
+      "sha256": "f733a536639b0e2b6e3eea96cd02aef3bd63aeb124b96ba31f3a2a3e0616b41c",
       "disposition": "formal-infrastructure",
       "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "11df713b2bc48840ab135c474e8d4a379a8f0a3b4e4b369e317b4b8819e8b2a7",
+      "sha256": "d55fea9a21cb0195ab5550d263ed74248ef10b96bb0f98fc8a3bcdaa29ab5a52",
       "disposition": "formal-infrastructure",
       "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
       "models": []
@@ -249,7 +249,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "fb1944d2c864ad39b9a202d14aa104e4578d1101147f980319a8fdc512b9f0a1",
+      "sha256": "d1089900bd58afe1ab5600cf1341257e3888e7dcb23e23b7ee3cbac9692d8e8e",
       "disposition": "test-support",
       "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
       "models": []

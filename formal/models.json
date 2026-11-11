@@ -10733,6 +10733,186 @@
    ]
   },
   {
+   "id": "AppEngineTraffic",
+   "model": "formal/AppEngineTraffic.tla",
+   "config": "formal/AppEngineTraffic.cfg",
+   "bounds": "Two teams, an owner and one other actor, two services (default and one other), two versions, splits in two shares, a boolean firewall and at most six admin commits or refusals; requests do not count.",
+   "properties": [
+    "TypeOK",
+    "AllocationsReferenceVersions",
+    "SplitComplete",
+    "DefaultFirst",
+    "ApplicationParent",
+    "DenialAtomic",
+    "OtherTeamUnchanged",
+    "ApplicationPermanent",
+    "ServedThroughRouteAndFirewall"
+   ],
+   "limits": "Admin-plane ownership, traffic-split, deletion-order and request-routing abstraction only; no Go, SQL, HTTP, Python sandbox, Cloud Storage copy, pagination, operations, quotas, IP or cookie sharding, crash or liveness proof. Native Go and official-client tests independently cover implementation boundaries.",
+   "source_scope": [
+    "internal/gcp/appengine/engine.go",
+    "internal/gcp/appengine/model.go",
+    "internal/gcp/appengine/store.go",
+    "internal/gcp/appengine/apps.go",
+    "internal/gcp/appengine/services.go",
+    "internal/gcp/appengine/firewall.go",
+    "internal/gcp/appengine/deploy.go",
+    "internal/gcp/appengine/serve.go",
+    "internal/gcp/appengine/openapi.go",
+    "internal/gcp/appengine/wsgi.py",
+    "internal/gcp/appengine/model.json",
+    "internal/gcp/storage/source.go",
+    "internal/server/cloud_storage.go",
+    "internal/server/server.go",
+    "tools/gcpmodels/appengine.py"
+   ],
+   "mutants": [
+    {
+     "id": "OmitOwnerCheck",
+     "edits": [
+      {
+       "old": "/\\ a = Owner /\\ steps < MaxSteps",
+       "new": "/\\ steps < MaxSteps",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DenialAtomic"
+    },
+    {
+     "id": "ChangeOtherTeam",
+     "edits": [
+      {
+       "old": "/\\ st' = [st EXCEPT ![t] = new]",
+       "new": "/\\ st' = [u \\in Teams |-> new]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OtherTeamUnchanged"
+    },
+    {
+     "id": "DeleteVersionWithTraffic",
+     "edits": [
+      {
+       "old": "/\\ s.alloc[<<x, v>>] = 0",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllocationsReferenceVersions"
+    },
+    {
+     "id": "SplitNamesMissingVersion",
+     "edits": [
+      {
+       "old": "/\\ \\A v \\in Versions : f[v] > 0 => <<x, v>> \\in s.versions",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllocationsReferenceVersions"
+    },
+    {
+     "id": "PartialSplit",
+     "edits": [
+      {
+       "old": "/\\ Share(n, x) = Total",
+       "new": "/\\ Share(n, x) > 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SplitComplete"
+    },
+    {
+     "id": "FirstVersionWithoutTraffic",
+     "edits": [
+      {
+       "old": "THEN @ ELSE [@ EXCEPT ![<<x, v>>] = Total]",
+       "new": "THEN @ ELSE @",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SplitComplete"
+    },
+    {
+     "id": "OmitDefaultFirst",
+     "edits": [
+      {
+       "old": "/\\ x = Default \\/ HasService(s, Default)",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DefaultFirst"
+    },
+    {
+     "id": "DeleteDefaultService",
+     "edits": [
+      {
+       "old": "/\\ s.app /\\ HasService(s, x) /\\ x # Default",
+       "new": "/\\ s.app /\\ HasService(s, x)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DefaultFirst"
+    },
+    {
+     "id": "KeepSplitOfDeletedService",
+     "edits": [
+      {
+       "old": "!.alloc = [p \\in Pairs |-> IF p[1] = x THEN 0 ELSE @[p]]])",
+       "new": "!.alloc = @])",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllocationsReferenceVersions"
+    },
+    {
+     "id": "DeployWithoutApplication",
+     "edits": [
+      {
+       "old": "/\\ s.app /\\ <<x, v>> \\notin s.versions",
+       "new": "/\\ <<x, v>> \\notin s.versions",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ApplicationParent"
+    },
+    {
+     "id": "DeleteApplication",
+     "edits": [
+      {
+       "old": "CreateApp(a, t) == ~st[t].app /\\ Commit(a, t, [st[t] EXCEPT !.app = TRUE])",
+       "new": "CreateApp(a, t) == Commit(a, t, [st[t] EXCEPT !.app = ~@])",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ApplicationPermanent"
+    },
+    {
+     "id": "ServePastFirewall",
+     "edits": [
+      {
+       "old": "/\\ s.app /\\ s.allow\n",
+       "new": "/\\ s.app\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ServedThroughRouteAndFirewall"
+    },
+    {
+     "id": "ServeUnroutedVersion",
+     "edits": [
+      {
+       "old": "/\\ IF explicit THEN <<x, v>> \\in s.versions ELSE s.alloc[<<x, v>>] > 0",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ServedThroughRouteAndFirewall"
+    }
+   ]
+  },
+  {
    "id": "AutoScalingPlanTargets",
    "model": "formal/AutoScalingPlanTargets.tla",
    "config": "formal/AutoScalingPlanTargets.cfg",

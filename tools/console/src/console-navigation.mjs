@@ -21,6 +21,7 @@ export const SERVICES = Object.freeze([
   {id: 'catalog', provider: 'aws', label: 'Service catalog', capability: 'catalog', route: '/catalog', keywords: 'catalog metadata control plane カタログ サービス メタデータ'},
   {id: 'gcp-storage', provider: 'gcp', label: 'Cloud Storage', route: '/gcp-storage', keywords: 'google bucket object バケット オブジェクト ストレージ クラウドストレージ'},
   {id: 'gcp-catalog', provider: 'gcp', label: 'Service catalog', route: '/gcp-catalog', keywords: 'google catalog api metadata カタログ サービス'},
+  {id: 'gcp-appengine', provider: 'gcp', label: 'App Engine', route: '/gcp-appengine', keywords: 'google app engine appengine gae application version traffic split firewall python wsgi アプリ アプリケーション バージョン トラフィック ファイアウォール'},
   {id: 'azure-blob', provider: 'azure', label: 'Blob Storage', route: '/azure-blob', keywords: 'container blob コンテナー コンテナ ブロブ ストレージ ブロブストレージ'},
   {id: 'azure-arm', provider: 'azure', label: 'Resource Manager', route: '/azure-arm', keywords: 'arm resource group subscription リソース グループ リソースグループ サブスクリプション リソースマネージャー'},
   {id: 'sakura-disks', provider: 'sakura', label: 'Disks', route: '/sakura-disks', keywords: 'sakura cloud disk configuration storage さくらのクラウド さくら ディスク 構成 ストレージ'},
@@ -51,6 +52,8 @@ export function serviceAvailable(id, capabilities) {
   if (capabilities.consoleScope && id !== 'ssm') return false;
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
   if (service.provider === 'sakura') return sakuraConfiguration(capabilities) !== null;
+  if (service.id === 'gcp-appengine') return typeof capabilities.gcpAppEngine?.endpoint === 'string' && typeof capabilities.gcpAppEngine.project === 'string'
+    && capabilities.gcpAppEngine.project.length > 0 && typeof capabilities.gcpAppEngine.dataPlane === 'string';
   if (service.id === 'gcp-catalog') return Array.isArray(capabilities.gcpCatalog?.apis) && capabilities.gcpCatalog.apis.length > 0;
   if (service.id === 'azure-arm') return Array.isArray(capabilities.azureCatalog?.providers) && capabilities.azureCatalog.providers.length > 0
     && typeof capabilities.azureCatalog.descriptors === 'string';

@@ -1,0 +1,8 @@
+/* App Engine view additions, scoped to the view; no remote fonts or assets. */
+.gcp-appengine p,.gcp-appengine dd{overflow-wrap:anywhere}
+.gcp-appengine td,.gcp-appengine th{overflow-wrap:break-word;word-break:normal}
+.gcp-appengine h2{margin-top:32px}
+.gcp-appengine .gcp-storage-form textarea{font:inherit;color:var(--gcp-ink);width:100%;max-width:100%;min-width:0;border:1px solid #747775;border-radius:4px;padding:10px;background:#fff}
+.gcp-appengine textarea:focus-visible,.gcp-appengine a:focus-visible,.gcp-appengine .gcp-storage-table-scroll:focus-visible{outline:3px solid #174ea6;outline-offset:3px}
+.gcp-appengine .gcp-storage-row-actions a{display:inline-flex;align-items:center;min-height:40px}
+.gcp-appengine button[aria-pressed=true]{font-weight:700}
