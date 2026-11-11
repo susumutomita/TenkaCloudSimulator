@@ -9,6 +9,7 @@ import json
 import os
 import re
 from pathlib import Path
+from route53_openapi import project_before_route53
 import urllib.request
 import xml.etree.ElementTree as ET
 from playwright.sync_api import sync_playwright, expect
@@ -16,6 +17,15 @@ from check import running, REPORTS
 from reflow import assert_reflow
 from openapi_parameters import validate_parameter_lists
 from test_sakura_openapi import OLD_IDS, NEW_IDS, COLLECTION, ITEM
+
+
+def validate_reference_contract(spec):
+    inherited = project_before_route53(spec)
+    operations = [op['operationId'] for item in inherited['paths'].values() for op in item.values() if isinstance(op, dict) and 'operationId' in op]
+    assert len(operations) == 67 and len(set(operations)) == 67 and set(operations) == OLD_IDS | NEW_IDS | {'S3MultipartUpload'}
+    assert spec['paths']['/{bucket}/{key}']['post']['operationId'] == 'S3MultipartUpload'
+    assert len(inherited['paths']) == 36 and COLLECTION in inherited['paths'] and ITEM in inherited['paths']
+    assert {'GCPListBuckets', 'GCPUploadObject', 'AzureListContainers', 'AzureGetBlob'} <= set(operations)
 
 
 def run_scalar_s3_docs():
@@ -39,11 +49,7 @@ def run_scalar_s3_docs():
         spec = json.loads(raw_spec)
         validate_parameter_lists(spec)
         assert spec == json.loads(Path('internal/server/apidocs/openapi.json').read_text()), 'Must exercise the actual embedded candidate spec'
-        operations = [op['operationId'] for item in spec['paths'].values() for op in item.values() if isinstance(op, dict) and 'operationId' in op]
-        assert len(operations) == 67 and len(set(operations)) == 67 and set(operations) == OLD_IDS | NEW_IDS | {'S3MultipartUpload'}
-        assert spec['paths']['/{bucket}/{key}']['post']['operationId'] == 'S3MultipartUpload'
-        assert len(spec['paths']) == 36 and COLLECTION in spec['paths'] and ITEM in spec['paths']
-        assert {'GCPListBuckets', 'GCPUploadObject', 'AzureListContainers', 'AzureGetBlob'} <= set(operations)
+        validate_reference_contract(spec)
         assert spec['paths']['/']['get']['responses']['200']['content']['application/xml']['schema']['$ref'].endswith('/S3BucketList')
         examples = spec['paths']['/{bucket}']['get']['responses']['200']['content']['application/xml']['examples']
         mode_paths = {'currentObjects': '/practice-bucket?list-type=2', 'versions': '/practice-bucket?versions',

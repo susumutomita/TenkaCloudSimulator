@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+from route53_openapi import project_before_route53
 import tempfile
 import urllib.error
 import urllib.request
@@ -48,6 +49,7 @@ def parameters(spec, path, method):
 
 
 def validate_contract(spec):
+    inherited = project_before_route53(spec)
     # Preserve the 61-operation baseline plus current main's five opt-in Sakura
     # routes. Both are literal fixtures, never read from the served document.
     assert len(MAIN_OPERATION_IDS) == len(set(MAIN_OPERATION_IDS)) == 61
@@ -56,12 +58,12 @@ def validate_contract(spec):
     expected_paths = set(MAIN_PATHS) | {SAKURA_COLLECTION, SAKURA_ITEM}
     assert len(expected_ids) == 66 and len(expected_paths) == 36
     entries = [(path, method, entry['operationId'])
-               for path, item in spec['paths'].items()
+               for path, item in inherited['paths'].items()
                for method, entry in item.items() if method in METHODS]
     ids = [entry[2] for entry in entries]
     assert len(ids) == len(set(ids)) == 67, 'Duplicated or missing OpenAPI operation ID'
     assert set(ids) == expected_ids | {'S3MultipartUpload'}, 'Existing operation inventory changed'
-    assert set(spec['paths']) == expected_paths, 'Existing path inventory changed'
+    assert set(inherited['paths']) == expected_paths, 'Existing path inventory changed'
     assert [(path, method) for path, method, name in entries if name == 'S3MultipartUpload'] == [(OBJECT_PATH, 'post')]
     validate_parameter_lists(spec)
     required = {

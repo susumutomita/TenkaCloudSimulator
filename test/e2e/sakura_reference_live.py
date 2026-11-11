@@ -10,16 +10,24 @@ import hashlib
 import json
 import os
 from pathlib import Path
+from route53_openapi import project_before_route53
+from test_openapi_parameters import validate_reference_inventory
 import re
 import sys
 import tempfile
 import urllib.request
 
 
+def validate_reference_contract(spec):
+    inherited = project_before_route53(spec)
+    entries = [op for item in inherited['paths'].values() for op in item.values()
+               if isinstance(op, dict) and 'operationId' in op]
+    validate_reference_inventory([op['operationId'] for op in entries])
+
+
 def run(root, binary, reports, browser=False):
     sys.path.insert(0, str(root/'test/e2e'))
     from sakura_cli import CLI, BASE, BASIC, create, frame
-    from test_openapi_parameters import validate_reference_inventory
     reports.mkdir(parents=True, exist_ok=True)
     statuses, executed = [], []
     owned = []
@@ -40,7 +48,7 @@ def run(root, binary, reports, browser=False):
         entries=[(path,method,op) for path,item in spec['paths'].items() for method,op in item.items() if isinstance(op,dict) and 'operationId' in op]
         # Check the independent 67-operation inventory before dictionary creation,
         # including Sakura and multipart IDs and rejection of duplicate IDs.
-        validate_reference_inventory([op['operationId'] for _,_,op in entries])
+        validate_reference_contract(spec)
         operations={op['operationId']:(path,method,op) for path,method,op in entries}
         names={'SakuraListDisks','SakuraCreateDisk','SakuraGetDisk','SakuraUpdateDisk','SakuraDeleteDisk'}
         assert names<=set(operations)

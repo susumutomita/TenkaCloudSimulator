@@ -6,6 +6,7 @@ from pathlib import Path
 import unittest
 
 from batch_reference_projection import project_batches
+from route53_openapi import project_before_route53
 from test_sakura_openapi import preserved
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -13,7 +14,7 @@ BASE_SHA256 = '02bdc1440b20fe8bf74d2cef12613b9a48dfc4bf1a0f0a4956ebd7e8773ccba2'
 
 
 def validate(spec):
-    base = copy.deepcopy(spec)
+    base = project_before_route53(spec)
     project_batches(base)
     assert hashlib.sha256(json.dumps(base, sort_keys=True, separators=(',', ':')).encode()).hexdigest() == BASE_SHA256
 
