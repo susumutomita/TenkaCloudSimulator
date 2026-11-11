@@ -51,11 +51,12 @@ type SSMCommand struct {
 	Targets     []SSMCommandTarget
 }
 
-// SSMCommandStore is opt-in and not registered as an AWS API. Immutable commands
+// SSMCommandStore is durable and opt-in. SSMCommandAPI exposes its bounded native
+// API only when composed with the canonical backend. Immutable commands
 // and target obligations are retained forever, including failures; global quota
 // is 128 commands, eight targets/command, 8 KiB scripts and 4 KiB/output stream.
-// Records are capped at 2 MiB each. There is no retry, deletion, cancellation,
-// session or production guest backend. TimeoutSeconds admits 30..3600 seconds
+// Records are capped at 2 MiB each. There is no automatic retry, command deletion,
+// or CancelCommand operation. Interactive sessions are separate. TimeoutSeconds admits 30..3600 seconds
 // and is retained as delivery intent, never as proof of guest cancellation.
 type SSMCommandStore struct {
 	db      *sql.DB

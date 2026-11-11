@@ -91,8 +91,14 @@ func TestStackIntrinsicOriginalBattleSupportedStage(t *testing.T) {
 	if !found {
 		t.Fatal("original escaped ARN not found")
 	}
-	// Full resource admission remains closed. Parsing a script never runs it.
-	if _, err = compileStack("ap-northeast-1", "battle", body, nil, "CAPABILITY_IAM"); err == nil || !strings.Contains(err.Error(), "Unsupported resource type:") {
+	// Network/instance types now have a bounded compiler, but parsing a script
+	// still cannot run it or supply missing template inputs. Full-template
+	// acceptance is separately exercised without skipping its remaining blockers.
+	if _, err = compileStack("ap-northeast-1", "battle", body, nil, "CAPABILITY_IAM"); err == nil || !strings.Contains(err.Error(), "missing required value") {
+		t.Fatalf("required input admission changed: %v", err)
+	}
+	unsupported := `{"Resources":{"Future":{"Type":"AWS::EC2::NatGateway","Properties":{}}}}`
+	if _, err = compileStack("ap-northeast-1", "unsupported", unsupported, nil, ""); err == nil || !strings.Contains(err.Error(), "Unsupported resource type:") {
 		t.Fatalf("unsupported resource admission changed: %v", err)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -17,6 +18,7 @@ import (
 	"time"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/server"
+	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/probeclock"
 )
 
 func main() {
@@ -27,10 +29,12 @@ func main() {
 		os.Exit(1)
 	}
 }
-func run(ctx context.Context, args []string, output io.Writer) error {
+func run(ctx context.Context, args []string, output io.Writer) (result error) {
 	flags := flag.NewFlagSet("simulator", flag.ContinueOnError)
 	flags.SetOutput(output)
 	listen := flags.String("listen", "127.0.0.1:4566", "HTTP listen address (console: /_simulator/console/)")
+	clockFD := flags.Int("battle-clock-proof-fd", 0, "Managed Linux launcher private clock pipe (only 3)")
+	battleRuntime := flags.String("battle-runtime-config", "", "Explicit private pinned Linux Battle runtime configuration (does not qualify Host clocks)")
 	statePath := flags.String("state", ":memory:", "SQLite state path; default is ephemeral memory")
 	remote := flags.Bool("allow-remote", false, "Allow binding beyond loopback; use only in an isolated trusted network")
 	tokenFile := flags.String("token-file", "simulator-token", "Private local operator access-token file (created with mode 0600)")
@@ -71,16 +75,46 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	if *unsafe && *remote {
 		return fmt.Errorf("--unsafe-no-auth cannot be combined with --allow-remote")
 	}
+	if *battleRuntime != "" && (*unsafe || *remote) {
+		return fmt.Errorf("Battle runtime requires authenticated numeric loopback")
+	}
+	if *battleRuntime != "" {
+		if err := validateBattlePlatform(); err != nil {
+			return err
+		}
+	}
+	var ownedClock *probeclock.Clock
+	if *clockFD != 0 {
+		if *clockFD != 3 || *battleRuntime == "" || *remote || *unsafe {
+			return errors.New("invalid owned clock launch")
+		}
+		// The pinned executable descriptor is not a guest capability. Close it before
+		// bootstrap or any provider can create a guest child.
+		if err := probeclock.CloseInheritedExecutable(); err != nil {
+			return errors.New("owned executable descriptor close uncertain")
+		}
+		ownedClock, err = probeclock.BootstrapInherited()
+		if err != nil {
+			return err
+		}
+	}
 	l, err := net.Listen("tcp", *listen)
 	if err != nil {
 		return err
 	}
-	handler, closeState, err := server.NewWithProviders(*statePath, server.ProviderConfig{CloudStorage: cloudConfig, SakuraDisks: sakuraScope})
+	var handler http.Handler
+	var closeState func() error
+	options := server.ProviderConfig{CloudStorage: cloudConfig, SakuraDisks: sakuraScope}
+	if *battleRuntime != "" {
+		handler, closeState, err = newBattleServer(ctx, *battleRuntime, "http://"+l.Addr().String(), *statePath, options, ownedClock)
+	} else {
+		handler, closeState, err = server.NewWithProviders(*statePath, options)
+	}
 	if err != nil {
 		_ = l.Close()
 		return err
 	}
-	defer closeState()
+	defer func() { result = errors.Join(result, closeState()) }()
 	if !*unsafe {
 		token, err := operatorToken(*tokenFile)
 		if err != nil {

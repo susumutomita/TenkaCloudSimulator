@@ -128,6 +128,12 @@ func createStackBucket(tx *sql.Tx, region string, r StackResource) error {
 	return s3WriteTags(tx, r.PhysicalID, tags)
 }
 func stackResourceNamespace(region, kind string) string {
+	if kind == "AWS::EC2::Instance" {
+		return "ec2-instance:" + region
+	}
+	if stackNetworkKind(kind) {
+		return "ec2-network:" + region
+	}
 	if kind == "AWS::Lambda::Function" {
 		return "lambda:" + region
 	} // Older readers must fail ownership validation, never interpret a function as an IAM role.
@@ -145,6 +151,18 @@ func stackResourceNamespace(region, kind string) string {
 // resource actions too. CAPABILITY_IAM acknowledges risk; it grants no rights.
 func stackResourcePermissions(record StackRecord, deleting bool, authorize func(string, string) error) error {
 	for _, r := range record.Resources {
+		if r.Type == "AWS::EC2::Instance" {
+			if err := stackInstancePermissions(record, r, deleting, authorize); err != nil {
+				return err
+			}
+			continue
+		}
+		if stackNetworkKind(r.Type) {
+			if err := stackNetworkPermissions(record, r, deleting, authorize); err != nil {
+				return err
+			}
+			continue
+		}
 		actions := []string{}
 		resource := ""
 		switch r.Type {

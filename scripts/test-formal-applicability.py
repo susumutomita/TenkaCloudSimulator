@@ -17,6 +17,42 @@ from formal_applicability import GateError, RECORD, changes, disposition, git, i
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class BattleFixtureClassificationTests(unittest.TestCase):
+    def test_only_exact_reviewed_battle_documents_and_fixtures_are_nonruntime(self):
+        expected = {
+            'documentation': ('guest/ssm-relay/README.md', 'scripts/guest-image/SESSION-IMAGE.md'),
+            'test-support': ('internal/aws/testdata/hello-world-battle-original.yaml', 'internal/aws/testdata/host-battle-bootstrap/provenance.json', 'internal/aws/testdata/host-battle-bootstrap/template.json', 'internal/server/testdata/battle-deployment-key-v1.json', 'scripts/guest-image/test_session_overlay.py'),
+        }
+        for kind, paths in expected.items():
+            for path in paths:
+                self.assertEqual(disposition(path), kind, path)
+
+    def test_adjacent_runtime_and_unreviewed_fixtures_remain_unclassified(self):
+        for path in ('guest/ssm-relay/other.md', 'guest/ssm-relay/main_linux.go',
+                     'scripts/guest-image/session-overlay.py', 'scripts/guest-image/other.py',
+                     'scripts/guest-image/test_other_overlay.py', 'scripts/guest-image/OTHER-IMAGE.md',
+                     'internal/aws/testdata/host-battle-bootstrap/other.json',
+                     'internal/aws/testdata/host-battle-bootstrap/template.json.py',
+                     'internal/server/testdata/other.json',
+                     'internal/aws/testdata/hello-world-other.yaml'):
+            self.assertIsNone(disposition(path), path)
+
+
+class SeedReplayInfrastructureClassificationTests(unittest.TestCase):
+    def test_only_reviewed_seed_replay_paths_are_formal_infrastructure(self):
+        for path in ('scripts/formal_seed_replay.py', 'scripts/formal_support/NICSessionSeedReachability.tla', 'scripts/formal_support/NICSessionSeedReachability.cfg', 'scripts/formal_support/ProbeOperationSeedReachability.tla', 'scripts/formal_support/ProbeOperationSeedReachability.cfg'):
+            self.assertEqual(disposition(path), 'formal-infrastructure', path)
+
+    def test_unknown_helpers_and_support_are_not_exempt(self):
+        for path in ('scripts/formal_seed_replay_other.py', 'scripts/formal_seed_replay.sh',
+                     'scripts/formal_support/Unknown.tla', 'scripts/formal_support/Unknown.cfg',
+                     'scripts/formal_support/helper.py', 'scripts/formal_support/helper.sh',
+                     'scripts/formal_support/NICSessionSeedReachability.tla.py',
+                     'scripts/formal_support/nested/NICSessionSeedReachability.tla',
+                     'formal/Unknown.md', 'internal/workload/guesttcp/unknown.go'):
+            self.assertIsNone(disposition(path), path)
+
+
 class LandingPresentationBoundaryTests(unittest.TestCase):
     def test_only_named_static_landing_documents_are_presentation(self):
         for path in ('internal/server/landing/index.html', 'internal/server/landing/landing.css'):
@@ -159,6 +195,20 @@ class ApplicabilityTests(unittest.TestCase):
         self.prepare('.claude/settings.json')
         with self.assertRaisesRegex(GateError, 'unclassified implementation/state path'):
             validate_record(self.root, self.base)
+
+    def test_terminal_entry_and_bundle_cannot_claim_presentation_exemption(self):
+        for path in ('tools/console/src/ssm-terminal-client.mjs', 'tools/console/src/ssm-terminal.jsx', 'tools/console/src/main.jsx', 'internal/server/web/app.js'):
+            self.assertEqual(disposition(path), 'presentation')
+            record = self.prepare(path)
+            item = next(i for i in record['changes'] if i['path'] == path)
+            item['disposition'] = 'presentation'
+            item['models'] = []
+            self.write_record(record)
+            self.commit('invalid presentation relabel')
+            with self.subTest(path=path), self.assertRaisesRegex(GateError, 'declared state/model scope requires'):
+                validate_record(self.root, self.base)
+            # Restore the valid modeled disposition before next independent path.
+            self.prepare(path)
 
     def test_prompt_docs_classification_does_not_override_registered_state_scope(self):
         path = '.claude/agents/code-reviewer.md'

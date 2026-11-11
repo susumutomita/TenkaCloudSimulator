@@ -1,3 +1,4 @@
+import SSMTerminal from './ssm-terminal.jsx';
 import Login from './login.jsx';
 import { LocaleProvider, useLocale } from './i18n.jsx';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -231,4 +232,4 @@ function Console(){
     {!pageForm&&<Modal visible={!!modal} onDismiss={()=>!saving&&close()} header={modalTitle} closeAriaLabel={t('Close dialog','ダイアログを閉じる')} footer={<Box float="right"><SpaceBetween direction="horizontal" size="xs"><Button disabled={saving} onClick={close}>{t('Cancel','キャンセル')}</Button><Button variant="primary" loading={saving} onClick={submit}>{modal==='delete'?(bucket&&!form.versionId?t('Delete object','オブジェクトを削除'):t('Delete permanently','完全に削除')):modal==='object'?t('Download object','オブジェクトをダウンロード'):modal==='identity'?t('Choose identity','演習IDを選択'):modal==='policy'?t('Save policy','ポリシーを保存'):modal==='parameter'?(form.overwrite?t('Save changes','変更を保存'):t('Create parameter','パラメータを作成')):primaryText}</Button></SpaceBetween></Box>}><Form errorText={modalError}>{fields}</Form></Modal>}
   </>;
 }
-createRoot(document.getElementById('root')).render(<LocaleProvider>{location.pathname==='/_simulator/login'?<Login/>:<Console/>}</LocaleProvider>);
+createRoot(document.getElementById('root')).render(<LocaleProvider>{location.pathname==='/_simulator/login'?<Login/>:location.hash==='#/terminal'?<SSMTerminal/>:<Console/>}</LocaleProvider>);

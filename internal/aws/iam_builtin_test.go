@@ -5,10 +5,14 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/xml"
+	"fmt"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 )
 
 func TestIAMSSMCorePinReadOnlyAndNamespace(t *testing.T) {
@@ -76,6 +80,7 @@ func TestIAMSSMCoreNativePermissionsRevocationAndGeneration(t *testing.T) {
 	ctx := context.Background()
 	g := ssmValueGateway(t)
 	roles := &IAMRoleStore{g.Store.Database()}
+	g.Roles = roles // Bind the native role store for actual STS policy snapshots.
 	role := managedRole(t, roles, "SSMReader")
 	peer := managedRole(t, roles, "Peer")
 	ssmValuePut(t, g, "us-east-1", "/practice/core", "String", "dummy")
@@ -100,8 +105,56 @@ func TestIAMSSMCoreNativePermissionsRevocationAndGeneration(t *testing.T) {
 	call("GetParameters", `{"Names":["/practice/core"]}`, 200)
 	call("PutParameter", `{"Name":"/practice/other","Type":"String","Value":"dummy"}`, 403)
 	call("GetParametersByPath", `{"Path":"/practice"}`, 403)
-	call("SendCommand", `{}`, 501)
-	call("StartSession", `{}`, 501)
+	// Principal headers alone cannot mint the native assumed-role binding.
+	call("SendCommand", `{}`, 403)
+	call("StartSession", `{}`, 403)
+	// This gateway unit test installs the verifier's private context from a real
+	// locally issued STS session. Signature verification is covered separately.
+	authority := NewSTSAuthority("local-builtin-test")
+	credentials, err := authority.Issue(STSSessionRequest{
+		Principal: role.RoleName, RoleARN: role.Arn, RoleID: role.RoleID,
+		SessionName: "builtin-regression", Duration: time.Hour,
+		Snapshot: func(ctx context.Context) (core.Policy, error) { return g.stsSessionPolicy(ctx, role) },
+		Validate: func(ctx context.Context) error {
+			current, e := roles.Get(ctx, role.RoleName)
+			if e != nil {
+				return e
+			}
+			if current.RoleID != role.RoleID {
+				return fmt.Errorf("role generation changed")
+			}
+			return nil
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	session := authority.sessions[credentials.AccessKeyID]
+	policy, err := session.snapshot(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, action := range []string{"ssm:SendCommand", "ssm:StartSession"} {
+		if decision := core.EvaluateWithContext(policy, action, "*", core.PolicyContext{"aws:userid": session.identity.UserID}); decision != "implicitDeny" {
+			t.Fatalf("SSMCore unexpectedly grants %s: %s", action, decision)
+		}
+	}
+	verifiedCall := func(action string, status int) {
+		t.Helper()
+		r := httptest.NewRequest("POST", "/", strings.NewReader(`{}`))
+		r.Header.Set("Content-Type", "application/x-amz-json-1.1")
+		r.Header.Set("X-Amz-Target", "AmazonSSM."+action)
+		c := context.WithValue(r.Context(), stsAuthorityContextKey{}, authority)
+		c = context.WithValue(c, sdkIdentityContextKey{}, session.identity)
+		c = context.WithValue(c, sdkSessionKeyContextKey{}, credentials.AccessKeyID)
+		w := httptest.NewRecorder()
+		g.ServeHTTP(w, r.WithContext(c))
+		if w.Code != status {
+			t.Fatalf("verified %s: %d %s", action, w.Code, w.Body.String())
+		}
+	}
+	verifiedCall("SendCommand", 501)
+	verifiedCall("StartSession", 501)
 	call("DescribeAssociation", `{}`, 501)
 	if got, e := g.Identities.Decision(peer.RoleName, "ssm:GetParameter", "*"); e != nil || got != "implicitDeny" {
 		t.Fatal(got, e)
@@ -122,7 +175,11 @@ func TestIAMSSMCoreNativePermissionsRevocationAndGeneration(t *testing.T) {
 	if err := roles.Delete(ctx, role.RoleName, role.RoleID); err != nil {
 		t.Fatal(err)
 	}
+	verifiedCall("SendCommand", 403)
+	verifiedCall("StartSession", 403)
 	fresh := managedRole(t, roles, role.RoleName)
+	verifiedCall("SendCommand", 403)
+	verifiedCall("StartSession", 403)
 	if err := roles.AttachRolePolicy(ctx, fresh.RoleName, iamSSMCoreARN, role.RoleID); iamCode(err) != "NoSuchEntity" {
 		t.Fatal(err)
 	}

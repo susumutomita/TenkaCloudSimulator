@@ -179,9 +179,9 @@ class SharedJSON10Schemas(unittest.TestCase):
             'CreateSecret', 'DescribeSecret', 'ListSecrets', 'PutSecretValue',
             'GetSecretValue', 'UpdateSecretVersionStage', 'DeleteSecret',
             'KMSCreateAlias', 'KMSListAliases', 'KMSUpdateAlias', 'KMSDeleteAlias',
-            'ListSecretVersionIds', 'UpdateSecret',
+            'ListSecretVersionIds', 'UpdateSecret', 'SSMCreateDocument', 'SSMGetDocument', 'SSMDescribeDocument', 'SSMListDocuments', 'SSMUpdateDocument', 'SSMDeleteDocument',
         })
-        self.assertEqual(len(media['examples']), 31)
+        self.assertEqual(len(media['examples']), 37)
         for example in media['examples'].values():
             shared.validate(example['value'])
 

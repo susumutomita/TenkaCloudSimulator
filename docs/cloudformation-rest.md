@@ -186,10 +186,11 @@ older events. A live stack name resolves to its current generation. Deleted
 stacks require their exact ARN; the latest 100 deleted generations are retained
 globally in addition to all live generations.
 
-Create/delete stack and resource transitions are written in the same SQLite
-transaction as the actual operation. These are local synchronous transitions,
-not AWS asynchronous lifecycle emulation. Failed operations return their API
-error and roll back event writes. Existing pre-upgrade stacks do not acquire
+Existing non-instance create/delete transitions remain in the same SQLite
+transaction as the actual operation. The explicitly configured local EC2 runtime
+is the exception described below: readiness happens outside SQLite and cannot
+be reported as complete merely because resource metadata was saved. Failed
+atomic operations return their API error and roll back event writes. Existing pre-upgrade stacks do not acquire
 invented create history; deleting one can begin its actual recorded history.
 
 Events expose timestamps, IDs, resource types and statuses, never resource
@@ -205,4 +206,37 @@ separate authorized, sanitized per-team projection.
 `Select`, synthetic local `GetAZs`, `Base64` and scalar `Sub` literal escapes are
 available in properties and outputs. See the [operand limits, local-zone contract
 and original Battle acceptance boundary](cloudformation-intrinsics.md). This adds
-no EC2, Session Manager, guest execution or full Battle support.
+no full Battle support on its own.
+
+
+## Local VPC state and configured instance lifecycle
+
+The bounded network subset is IPv4 VPC/Subnet, InternetGateway and attachment,
+RouteTable, an explicit `0.0.0.0/0` gateway route and subnet association, and TCP
+CIDR ingress SecurityGroup rules. These are actual owned SQLite resources, not
+host network or AWS provisioning. Network-only stacks remain atomic. Unsupported
+resource properties, IPv6, other route targets and non-TCP rules are rejected.
+
+An `AWS::EC2::Instance` requires an operator-installed, qualified local runtime.
+Without one, creation is rejected before stack/network changes. It supports one
+instance per stack, a native same-stack instance profile, a pinned local image
+alias and unchanged bounded UserData. It does not download AMIs or launch AWS.
+IAM admission checks the concrete image, instance, subnet, security groups and
+implicit local NIC/root-disk resource identities, plus the profile's actual role
+via `iam:PassRole`; tags require `ec2:CreateTags`. Implicit NIC/disk identities do
+not expose independent EC2 management APIs.
+
+Creation first commits `CREATE_IN_PROGRESS`, then obtains actual backend readiness
+outside SQL. Only the same still-live stack incarnation may become
+`CREATE_COMPLETE`. Launch failure records `CREATE_FAILED`; a restart does not
+replay or adopt an unfinished launch. Cleanup requires retained runtime ownership.
+A `.simulator.invalid` hostname is a reserved local alias resolved only against an
+actual retained Host receipt, never public DNS or an external HTTP fallback.
+
+The current physical backend cannot refresh policy without replacing its guest
+channel. Therefore live SG/route mutations are rejected **before** changing state
+or sealing that backend. Stack deletion intentionally seals/joins the owner.
+Low-level policy/lease tests do not demonstrate live networking or guest recovery.
+The unchanged full Battle template remains a separate acceptance target: its
+participant policy conditions, Host registration, real nginx stop/recovery and
+scoring must all work before calling the Battle usable.

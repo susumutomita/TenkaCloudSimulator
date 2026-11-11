@@ -19,7 +19,13 @@ FORMAL_INFRA = {'formal/models.json', 'formal/tla2tools.sha256',
                 'scripts/check-formal.py', 'scripts/formal_model_gate.py',
                 'scripts/check-formal-applicability.py', 'scripts/formal_applicability.py',
                 'scripts/test-formal-gate.py', 'scripts/test-formal-applicability.py',
-                'scripts/formal_module_metadata.py'}
+                'scripts/formal_module_metadata.py',
+                'scripts/formal_seed_replay.py',
+                'scripts/formal_support/NICSessionSeedReachability.tla',
+                'scripts/formal_support/NICSessionSeedReachability.cfg',
+                'scripts/formal_support/ProbeOperationSeedReachability.tla',
+                'scripts/formal_support/ProbeOperationSeedReachability.cfg',
+                }
 KNOWN_VALIDATION = {
     'scripts/check-sts-formal-candidate.py',
     'scripts/build-release.py', 'scripts/verify-release.py', 'scripts/verify-release-tag.py',
@@ -30,13 +36,13 @@ KNOWN_VALIDATION = {
     'scripts/requirements-test.txt',
 }
 NONFORMAL = {
-    'documentation': ['internal/aws/testdata/sts-original/README.md',
+    'documentation': ['guest/ssm-relay/README.md', 'scripts/guest-image/SESSION-IMAGE.md', 'internal/aws/testdata/sts-original/README.md',
                       'internal/aws/testdata/sts-original/LICENSE', 'README.md', 'README.ja.md', 'SECURITY.md', 'AGENTS.md', 'docs/**', 'formal/README.md',
                       'LICENSE', 'NOTICE', 'third_party/**', 'internal/legal/assets/**'],
     'presentation': ['tools/console/**', 'tools/scalar/**', 'internal/server/web/**',
                      'internal/server/apidocs/**',
                      'internal/server/landing/index.html', 'internal/server/landing/landing.css'],
-    'test-support': ['internal/aws/testdata/hello-world-battle-iam-fragment.yaml', 'internal/aws/testdata/sts-original/hello-world.yaml', 'test/**', '*_test.go', 'scripts/test-*.py',
+    'test-support': ['internal/aws/testdata/hello-world-battle-original.yaml', 'internal/aws/testdata/host-battle-bootstrap/provenance.json', 'internal/aws/testdata/host-battle-bootstrap/template.json', 'internal/server/testdata/battle-deployment-key-v1.json', 'scripts/guest-image/test_session_overlay.py', 'internal/aws/testdata/hello-world-battle-iam-fragment.yaml', 'internal/aws/testdata/sts-original/hello-world.yaml', 'test/**', '*_test.go', 'scripts/test-*.py',
                      'internal/aws/testdata/dynamodb_size_sdk.py'],
     'build-metadata': ['Makefile', '.gitignore', '.gitattributes', '.github/CODEOWNERS',
                        '.github/PULL_REQUEST_TEMPLATE.md'],

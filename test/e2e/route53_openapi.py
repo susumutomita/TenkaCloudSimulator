@@ -2,6 +2,13 @@
 import copy
 import hashlib
 import json
+import runpy
+from pathlib import Path
+
+# This module is loaded both by sibling tests and by the asset gate via runpy.
+project_ssm_documents = runpy.run_path(
+    str(Path(__file__).with_name("ssm_document_reference.py"))
+)["project_ssm_documents"]
 
 ROUTE53_PATHS = {
     '/2013-04-01/hostedzone',
@@ -37,6 +44,7 @@ def validate_route53(spec):
 def project_before_route53(spec):
     validate_route53(spec)
     projected = copy.deepcopy(spec)
+    project_ssm_documents(projected)
     for path in ROUTE53_PATHS:
         del projected['paths'][path]
     projected['tags'] = [tag for tag in projected['tags'] if tag.get('name') != TAG]

@@ -191,6 +191,9 @@ func (s *EC2GuestLeaseStore) Acquire(ctx context.Context, o EC2GuestOwner) (EC2G
 // There are only two further dispatches: containment, then release. Neither
 // dispatch acknowledgement itself proves containment or release.
 func (s *EC2GuestLeaseStore) Advance(ctx context.Context, expected EC2GuestLease) (EC2GuestLease, error) {
+	return s.advanceAttachment(ctx, expected, nil)
+}
+func (s *EC2GuestLeaseStore) advanceAttachment(ctx context.Context, expected EC2GuestLease, permit *ec2AttachmentEntry) (EC2GuestLease, error) {
 	if !validGuestRecord(expected) {
 		return EC2GuestLease{}, errGuestLease
 	}
@@ -206,6 +209,10 @@ func (s *EC2GuestLeaseStore) Advance(ctx context.Context, expected EC2GuestLease
 	if r != expected {
 		return expected, errGuestLease
 	}
+	if e = ec2AttachmentAdvanceGuard(ctx, tx, expected, permit); e != nil {
+		return expected, e
+	}
+
 	switch r.State {
 	case "held":
 		r.State = "contain_pending"

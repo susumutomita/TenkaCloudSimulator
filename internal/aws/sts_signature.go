@@ -71,7 +71,7 @@ func sdkHMAC(key []byte, value string) []byte {
 
 func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time.Time) error {
 	fail := func() error { return fmt.Errorf("local SigV4 signature verification failed") }
-	handoff := r.URL.Path == "/_simulator/v1/console-handoffs" && s.service == "sts"
+	handoff := (r.URL.Path == "/_simulator/v1/console-handoffs" || r.URL.Path == "/_simulator/v1/terminal-handoffs") && s.service == "sts"
 	if secret == "" || (r.URL.Path != "/" && !handoff) || r.URL.RawPath != "" || r.URL.User != nil {
 		return fail()
 	}
