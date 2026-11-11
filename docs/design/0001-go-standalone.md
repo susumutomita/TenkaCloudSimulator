@@ -6,6 +6,8 @@ Coreは問題ID/採点を知らない。SSM・stack/ownershipのschemaはAWS lay
 
 Lambda定義/ZIP/region/role/environment/revisionはAWS layerのprovider-owned SQLite tableに保存する。native APIのIAM・PassRoleを評価した後、provider-neutralなinternal/workload/pythonへコード/event/contextと明示したbounded capability・固定module FSを渡す。固定CPython/WASI・選択stdlib・原文rightsを埋め込み、host filesystem/environment/process/socketは渡さない。guest memory/時間/出力量/同時実行を制限する。限定inline Lambda CFNを同じ保存処理へ接続する。関数内SDKは保存role/regionに固定したnative SSM/S3 subsetのみ。問題固有のhandlerや任意HTTP proxyはない。[制限](../lambda.md)。
 
+`internal/inference`はprovider中立の有界テキスト生成を持つ。cloud protocol、IAM、問題ID、採点を知らない。AWS layerのBedrock Runtimeが`bedrock:InvokeModel`を評価し、Anthropic Messages/Converseの本文を厳密に検証してから、operatorが対応付けたbackend model名だけを渡す。Ollama adapterは設定されたnumeric loopback `host:port`だけへproxy・redirect・名前解決なしで接続し、同時実行・期限・入出力サイズを制限する。無効・未対応付け・停止中のbackendは明示エラーで、別backendや合成応答へ切り替えない。promptと応答はSQLite・logへ保存しない。Apple Foundation Models adapterはこのbuildに含めない。[範囲](../bedrock-runtime.md)。
+
 Consoleは公式Cloudscape/Reactを開発時にbundleし、fonts/assets/licensesを埋め込む。独自模倣CSSではない。UI/SDK/Scalarはいずれも実HTTPを通り同一SQLite状態を使う。実行時Node/npm、CDN、クラウドproxy不要。UIは実AWS全機能と同一ではない。[比較](../console.md)。
 
 CLI token authorityはoperatorと15分participantを区別し、participant identity header上書きを拒否する。主催ホストはチームごとに別プロセス/DB/tokenを管理し、ログイン済み利用者とチームを認可する。単一プロセス内のidentity選択でチーム分離しない。library compositionのserver.Newは認証を自動追加しない。

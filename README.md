@@ -84,6 +84,8 @@ console, CloudFormation adapter or Challenge integration.
   [SSM value parameters](docs/cloudformation-ssm-parameters.md),
   [native IAM profiles](docs/cloudformation-iam-profiles.md),
   [pinned SSM policy](docs/iam-ssm-managed-policy.md).
+- **Local AI inference (opt-in):** [Bedrock Runtime InvokeModel/Converse through your own
+  Ollama](docs/bedrock-runtime.md). Off by default; no cloud fallback, streaming or tool use.
 - **Other clouds:** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).
