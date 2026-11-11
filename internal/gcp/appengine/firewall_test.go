@@ -3,6 +3,7 @@ package appengine
 import (
 	"fmt"
 	"net/netip"
+	"reflect"
 	"testing"
 )
 
@@ -123,6 +124,45 @@ func TestFirewallMatchingUsesTheFirstRuleInPriorityOrder(t *testing.T) {
 	for remote, ok := range map[string]bool{"127.0.0.1:80": true, "[::1]:80": true, "::1": true, "[::1]": true, "nonsense": false} {
 		if _, err := clientAddress(remote); (err == nil) != ok {
 			t.Errorf("client address %s: %v", remote, err)
+		}
+	}
+}
+
+func TestBatchUpdateCustomRuleQuotaWithOptionalDefault(t *testing.T) {
+	for _, customCount := range []int{maxFirewallRules, maxFirewallRules + 1} {
+		for _, includeDefault := range []bool{false, true} {
+			t.Run(fmt.Sprintf("custom=%d/default=%t", customCount, includeDefault), func(t *testing.T) {
+				h := newHarness(t, options{runner: &fakeRunner{}})
+				h.createApp("us-central")
+				path := base + "/firewall/ingressRules"
+				h.ok("POST", path, map[string]any{"priority": 500, "action": "DENY", "sourceRange": "*"})
+				h.ok("PATCH", path+"/2147483647?updateMask=action", map[string]any{"action": "DENY"})
+				before := h.ok("GET", path, nil)
+				rules := []any{}
+				for i := 1; i <= customCount; i++ {
+					rules = append(rules, map[string]any{"priority": i, "action": "ALLOW", "sourceRange": "*"})
+				}
+				if includeDefault {
+					rules = append(rules, map[string]any{"priority": defaultRule, "action": "ALLOW", "sourceRange": "*"})
+				}
+				body := map[string]any{"ingressRules": rules}
+				if customCount > maxFirewallRules {
+					h.fails("INVALID_ARGUMENT", "POST", path+":batchUpdate", body)
+					if after := h.ok("GET", path, nil); !reflect.DeepEqual(before, after) {
+						t.Fatalf("rejected batch changed rules: before=%v after=%v", before, after)
+					}
+					return
+				}
+				result := h.ok("POST", path+":batchUpdate", body)["ingressRules"].([]any)
+				if len(result) != maxFirewallRules+1 {
+					t.Fatalf("want 100 custom rules and one default, got %d", len(result))
+				}
+				fallback := h.ok("GET", path+"/2147483647", nil)
+				if fallback["action"] != "ALLOW" {
+					t.Fatalf("default rule: %v", fallback)
+				}
+				h.fails("RESOURCE_EXHAUSTED", "POST", path, map[string]any{"priority": 500, "action": "ALLOW", "sourceRange": "*"})
+			})
 		}
 	}
 }

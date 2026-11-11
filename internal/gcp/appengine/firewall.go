@@ -322,6 +322,9 @@ func (e *Engine) batchUpdateRules(q *request) (any, error) {
 		}
 		rules = append(rules, r)
 	}
+	if len(rules) > maxFirewallRules {
+		return nil, invalid("The local App Engine simulator keeps at most 100 firewall rules besides the default rule.")
+	}
 	return e.write(q.ctx, func(tx *sql.Tx) (any, error) {
 		if _, err := loadApplication(tx, e.cfg.Project); err != nil {
 			return nil, err
