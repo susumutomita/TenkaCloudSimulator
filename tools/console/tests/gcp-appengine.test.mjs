@@ -78,7 +78,10 @@ test('a missing application offers creation and reloads only after the acknowled
   assert.deepEqual(JSON.parse(post.body), {id: 'tenkacloud-local', locationId: 'us-central'});
   assert.ok(calls.indexOf(post) < calls.length - 1, 'the view reloads after the write');
   assert.match(h.text(), /Application tenkacloud-local created/);
-  assert.ok(h.text().includes('v1-dot-default-dot-tenkacloud-local.appspot.com'));
+  const links = [];
+  JSON.parse(h.text(), (key, value) => { if (key === 'href' && value.startsWith(appEngine.dataPlane.split('{')[0])) links.push(value); return value; });
+  assert.deepEqual(links, [h.api.dataPlaneURL(appEngine.dataPlane, h.api.versionHost('v1', 'default', 'tenkacloud-local'))]);
+  assert.equal(links[0], '/_simulator/providers/gcp/appspot/v1-dot-default-dot-tenkacloud-local.appspot.com/');
   assert.match(h.text(), /v1 100%/);
 });
 
