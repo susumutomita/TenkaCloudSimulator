@@ -2,4 +2,4 @@
 
 @AGENTS.md
 
-`.claude/skills/` と `.claude/agents/` は必要なときだけ使う補助ツールです。専用スキル、固定人数の subagent、`Plan.md` は着手・完了の前提ではありません。
+作業契約と検証コマンドの正本は `AGENTS.md` です。`.claude/skills/` と `.claude/agents/` は必要なときだけ使い、作業のためだけに計画書や進捗文書を増やさないでください。

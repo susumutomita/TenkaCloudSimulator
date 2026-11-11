@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -172,6 +173,7 @@ func (g *Gateway) serveSSM(w http.ResponseWriter, r *http.Request) {
 	allowed := map[string][]string{
 		"PutParameter": {"Name", "Value", "Type", "Description", "Overwrite", "Tier", "DataType"},
 		"GetParameter": {"Name", "WithDecryption"}, "GetParameters": {"Names", "WithDecryption"}, "DeleteParameter": {"Name"},
+		"DeleteParameters":   {"Names"},
 		"DescribeParameters": {"MaxResults", "NextToken"}, "GetParametersByPath": {"Path", "Recursive", "MaxResults", "NextToken", "WithDecryption"},
 	}
 	fields, ok := allowed[op]
@@ -210,6 +212,26 @@ func (g *Gateway) serveSSM(w http.ResponseWriter, r *http.Request) {
 		invalid("Invalid request field type.")
 		return
 	}
+	if op == "DeleteParameters" {
+		// The batch has exactly one field. Inspect the original object because
+		// unmarshalling into a map would silently accept duplicate Names keys.
+		dec := json.NewDecoder(bytes.NewReader(data))
+		_, _ = dec.Token() // The complete JSON object was validated above.
+		if _, err = dec.Token(); err != nil {
+			invalid("Names requires 1–10 names.")
+			return
+		}
+		var value json.RawMessage
+		if err = dec.Decode(&value); err != nil || dec.More() {
+			invalid("Use exactly one Names field.")
+			return
+		}
+		input.Names, err = parameterDeleteNames(input.Names)
+		if err != nil {
+			ssmError(w, err)
+			return
+		}
+	}
 	input.Name = strings.TrimSpace(input.Name)
 	if (op == "PutParameter" || op == "GetParameter" || op == "DeleteParameter") && !validParameterName(input.Name) {
 		invalid("Use a parameter name of up to 1011 characters and at most 15 path levels; labels/versions/ARN selectors are not supported.")
@@ -225,8 +247,29 @@ func (g *Gateway) serveSSM(w http.ResponseWriter, r *http.Request) {
 	if principal == "" {
 		principal = core.Administrator
 	}
+	// Evaluate the entire batch against one policy, including local principal
+	// requests that do not already carry a verified SDK policy snapshot.
+	var batchPolicy *core.Policy
+	if op == "DeleteParameters" {
+		if policy, ok := SDKPolicyFromContext(r.Context()); ok {
+			batchPolicy = &policy
+		} else if principal != core.Administrator {
+			policy, _, err := g.Identities.PolicyContext(r.Context(), principal)
+			if err != nil {
+				ssmError(w, err)
+				return
+			}
+			batchPolicy = &policy
+		}
+	}
 	authorize := func(resource string) bool {
-		decision, err := g.sdkDecision(r, principal, "ssm:"+op, resource)
+		var decision string
+		var err error
+		if batchPolicy != nil {
+			decision = core.Evaluate(*batchPolicy, "ssm:"+op, resource)
+		} else {
+			decision, err = g.sdkDecision(r, principal, "ssm:"+op, resource)
+		}
 		if err != nil {
 			ssmError(w, err)
 			return false
@@ -248,7 +291,7 @@ func (g *Gateway) serveSSM(w http.ResponseWriter, r *http.Request) {
 	if op == "GetParametersByPath" {
 		resource = arn(strings.TrimSuffix(input.Path, "/")) + "/*"
 	}
-	if op != "GetParameters" && !authorize(resource) {
+	if op != "GetParameters" && op != "DeleteParameters" && !authorize(resource) {
 		return
 	}
 	switch op {
@@ -334,6 +377,18 @@ func (g *Gateway) serveSSM(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		ssmJSON(w, 200, map[string]any{})
+	case "DeleteParameters":
+		for _, name := range input.Names {
+			if !authorize(arn(name)) {
+				return
+			}
+		}
+		deleted, missing, err := g.Parameters.DeleteMany(r.Context(), region, input.Names)
+		if err != nil {
+			ssmError(w, err)
+			return
+		}
+		ssmJSON(w, 200, map[string]any{"DeletedParameters": deleted, "InvalidParameters": missing})
 	default:
 		if op == "GetParametersByPath" && (!strings.HasPrefix(input.Path, "/") || input.Path != "/" && !validParameterName(strings.TrimSuffix(input.Path, "/"))) {
 			invalid("Use a slash-prefixed hierarchy path.")

@@ -43,8 +43,8 @@ def verify(directory, commit, version=None):
         raise ValueError('unexpected release build flags')
     if info['targets'] != [t.replace('_', '/') for t in TARGETS] or info['cgo_enabled'] is not False:
         raise ValueError('unexpected build targets or CGO configuration')
-    if not info['toolchain'].startswith('go version go1.26.10 '):
-        raise ValueError('release requires the pinned Go 1.26.10 toolchain')
+    if not info['toolchain'].startswith('go version go1.26.11 '):
+        raise ValueError('release requires the pinned Go 1.26.11 toolchain')
     return info
 
 

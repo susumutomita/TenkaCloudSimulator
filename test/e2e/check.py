@@ -80,6 +80,10 @@ class Conformance(unittest.TestCase):
  def test_route53_native_public_zone_sdk(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("route53.py"))],check=True,timeout=180)
 
+ def test_ssm_batch_reference_contract(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_ssm_batch_reference.py'))],check=True,timeout=30)
+ def test_ssm_batch_delete_native_sdk_and_isolation(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('ssm_batch_delete.py'))],check=True,timeout=120)
  def test_sns_sqs_native_fanout_restart_and_isolation(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('sns_sqs_fanout.py'))],check=True,timeout=180)
  def test_scalar_aws_json_live_response_display(self):
@@ -362,6 +366,8 @@ def handler(event,context):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_ssm_parameters.py'))],check=True,timeout=120)
  def test_cloudformation_rest_native_sdk_lifecycle(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cloudformation_rest.py'))],check=True)
+ def test_sqs_batch_delete_sdk_atomicity_and_isolation(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('sqs_batch_delete.py'))],check=True,timeout=180)
  def test_sqs_native_sdk_two_teams_restart_retention_and_cleanup(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('sqs.py'))],check=True)
  def test_apigateway_rest_sdk_permissions_and_two_teams(self):

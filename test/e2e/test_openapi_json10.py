@@ -22,15 +22,15 @@ class SharedJSON10Schemas(unittest.TestCase):
     def examples(self):
         return self.spec['paths']['/']['post']['requestBody']['content'][MEDIA]['examples']
 
-    def test_all_sixteen_templates_match_shared_and_operation_schemas(self):
-        self.assertEqual(validate_json10_examples(self.spec), 16)
+    def test_all_seventeen_templates_match_shared_and_operation_schemas(self):
+        self.assertEqual(validate_json10_examples(self.spec), 17)
 
     def test_omitting_dynamodb_union_branches_reproduces_composition_failure(self):
         broken = copy.deepcopy(self.spec)
         schema = broken['paths']['/']['post']['requestBody']['content'][MEDIA]['schema']
         schema['anyOf'] = [branch for branch in schema['anyOf']
                            if '/DynamoDB' not in branch.get('$ref', '')]
-        self.assertEqual(len(schema['anyOf']), 9)
+        self.assertEqual(len(schema['anyOf']), 10)
         shared = validator(broken, schema)
         for operation in DYNAMODB_OPERATIONS:
             with self.subTest(operation=operation), self.assertRaises(ValidationError):
@@ -46,6 +46,66 @@ class SharedJSON10Schemas(unittest.TestCase):
                     shared.validate(invalid)
                 with self.assertRaises(ValidationError):
                     validator(self.spec, request_schema(self.spec, name)).validate(invalid)
+
+    def test_batch_delete_template_and_strict_entry_bounds(self):
+        example = self.examples()['DeleteMessageBatch']
+        self.assertEqual(example['x-simulator-target'], 'AmazonSQS.DeleteMessageBatch')
+        schema = validator(self.spec, request_schema(self.spec, 'DeleteMessageBatch'))
+        original = example['value']
+        schema.validate(original)
+        entry = original['Entries'][0]
+        for entries in ([], [entry] * 11, None, {}, [None],
+                        [{**entry, 'Id': value} for value in ('valid', '')],
+                        [{**entry, 'ReceiptHandle': ''}],
+                        [{**entry, 'Unknown': True}],
+                        [{'Id': 'missing-receipt'}], [{'ReceiptHandle': 'missing-id'}]):
+            with self.subTest(entries=entries), self.assertRaises(ValidationError):
+                schema.validate({**original, 'Entries': entries})
+        for field, invalids in (('Id', ('', 'x' * 81, 'bad.id', '日本語', 'valid\n', 'valid\r\n', 1, None, True)),
+                               ('ReceiptHandle', ('', None, 1, True))):
+            for value in invalids:
+                with self.subTest(field=field, value=value), self.assertRaises(ValidationError):
+                    schema.validate({**original, 'Entries': [{**entry, field: value}]})
+        for missing in ('QueueUrl', 'Entries'):
+            invalid = copy.deepcopy(original)
+            del invalid[missing]
+            with self.assertRaises(ValidationError):
+                schema.validate(invalid)
+        # Uniqueness of only the Id field is a native API obligation, not
+        # something JSON Schema's whole-object uniqueItems can express.
+        self.assertNotIn('uniqueItems', self.spec['components']['schemas'][
+            'SQSDeleteMessageBatchRequest']['properties']['Entries'])
+
+    def test_batch_response_requires_both_strict_partitions(self):
+        success = {'Id': 'deleted'}
+        failure = {'Id': 'invalid', 'Code': 'ReceiptHandleIsInvalid',
+                   'Message': 'The input receipt handle is invalid.', 'SenderFault': True}
+        for result in ({'Successful': [success], 'Failed': []},
+                       {'Successful': [], 'Failed': [failure]},
+                       {'Successful': [success], 'Failed': [failure]}):
+            validate_json10_response(self.spec, 200, result, sqs_operation='DeleteMessageBatch')
+        for invalid in ({'Successful': []}, {'Failed': []},
+                        {'Successful': None, 'Failed': []},
+                        {'Successful': [], 'Failed': None},
+                        {'Successful': [{'Id': 'ok', 'ReceiptHandle': 'leak'}], 'Failed': []},
+                        {'Successful': [], 'Failed': [{**failure, 'SenderFault': False}]},
+                        {'Successful': [], 'Failed': [{**failure, 'Code': 'InternalError'}]}):
+            with self.subTest(invalid=invalid), self.assertRaises(ValidationError):
+                validate_json10_response(self.spec, 200, invalid, sqs_operation='DeleteMessageBatch')
+        # ECMAScript/Python '$' may match before a final newline. The ID
+        # contract forbids every non-ASCII-ID character anywhere in the value.
+        for part, item in (('Successful', success), ('Failed', failure)):
+            for invalid_id in ('valid\n', 'valid\r\n'):
+                invalid = {'Successful': [], 'Failed': []}
+                invalid[part] = [{**item, 'Id': invalid_id}]
+                with self.subTest(part=part, invalid_id=invalid_id), self.assertRaises(ValidationError):
+                    validate_json10_response(self.spec, 200, invalid, sqs_operation='DeleteMessageBatch')
+        broken = copy.deepcopy(self.spec)
+        media = broken['paths']['/']['post']['responses']['200']['content'][MEDIA]
+        media['schema']['anyOf'] = [branch for branch in media['schema']['anyOf']
+                                   if not branch.get('$ref', '').endswith('/SQSDeleteMessageBatchResult')]
+        with self.assertRaises(ValidationError):
+            validate_json10_response(broken, 200, {'Successful': [success], 'Failed': []})
 
     def test_nested_options_and_case_changes_are_rejected(self):
         original = self.examples()['DynamoDBCreateTable']['value']
@@ -112,7 +172,7 @@ class SharedJSON10Schemas(unittest.TestCase):
         media = self.spec['paths']['/']['post']['requestBody']['content']['application/x-amz-json-1.1']
         shared = validator(self.spec, media['schema'])
         self.assertEqual(set(media['examples']), {
-            'SSMGetParameter', 'KMSCreateKey', 'KMSDescribeKey', 'KMSListKeys',
+            'SSMGetParameter', 'SSMDeleteParameters', 'KMSCreateKey', 'KMSDescribeKey', 'KMSListKeys',
             'KMSEnableKey', 'KMSDisableKey', 'KMSGetKeyPolicy', 'KMSEncrypt', 'KMSDecrypt',
             'LogsCreateLogGroup', 'LogsDescribeLogGroups', 'LogsDeleteLogGroup',
             'LogsCreateLogStream', 'LogsDeleteLogStream', 'LogsDescribeLogStreams', 'LogsPutLogEvents', 'LogsGetLogEvents',
@@ -121,7 +181,7 @@ class SharedJSON10Schemas(unittest.TestCase):
             'KMSCreateAlias', 'KMSListAliases', 'KMSUpdateAlias', 'KMSDeleteAlias',
             'ListSecretVersionIds',
         })
-        self.assertEqual(len(media['examples']), 29)
+        self.assertEqual(len(media['examples']), 30)
         for example in media['examples'].values():
             shared.validate(example['value'])
 

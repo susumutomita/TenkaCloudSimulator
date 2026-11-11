@@ -12,6 +12,7 @@ import unittest
 from jsonschema import ValidationError
 from openapi_json10 import validator
 from route53_openapi import project_before_route53
+from batch_reference_projection import project_batches
 
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/disk'
@@ -31,12 +32,14 @@ def operations(spec):
     return [(path,method,value) for path,item in spec['paths'].items() for method,value in item.items() if method in METHODS]
 
 
+
 def preserved(spec):
     spec = project_before_route53(spec)
     # Validate the three reviewed DeleteLogStream additions exactly, then remove
     # only those additions from a copy. Every pre-existing digest below is kept
     # unchanged. This projection was checked against public main36e72c4 in full.
     spec = copy.deepcopy(spec)
+    project_batches(spec)
     media = spec['paths']['/']['post']['requestBody']['content'][JSON11]
     assert len(media['examples']) == 29
     example = media['examples'].pop('LogsDeleteLogStream', None)
@@ -108,6 +111,32 @@ class SakuraReference(unittest.TestCase):
 
     def test_all_existing_operations_components_and_28_templates_are_exact(self):
         preserved(self.spec)
+
+    def test_sqs_batch_projection_cannot_hide_contract_or_inherited_drift(self):
+        def media(spec):
+            return spec['paths']['/']['post']['requestBody']['content']['application/x-amz-json-1.0']
+        def schema(spec):
+            return spec['components']['schemas']['SQSDeleteMessageBatchRequest']
+        for label, change in (
+            ('missing batch example', lambda spec: media(spec)['examples'].pop('DeleteMessageBatch')),
+            ('wrong target', lambda spec: media(spec)['examples']['DeleteMessageBatch'].update(summary='wrong target')),
+            ('missing Id', lambda spec: schema(spec)['properties']['Entries']['items']['required'].remove('Id')),
+            ('relaxed entry bound', lambda spec: schema(spec)['properties']['Entries'].update(maxItems=11)),
+            ('relaxed fields', lambda spec: schema(spec).update(additionalProperties=True)),
+            ('missing result partition', lambda spec: spec['components']['schemas']['SQSDeleteMessageBatchResult']['required'].remove('Failed')),
+            ('wrong IAM action', lambda spec: spec['paths']['/']['post']['x-simulator-sqs-operation-schemas']['DeleteMessageBatch'].update(permission='sqs:DeleteMessageBatch')),
+            ('missing request branch', lambda spec: media(spec)['schema']['anyOf'].pop()),
+            ('duplicate request branch', lambda spec: media(spec)['schema']['anyOf'].append({'$ref': '#/components/schemas/SQSDeleteMessageBatchRequest'})),
+            ('missing response branch', lambda spec: spec['paths']['/']['post']['responses']['200']['content']['application/x-amz-json-1.0']['schema']['anyOf'].pop()),
+            ('changed existing SQS', lambda spec: media(spec)['examples']['SendMessage']['value'].update(MessageBody='changed')),
+            ('changed DynamoDB', lambda spec: media(spec)['examples']['DynamoDBGetItem']['value'].update(TableName='changed')),
+            ('changed other reference', lambda spec: spec['paths']['/{bucket}']['put'].update(summary='changed')),
+            ('unreviewed component', lambda spec: spec['components']['schemas'].update(UnreviewedBatchExtension={'type': 'string'})),
+        ):
+            broken = copy.deepcopy(self.spec)
+            change(broken)
+            with self.subTest(change=label), self.assertRaises(AssertionError):
+                preserved(broken)
 
     def test_log_stream_addition_cannot_hide_missing_or_changed_contracts(self):
         def media(spec):

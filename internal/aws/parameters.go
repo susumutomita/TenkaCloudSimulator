@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"slices"
 	"time"
 )
 
@@ -100,4 +101,82 @@ func (s *ParameterStore) Delete(region, name string) error {
 		return ssmFailure{"ParameterNotFound", "The specified parameter does not exist."}
 	}
 	return err
+}
+
+func parameterDeleteNames(names []string) ([]string, error) {
+	if len(names) < 1 || len(names) > 10 {
+		return nil, ssmFailure{"ValidationException", "Names requires 1–10 names."}
+	}
+	unique := make([]string, 0, len(names))
+	for _, name := range names {
+		if !validParameterName(name) {
+			return nil, ssmFailure{"ValidationException", "Use a parameter name of up to 1011 characters and at most 15 path levels; labels/versions/ARN selectors are not supported."}
+		}
+		if !slices.Contains(unique, name) {
+			unique = append(unique, name)
+		}
+	}
+	return unique, nil
+}
+
+// DeleteMany commits the batch together and reports each distinct name once,
+// preserving first occurrence order within each result. Atomicity, duplicate
+// handling and ordering are simulator guarantees, not AWS compatibility claims.
+// It retains the existing name subset and does not impose AWS's recreation delay.
+// The caller must authorize ssm:DeleteParameters for every name before calling.
+func (s *ParameterStore) DeleteMany(ctx context.Context, region string, names []string) ([]string, []string, error) {
+	names, err := parameterDeleteNames(names)
+	if err != nil {
+		return nil, nil, err
+	}
+	if !slices.Contains(Regions, region) {
+		return nil, nil, ssmFailure{"ValidationException", "Unsupported simulator region."}
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer tx.Rollback()
+	deleted, missing := []string{}, []string{}
+	for _, name := range names {
+		var exists int
+		err = tx.QueryRowContext(ctx, "SELECT 1 FROM aws_ssm_parameters WHERE region=? AND name=?", region, name).Scan(&exists)
+		if err == sql.ErrNoRows {
+			missing = append(missing, name)
+			continue
+		}
+		if err != nil {
+			return nil, nil, err
+		}
+		deleted = append(deleted, name)
+	}
+	for _, name := range deleted {
+		result, err := tx.ExecContext(ctx, "DELETE FROM aws_ssm_parameters WHERE region=? AND name=?", region, name)
+		if err != nil {
+			return nil, nil, err
+		}
+		changed, err := result.RowsAffected()
+		if err != nil {
+			return nil, nil, err
+		}
+		if changed != 1 {
+			return nil, nil, fmt.Errorf("parameter deletion did not remove its target")
+		}
+	}
+	// Check after every mutation: a later trigger must not resurrect an earlier
+	// target while the API still reports that it was deleted.
+	for _, name := range deleted {
+		var exists int
+		err = tx.QueryRowContext(ctx, "SELECT 1 FROM aws_ssm_parameters WHERE region=? AND name=?", region, name).Scan(&exists)
+		if err == nil {
+			return nil, nil, fmt.Errorf("deleted parameter still exists")
+		}
+		if err != sql.ErrNoRows {
+			return nil, nil, err
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, nil, err
+	}
+	return deleted, missing, nil
 }

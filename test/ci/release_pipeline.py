@@ -36,7 +36,7 @@ class ManifestTests(unittest.TestCase):
         self.directory = Path(self.temporary.name)
         self.info = {'source_commit': COMMIT, 'version': 'v0.1.0', 'host_protocol': 1,
                      'source_repository': 'https://github.com/susumutomita/TenkaCloudSimulator',
-                     'toolchain': 'go version go1.26.10 linux/amd64',
+                     'toolchain': 'go version go1.26.11 linux/amd64',
                      'cgo_enabled': False, 'build_flags': FLAGS,
                      'targets': [t.replace('_', '/') for t in verify.TARGETS]}
         for name in verify.ASSETS - {'BUILDINFO.json'}:
@@ -115,6 +115,12 @@ class ManifestTests(unittest.TestCase):
                     self.check()
                 self.info[key] = old
 
+    def test_previous_patch_toolchain_refused(self):
+        self.info['toolchain'] = 'go version go1.26.10 linux/amd64'
+        self.refresh()
+        with self.assertRaisesRegex(ValueError, 'pinned Go 1.26.11'):
+            self.check()
+
     def test_missing_host_protocol_refused(self):
         del self.info['host_protocol']
         self.refresh()
@@ -144,6 +150,13 @@ class TagTests(unittest.TestCase):
 
 
 class WorkflowTests(unittest.TestCase):
+    def test_go_security_patch_pin_is_consistent(self):
+        for name, count in [('ci.yml', 2), ('release.yml', 1)]:
+            workflow = (ROOT / '.github/workflows' / name).read_text()
+            pins = [line.strip() for line in workflow.splitlines()
+                    if line.strip().startswith('go-version:')]
+            self.assertEqual(pins, ["go-version: '1.26.11'"] * count)
+
     def test_release_publication_retains_all_gates_and_draft_first(self):
         workflow = (ROOT / '.github/workflows/release.yml').read_text()
         self.assertIn('needs: [validate, formal, build, smoke]', workflow)
@@ -177,7 +190,7 @@ class BuildTests(unittest.TestCase):
 import json, os, pathlib, sys
 args = sys.argv[1:]
 if args == ['version']:
-    print('go version go1.26.10 linux/amd64')
+    print('go version go1.26.11 linux/amd64')
 elif args == ['mod', 'verify']:
     assert pathlib.Path('source.txt').read_text() == 'committed'
 else:
@@ -240,8 +253,14 @@ else:
         self.assertFalse((self.output / 'SHA256SUMS').exists())
         self.assertFalse((self.output / 'BUILDINFO.json').exists())
 
+    def test_previous_patch_toolchain_refused_before_build(self):
+        self.go.write_text(self.go.read_text().replace('go1.26.11', 'go1.26.10'))
+        with self.assertRaises(SystemExit):
+            self.invoke()
+        self.assertEqual(list(self.output.iterdir()), [])
+
     def test_wrong_toolchain_refused(self):
-        self.go.write_text(self.go.read_text().replace('go1.26.10', 'go1.25.0'))
+        self.go.write_text(self.go.read_text().replace('go1.26.11', 'go1.25.0'))
         with self.assertRaises(SystemExit):
             self.invoke()
         self.assertEqual(list(self.output.iterdir()), [])

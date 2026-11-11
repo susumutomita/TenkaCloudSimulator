@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "1ea676eec2587e0df00629bcf26c23a6dd6e4681",
+  "base_sha": "729af3aa3858b7813a623f6b4f66b25377022ad5",
   "changes": [
     {
       "path": "docs/route53.md",
@@ -49,7 +49,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "3fc205106ad2d439ed58afe5823100f063f2e749b00449d9ad25a32985a21a8c",
+      "sha256": "44c051369963ed5c71c47ae63e3c17eea6fbedd11f9d6896b58be7b47c63eb10",
       "disposition": "formal-infrastructure",
       "reason": "Registers Route53 invariants, six mandatory sensitivity controls and source scopes while preserving all prior models and controls.",
       "models": []
@@ -160,7 +160,7 @@
     },
     {
       "path": "internal/aws/ssm.go",
-      "sha256": "f511d876138aea53e1ed1baa27433a332cac59565a194f501678e6eb966d343e",
+      "sha256": "fa1e3abd25d2d9ab7d7a0736407f9a802a988cc3a53943b81cbac7126be8d857",
       "disposition": "modeled",
       "reason": "Adds bounded Route53 native persistence and atomic batches, immutable caller authority, conflict-safe dispatch and additive composition. Existing unrelated services and authority paths remain intact.",
       "models": [
@@ -179,7 +179,7 @@
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "9988f529f84b2e92209c3d33970354919b5e2fe27b4cd35933a20bc563bc6c2f",
+      "sha256": "62ef70486f313e428c616fb86c502e0c64f295c7b61def556ca16c8787a6865b",
       "disposition": "presentation",
       "reason": "Adds exactly five Route53 REST/XML paths and eight operation contracts, without changing inherited paths/components or enabling a console.",
       "models": []
@@ -193,7 +193,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "8fc7799ec9949ffaddd7cd06a4d966274e8549d26f42c9977ceea7e38c909529",
+      "sha256": "38f565ce6d12a50b17e81b095d8d67e7aa997c6e77c751b33a446651fa4ed922",
       "disposition": "modeled",
       "reason": "Adds bounded Route53 native persistence and atomic batches, immutable caller authority, conflict-safe dispatch and additive composition. Existing unrelated services and authority paths remain intact.",
       "models": [
@@ -219,14 +219,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "536c419d2cdfbe69f17b690fa373a38c016c714116c25ff501fb2b352d2a5567",
+      "sha256": "170e7aaeae3c76bf66ed7a3bdbd50c63c0a0cb3c813a4cf90fcbabd4a4dbb0a1",
       "disposition": "formal-infrastructure",
       "reason": "Registers Route53 invariants, six mandatory sensitivity controls and source scopes while preserving all prior models and controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "77f510501eaba174aa01223e6b2dbb3e36d9d59819f79a519b4a661f1d569b73",
+      "sha256": "0befda236ac7212ba9d0f07897b042670387c94da89f4a498e3ce1971ed1652e",
       "disposition": "formal-infrastructure",
       "reason": "Adds independent Route53 review regression and fail-closed formal inventory/property/control/source-scope removal tests. Existing IDs, controls and thresholds are preserved.",
       "models": []
@@ -247,7 +247,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "45f445d05a3b9a361c6fe1d13b8b43cc26db88c9ee9d79e4220990666a9b26fd",
+      "sha256": "f995d104c52ae5096455f3f5ad8715392047d783d11923705aae913f36a2ae08",
       "disposition": "test-support",
       "reason": "Validates the complete exact Route53 extension before inherited reference inventories, preserving original baseline IDs/path sets and full served spec for native examples. Adds real-validator negative controls and mandatory registration.",
       "models": []
@@ -310,14 +310,14 @@
     },
     {
       "path": "test/e2e/sqs_docs.py",
-      "sha256": "7b9391ffb88f3dbc46f99734f2d67bc8666db8fdd686569d8ab5793a54c8ef09",
+      "sha256": "3d620f422b73c882c9d28ca2c202fa01545675550afb55b5a4580ce2a5dfcc5d",
       "disposition": "test-support",
       "reason": "Validates the complete exact Route53 extension before inherited reference inventories, preserving original baseline IDs/path sets and full served spec for native examples. Adds real-validator negative controls and mandatory registration.",
       "models": []
     },
     {
       "path": "test/e2e/test_openapi_json10.py",
-      "sha256": "599baf2381778968db40223a0a11eccd0c822971449b3e66aae2baf816010bcf",
+      "sha256": "4986363403854123a7258d05c121066f89df307f84cf9ba8b1897477ae4aa5f0",
       "disposition": "test-support",
       "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
       "models": []
@@ -345,9 +345,16 @@
     },
     {
       "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "a5591308dd9690b8b16095445337f64d32c87c28c72d54c7dd97218b4068ae06",
+      "sha256": "63625afd40beecefbcb0abc5fc92edf366335958300857b74dca29005b1ed6fa",
       "disposition": "test-support",
       "reason": "Adds native/server/SDK and strict OpenAPI detector acceptance. Existing snapshot inventories and hashes are preserved; only independently validated exact Route53 additions are projected away.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_ssm_batch_reference.py",
+      "sha256": "4179c96dacc1f7136edd819cc4620e640d14f1c57badfb6ea83a22404071c34e",
+      "disposition": "test-support",
+      "reason": "Compose exact Route53 projection before the existing batch projection; retain inherited reference hash and all mutation controls.",
       "models": []
     }
   ]

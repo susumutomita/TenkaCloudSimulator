@@ -78,7 +78,7 @@
       },
       "post": {
         "summary": "AWS native JSON or Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request \u2192 Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, batch operations and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM customer-managed policies and role attachments are also available through the dedicated IAM provider template, with explicit ListPolicies Scope=Local. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. Customer-managed grants and the exact read-only AmazonSSMManagedInstanceCore v2 builtin are supported; no general AWS policy catalog or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1\u20134096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.\n\nKMS aliases: TrentService.CreateAlias, ListAliases, UpdateAlias, DeleteAlias. Customer alias names include alias/ and are case-sensitive; alias/aws/ is reserved. Alias targets are concrete local key IDs/ARNs in the same account/Region. Create requires kms:CreateAlias on alias+target, Update kms:UpdateAlias on alias+old+new, Delete kms:DeleteAlias on alias+target, List kms:ListAliases on *. Local aliases are capped at1000 total/50 per key; ListAliases defaults50 and accepts1\u2013100. Create/Update/Delete return empty200. Encrypt/Decrypt accept aliases, resolving and authorizing the concrete key in the same transaction. No alias identifiers for DescribeKey/EnableKey/DisableKey/GetKeyPolicy, AWS-managed aliases, alias ABAC, key deletion lifecycle, grants or CFN KMS resources.",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request \u2192 Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, DeleteMessageBatch, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, SendMessageBatch, ChangeMessageVisibilityBatch and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter, DeleteParameters. DeleteParameters requires 1\u201310 names and ssm:DeleteParameters on every distinct target, including missing names. The simulator validates and authorizes the complete batch before one atomic transaction. Duplicate names appear once in first-occurrence order within DeletedParameters or InvalidParameters. These ordering and atomicity guarantees are local bounds, not AWS equivalence. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM customer-managed policies and role attachments are also available through the dedicated IAM provider template, with explicit ListPolicies Scope=Local. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. Customer-managed grants and the exact read-only AmazonSSMManagedInstanceCore v2 builtin are supported; no general AWS policy catalog or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1\u20134096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.\n\nKMS aliases: TrentService.CreateAlias, ListAliases, UpdateAlias, DeleteAlias. Customer alias names include alias/ and are case-sensitive; alias/aws/ is reserved. Alias targets are concrete local key IDs/ARNs in the same account/Region. Create requires kms:CreateAlias on alias+target, Update kms:UpdateAlias on alias+old+new, Delete kms:DeleteAlias on alias+target, List kms:ListAliases on *. Local aliases are capped at1000 total/50 per key; ListAliases defaults50 and accepts1\u2013100. Create/Update/Delete return empty200. Encrypt/Decrypt accept aliases, resolving and authorizing the concrete key in the same transaction. No alias identifiers for DescribeKey/EnableKey/DisableKey/GetKeyPolicy, AWS-managed aliases, alias ABAC, key deletion lifecycle, grants or CFN KMS resources.\n\nSQS DeleteMessageBatch: 1\u201310 distinct entry IDs, IAM sqs:DeleteMessage on the queue ARN. HTTP200 always includes Successful and Failed arrays; inspect both even on success. Invalid/stale/expired/peer receipts are per-entry SenderFault failures. Local partitions retain input order and repeated handles with different IDs succeed only on the first occurrence, unlike an AWS ordering guarantee. A required SQL, cancellation, commit or acknowledgement failure returns sanitized500 and rolls back every deletion and scoped expiry cleanup, without a success list. No batch console action is added.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -190,6 +190,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/LogsDeleteLogStreamRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSMDeleteParametersInput"
                   }
                 ],
                 "description": "SSM, KMS, CloudWatch Logs or Secrets Manager JSON 1.1 as selected by X-Amz-Target. The generic object alternative preserves SSM and Secrets Manager templates; named KMS and Logs schemas document their bounded shapes. Exact KMS per-target schemas are in x-simulator-kms-operation-schemas; body alone cannot discriminate routing."
@@ -461,6 +464,16 @@
                   },
                   "x-request-schema": {
                     "$ref": "#/components/schemas/LogsDeleteLogStreamRequest"
+                  }
+                },
+                "SSMDeleteParameters": {
+                  "summary": "X-Amz-Target: AmazonSSM.DeleteParameters",
+                  "description": "Destructive: deletes the named local parameters if present. Use disposable parameter names. Selecting this example does not set the routing header.",
+                  "value": {
+                    "Names": [
+                      "/practice/delete-one",
+                      "/practice/delete-two"
+                    ]
                   }
                 }
               }
@@ -876,9 +889,12 @@
                   },
                   {
                     "$ref": "#/components/schemas/DynamoDBDeleteTableRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SQSDeleteMessageBatchRequest"
                   }
                 ],
-                "description": "SQS and DynamoDB share JSON 1.0. X-Amz-Target selects the native operation; body shapes overlap, so all nine SQS and seven bounded DynamoDB request schemas are retained in anyOf. Static templates require live substitutions. Saved-table key relationships and native byte limits are checked by the API.",
+                "description": "SQS and DynamoDB share JSON 1.0. X-Amz-Target selects the native operation; body shapes overlap, so all ten SQS and seven bounded DynamoDB request schemas are retained in anyOf. Static templates require live substitutions. Saved-table key relationships and native byte limits are checked by the API.",
                 "type": "object"
               },
               "examples": {
@@ -1095,6 +1111,29 @@
                   "x-request-schema": {
                     "$ref": "#/components/schemas/DynamoDBDeleteTableRequest"
                   }
+                },
+                "DeleteMessageBatch": {
+                  "summary": "X-Amz-Target: AmazonSQS.DeleteMessageBatch",
+                  "description": "STATIC TEMPLATE, not live state. Use X-Amz-Target: AmazonSQS.DeleteMessageBatch, X-Simulator-Service:sqs, selected region and JSON1.0. Create/Get actual QueueUrl first; Receive supplies current MessageId/ReceiptHandle. Replace all __...__ placeholders with actual responses. Never use MessageId as a receipt or send real AWS credentials. Receive two messages and substitute each current receipt separately. IDs identify result entries, not messages. Read both Successful and Failed arrays; IAM permission is sqs:DeleteMessage.",
+                  "value": {
+                    "QueueUrl": "__QUEUE_URL__",
+                    "Entries": [
+                      {
+                        "Id": "delete-first",
+                        "ReceiptHandle": "__RECEIPT_HANDLE__"
+                      },
+                      {
+                        "Id": "delete-second",
+                        "ReceiptHandle": "__SECOND_RECEIPT_HANDLE__"
+                      }
+                    ]
+                  },
+                  "x-simulator-operation": "DeleteMessageBatch",
+                  "x-simulator-static-template": true,
+                  "x-simulator-target": "AmazonSQS.DeleteMessageBatch",
+                  "x-request-schema": {
+                    "$ref": "#/components/schemas/SQSDeleteMessageBatchRequest"
+                  }
                 }
               }
             }
@@ -1139,6 +1178,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/DynamoDBGetItemResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SQSDeleteMessageBatchResult"
                     }
                   ]
                 }
@@ -1173,6 +1215,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/SecretsListSecretVersionIdsOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SSMDeleteParametersOutput"
                     }
                   ],
                   "description": "Shared JSON1.1 response envelope selected by native target; the generic object preserves other services. Exact ListSecretVersionIds output is documented by the supplementary operation-schema mapping, not a global discriminator."
@@ -1207,6 +1252,17 @@
                             "AWSCURRENT"
                           ]
                         }
+                      ]
+                    }
+                  },
+                  "SSMDeleteParameters": {
+                    "summary": "Static DeleteParameters result, not current state",
+                    "value": {
+                      "DeletedParameters": [
+                        "/practice/delete-one"
+                      ],
+                      "InvalidParameters": [
+                        "/practice/delete-two"
                       ]
                     }
                   }
@@ -1485,6 +1541,48 @@
               ]
             },
             "note": "Supplemental per-target schema, not body-only routing. Existing seven operations retain their contracts."
+          }
+        },
+        "x-simulator-ssm-operation-schemas": {
+          "DeleteParameters": {
+            "target": "AmazonSSM.DeleteParameters",
+            "request": {
+              "$ref": "#/components/schemas/SSMDeleteParametersInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/SSMDeleteParametersOutput"
+            },
+            "iamAction": "ssm:DeleteParameters",
+            "atomicBatch": true
+          }
+        },
+        "x-simulator-sqs-operation-schemas": {
+          "DeleteMessageBatch": {
+            "target": "AmazonSQS.DeleteMessageBatch",
+            "request": {
+              "$ref": "#/components/schemas/SQSDeleteMessageBatchRequest"
+            },
+            "response": {
+              "$ref": "#/components/schemas/SQSDeleteMessageBatchResult"
+            },
+            "permission": "sqs:DeleteMessage on the selected queue ARN",
+            "errors": {
+              "400": [
+                "EmptyBatchRequest",
+                "TooManyEntriesInBatchRequest",
+                "BatchEntryIdsNotDistinct",
+                "InvalidBatchEntryId",
+                "InvalidParameterValue",
+                "AWS.SimpleQueueService.NonExistentQueue"
+              ],
+              "403": [
+                "AccessDenied"
+              ],
+              "500": [
+                "InternalError sanitized; entire transaction rolled back"
+              ]
+            },
+            "note": "Supplemental per-target schema; the shared body union does not select a target. Partial semantic failures remain HTTP200."
           }
         }
       }
@@ -15425,7 +15523,7 @@
         "properties": {
           "__type": {
             "type": "string",
-            "description": "Native code, e.g. InvalidParameterValue, InvalidMessageContents, InvalidAttributeName, QueueNameExists, AWS.SimpleQueueService.NonExistentQueue, ReceiptHandleIsInvalid, SimulatorQuotaExceeded, AccessDenied, InternalError, UnknownOperationException."
+            "description": "Native code, e.g. InvalidParameterValue, InvalidMessageContents, InvalidAttributeName, QueueNameExists, AWS.SimpleQueueService.NonExistentQueue, ReceiptHandleIsInvalid, SimulatorQuotaExceeded, AccessDenied, InternalError, UnknownOperationException. DeleteMessageBatch also returns EmptyBatchRequest, TooManyEntriesInBatchRequest, BatchEntryIdsNotDistinct and InvalidBatchEntryId."
           },
           "Message": {
             "type": "string",
@@ -17115,6 +17213,175 @@
           "logGroupName",
           "logStreamName"
         ]
+      },
+      "SSMDeleteParametersInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Names"
+        ],
+        "properties": {
+          "Names": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1011,
+              "pattern": "^/?[a-zA-Z0-9_.-]+(/[a-zA-Z0-9_.-]+)*$",
+              "description": "Existing simulator subset: at most 15 slashes; no leading/trailing spaces, aws/ssm reserved prefixes (case-insensitive), ARN, label or version selectors. Leading slash and no slash remain distinct storage keys."
+            }
+          }
+        },
+        "description": "Raw array count is 1\u201310 before duplicate removal. Only one exact-case Names field is accepted; duplicate JSON members and null are invalid."
+      },
+      "SSMDeleteParametersOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "DeletedParameters",
+          "InvalidParameters"
+        ],
+        "properties": {
+          "DeletedParameters": {
+            "type": "array",
+            "maxItems": 10,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1011,
+              "pattern": "^/?[a-zA-Z0-9_.-]+(/[a-zA-Z0-9_.-]+)*$",
+              "description": "Existing simulator subset: at most 15 slashes; no leading/trailing spaces, aws/ssm reserved prefixes (case-insensitive), ARN, label or version selectors. Leading slash and no slash remain distinct storage keys."
+            }
+          },
+          "InvalidParameters": {
+            "type": "array",
+            "maxItems": 10,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1011,
+              "pattern": "^/?[a-zA-Z0-9_.-]+(/[a-zA-Z0-9_.-]+)*$",
+              "description": "Existing simulator subset: at most 15 slashes; no leading/trailing spaces, aws/ssm reserved prefixes (case-insensitive), ARN, label or version selectors. Leading slash and no slash remain distinct storage keys."
+            }
+          }
+        },
+        "description": "Both arrays are always present. Each distinct requested name is reported once in the partition matching its existence when the deletion transaction begins. Missing names are not a whole-request error. No result is acknowledged after database/commit failure."
+      },
+      "SQSDeleteMessageBatchRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "QueueUrl",
+          "Entries"
+        ],
+        "properties": {
+          "QueueUrl": {
+            "type": "string",
+            "description": "Actual QueueUrl returned by CreateQueue/GetQueueUrl. Replace __QUEUE_URL__; never fetch this URL as an external endpoint. The local API also accepts a bare name/final name segment, a documented deviation.",
+            "minLength": 1
+          },
+          "Entries": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "Id",
+                "ReceiptHandle"
+              ],
+              "properties": {
+                "Id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80,
+                  "not": {
+                    "pattern": "[^A-Za-z0-9_-]"
+                  }
+                },
+                "ReceiptHandle": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Current actual ReceiveMessage receipt; MessageId is not a receipt."
+                }
+              }
+            }
+          }
+        },
+        "description": "Native JSON1.0 DeleteMessageBatch. IDs must be distinct, enforced by the API (JSON Schema cannot express uniqueness of only Id). Duplicate object keys, unknown/case-changed fields, nulls, wrong types, invalid Unicode and missing/empty receipts fail before mutation. QueueUrl must resolve a supported Standard queue. The existing 320KiB request bound applies."
+      },
+      "SQSDeleteMessageBatchResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Successful",
+          "Failed"
+        ],
+        "properties": {
+          "Successful": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "Id"
+              ],
+              "properties": {
+                "Id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80,
+                  "not": {
+                    "pattern": "[^A-Za-z0-9_-]"
+                  }
+                }
+              }
+            }
+          },
+          "Failed": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "Id",
+                "Code",
+                "Message",
+                "SenderFault"
+              ],
+              "properties": {
+                "Id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80,
+                  "not": {
+                    "pattern": "[^A-Za-z0-9_-]"
+                  }
+                },
+                "Code": {
+                  "type": "string",
+                  "const": "ReceiptHandleIsInvalid"
+                },
+                "Message": {
+                  "type": "string",
+                  "const": "The input receipt handle is invalid."
+                },
+                "SenderFault": {
+                  "type": "boolean",
+                  "const": true
+                }
+              }
+            }
+          }
+        },
+        "description": "Both arrays are present even when empty. Together they partition the 1\u201310 request entries, in request order within each array. Distinct IDs sharing one current handle locally succeed first and fail thereafter. All-invalid HTTP200 may commit legitimate scoped expiry cleanup. Infrastructure failure has no batch result and rolls back all changes. Ordering and strict stale-handle rejection are local bounds, not AWS guarantees."
       }
     },
     "responses": {

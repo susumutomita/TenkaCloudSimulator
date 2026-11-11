@@ -71,7 +71,7 @@ Python 3.12のみ、ゲストメモリ128 MiB、タイムアウト1〜30秒で�
 対応する操作と制限は各ガイドにまとめています。APIがあっても、画面・CloudFormation・Challengeのすべてに対応するとは限りません。
 
 - **ストレージ・データ：** [S3](docs/s3.md)（[multipart](docs/s3-multipart.md)）、
-  [DynamoDB](docs/dynamodb.md)、[Parameter Store](docs/console.md)。
+  [DynamoDB](docs/dynamodb.md)、[Parameter Store](docs/ssm-parameters.md)。
 - **関数・メッセージ：** [Lambda](docs/lambda.md)、[API Gateway](docs/apigateway.md)、
   [SQS](docs/sqs.md)、[SNS](docs/sns.md)、[CloudWatch Logs](docs/cloudwatch-logs.md)。
 - **認可・シークレット：** [IAM](docs/iam.md)、[native SDK / STS](docs/sts-native.md)、

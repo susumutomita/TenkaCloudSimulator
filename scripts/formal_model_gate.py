@@ -1165,6 +1165,17 @@ BASE_INVARIANTS['SNSQueueFanout'] = {'Authorized', 'TypeOK', 'ParentPresent', 'B
 REQUIRED_MUTANTS['SNSQueueFanout'] = {'SkipQueueParent', 'SkipPayloadBytes', 'DropAuditRow', 'SkipTopicParent', 'SkipQueueAuthorization', 'DropQueueDelivery', 'SkipMessageCount', 'PartialDeliveryOnFailure', 'IgnoreCommitFailure'}
 REQUIRED_SOURCE_SCOPES['SNSQueueFanout'] = {'internal/server/server.go', 'internal/aws/sqs_store.go', 'internal/server/sns_test.go', 'internal/aws/sns_store.go', 'internal/aws/sns_sqs_fanout_test.go', 'internal/aws/sns.go', 'internal/aws/sns_sqs_fanout.go'}
 
+# Independent bounded native SSM batch transaction contract.
+BASE_MODELS.add('SSMBatchDeletion')
+BASE_INVARIANTS['SSMBatchDeletion'] = {'TypeOK', 'AdmissionBeforeMutation', 'PendingInvisible', 'NoEarlyResponse', 'FailureAtomic', 'DurableAck', 'PeerFrame', 'ExactDeletion', 'SuccessfulResultsExact', 'MissingIsNotFailure', 'CanceledPreservesState'}
+REQUIRED_MUTANTS['SSMBatchDeletion'] = {'CountAfterDedup', 'AllowEmpty', 'IgnoreShape', 'ValidateFirstOnly', 'IgnoreExplicitDeny', 'AuthorizePresentOnly', 'AuthorizeFirstOnly', 'WriteBeforeCommit', 'RespondBeforeCommit', 'PersistFailedCommit', 'AcknowledgeFailedCommit', 'PersistCanceledWork', 'PersistStorageFailure', 'DeleteForeignRegion', 'DeleteUnrelatedName', 'RetainTarget', 'MutatePeerValue', 'KeepDuplicates', 'ReverseResults', 'ReportMissingAsDeleted', 'HideMissingResults', 'RejectMissing', 'MutatePeerVersion'}
+REQUIRED_SOURCE_SCOPES['SSMBatchDeletion'] = {'internal/aws/parameters.go', 'internal/aws/ssm.go'}
+
+BASE_MODELS.add('SQSBatchDeletion')
+BASE_INVARIANTS['SQSBatchDeletion'] = {'DurableAck', 'ParentBeforeMutation', 'PeerFrame', 'NoEarlyResponse', 'PurgeBeforeResolution', 'PreflightBeforeEffects', 'IAMBinding', 'CommittedStateExact', 'TypeOK', 'FailureAtomic', 'VerifiedBeforeCommit', 'OrderedPartition', 'BothArraysPresent', 'SemanticFailuresCommit', 'AuthorizationBeforeTransaction', 'PendingInvisible', 'ResolutionExact', 'SanitizedFailure', 'DeleteAcknowledged'}
+REQUIRED_MUTANTS['SQSBatchDeletion'] = {'ReuseSelectedReceipt', 'LeakInternalFailure', 'IgnoreDeny', 'ReplyBeforeCommit', 'AcceptRetiredQueueReceipt', 'ReverseFailed', 'ReverseSuccessful', 'OmitSuccessfulArray', 'SkipShape', 'SkipFinalQueueCheck', 'SkipQueueURL', 'PurgePeerRows', 'SkipExpiryCleanup', 'UseBatchIAMAction', 'IgnorePersistedDuplicate', 'AcknowledgeUncommittedDeletion', 'DropResolvedFailure', 'ValidateFirstIDOnly', 'WrongSenderFault', 'IgnorePurgeFailure', 'ResolvePeerReceipts', 'DropResolvedSuccess', 'RejectAllInvalidHandles', 'SkipMaximumCount', 'OmitFailedArray', 'AcceptPreviousReceipt', 'DiscardCommittedExpiry', 'IgnoreCommitFailure', 'SkipMinimumCount', 'SkipFinalIDCheck', 'SkipQueueRecheck', 'SkipFinalReceiptCheck', 'PublishFailedTransaction', 'AuthorizePeerQueue', 'IgnoreAffectedCount', 'ExposeStagedCleanup', 'ValidateFirstReceiptOnly', 'SkipFinalExpiryCheck', 'SkipDistinctIDs'}
+REQUIRED_SOURCE_SCOPES['SQSBatchDeletion'] = {'internal/aws/sqs_store.go', 'internal/aws/sqs_batch_delete.go', 'internal/aws/sqs.go'}
+
 class GateError(ValueError):
     pass
 
