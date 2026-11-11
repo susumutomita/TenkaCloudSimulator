@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"context"
 	"crypto/md5"
 	"crypto/rand"
 	"database/sql"
@@ -183,14 +184,22 @@ func (s *SQSStore) DeleteQueue(region, name string) error {
 // requested mutation in one caller-owned transaction. Cached HTTP queue values
 // never authorize a write after another request has deleted that queue.
 func sqsQueueTx(tx *sql.Tx, region, name string) (SQSQueue, error) {
-	q, err := scanQueue(tx.QueryRow("SELECT region,name,created,visibility_timeout,delay_seconds,retention_seconds FROM aws_sqs_queues WHERE region=? AND name=?", region, name))
+	return sqsQueueContextTx(context.Background(), tx, region, name)
+}
+
+func sqsQueueContextTx(ctx context.Context, tx *sql.Tx, region, name string) (SQSQueue, error) {
+	q, err := scanQueue(tx.QueryRowContext(ctx, "SELECT region,name,created,visibility_timeout,delay_seconds,retention_seconds FROM aws_sqs_queues WHERE region=? AND name=?", region, name))
 	if errors.Is(err, sql.ErrNoRows) {
 		return q, errQueueMissing
 	}
 	return q, err
 }
 func purgeExpiredTx(tx *sql.Tx, q SQSQueue, now float64) error {
-	_, err := tx.Exec("DELETE FROM aws_sqs_messages WHERE region=? AND queue=? AND sent<=?", q.Region, q.Name, now-float64(q.RetentionSeconds))
+	return purgeExpiredContextTx(context.Background(), tx, q, now)
+}
+
+func purgeExpiredContextTx(ctx context.Context, tx *sql.Tx, q SQSQueue, now float64) error {
+	_, err := tx.ExecContext(ctx, "DELETE FROM aws_sqs_messages WHERE region=? AND queue=? AND sent<=?", q.Region, q.Name, now-float64(q.RetentionSeconds))
 	return err
 }
 

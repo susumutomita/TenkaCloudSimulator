@@ -75,7 +75,7 @@ Each guide lists the supported operations and limits. An API does not imply a
 console, CloudFormation adapter or Challenge integration.
 
 - **Storage and data:** [S3](docs/s3.md) ([multipart](docs/s3-multipart.md)),
-  [DynamoDB](docs/dynamodb.md), [Parameter Store](docs/console.md).
+  [DynamoDB](docs/dynamodb.md), [Parameter Store](docs/ssm-parameters.md).
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
   [SQS](docs/sqs.md), [SNS](docs/sns.md), [CloudWatch Logs](docs/cloudwatch-logs.md).
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),

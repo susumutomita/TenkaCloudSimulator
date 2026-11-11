@@ -8,7 +8,7 @@ from jsonschema import Draft202012Validator
 MEDIA = 'application/x-amz-json-1.0'
 SQS_OPERATIONS = ('CreateQueue', 'ListQueues', 'GetQueueUrl', 'GetQueueAttributes',
                   'SendMessage', 'ReceiveMessage', 'ChangeMessageVisibility',
-                  'DeleteMessage', 'DeleteQueue')
+                  'DeleteMessage', 'DeleteMessageBatch', 'DeleteQueue')
 DYNAMODB_OPERATIONS = ('CreateTable', 'ListTables', 'DescribeTable', 'PutItem',
                        'GetItem', 'DeleteItem', 'DeleteTable')
 
@@ -31,7 +31,7 @@ def validate_json10_examples(spec):
     media = spec['paths']['/']['post']['requestBody']['content'][MEDIA]
     expected = {*SQS_OPERATIONS, *('DynamoDB' + operation for operation in DYNAMODB_OPERATIONS)}
     if set(media['examples']) != expected:
-        raise AssertionError('Shared JSON 1.0 examples do not contain the nine SQS and seven DynamoDB operations')
+        raise AssertionError('Shared JSON 1.0 examples do not contain the ten SQS and seven DynamoDB operations')
     union = validator(spec, media['schema'])
     for name, example in media['examples'].items():
         union.validate(example['value'])
@@ -39,10 +39,13 @@ def validate_json10_examples(spec):
     return len(expected)
 
 
-def validate_json10_response(spec, status, value, dynamodb_operation=None):
+def validate_json10_response(spec, status, value, dynamodb_operation=None, sqs_operation=None):
     post = spec['paths']['/']['post']
     schema = post['responses'][str(status)]['content'][MEDIA]['schema']
     validator(spec, schema).validate(value)
     if status == 200 and dynamodb_operation:
         exact = post['x-simulator-dynamodb-operation-schemas'][dynamodb_operation]['response']
+        validator(spec, exact).validate(value)
+    if status == 200 and sqs_operation:
+        exact = post['x-simulator-sqs-operation-schemas'][sqs_operation]['response']
         validator(spec, exact).validate(value)

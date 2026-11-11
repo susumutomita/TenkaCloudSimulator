@@ -48,8 +48,8 @@ def main():
         with tarfile.open(archive) as tar:
             tar.extractall(source, filter='data')
         toolchain = run(go, 'version', cwd=source, env=env)
-        if not toolchain.startswith('go version go1.26.10 '):
-            parser.error('release builds require Go 1.26.10')
+        if not toolchain.startswith('go version go1.26.11 '):
+            parser.error('release builds require Go 1.26.11')
         subprocess.run(['python3', 'scripts/check-assets.py'], cwd=source, check=True)
         subprocess.run([go, 'mod', 'verify'], cwd=source, check=True, env=env)
         for target, arch in TARGETS:

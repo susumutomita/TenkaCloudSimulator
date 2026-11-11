@@ -67,6 +67,7 @@ type sqsRequest struct {
 	MaxResults                  int
 	NextToken                   string
 	ReceiptHandle               string
+	Entries                     []SQSDeleteMessageBatchEntry
 	MessageAttributeNames       []string
 	MessageSystemAttributeNames []string
 }
@@ -138,6 +139,7 @@ func (g *Gateway) serveSQS(w http.ResponseWriter, r *http.Request) {
 		"SendMessage":             {"QueueUrl", "MessageBody", "DelaySeconds", "MessageAttributes"},
 		"ReceiveMessage":          {"QueueUrl", "MaxNumberOfMessages", "VisibilityTimeout", "WaitTimeSeconds", "MessageAttributeNames", "MessageSystemAttributeNames"},
 		"DeleteMessage":           {"QueueUrl", "ReceiptHandle"},
+		"DeleteMessageBatch":      {"QueueUrl", "Entries"},
 		"ChangeMessageVisibility": {"QueueUrl", "ReceiptHandle", "VisibilityTimeout"},
 		"GetQueueAttributes":      {"QueueUrl", "AttributeNames"},
 	}
@@ -150,6 +152,12 @@ func (g *Gateway) serveSQS(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		invalid("SQS requests are limited to 320 KiB.")
 		return
+	}
+	if op == "DeleteMessageBatch" {
+		if err := validateSQSDeleteBatchJSON(data); err != nil {
+			sqsError(w, err)
+			return
+		}
 	}
 	var raw map[string]json.RawMessage
 	if json.Unmarshal(data, &raw) != nil || raw == nil {
@@ -187,8 +195,13 @@ func (g *Gateway) serveSQS(w http.ResponseWriter, r *http.Request) {
 	if principal == "" {
 		principal = core.Administrator
 	}
+	action := "sqs:" + op
+	if op == "DeleteMessageBatch" {
+		// AWS maps the batch API to the single-message permission.
+		action = "sqs:DeleteMessage"
+	}
 	authorize := func(resource string) bool {
-		decision, err := g.Identities.DecisionContext(r.Context(), principal, "sqs:"+op, resource)
+		decision, err := g.Identities.DecisionContext(r.Context(), principal, action, resource)
 		if err != nil {
 			sqsError(w, err)
 			return false
@@ -484,6 +497,13 @@ func (g *Gateway) serveSQS(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		sqsJSON(w, 200, map[string]any{"Messages": out})
+	case "DeleteMessageBatch":
+		out, err := g.Queues.DeleteMessageBatch(r.Context(), region, queueName, input.Entries)
+		if err != nil {
+			sqsError(w, err)
+			return
+		}
+		sqsJSON(w, 200, out)
 	case "DeleteMessage":
 		if _, ok := loadQueue(); !ok {
 			return
