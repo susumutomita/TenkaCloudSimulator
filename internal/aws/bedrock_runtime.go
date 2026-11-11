@@ -88,8 +88,12 @@ func NewBedrockRuntime(config BedrockRuntimeConfig) (*BedrockRuntime, error) {
 	return &BedrockRuntime{backend: bounded, models: models, base: base, stop: stop}, nil
 }
 
-// Close cancels in-flight generations. It is safe to call more than once.
-func (b *BedrockRuntime) Close() { b.stop() }
+// Close cancels in-flight generations and refuses later ones before they
+// reach the backend. The creator owns it; it is safe to call more than once.
+func (b *BedrockRuntime) Close() {
+	b.stop()
+	b.backend.Close()
+}
 
 // BackendName names the selected backend kind.
 func (b *BedrockRuntime) BackendName() string { return b.backend.Name() }
@@ -115,6 +119,11 @@ func (b *BedrockRuntime) generate(ctx context.Context, request inference.Request
 	defer cancel()
 	release := context.AfterFunc(b.base, cancel)
 	defer release()
+	// AfterFunc cancels asynchronously; a closed runtime must not admit a
+	// request to the backend in that window.
+	if b.base.Err() != nil {
+		cancel()
+	}
 	return b.backend.Generate(ctx, request)
 }
 
@@ -263,6 +272,8 @@ func bedrockInferenceError(err error, modelID string) *bedrockError {
 		return &bedrockError{code: "ThrottlingException", status: http.StatusTooManyRequests, message: message}
 	case inference.Canceled:
 		return &bedrockError{code: "ServiceUnavailableException", status: http.StatusServiceUnavailable, message: message}
+	case inference.TooLarge:
+		return bedrockInvalid("%s", message)
 	}
 	failure := &bedrockError{code: "ModelErrorException", status: http.StatusFailedDependency, message: message, extra: map[string]any{"resourceName": modelID}}
 	if status := inference.StatusOf(err); status > 0 {
@@ -341,8 +352,12 @@ func (g *Gateway) bedrockRuntime(w http.ResponseWriter, r *http.Request) *bedroc
 		return &bedrockError{code: "AccessDeniedException", status: http.StatusForbidden, message: "IAM evaluation: " + decision + " for " + principal + " (" + bedrockInvokeAction + " on " + resource + ")."}
 	}
 	data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, BedrockRuntimeRequestBytes))
-	if err != nil {
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
 		return bedrockInvalid("Request bodies are limited to %d bytes.", BedrockRuntimeRequestBytes)
+	}
+	if err != nil {
+		return bedrockInvalid("The request body could not be read completely.")
 	}
 	backendModel, mapped := runtime.models[modelID]
 	if !mapped {

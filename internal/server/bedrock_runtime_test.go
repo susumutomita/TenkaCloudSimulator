@@ -52,7 +52,7 @@ func TestBedrockRuntimeIsDisabledByDefaultBesideTheControlPlane(t *testing.T) {
 	status(t, s, "GET", "/guardrails", "", 200, auth)
 }
 
-func TestBedrockRuntimeCompositionReportsAndClosesTheRuntime(t *testing.T) {
+func TestBedrockRuntimeCompositionReportsTheRuntimeAndLeavesItCallerOwned(t *testing.T) {
 	backend := &blockingBackend{started: make(chan struct{})}
 	runtime, err := aws.NewBedrockRuntime(aws.BedrockRuntimeConfig{Backend: backend, Models: map[string]string{"amazon.nova-micro-v1:0": "local"}, Timeout: time.Minute, Concurrency: 1})
 	if err != nil {
@@ -77,15 +77,23 @@ func TestBedrockRuntimeCompositionReportsAndClosesTheRuntime(t *testing.T) {
 		done <- response.StatusCode
 	}()
 	<-backend.started
+	// The caller owns the runtime: closing the composition leaves it open,
+	// and closing the runtime cancels the generation.
 	if err := closeState(); err != nil {
 		t.Fatal(err)
 	}
+	select {
+	case code := <-done:
+		t.Fatalf("closing the composition ended a caller-owned generation: %d", code)
+	case <-time.After(100 * time.Millisecond):
+	}
+	runtime.Close()
 	select {
 	case code := <-done:
 		if code != 503 {
 			t.Fatalf("closed runtime status %d", code)
 		}
 	case <-time.After(10 * time.Second):
-		t.Fatal("closing the composition did not cancel the generation")
+		t.Fatal("closing the runtime did not cancel the generation")
 	}
 }

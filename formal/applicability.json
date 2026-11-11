@@ -1,571 +1,371 @@
 {
   "version": 1,
-  "base_sha": "83c67934e923c6f8f9ea79e3c6335b353c5b2ac8",
+  "base_sha": "d096316726049261b1a1f9d5818c469027e04e2b",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "ae78c7513728ee3d5930e4aaebfded3fcc69ebac3b03ac254ca0cf48094cfb98",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers mandatory component checks or exact finite properties, mutation controls and source-removal guards without weakening existing gates.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-secret-description-workflow.md",
-      "sha256": "5d18300ba148d261f86e9aece9d9ddffcdcb5181bc2d4fedb79cd6421dbc756d",
+      "path": "AGENTS.md",
+      "sha256": "a88eb563f43ca1bc5bf3c793dbd7f8bc9f877660af26dd8272138279ec1d19ee",
       "disposition": "documentation",
-      "reason": "Defines enduring description workflow semantics and finite assumptions/limits; no progress receipt or intermediate handoff.",
+      "reason": "Records the new provider-neutral internal/inference ownership boundary and its no-fallback/no-storage rules.",
       "models": []
     },
     {
-      "path": "docs/formal-secret-metadata-update.md",
-      "sha256": "57679335686780ac9da63bf0f6a8a81b85c49d8c1a9100eef75748e1e85595db",
+      "path": "README.ja.md",
+      "sha256": "cca2fb78d9fb64979f4225966d2cab482654f6af6bd0684b6b46d80a89fd40c2",
       "disposition": "documentation",
-      "reason": "Defines the enduring supported API contract or finite abstraction assumptions and limitations; does not record progress or interim validation receipts.",
+      "reason": "Japanese link to the opt-in local Bedrock Runtime guide and its limits.",
       "models": []
     },
     {
-      "path": "docs/secrets-manager-update-description.md",
-      "sha256": "797328ce35b8076109db4cf35d35ae406cfb5f7b2db1703140779aff949664a0",
+      "path": "README.md",
+      "sha256": "d3866d9269935e9159dce2e278f6c4a61a73a1f9d09b770fe0d65d4be837363e",
       "disposition": "documentation",
-      "reason": "Defines the enduring supported API contract or finite abstraction assumptions and limitations; does not record progress or interim validation receipts.",
+      "reason": "Links the opt-in local Bedrock Runtime guide and states its limits.",
       "models": []
     },
     {
-      "path": "formal/SecretDescriptionWorkflow.cfg",
-      "sha256": "17ab2bf119653872152b901ea065276626d7103b6903c935b4cca7921f548df8",
+      "path": "SECURITY.md",
+      "sha256": "20bee3bd8875866490013b4398e622bd45a0f3aab371ac9d3e13ddb4aba0e5e5",
+      "disposition": "documentation",
+      "reason": "Documents the opt-in loopback-only backend connection, authorization order, bounds, no storage, public mapped IDs and the Apple refusal.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/bedrock_flags.go",
+      "sha256": "43f19dd7d28a9aa8a443980fb6c11957539315743f1221f33836da71a4ef8e7d",
       "disposition": "modeled",
-      "reason": "Binds the description editor lifecycle and preserved existing Secrets view boundaries to their finite abstractions. Backend commit after UI abort, stale response suppression, duplicate latch, uncertain reconciliation and read-only retry require separate native/component/browser validation; no React refinement is claimed.",
+      "reason": "Builds the single operator-selected backend from explicit flags, refuses orphan, repeated, unauthenticated and Apple configuration before startup, and never selects another backend.",
       "models": [
         {
-          "id": "SecretDescriptionWorkflow",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
-            "TypeOK",
-            "FreshEmissions",
-            "AcknowledgmentIdentity",
-            "MetadataIdentity",
-            "OnePendingSubmission",
-            "LiveWorkKeepsLatch",
-            "NoWriteWhileUncertain",
-            "UncertaintyFence",
-            "AcknowledgedStatusPreserved",
-            "NoValueRetrieval",
-            "ReadRetriesStayReadOnly",
-            "NoStaleFollowupRead",
-            "ServerCommitPreserved",
-            "UnmountHidesDisplay"
+            "BackendOnlyAfterAdmission",
+            "NoFallback",
+            "ConcurrencyBound"
           ],
-          "limits": "Finite UI lifecycle abstraction against description component source d97f987f3a37d922860a894f9f98256975e5cfc0. Assumes validated confirmed input, captured authenticated callback and valid backend metadata. No Go/React/DOM/browser refinement, actual scheduling, Unicode/ARN parsing, auth, SQL/crash atomicity, network cancellation or rollback proof. Fresh explicit confirmed input may clear uncertainty; failed reconciliation may not."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
     },
     {
-      "path": "formal/SecretDescriptionWorkflow.tla",
-      "sha256": "5c3f0d7528ca6df73721ce11b7aafa39d2f17ecc33db8356eae9cb5bce34cde5",
+      "path": "cmd/simulator/bedrock_flags_test.go",
+      "sha256": "80218d8939e496afa4b8448773a355ace63afe44afcad59758f669da7f929346",
+      "disposition": "test-support",
+      "reason": "Checks flag validation, repeated-flag and pre-startup refusals and an actual authenticated CLI run against a synthetic Ollama test double.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/main.go",
+      "sha256": "4990a48fbd27f75d4b6cabc9ab870d147ad5d701ec6c03c03a0f168690de6103",
       "disposition": "modeled",
-      "reason": "Binds the description editor lifecycle and preserved existing Secrets view boundaries to their finite abstractions. Backend commit after UI abort, stale response suppression, duplicate latch, uncertain reconciliation and read-only retry require separate native/component/browser validation; no React refinement is claimed.",
+      "reason": "Validates the Bedrock flags before any listener or startup file, passes the one runtime to the composition and cancels it when shutdown begins.",
       "models": [
         {
-          "id": "SecretDescriptionWorkflow",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
-            "TypeOK",
-            "FreshEmissions",
-            "AcknowledgmentIdentity",
-            "MetadataIdentity",
-            "OnePendingSubmission",
-            "LiveWorkKeepsLatch",
-            "NoWriteWhileUncertain",
-            "UncertaintyFence",
-            "AcknowledgedStatusPreserved",
-            "NoValueRetrieval",
-            "ReadRetriesStayReadOnly",
-            "NoStaleFollowupRead",
-            "ServerCommitPreserved",
-            "UnmountHidesDisplay"
+            "NoCallAfterClose",
+            "NoFallback"
           ],
-          "limits": "Finite UI lifecycle abstraction against description component source d97f987f3a37d922860a894f9f98256975e5cfc0. Assumes validated confirmed input, captured authenticated callback and valid backend metadata. No Go/React/DOM/browser refinement, actual scheduling, Unicode/ARN parsing, auth, SQL/crash atomicity, network cancellation or rollback proof. Fresh explicit confirmed input may clear uncertainty; failed reconciliation may not."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
     },
     {
-      "path": "formal/SecretMetadataUpdate.cfg",
-      "sha256": "33f07507c5abdb7e9989ee3abf312b744a02ae13f44e2a17b40e61510ee6ac44",
+      "path": "docs/bedrock-runtime.md",
+      "sha256": "6918606b62d0ef9d93d838ed483171f45ab681fd460c6e12ccf2044f955556a3",
+      "disposition": "documentation",
+      "reason": "Defines the supported Bedrock Runtime contract, errors, transport boundary, unsupported scope and verification; no progress receipt.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "a3fdf4d11bab096ece90e77afa159365018113ef5617554dfdf954aca41c2c8f",
+      "disposition": "documentation",
+      "reason": "Describes the internal/inference architecture boundary and Bedrock Runtime responsibilities.",
+      "models": []
+    },
+    {
+      "path": "docs/formal-bedrock-runtime.md",
+      "sha256": "910b83cb7f9fa99aa9cd54b3e90f484b42470c5b6f5bf6c3fa3b840fa6634682",
+      "disposition": "documentation",
+      "reason": "Defines the finite model, its invariants, controls, source correspondence and limits.",
+      "models": []
+    },
+    {
+      "path": "formal/BedrockRuntimeAdmission.cfg",
+      "sha256": "d367eca2115f916656be5c524738b9d6921b4e88e25cd742ac485caf8582427c",
       "disposition": "modeled",
-      "reason": "Binds the bounded description-only update and preserved existing HTTP contracts to their declared finite models; no value reads or version/stage mutation are added. Native persistence and authorization tests remain independent obligations.",
+      "reason": "Checks every declared Bedrock Runtime invariant on two requests with one slot.",
       "models": [
         {
-          "id": "SecretMetadataUpdate",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
             "TypeOK",
-            "Authorized",
-            "ValidPresent",
-            "DurableAcknowledgement",
-            "NoPartialVisibility",
-            "RefusalUnchanged",
-            "ExactMetadata",
-            "PeerPreserved",
-            "IdentityPreserved",
-            "CreatedPreserved",
-            "VersionPreserved",
-            "ValuePreserved",
-            "StagePreserved"
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst",
+            "NoCallAfterClose",
+            "ConcurrencyBound",
+            "SuccessOnlyFromBackend",
+            "NoFallback",
+            "TruthfulFailure",
+            "NoPersistence"
           ],
-          "limits": "One request with captured authorization and target identity. Abstract commit acknowledgement and final metadata checks; no Go/SQL refinement, IAM/ARN/JSON/Unicode parsing, crash recovery, concurrent requests, encryption, SDK or browser proof."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
     },
     {
-      "path": "formal/SecretMetadataUpdate.tla",
-      "sha256": "024b90a3673588630a740587a17de2239bbad8512bd456b785a041969809e0b8",
+      "path": "formal/BedrockRuntimeAdmission.tla",
+      "sha256": "7c8a5df4dfe745de86ddd951e00169d2c003d27c0a824d0ad83b2996605ebb64",
       "disposition": "modeled",
-      "reason": "Binds the bounded description-only update and preserved existing HTTP contracts to their declared finite models; no value reads or version/stage mutation are added. Native persistence and authorization tests remain independent obligations.",
+      "reason": "Defines the finite admission/result abstraction and its fourteen sensitivity anchors.",
       "models": [
         {
-          "id": "SecretMetadataUpdate",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
             "TypeOK",
-            "Authorized",
-            "ValidPresent",
-            "DurableAcknowledgement",
-            "NoPartialVisibility",
-            "RefusalUnchanged",
-            "ExactMetadata",
-            "PeerPreserved",
-            "IdentityPreserved",
-            "CreatedPreserved",
-            "VersionPreserved",
-            "ValuePreserved",
-            "StagePreserved"
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst",
+            "NoCallAfterClose",
+            "ConcurrencyBound",
+            "SuccessOnlyFromBackend",
+            "NoFallback",
+            "TruthfulFailure",
+            "NoPersistence"
           ],
-          "limits": "One request with captured authorization and target identity. Abstract commit acknowledgement and final metadata checks; no Go/SQL refinement, IAM/ARN/JSON/Unicode parsing, crash recovery, concurrent requests, encryption, SDK or browser proof."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
+    },
+    {
+      "path": "formal/README.md",
+      "sha256": "5774ae4e422464e9efac262a7cbe838e22fe4b76b7e5bb3704a713d46a3ebe03",
+      "disposition": "documentation",
+      "reason": "Summarizes the registered Bedrock Runtime admission model and points to its contract.",
+      "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "7019dd279d09341ce5a189c07c3ec056c448b527634ec5a36cb9b96d711701df",
+      "sha256": "850258d1778b74b1144f8c48a64ecdf61041df0a39bdc6c8c59886aa63cfc746",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the metadata-update model and protects its full invariant, control and source inventory without removing or altering existing model entries.",
+      "reason": "Registers the Bedrock Runtime admission model with its invariants, fourteen controls and exact source scope without altering existing entries.",
       "models": []
     },
     {
-      "path": "internal/aws/secret_http.go",
-      "sha256": "69d3d209ff1a1ea3ace43c281d301b515026b0a4b508c604ed665cd322f79e04",
+      "path": "internal/aws/bedrock_runtime.go",
+      "sha256": "29db20c176af739417289f73689ecdc055f588aa33084159032efc61d97fe82f",
       "disposition": "modeled",
-      "reason": "Binds the bounded description-only update and preserved existing HTTP contracts to their declared finite models; no value reads or version/stage mutation are added. Native persistence and authorization tests remain independent obligations.",
+      "reason": "Implements the admission order (route, enabled backend, IAM, mapping, input), shutdown refusal and the backend-result-to-error mapping; stores and logs no prompt or reply.",
       "models": [
         {
-          "id": "SecretsDisclosureChannels",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
-            "TypeOK",
-            "RawRequiresAuthorizedGet",
-            "MetadataLogErrorRedacted",
-            "DeniedNoRaw",
-            "RawEmissionRequiresGet"
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst",
+            "NoCallAfterClose",
+            "SuccessOnlyFromBackend",
+            "TruthfulFailure",
+            "NoPersistence"
           ],
-          "limits": "Finite classification of plaintext acquisition/output call sites, not Go fmt/JSON/slog, SQL, encryption, memory secrecy or implementation refinement. The private plaintext() accessor itself has no authorization: its only production writer call site must follow successful native Get authorization. Actual private-holder formatting/JSON/slog sentinel tests and native denied-Get/error/metadata tests verify the Go mechanisms independently."
-        },
-        {
-          "id": "SecretVersionListing",
-          "properties": [
-            "TypeOK",
-            "ReadAfterAuthorization",
-            "NoDeniedEmission",
-            "TokenScopeBound",
-            "StrictForwardKeyset",
-            "FilterBeforePageLimit",
-            "ContinuationPosition",
-            "TerminalConverges",
-            "ReadFramePreserved"
-          ],
-          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
-        },
-        {
-          "id": "SecretMetadataUpdate",
-          "properties": [
-            "TypeOK",
-            "Authorized",
-            "ValidPresent",
-            "DurableAcknowledgement",
-            "NoPartialVisibility",
-            "RefusalUnchanged",
-            "ExactMetadata",
-            "PeerPreserved",
-            "IdentityPreserved",
-            "CreatedPreserved",
-            "VersionPreserved",
-            "ValuePreserved",
-            "StagePreserved"
-          ],
-          "limits": "One request with captured authorization and target identity. Abstract commit acknowledgement and final metadata checks; no Go/SQL refinement, IAM/ARN/JSON/Unicode parsing, crash recovery, concurrent requests, encryption, SDK or browser proof."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
     },
     {
-      "path": "internal/aws/secret_metadata_update.go",
-      "sha256": "c82169708cd7c1e8b31120942d3dbcd46919fa81ee53fcc6b99f21aceb0ca962",
+      "path": "internal/aws/bedrock_runtime_messages.go",
+      "sha256": "4bf61a13b1072f9980cad2274810264dee3cb8ee1ed18f6d62f4c5253c593883",
       "disposition": "modeled",
-      "reason": "Binds the bounded description-only update and preserved existing HTTP contracts to their declared finite models; no value reads or version/stage mutation are added. Native persistence and authorization tests remain independent obligations.",
+      "reason": "Strict request decoding: unsupported, repeated or null members and non-text content are refused before the backend; reply encoding carries only the backend text.",
       "models": [
         {
-          "id": "SecretMetadataUpdate",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
-            "TypeOK",
-            "Authorized",
-            "ValidPresent",
-            "DurableAcknowledgement",
-            "NoPartialVisibility",
-            "RefusalUnchanged",
-            "ExactMetadata",
-            "PeerPreserved",
-            "IdentityPreserved",
-            "CreatedPreserved",
-            "VersionPreserved",
-            "ValuePreserved",
-            "StagePreserved"
+            "BackendOnlyAfterAdmission",
+            "SuccessOnlyFromBackend",
+            "NoPersistence"
           ],
-          "limits": "One request with captured authorization and target identity. Abstract commit acknowledgement and final metadata checks; no Go/SQL refinement, IAM/ARN/JSON/Unicode parsing, crash recovery, concurrent requests, encryption, SDK or browser proof."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
     },
     {
-      "path": "internal/aws/secret_metadata_update_test.go",
-      "sha256": "eec4b72ec1118c289fb0d5b36fba268fa65315dcad7d8a2191c7ae66c4751652",
+      "path": "internal/aws/bedrock_runtime_test.go",
+      "sha256": "c88b3615117583dd42caed7bed48c27f6a30ea173957fa246d39dbab7ac84483",
       "disposition": "test-support",
-      "reason": "Checks description-only lifecycle, authorization, strict boundary refusals, isolation, immutable state preservation and failed-write rollback.",
+      "reason": "Checks routing before the catalog, admission order, strict refusals before the backend, IAM, failure mapping, throttling, timeout, shutdown, listener deadlines and no stored prompt over actual HTTP.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "56981afe19c25dfee2f6452f1ead93345fef98c01af7321b97f96d46ecfbb7d5",
-      "disposition": "presentation",
-      "reason": "Adds the strict per-target metadata-only API schema/examples.",
+      "path": "internal/aws/s3.go",
+      "sha256": "5c801d893636d43441921390166c89f2f9a6b3fec840e6ec528f84f73d1eeaa8",
+      "disposition": "modeled",
+      "reason": "Adds only the optional Gateway.BedrockRuntime field; nil keeps inference disabled with an explicit error. Existing S3 behavior is unchanged.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "BackendOnlyAfterAdmission",
+            "NoFallback"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "48804bfe69bb2a1bd3df0c6941e3e27daaa213f010254bdb60796cb42458cdcf",
+      "disposition": "modeled",
+      "reason": "Adds only the first dispatch branch that recognizes Bedrock Runtime routes before the control-plane catalog; other services keep their dispatch order.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/inference/apple.go",
+      "sha256": "d00de40c7d7d1410528f54c0066887fe0b0f3684f2e7b5fb1dc05f51a53afec5",
+      "disposition": "modeled",
+      "reason": "The Apple backend reports unavailable on every build and never substitutes another backend or a synthetic answer.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "NoFallback",
+            "SuccessOnlyFromBackend"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/inference/inference.go",
+      "sha256": "187ec504c88341f1c3dc7496e085cdd3f11f9933c387439e46778a882cc72f77",
+      "disposition": "modeled",
+      "reason": "Bounded backend: refuses ended contexts, fails fast when the slot is taken, releases it on every ending and reports deadlines and cancellation as themselves.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "ConcurrencyBound",
+            "NoCallAfterClose",
+            "TruthfulFailure"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/inference/ollama.go",
+      "sha256": "5b14ae586b10f48e8f0df2de82fa6d99d0762f28049bb9a9b727929488d6465c",
+      "disposition": "modeled",
+      "reason": "Ollama adapter: one pinned loopback endpoint, typed failures for every backend status or unusable reply, success only with text Ollama returned, no logging or storage.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "SuccessOnlyFromBackend",
+            "TruthfulFailure",
+            "NoFallback",
+            "NoPersistence"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/inference/ollama_test.go",
+      "sha256": "5b6aeefdf5d57c70fa6381a29bee629d7352dc87c1c6226e798f4614d4d5a68f",
+      "disposition": "test-support",
+      "reason": "Checks URL/model validation, the actual Ollama HTTP boundary with a test double, every failure kind, size bounds and the concurrency/deadline gate.",
       "models": []
     },
     {
-      "path": "internal/server/secrets_composition_test.go",
-      "sha256": "9e49cb8f3f36e733078584d7766d58856fe86c618524f21a3a318c178edff774",
+      "path": "internal/server/bedrock_runtime.go",
+      "sha256": "9f66f9f17331276b43b184b292b029deb1df1dc6a002596688cfa68e911ad596",
+      "disposition": "modeled",
+      "reason": "Advertises whether the single configured backend is enabled, its kind and mapped IDs; it exposes no backend address, backend model name, prompt or reply.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "NoFallback",
+            "NoPersistence"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/bedrock_runtime_test.go",
+      "sha256": "5847f9db4ec091cadbc7dda6983a32a916b7d1acb797893224e6a85a7a31f289",
       "disposition": "test-support",
-      "reason": "Adds composed-server coverage or mandatory official SDK acceptance with strict document mutation/removal detectors, IAM, isolation, restart and unchanged private state checks.",
+      "reason": "Checks default disabled capabilities beside the control plane and caller-owned runtime closing in the composed server.",
       "models": []
+    },
+    {
+      "path": "internal/server/sakura_provider.go",
+      "sha256": "b0d44af3da2e3b1dc88400f21d6d1ad299f14adac656b457ed17978dd57e874e",
+      "disposition": "modeled",
+      "reason": "Adds the caller-owned ProviderConfig.BedrockRuntime field; the composition neither creates another backend nor closes the caller's runtime.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "NoFallback",
+            "NoCallAfterClose"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "2a3cc7e102943cb48256d0aa8e918eb923a23d0f3c3d4c1489551f3e78981dc9",
+      "sha256": "6324dca92cc5f7ce5b256d7e604f4411d4c91e7ff0f6f6b32c01b85323571f6e",
       "disposition": "modeled",
-      "reason": "Adds only the bounded UpdateSecret capability advertisement; existing native identity/version/stage lifecycle composition is preserved. Composed-server and SDK tests check that advertised operations actually execute; the finite model does not prove capability inventory or JSON rendering.",
+      "reason": "Passes the configured runtime to the gateway and adds its capability entry; existing composition and closing are unchanged.",
       "models": [
         {
-          "id": "SecretsVersionLifecycle",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
-            "TypeOK",
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
+            "BackendOnlyAfterAdmission",
+            "NoFallback"
           ],
-          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/web/app.js",
-      "sha256": "195f938407a35b1fafa012dc3aa646b32b7b2d7d11e24a03c5c9ebcad73f9b5e",
-      "disposition": "modeled",
-      "reason": "Binds the description editor lifecycle and preserved existing Secrets view boundaries to their finite abstractions. Backend commit after UI abort, stale response suppression, duplicate latch, uncertain reconciliation and read-only retry require separate native/component/browser validation; no React refinement is claimed.",
-      "models": [
-        {
-          "id": "SecretsRevealEpoch",
-          "properties": [
-            "TypeOK",
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
-          ],
-          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
-        },
-        {
-          "id": "SakuraDisksViewEpoch",
-          "properties": [
-            "TypeOK",
-            "AcceptedReadScope",
-            "SuccessfulReadOnly",
-            "RenderedScopeBound",
-            "RenderedResourceBound",
-            "StaleReadFrame",
-            "StaleWriteFrame",
-            "NavigationACKFrame",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryOnly",
-            "SingleWriteSend",
-            "LocaleFrame",
-            "CancelDraftClear"
-          ],
-          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
-        },
-        {
-          "id": "DynamoDBConsoleEpoch",
-          "properties": [
-            "TypeOK",
-            "NoStalePublication",
-            "ReadGenerationVerified",
-            "DisplayedKeyBound",
-            "CancelNoOrphanLoading",
-            "AckClosesDraft",
-            "AckBelongsToCurrentView",
-            "ReadRetryNeverWrites",
-            "SingleSendBeforeACK",
-            "LocalePreservesDraft"
-          ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
-        },
-        {
-          "id": "SecretMetadataViewEpoch",
-          "properties": [
-            "TypeOK",
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
-          ],
-          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
-        },
-        {
-          "id": "KMSAliasesViewEpoch",
-          "properties": [
-            "TypeOK",
-            "CurrentListOutcome",
-            "NoCachedRowsOnFailure",
-            "CurrentTargetMetadata",
-            "ClosedFormHasNoTarget",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryNeverWrites",
-            "OnlyVerifiedTargetSubmitted",
-            "DeleteRequiresExactConfirmation",
-            "LocalePreservesIntent"
-          ],
-          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
-        },
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "TypeOK",
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model."
-        },
-        {
-          "id": "LoginInputIntent",
-          "properties": [
-            "TypeOK",
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
-          ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
-        },
-        {
-          "id": "LambdaLogTailDisclosure",
-          "properties": [
-            "TypeOK",
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
-          ],
-          "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "47102417c7dd99a2e901a12b6a34cfca62fffae90c1af20d4f13b47ac1f8defc",
+      "sha256": "6e441c06bcd7571a47b954e8bf304387b9ca05731d2b6931a0f634160089ce5e",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the metadata-update model and protects its full invariant, control and source inventory without removing or altering existing model entries.",
+      "reason": "Protects the new model's invariants, controls and exact source scope from silent removal.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "3c5f6c11c0a5afeb172adae09fd3fe7bb575314fe0992c3fa493ff6a21166d18",
+      "sha256": "48eb3ab72d0305c7fedb548d761a91864fa19b3a8655d687a1f84f3e3689d923",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the metadata-update model and protects its full invariant, control and source inventory without removing or altering existing model entries.",
+      "reason": "Adds removal detectors for the new model and names it in the complete registry inventory.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/bedrock_runtime.py",
+      "sha256": "05399ecffd2404c6bdf33531910ddeca6f15c4edbf27de1a9367a031b674d479",
+      "disposition": "test-support",
+      "reason": "Built binary with official boto3 against a fake Ollama process: operations, refusals, IAM, restart, stopped backend and no stored or logged prompt.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "600c3c3549204f661082bde07e40220bcddd510a797f7c98a5e223dee10f23aa",
+      "sha256": "da209f1f60ac1fafe589caf04692fa81e22b8ec40ab69188849bc7b4806501b5",
       "disposition": "test-support",
-      "reason": "Adds composed-server coverage or mandatory official SDK acceptance with strict document mutation/removal detectors, IAM, isolation, restart and unchanged private state checks.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/secret_description_console.py",
-      "sha256": "d0a542dcfcefc17228aacdb064d008638f26ac604993a4ee2165d97def5ef21c",
-      "disposition": "test-support",
-      "reason": "Registers or exercises actual description-edit UI behavior, IAM, deferred responses and metadata-only boundaries using the normal local fixture.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/secret_reference_projection.py",
-      "sha256": "139225d89123e3a4e894dbddfdc89c9936d3060b39dd7b4d1b0340966e6f5fc0",
-      "disposition": "test-support",
-      "reason": "Exact additive Secret UpdateSecret projection preserves SSM batch and Route53 reference baseline hashes; pins metadata-only schemas, examples and service description before removal. Static regression support, not runtime authority or proof.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/secrets_metadata_update.py",
-      "sha256": "d52cc141361ec559daa6442b15fe1d6e80e03728bafac1baf231ee3523e593c7",
-      "disposition": "test-support",
-      "reason": "Adds composed-server coverage or mandatory official SDK acceptance with strict document mutation/removal detectors, IAM, isolation, restart and unchanged private state checks.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_openapi_json10.py",
-      "sha256": "f5e253efee5455d9afe3fb44db30b9a8c4b8ce32e6d22aac3793a0b590c15427",
-      "disposition": "test-support",
-      "reason": "Checks the additive UpdateSecret template against strict metadata-only request and response schemas, including unsupported-field and boundary rejection; no runtime or finite model changes.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "95267f77b15b8d59496cc9fdcdb3e4a9eed50cf322aa04e7099242ff2936b252",
-      "disposition": "test-support",
-      "reason": "Pins and projects only the reviewed UpdateSecret additions while preserving existing contract hashes, with mutation controls for missing, changed, duplicate and unrelated contracts; no runtime or finite model changes.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_ssm_batch_reference.py",
-      "sha256": "476b09f36e3f26abdc7648700dd625c5174a1915c74de2c8bb4ce74ffb60bbdf",
-      "disposition": "test-support",
-      "reason": "Exact additive Secret UpdateSecret projection preserves SSM batch and Route53 reference baseline hashes; pins metadata-only schemas, examples and service description before removal. Static regression support, not runtime authority or proof.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "b52b9d545b18f0901be427b24275877e3067c2a945752e98d20217d875fbeb66",
-      "disposition": "presentation",
-      "reason": "Adds or composes the bounded description editor, its generated product assets/build metadata or component tests; normal bundle provenance and UI acceptance remain separate obligations.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "77212056280496448605c24f2a09d5dc15d33b3b1768ee786576d6c4d8588f14",
-      "disposition": "presentation",
-      "reason": "Adds or composes the bounded description editor, its generated product assets/build metadata or component tests; normal bundle provenance and UI acceptance remain separate obligations.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/secret_description.jsx",
-      "sha256": "5988641b3f8ca0082c2c610811cea299fa3534d594b4be2edb932d4636b68acf",
-      "disposition": "modeled",
-      "reason": "Binds the description editor lifecycle and preserved existing Secrets view boundaries to their finite abstractions. Backend commit after UI abort, stale response suppression, duplicate latch, uncertain reconciliation and read-only retry require separate native/component/browser validation; no React refinement is claimed.",
-      "models": [
-        {
-          "id": "SecretDescriptionWorkflow",
-          "properties": [
-            "TypeOK",
-            "FreshEmissions",
-            "AcknowledgmentIdentity",
-            "MetadataIdentity",
-            "OnePendingSubmission",
-            "LiveWorkKeepsLatch",
-            "NoWriteWhileUncertain",
-            "UncertaintyFence",
-            "AcknowledgedStatusPreserved",
-            "NoValueRetrieval",
-            "ReadRetriesStayReadOnly",
-            "NoStaleFollowupRead",
-            "ServerCommitPreserved",
-            "UnmountHidesDisplay"
-          ],
-          "limits": "Finite UI lifecycle abstraction against description component source d97f987f3a37d922860a894f9f98256975e5cfc0. Assumes validated confirmed input, captured authenticated callback and valid backend metadata. No Go/React/DOM/browser refinement, actual scheduling, Unicode/ARN parsing, auth, SQL/crash atomicity, network cancellation or rollback proof. Fresh explicit confirmed input may clear uncertainty; failed reconciliation may not."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/secrets-manager.jsx",
-      "sha256": "e9d253da49b30bcd9e18b776401771e914cd32028ea2bb5810b49e5edaa27779",
-      "disposition": "modeled",
-      "reason": "Binds the description editor lifecycle and preserved existing Secrets view boundaries to their finite abstractions. Backend commit after UI abort, stale response suppression, duplicate latch, uncertain reconciliation and read-only retry require separate native/component/browser validation; no React refinement is claimed.",
-      "models": [
-        {
-          "id": "SecretsRevealEpoch",
-          "properties": [
-            "TypeOK",
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
-          ],
-          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
-        },
-        {
-          "id": "SecretsMutationRefresh",
-          "properties": [
-            "TypeOK",
-            "AckClosesForm",
-            "NoWriteOnReadRetry",
-            "AckClearsDraft",
-            "FreshFormHasToken"
-          ],
-          "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks."
-        },
-        {
-          "id": "SecretMetadataViewEpoch",
-          "properties": [
-            "TypeOK",
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
-          ],
-          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/tests/secret-description.test.mjs",
-      "sha256": "11adbc43ea245705d32cdfd159ea311515b083a49d6b8942820da5e11ea1fdce",
-      "disposition": "presentation",
-      "reason": "Adds or composes the bounded description editor, its generated product assets/build metadata or component tests; normal bundle provenance and UI acceptance remain separate obligations.",
-      "models": []
-    },
-    {
-      "path": "tools/console/tests/secrets-manager-locale.test.mjs",
-      "sha256": "556b5352b8a379da5149e57b118e20900190e4de803a775678b40d7941d32b24",
-      "disposition": "presentation",
-      "reason": "Adds or composes the bounded description editor, its generated product assets/build metadata or component tests; normal bundle provenance and UI acceptance remain separate obligations.",
+      "reason": "Registers the Bedrock Runtime boto3 acceptance in the mandatory E2E suite.",
       "models": []
     }
   ]

@@ -52,7 +52,9 @@ func TestBedrockFlagsDefaultDisabledAndRejectOrphanOptions(t *testing.T) {
 			t.Fatalf("%s silently ignored: %v", orphan, err)
 		}
 	}
-	for _, malformed := range [][]string{{"--bedrock-runtime-timeout=soon"}, {"--bedrock-runtime-concurrency=two"}} {
+	for _, malformed := range [][]string{{"--bedrock-runtime-timeout=soon"}, {"--bedrock-runtime-concurrency=two"},
+		{"--bedrock-runtime-backend=apple", "--bedrock-runtime-backend=ollama"}, {"--bedrock-ollama-url=http://127.0.0.1:1", "--bedrock-ollama-url=http://127.0.0.1:2"},
+		{"--bedrock-runtime-timeout=5s", "--bedrock-runtime-timeout=6s"}, {"--bedrock-runtime-concurrency=1", "--bedrock-runtime-concurrency=2"}} {
 		if _, err := parsedBedrockFlags(t, malformed...); err == nil {
 			t.Fatalf("%v parsed", malformed)
 		}

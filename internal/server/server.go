@@ -221,9 +221,6 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		mux.ServeHTTP(w, r)
 	})
 	return handler, func() error {
-		if options.BedrockRuntime != nil {
-			options.BedrockRuntime.Close()
-		}
 		runtimeErr := lambdas.Close()
 		storeErr := store.Close()
 		if runtimeErr != nil {

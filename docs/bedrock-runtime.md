@@ -35,15 +35,20 @@ and Claude Code compatibility (P3) are **not implemented**; see
 | `--bedrock-runtime-concurrency` | Simultaneous generations, 1–8, default 2. Extra requests fail at once with `ThrottlingException`; they are not queued. |
 
 Any Bedrock flag without `--bedrock-runtime-backend` is a startup error, and
-the backend cannot be combined with `--unsafe-no-auth`. Startup does not
-contact Ollama, so a stopped Ollama is reported on the first request.
+the backend cannot be combined with `--unsafe-no-auth`. Every flag except
+`--bedrock-model` may be given only once; a repeat is refused, not overridden.
+Startup does not contact Ollama, so a stopped Ollama is reported on the first
+request.
 
 ## Call it
 
 Use the simulator endpoint, Region `us-east-1`, `us-west-2`, `ap-northeast-1`
-or `eu-west-1`, a dummy `TCSIM…` access key, and the local token in
-`X-Simulator-Token` (or the console/SDK authentication described in the
-[README](../README.md)). Use synthetic prompts only.
+or `eu-west-1`, a dummy `TCSIM…` access key, and the operator or participant
+token in the `X-Simulator-Token` header. Use synthetic prompts only. The native
+SDK credentials `TCSIMOPERATOR` and assumed-role `TCSIMASIA…` keys are accepted
+only for STS, IAM, CloudFormation and SSM signing, so they are refused for
+`bedrock`. Bedrock API keys (`Authorization: Bearer`) are refused too. There is
+no console page.
 
 ```python
 import boto3, json
@@ -69,8 +74,9 @@ print(json.loads(reply["body"].read())["content"][0]["text"])
 ```
 
 `/_simulator/v1/capabilities` lists `services["bedrock-runtime"]`: whether it is
-enabled, the backend kind, the mapped Bedrock model IDs and the limits. It
-never shows the backend address or backend model names.
+enabled, the backend kind, the mapped Bedrock model IDs and the limits. Every
+authenticated caller, participants included, can read it, so mapped model IDs
+are not secret. It never shows the backend address or backend model names.
 
 ## Contract
 
@@ -89,8 +95,8 @@ returns `ResourceNotFoundException`.
 
 **Authorization.** Both operations evaluate `bedrock:InvokeModel` on
 `arn:aws:bedrock:<Region>::foundation-model/<model ID>` for the request's
-exercise identity, before the mapping is consulted and before any backend
-call. A geography-prefixed ID is authorized as this foundation-model ARN; real
+exercise identity, before the request body is read, before the mapping is
+consulted and before any backend call. A geography-prefixed ID is authorized as this foundation-model ARN; real
 inference-profile ARNs and their extra checks are not modeled. As elsewhere,
 this identity check is exercise context, not tenant isolation: give each team
 its own process, database and token.
@@ -112,11 +118,11 @@ accepts `messages`, optional `system` text blocks and
 end with `user` and alternate. The response contains `output.message`,
 `stopReason`, `usage` and `metrics.latencyMs`.
 
-**Strictness.** Unknown, unsupported or `null` members, blank text, other
-content types, any `X-Amzn-Bedrock-*` option header (trace, guardrails,
+**Strictness.** Unknown, unsupported, repeated or `null` members, blank text,
+other content types, any `X-Amzn-Bedrock-*` option header (trace, guardrails,
 latency, service tier), query parameters, session tokens, invalid UTF-8,
-trailing JSON and bodies over 1 MiB return `ValidationException`; nothing is
-silently dropped. Multiple text blocks in one message are joined with a
+trailing JSON, incomplete bodies and bodies over 1 MiB return
+`ValidationException`; nothing is silently dropped. Multiple text blocks in one message are joined with a
 newline. A final `assistant` message (prefill) and `stop_sequences` /
 `stopSequences` are refused, because the local backend cannot report
 `stop_sequence` truthfully.
@@ -126,6 +132,10 @@ Ollama's `done_reason`. Token counts are Ollama's own tokenizer counts (0 when
 Ollama omits them), not Anthropic or AWS counts. An empty reply has an empty
 `content` list. A reply containing reasoning (`thinking`), tool calls, images
 or a remote-execution marker is refused with `ModelErrorException`, not trimmed.
+The adapter sends no `think` option. Depending on the Ollama version, a
+reasoning model may instead put its reasoning inside the reply text, which is
+returned as is, so prefer a non-reasoning model. Ollama may also drop earlier
+turns to fit its context window; the adapter cannot detect that.
 
 | Situation | Error (HTTP) |
 | --- | --- |
@@ -135,8 +145,8 @@ or a remote-execution marker is refused with `ModelErrorException`, not trimmed.
 | Unmapped model ID, or mapped model not installed in Ollama | `ResourceNotFoundException` (404) |
 | Ollama unreachable, or the simulator is shutting down | `ServiceUnavailableException` (503) |
 | All slots busy, or Ollama reports it is busy | `ThrottlingException` (429) |
-| Deadline expired | `ModelTimeoutException` (408) |
-| Ollama error or unusable reply | `ModelErrorException` (424) with `originalStatusCode` and `resourceName` |
+| Operator or caller deadline expired | `ModelTimeoutException` (408) |
+| Ollama error or unusable reply | `ModelErrorException` (424) with `resourceName`, and `originalStatusCode` when Ollama returned a status |
 
 Ollama error bodies are never echoed, because they may quote the prompt.
 
@@ -146,7 +156,10 @@ Ollama error bodies are never echoed, because they may quote the prompt.
   plain HTTP, with no environment proxy, no redirects, no name resolution and
   no TLS endpoint. It calls only `POST /api/chat` with `"stream": false`.
 - Request bodies are limited to 1 MiB, backend requests to 2 MiB and backend
-  replies (headers 16 KiB, body 1 MiB). The deadline, client disconnects and
+  replies (headers 16 KiB, body 1 MiB). Prompt text is sent without HTML
+  escaping, so any valid body under 1 MiB fits the backend bound; if the bound
+  were exceeded, the request would fail with `ValidationException` before
+  reaching Ollama. The deadline, client disconnects and
   shutdown cancel the backend request. A request under way extends the
   listener's 30-second read/write deadlines to its own deadline plus 10 seconds.
 - Prompts and replies are not written to SQLite or logs. A Go test checks the
@@ -195,6 +208,10 @@ Tests use synthetic prompts and test doubles only:
 - `test/e2e/bedrock_runtime.py`: the built binary with the official boto3
   client against a fake Ollama process, including participant IAM denial and
   restart with the same database.
+
+- `formal/BedrockRuntimeAdmission.tla`: a bounded model of admission order,
+  shutdown, slots and truthful results, with fourteen sensitivity controls
+  ([model contract](formal-bedrock-runtime.md)).
 
 None of these use a real model, Apple hardware or Claude Code. Results with a
 real Ollama model are not part of these checks.

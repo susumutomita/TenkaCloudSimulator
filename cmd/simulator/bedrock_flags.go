@@ -28,19 +28,27 @@ type bedrockCLIFlags struct {
 }
 
 // registerBedrockFlags adds the opt-in Bedrock Runtime flags. Every flag
-// records that it was supplied, so disabled mode cannot silently ignore one.
+// records that it was supplied, so disabled mode cannot silently ignore one,
+// and a single-valued flag given twice is refused instead of overridden.
 func registerBedrockFlags(set *flag.FlagSet) (*bedrockCLIFlags, error) {
 	if set == nil {
 		return nil, errors.New("Bedrock Runtime flag registration requires a flag set")
 	}
 	values := &bedrockCLIFlags{timeout: defaultBedrockTimeout, concurrency: defaultBedrockConcurrency}
-	set.Func("bedrock-runtime-backend", "Enable Bedrock Runtime InvokeModel/Converse with an explicit local backend: ollama or apple (no cloud fallback)", func(value string) error {
-		values.backend, values.backendSet = value, true
+	once := func(supplied *bool) error {
+		if *supplied {
+			return errors.New("may be given only once")
+		}
+		*supplied = true
 		return nil
+	}
+	set.Func("bedrock-runtime-backend", "Enable Bedrock Runtime InvokeModel/Converse with an explicit local backend: ollama or apple (no cloud fallback)", func(value string) error {
+		values.backend = value
+		return once(&values.backendSet)
 	})
 	set.Func("bedrock-ollama-url", "Numeric-loopback Ollama URL (default "+inference.DefaultOllamaURL+"; no proxy, redirect or remote host)", func(value string) error {
-		values.ollamaURL, values.urlSet = value, true
-		return nil
+		values.ollamaURL = value
+		return once(&values.urlSet)
 	})
 	set.Func("bedrock-model", "Repeatable operator mapping MODEL_ID=LOCAL_MODEL, for example anthropic.claude-3-haiku-20240307-v1:0=llama3.2:1b (models are never downloaded)", func(value string) error {
 		values.models, values.modelsSet = append(values.models, value), true
@@ -51,16 +59,16 @@ func registerBedrockFlags(set *flag.FlagSet) (*bedrockCLIFlags, error) {
 		if err != nil {
 			return errors.New("use a Go duration such as 90s")
 		}
-		values.timeout, values.timeoutSet = parsed, true
-		return nil
+		values.timeout = parsed
+		return once(&values.timeoutSet)
 	})
 	set.Func("bedrock-runtime-concurrency", fmt.Sprintf("Simultaneous local generations admitted, %d–%d (default %d); excess requests are throttled", inference.MinConcurrency, inference.MaxConcurrency, defaultBedrockConcurrency), func(value string) error {
 		parsed, err := strconv.Atoi(value)
 		if err != nil {
 			return errors.New("use an integer")
 		}
-		values.concurrency, values.concurrencySet = parsed, true
-		return nil
+		values.concurrency = parsed
+		return once(&values.concurrencySet)
 	})
 	return values, nil
 }

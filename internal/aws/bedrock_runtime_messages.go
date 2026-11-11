@@ -27,13 +27,42 @@ func writeBedrockJSON(w http.ResponseWriter, status int, value any) {
 	_, _ = w.Write(body.Bytes())
 }
 
-// bedrockObject decodes exactly one JSON object whose members are all named
-// in allowed. Null members and trailing data are refused.
-func bedrockObject(data []byte, where string, allowed ...string) (map[string]json.RawMessage, *bedrockError) {
-	var fields map[string]json.RawMessage
+// bedrockMembers decodes exactly one JSON object. A repeated member is
+// refused instead of letting the last value silently win.
+func bedrockMembers(data []byte, where string) (map[string]json.RawMessage, *bedrockError) {
+	malformed := bedrockInvalid("%s must be one JSON object.", where)
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	if decoder.Decode(&fields) != nil || fields == nil || decoder.Decode(new(json.RawMessage)) != io.EOF {
-		return nil, bedrockInvalid("%s must be one JSON object.", where)
+	if token, err := decoder.Token(); err != nil || token != json.Delim('{') {
+		return nil, malformed
+	}
+	members := map[string]json.RawMessage{}
+	for decoder.More() {
+		token, err := decoder.Token()
+		name, ok := token.(string)
+		var value json.RawMessage
+		if err != nil || !ok || decoder.Decode(&value) != nil {
+			return nil, malformed
+		}
+		if _, repeated := members[name]; repeated {
+			return nil, bedrockInvalid("%s member %q is repeated.", where, name)
+		}
+		members[name] = value
+	}
+	if token, err := decoder.Token(); err != nil || token != json.Delim('}') {
+		return nil, malformed
+	}
+	if _, err := decoder.Token(); err != io.EOF {
+		return nil, malformed
+	}
+	return members, nil
+}
+
+// bedrockObject decodes exactly one JSON object whose members are all named
+// in allowed. Repeated or null members and trailing data are refused.
+func bedrockObject(data []byte, where string, allowed ...string) (map[string]json.RawMessage, *bedrockError) {
+	fields, failure := bedrockMembers(data, where)
+	if failure != nil {
+		return nil, failure
 	}
 	names := make([]string, 0, len(fields))
 	for name := range fields {
@@ -253,9 +282,9 @@ func parseAnthropicInvoke(data []byte) (inference.Request, *bedrockError) {
 // converseText decodes one Converse ContentBlock or SystemContentBlock union,
 // which must set exactly one member; only text is supported.
 func converseText(raw json.RawMessage, where string) (string, *bedrockError) {
-	var members map[string]json.RawMessage
-	if json.Unmarshal(raw, &members) != nil || members == nil {
-		return "", bedrockInvalid("%s must be an object.", where)
+	members, failure := bedrockMembers(raw, where)
+	if failure != nil {
+		return "", failure
 	}
 	if len(members) != 1 {
 		return "", bedrockInvalid("%s must set exactly one member.", where)

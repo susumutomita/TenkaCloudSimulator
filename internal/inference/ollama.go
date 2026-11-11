@@ -168,9 +168,16 @@ func (o *Ollama) Generate(ctx context.Context, request Request) (Result, error) 
 	if request.TopK != nil {
 		options["top_k"] = *request.TopK
 	}
-	body, err := json.Marshal(ollamaRequest{Model: request.Model, Messages: messages, Stream: false, Options: options})
-	if err != nil || len(body) > MaxBackendRequestBytes {
-		return Result{}, failure(BackendFailure, 0, "The local inference request exceeds the backend transport limit.")
+	var encoded bytes.Buffer
+	encoder := json.NewEncoder(&encoded)
+	// Keep prompt text byte-for-byte; HTML escaping would inflate <, > and &.
+	encoder.SetEscapeHTML(false)
+	if err := encoder.Encode(ollamaRequest{Model: request.Model, Messages: messages, Stream: false, Options: options}); err != nil {
+		return Result{}, failure(BackendFailure, 0, "The local inference request could not be encoded.")
+	}
+	body := encoded.Bytes()
+	if len(body) > MaxBackendRequestBytes {
+		return Result{}, failure(TooLarge, 0, "The translated request exceeds the %d-byte local backend transport limit.", MaxBackendRequestBytes)
 	}
 	outbound, err := http.NewRequestWithContext(ctx, http.MethodPost, o.base+"/api/chat", bytes.NewReader(body))
 	if err != nil {

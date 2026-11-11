@@ -79,6 +79,8 @@ const (
 	Unrepresentable
 	// Canceled: the caller or the simulator shutdown canceled the request.
 	Canceled
+	// TooLarge: the translated backend request exceeds the transport bound.
+	TooLarge
 )
 
 // Error is a typed backend failure. Message never contains prompt or response
@@ -164,10 +166,14 @@ func (b *Bounded) Timeout() time.Duration { return b.timeout }
 // Concurrency is the number of simultaneous generations admitted.
 func (b *Bounded) Concurrency() int { return cap(b.slots) }
 
-// Generate admits at most Concurrency requests and applies Timeout. Deadline
-// and cancellation failures are reported as Timeout and Canceled even when the
-// backend returned a different error after the context ended.
+// Generate admits at most Concurrency requests and applies Timeout. A request
+// whose context already ended never reaches the backend. Any expired deadline,
+// the operator's or the caller's, is reported as Timeout and any cancellation
+// as Canceled, even when the backend returned a different error afterward.
 func (b *Bounded) Generate(ctx context.Context, request Request) (Result, error) {
+	if ctx.Err() != nil {
+		return Result{}, ended(ctx, b.timeout)
+	}
 	select {
 	case b.slots <- struct{}{}:
 	default:
@@ -177,14 +183,25 @@ func (b *Bounded) Generate(ctx context.Context, request Request) (Result, error)
 	bounded, cancel := context.WithTimeout(ctx, b.timeout)
 	defer cancel()
 	result, err := b.backend.Generate(bounded, request)
-	if errors.Is(bounded.Err(), context.DeadlineExceeded) && ctx.Err() == nil {
-		return Result{}, failure(Timeout, 0, "The local backend did not finish within %s.", b.timeout)
-	}
-	if ctx.Err() != nil {
-		return Result{}, failure(Canceled, 0, "The request was canceled before the local backend finished.")
+	if bounded.Err() != nil {
+		return Result{}, ended(bounded, b.timeout)
 	}
 	if err != nil {
 		return Result{}, err
 	}
 	return result, nil
+}
+
+func ended(ctx context.Context, timeout time.Duration) error {
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return failure(Timeout, 0, "The local backend did not finish before the request deadline (at most %s).", timeout)
+	}
+	return failure(Canceled, 0, "The request was canceled before the local backend finished.")
+}
+
+// Close releases idle resources of a backend that holds any.
+func (b *Bounded) Close() {
+	if closer, ok := b.backend.(interface{ Close() }); ok {
+		closer.Close()
+	}
 }

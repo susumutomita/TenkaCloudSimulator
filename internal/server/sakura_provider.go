@@ -11,7 +11,8 @@ type ProviderConfig struct {
 	CloudStorage CloudStorageConfig
 	SakuraDisks  *sakura.Config
 	// BedrockRuntime is the trusted, operator-built local inference adapter.
-	// nil keeps Bedrock Runtime inference disabled with explicit errors.
+	// nil keeps Bedrock Runtime inference disabled with explicit errors. The
+	// caller owns it and closes it; closing the composition does not.
 	BedrockRuntime *aws.BedrockRuntime
 }
 

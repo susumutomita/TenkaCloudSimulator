@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -303,7 +305,7 @@ func TestBedrockRuntimeRejectsUnsupportedInputBeforeTheBackend(t *testing.T) {
 	base := func(extra string) string {
 		return `{"anthropic_version":"bedrock-2023-05-31","max_tokens":1,"messages":[{"role":"user","content":"x"}]` + extra + `}`
 	}
-	for _, extra := range []string{`,"tools":[]`, `,"tool_choice":{}`, `,"stop_sequences":["x"]`, `,"stream":true`, `,"thinking":{}`, `,"metadata":{}`, `,"anthropic_beta":[]`, `,"system":null`,
+	for _, extra := range []string{`,"max_tokens":2`, `,"messages":[{"role":"user","content":"y"}]`, `,"tools":[]`, `,"tool_choice":{}`, `,"stop_sequences":["x"]`, `,"stream":true`, `,"thinking":{}`, `,"metadata":{}`, `,"anthropic_beta":[]`, `,"system":null`,
 		`,"temperature":1.5`, `,"temperature":"0.5"`, `,"top_p":-0.1`, `,"top_k":0`, `,"top_k":501`, `,"top_k":1.5`, `,"system":[]`, `,"system":[{"type":"image"}]`, `,"system":7`} {
 		invoke = append(invoke, base(extra))
 	}
@@ -340,7 +342,8 @@ func TestBedrockRuntimeRejectsUnsupportedInputBeforeTheBackend(t *testing.T) {
 	for _, extra := range []string{`"toolConfig":{}`, `"guardrailConfig":{}`, `"additionalModelRequestFields":{}`, `"promptVariables":{}`, `"additionalModelResponseFieldPaths":[]`,
 		`"requestMetadata":{"k":"v"}`, `"performanceConfig":{"latency":"standard"}`, `"serviceTier":{"type":"default"}`, `"system":[{"cachePoint":{"type":"default"}}]`, `"system":[{"guardContent":{}}]`,
 		`"system":{}`, `"inferenceConfig":{"stopSequences":["x"]}`, `"inferenceConfig":{"maxTokens":0}`, `"inferenceConfig":{"maxTokens":9000}`, `"inferenceConfig":{"temperature":2}`,
-		`"inferenceConfig":{"topP":"1"}`, `"inferenceConfig":[]`} {
+		`"inferenceConfig":{"topP":"1"}`, `"inferenceConfig":[]`, `"inferenceConfig":{"maxTokens":9000,"maxTokens":5}`, `"system":[{"text":"a","text":"b"}]`,
+		`"messages":[{"role":"user","content":[{"text":"y"}]}]`, `"inferenceConfig":{"maxTokens":5}x`, `"inferenceConfig":{7:1}`, `"inferenceConfig":{"maxTokens":5`} {
 		converse = append(converse, `{`+valid+`,`+extra+`}`)
 	}
 	for _, block := range []string{`{"image":{"format":"png","source":{"bytes":"eA=="}}}`, `{"document":{}}`, `{"video":{}}`, `{"toolUse":{}}`, `{"toolResult":{}}`, `{"guardContent":{}}`,
@@ -560,6 +563,62 @@ func TestBedrockRuntimeTimeoutConcurrencyAndShutdownCancellation(t *testing.T) {
 	closing.gateway.BedrockRuntime.Close()
 	closing.gateway.BedrockRuntime.Close()
 	expectBedrockError(t, <-done, 503, "ServiceUnavailableException")
+	backend.mu.Lock()
+	backend.started, backend.release = nil, nil
+	backend.mu.Unlock()
+	before := len(backend.calls())
+	for attempt := 0; attempt < 50; attempt++ {
+		expectBedrockError(t, closing.call(t, "POST", bedrockTestPath+"converse", nil, converseBody), 503, "ServiceUnavailableException")
+	}
+	if len(backend.calls()) != before {
+		t.Fatal("a closed runtime admitted a new request to the backend")
+	}
+}
+
+func TestBedrockRuntimeBoundsTheTranslatedRequestNotOnlyTheClientBody(t *testing.T) {
+	var calls atomic.Int32
+	harness := newOllamaHarness(t, 5*time.Second, 1, func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		_, _ = io.Copy(io.Discard, r.Body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"message":{"role":"assistant","content":"ok"},"done":true,"done_reason":"stop"}`)
+	})
+	markup := strings.Repeat("<", 400_000)
+	reply := harness.call(t, "POST", bedrockTestPath+"invoke", nil, `{"anthropic_version":"bedrock-2023-05-31","max_tokens":1,"messages":[{"role":"user","content":"`+markup+`"}]}`)
+	if reply.status != 200 || calls.Load() != 1 {
+		t.Fatalf("markup prompt under 1 MiB %d %v", reply.status, reply.body)
+	}
+	// Go JSON escapes U+2028, the largest expansion of a valid UTF-8 body
+	// (3 to 6 bytes); a body just under 1 MiB stays within the 2 MiB bound.
+	separators := "x" + strings.Repeat("\u2028", (BedrockRuntimeRequestBytes-128)/3)
+	reply = harness.call(t, "POST", bedrockTestPath+"invoke", nil, `{"anthropic_version":"bedrock-2023-05-31","max_tokens":1,"messages":[{"role":"user","content":"`+separators+`"}]}`)
+	if reply.status != 200 || calls.Load() != 2 {
+		t.Fatalf("maximum-expansion prompt under 1 MiB %d %v", reply.status, reply.body)
+	}
+	// The adapter's own bound stays a client error if it is ever reached.
+	if failure := bedrockInferenceError(&inference.Error{Kind: inference.TooLarge, Message: "too large"}, bedrockTestModel); failure.code != "ValidationException" || failure.status != 400 {
+		t.Fatalf("translated size failure %+v", failure)
+	}
+}
+
+func TestBedrockRuntimeReportsAnIncompleteBodySeparately(t *testing.T) {
+	harness := newBedrockHarness(t, &recordingBackend{}, time.Second, 1)
+	connection, err := net.Dial("tcp", strings.TrimPrefix(harness.server.URL, "http://"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer connection.Close()
+	_, _ = io.WriteString(connection, "POST "+bedrockTestPath+"converse HTTP/1.1\r\nHost: localhost\r\nAuthorization: "+bedrockTestAuth+"\r\nContent-Type: application/json\r\nContent-Length: 100\r\n\r\n{\"messages\":")
+	_ = connection.(*net.TCPConn).CloseWrite()
+	response, err := http.ReadResponse(bufio.NewReader(connection), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	data, _ := io.ReadAll(response.Body)
+	if response.StatusCode != 400 || !bytes.Contains(data, []byte("could not be read completely")) {
+		t.Fatalf("incomplete body %d %s", response.StatusCode, data)
+	}
 }
 
 func TestBedrockRuntimeExtendsListenerDeadlinesForBoundedGeneration(t *testing.T) {

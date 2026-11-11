@@ -621,6 +621,53 @@ class FormalGateTests(unittest.TestCase):
         finally:
             path.write_text(original)
 
+    def test_bedrock_runtime_model_properties_controls_and_source_scopes_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        model = next(m for m in json.loads(original)['models'] if m['id'] == 'BedrockRuntimeAdmission')
+        expected_properties = {'AuthorizationFirst', 'BackendOnlyAfterAdmission', 'ConcurrencyBound', 'NoCallAfterClose', 'NoFallback', 'NoPersistence', 'SuccessOnlyFromBackend', 'TruthfulFailure', 'TypeOK'}
+        expected_controls = {'AdmitAfterClose', 'CallUnsupportedOperation', 'FallbackBackend', 'IgnoreConcurrency', 'LeakSlot', 'MapBeforeAuthorization', 'MisreportMissingModel', 'OmitAuthorization', 'OmitEnablement', 'OmitMapping', 'OmitValidation', 'PersistPrompt', 'ShutdownClaimsBackendFailure', 'SyntheticDisabledSuccess'}
+        expected_scope = {'cmd/simulator/bedrock_flags.go', 'cmd/simulator/main.go', 'internal/aws/bedrock_runtime.go', 'internal/aws/bedrock_runtime_messages.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/inference/apple.go', 'internal/inference/inference.go', 'internal/inference/ollama.go', 'internal/server/bedrock_runtime.go', 'internal/server/sakura_provider.go', 'internal/server/server.go'}
+        self.assertEqual(set(model['properties']), expected_properties)
+        self.assertEqual({m['id'] for m in model['mutants']}, expected_controls)
+        self.assertEqual(set(model['source_scope']), expected_scope)
+        tla, cfg = self.root / model['model'], self.root / model['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        try:
+            registry = json.loads(original)
+            registry['models'] = [m for m in registry['models'] if m['id'] != model['id']]
+            path.write_text(json.dumps(registry))
+            tla.unlink(); cfg.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            tla.write_bytes(source); cfg.write_bytes(config)
+            for prop in sorted(expected_properties):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['properties'].remove(prop)
+                cfg.write_text('\n'.join(line for line in config.decode().splitlines() if line != 'INVARIANT ' + prop) + '\n')
+                path.write_text(json.dumps(registry))
+                with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+            cfg.write_bytes(config)
+            for control in sorted(expected_controls):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['mutants'] = [m for m in target['mutants'] if m['id'] != control]
+                path.write_text(json.dumps(registry))
+                with self.subTest(control=control), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                    load_registry(self.root)
+            for source_path in sorted(expected_scope):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['source_scope'].remove(source_path)
+                path.write_text(json.dumps(registry))
+                with self.subTest(source_scope=source_path), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+        finally:
+            path.write_text(original)
+            tla.write_bytes(source); cfg.write_bytes(config)
+
     def test_route53_model_properties_six_controls_and_source_scopes_cannot_disappear(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -672,7 +719,7 @@ class FormalGateTests(unittest.TestCase):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'Route53AtomicBatch', 'SSMBatchDeletion', 'SQSBatchDeletion', 'SNSQueueFanout', 'SSMDurableCommands', 'SakuraDiskMetadata', 'DynamoDBAdmission', 'CFNFinalCleanupACK', 'SecretVersionListing', 'ProviderPath', 'CatalogConsoleEpoch', 'SakuraDiskAdmission', 'CFNConditionMemoDepth', 'WAFRequestEvaluation', 'LoginInputIntent', 'SakuraDisksViewEpoch', 'CloudWatchLogsViewEpoch', 'SakuraStartupAdmission', 'ProviderActor', 'S3MultipartState', 'StartupTokenVisibility', 'DynamoDBConsoleEpoch', 'IAMInstanceProfiles', 'CFNConditionAdmission', 'BrowserSessions', 'KMSKeyState', 'ProjectAuthority', 'BlobRange', 'KMSAliasesViewEpoch', 'SQSConsoleEpoch', 'SecretsRevealEpoch', 'LandingAccessAdmission', 'RESTRouteMatching', 'CFNPhysicalResourceACK', 'WAFAssociationAuthorization', 'SNSAdmission', 'IAMManagedPolicies', 'AzurePropertiesEpoch', 'NativeWireProjection', 'DurableGuestLease', 'CFNParameterSnapshot', 'CatalogResourceLifecycle', 'RESTDeploymentSnapshot', 'SQSLifecycle', 'SQSStorageBudget', 'SecretsDisclosureChannels', 'KMSAliasCatalog', 'SecretsVersionLifecycle', 'KMSAliasCrypto', 'ConsoleHandoff', 'IAMBuiltinPinTransaction', 'SNSLifecycle', 'LandingTopologyState', 'CFNEventHistory', 'CloudWatchLogsLifecycle', 'GuestCommandLifecycle', 'SSMParameterState', 'STSSessionLifecycle', 'SecretMetadataViewEpoch', 'SecretsMutationRefresh', 'RESTProxyEventBoundary', 'CFNNativeIAMTransaction', 'KMSProtocolAdmission', 'S3Versions', 'StackOwnership', 'AzureBlobState', 'KMSBootstrapTransaction', 'LambdaLogTailDisclosure', 'GCPStorageState', 'NativeIAMOwnership', 'AzurePropertiesTarget', 'DynamoDBLifecycle', 'ObjectStore'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'BedrockRuntimeAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'Route53AtomicBatch', 'SSMBatchDeletion', 'SQSBatchDeletion', 'SNSQueueFanout', 'SSMDurableCommands', 'SakuraDiskMetadata', 'DynamoDBAdmission', 'CFNFinalCleanupACK', 'SecretVersionListing', 'ProviderPath', 'CatalogConsoleEpoch', 'SakuraDiskAdmission', 'CFNConditionMemoDepth', 'WAFRequestEvaluation', 'LoginInputIntent', 'SakuraDisksViewEpoch', 'CloudWatchLogsViewEpoch', 'SakuraStartupAdmission', 'ProviderActor', 'S3MultipartState', 'StartupTokenVisibility', 'DynamoDBConsoleEpoch', 'IAMInstanceProfiles', 'CFNConditionAdmission', 'BrowserSessions', 'KMSKeyState', 'ProjectAuthority', 'BlobRange', 'KMSAliasesViewEpoch', 'SQSConsoleEpoch', 'SecretsRevealEpoch', 'LandingAccessAdmission', 'RESTRouteMatching', 'CFNPhysicalResourceACK', 'WAFAssociationAuthorization', 'SNSAdmission', 'IAMManagedPolicies', 'AzurePropertiesEpoch', 'NativeWireProjection', 'DurableGuestLease', 'CFNParameterSnapshot', 'CatalogResourceLifecycle', 'RESTDeploymentSnapshot', 'SQSLifecycle', 'SQSStorageBudget', 'SecretsDisclosureChannels', 'KMSAliasCatalog', 'SecretsVersionLifecycle', 'KMSAliasCrypto', 'ConsoleHandoff', 'IAMBuiltinPinTransaction', 'SNSLifecycle', 'LandingTopologyState', 'CFNEventHistory', 'CloudWatchLogsLifecycle', 'GuestCommandLifecycle', 'SSMParameterState', 'STSSessionLifecycle', 'SecretMetadataViewEpoch', 'SecretsMutationRefresh', 'RESTProxyEventBoundary', 'CFNNativeIAMTransaction', 'KMSProtocolAdmission', 'S3Versions', 'StackOwnership', 'AzureBlobState', 'KMSBootstrapTransaction', 'LambdaLogTailDisclosure', 'GCPStorageState', 'NativeIAMOwnership', 'AzurePropertiesTarget', 'DynamoDBLifecycle', 'ObjectStore'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:

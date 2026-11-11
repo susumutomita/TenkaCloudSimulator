@@ -174,6 +174,22 @@ func TestOllamaMapsBackendResponsesToTypedFailures(t *testing.T) {
 	}
 }
 
+func TestOllamaKeepsMarkupPromptsUnescapedWithinTheTransportBound(t *testing.T) {
+	var received []byte
+	backend, _ := fakeOllama(t, func(w http.ResponseWriter, r *http.Request) {
+		received, _ = io.ReadAll(r.Body)
+		chatReply(w, `{"message":{"role":"assistant","content":"ok"},"done":true,"done_reason":"stop"}`)
+	})
+	markup := strings.Repeat("<a&b>", 400_000/5)
+	request := Request{Model: "synthetic:latest", MaxTokens: 1, Messages: []Message{{RoleUser, markup}}}
+	if _, err := backend.Generate(context.Background(), request); err != nil {
+		t.Fatalf("markup prompt within the client limit failed: %v", err)
+	}
+	if !strings.Contains(string(received), markup) || len(received) > len(markup)+256 {
+		t.Fatal("markup prompt was escaped or inflated")
+	}
+}
+
 func TestOllamaZeroAndMissingCountsAndEmptyContent(t *testing.T) {
 	backend, _ := fakeOllama(t, func(w http.ResponseWriter, r *http.Request) {
 		chatReply(w, `{"message":{"role":"assistant","content":""},"done":true,"done_reason":"stop","prompt_eval_count":-1}`)
@@ -193,13 +209,19 @@ func TestOllamaRefusesIncompleteRequestsWithoutContactingBackend(t *testing.T) {
 		func(r *Request) { r.Messages = nil },
 		func(r *Request) { r.MaxTokens = 0 },
 		func(r *Request) { r.Messages = []Message{{"system", "x"}} },
-		func(r *Request) { r.Messages = []Message{{RoleUser, strings.Repeat("x", MaxBackendRequestBytes)}} },
 	} {
 		request := valid
 		mutate(&request)
 		if _, err := backend.Generate(context.Background(), request); KindOf(err) != BackendFailure {
 			t.Fatalf("incomplete request kind %d", KindOf(err))
 		}
+	}
+	// Control characters expand sixfold in JSON; the translated request, not
+	// the client body, is what the transport bound limits.
+	oversized := valid
+	oversized.Messages = []Message{{RoleUser, strings.Repeat("\x01", MaxBackendRequestBytes/6+1)}}
+	if _, err := backend.Generate(context.Background(), oversized); KindOf(err) != TooLarge {
+		t.Fatalf("oversized translated request kind %d", KindOf(err))
 	}
 	if calls.Load() != 0 {
 		t.Fatal("backend was contacted")
@@ -345,4 +367,43 @@ func TestBoundedRejectsExcessConcurrencyAndEnforcesDeadline(t *testing.T) {
 	if _, err = bounded.Generate(ctx, Request{}); KindOf(err) != Canceled {
 		t.Fatalf("canceled kind %d", KindOf(err))
 	}
+	// A caller deadline shorter than the operator's is still a timeout.
+	short, stop := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer stop()
+	if _, err = bounded.Generate(short, Request{}); KindOf(err) != Timeout {
+		t.Fatalf("caller deadline kind %d", KindOf(err))
+	}
+	calls := backend.calls.Load()
+	for _, ended := range []context.Context{ctx, short} {
+		if _, err = bounded.Generate(ended, Request{}); KindOf(err) != Canceled && KindOf(err) != Timeout {
+			t.Fatalf("ended context kind %d", KindOf(err))
+		}
+	}
+	if backend.calls.Load() != calls {
+		t.Fatal("an already-ended request reached the backend")
+	}
+}
+
+type closingBackend struct {
+	scriptedBackend
+	closed atomic.Int32
+}
+
+func (c *closingBackend) Close() { c.closed.Add(1) }
+
+func TestBoundedCloseReleasesBackendResourcesWhenSupported(t *testing.T) {
+	closing := &closingBackend{}
+	bounded, err := NewBounded(closing, time.Second, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bounded.Close()
+	if closing.closed.Load() != 1 {
+		t.Fatal("backend Close was not delegated")
+	}
+	plain, err := NewBounded(&scriptedBackend{}, time.Second, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plain.Close()
 }
