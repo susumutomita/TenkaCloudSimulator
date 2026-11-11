@@ -3,6 +3,13 @@
   "base_sha": "ade9f93970168c145b4189b636190eddb8271f09",
   "changes": [
     {
+      "path": ".github/workflows/formal.yml",
+      "sha256": "ca5ebe4f613a19ded222b824ad4b952732372ed1796a4ed87523e13f440a67b7",
+      "disposition": "formal-infrastructure",
+      "reason": "Extends only the outer serial validation job budget to 45 minutes for the 72-model registry and guard tests; all per-case deadlines, invariants, negative controls, applicability checks and retained evidence remain unchanged.",
+      "models": []
+    },
+    {
       "path": "README.ja.md",
       "sha256": "31490d65eecd49315ee2e06c5ee7d5e1655c7c13a5368540d25bfc0a66286dd6",
       "disposition": "documentation",
