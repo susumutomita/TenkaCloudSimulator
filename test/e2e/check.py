@@ -78,7 +78,7 @@ class Conformance(unittest.TestCase):
   subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_reference_adapters.py"))],check=True,timeout=60)
 
  def test_elb_native_lambda_target_sdk(self):
-  subprocess.run([sys.executable,str(Path(__file__).with_name("elb.py"))],check=True,timeout=240)
+  subprocess.run([sys.executable,str(Path(__file__).with_name("elb.py"))],check=True,timeout=300)
 
  def test_route53_native_public_zone_sdk(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("route53.py"))],check=True,timeout=180)

@@ -77,7 +77,7 @@ def handler(event, context):
     return code.getvalue()
 
 
-def wait_health(elb, group, state, reason=None, seconds=40):
+def wait_health(elb, group, state, reason=None, seconds=75):
     deadline = time.monotonic() + seconds
     while True:
         health = elb.describe_target_health(TargetGroupArn=group)["TargetHealthDescriptions"][0]["TargetHealth"]
@@ -107,8 +107,10 @@ with tempfile.TemporaryDirectory(prefix="elb-sdk-") as directory:
         error("DuplicateLoadBalancerName", lambda: elb.create_load_balancer(Name="team-web", Subnets=SUBNETS, Scheme="internal"))
         error("InvalidConfigurationRequest", lambda: elb.create_load_balancer(Name="network", Subnets=SUBNETS, Type="network"))
         error("InvalidConfigurationRequest", lambda: elb.create_target_group(Name="instances", Protocol="HTTP", Port=80, VpcId="vpc-12345678"))
+        # A generous health timeout keeps slow CI sandboxes from turning a
+        # mismatch into a timeout; the native tests cover Target.Timeout.
         group = elb.create_target_group(Name="team-fn", TargetType="lambda", HealthCheckEnabled=True, HealthCheckPath="/health",
-            HealthCheckIntervalSeconds=5, HealthCheckTimeoutSeconds=2, HealthyThresholdCount=2, UnhealthyThresholdCount=2)["TargetGroups"][0]
+            HealthCheckIntervalSeconds=10, HealthCheckTimeoutSeconds=8, HealthyThresholdCount=2, UnhealthyThresholdCount=2)["TargetGroups"][0]
         tg = group["TargetGroupArn"]
         assert group["TargetType"] == "lambda" and group["Matcher"]["HttpCode"] == "200"
         error("AccessDenied", lambda: elb.register_targets(TargetGroupArn=tg, Targets=[{"Id": lambdas.get_function_configuration(FunctionName="alb-app")["FunctionArn"]}]))

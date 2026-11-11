@@ -97,7 +97,10 @@ func TestELBRoutesToSavedLambdaAndTracksHealthTransitions(t *testing.T) {
 	function := elbSave(t, h, "alb-app", "200", false)
 	arn := lambdaARN("us-east-1", function.Name)
 	lb := h.loadBalancer("web")
-	tg := h.targetGroup("app", "HealthCheckEnabled", "true", "HealthCheckPath", "/health", "HealthCheckIntervalSeconds", "5", "HealthCheckTimeoutSeconds", "2", "HealthyThresholdCount", "2", "UnhealthyThresholdCount", "2")
+	// The health timeout exceeds the function timeout, so slow sandboxes (for
+	// example under the race detector) are bounded by the function, not judged
+	// as health timeouts. Timeouts are checked separately with a short limit.
+	tg := h.targetGroup("app", "HealthCheckEnabled", "true", "HealthCheckPath", "/health", "HealthCheckIntervalSeconds", "30", "HealthCheckTimeoutSeconds", "25", "HealthyThresholdCount", "2", "UnhealthyThresholdCount", "2")
 	h.forward(lb.LoadBalancerArn, tg.TargetGroupArn, "80")
 	h.ok("CreateListener", "LoadBalancerArn", lb.LoadBalancerArn, "Protocol", "HTTP", "Port", "81", "DefaultActions.member.1.Type", "fixed-response", "DefaultActions.member.1.FixedResponseConfig.StatusCode", "418", "DefaultActions.member.1.FixedResponseConfig.ContentType", "text/html", "DefaultActions.member.1.FixedResponseConfig.MessageBody", "<b>teapot</b>")
 
@@ -205,24 +208,26 @@ func TestELBRoutesToSavedLambdaAndTracksHealthTransitions(t *testing.T) {
 			t.Fatal(n, err)
 		}
 	}
+	step := func(seconds int) {
+		t.Helper()
+		later = later.Add(time.Duration(seconds) * time.Second)
+		run(later)
+	}
 	run(later)
 	elbState(t, h.health(tg.TargetGroupArn), "initial", "Elb.InitialHealthChecking")
 	if n, err := h.gateway.RunELBHealthChecks(ctx, elbAt(later), 4); err != nil || n != 0 {
 		t.Fatal("a check ran again before its interval", n, err)
 	}
-	later = later.Add(5 * time.Second)
-	run(later)
+	step(30)
 	elbState(t, h.health(tg.TargetGroupArn), "healthy", "")
 	// Re-applying identical settings is not a change and keeps the health.
 	h.ok("ModifyTargetGroup", "TargetGroupArn", tg.TargetGroupArn)
-	h.ok("ModifyTargetGroup", "TargetGroupArn", tg.TargetGroupArn, "HealthCheckIntervalSeconds", "5", "Matcher.HttpCode", "200")
+	h.ok("ModifyTargetGroup", "TargetGroupArn", tg.TargetGroupArn, "HealthCheckIntervalSeconds", "30", "Matcher.HttpCode", "200")
 	elbState(t, h.health(tg.TargetGroupArn), "healthy", "")
 	elbSave(t, h, "alb-app", "500", true)
-	later = later.Add(5 * time.Second)
-	run(later)
+	step(30)
 	elbState(t, h.health(tg.TargetGroupArn), "healthy", "")
-	later = later.Add(5 * time.Second)
-	run(later)
+	step(30)
 	got := h.health(tg.TargetGroupArn)
 	elbState(t, got, "unhealthy", "Target.ResponseCodeMismatch")
 	if got[0].TargetHealth.Description != "Health checks failed with these codes: [500]" {
@@ -232,18 +237,20 @@ func TestELBRoutesToSavedLambdaAndTracksHealthTransitions(t *testing.T) {
 	if open := h.traffic("GET", "/_elb/us-east-1/web/80/open", "", nil); open.Code != 201 {
 		t.Fatal(open.Code)
 	}
-	elbSave(t, h, "alb-app", "slow", true)
-	later = later.Add(5 * time.Second)
-	run(later)
-	elbState(t, h.health(tg.TargetGroupArn), "unhealthy", "Target.Timeout")
 	elbSave(t, h, "alb-app", "crash", true)
-	later = later.Add(5 * time.Second)
-	run(later)
+	step(30)
 	elbState(t, h.health(tg.TargetGroupArn), "unhealthy", "Target.FailedHealthChecks")
 	elbSave(t, h, "alb-app", "200", true)
-	later = later.Add(5 * time.Second)
-	run(later)
+	step(30)
 	elbState(t, h.health(tg.TargetGroupArn), "unhealthy", "Target.FailedHealthChecks")
+	// A handler slower than a short health timeout is a health timeout.
+	h.ok("ModifyTargetGroup", "TargetGroupArn", tg.TargetGroupArn, "HealthCheckIntervalSeconds", "5", "HealthCheckTimeoutSeconds", "2")
+	elbState(t, h.health(tg.TargetGroupArn), "initial", "Elb.InitialHealthChecking")
+	elbSave(t, h, "alb-app", "slow", true)
+	step(5)
+	elbState(t, h.health(tg.TargetGroupArn), "initial", "Elb.InitialHealthChecking")
+	step(5)
+	elbState(t, h.health(tg.TargetGroupArn), "unhealthy", "Target.Timeout")
 
 	// A result computed before a configuration change is discarded.
 	checks, err := h.gateway.ELB.dueChecks(ctx, later.Add(time.Hour), 4)
