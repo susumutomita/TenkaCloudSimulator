@@ -2,7 +2,7 @@
 // One OpenAPI document per catalog service, generated from the embedded
 // official botocore, Google discovery or Azure REST API specification subsets. The page names its catalog directory from a fixed
 // allowlist; requests stay on this simulator origin.
-const catalogDirectory = ["gcp-catalog", "azure-catalog"].includes(
+const catalogDirectory = ["gcp-catalog", "gcp-appengine", "azure-catalog"].includes(
   document.getElementById("reference").dataset.catalog,
 )
   ? document.getElementById("reference").dataset.catalog
