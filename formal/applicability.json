@@ -1,649 +1,324 @@
 {
   "version": 1,
-  "base_sha": "d096316726049261b1a1f9d5818c469027e04e2b",
+  "base_sha": "66287bb49d39b22b1974b59773096e9d51004627",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "865c54710d7f28fa20a18fcef13f8a9f55008c54ba5984e6045a8ded783cf100",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the AppEngineTraffic model, its required invariants, thirteen mutation controls and exact source scope, and the console helper test, without weakening existing gates.",
-      "models": []
-    },
-    {
       "path": "README.ja.md",
-      "sha256": "0973f1eb4c8794d05ce0c36a1172737a67d963e1147fe755e6e00213ce3d3d58",
+      "sha256": "dc4ebf23a6357f39cf35c1d8faa2044b658d1600e1f48db19a7647f018e0d11b",
       "disposition": "documentation",
-      "reason": "Enduring App Engine contract, limits, notices and navigation; no progress receipt.",
+      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "cdec7b8ee75788d6f232cd477138c05f8606ac5f80b8251a9ba53d9a7f47a3a5",
+      "sha256": "80ef1e53ff84cec24c1700744a08d23635e6f5d71dc65494d9239eab5b0af875",
       "disposition": "documentation",
-      "reason": "Enduring App Engine contract, limits, notices and navigation; no progress receipt.",
+      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
       "models": []
     },
     {
-      "path": "docs/gcp-appengine.md",
-      "sha256": "3e16e85ce93d6329898520f6b580b752f064d2b4e1d00b6b1b1d2e7d20d846c3",
+      "path": "SECURITY.md",
+      "sha256": "d87d960439886caff29f2692140c139466c95507f77c2d22175af6eca91dc771",
       "disposition": "documentation",
-      "reason": "Enduring App Engine contract, limits, notices and navigation; no progress receipt.",
+      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
       "models": []
     },
     {
-      "path": "docs/gcp-catalog.md",
-      "sha256": "2b05f63c8d3f857201183e8be4e1856a3cf9a3f9d6159c1a61f4c875c363c250",
+      "path": "docs/apigateway.md",
+      "sha256": "0839967691c595f2de2d244f61762a2173445c098cfce506f92f26efb7375f39",
       "disposition": "documentation",
-      "reason": "Enduring App Engine contract, limits, notices and navigation; no progress receipt.",
+      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
       "models": []
     },
     {
-      "path": "formal/AppEngineTraffic.cfg",
-      "sha256": "b1b08bfaaf88d0f19edfb72ef417a42a8c5966a18f7caf9a260eef908a00ac6d",
+      "path": "docs/elb.md",
+      "sha256": "7d5a9f171ced56a06ad7e8d8b2d677c277cafb26a57c52b748d3e502e0a80807",
+      "disposition": "documentation",
+      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
+      "models": []
+    },
+    {
+      "path": "formal/ELBTargetLifecycle.cfg",
+      "sha256": "397f2964183cabd86a83aa0caef50cfcecebdb830a317f20bf111faeae83278f",
       "disposition": "modeled",
-      "reason": "Bounds and invariants of the finite model.",
+      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
       "models": [
         {
-          "id": "AppEngineTraffic",
+          "id": "ELBTargetLifecycle",
           "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
           ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
+          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
         }
       ]
     },
     {
-      "path": "formal/AppEngineTraffic.tla",
-      "sha256": "734af5a7d211026856d75255c1ad1fe0aa65647964555d01a815d4e7f2374c51",
+      "path": "formal/ELBTargetLifecycle.tla",
+      "sha256": "311402892b6035781bd03273cb45e27d6480d9bb2451a87d5d96226718ca381d",
       "disposition": "modeled",
-      "reason": "The finite model itself.",
+      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
       "models": [
         {
-          "id": "AppEngineTraffic",
+          "id": "ELBTargetLifecycle",
           "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
           ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
+          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "69300bcf92eec295f1c7c77c1d95e938c6fe9c44b126e9f6bb7650e3cfd8ee85",
+      "sha256": "26d8928614e687779a4c2dbe88c5d7b8c14c4a2bc1cb0223093e8d184fd222df",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the AppEngineTraffic model, its required invariants, thirteen mutation controls and exact source scope, and the console helper test, without weakening existing gates.",
+      "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
       "models": []
     },
     {
-      "path": "internal/gcp/appengine/admin_test.go",
-      "sha256": "c56a6bc2829f2cba281371ea9b2d2801d90ad73d3ea1ce6cc730fa12f1cfd97c",
+      "path": "internal/aws/apirouting/alb_headers.go",
+      "sha256": "8f605c5eecf480592b534d0551075cc0d73452e7270ec090fac1782a021e7319",
+      "disposition": "modeled",
+      "reason": "Exposes the existing REST proxy header authority exclusion to the load balancer event projection without changing it.",
+      "models": [
+        {
+          "id": "ELBTargetLifecycle",
+          "properties": [
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/elb_deadline_test.go",
+      "sha256": "2adce81395fc79f49533936ebeef84bad455a2131e2e8067a07b0b300cbabe2b",
       "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
+      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
       "models": []
     },
     {
-      "path": "internal/gcp/appengine/apps.go",
-      "sha256": "39674a0242a6292cdcf9f5931fc6a0e60308a259fd08e13c8a228b7f6913bc0c",
+      "path": "internal/aws/elb_dispatch.go",
+      "sha256": "7a5fb5fdb89363f1f4b6c73ae8e2c375232092372c3e95d7c75ca32233cfe2b5",
       "disposition": "modeled",
-      "reason": "Permanent single application, owner check of the body project and synchronous operations correspond to CreateApp, ApplicationPermanent and DenialAtomic.",
+      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
       "models": [
         {
-          "id": "AppEngineTraffic",
+          "id": "ELBTargetLifecycle",
           "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
           ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
+          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
         }
       ]
     },
     {
-      "path": "internal/gcp/appengine/deploy.go",
-      "sha256": "687f64c6a2a2c0cd7b86e8ed83156c8add10073ac2703f8c43cc8ff04787eafe",
+      "path": "internal/aws/elb_query.go",
+      "sha256": "3bc53f2f00840515529a316ca34dcad699ab2ee7dc74eee752548c5a816df3de",
       "disposition": "modeled",
-      "reason": "Deployment admission copies bounded sources before the Deploy commit; refusal leaves state unchanged.",
+      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
       "models": [
         {
-          "id": "AppEngineTraffic",
+          "id": "ELBTargetLifecycle",
           "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
           ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
+          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
         }
       ]
     },
     {
-      "path": "internal/gcp/appengine/engine.go",
-      "sha256": "827848fba5da30075256c2f498079c037a4455526f77e4a3226d11b860aaba9e",
+      "path": "internal/aws/elb_store.go",
+      "sha256": "30551c9098d3d4c9cf90ce8df2b555f66f0bf8dcc5d26dee57d1ab03ddd460ee",
       "disposition": "modeled",
-      "reason": "Owner-only admin dispatch before existence checks, refusal of unreviewed methods and fields, and the lazily started sandbox; DenialAtomic and OtherTeamUnchanged abstract its authorization frame.",
+      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
       "models": [
         {
-          "id": "AppEngineTraffic",
+          "id": "ELBTargetLifecycle",
           "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
           ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
+          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
         }
       ]
     },
     {
-      "path": "internal/gcp/appengine/faults_test.go",
-      "sha256": "b5b52fca345027580f7ace69cfcffd2584e130f207d5233de2050e16942e9113",
+      "path": "internal/aws/elb_target.go",
+      "sha256": "3f9d6e7253f5482fdc06a9b50e331bbe837fd724f3e384d22cb233f8c9b042f0",
+      "disposition": "modeled",
+      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
+      "models": [
+        {
+          "id": "ELBTargetLifecycle",
+          "properties": [
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/elb_target_test.go",
+      "sha256": "36905c8f0aaf1cf982392566da38321da765938b892897f6ce690efd9a59a1b8",
       "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
+      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
       "models": []
     },
     {
-      "path": "internal/gcp/appengine/firewall.go",
-      "sha256": "23ce86cfb14b6fa1934903d0d083010644c28f4122bd6629615af36417cb070a",
-      "disposition": "modeled",
-      "reason": "Firewall rules and first-match evaluation correspond to SetFirewall and the allow guard of Serve.",
-      "models": [
-        {
-          "id": "AppEngineTraffic",
-          "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
-          ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/appengine/firewall_test.go",
-      "sha256": "a2132c0127be40dcfc3f5c909d91a00ad9ede74974424436af37613a76a6a31b",
+      "path": "internal/aws/elb_test.go",
+      "sha256": "ac42c14570c8f3104f8651d0a9906b6547406a4318a77fc297e6c27f4506af7f",
       "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
+      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
       "models": []
     },
     {
-      "path": "internal/gcp/appengine/harness_test.go",
-      "sha256": "0e291c385b3775bd7aff12ffa3f70c09b5fb90d0b3f4e1edfd6cf660f3816505",
+      "path": "internal/aws/lambda_permissions.go",
+      "sha256": "5e674117bcaeecc1f44c06aa0ff6a833e660e1d2b1ce0178d97f4badc52b813c",
+      "disposition": "modeled",
+      "reason": "Adds the bounded elasticloadbalancing.amazonaws.com target-group source to Lambda resource policies; API Gateway behavior is unchanged.",
+      "models": [
+        {
+          "id": "ELBTargetLifecycle",
+          "properties": [
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "ceb905eb4682b1c21bc7e7213371bda20ab60864f75d73bda731a0b43be70e33",
+      "disposition": "modeled",
+      "reason": "Adds only the ELB store field to the shared gateway; existing service routing is unchanged.",
+      "models": [
+        {
+          "id": "ELBTargetLifecycle",
+          "properties": [
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "e5d8fd17e7db082a22313301a7c89c59b4ca6ac8ac7709b1c2e705348a5d102d",
+      "disposition": "modeled",
+      "reason": "Dispatches explicitly selected or ELB-scoped Query requests and the /_elb/ data plane before other services.",
+      "models": [
+        {
+          "id": "ELBTargetLifecycle",
+          "properties": [
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/elb_composition_test.go",
+      "sha256": "096dea06000e4a426c66ac9912e864368e6fcaff6bae011687b1c482e71da2b3",
       "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
+      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
       "models": []
-    },
-    {
-      "path": "internal/gcp/appengine/model.go",
-      "sha256": "301361f87bd7b56e42ed333ea624fd1b5bea54fc10eb37131afa239ba5d7aa54",
-      "disposition": "modeled",
-      "reason": "Binds the reviewed official routes and schemas that admit requests to the modeled commits; refused routes change no state.",
-      "models": [
-        {
-          "id": "AppEngineTraffic",
-          "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
-          ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/appengine/model.json",
-      "sha256": "8fc9f35f021304c547b15f2d56a3c68f0a6f34b3df3338a638b4d50a01f33768",
-      "disposition": "modeled",
-      "reason": "Embedded official discovery subset whose reviewed methods are the only admitted transitions.",
-      "models": [
-        {
-          "id": "AppEngineTraffic",
-          "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
-          ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/appengine/model_test.go",
-      "sha256": "7209c8b77dd9571696419a0b49b6629c1914531b9370aa04c1823d7a30b0f45c",
-      "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/appengine/openapi.go",
-      "sha256": "4d7ac9ef067e92437cea72002678e6a4c8110bd26208d8abf4c708a87c3eb0f0",
-      "disposition": "modeled",
-      "reason": "Reference projection of the same reviewed subset; it reads the model and changes no state.",
-      "models": [
-        {
-          "id": "AppEngineTraffic",
-          "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
-          ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/appengine/serve.go",
-      "sha256": "63ad32e39e422ae40ae0854b14c1d848ad62f8ddb688a6b20dbc78f7b825778d",
-      "disposition": "modeled",
-      "reason": "Hostname routing, split selection, firewall and serving checks correspond to Serve and ServedThroughRouteAndFirewall.",
-      "models": [
-        {
-          "id": "AppEngineTraffic",
-          "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
-          ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/appengine/serve_test.go",
-      "sha256": "dc5dedcaa7ae1b537f129e418efa707febe82c3e90e85c28f674644db5e1a845",
-      "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/appengine/services.go",
-      "sha256": "6ac509b181ad569e3522ce03a9a5ae450794132478a81c7a90f2c6137234cab7",
-      "disposition": "modeled",
-      "reason": "Default-first services, first-version allocation, complete splits of existing versions and traffic-guarded deletion correspond to Deploy, SetSplit, DeleteVersion and DeleteService.",
-      "models": [
-        {
-          "id": "AppEngineTraffic",
-          "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
-          ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/appengine/store.go",
-      "sha256": "a80a9e101ebcb87d2c4c3a57ceb88703b7225bce72a719bbac9d5f0214a65dba",
-      "disposition": "modeled",
-      "reason": "Provider tables whose foreign keys and single serializable transactions implement the modeled parent, allocation and deletion-order constraints.",
-      "models": [
-        {
-          "id": "AppEngineTraffic",
-          "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
-          ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/appengine/wsgi.py",
-      "sha256": "52723ad7ed135e3444d8978a5eb8a6c4750f8f50e4bc6bb36ac74b34a4738149",
-      "disposition": "modeled",
-      "reason": "Trusted WSGI glue executed only after Serve admits a request; it has no admin authority.",
-      "models": [
-        {
-          "id": "AppEngineTraffic",
-          "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
-          ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/storage/source.go",
-      "sha256": "3868b620bcf62faf9cca6e8338dc417ae86305cc8f5bc5a5546d1e84aefb8604",
-      "disposition": "modeled",
-      "reason": "Read-only same-project source copy used by Deploy; it never mutates Storage state.",
-      "models": [
-        {
-          "id": "AppEngineTraffic",
-          "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
-          ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/storage/source_test.go",
-      "sha256": "829fcc0a4a68c263e62eeb52206f7c1bdefa9e7ed2ab765f9e3360e44a8e28f0",
-      "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
-      "models": []
-    },
-    {
-      "path": "internal/legal/assets/GOOGLE-DISCOVERY-NOTICES.txt",
-      "sha256": "0e2399db6fa67ffe4fa99c44813fe228338b2abb0f49ed12520d0c13577a5d94",
-      "disposition": "documentation",
-      "reason": "Enduring App Engine contract, limits, notices and navigation; no progress receipt.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog-init.js",
-      "sha256": "27d2497b0e74bebaf8b8c8d29956d5f4e20dd5beed6a17b57f31d1c12745cb0a",
-      "disposition": "presentation",
-      "reason": "Console view, bundle and API reference presentation over the same admin requests; authority stays on the server.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-appengine.html",
-      "sha256": "ee5419f2f7101689e88b889baba10dd34302be400bb2d2e9b4d50ee203463d43",
-      "disposition": "presentation",
-      "reason": "Console view, bundle and API reference presentation over the same admin requests; authority stays on the server.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-appengine/appengine.v1.json",
-      "sha256": "28325872de3253c4238e0d837b3e40fb126ea60733b5f2f2fd1cd75b82f7b388",
-      "disposition": "presentation",
-      "reason": "Console view, bundle and API reference presentation over the same admin requests; authority stays on the server.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-appengine/index.json",
-      "sha256": "a437603b700ed65957df552fb3995057e1b5d74dca6f22c6a64a0daa14dd6c55",
-      "disposition": "presentation",
-      "reason": "Console view, bundle and API reference presentation over the same admin requests; authority stays on the server.",
-      "models": []
-    },
-    {
-      "path": "internal/server/appengine_composition_test.go",
-      "sha256": "a906b03459e11ad1f31813251f88425d0b9c8b0e65f00687aeb8c1083ad69167",
-      "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
-      "models": []
-    },
-    {
-      "path": "internal/server/cloud_storage.go",
-      "sha256": "bde6df73ce2ddfeb0d269d9572693d9e784688ceb2777c4bd144e1176d68f418",
-      "disposition": "modeled",
-      "reason": "Composes App Engine with the configured project owner and native Cloud Storage source and advertises its capability.",
-      "models": [
-        {
-          "id": "AppEngineTraffic",
-          "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
-          ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "c125bf4001c65920d3db6776ea9b1dab2fd9ecf567b53bf076ecb51a7a5d7ff4",
+      "sha256": "30273f4ce3252a9523fab85bdc69481a37f656ad91aa163db1da49cdc41b9fd3",
       "disposition": "modeled",
-      "reason": "Registers the App Engine capability and closes its runtime with the store.",
+      "reason": "Composes the ELB store, owns the health-check loop lifecycle before runtime and store close, and publishes capabilities.",
       "models": [
         {
-          "id": "AppEngineTraffic",
+          "id": "ELBTargetLifecycle",
           "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
           ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/web/app.css",
-      "sha256": "cbe17988936f688c1fd747cced5ac2cd787ea48cde0da2902eb0ac2db7198c99",
-      "disposition": "presentation",
-      "reason": "Console view, bundle and API reference presentation over the same admin requests; authority stays on the server.",
-      "models": []
-    },
-    {
-      "path": "internal/server/web/app.js",
-      "sha256": "7b420c2d258458392bb7c6f323565123c1381424480f0ca1255476a50fabc886",
-      "disposition": "modeled",
-      "reason": "Regenerated console bundle that adds the App Engine view; it uses the same epoch-guarded request, acknowledged-reload and visible-failure pattern as the catalog view, and server checks remain authoritative.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "ReloadOnlyAfterAck",
-            "OnlyCurrentReplies",
-            "FailureVisible",
-            "SingleWriter"
-          ],
-          "limits": "Abstract view epochs only; the App Engine view reuses the catalog view pattern (request epochs, reload after an acknowledged write, visible failures, one write at a time). Rendering, layout, CSS, accessibility and the bundler are covered by the browser e2e, not the model."
+          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "3c2cca5425025c366dccd19aaa4510cdf0c8c76fccbb6124f03902fd163943b2",
+      "sha256": "e1034ad3fe81a75f2824fd6aa034412aecee048929a9e6f4eb1ed247bc022a47",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the AppEngineTraffic model, its required invariants, thirteen mutation controls and exact source scope, and the console helper test, without weakening existing gates.",
+      "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "cd0b6254fb5936a81f0a3c17b8ec499489562df7d843395c042a23be0657d077",
+      "sha256": "3a952fbd9b736983f846cf22316735c1ae699944995f2f7c149612e361f8a17b",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the AppEngineTraffic model, its required invariants, thirteen mutation controls and exact source scope, and the console helper test, without weakening existing gates.",
+      "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "25392ede582b27d8a38048a4f63d5c1eae9ea451cadb1a00b310947aa45023b7",
+      "sha256": "a3741b5578c318e3664d734168501043ac57caf5965a294ec8b10f7503859191",
       "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
+      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
       "models": []
     },
     {
-      "path": "test/e2e/console_language.py",
-      "sha256": "bc1b1d03d823850962517fa2fa99787a21fba7d5e7ac55d7269c05ef9a5127b7",
+      "path": "test/e2e/elb.py",
+      "sha256": "5719a85234df15841afbeb20b14a03b33eaeea69775f03c2e2355d0733569a54",
       "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
+      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
       "models": []
-    },
-    {
-      "path": "test/e2e/gcp_appengine_console.py",
-      "sha256": "3988d1f112c08c71fe01697b28ed128c951b0d2017204921da44522ebe26b212",
-      "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_appengine_sdk.py",
-      "sha256": "3e4bdc191b2284b1b7f276c837c101686cb1cdcdc3a4650d5b217ce2a7863c5e",
-      "disposition": "test-support",
-      "reason": "Native, composition, official-client and browser checks of the App Engine contract.",
-      "models": []
-    },
-    {
-      "path": "third_party/GOOGLE-DISCOVERY-NOTICES.txt",
-      "sha256": "0e2399db6fa67ffe4fa99c44813fe228338b2abb0f49ed12520d0c13577a5d94",
-      "disposition": "documentation",
-      "reason": "Enduring App Engine contract, limits, notices and navigation; no progress receipt.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "3f463c752d14e20a94d4f22aa403adffddac47e9f04876a7a27c5e149088edad",
-      "disposition": "presentation",
-      "reason": "Console view, bundle and API reference presentation over the same admin requests; authority stays on the server.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "a8b2e5aa613b19e7d7e494d0f6328c6215154dd3e5db9ee81ae3c76cc211bf29",
-      "disposition": "presentation",
-      "reason": "Console view, bundle and API reference presentation over the same admin requests; authority stays on the server.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "b797ec29c9acbb7a14fb5383dec5a2977c3705d59b83a7221861bece53f8ce2c",
-      "disposition": "presentation",
-      "reason": "Console view, bundle and API reference presentation over the same admin requests; authority stays on the server.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/gcp-appengine.css",
-      "sha256": "9deb13bb3b82a628b006f9d7e39259d3f10ce9f738fdcdcfb3ff484df151bd93",
-      "disposition": "presentation",
-      "reason": "Console view, bundle and API reference presentation over the same admin requests; authority stays on the server.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/gcp-appengine.jsx",
-      "sha256": "691f2f85670eec9846ec2f22c91b597dc8c9237a247a7e2248df9fcb10e8c3a5",
-      "disposition": "presentation",
-      "reason": "Console view, bundle and API reference presentation over the same admin requests; authority stays on the server.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "6e358016bed1f2f2ffbaa4b59cc3c00c4271f2244c3e66c35d694bd632ebc802",
-      "disposition": "modeled",
-      "reason": "Mounts the App Engine view inside the Google Cloud shell keyed by the exercise identity, as the catalog view is mounted; no authority moves to the client.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "ReloadOnlyAfterAck",
-            "OnlyCurrentReplies",
-            "FailureVisible",
-            "SingleWriter"
-          ],
-          "limits": "Abstract view epochs only; the App Engine view reuses the catalog view pattern (request epochs, reload after an acknowledged write, visible failures, one write at a time). Rendering, layout, CSS, accessibility and the bundler are covered by the browser e2e, not the model."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/tests/gcp-appengine.test.mjs",
-      "sha256": "2d8364f22454239ae1a5ce17f11bb441bd01f80b2317ccc4df9fe47ed6f5f295",
-      "disposition": "presentation",
-      "reason": "Console view, bundle and API reference presentation over the same admin requests; authority stays on the server.",
-      "models": []
-    },
-    {
-      "path": "tools/gcpmodels/appengine.py",
-      "sha256": "76ea73060296b09551a4f9baedb938823cf280e82b2cc086fd25c4a30521a1e1",
-      "disposition": "modeled",
-      "reason": "Development extractor of the embedded discovery subset that bounds the admitted transitions.",
-      "models": [
-        {
-          "id": "AppEngineTraffic",
-          "properties": [
-            "AllocationsReferenceVersions",
-            "SplitComplete",
-            "DefaultFirst",
-            "ApplicationParent",
-            "DenialAtomic",
-            "OtherTeamUnchanged",
-            "ApplicationPermanent",
-            "ServedThroughRouteAndFirewall"
-          ],
-          "limits": "Finite owner, split, deletion-order and routing abstraction only; Go, SQL, HTTP, the Python sandbox, Cloud Storage copying, sharding, operations, quotas and crashes are covered by native and official-client tests, not by the model."
-        }
-      ]
     }
   ]
 }

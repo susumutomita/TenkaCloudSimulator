@@ -92,8 +92,9 @@ func (s *LambdaPermissionStore) Add(ctx context.Context, region, name, sid, prin
 }
 func addTx(ctx context.Context, tx *sql.Tx, region, name, sid, principal, action, source, revision string) (LambdaResourceStatement, error) {
 	var err error
-	if !lambdaStatementID.MatchString(sid) || principal != "apigateway.amazonaws.com" || action != "lambda:InvokeFunction" || !localAPISource(region, source) {
-		return LambdaResourceStatement{}, apiFailure("InvalidParameterValueException", "Use a bounded local API Gateway SourceArn and InvokeFunction permission.")
+	service := principal == "apigateway.amazonaws.com" && localAPISource(region, source) || principal == lambdaELBPrincipal && localELBSource(region, source)
+	if !lambdaStatementID.MatchString(sid) || !service || action != "lambda:InvokeFunction" {
+		return LambdaResourceStatement{}, apiFailure("InvalidParameterValueException", "Use a bounded local API Gateway or Elastic Load Balancing target group SourceArn and InvokeFunction permission.")
 	}
 	policy, current, err := lambdaPolicyRead(ctx, tx, region, name)
 	if err != nil {
@@ -146,6 +147,45 @@ func lambdaPolicyAllowsAPI(policy LambdaResourcePolicy, region, name, source str
 		}
 		pattern := statement.Condition["ArnLike"]["AWS:SourceArn"]
 		if !localAPISource(region, pattern) {
+			continue
+		}
+		if core.Evaluate(core.Policy{Version: "2012-10-17", Statement: core.Statements{{Effect: "Allow", Action: core.StringList{"lambda:InvokeFunction"}, Resource: core.StringList{pattern}}}}, "lambda:InvokeFunction", source) == "allowed" {
+			return true
+		}
+	}
+	return false
+}
+
+const lambdaELBPrincipal = "elasticloadbalancing.amazonaws.com"
+
+// localELBSource admits a same-region local target group ARN or an ArnLike
+// pattern over target group names and IDs. No other ELB resource is a source.
+func localELBSource(region, source string) bool {
+	prefix := elbPrefix(region) + "targetgroup/"
+	rest, ok := strings.CutPrefix(source, prefix)
+	if !ok || rest == "" || len(source) > 1024 {
+		return false
+	}
+	for _, r := range rest {
+		if !(r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || strings.ContainsRune("-/*?", r)) {
+			return false
+		}
+	}
+	return true
+}
+
+// lambdaPolicyAllowsELB requires an exact concrete target group source and a
+// matching Elastic Load Balancing service statement on this function.
+func lambdaPolicyAllowsELB(policy LambdaResourcePolicy, region, name, source string) bool {
+	if elbTGARNPattern.FindStringSubmatch(source) == nil || !localELBSource(region, source) || strings.ContainsAny(source, "*?") {
+		return false
+	}
+	for _, statement := range policy.Statement {
+		if statement.Effect != "Allow" || statement.Principal["Service"] != lambdaELBPrincipal || statement.Action != "lambda:InvokeFunction" || statement.Resource != lambdaARN(region, name) {
+			continue
+		}
+		pattern := statement.Condition["ArnLike"]["AWS:SourceArn"]
+		if !localELBSource(region, pattern) {
 			continue
 		}
 		if core.Evaluate(core.Policy{Version: "2012-10-17", Statement: core.Statements{{Effect: "Allow", Action: core.StringList{"lambda:InvokeFunction"}, Resource: core.StringList{pattern}}}}, "lambda:InvokeFunction", source) == "allowed" {
