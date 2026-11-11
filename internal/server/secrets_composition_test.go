@@ -41,7 +41,7 @@ func TestSecretsCompositionNativeRootAndS3LiteralNeighbors(t *testing.T) {
 	if err = json.Unmarshal(cap.Body.Bytes(), &caps); err != nil {
 		t.Fatal(err)
 	}
-	wantOperations := map[string]bool{"CreateSecret": true, "DescribeSecret": true, "ListSecrets": true, "ListSecretVersionIds": true, "PutSecretValue": true, "GetSecretValue": true, "UpdateSecretVersionStage": true, "DeleteSecret": true}
+	wantOperations := map[string]bool{"CreateSecret": true, "DescribeSecret": true, "UpdateSecret": true, "ListSecrets": true, "ListSecretVersionIds": true, "PutSecretValue": true, "GetSecretValue": true, "UpdateSecretVersionStage": true, "DeleteSecret": true}
 	for _, operation := range caps.Services["secretsmanager"].Operations {
 		if !wantOperations[operation] {
 			t.Fatal("canonical capabilities included an unexpected or duplicate Secrets operation")
@@ -63,9 +63,26 @@ func TestSecretsCompositionNativeRootAndS3LiteralNeighbors(t *testing.T) {
 	if err = json.Unmarshal(created.Body.Bytes(), &identity); err != nil || identity.ARN == "" {
 		t.Fatal("canonical server did not initialize native Secrets store")
 	}
+	headers["X-Amz-Target"] = "secretsmanager.UpdateSecret"
+	updated := call("POST", "/", `{"SecretId":"training/composed","Description":"Updated metadata"}`, headers)
+	require(updated, 200)
+	var updateIdentity map[string]any
+	if err = json.Unmarshal(updated.Body.Bytes(), &updateIdentity); err != nil || len(updateIdentity) != 2 || updateIdentity["ARN"] != identity.ARN || updateIdentity["Name"] != "training/composed" {
+		t.Fatal("composed metadata update response differs from its native contract")
+	}
+	for _, body := range []string{`{"SecretId":"training/composed"}`, `{"SecretId":"training/composed","Description":"bad","SecretString":""}`, `{"SecretId":"training/composed","Description":"bad","KmsKeyId":""}`, `{"SecretId":"training/composed","Description":"bad","ClientRequestToken":"short"}`} {
+		rejected := call("POST", "/", body, headers)
+		require(rejected, 400)
+		if !strings.Contains(rejected.Body.String(), "InvalidParameterException") {
+			t.Fatal("wrong metadata refusal")
+		}
+	}
 	headers["X-Amz-Target"] = "secretsmanager.DescribeSecret"
 	described := call("POST", "/", `{"SecretId":"training/composed"}`, headers)
 	require(described, 200)
+	if !strings.Contains(described.Body.String(), `"Description":"Updated metadata"`) {
+		t.Fatal("metadata update was lost or rejected request mutated state")
+	}
 	if strings.Contains(described.Body.String(), "DUMMY-secret-") {
 		t.Fatal("composition metadata leaked value")
 	}

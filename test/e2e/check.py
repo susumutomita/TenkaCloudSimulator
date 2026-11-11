@@ -659,6 +659,12 @@ def handler(event,context):
  def test_secrets_manager_native_two_teams_restart_and_redaction(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager.py'))],check=True)
 
+ def test_secrets_manager_update_description_native_contract(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_metadata_update.py'))],check=True,timeout=180)
+
+ def test_secrets_manager_description_console_context_and_authority(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('secret_description_console.py'))],check=True,timeout=180)
+
  def test_secrets_manager_version_metadata_native_sdk_and_cursor_scope(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_versions.py'))],check=True,timeout=180)
 

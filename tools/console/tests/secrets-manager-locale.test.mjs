@@ -49,7 +49,46 @@ function normalizeScopedMotion(candidate) {
   candidate=replaceExactlyOne(candidate,' return <div data-secrets-motion ref={motionRoot}><SpaceBetween',' return <SpaceBetween');
   return replaceExactlyOne(candidate,'</SpaceBetween></div>\n}\n','</SpaceBetween>\n}\n');
 }
+const descriptionImport="import SecretDescription from './secret_description.jsx';\n";
+const descriptionTab="{id:'description',label:t('Edit description','説明を編集'),disabled:busy||!!mode,content:<SecretDescription region={region} request={request} secretARN={detail?.ARN||''} active={section==='description'}/>},";
+function normalizeDescriptionEntry(candidate) {
+  candidate=replaceExactlyOne(candidate,descriptionImport,'');
+  return replaceExactlyOne(candidate,descriptionTab,'');
+}
+// Exact integration delta from 6abcbca4bf6612e36470f7e69f29ea090566b8ea (#430).
+// Reversing these six literals reproduces its parent source byte-for-byte.
+const inheritedVersionIntegration=[
+  [
+    "import SecretVersions from './secret_versions.jsx';\n",
+    ""
+  ],
+  [
+    " const [section,setSection]=useState('secrets');\n",
+    ""
+  ],
+  [
+    "{section==='secrets'&&error&&",
+    "{error&&"
+  ],
+  [
+    "{section==='secrets'&&notice&&",
+    "{notice&&"
+  ],
+  [
+    "<Tabs activeTabId={section} onChange={({detail})=>{if(busy||mode)return;invalidate();setLoading(false);setError('');setSection(detail.activeTabId);if(detail.activeTabId==='secrets')browse()}} tabs={[{id:'secrets',label:t('Secrets','シークレット'),content:<>",
+    ""
+  ],
+  [
+    "</>},{id:'versions',label:t('Version metadata','バージョンメタデータ'),disabled:busy||!!mode,content:<SecretVersions region={region} request={request} secretARN={detail?.ARN||''} active={section==='versions'}/>}]} />",
+    ""
+  ]
+];
+function normalizeInheritedVersionEntry(candidate) {
+ for(const [before,after] of inheritedVersionIntegration)candidate=replaceExactlyOne(candidate,before,after);
+ return candidate;
+}
 function assertEnglishContract(candidate) {
+  candidate=normalizeInheritedVersionEntry(normalizeDescriptionEntry(candidate));
   let erased = normalizeACK(normalizeIncomingRecovery(normalizeScopedMotion(candidate))).replace("import {useLocale} from './i18n.jsx';\n", '').replace(' const {t}=useLocale();\n', '');
   const a = erased.indexOf('// Canonical presentation state only.');
   const b = erased.indexOf('// Parent remounts');
@@ -140,4 +179,24 @@ test('locale helpers introduce no credential or reveal sinks', () => {
   assert.equal(/request\(|fetch\(|localStorage|sessionStorage|console\.|setRevealed|SecretString|JSON\.parse|JSON\.stringify/.test(helperSource), false);
   assert.equal(/\bt\((?:draft|revealed|detail|value|e\.message)/.test(source), false);
   assert.equal(/setNotice\(t\(|setError\(t\(/.test(source), false);
+});
+
+test('description entry normalization rejects missing, duplicated or changed wiring',()=>{
+ for(const candidate of [source.replace(descriptionImport,''),source.replace(descriptionImport,descriptionImport+descriptionImport),
+  source.replace(descriptionImport,descriptionImport.replace('./secret_description.jsx','./secret_versions.jsx')),
+  source.replace(descriptionTab,''),source.replace(descriptionTab,descriptionTab+descriptionTab),
+  source.replace(descriptionTab,descriptionTab.replace('request={request}','request={()=>{}}')),
+  source.replace(descriptionTab,descriptionTab.replace('region={region}',"region={'us-east-1'}")),
+  source.replace(descriptionTab,descriptionTab.replace("secretARN={detail?.ARN||''}","secretARN={detail?.Name||''}")),
+  source.replace(descriptionTab,descriptionTab.replace("active={section==='description'}",'active={true}')),
+  source.replace(descriptionTab,descriptionTab.replace('disabled:busy||!!mode','disabled:false'))])assert.throws(()=>assertEnglishContract(candidate));
+});
+
+test('inherited version integration requires every exact historical literal',()=>{
+ const inherited=normalizeDescriptionEntry(source);
+ for(const [before] of inheritedVersionIntegration){
+  assert.throws(()=>normalizeInheritedVersionEntry(inherited.replace(before,'')));
+  assert.throws(()=>normalizeInheritedVersionEntry(inherited.replace(before,before+before)));
+  assert.throws(()=>normalizeInheritedVersionEntry(inherited.replace(before,before.replace(/.$/s,'!'))));
+ }
 });

@@ -10323,6 +10323,414 @@
      "expect_invariant": "OtherTeamUnchanged"
     }
    ]
+  },
+  {
+   "id": "SecretMetadataUpdate",
+   "model": "formal/SecretMetadataUpdate.tla",
+   "config": "formal/SecretMetadataUpdate.cfg",
+   "bounds": "Two abstract secret keys, three descriptions (including empty), four Boolean request verdicts, three write outcomes, one staged transaction.",
+   "properties": [
+    "TypeOK",
+    "Authorized",
+    "ValidPresent",
+    "DurableAcknowledgement",
+    "NoPartialVisibility",
+    "RefusalUnchanged",
+    "ExactMetadata",
+    "PeerPreserved",
+    "IdentityPreserved",
+    "CreatedPreserved",
+    "VersionPreserved",
+    "ValuePreserved",
+    "StagePreserved"
+   ],
+   "limits": "One request with captured authorization and target identity. Abstract commit acknowledgement and final metadata checks; no Go/SQL refinement, IAM/ARN/JSON/Unicode parsing, crash recovery, concurrent requests, encryption, SDK or browser proof.",
+   "source_scope": [
+    "internal/aws/secret_metadata_update.go",
+    "internal/aws/secret_http.go"
+   ],
+   "mutants": [
+    {
+     "id": "SkipAuthorization",
+     "edits": [
+      {
+       "old": "Admitted == request.valid /\\ request.present /\\ request.allowed",
+       "new": "Admitted == request.valid /\\ request.present",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "Authorized"
+    },
+    {
+     "id": "SkipValidity",
+     "edits": [
+      {
+       "old": "Admitted == request.valid /\\ request.present /\\ request.allowed",
+       "new": "Admitted == request.present /\\ request.allowed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValidPresent"
+    },
+    {
+     "id": "SkipExistence",
+     "edits": [
+      {
+       "old": "Admitted == request.valid /\\ request.present /\\ request.allowed",
+       "new": "Admitted == request.valid /\\ request.allowed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValidPresent"
+    },
+    {
+     "id": "SkipCommitAcknowledgement",
+     "edits": [
+      {
+       "old": "success == Admitted /\\ request.ack /\\ Exact",
+       "new": "success == Admitted /\\ Exact",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DurableAcknowledgement"
+    },
+    {
+     "id": "SkipFinalStateCheck",
+     "edits": [
+      {
+       "old": "success == Admitted /\\ request.ack /\\ Exact",
+       "new": "success == Admitted /\\ request.ack",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DurableAcknowledgement"
+    },
+    {
+     "id": "FailedRollback",
+     "edits": [
+      {
+       "old": "IF success THEN pending ELSE Initial",
+       "new": "IF success THEN pending ELSE pending",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RefusalUnchanged"
+    },
+    {
+     "id": "ExposeTentativeWrite",
+     "edits": [
+      {
+       "old": "/\\ UNCHANGED <<request, durable, accepted>>",
+       "new": "/\\ durable' = pending'\n         /\\ UNCHANGED <<request, accepted>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoPartialVisibility"
+    },
+    {
+     "id": "WrongDescription",
+     "edits": [
+      {
+       "old": "IF success THEN pending ELSE Initial",
+       "new": "IF success THEN [pending EXCEPT ![request.target].description = \"old\"] ELSE Initial",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactMetadata"
+    },
+    {
+     "id": "CorruptPeerPreserved",
+     "edits": [
+      {
+       "old": "IF success THEN pending ELSE Initial",
+       "new": "IF success THEN [pending EXCEPT ![3-request.target].description = \"new\"] ELSE Initial",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PeerPreserved"
+    },
+    {
+     "id": "CorruptIdentityPreserved",
+     "edits": [
+      {
+       "old": "IF success THEN pending ELSE Initial",
+       "new": "IF success THEN [pending EXCEPT ![request.target].identity = 3-request.target] ELSE Initial",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IdentityPreserved"
+    },
+    {
+     "id": "CorruptCreatedPreserved",
+     "edits": [
+      {
+       "old": "IF success THEN pending ELSE Initial",
+       "new": "IF success THEN [pending EXCEPT ![request.target].created = 1] ELSE Initial",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CreatedPreserved"
+    },
+    {
+     "id": "CorruptVersionPreserved",
+     "edits": [
+      {
+       "old": "IF success THEN pending ELSE Initial",
+       "new": "IF success THEN [pending EXCEPT ![request.target].version = 2] ELSE Initial",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "VersionPreserved"
+    },
+    {
+     "id": "CorruptValuePreserved",
+     "edits": [
+      {
+       "old": "IF success THEN pending ELSE Initial",
+       "new": "IF success THEN [pending EXCEPT ![request.target].value = 3-request.target] ELSE Initial",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValuePreserved"
+    },
+    {
+     "id": "CorruptStagePreserved",
+     "edits": [
+      {
+       "old": "IF success THEN pending ELSE Initial",
+       "new": "IF success THEN [pending EXCEPT ![request.target].stage = 2] ELSE Initial",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StagePreserved"
+    }
+   ]
+  },
+  {
+   "id": "SecretDescriptionWorkflow",
+   "model": "formal/SecretDescriptionWorkflow.tla",
+   "config": "formal/SecretDescriptionWorkflow.cfg",
+   "bounds": "Nine transitions, three explicit execute invocations, one scope/intent invalidation (including unmount), Boolean backend commit and response validity. An automatic post-ACK read shares the captured request epoch.",
+   "properties": [
+    "TypeOK",
+    "FreshEmissions",
+    "AcknowledgmentIdentity",
+    "MetadataIdentity",
+    "OnePendingSubmission",
+    "LiveWorkKeepsLatch",
+    "NoWriteWhileUncertain",
+    "UncertaintyFence",
+    "AcknowledgedStatusPreserved",
+    "NoValueRetrieval",
+    "ReadRetriesStayReadOnly",
+    "NoStaleFollowupRead",
+    "ServerCommitPreserved",
+    "UnmountHidesDisplay"
+   ],
+   "limits": "Finite UI lifecycle abstraction against description component source d97f987f3a37d922860a894f9f98256975e5cfc0. Assumes validated confirmed input, captured authenticated callback and valid backend metadata. No Go/React/DOM/browser refinement, actual scheduling, Unicode/ARN parsing, auth, SQL/crash atomicity, network cancellation or rollback proof. Fresh explicit confirmed input may clear uncertainty; failed reconciliation may not.",
+   "source_scope": [
+    "tools/console/src/secret_description.jsx"
+   ],
+   "mutants": [
+    {
+     "id": "SkipSynchronousLatch",
+     "edits": [
+      {
+       "old": " /\\ ~locked\n",
+       "new": " /\\ TRUE\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnePendingSubmission"
+    },
+    {
+     "id": "SkipUncertaintyFence",
+     "edits": [
+      {
+       "old": " /\\ (~write \\/ status#\"Uncertain\")",
+       "new": " /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoWriteWhileUncertain"
+    },
+    {
+     "id": "SkipEpochCheck",
+     "edits": [
+      {
+       "old": "Current(id) == alive /\\ requests[id].context=context /\\ requests[id].ticket=epoch",
+       "new": "Current(id) == alive /\\ requests[id].context=context",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FreshEmissions"
+    },
+    {
+     "id": "PublishStaleWrite",
+     "edits": [
+      {
+       "old": "current == Current(id)\n        accepted",
+       "new": "current == TRUE\n        accepted",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FreshEmissions"
+    },
+    {
+     "id": "PublishStaleRead",
+     "edits": [
+      {
+       "old": "current == Current(id)\n        valid",
+       "new": "current == TRUE\n        valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FreshEmissions"
+    },
+    {
+     "id": "AcceptMalformedACK",
+     "edits": [
+      {
+       "old": "accepted == current /\\ validACK",
+       "new": "accepted == current",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AcknowledgmentIdentity"
+    },
+    {
+     "id": "AcceptMalformedMetadata",
+     "edits": [
+      {
+       "old": "valid == validMetadata",
+       "new": "valid == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "MetadataIdentity"
+    },
+    {
+     "id": "StaleWriteUnlocksNewRequest",
+     "edits": [
+      {
+       "old": "locked'=IF current THEN accepted ELSE locked",
+       "new": "locked'=accepted",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LiveWorkKeepsLatch"
+    },
+    {
+     "id": "StaleReadUnlocksNewRequest",
+     "edits": [
+      {
+       "old": "locked'=IF current THEN FALSE ELSE locked",
+       "new": "locked'=FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LiveWorkKeepsLatch"
+    },
+    {
+     "id": "FailedReconciliationClearsFence",
+     "edits": [
+      {
+       "old": "ELSE IF status=\"Uncertain\" THEN \"Uncertain\"",
+       "new": "ELSE IF status=\"Uncertain\" THEN \"ReadError\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UncertaintyFence"
+    },
+    {
+     "id": "FailedRefreshLosesACK",
+     "edits": [
+      {
+       "old": "ELSE IF status \\in {\"Saved\",\"Refresh\"} THEN \"Refresh\" ELSE \"ReadError\"",
+       "new": "ELSE IF status \\in {\"Saved\",\"Refresh\"} THEN \"ReadError\" ELSE \"ReadError\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AcknowledgedStatusPreserved"
+    },
+    {
+     "id": "ReadRetryResubmitsMutation",
+     "edits": [
+      {
+       "old": "Dispatch(IF write THEN \"UpdateSecret\" ELSE \"DescribeSecret\",",
+       "new": "Dispatch(IF write THEN \"UpdateSecret\" ELSE \"UpdateSecret\",",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReadRetriesStayReadOnly"
+    },
+    {
+     "id": "ACKRefreshResubmitsMutation",
+     "edits": [
+      {
+       "old": "Dispatch(\"DescribeSecret\",\"AfterACK\",current)",
+       "new": "Dispatch(\"UpdateSecret\",\"AfterACK\",current)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReadRetriesStayReadOnly"
+    },
+    {
+     "id": "RetrieveValueOnRefresh",
+     "edits": [
+      {
+       "old": "Dispatch(IF write THEN \"UpdateSecret\" ELSE \"DescribeSecret\",",
+       "new": "Dispatch(IF write THEN \"UpdateSecret\" ELSE \"GetSecretValue\",",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoValueRetrieval"
+    },
+    {
+     "id": "StaleACKStartsRefresh",
+     "edits": [
+      {
+       "old": "calls'=IF accepted THEN",
+       "new": "calls'=IF validACK THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoStaleFollowupRead"
+    },
+    {
+     "id": "AbortSuppressesServerCommit",
+     "edits": [
+      {
+       "old": "durableCommits'=IF commit THEN",
+       "new": "durableCommits'=IF commit /\\ Current(id) THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ServerCommitPreserved"
+    },
+    {
+     "id": "AbortRollsBackServerCommit",
+     "edits": [
+      {
+       "old": "UNCHANGED <<nextID,requests,serverCommits,durableCommits,emissions,writes,calls>>",
+       "new": "durableCommits'={}\n /\\ UNCHANGED <<nextID,requests,serverCommits,emissions,writes,calls>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ServerCommitPreserved"
+    },
+    {
+     "id": "UnmountKeepsDisplay",
+     "edits": [
+      {
+       "old": "locked'=FALSE /\\ status'=\"None\" /\\ acked'=FALSE /\\ uncertain'=FALSE /\\ metadata'=FALSE",
+       "new": "locked'=FALSE /\\ status'=status /\\ acked'=FALSE /\\ uncertain'=FALSE /\\ metadata'=metadata",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UnmountHidesDisplay"
+    }
+   ]
   }
  ]
 }
