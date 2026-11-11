@@ -33,6 +33,126 @@ class FormalGateTests(unittest.TestCase):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, target)
 
+    def test_ssm_batch_inventory_and_boundaries_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SSMBatchDeletion')
+        self.assertEqual(len(entry['properties']), 11)
+        self.assertEqual(len(entry['mutants']), 23)
+        self.assertEqual(set(entry['source_scope']), {
+            'internal/aws/parameters.go', 'internal/aws/ssm.go'})
+        config = self.root / entry['config']
+        cfg = config.read_text()
+        load_registry(self.root)
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == entry['id'])
+                target[field].remove(item)
+                if field == 'properties':
+                    # Also remove matching config lines/controls: schema matching
+                    # must not hide removal of an independently required oracle.
+                    config.write_text(cfg.replace('INVARIANT ' + item + '\n', ''))
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                path.write_text(json.dumps(changed))
+                expected = {'properties': 'existing required invariant was removed',
+                            'mutants': 'required mutation control was removed',
+                            'source_scope': 'required exact source scope changed'}[field]
+                with self.subTest(field=field, item=item), self.assertRaisesRegex(GateError, expected):
+                    load_registry(self.root)
+                config.write_text(cfg)
+        changed = json.loads(original)
+        target = next(m for m in changed['models'] if m['id'] == entry['id'])
+        target['source_scope'].append('internal/core/store.go')
+        path.write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(changed))
+        (self.root / entry['model']).unlink()
+        config.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_ssm_batch_bounds_and_controls_preserve_independent_oracles(self):
+        entry = next(m for m in load_registry(self.root)['models'] if m['id'] == 'SSMBatchDeletion')
+        source = (self.root / entry['model']).read_text()
+        for anchor in ('n \\in 0..3', 'i \\in 1..10', 'i \\in 1..11',
+                       'SUBSET RequestedKeys', '"implicit-deny", "explicit-deny"',
+                       '"valid", "bad-shape", "bad-first", "bad-last"',
+                       'Unique(xs)', 'FirstIndices == SelectSeq', 'Snapshot(present)',
+                       'Abort("canceled")', 'Abort("storage-error")', 'commitOK \\in BOOLEAN'):
+            self.assertIn(anchor, source)
+        oracles = source.split('TypeOK ==', 1)[1]
+        response_oracle = source.split('FirstIndices ==', 1)[1].split('Init ==', 1)[0]
+        for mutant in entry['mutants']:
+            with self.subTest(mutant=mutant['id']):
+                name, changed = apply_mutant(source, entry['id'], mutant)
+                self.assertEqual(name, entry['id'] + '_' + mutant['id'])
+                self.assertNotEqual(source, changed)
+                self.assertEqual(changed.split('TypeOK ==', 1)[1], oracles)
+                self.assertEqual(changed.split('FirstIndices ==', 1)[1].split('Init ==', 1)[0], response_oracle)
+                broken = json.loads(json.dumps(mutant))
+                broken['edits'][0]['old'] += 'missing-anchor'
+                with self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                    apply_mutant(source, entry['id'], broken)
+
+    def test_sqs_batch_deletion_required_inventory_and_scope(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'SQSBatchDeletion')
+        self.assertEqual(len(entry['properties']), 19)
+        self.assertEqual(len(entry['mutants']), 39)
+        self.assertEqual(set(entry['source_scope']), {
+            'internal/aws/sqs.go', 'internal/aws/sqs_batch_delete.go', 'internal/aws/sqs_store.go'})
+        config = self.root / entry['config']
+        cfg = config.read_text()
+        load_registry(self.root)
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == entry['id'])
+                target[field].remove(item)
+                if field == 'properties':
+                    config.write_text(cfg.replace('INVARIANT ' + item + '\n', ''))
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                path.write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config.write_text(cfg)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(changed))
+        (self.root / entry['model']).unlink()
+        config.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_sqs_batch_deletion_anchors_and_oracle_are_independent(self):
+        entry = next(m for m in json.loads((self.root / 'formal/models.json').read_text())['models']
+                     if m['id'] == 'SQSBatchDeletion')
+        source = (self.root / entry['model']).read_text()
+        for anchor in ('Rows == 1..7', 'n \\in 0..2', 'i \\in 1..10', 'i \\in 1..11',
+                       '"recreated"', '"missing-queue"', '"duplicate"', '"ignored-purge"',
+                       '"queue-drift"', '"reinsert-id"', '"rebind-receipt"', '"late-expiry"',
+                       '"database-b"', '"region-b"', '"queue-b"', '"sqs:DeleteMessage"'):
+            self.assertIn(anchor, source)
+        oracle = source.split('RawValid ==', 1)[1].split('Init ==', 1)[0]
+        for forbidden in ('Valid /', 'Matches(Request', 'selected[', 'good[', 'bad[', 'work['):
+            self.assertNotIn(forbidden, oracle)
+        self.assertIn('before[r].receipt = Request[i].receipt', oracle)
+        self.assertIn('Request[j].receipt # Request[i].receipt', oracle)
+        for mutant in entry['mutants']:
+            with self.subTest(mutant=mutant['id']):
+                module, changed = apply_mutant(source, entry['id'], mutant)
+                self.assertNotEqual(source, changed)
+                self.assertEqual(module, entry['id'] + '_' + mutant['id'])
+                broken = json.loads(json.dumps(mutant))
+                broken['edits'][0]['old'] += 'missing-anchor'
+                with self.assertRaisesRegex(GateError, 'mutation anchor count mismatch'):
+                    apply_mutant(source, entry['id'], broken)
+
     def test_native_sns_fanout_inventory_and_boundaries_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -501,11 +621,58 @@ class FormalGateTests(unittest.TestCase):
         finally:
             path.write_text(original)
 
+    def test_route53_model_properties_six_controls_and_source_scopes_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        model = next(m for m in json.loads(original)['models'] if m['id'] == 'Route53AtomicBatch')
+        expected_properties = {'TypeOK', 'AtomicPair', 'PreserveSentinel', 'OnlyAuthorizedValid', 'OtherTeamUnchanged', 'PendingInvisible'}
+        expected_controls = {'OmitAuthorization', 'OmitValidation', 'HalfBatch', 'ChangeSentinel', 'ChangeOtherTeam', 'ExposePendingState'}
+        expected_scope = {'internal/aws/route53_store.go', 'internal/aws/route53_http.go', 'internal/aws/route53_dispatch.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/server/server.go'}
+        self.assertEqual(set(model['properties']), expected_properties)
+        self.assertEqual({m['id'] for m in model['mutants']}, expected_controls)
+        self.assertEqual(set(model['source_scope']), expected_scope)
+        tla, cfg = self.root / model['model'], self.root / model['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        try:
+            registry = json.loads(original)
+            registry['models'] = [m for m in registry['models'] if m['id'] != model['id']]
+            path.write_text(json.dumps(registry))
+            tla.unlink(); cfg.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            tla.write_bytes(source); cfg.write_bytes(config)
+            for prop in sorted(expected_properties):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['properties'].remove(prop)
+                cfg.write_text('\n'.join(line for line in config.decode().splitlines() if line != 'INVARIANT ' + prop) + '\n')
+                path.write_text(json.dumps(registry))
+                with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+            cfg.write_bytes(config)
+            for control in sorted(expected_controls):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['mutants'] = [m for m in target['mutants'] if m['id'] != control]
+                path.write_text(json.dumps(registry))
+                with self.subTest(control=control), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                    load_registry(self.root)
+            for source_path in sorted(expected_scope):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['source_scope'].remove(source_path)
+                path.write_text(json.dumps(registry))
+                with self.subTest(source_scope=source_path), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+        finally:
+            path.write_text(original)
+            tla.write_bytes(source); cfg.write_bytes(config)
+
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SNSQueueFanout', 'SSMDurableCommands', 'SakuraDiskMetadata', 'DynamoDBAdmission', 'CFNFinalCleanupACK', 'SecretVersionListing', 'ProviderPath', 'CatalogConsoleEpoch', 'SakuraDiskAdmission', 'CFNConditionMemoDepth', 'WAFRequestEvaluation', 'LoginInputIntent', 'SakuraDisksViewEpoch', 'CloudWatchLogsViewEpoch', 'SakuraStartupAdmission', 'ProviderActor', 'S3MultipartState', 'StartupTokenVisibility', 'DynamoDBConsoleEpoch', 'IAMInstanceProfiles', 'CFNConditionAdmission', 'BrowserSessions', 'KMSKeyState', 'ProjectAuthority', 'BlobRange', 'KMSAliasesViewEpoch', 'SQSConsoleEpoch', 'SecretsRevealEpoch', 'LandingAccessAdmission', 'RESTRouteMatching', 'CFNPhysicalResourceACK', 'WAFAssociationAuthorization', 'SNSAdmission', 'IAMManagedPolicies', 'AzurePropertiesEpoch', 'NativeWireProjection', 'DurableGuestLease', 'CFNParameterSnapshot', 'CatalogResourceLifecycle', 'RESTDeploymentSnapshot', 'SQSLifecycle', 'SQSStorageBudget', 'SecretsDisclosureChannels', 'KMSAliasCatalog', 'SecretsVersionLifecycle', 'KMSAliasCrypto', 'ConsoleHandoff', 'IAMBuiltinPinTransaction', 'SNSLifecycle', 'LandingTopologyState', 'CFNEventHistory', 'CloudWatchLogsLifecycle', 'GuestCommandLifecycle', 'SSMParameterState', 'STSSessionLifecycle', 'SecretMetadataViewEpoch', 'SecretsMutationRefresh', 'RESTProxyEventBoundary', 'CFNNativeIAMTransaction', 'KMSProtocolAdmission', 'S3Versions', 'StackOwnership', 'AzureBlobState', 'KMSBootstrapTransaction', 'LambdaLogTailDisclosure', 'GCPStorageState', 'NativeIAMOwnership', 'AzurePropertiesTarget', 'DynamoDBLifecycle', 'ObjectStore'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'Route53AtomicBatch', 'SSMBatchDeletion', 'SQSBatchDeletion', 'SNSQueueFanout', 'SSMDurableCommands', 'SakuraDiskMetadata', 'DynamoDBAdmission', 'CFNFinalCleanupACK', 'SecretVersionListing', 'ProviderPath', 'CatalogConsoleEpoch', 'SakuraDiskAdmission', 'CFNConditionMemoDepth', 'WAFRequestEvaluation', 'LoginInputIntent', 'SakuraDisksViewEpoch', 'CloudWatchLogsViewEpoch', 'SakuraStartupAdmission', 'ProviderActor', 'S3MultipartState', 'StartupTokenVisibility', 'DynamoDBConsoleEpoch', 'IAMInstanceProfiles', 'CFNConditionAdmission', 'BrowserSessions', 'KMSKeyState', 'ProjectAuthority', 'BlobRange', 'KMSAliasesViewEpoch', 'SQSConsoleEpoch', 'SecretsRevealEpoch', 'LandingAccessAdmission', 'RESTRouteMatching', 'CFNPhysicalResourceACK', 'WAFAssociationAuthorization', 'SNSAdmission', 'IAMManagedPolicies', 'AzurePropertiesEpoch', 'NativeWireProjection', 'DurableGuestLease', 'CFNParameterSnapshot', 'CatalogResourceLifecycle', 'RESTDeploymentSnapshot', 'SQSLifecycle', 'SQSStorageBudget', 'SecretsDisclosureChannels', 'KMSAliasCatalog', 'SecretsVersionLifecycle', 'KMSAliasCrypto', 'ConsoleHandoff', 'IAMBuiltinPinTransaction', 'SNSLifecycle', 'LandingTopologyState', 'CFNEventHistory', 'CloudWatchLogsLifecycle', 'GuestCommandLifecycle', 'SSMParameterState', 'STSSessionLifecycle', 'SecretMetadataViewEpoch', 'SecretsMutationRefresh', 'RESTProxyEventBoundary', 'CFNNativeIAMTransaction', 'KMSProtocolAdmission', 'S3Versions', 'StackOwnership', 'AzureBlobState', 'KMSBootstrapTransaction', 'LambdaLogTailDisclosure', 'GCPStorageState', 'NativeIAMOwnership', 'AzurePropertiesTarget', 'DynamoDBLifecycle', 'ObjectStore'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:

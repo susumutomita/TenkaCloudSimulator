@@ -5,8 +5,9 @@
 Baseline: [`835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152`](https://github.com/susumutomita/TenkaCloudSimulator/commit/835853a2eddf95c85a9a8bbb9ad3a6d9ba0b7152).
 This is an index of bounded contracts and source evidence, not a service completion
 percentage or a claim that every named test was rerun by this documentation task.
-Use the [development roster](development-status.md) for dated integration records
-and the [README service table](../README.md#supported-services) for entry points.
+Use the relevant Issue or PR for dated integration records;
+[development status](development-status.md) links to those sources. Use the
+[README service table](../README.md#supported-services) for entry points.
 The November 4 matrix below is historical and must not override this snapshot.
 
 | Contract at this baseline | Current source and acceptance references | Explicit boundary |
@@ -54,9 +55,10 @@ maintained guides; the immutable baseline identifies the historical code.
 
 **Public snapshot: 2026-11-04 12:35 UTC. Baseline
 `2d8a41a0cb576bd42561a7162d35129f44979c08`.** This matrix describes that public
-main source, not a union of unpublished service branches. The linked [development roster](development-status.md) now contains later
-public integration records; it is not frozen to this historical baseline. Local-only implementation histories and executor receipts are not
-part of this publication.
+main source, not a union of unpublished service branches. For later public
+integration records, use the relevant Issue or PR via
+[development status](development-status.md). Local-only implementation histories
+and executor receipts are not part of this publication.
 
 Main [ci41828639809](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41828639809),
 [Formal41828639605](https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/41828639605)
@@ -82,10 +84,10 @@ Unknown runtime changes still need a relevant model; prose is not an exemption.
 Workflow runs do not establish configured repository branch protection.
 
 Public candidates remain separate from main. Historical CI on base55a or6ff
-cannot validate restacked source on2d8. Use the linked roster for exact public
-HEADs, successful/failed/running workflows and pending integration. Do not add
-candidate model counts, restricted coverage or local source receipts to main's
-totals; do not treat code-scanning success as a passing normal CI.
+cannot validate restacked source on2d8. Use the relevant PR and its exact-commit
+CI for public HEADs, successful/failed/running workflows and pending integration.
+Do not add candidate model counts, restricted coverage or local source receipts
+to main's totals; do not treat code-scanning success as a passing normal CI.
 
 ### Implemented main contracts at `2d8a41a0`
 

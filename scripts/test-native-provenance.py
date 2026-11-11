@@ -240,6 +240,11 @@ class NativeProvenanceTests(unittest.TestCase):
         original_assert = "assert len(operations)==len(set(operations)) and set(operations)==expected_legacy|expected_rest|expected_multicloud"
         extended_assert = original_assert + "|expected_sakura"
         prefix = source.split("# Retain exact historical rights", 1)[0]
+        # Require the three reviewed Route53 adapter changes exactly once.
+        # Normalize only their exact bytes; the original prefix hash is unchanged.
+        for approved, original in self._route53_asset_adapters():
+            self.assertEqual(prefix.count(approved), 1, "Exact approved Route53 adapter is required once")
+            prefix = prefix.replace(approved, original, 1)
         self.assertEqual(prefix.count(extension), 1, "Exact approved five-ID extension is required once")
         self.assertEqual(prefix.count(extended_assert), 1, "Exact approved closed union is required once")
         prefix = prefix.replace(extension, "", 1).replace(extended_assert, original_assert, 1)
@@ -249,6 +254,29 @@ class NativeProvenanceTests(unittest.TestCase):
         self.assertEqual(prefix.count(multipart), 1, "Exact approved multipart operation is required once")
         prefix = prefix.replace(multipart, "expected_legacy={", 1)
         self.assertEqual(hashlib.sha256(prefix.encode()).hexdigest(), "331cc7e21fd3a30aa72b690846cf60c04f06ea19c0035ac73ea13f629334d685")
+
+    @staticmethod
+    def _route53_asset_adapters():
+        return (
+            ("import hashlib,json,runpy\n", "import hashlib,json\n"),
+            ("route53_contract=runpy.run_path('test/e2e/route53_openapi.py')\n"
+             "inherited_spec=route53_contract['project_before_route53'](spec)\n", ""),
+            ("operations=[v['operationId'] for p in inherited_spec['paths'].values()",
+             "operations=[v['operationId'] for p in spec['paths'].values()"),
+        )
+
+    def test_asset_prefix_rejects_missing_changed_duplicate_route53_adapters(self):
+        source = (REPO / "scripts/check-assets.py").read_text()
+        for approved, original in self._route53_asset_adapters():
+            self.assertEqual(source.count(approved), 1)
+            for label, replacement in (("missing", original),
+                                       ("changed", approved.replace("route53", "unreviewed", 1) if "route53" in approved else approved.replace("inherited_spec", "unreviewed_spec", 1)),
+                                       ("duplicate", approved + approved)):
+                # The import has no lowercase route53 or inherited_spec token.
+                if label == "changed" and replacement == approved:
+                    replacement = approved.replace("runpy", "runpy2", 1)
+                with self.subTest(adapter=approved, mutation=label), self.assertRaises(AssertionError):
+                    self._assert_original_asset_prefix(source.replace(approved, replacement, 1))
 
     def test_asset_prefix_rejects_changed_duplicate_or_missing_multipart_extension(self):
         source = (REPO / "scripts/check-assets.py").read_text()

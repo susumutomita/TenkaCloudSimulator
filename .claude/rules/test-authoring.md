@@ -1,7 +1,9 @@
 ---
 paths:
-  - "**/*.test.ts*"
-  - "**/*.spec.ts*"
+  - "**/*_test.go"
+  - "**/*.test.mjs"
+  - "test/**"
+  - "scripts/test-*.py"
 ---
 
 # Test authoring guidance
@@ -16,4 +18,4 @@ paths:
 - 正常系だけでなく、変更に関係する異常系、境界値、権限、競合を検証する。既存テストが十分なら重複を追加しない。
 - coverage は不足箇所を見つけるシグナルとして使い、リポジトリの既存 CI 閾値を満たす。数値だけを上げるテストを書かない。
 
-合否の正本は、test runner、typecheck、architecture harness、CI です。編集直後の hook や特定の review Skill は必須経路ではありません。
+検証コマンドの正本は `AGENTS.md`、`Makefile`、`docs/ci.md` です。編集直後の hook や特定の review Skill は必須経路ではありません。

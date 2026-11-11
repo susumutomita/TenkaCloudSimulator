@@ -10,7 +10,7 @@ import tempfile
 import time
 from pathlib import Path
 
-BASE_MODELS = {'S3MultipartState', 'AzureBlobState',
+BASE_MODELS = {'Route53AtomicBatch', 'S3MultipartState', 'AzureBlobState',
  'CatalogConsoleEpoch',
  'CatalogResourceLifecycle',
  'AzurePropertiesEpoch',
@@ -61,7 +61,7 @@ BASE_MODELS = {'S3MultipartState', 'AzureBlobState',
  'StackOwnership',
  'StartupTokenVisibility',
  'LandingTopologyState', 'LandingAccessAdmission', 'LoginInputIntent'}
-BASE_INVARIANTS = {'S3MultipartState': {'TypeOK', 'Budget', 'NoOrphans', 'Cleanup', 'RefusalAtomic'}, 'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'ReloadOnlyAfterAck', 'OnlyCurrentReplies', 'FailureVisible', 'SingleWriter'},
+BASE_INVARIANTS = {'Route53AtomicBatch': {'PendingInvisible', 'TypeOK', 'PreserveSentinel', 'AtomicPair', 'OnlyAuthorizedValid', 'OtherTeamUnchanged'}, 'S3MultipartState': {'TypeOK', 'Budget', 'NoOrphans', 'Cleanup', 'RefusalAtomic'}, 'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'ReloadOnlyAfterAck', 'OnlyCurrentReplies', 'FailureVisible', 'SingleWriter'},
  'CatalogResourceLifecycle': {'PeerFrame', 'QuotaBound', 'FailureFrame', 'FreshIDs', 'TokenOnce', 'GenerationAdvances', 'ChildGuard', 'StaleWriteRejected', 'AuthorizationFirst', 'TokenBinding', 'UniqueNames', 'TypeOK', 'ReplayNoDuplicate'},
  'AzureBlobState': {'BudgetBounded',
                     'ConditionEnforced',
@@ -476,7 +476,7 @@ BASE_INVARIANTS = {'S3MultipartState': {'TypeOK', 'Budget', 'NoOrphans', 'Cleanu
                           'UnsupportedCanvasHidden'},
  'LoginInputIntent': {'LocaleIntentFrame', 'NoEmptyPOST', 'IntentInvalidatesAsync', 'TypeOK', 'SubmissionSelectionExact', 'NoPOSTWhileBlocked', 'StaleFileCompletionFrame', 'AdoptedValueExact'}}
 # Established controls require an explicit gate-policy change before retirement.
-REQUIRED_MUTANTS = {'S3MultipartState': {'OmitPartBudget', 'OmitUploadParent', 'RetainCompletedParts', 'PartialFailure', 'OmitUploadBinding'}, 'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureError', 'ReloadAfterFailedWrite', 'AcceptAfterUnmount', 'AllowConcurrentWrites'},
+REQUIRED_MUTANTS = {'Route53AtomicBatch': {'ChangeSentinel', 'ExposePendingState', 'HalfBatch', 'OmitAuthorization', 'ChangeOtherTeam', 'OmitValidation'}, 'S3MultipartState': {'OmitPartBudget', 'OmitUploadParent', 'RetainCompletedParts', 'PartialFailure', 'OmitUploadBinding'}, 'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureError', 'ReloadAfterFailedWrite', 'AcceptAfterUnmount', 'AllowConcurrentWrites'},
  'CatalogResourceLifecycle': {'AllowDuplicateNames', 'ReplayCommits', 'IgnoreGeneration', 'TokenToFutureID', 'UpdateKeepsGeneration', 'ReplayCreatesRow', 'WritePeerScope', 'ReuseDeletedID', 'IgnoreQuota', 'DeleteParentWithChildren', 'FaultCommits', 'DeniedCommits'},
  'AzureBlobState': {'ContainerDeleteErasesPeer',
                     'ContainerDeleteLeavesBlobs',
@@ -873,7 +873,7 @@ REQUIRED_MUTANTS = {'S3MultipartState': {'OmitPartBudget', 'OmitUploadParent', '
                           'WrongDetailProjection',
                           'WrongProviderDefault'},
  'LoginInputIntent': {'FileCompletionIgnoresRevision', 'NonemptyDOMUsesControlledState', 'UnmountedFileCompletionPublishes', 'LocaleClearsIntent', 'LocaleInvalidatesCurrentFile', 'SubmitIgnoresBusy', 'CurrentFileErrorDiscarded', 'FlushDoesNotAdoptNativeValue', 'NativeAdoptionSkipsNewIntent', 'EmptyDOMReusesOldCredential', 'OldPasteSurvivesNewIntent', 'SubmitIgnoresFileGate', 'FocusSkipsNativeAdoption', 'KeyDownSkipsNativeAdoption'}}
-REQUIRED_SOURCE_SCOPES = {'CFNConditionAdmission': {'internal/aws/cloudformation.go',
+REQUIRED_SOURCE_SCOPES = {'Route53AtomicBatch': {'internal/aws/s3.go', 'internal/aws/route53_http.go', 'internal/server/server.go', 'internal/aws/ssm.go', 'internal/aws/route53_store.go', 'internal/aws/route53_dispatch.go'}, 'CFNConditionAdmission': {'internal/aws/cloudformation.go',
                            'internal/aws/cloudformation_conditions.go',
                            'internal/aws/cloudformation_conditions_link.go',
                            'internal/aws/cloudformation_intrinsics.go'},
@@ -1174,6 +1174,17 @@ BASE_MODELS.add('SecretDescriptionWorkflow')
 BASE_INVARIANTS['SecretDescriptionWorkflow'] = {'MetadataIdentity', 'ReadRetriesStayReadOnly', 'AcknowledgmentIdentity', 'TypeOK', 'NoStaleFollowupRead', 'LiveWorkKeepsLatch', 'NoValueRetrieval', 'NoWriteWhileUncertain', 'FreshEmissions', 'AcknowledgedStatusPreserved', 'OnePendingSubmission', 'ServerCommitPreserved', 'UnmountHidesDisplay', 'UncertaintyFence'}
 REQUIRED_MUTANTS['SecretDescriptionWorkflow'] = {'AbortRollsBackServerCommit', 'PublishStaleRead', 'FailedReconciliationClearsFence', 'StaleACKStartsRefresh', 'RetrieveValueOnRefresh', 'ReadRetryResubmitsMutation', 'AcceptMalformedACK', 'StaleWriteUnlocksNewRequest', 'PublishStaleWrite', 'SkipSynchronousLatch', 'SkipEpochCheck', 'AcceptMalformedMetadata', 'AbortSuppressesServerCommit', 'ACKRefreshResubmitsMutation', 'UnmountKeepsDisplay', 'FailedRefreshLosesACK', 'StaleReadUnlocksNewRequest', 'SkipUncertaintyFence'}
 REQUIRED_SOURCE_SCOPES['SecretDescriptionWorkflow'] = {'tools/console/src/secret_description.jsx'}
+
+# Independent bounded native SSM batch transaction contract.
+BASE_MODELS.add('SSMBatchDeletion')
+BASE_INVARIANTS['SSMBatchDeletion'] = {'TypeOK', 'AdmissionBeforeMutation', 'PendingInvisible', 'NoEarlyResponse', 'FailureAtomic', 'DurableAck', 'PeerFrame', 'ExactDeletion', 'SuccessfulResultsExact', 'MissingIsNotFailure', 'CanceledPreservesState'}
+REQUIRED_MUTANTS['SSMBatchDeletion'] = {'CountAfterDedup', 'AllowEmpty', 'IgnoreShape', 'ValidateFirstOnly', 'IgnoreExplicitDeny', 'AuthorizePresentOnly', 'AuthorizeFirstOnly', 'WriteBeforeCommit', 'RespondBeforeCommit', 'PersistFailedCommit', 'AcknowledgeFailedCommit', 'PersistCanceledWork', 'PersistStorageFailure', 'DeleteForeignRegion', 'DeleteUnrelatedName', 'RetainTarget', 'MutatePeerValue', 'KeepDuplicates', 'ReverseResults', 'ReportMissingAsDeleted', 'HideMissingResults', 'RejectMissing', 'MutatePeerVersion'}
+REQUIRED_SOURCE_SCOPES['SSMBatchDeletion'] = {'internal/aws/parameters.go', 'internal/aws/ssm.go'}
+
+BASE_MODELS.add('SQSBatchDeletion')
+BASE_INVARIANTS['SQSBatchDeletion'] = {'DurableAck', 'ParentBeforeMutation', 'PeerFrame', 'NoEarlyResponse', 'PurgeBeforeResolution', 'PreflightBeforeEffects', 'IAMBinding', 'CommittedStateExact', 'TypeOK', 'FailureAtomic', 'VerifiedBeforeCommit', 'OrderedPartition', 'BothArraysPresent', 'SemanticFailuresCommit', 'AuthorizationBeforeTransaction', 'PendingInvisible', 'ResolutionExact', 'SanitizedFailure', 'DeleteAcknowledged'}
+REQUIRED_MUTANTS['SQSBatchDeletion'] = {'ReuseSelectedReceipt', 'LeakInternalFailure', 'IgnoreDeny', 'ReplyBeforeCommit', 'AcceptRetiredQueueReceipt', 'ReverseFailed', 'ReverseSuccessful', 'OmitSuccessfulArray', 'SkipShape', 'SkipFinalQueueCheck', 'SkipQueueURL', 'PurgePeerRows', 'SkipExpiryCleanup', 'UseBatchIAMAction', 'IgnorePersistedDuplicate', 'AcknowledgeUncommittedDeletion', 'DropResolvedFailure', 'ValidateFirstIDOnly', 'WrongSenderFault', 'IgnorePurgeFailure', 'ResolvePeerReceipts', 'DropResolvedSuccess', 'RejectAllInvalidHandles', 'SkipMaximumCount', 'OmitFailedArray', 'AcceptPreviousReceipt', 'DiscardCommittedExpiry', 'IgnoreCommitFailure', 'SkipMinimumCount', 'SkipFinalIDCheck', 'SkipQueueRecheck', 'SkipFinalReceiptCheck', 'PublishFailedTransaction', 'AuthorizePeerQueue', 'IgnoreAffectedCount', 'ExposeStagedCleanup', 'ValidateFirstReceiptOnly', 'SkipFinalExpiryCheck', 'SkipDistinctIDs'}
+REQUIRED_SOURCE_SCOPES['SQSBatchDeletion'] = {'internal/aws/sqs_store.go', 'internal/aws/sqs_batch_delete.go', 'internal/aws/sqs.go'}
 
 class GateError(ValueError):
     pass

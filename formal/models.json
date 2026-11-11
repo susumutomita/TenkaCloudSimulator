@@ -9491,6 +9491,840 @@
    ]
   },
   {
+   "id": "SSMBatchDeletion",
+   "model": "formal/SSMBatchDeletion.tla",
+   "config": "formal/SSMBatchDeletion.cfg",
+   "bounds": "One request; two regions, two target names and one always-present unrelated name per region. All raw two-name sequences of length 0..3 plus repeated-name sequences of length 10 and 11; all target presence subsets; per-target allow/implicit-deny/explicit-deny; valid, invalid-shape, invalid-first and invalid-last abstractions. Full value/version records have key-specific fixed witnesses. One staged transaction, cancellation/storage faults before commit, Boolean commit outcome.",
+   "properties": [
+    "TypeOK",
+    "AdmissionBeforeMutation",
+    "PendingInvisible",
+    "NoEarlyResponse",
+    "CanceledPreservesState",
+    "FailureAtomic",
+    "DurableAck",
+    "PeerFrame",
+    "ExactDeletion",
+    "SuccessfulResultsExact",
+    "MissingIsNotFailure"
+   ],
+   "limits": "Bounded contract checking only. Raw 1..10 count and first-occurrence duplicate handling are the simulator policy; response order is not claimed as an AWS guarantee. Shape/name validity and immutable IAM decisions are abstract inputs, not parser/ARN/policy proofs. A single serial transaction stages writes privately; the model does not prove Go/SQL refinement, actual commit/cancellation races, snapshot acquisition, physical crash recovery, concurrent requests, all possible record contents, live AWS parity, or code coverage. Cancellation after committed success cannot undo a commit.",
+   "source_scope": [
+    "internal/aws/parameters.go",
+    "internal/aws/ssm.go"
+   ],
+   "mutants": [
+    {
+     "id": "CountAfterDedup",
+     "edits": [
+      {
+       "old": "CountValid == Len(request) >= 1 /\\ Len(request) <= 10",
+       "new": "CountValid == Len(OrderedTargets) >= 1 /\\ Len(OrderedTargets) <= 10",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionBeforeMutation"
+    },
+    {
+     "id": "AllowEmpty",
+     "edits": [
+      {
+       "old": "CountValid == Len(request) >= 1 /\\ Len(request) <= 10",
+       "new": "CountValid == Len(request) <= 10",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionBeforeMutation"
+    },
+    {
+     "id": "IgnoreShape",
+     "edits": [
+      {
+       "old": "ShapeValid == validity # \"bad-shape\"",
+       "new": "ShapeValid == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionBeforeMutation"
+    },
+    {
+     "id": "ValidateFirstOnly",
+     "edits": [
+      {
+       "old": "EveryNameValid == validity \\notin {\"bad-first\", \"bad-last\"}",
+       "new": "EveryNameValid == validity # \"bad-first\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionBeforeMutation"
+    },
+    {
+     "id": "IgnoreExplicitDeny",
+     "edits": [
+      {
+       "old": "EveryTargetAuthorized == \\A n \\in Targets : policy[n] = \"allow\"",
+       "new": "EveryTargetAuthorized == \\A n \\in Targets : policy[n] # \"implicit-deny\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionBeforeMutation"
+    },
+    {
+     "id": "AuthorizePresentOnly",
+     "edits": [
+      {
+       "old": "EveryTargetAuthorized == \\A n \\in Targets : policy[n] = \"allow\"",
+       "new": "EveryTargetAuthorized == \\A n \\in Targets : before[<<region,n>>] = None \\/ policy[n] = \"allow\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionBeforeMutation"
+    },
+    {
+     "id": "AuthorizeFirstOnly",
+     "edits": [
+      {
+       "old": "EveryTargetAuthorized == \\A n \\in Targets : policy[n] = \"allow\"",
+       "new": "EveryTargetAuthorized == IF Len(request) = 0 THEN TRUE ELSE policy[request[1]] = \"allow\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionBeforeMutation"
+    },
+    {
+     "id": "WriteBeforeCommit",
+     "edits": [
+      {
+       "old": "/\\ cursor' = cursor + 1\n /\\ UNCHANGED <<Inputs, db, phase, status, deleted, missing>>",
+       "new": "/\\ cursor' = cursor + 1\n /\\ db' = work'\n /\\ UNCHANGED <<Inputs, phase, status, deleted, missing>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PendingInvisible"
+    },
+    {
+     "id": "RespondBeforeCommit",
+     "edits": [
+      {
+       "old": "/\\ cursor' = cursor + 1\n /\\ UNCHANGED <<Inputs, db, phase, status, deleted, missing>>",
+       "new": "/\\ cursor' = cursor + 1\n /\\ deleted' = <<OrderedTargets[cursor]>>\n /\\ UNCHANGED <<Inputs, db, phase, status, missing>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoEarlyResponse"
+    },
+    {
+     "id": "PersistFailedCommit",
+     "edits": [
+      {
+       "old": "db' = IF accepted THEN work ELSE before",
+       "new": "db' = work",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureAtomic"
+    },
+    {
+     "id": "AcknowledgeFailedCommit",
+     "edits": [
+      {
+       "old": "LET accepted == commitOK",
+       "new": "LET accepted == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DurableAck"
+    },
+    {
+     "id": "PersistCanceledWork",
+     "edits": [
+      {
+       "old": "/\\ work' = before\n /\\ UNCHANGED <<Inputs, db, cursor, deleted, missing>>",
+       "new": "/\\ work' = before\n /\\ db' = IF reason = \"canceled\" THEN work ELSE before\n /\\ UNCHANGED <<Inputs, cursor, deleted, missing>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CanceledPreservesState"
+    },
+    {
+     "id": "PersistStorageFailure",
+     "edits": [
+      {
+       "old": "/\\ work' = before\n /\\ UNCHANGED <<Inputs, db, cursor, deleted, missing>>",
+       "new": "/\\ work' = before\n /\\ db' = IF reason = \"storage-error\" THEN work ELSE before\n /\\ UNCHANGED <<Inputs, cursor, deleted, missing>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureAtomic"
+    },
+    {
+     "id": "DeleteForeignRegion",
+     "edits": [
+      {
+       "old": "LET k == <<region, OrderedTargets[cursor]>> IN",
+       "new": "LET requested == <<region, OrderedTargets[cursor]>>\n        foreign == <<IF region = RegionA THEN RegionB ELSE RegionA, OrderedTargets[cursor]>>\n        k == IF work[foreign] # None THEN foreign ELSE requested IN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PeerFrame"
+    },
+    {
+     "id": "DeleteUnrelatedName",
+     "edits": [
+      {
+       "old": "work' = [work EXCEPT ![k] = None]",
+       "new": "work' = [work EXCEPT ![k] = None, ![<<region,Peer>>] = None]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PeerFrame"
+    },
+    {
+     "id": "RetainTarget",
+     "edits": [
+      {
+       "old": "work' = [work EXCEPT ![k] = None]",
+       "new": "work' = work",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDeletion"
+    },
+    {
+     "id": "MutatePeerValue",
+     "edits": [
+      {
+       "old": "work' = [work EXCEPT ![k] = None]",
+       "new": "work' = [work EXCEPT ![k] = None, ![<<region,Peer>>] = Seed(<<region,NameB>>)]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PeerFrame"
+    },
+    {
+     "id": "KeepDuplicates",
+     "edits": [
+      {
+       "old": "OrderedTargets == Unique(request)",
+       "new": "OrderedTargets == request",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SuccessfulResultsExact"
+    },
+    {
+     "id": "ReverseResults",
+     "edits": [
+      {
+       "old": "deleted' = IF accepted THEN found ELSE <<>>",
+       "new": "deleted' = IF accepted THEN [i \\in 1..Len(found) |-> found[Len(found)-i+1]] ELSE <<>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SuccessfulResultsExact"
+    },
+    {
+     "id": "ReportMissingAsDeleted",
+     "edits": [
+      {
+       "old": "found == SelectSeq(OrderedTargets, LAMBDA n : before[<<region,n>>] # None)",
+       "new": "found == OrderedTargets",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SuccessfulResultsExact"
+    },
+    {
+     "id": "HideMissingResults",
+     "edits": [
+      {
+       "old": "missing' = IF accepted THEN absent ELSE <<>>",
+       "new": "missing' = <<>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SuccessfulResultsExact"
+    },
+    {
+     "id": "RejectMissing",
+     "edits": [
+      {
+       "old": "Admission == CountValid /\\ ShapeValid /\\ EveryNameValid /\\ EveryTargetAuthorized",
+       "new": "Admission == CountValid /\\ ShapeValid /\\ EveryNameValid /\\ EveryTargetAuthorized\n             /\\ (\\A n \\in Targets : before[<<region,n>>] # None)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "MissingIsNotFailure"
+    },
+    {
+     "id": "MutatePeerVersion",
+     "edits": [
+      {
+       "old": "work' = [work EXCEPT ![k] = None]",
+       "new": "work' = [work EXCEPT ![k] = None, ![<<region,Peer>>].version = 1]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PeerFrame"
+    }
+   ]
+  },
+  {
+   "id": "SQSBatchDeletion",
+   "model": "formal/SQSBatchDeletion.tla",
+   "config": "formal/SQSBatchDeletion.cfg",
+   "bounds": "One DeleteMessageBatch transaction; seven message slots across a target and peer queue, region and database scopes; seven initial snapshots including missing messages/queue, queue recreation and duplicate persisted receipt corruption; nine opaque receipt witnesses; all receipt sequences of length 0..2, two ordered mixed triples, and raw lengths 10/11. Valid numeric IDs abstract accepted string IDs. Malformed first/last ID and receipt, duplicate ID, shape/URL, five IAM verdict, ignored-write/commit, purge/queue/ID/receipt final-verification fault witnesses are separate finite families, not their full Cartesian product. Cancellation/storage rollback is enabled at every transaction stage.",
+   "properties": [
+    "TypeOK",
+    "PreflightBeforeEffects",
+    "IAMBinding",
+    "AuthorizationBeforeTransaction",
+    "ParentBeforeMutation",
+    "PendingInvisible",
+    "NoEarlyResponse",
+    "FailureAtomic",
+    "PeerFrame",
+    "ResolutionExact",
+    "BothArraysPresent",
+    "OrderedPartition",
+    "CommittedStateExact",
+    "DurableAck",
+    "SemanticFailuresCommit",
+    "PurgeBeforeResolution",
+    "VerifiedBeforeCommit",
+    "DeleteAcknowledged",
+    "SanitizedFailure"
+   ],
+   "limits": "Independent bounded initial-state/result oracle for simulator-specific ordered receipt consumption, per-entry failures and transaction publication. A repeated current handle under distinct IDs succeeds only at its first entry; all-invalid semantic results can commit legitimate scoped expiry cleanup. Transaction queue rereads use the current incarnation, with abstract final drift checks; no cached HTTP incarnation precondition is invented. Assumes immutable policy, collision-free ordinary receipt issuance, a frozen retention cutoff, and atomic transaction commit/rollback. Corrupt duplicate persisted handles and trigger-like ignored writes/reinsertions are explicit faults. No Go/SQL refinement, wire parser/URL/ARN/string/Unicode proof, policy evaluator proof, real wall-clock, crash/restart/disk durability, concurrent request, network, FIFO, other batch API, or full AWS behavior/parity claim. Native tests remain independent evidence.",
+   "source_scope": [
+    "internal/aws/sqs.go",
+    "internal/aws/sqs_batch_delete.go",
+    "internal/aws/sqs_store.go"
+   ],
+   "mutants": [
+    {
+     "id": "SkipMinimumCount",
+     "edits": [
+      {
+       "old": "MinimumCount == Len(Request) >= 1",
+       "new": "MinimumCount == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreflightBeforeEffects"
+    },
+    {
+     "id": "SkipMaximumCount",
+     "edits": [
+      {
+       "old": "MaximumCount == Len(Request) <= 10",
+       "new": "MaximumCount == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreflightBeforeEffects"
+    },
+    {
+     "id": "SkipShape",
+     "edits": [
+      {
+       "old": "ShapeValid == input.shape",
+       "new": "ShapeValid == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreflightBeforeEffects"
+    },
+    {
+     "id": "SkipQueueURL",
+     "edits": [
+      {
+       "old": "URLValid == input.url",
+       "new": "URLValid == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreflightBeforeEffects"
+    },
+    {
+     "id": "ValidateFirstIDOnly",
+     "edits": [
+      {
+       "old": "IDsValid == \\A i \\in Indices : Request[i].id \\in 1..11",
+       "new": "IDsValid == Len(Request) = 0 \\/ Request[1].id \\in 1..11",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreflightBeforeEffects"
+    },
+    {
+     "id": "SkipDistinctIDs",
+     "edits": [
+      {
+       "old": "IDsDistinct == \\A i,j \\in Indices : i # j => Request[i].id # Request[j].id",
+       "new": "IDsDistinct == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreflightBeforeEffects"
+    },
+    {
+     "id": "ValidateFirstReceiptOnly",
+     "edits": [
+      {
+       "old": "ReceiptsValid == \\A i \\in Indices : Request[i].receipt # None",
+       "new": "ReceiptsValid == Len(Request) = 0 \\/ Request[1].receipt # None",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreflightBeforeEffects"
+    },
+    {
+     "id": "UseBatchIAMAction",
+     "edits": [
+      {
+       "old": "iamAction' = \"sqs:DeleteMessage\"",
+       "new": "iamAction' = \"sqs:DeleteMessageBatch\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IAMBinding"
+    },
+    {
+     "id": "AuthorizePeerQueue",
+     "edits": [
+      {
+       "old": "iamResource' = Target",
+       "new": "iamResource' = Scope(4)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IAMBinding"
+    },
+    {
+     "id": "IgnoreDeny",
+     "edits": [
+      {
+       "old": "Allowed == input.policy = \"delete\"",
+       "new": "Allowed == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizationBeforeTransaction"
+    },
+    {
+     "id": "SkipQueueRecheck",
+     "edits": [
+      {
+       "old": "ParentPresent == input.seed # \"missing-queue\"",
+       "new": "ParentPresent == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ParentBeforeMutation"
+    },
+    {
+     "id": "PurgePeerRows",
+     "edits": [
+      {
+       "old": "[r \\in Rows |-> IF work[r] # None /\\ work[r].scope = Target /\\ work[r].expired THEN None ELSE work[r]]",
+       "new": "[r \\in Rows |-> IF work[r] # None /\\ work[r].expired THEN None ELSE work[r]]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PeerFrame"
+    },
+    {
+     "id": "SkipExpiryCleanup",
+     "edits": [
+      {
+       "old": "work' = IF input.fault = \"ignored-purge\" THEN work ELSE\n      [r \\in Rows |-> IF work[r] # None /\\ work[r].scope = Target /\\ work[r].expired THEN None ELSE work[r]]",
+       "new": "work' = work",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SemanticFailuresCommit"
+    },
+    {
+     "id": "IgnorePurgeFailure",
+     "edits": [
+      {
+       "old": "IF ~NoExpired(work) THEN Rollback(\"purge\") ELSE",
+       "new": "IF FALSE THEN Rollback(\"purge\") ELSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PurgeBeforeResolution"
+    },
+    {
+     "id": "ResolvePeerReceipts",
+     "edits": [
+      {
+       "old": "Scoped(row) == row.scope = Target",
+       "new": "Scoped(row) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResolutionExact"
+    },
+    {
+     "id": "AcceptPreviousReceipt",
+     "edits": [
+      {
+       "old": "Current(row,entry) == row.receipt = entry.receipt",
+       "new": "Current(row,entry) == row.receipt[1] = entry.receipt[1] /\\ row.receipt[2] = entry.receipt[2] /\\ row.receipt[3] = entry.receipt[3]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResolutionExact"
+    },
+    {
+     "id": "AcceptRetiredQueueReceipt",
+     "edits": [
+      {
+       "old": "Current(row,entry) == row.receipt = entry.receipt",
+       "new": "Current(row,entry) == row.receipt[1] = entry.receipt[1] /\\ row.receipt[3] = entry.receipt[3] /\\ row.receipt[4] = entry.receipt[4]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResolutionExact"
+    },
+    {
+     "id": "ReuseSelectedReceipt",
+     "edits": [
+      {
+       "old": "available == Cardinality(matches) = 1 /\\ row \\notin {selected[i] : i \\in 1..Len(selected)}",
+       "new": "available == Cardinality(matches) = 1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResolutionExact"
+    },
+    {
+     "id": "IgnorePersistedDuplicate",
+     "edits": [
+      {
+       "old": "IN IF Cardinality(matches) > 1 THEN Rollback(\"duplicate\")",
+       "new": "IN IF FALSE THEN Rollback(\"duplicate\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DurableAck"
+    },
+    {
+     "id": "IgnoreAffectedCount",
+     "edits": [
+      {
+       "old": "affected == input.writeOK /\\ work[row] # None",
+       "new": "affected == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeleteAcknowledged"
+    },
+    {
+     "id": "PublishFailedTransaction",
+     "edits": [
+      {
+       "old": "db' = before /\\ work' = before /\\ queueDB' = queueBefore /\\ queueWork' = queueBefore",
+       "new": "db' = work /\\ work' = before /\\ queueDB' = queueBefore /\\ queueWork' = queueBefore",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureAtomic"
+    },
+    {
+     "id": "IgnoreCommitFailure",
+     "edits": [
+      {
+       "old": "/\\ IF input.commitOK",
+       "new": "/\\ IF TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DurableAck"
+    },
+    {
+     "id": "ReplyBeforeCommit",
+     "edits": [
+      {
+       "old": "PurgeCheck ==\n /\\ phase = \"purge-check\"\n /\\ IF ~NoExpired(work) THEN Rollback(\"purge\") ELSE\n      /\\ phase' = \"resolve\"\n      /\\ UNCHANGED <<Stable,db,work,cursor,selected,deleteCursor,good,bad,status,response,failure,error,iamCalled,iamAction,iamResource,transactionOpened,queueDB,queueWork>>",
+       "new": "PurgeCheck ==\n /\\ phase = \"purge-check\"\n /\\ IF ~NoExpired(work) THEN Rollback(\"purge\") ELSE\n      /\\ phase' = \"resolve\" /\\ response' = [Successful |-> good, Failed |-> bad]\n      /\\ UNCHANGED <<Stable,db,work,cursor,selected,deleteCursor,good,bad,status,failure,error,iamCalled,iamAction,iamResource,transactionOpened,queueDB,queueWork>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoEarlyResponse"
+    },
+    {
+     "id": "OmitSuccessfulArray",
+     "edits": [
+      {
+       "old": "response' = [Successful |-> good, Failed |-> bad]",
+       "new": "response' = [Failed |-> bad]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BothArraysPresent"
+    },
+    {
+     "id": "OmitFailedArray",
+     "edits": [
+      {
+       "old": "response' = [Successful |-> good, Failed |-> bad]",
+       "new": "response' = [Successful |-> good]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BothArraysPresent"
+    },
+    {
+     "id": "ReverseSuccessful",
+     "edits": [
+      {
+       "old": "response' = [Successful |-> good, Failed |-> bad]",
+       "new": "response' = [Successful |-> [i \\in 1..Len(good) |-> good[Len(good)-i+1]], Failed |-> bad]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OrderedPartition"
+    },
+    {
+     "id": "ReverseFailed",
+     "edits": [
+      {
+       "old": "response' = [Successful |-> good, Failed |-> bad]",
+       "new": "response' = [Successful |-> good, Failed |-> [i \\in 1..Len(bad) |-> bad[Len(bad)-i+1]]]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OrderedPartition"
+    },
+    {
+     "id": "WrongSenderFault",
+     "edits": [
+      {
+       "old": "FailureEntry(id) == [Id |-> id, Code |-> \"ReceiptHandleIsInvalid\", SenderFault |-> TRUE]",
+       "new": "FailureEntry(id) == [Id |-> id, Code |-> \"ReceiptHandleIsInvalid\", SenderFault |-> FALSE]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResolutionExact"
+    },
+    {
+     "id": "RejectAllInvalidHandles",
+     "edits": [
+      {
+       "old": "Commit ==\n /\\ phase = \"commit\"\n /\\ IF input.commitOK",
+       "new": "Commit ==\n /\\ phase = \"commit\"\n /\\ IF Len(good) = 0 THEN Rollback(\"final-check\") ELSE IF input.commitOK",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SemanticFailuresCommit"
+    },
+    {
+     "id": "LeakInternalFailure",
+     "edits": [
+      {
+       "old": "error' = \"InternalError\"",
+       "new": "error' = reason",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SanitizedFailure"
+    },
+    {
+     "id": "SkipFinalQueueCheck",
+     "edits": [
+      {
+       "old": "FinalQueueValid == queueWork = queueBefore",
+       "new": "FinalQueueValid == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "VerifiedBeforeCommit"
+    },
+    {
+     "id": "SkipFinalExpiryCheck",
+     "edits": [
+      {
+       "old": "FinalExpiryValid == NoExpired(work)",
+       "new": "FinalExpiryValid == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "VerifiedBeforeCommit"
+    },
+    {
+     "id": "SkipFinalIDCheck",
+     "edits": [
+      {
+       "old": "FinalIDsAbsent == \\A i \\in 1..Len(selected) : work[selected[i]] = None",
+       "new": "FinalIDsAbsent == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "VerifiedBeforeCommit"
+    },
+    {
+     "id": "SkipFinalReceiptCheck",
+     "edits": [
+      {
+       "old": "FinalReceiptsAbsent == \\A i \\in 1..Len(selected), r \\in Rows :\n work[r] # None /\\ work[r].scope = Target => work[r].receipt # before[selected[i]].receipt",
+       "new": "FinalReceiptsAbsent == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "VerifiedBeforeCommit"
+    },
+    {
+     "id": "DropResolvedSuccess",
+     "edits": [
+      {
+       "old": "good' = IF available THEN Append(good,[Id |-> Request[cursor].id]) ELSE good",
+       "new": "good' = good",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResolutionExact"
+    },
+    {
+     "id": "DropResolvedFailure",
+     "edits": [
+      {
+       "old": "bad' = IF available THEN bad ELSE Append(bad,FailureEntry(Request[cursor].id))",
+       "new": "bad' = bad",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResolutionExact"
+    },
+    {
+     "id": "ExposeStagedCleanup",
+     "edits": [
+      {
+       "old": " /\\ phase' = \"purge-check\"\n /\\ UNCHANGED <<Stable,db,cursor,selected,deleteCursor,good,bad,status,response,failure,error,iamCalled,iamAction,iamResource,transactionOpened,queueDB,queueWork>>",
+       "new": " /\\ phase' = \"purge-check\"\n /\\ db' = [r \\in Rows |-> IF work[r] # None /\\ work[r].scope = Target /\\ work[r].expired THEN None ELSE work[r]]\n /\\ UNCHANGED <<Stable,cursor,selected,deleteCursor,good,bad,status,response,failure,error,iamCalled,iamAction,iamResource,transactionOpened,queueDB,queueWork>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PendingInvisible"
+    },
+    {
+     "id": "AcknowledgeUncommittedDeletion",
+     "edits": [
+      {
+       "old": "db' = work /\\ queueDB' = queueWork",
+       "new": "db' = before /\\ queueDB' = queueWork",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CommittedStateExact"
+    },
+    {
+     "id": "DiscardCommittedExpiry",
+     "edits": [
+      {
+       "old": "db' = work /\\ queueDB' = queueWork",
+       "new": "db' = [r \\in Rows |-> IF before[r] # None /\\ before[r].scope = Target /\\ before[r].expired THEN before[r] ELSE work[r]] /\\ queueDB' = queueWork",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CommittedStateExact"
+    }
+   ]
+  },
+  {
+   "id": "Route53AtomicBatch",
+   "model": "formal/Route53AtomicBatch.tla",
+   "config": "formal/Route53AtomicBatch.cfg",
+   "bounds": "Two teams, binary pair values and sentinel, one staged batch, at most two commits.",
+   "properties": [
+    "TypeOK",
+    "AtomicPair",
+    "PreserveSentinel",
+    "OnlyAuthorizedValid",
+    "OtherTeamUnchanged",
+    "PendingInvisible"
+   ],
+   "limits": "Atomic batch/authority/team frame abstraction only; no Go/SQL/XML/DNS, receipt retention, quota, pagination, crash or liveness proof. Native and SDK tests independently cover implementation boundaries.",
+   "source_scope": [
+    "internal/aws/route53_store.go",
+    "internal/aws/route53_http.go",
+    "internal/aws/route53_dispatch.go",
+    "internal/aws/s3.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "ExposePendingState",
+     "edits": [
+      {
+       "old": "/\\ UNCHANGED <<zones, records, receipts, commits>>\nCommit(p)",
+       "new": "/\\ records' = [records EXCEPT ![t].first = target, ![t].second = target]\n    /\\ UNCHANGED <<zones, receipts, commits>>\nCommit(p)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PendingInvisible"
+    },
+    {
+     "id": "OmitAuthorization",
+     "edits": [
+      {
+       "old": "/\\ p.authorized /\\ p.valid",
+       "new": "/\\ p.valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyAuthorizedValid"
+    },
+    {
+     "id": "OmitValidation",
+     "edits": [
+      {
+       "old": "/\\ p.authorized /\\ p.valid",
+       "new": "/\\ p.authorized",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyAuthorizedValid"
+    },
+    {
+     "id": "HalfBatch",
+     "edits": [
+      {
+       "old": "![p.team].second = p.value",
+       "new": "![p.team].second = 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AtomicPair"
+    },
+    {
+     "id": "ChangeSentinel",
+     "edits": [
+      {
+       "old": "![p.team].second = p.value]",
+       "new": "![p.team].second = p.value, ![p.team].sentinel = 0]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreserveSentinel"
+    },
+    {
+     "id": "ChangeOtherTeam",
+     "edits": [
+      {
+       "old": "records' = [records EXCEPT ![p.team].first = p.value,\n                                 ![p.team].second = p.value]",
+       "new": "records' = [t \\in Teams |-> [first |-> p.value, second |-> p.value, sentinel |-> 1]]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OtherTeamUnchanged"
+    }
+   ]
+  },
+  {
    "id": "SecretMetadataUpdate",
    "model": "formal/SecretMetadataUpdate.tla",
    "config": "formal/SecretMetadataUpdate.cfg",

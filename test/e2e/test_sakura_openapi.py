@@ -11,6 +11,9 @@ import unittest
 
 from jsonschema import ValidationError
 from openapi_json10 import validator
+from route53_openapi import project_before_route53
+from batch_reference_projection import project_batches
+from secret_reference_projection import project_secret_description
 
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/disk'
@@ -30,28 +33,15 @@ def operations(spec):
     return [(path,method,value) for path,item in spec['paths'].items() for method,value in item.items() if method in METHODS]
 
 
+
 def preserved(spec):
+    spec = project_before_route53(spec)
     # Validate the three reviewed DeleteLogStream additions exactly, then remove
     # only those additions from a copy. Every pre-existing digest below is kept
     # unchanged. This projection was checked against public main36e72c4 in full.
     spec = copy.deepcopy(spec)
-    # Pin every reviewed UpdateSecret addition before projecting it away. The
-    # pre-existing service digests below remain unchanged and still detect drift.
-    operation = spec['paths']['/']['post']
-    request = operation['requestBody']['content'][JSON11]
-    response = operation['responses']['200']['content'][JSON11]
-    assert len(request['examples']) == 30
-    assert digest(request['examples'].pop('UpdateSecret', None)) == 'db2972742f1e15d728c5410cf10ede226b05831c6a90e8b975c709f09aef04d3', 'UpdateSecret contract changed: UpdateSecret'
-    assert digest(response['examples'].pop('UpdateSecret', None)) == '4fb8eaa8926e8e726ffcc6b6fff0fc8736e5a94f0f431f0475910301c8f4c451', 'UpdateSecret contract changed: UpdateSecret'
-    assert digest(operation['x-simulator-secrets-operation-schemas'].pop('secretsmanager.UpdateSecret', None)) == '5ca666ab206f582e9e17bc57508904904defdfd4a88b57ca7d916552f429bab4', 'UpdateSecret contract changed: secretsmanager.UpdateSecret'
-    assert digest(spec['components']['schemas'].pop('SecretsUpdateSecretInput', None)) == '1fe4604e0dfbc27e581a32d4572717a03b59b10d4b0cf56cb7ca231dc52ad854', 'UpdateSecret contract changed: SecretsUpdateSecretInput'
-    assert digest(spec['components']['schemas'].pop('SecretsUpdateSecretOutput', None)) == '401d72f452a2457dda3bc1248eef42a37d4be07200aafbb02c0b8e2c97d7010b', 'UpdateSecret contract changed: SecretsUpdateSecretOutput'
-    for media, name in ((request, 'SecretsUpdateSecretInput'),
-                        (response, 'SecretsUpdateSecretOutput')):
-        ref = {'$ref': '#/components/schemas/' + name}
-        union = media['schema']['anyOf']
-        assert union.count(ref) == 1 and union[-1] == ref, 'UpdateSecret union binding changed'
-        union.pop()
+    project_secret_description(spec)
+    project_batches(spec)
     media = spec['paths']['/']['post']['requestBody']['content'][JSON11]
     assert len(media['examples']) == 29
     example = media['examples'].pop('LogsDeleteLogStream', None)
@@ -124,6 +114,32 @@ class SakuraReference(unittest.TestCase):
     def test_all_existing_operations_components_and_28_templates_are_exact(self):
         preserved(self.spec)
 
+    def test_sqs_batch_projection_cannot_hide_contract_or_inherited_drift(self):
+        def media(spec):
+            return spec['paths']['/']['post']['requestBody']['content']['application/x-amz-json-1.0']
+        def schema(spec):
+            return spec['components']['schemas']['SQSDeleteMessageBatchRequest']
+        for label, change in (
+            ('missing batch example', lambda spec: media(spec)['examples'].pop('DeleteMessageBatch')),
+            ('wrong target', lambda spec: media(spec)['examples']['DeleteMessageBatch'].update(summary='wrong target')),
+            ('missing Id', lambda spec: schema(spec)['properties']['Entries']['items']['required'].remove('Id')),
+            ('relaxed entry bound', lambda spec: schema(spec)['properties']['Entries'].update(maxItems=11)),
+            ('relaxed fields', lambda spec: schema(spec).update(additionalProperties=True)),
+            ('missing result partition', lambda spec: spec['components']['schemas']['SQSDeleteMessageBatchResult']['required'].remove('Failed')),
+            ('wrong IAM action', lambda spec: spec['paths']['/']['post']['x-simulator-sqs-operation-schemas']['DeleteMessageBatch'].update(permission='sqs:DeleteMessageBatch')),
+            ('missing request branch', lambda spec: media(spec)['schema']['anyOf'].pop()),
+            ('duplicate request branch', lambda spec: media(spec)['schema']['anyOf'].append({'$ref': '#/components/schemas/SQSDeleteMessageBatchRequest'})),
+            ('missing response branch', lambda spec: spec['paths']['/']['post']['responses']['200']['content']['application/x-amz-json-1.0']['schema']['anyOf'].pop()),
+            ('changed existing SQS', lambda spec: media(spec)['examples']['SendMessage']['value'].update(MessageBody='changed')),
+            ('changed DynamoDB', lambda spec: media(spec)['examples']['DynamoDBGetItem']['value'].update(TableName='changed')),
+            ('changed other reference', lambda spec: spec['paths']['/{bucket}']['put'].update(summary='changed')),
+            ('unreviewed component', lambda spec: spec['components']['schemas'].update(UnreviewedBatchExtension={'type': 'string'})),
+        ):
+            broken = copy.deepcopy(self.spec)
+            change(broken)
+            with self.subTest(change=label), self.assertRaises(AssertionError):
+                preserved(broken)
+
     def test_secret_update_projection_rejects_missing_changed_and_extra_contracts(self):
         def request(spec):
             return spec['paths']['/']['post']['requestBody']['content'][JSON11]
@@ -132,6 +148,7 @@ class SakuraReference(unittest.TestCase):
         def mapping(spec):
             return spec['paths']['/']['post']['x-simulator-secrets-operation-schemas']
         for label, change in (
+            ('changed service description', lambda spec: next(t for t in spec['tags'] if t['name'] == 'Secrets Manager').update(description='changed')),
             ('missing request', lambda spec: request(spec)['examples'].pop('UpdateSecret')),
             ('wrong target', lambda spec: request(spec)['examples']['UpdateSecret'].update(summary='wrong')),
             ('changed request', lambda spec: request(spec)['examples']['UpdateSecret']['value'].update(Description='changed')),

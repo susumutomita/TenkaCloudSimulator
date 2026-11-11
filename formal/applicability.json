@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "base_sha": "1ea676eec2587e0df00629bcf26c23a6dd6e4681",
+  "base_sha": "83c67934e923c6f8f9ea79e3c6335b353c5b2ac8",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "6ac07c61c314c34a6e6cab35618798bbda1094ce2032df33bda8e975f0ac073f",
+      "sha256": "ae78c7513728ee3d5930e4aaebfded3fcc69ebac3b03ac254ca0cf48094cfb98",
       "disposition": "formal-infrastructure",
       "reason": "Registers mandatory component checks or exact finite properties, mutation controls and source-removal guards without weakening existing gates.",
       "models": []
@@ -142,7 +142,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "f0cc5f8ef54c3b5709f360a33e7792676e94e3312954d27321d3937debbe79c0",
+      "sha256": "7019dd279d09341ce5a189c07c3ec056c448b527634ec5a36cb9b96d711701df",
       "disposition": "formal-infrastructure",
       "reason": "Registers the metadata-update model and protects its full invariant, control and source inventory without removing or altering existing model entries.",
       "models": []
@@ -236,7 +236,7 @@
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "97594196dadc53016b9787e229f236509559d95294ff534a56da916e0d24b7c3",
+      "sha256": "56981afe19c25dfee2f6452f1ead93345fef98c01af7321b97f96d46ecfbb7d5",
       "disposition": "presentation",
       "reason": "Adds the strict per-target metadata-only API schema/examples.",
       "models": []
@@ -250,7 +250,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "8b61130a8bcafa13c00cab181a7111b9bb812fb568bbcee0e246ba1d048ae139",
+      "sha256": "2a3cc7e102943cb48256d0aa8e918eb923a23d0f3c3d4c1489551f3e78981dc9",
       "disposition": "modeled",
       "reason": "Adds only the bounded UpdateSecret capability advertisement; existing native identity/version/stage lifecycle composition is preserved. Composed-server and SDK tests check that advertised operations actually execute; the finite model does not prove capability inventory or JSON rendering.",
       "models": [
@@ -402,21 +402,21 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "e058a9048073ebe788271f3c2d0b6dd498a59e4b8ea4ddc6dd6e65172790f720",
+      "sha256": "47102417c7dd99a2e901a12b6a34cfca62fffae90c1af20d4f13b47ac1f8defc",
       "disposition": "formal-infrastructure",
       "reason": "Registers the metadata-update model and protects its full invariant, control and source inventory without removing or altering existing model entries.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "886ea6b690abdd5bbe670d0d716d2928e269226c9ffbf755c8cf210f6e1417cd",
+      "sha256": "3c5f6c11c0a5afeb172adae09fd3fe7bb575314fe0992c3fa493ff6a21166d18",
       "disposition": "formal-infrastructure",
       "reason": "Registers the metadata-update model and protects its full invariant, control and source inventory without removing or altering existing model entries.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "40204c234e275435a554eea1e88470043b50a17d5d5a86bf7a3e3f6d786bc01d",
+      "sha256": "600c3c3549204f661082bde07e40220bcddd510a797f7c98a5e223dee10f23aa",
       "disposition": "test-support",
       "reason": "Adds composed-server coverage or mandatory official SDK acceptance with strict document mutation/removal detectors, IAM, isolation, restart and unchanged private state checks.",
       "models": []
@@ -429,6 +429,13 @@
       "models": []
     },
     {
+      "path": "test/e2e/secret_reference_projection.py",
+      "sha256": "139225d89123e3a4e894dbddfdc89c9936d3060b39dd7b4d1b0340966e6f5fc0",
+      "disposition": "test-support",
+      "reason": "Exact additive Secret UpdateSecret projection preserves SSM batch and Route53 reference baseline hashes; pins metadata-only schemas, examples and service description before removal. Static regression support, not runtime authority or proof.",
+      "models": []
+    },
+    {
       "path": "test/e2e/secrets_metadata_update.py",
       "sha256": "d52cc141361ec559daa6442b15fe1d6e80e03728bafac1baf231ee3523e593c7",
       "disposition": "test-support",
@@ -437,16 +444,23 @@
     },
     {
       "path": "test/e2e/test_openapi_json10.py",
-      "sha256": "a26e39d987ee7ed1439300e52cd8bf5f0d78b53e40a2c9449a3778bc54ce15e9",
+      "sha256": "f5e253efee5455d9afe3fb44db30b9a8c4b8ce32e6d22aac3793a0b590c15427",
       "disposition": "test-support",
       "reason": "Checks the additive UpdateSecret template against strict metadata-only request and response schemas, including unsupported-field and boundary rejection; no runtime or finite model changes.",
       "models": []
     },
     {
       "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "e6311c028f5f593d496ea12caa5eefc8407ce517937cad01187105ca505478f7",
+      "sha256": "95267f77b15b8d59496cc9fdcdb3e4a9eed50cf322aa04e7099242ff2936b252",
       "disposition": "test-support",
       "reason": "Pins and projects only the reviewed UpdateSecret additions while preserving existing contract hashes, with mutation controls for missing, changed, duplicate and unrelated contracts; no runtime or finite model changes.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_ssm_batch_reference.py",
+      "sha256": "476b09f36e3f26abdc7648700dd625c5174a1915c74de2c8bb4ce74ffb60bbdf",
+      "disposition": "test-support",
+      "reason": "Exact additive Secret UpdateSecret projection preserves SSM batch and Route53 reference baseline hashes; pins metadata-only schemas, examples and service description before removal. Static regression support, not runtime authority or proof.",
       "models": []
     },
     {
