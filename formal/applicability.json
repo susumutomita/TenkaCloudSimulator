@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "base_sha": "d096316726049261b1a1f9d5818c469027e04e2b",
+  "base_sha": "66287bb49d39b22b1974b59773096e9d51004627",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "911d4a3eb415b38b7d7d0d4fc3e425359800f23961209912895faf46e01fd4b4",
+      "sha256": "dc4ebf23a6357f39cf35c1d8faa2044b658d1600e1f48db19a7647f018e0d11b",
       "disposition": "documentation",
       "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "21ed8b400b9604cd175e9c0b937c45ec95899999f1198d904b8d45646d503016",
+      "sha256": "80ef1e53ff84cec24c1700744a08d23635e6f5d71dc65494d9239eab5b0af875",
       "disposition": "documentation",
       "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
       "models": []
@@ -79,7 +79,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "054929992fbf128d9c1397995e92ee012be1fef1c9beb5618b6b97ef5fca423c",
+      "sha256": "26d8928614e687779a4c2dbe88c5d7b8c14c4a2bc1cb0223093e8d184fd222df",
       "disposition": "formal-infrastructure",
       "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
       "models": []
@@ -108,7 +108,7 @@
       "path": "internal/aws/elb_deadline_test.go",
       "sha256": "2adce81395fc79f49533936ebeef84bad455a2131e2e8067a07b0b300cbabe2b",
       "disposition": "test-support",
-      "reason": "Checks successful and timed-out Lambda target responses over a real HTTP connection whose initial write deadline is shorter than guest execution.",
+      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
       "models": []
     },
     {
@@ -175,7 +175,7 @@
       "path": "internal/aws/elb_target.go",
       "sha256": "3f9d6e7253f5482fdc06a9b50e331bbe837fd724f3e384d22cb233f8c9b042f0",
       "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction. HTTP responses retain a bounded initialization/execution budget and write grace; deadline behavior is checked by a real-connection regression, not the finite model.",
+      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
       "models": [
         {
           "id": "ELBTargetLifecycle",
@@ -274,7 +274,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "26751c242d0a25d354b377db6b218fb92d62ea6861a4aef4dde4daf8969909fb",
+      "sha256": "30273f4ce3252a9523fab85bdc69481a37f656ad91aa163db1da49cdc41b9fd3",
       "disposition": "modeled",
       "reason": "Composes the ELB store, owns the health-check loop lifecycle before runtime and store close, and publishes capabilities.",
       "models": [
@@ -294,21 +294,21 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "5fb272599c0f65e86a5294d6d9c297490e33620abb70f55113d8e0187cce38cd",
+      "sha256": "e1034ad3fe81a75f2824fd6aa034412aecee048929a9e6f4eb1ed247bc022a47",
       "disposition": "formal-infrastructure",
       "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "0f780495aabcb205f06b042200c5be5787ed8a61873de7956cd61286cdf2231c",
+      "sha256": "3a952fbd9b736983f846cf22316735c1ae699944995f2f7c149612e361f8a17b",
       "disposition": "formal-infrastructure",
       "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "a8e2c4f0e8c23fc01f9c022d04f1babb7d4b7a881e38b60058355547b6b32eb7",
+      "sha256": "a3741b5578c318e3664d734168501043ac57caf5965a294ec8b10f7503859191",
       "disposition": "test-support",
       "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
       "models": []

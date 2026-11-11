@@ -1,0 +1,2605 @@
+{
+ "components": {
+  "schemas": {
+   "ApiConfigHandler": {
+    "additionalProperties": false,
+    "properties": {
+     "authFailAction": {
+      "enum": [
+       "AUTH_FAIL_ACTION_UNSPECIFIED",
+       "AUTH_FAIL_ACTION_REDIRECT",
+       "AUTH_FAIL_ACTION_UNAUTHORIZED"
+      ],
+      "type": "string"
+     },
+     "login": {
+      "enum": [
+       "LOGIN_UNSPECIFIED",
+       "LOGIN_OPTIONAL",
+       "LOGIN_ADMIN",
+       "LOGIN_REQUIRED"
+      ],
+      "type": "string"
+     },
+     "script": {
+      "type": "string"
+     },
+     "securityLevel": {
+      "enum": [
+       "SECURE_UNSPECIFIED",
+       "SECURE_DEFAULT",
+       "SECURE_NEVER",
+       "SECURE_OPTIONAL",
+       "SECURE_ALWAYS"
+      ],
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ApiEndpointHandler": {
+    "additionalProperties": false,
+    "properties": {
+     "scriptPath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Application": {
+    "additionalProperties": false,
+    "properties": {
+     "authDomain": {
+      "type": "string"
+     },
+     "codeBucket": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "databaseType": {
+      "enum": [
+       "DATABASE_TYPE_UNSPECIFIED",
+       "CLOUD_DATASTORE",
+       "CLOUD_FIRESTORE",
+       "CLOUD_DATASTORE_COMPATIBILITY"
+      ],
+      "type": "string"
+     },
+     "defaultBucket": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "defaultCookieExpiration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "defaultHostname": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "dispatchRules": {
+      "items": {
+       "$ref": "#/components/schemas/UrlDispatchRule"
+      },
+      "type": "array"
+     },
+     "featureSettings": {
+      "$ref": "#/components/schemas/FeatureSettings"
+     },
+     "gcrDomain": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "generatedCustomerMetadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "iap": {
+      "$ref": "#/components/schemas/IdentityAwareProxy"
+     },
+     "id": {
+      "type": "string"
+     },
+     "locationId": {
+      "type": "string"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "serviceAccount": {
+      "type": "string"
+     },
+     "servingStatus": {
+      "enum": [
+       "UNSPECIFIED",
+       "SERVING",
+       "USER_DISABLED",
+       "SYSTEM_DISABLED"
+      ],
+      "type": "string"
+     },
+     "sslPolicy": {
+      "enum": [
+       "SSL_POLICY_UNSPECIFIED",
+       "DEFAULT",
+       "MODERN"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AutomaticScaling": {
+    "additionalProperties": false,
+    "properties": {
+     "coolDownPeriod": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "cpuUtilization": {
+      "$ref": "#/components/schemas/CpuUtilization"
+     },
+     "diskUtilization": {
+      "$ref": "#/components/schemas/DiskUtilization"
+     },
+     "maxConcurrentRequests": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "maxIdleInstances": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "maxPendingLatency": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "maxTotalInstances": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minIdleInstances": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minPendingLatency": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "minTotalInstances": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "networkUtilization": {
+      "$ref": "#/components/schemas/NetworkUtilization"
+     },
+     "requestUtilization": {
+      "$ref": "#/components/schemas/RequestUtilization"
+     },
+     "standardSchedulerSettings": {
+      "$ref": "#/components/schemas/StandardSchedulerSettings"
+     }
+    },
+    "type": "object"
+   },
+   "BasicScaling": {
+    "additionalProperties": false,
+    "properties": {
+     "idleTimeout": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "maxInstances": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "BatchUpdateIngressRulesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ingressRules": {
+      "items": {
+       "$ref": "#/components/schemas/FirewallRule"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "BatchUpdateIngressRulesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ingressRules": {
+      "items": {
+       "$ref": "#/components/schemas/FirewallRule"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CloudBuildOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "appYamlPath": {
+      "type": "string"
+     },
+     "cloudBuildTimeout": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ContainerInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "image": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CpuUtilization": {
+    "additionalProperties": false,
+    "properties": {
+     "aggregationWindowLength": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "targetUtilization": {
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "Deployment": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudBuildOptions": {
+      "$ref": "#/components/schemas/CloudBuildOptions"
+     },
+     "container": {
+      "$ref": "#/components/schemas/ContainerInfo"
+     },
+     "files": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/FileInfo"
+      },
+      "type": "object"
+     },
+     "zip": {
+      "$ref": "#/components/schemas/ZipInfo"
+     }
+    },
+    "type": "object"
+   },
+   "DiskUtilization": {
+    "additionalProperties": false,
+    "properties": {
+     "targetReadBytesPerSecond": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "targetReadOpsPerSecond": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "targetWriteBytesPerSecond": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "targetWriteOpsPerSecond": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Empty": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "EndpointsApiService": {
+    "additionalProperties": false,
+    "properties": {
+     "configId": {
+      "type": "string"
+     },
+     "disableTraceSampling": {
+      "type": "boolean"
+     },
+     "name": {
+      "type": "string"
+     },
+     "rolloutStrategy": {
+      "enum": [
+       "UNSPECIFIED_ROLLOUT_STRATEGY",
+       "FIXED",
+       "MANAGED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Entrypoint": {
+    "additionalProperties": false,
+    "properties": {
+     "shell": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ErrorHandler": {
+    "additionalProperties": false,
+    "properties": {
+     "errorCode": {
+      "enum": [
+       "ERROR_CODE_UNSPECIFIED",
+       "ERROR_CODE_DEFAULT",
+       "ERROR_CODE_OVER_QUOTA",
+       "ERROR_CODE_DOS_API_DENIAL",
+       "ERROR_CODE_TIMEOUT"
+      ],
+      "type": "string"
+     },
+     "mimeType": {
+      "type": "string"
+     },
+     "staticFile": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FeatureSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "splitHealthChecks": {
+      "type": "boolean"
+     },
+     "useContainerOptimizedOs": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "FileInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "mimeType": {
+      "type": "string"
+     },
+     "sha1Sum": {
+      "type": "string"
+     },
+     "sourceUrl": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FirewallRule": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "UNSPECIFIED_ACTION",
+       "ALLOW",
+       "DENY"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "priority": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "sourceRange": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FlexibleRuntimeSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "operatingSystem": {
+      "type": "string"
+     },
+     "runtimeVersion": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HealthCheck": {
+    "additionalProperties": false,
+    "properties": {
+     "checkInterval": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "disableHealthCheck": {
+      "type": "boolean"
+     },
+     "healthyThreshold": {
+      "format": "uint32",
+      "type": "integer"
+     },
+     "host": {
+      "type": "string"
+     },
+     "restartThreshold": {
+      "format": "uint32",
+      "type": "integer"
+     },
+     "timeout": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "unhealthyThreshold": {
+      "format": "uint32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "IdentityAwareProxy": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "oauth2ClientId": {
+      "type": "string"
+     },
+     "oauth2ClientSecret": {
+      "type": "string"
+     },
+     "oauth2ClientSecretSha256": {
+      "readOnly": true,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Library": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListIngressRulesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ingressRules": {
+      "items": {
+       "$ref": "#/components/schemas/FirewallRule"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListLocationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "locations": {
+      "items": {
+       "$ref": "#/components/schemas/Location"
+      },
+      "type": "array"
+     },
+     "nextPageToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListOperationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array"
+     },
+     "unreachable": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListServicesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "services": {
+      "items": {
+       "$ref": "#/components/schemas/Service"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListVersionsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextPageToken": {
+      "type": "string"
+     },
+     "versions": {
+      "items": {
+       "$ref": "#/components/schemas/Version"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LivenessCheck": {
+    "additionalProperties": false,
+    "properties": {
+     "checkInterval": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "failureThreshold": {
+      "format": "uint32",
+      "type": "integer"
+     },
+     "host": {
+      "type": "string"
+     },
+     "initialDelay": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "successThreshold": {
+      "format": "uint32",
+      "type": "integer"
+     },
+     "timeout": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Location": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "locationId": {
+      "type": "string"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ManualScaling": {
+    "additionalProperties": false,
+    "properties": {
+     "instances": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Network": {
+    "additionalProperties": false,
+    "properties": {
+     "forwardedPorts": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "instanceIpMode": {
+      "enum": [
+       "INSTANCE_IP_MODE_UNSPECIFIED",
+       "EXTERNAL",
+       "INTERNAL"
+      ],
+      "type": "string"
+     },
+     "instanceTag": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "sessionAffinity": {
+      "type": "boolean"
+     },
+     "subnetworkName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "ingressTrafficAllowed": {
+      "enum": [
+       "INGRESS_TRAFFIC_ALLOWED_UNSPECIFIED",
+       "INGRESS_TRAFFIC_ALLOWED_ALL",
+       "INGRESS_TRAFFIC_ALLOWED_INTERNAL_ONLY",
+       "INGRESS_TRAFFIC_ALLOWED_INTERNAL_AND_LB"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkUtilization": {
+    "additionalProperties": false,
+    "properties": {
+     "targetReceivedBytesPerSecond": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "targetReceivedPacketsPerSecond": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "targetSentBytesPerSecond": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "targetSentPacketsPerSecond": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Operation": {
+    "additionalProperties": false,
+    "properties": {
+     "done": {
+      "type": "boolean"
+     },
+     "error": {
+      "$ref": "#/components/schemas/Status"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "name": {
+      "type": "string"
+     },
+     "response": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ReadinessCheck": {
+    "additionalProperties": false,
+    "properties": {
+     "appStartTimeout": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "checkInterval": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "failureThreshold": {
+      "format": "uint32",
+      "type": "integer"
+     },
+     "host": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "successThreshold": {
+      "format": "uint32",
+      "type": "integer"
+     },
+     "timeout": {
+      "format": "google-duration",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RequestUtilization": {
+    "additionalProperties": false,
+    "properties": {
+     "targetConcurrentRequests": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "targetRequestCountPerSecond": {
+      "format": "int32",
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Resources": {
+    "additionalProperties": false,
+    "properties": {
+     "cpu": {
+      "format": "double",
+      "type": "number"
+     },
+     "diskGb": {
+      "format": "double",
+      "type": "number"
+     },
+     "kmsKeyReference": {
+      "type": "string"
+     },
+     "memoryGb": {
+      "format": "double",
+      "type": "number"
+     },
+     "volumes": {
+      "items": {
+       "$ref": "#/components/schemas/Volume"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ScriptHandler": {
+    "additionalProperties": false,
+    "properties": {
+     "scriptPath": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Service": {
+    "additionalProperties": false,
+    "properties": {
+     "generatedCustomerMetadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "id": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "labels": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "networkSettings": {
+      "$ref": "#/components/schemas/NetworkSettings"
+     },
+     "split": {
+      "$ref": "#/components/schemas/TrafficSplit"
+     }
+    },
+    "type": "object"
+   },
+   "StandardSchedulerSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "maxInstances": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "minInstances": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "targetCpuUtilization": {
+      "format": "double",
+      "type": "number"
+     },
+     "targetThroughputUtilization": {
+      "format": "double",
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "StaticFilesHandler": {
+    "additionalProperties": false,
+    "properties": {
+     "applicationReadable": {
+      "type": "boolean"
+     },
+     "expiration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "httpHeaders": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "mimeType": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "requireMatchingFile": {
+      "type": "boolean"
+     },
+     "uploadPathRegex": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Status": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "details": {
+      "items": {
+       "additionalProperties": {
+        "description": "Any JSON value"
+       },
+       "type": "object"
+      },
+      "type": "array"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TrafficSplit": {
+    "additionalProperties": false,
+    "properties": {
+     "allocations": {
+      "additionalProperties": {
+       "format": "double",
+       "type": "number"
+      },
+      "type": "object"
+     },
+     "shardBy": {
+      "enum": [
+       "UNSPECIFIED",
+       "COOKIE",
+       "IP",
+       "RANDOM"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UrlDispatchRule": {
+    "additionalProperties": false,
+    "properties": {
+     "domain": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "service": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UrlMap": {
+    "additionalProperties": false,
+    "properties": {
+     "apiEndpoint": {
+      "$ref": "#/components/schemas/ApiEndpointHandler"
+     },
+     "authFailAction": {
+      "enum": [
+       "AUTH_FAIL_ACTION_UNSPECIFIED",
+       "AUTH_FAIL_ACTION_REDIRECT",
+       "AUTH_FAIL_ACTION_UNAUTHORIZED"
+      ],
+      "type": "string"
+     },
+     "login": {
+      "enum": [
+       "LOGIN_UNSPECIFIED",
+       "LOGIN_OPTIONAL",
+       "LOGIN_ADMIN",
+       "LOGIN_REQUIRED"
+      ],
+      "type": "string"
+     },
+     "redirectHttpResponseCode": {
+      "enum": [
+       "REDIRECT_HTTP_RESPONSE_CODE_UNSPECIFIED",
+       "REDIRECT_HTTP_RESPONSE_CODE_301",
+       "REDIRECT_HTTP_RESPONSE_CODE_302",
+       "REDIRECT_HTTP_RESPONSE_CODE_303",
+       "REDIRECT_HTTP_RESPONSE_CODE_307"
+      ],
+      "type": "string"
+     },
+     "script": {
+      "$ref": "#/components/schemas/ScriptHandler"
+     },
+     "securityLevel": {
+      "enum": [
+       "SECURE_UNSPECIFIED",
+       "SECURE_DEFAULT",
+       "SECURE_NEVER",
+       "SECURE_OPTIONAL",
+       "SECURE_ALWAYS"
+      ],
+      "type": "string"
+     },
+     "staticFiles": {
+      "$ref": "#/components/schemas/StaticFilesHandler"
+     },
+     "urlRegex": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Version": {
+    "additionalProperties": false,
+    "properties": {
+     "apiConfig": {
+      "$ref": "#/components/schemas/ApiConfigHandler"
+     },
+     "appEngineApis": {
+      "type": "boolean"
+     },
+     "appEngineBundledServices": {
+      "items": {
+       "enum": [
+        "BUNDLED_SERVICE_TYPE_UNSPECIFIED",
+        "BUNDLED_SERVICE_TYPE_APP_IDENTITY_SERVICE",
+        "BUNDLED_SERVICE_TYPE_BLOBSTORE",
+        "BUNDLED_SERVICE_TYPE_CAPABILITY_SERVICE",
+        "BUNDLED_SERVICE_TYPE_DATASTORE_V3",
+        "BUNDLED_SERVICE_TYPE_DEFERRED",
+        "BUNDLED_SERVICE_TYPE_IMAGES",
+        "BUNDLED_SERVICE_TYPE_MAIL",
+        "BUNDLED_SERVICE_TYPE_MEMCACHE",
+        "BUNDLED_SERVICE_TYPE_MODULES",
+        "BUNDLED_SERVICE_TYPE_NAMESPACES",
+        "BUNDLED_SERVICE_TYPE_NDB",
+        "BUNDLED_SERVICE_TYPE_SEARCH",
+        "BUNDLED_SERVICE_TYPE_TASKQUEUES",
+        "BUNDLED_SERVICE_TYPE_URLFETCH",
+        "BUNDLED_SERVICE_TYPE_USERS"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "automaticScaling": {
+      "$ref": "#/components/schemas/AutomaticScaling"
+     },
+     "basicScaling": {
+      "$ref": "#/components/schemas/BasicScaling"
+     },
+     "betaSettings": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "buildEnvVariables": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "createTime": {
+      "format": "google-datetime",
+      "type": "string"
+     },
+     "createdBy": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "defaultExpiration": {
+      "format": "google-duration",
+      "type": "string"
+     },
+     "deployment": {
+      "$ref": "#/components/schemas/Deployment"
+     },
+     "diskUsageBytes": {
+      "format": "int64",
+      "readOnly": true,
+      "type": "string"
+     },
+     "endpointsApiService": {
+      "$ref": "#/components/schemas/EndpointsApiService"
+     },
+     "entrypoint": {
+      "$ref": "#/components/schemas/Entrypoint"
+     },
+     "env": {
+      "type": "string"
+     },
+     "envVariables": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "errorHandlers": {
+      "items": {
+       "$ref": "#/components/schemas/ErrorHandler"
+      },
+      "type": "array"
+     },
+     "flexibleRuntimeSettings": {
+      "$ref": "#/components/schemas/FlexibleRuntimeSettings"
+     },
+     "generatedCustomerMetadata": {
+      "additionalProperties": {
+       "description": "Any JSON value"
+      },
+      "type": "object"
+     },
+     "handlers": {
+      "items": {
+       "$ref": "#/components/schemas/UrlMap"
+      },
+      "type": "array"
+     },
+     "healthCheck": {
+      "$ref": "#/components/schemas/HealthCheck"
+     },
+     "id": {
+      "type": "string"
+     },
+     "inboundServices": {
+      "items": {
+       "enum": [
+        "INBOUND_SERVICE_UNSPECIFIED",
+        "INBOUND_SERVICE_MAIL",
+        "INBOUND_SERVICE_MAIL_BOUNCE",
+        "INBOUND_SERVICE_XMPP_ERROR",
+        "INBOUND_SERVICE_XMPP_MESSAGE",
+        "INBOUND_SERVICE_XMPP_SUBSCRIBE",
+        "INBOUND_SERVICE_XMPP_PRESENCE",
+        "INBOUND_SERVICE_CHANNEL_PRESENCE",
+        "INBOUND_SERVICE_WARMUP"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "instanceClass": {
+      "type": "string"
+     },
+     "libraries": {
+      "items": {
+       "$ref": "#/components/schemas/Library"
+      },
+      "type": "array"
+     },
+     "livenessCheck": {
+      "$ref": "#/components/schemas/LivenessCheck"
+     },
+     "manualScaling": {
+      "$ref": "#/components/schemas/ManualScaling"
+     },
+     "name": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "network": {
+      "$ref": "#/components/schemas/Network"
+     },
+     "nobuildFilesRegex": {
+      "type": "string"
+     },
+     "readinessCheck": {
+      "$ref": "#/components/schemas/ReadinessCheck"
+     },
+     "resources": {
+      "$ref": "#/components/schemas/Resources"
+     },
+     "runtime": {
+      "type": "string"
+     },
+     "runtimeApiVersion": {
+      "type": "string"
+     },
+     "runtimeChannel": {
+      "type": "string"
+     },
+     "runtimeMainExecutablePath": {
+      "type": "string"
+     },
+     "serviceAccount": {
+      "type": "string"
+     },
+     "servingStatus": {
+      "enum": [
+       "SERVING_STATUS_UNSPECIFIED",
+       "SERVING",
+       "STOPPED"
+      ],
+      "type": "string"
+     },
+     "threadsafe": {
+      "type": "boolean"
+     },
+     "versionUrl": {
+      "readOnly": true,
+      "type": "string"
+     },
+     "vm": {
+      "type": "boolean"
+     },
+     "vpcAccessConnector": {
+      "$ref": "#/components/schemas/VpcAccessConnector"
+     },
+     "zones": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Volume": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "sizeGb": {
+      "format": "double",
+      "type": "number"
+     },
+     "volumeType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VpcAccessConnector": {
+    "additionalProperties": false,
+    "properties": {
+     "egressSetting": {
+      "enum": [
+       "EGRESS_SETTING_UNSPECIFIED",
+       "ALL_TRAFFIC",
+       "PRIVATE_IP_RANGES"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ZipInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "filesCount": {
+      "format": "int32",
+      "type": "integer"
+     },
+     "sourceUrl": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded native simulator subset of the official App Engine Admin API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Methods follow the official App Engine Admin API v1 paths; long-running operations complete synchronously and stay readable through apps.operations.get/list. Only the configured project owner may call a method; this is not Google IAM. The application cannot be deleted, as in App Engine. Versions run python312 in the standard environment only. Deployment copies Python sources from Cloud Storage objects of the configured project (deployment.zip or deployment.files); main.py must define the WSGI callable app. Requests reach versions through the stored traffic split (IP, COOKIE or RANDOM) and firewall at /_simulator/providers/gcp/appspot/\u003chostname\u003e/; each request runs once in a fresh sandbox with a 10 second deadline and no network.",
+  "title": "App Engine Admin API (simulator)",
+  "version": "v1"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/apps": {
+   "post": {
+    "operationId": "appengine.apps.create",
+    "parameters": [],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Application"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.create",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}": {
+   "get": {
+    "operationId": "appengine.apps.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "includeExtraData",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Application"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.get",
+    "tags": [
+     "App Engine"
+    ]
+   },
+   "patch": {
+    "operationId": "appengine.apps.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Application"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.patch",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}/firewall/ingressRules": {
+   "get": {
+    "operationId": "appengine.apps.firewall.ingressRules.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "matchingAddress",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListIngressRulesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.firewall.ingressRules.list",
+    "tags": [
+     "App Engine"
+    ]
+   },
+   "post": {
+    "operationId": "appengine.apps.firewall.ingressRules.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FirewallRule"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FirewallRule"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.firewall.ingressRules.create",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}/firewall/ingressRules/{ingressRulesId}": {
+   "delete": {
+    "operationId": "appengine.apps.firewall.ingressRules.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ingressRulesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Empty"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.firewall.ingressRules.delete",
+    "tags": [
+     "App Engine"
+    ]
+   },
+   "get": {
+    "operationId": "appengine.apps.firewall.ingressRules.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ingressRulesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FirewallRule"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.firewall.ingressRules.get",
+    "tags": [
+     "App Engine"
+    ]
+   },
+   "patch": {
+    "operationId": "appengine.apps.firewall.ingressRules.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ingressRulesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FirewallRule"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FirewallRule"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.firewall.ingressRules.patch",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}/firewall/ingressRules:batchUpdate": {
+   "post": {
+    "operationId": "appengine.apps.firewall.ingressRules.batchUpdate",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BatchUpdateIngressRulesRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BatchUpdateIngressRulesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.firewall.ingressRules.batchUpdate",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}/locations": {
+   "get": {
+    "operationId": "appengine.apps.locations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "extraLocationTypes",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListLocationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.locations.list",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}/locations/{locationsId}": {
+   "get": {
+    "operationId": "appengine.apps.locations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "locationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Location"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.locations.get",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}/operations": {
+   "get": {
+    "operationId": "appengine.apps.operations.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "filter",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "returnPartialSuccess",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListOperationsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.operations.list",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}/operations/{operationsId}": {
+   "get": {
+    "operationId": "appengine.apps.operations.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "operationsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.operations.get",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}/services": {
+   "get": {
+    "operationId": "appengine.apps.services.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListServicesResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.services.list",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}/services/{servicesId}": {
+   "delete": {
+    "operationId": "appengine.apps.services.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.services.delete",
+    "tags": [
+     "App Engine"
+    ]
+   },
+   "get": {
+    "operationId": "appengine.apps.services.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Service"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.services.get",
+    "tags": [
+     "App Engine"
+    ]
+   },
+   "patch": {
+    "operationId": "appengine.apps.services.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "migrateTraffic",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Service"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.services.patch",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}/services/{servicesId}/versions": {
+   "get": {
+    "operationId": "appengine.apps.services.versions.list",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageSize",
+      "required": false,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "pageToken",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "view",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListVersionsResponse"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.services.versions.list",
+    "tags": [
+     "App Engine"
+    ]
+   },
+   "post": {
+    "operationId": "appengine.apps.services.versions.create",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Version"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.services.versions.create",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  },
+  "/v1/apps/{appsId}/services/{servicesId}/versions/{versionsId}": {
+   "delete": {
+    "operationId": "appengine.apps.services.versions.delete",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "versionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.services.versions.delete",
+    "tags": [
+     "App Engine"
+    ]
+   },
+   "get": {
+    "operationId": "appengine.apps.services.versions.get",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "versionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "view",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Version"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.services.versions.get",
+    "tags": [
+     "App Engine"
+    ]
+   },
+   "patch": {
+    "operationId": "appengine.apps.services.versions.patch",
+    "parameters": [
+     {
+      "in": "path",
+      "name": "appsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "servicesId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "versionsId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "updateMask",
+      "required": false,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Version"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Operation"
+        }
+       }
+      },
+      "description": "Successful response."
+     },
+     "400": {
+      "description": "INVALID_ARGUMENT or FAILED_PRECONDITION google.rpc.Status."
+     },
+     "403": {
+      "description": "PERMISSION_DENIED for a project or subject other than the configured owner."
+     },
+     "404": {
+      "description": "NOT_FOUND."
+     },
+     "409": {
+      "description": "ALREADY_EXISTS."
+     }
+    },
+    "summary": "apps.services.versions.patch",
+    "tags": [
+     "App Engine"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/_simulator/providers/gcp/appengine"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded native simulator subset of the official App Engine Admin API (v1) discovery document. Every other official method returns HTTP 501 UNIMPLEMENTED. Methods follow the official App Engine Admin API v1 paths; long-running operations complete synchronously and stay readable through apps.operations.get/list. Only the configured project owner may call a method; this is not Google IAM. The application cannot be deleted, as in App Engine. Versions run python312 in the standard environment only. Deployment copies Python sources from Cloud Storage objects of the configured project (deployment.zip or deployment.files); main.py must define the WSGI callable app. Requests reach versions through the stored traffic split (IP, COOKIE or RANDOM) and firewall at /_simulator/providers/gcp/appspot/\u003chostname\u003e/; each request runs once in a fresh sandbox with a 10 second deadline and no network.",
+   "name": "App Engine"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "google-api-python-client",
+  "version": "2.199.0",
+  "file": "googleapiclient/discovery_cache/documents/appengine.v1.json",
+  "sha256": "e35418b4cee467a81c938fe186d14647e3451084298bd4971ee4bb0fcfa33cbd",
+  "license": "Apache-2.0",
+  "revision": "20260717"
+ }
+}

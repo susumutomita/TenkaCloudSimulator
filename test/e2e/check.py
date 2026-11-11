@@ -710,6 +710,12 @@ def handler(event,context):
  def test_gcp_catalog_console_reference_and_shared_native_state(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_console.py'))], check=True, timeout=300)
 
+ def test_gcp_appengine_official_clients_deploy_serve_split_firewall_two_teams_restart(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_appengine_sdk.py'))], check=True, timeout=300)
+
+ def test_gcp_appengine_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_appengine_console.py'))], check=True, timeout=300)
+
  def test_azure_catalog_official_sdks_two_teams_owner_restart_and_cleanup(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('azure_catalog_fixtures.py'))], check=True, timeout=600)
 

@@ -157,7 +157,7 @@ def run_console_language():
                     view = page.get_by_role('region', name='Cloud Storage', exact=True)
                     expect(view.get_by_role('heading', name='バケット', exact=True)).to_be_visible()
                     expect(view.get_by_role('button', name=gcp_name, exact=True)).to_be_visible()
-                    keyboard_catalog_entry_order('Google Cloud', 'Cloud Storage', 'Service catalog')
+                    keyboard_catalog_entry_order('Google Cloud', 'App Engine', 'Cloud Storage')
                     keyboard_catalog('Google Cloud', 'Cloud Storage')
                     scope = page.locator('.gcp-console-scope')
                     expect(scope).to_contain_text('tenkacloud-local')
