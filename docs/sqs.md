@@ -1,6 +1,6 @@
 # SQS supported subset
 
-The simulator implements nine Standard-queue operations over AWS JSON 1.0:
+The simulator implements ten Standard-queue operations over AWS JSON 1.0:
 root `POST`, `Content-Type: application/x-amz-json-1.0`, and
 `X-Amz-Target: AmazonSQS.<Operation>`. The provider prefix
 `/_simulator/providers/aws/` reaches the same SQLite state. No real AWS access,
@@ -18,6 +18,7 @@ Use `--state <file>` to retain queues and messages across process restarts.
 | SendMessage | Body 1–262144 UTF-8 bytes; optional per-message `DelaySeconds`; up to 10 message attributes (`String`/`Number`/`Binary`). Returns `MessageId`, `MD5OfMessageBody` and `MD5OfMessageAttributes` (AWS checksum algorithm). |
 | ReceiveMessage | `MaxNumberOfMessages` 1–10, per-call `VisibilityTimeout` override, `WaitTimeSeconds` 0–20 long polling. Claimed messages become invisible, gain a fresh receipt handle and an incremented `ApproximateReceiveCount`. |
 | DeleteMessage | Requires the current receipt handle; a stale/unknown handle fails with `ReceiptHandleIsInvalid`. |
+| DeleteMessageBatch | 1–10 entries with distinct IDs; uses `sqs:DeleteMessage`, returns both `Successful` and `Failed` arrays. See the batch contract below. |
 | ChangeMessageVisibility | Sets a claimed message's invisibility deadline (0 makes it deliverable again). |
 | GetQueueAttributes | `All` or a subset of `QueueArn`, `CreatedTimestamp`, `VisibilityTimeout`, `DelaySeconds`, `MessageRetentionPeriod`, `ApproximateNumberOfMessages`, `ApproximateNumberOfMessagesNotVisible`. Unknown names fail with `InvalidAttributeName`. |
 
@@ -30,13 +31,55 @@ Explicit zero list/receive counts fail; omitted counts retain defaults of 1000/1
 Unknown operations return 501; unsupported request fields, nested attribute
 members and invalid types return errors rather than being silently discarded.
 
+## DeleteMessageBatch
+
+Use `AmazonSQS.DeleteMessageBatch` with `QueueUrl` and `Entries`. Each entry
+requires an `Id` (1–80 ASCII letters, digits, underscore or hyphen) and a nonempty
+current `ReceiptHandle`. IDs correlate response entries; they are not MessageIds.
+IDs must be distinct. Missing/empty entries, more than ten entries, duplicate IDs,
+invalid IDs, ambiguous duplicate JSON keys, unsupported fields, nulls, invalid
+Unicode and wrong types fail the whole request before mutation. The same 320 KiB
+HTTP body limit applies. QueueUrl uses the existing local resolution rules below.
+
+Authorization uses **`sqs:DeleteMessage`**, not `sqs:DeleteMessageBatch`, on the
+selected queue ARN. IAM denial and a missing queue fail the whole request.
+
+- **Semantic receipt failures:** a valid batch returns HTTP 200 with both
+  `Successful` and `Failed` arrays, including empty arrays. Unknown, stale,
+  retention-expired, peer-queue and peer-region receipts produce per-entry
+  `ReceiptHandleIsInvalid`, `SenderFault: true` failures. Valid entries delete
+  their messages. Always inspect both arrays, even after HTTP 200.
+- **Local deterministic behavior:** each partition retains input order. If
+  distinct IDs reuse the same current handle, the first succeeds and later
+  occurrences fail. This is a simulator bound, not an AWS ordering guarantee.
+  Visibility expiration alone does not retire a handle; redelivery rotates it.
+- **Atomic infrastructure failure:** a required SQL read/write, cancellation,
+  commit or final acknowledgement check failure rolls back every deletion and
+  scoped retention cleanup. The response is sanitized HTTP 500 `InternalError`,
+  with no success list or receipt/storage details. Partial semantic failure is
+  not a partial infrastructure commit.
+- **Retention cleanup:** valid deletions and cleanup of expired messages in the
+  selected queue/region commit together. An all-invalid HTTP 200 batch may still
+  commit legitimate scoped expiry cleanup. Foreign queues/regions are unchanged.
+
+The finite `SQSBatchDeletion` model explores validation, the fixed single-message
+IAM action, ordered partitions, scoped cleanup, rollback and final acknowledgement
+at bounded abstract states. It does not prove Go/SQL refinement, real IAM/parser
+behavior, token/process isolation, clock timing, crash durability, receipt
+randomness or AWS distributed semantics. Native storage faults and the standalone
+`test/e2e/sqs_batch_delete.py` SDK driver are separate concrete checks. The driver
+uses dummy credentials and owned loopback endpoints, tests served examples,
+restart, authority boundaries and row removal, and uses clearly isolated SQLite
+fault fixtures; those fixtures are not public APIs. No batch console UI is added.
+
 ## Authentication, scope and local limits
 
 The CLI requires host-issued access tokens by default. Dummy `TCSIM...` signing
 keys identify the wire format and request region, not the host identity. Real
 AWS-style keys, session tokens and conflicting explicit/credential regions are
 rejected. IAM evaluates `sqs:<Operation>` against
-`arn:aws:sqs:<region>:000000000000:<queue>` (`*` for ListQueues). Identity
+`arn:aws:sqs:<region>:000000000000:<queue>` (`*` for ListQueues);
+DeleteMessageBatch uses `sqs:DeleteMessage`. Identity
 selection is not authentication. Hosts must allocate separate process, SQLite
 file and token authority per team; see [the access boundary](../SECURITY.md).
 
@@ -93,7 +136,8 @@ security policy excludes.
 - Stale receipt deletion is strictly rejected locally. AWS documents that old
   receipt deletion may succeed without deleting the message. No distributed
   replicas, probabilistic delivery or exactly-once processing is simulated.
-- FIFO, batch APIs, Query/XML, DLQ/redrive, encryption, queue tags/policies,
+- FIFO, SendMessageBatch, ChangeMessageVisibilityBatch, Query/XML, DLQ/redrive,
+  encryption, queue tags/policies,
   PurgeQueue, CloudFormation SQS resources and Lambda SQS event sources/guest SDK
   capability are not implemented. Existing unsupported
   Challenge problems are not marked runnable by this native API increment.
@@ -146,6 +190,8 @@ concrete tests. Bounds are exploration limits, not production quotas.
 - [ListQueues pagination](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ListQueues.html)
 - [ReceiveMessage and receipt handles](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ReceiveMessage.html)
 - [DeleteMessage distributed-delivery limits](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_DeleteMessage.html)
+- [DeleteMessageBatch request, response and per-entry errors](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_DeleteMessageBatch.html)
+- [SQS API-to-permission mapping](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-api-permissions-reference.html)
 - [ChangeMessageVisibility](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ChangeMessageVisibility.html)
 - [Queue count attributes](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_GetQueueAttributes.html)
 - [SQLite trigger cautions and RAISE](https://www.sqlite.org/lang_createtrigger.html)

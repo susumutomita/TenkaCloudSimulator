@@ -1,145 +1,442 @@
 {
   "version": 1,
-  "base_sha": "1ea676eec2587e0df00629bcf26c23a6dd6e4681",
+  "base_sha": "ade9f93970168c145b4189b636190eddb8271f09",
   "changes": [
     {
-      "path": ".claude/agents/code-reviewer.md",
-      "sha256": "a30a1b1f22c4a94a1197bfed4fa40afa40e7c5b591cb8e8a365a55ac8aec8536",
+      "path": "README.ja.md",
+      "sha256": "31490d65eecd49315ee2e06c5ee7d5e1655c7c13a5368540d25bfc0a66286dd6",
       "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
+      "reason": "Documents the supported public SSM batch API, compatibility limits and permanent service reference links; no implementation state or progress record.",
       "models": []
     },
     {
-      "path": ".claude/agents/debugger.md",
-      "sha256": "32e6802b6602467bb8a66501db564b5f48256ec279bc7038ae3ac5983be91543",
+      "path": "README.md",
+      "sha256": "7aff7d456b38df793aedaa5bae36ec4e652d2d4dfe70879f95151ed4b6e8a7c0",
       "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": ".claude/rules/doc-style.md",
-      "sha256": null,
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": ".claude/rules/quality-bar.md",
-      "sha256": null,
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": ".claude/rules/skill-authoring.md",
-      "sha256": "d3d67cff0c2122befe7096d84020157ff9d9559f706ca802f76d4ebe934014de",
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": ".claude/rules/test-authoring.md",
-      "sha256": "f523ad3e80dee90fae31d654f87966f70068dae13945a14cd3c5c106c26f732a",
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": ".claude/skills/feature/SKILL.md",
-      "sha256": null,
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": ".claude/skills/follow-up/SKILL.md",
-      "sha256": null,
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "AGENTS.md",
-      "sha256": "f629666263b9f67f623dba9a02bc8f1cceaed98562cb8a8e81268e29a74293e9",
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "CLAUDE.md",
-      "sha256": "4718c31d9578f9678fa16731116e319120ecd1a54235fbe456fb9a915bf9332d",
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "docs/contributing/parallel-development.md",
-      "sha256": "d3131f03ad6c32e054a84895521ad51394995bae8f5454b59da4c0e7b985eda2",
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0005-parallel-service-contracts.md",
-      "sha256": "efc549471c18fd34e36e7030a1e4c9e587238bcfb7d918cb5584f94b22df616e",
-      "disposition": "documentation",
-      "reason": "Retains the existing atomic CFN checkpoint, generation and pending-stack visibility requirement in the permanent callback contract instead of a dated progress record; no runtime change.",
-      "models": []
-    },
-    {
-      "path": "docs/development-status.md",
-      "sha256": "0989a6bad4f53404e7a771226079cf212aa97135cbc17c0b37840722f4df37ad",
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "docs/open-issue-progress.md",
-      "sha256": "12c665da5c9e11d96f2e1e9c2b958a90e0b41ac2ea8abc2f8fed4367d892ef87",
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "docs/s3-multipart.md",
-      "sha256": "dd19d4932049dd02de175975c04066055cdbed67f222e085832d59fec8abac89",
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "docs/service-verification.md",
-      "sha256": "426713be6e491f9fb313b7553d83226b99ebefb903c75b28324ee81f1a33ebff",
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "docs/services-roadmap.md",
-      "sha256": "3e457297bedbf2020f2df2ea01ad93f39e50c39c898c2250fdaaf6b02de893a2",
-      "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
+      "reason": "Documents the supported public SSM batch API, compatibility limits and permanent service reference links; no implementation state or progress record.",
       "models": []
     },
     {
       "path": "docs/sqs.md",
-      "sha256": "0b726b501b21912bd29a27ebb8e7dea915306716d5fc48d9f5f15a6fa6b45950",
+      "sha256": "8772a69d538f4b64f1aa9411757199904b9ebc324cf2f0f69babc5b5a85d0051",
       "disposition": "documentation",
-      "reason": "Consolidates repository guidance and removes duplicated or dated progress narration while preserving stable links, security, API, release and integration requirements. This changes documentation only, not executable configuration or runtime behavior.",
+      "reason": "Documents the permanent ten-operation contract, single-message IAM action, partial semantic errors, atomic infrastructure rollback and explicit local compatibility bounds.",
       "models": []
     },
     {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "bdbc503ff76fa96833ed8a9b04b933a7efba63201f453e25545e8aea4fb70986",
-      "disposition": "formal-infrastructure",
-      "reason": "Recognizes only one-level, regular nonexecutable prompt Markdown and preserves exact blob binding and registered state precedence. Negative controls reject nested paths, executable or symlink modes, runnable scripts, hooks/settings, stale prompt hashes and existing modeled state exemptions.",
+      "path": "docs/ssm-parameters.md",
+      "sha256": "f1d115723f6574e807066ab4288ac910ec6f121880f4dee70fad68ff4585655d",
+      "disposition": "documentation",
+      "reason": "Documents the supported public SSM batch API, compatibility limits and permanent service reference links; no implementation state or progress record.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "348621b9dd94e8e35b8c0f428d263e322c9b0fe60b0ae3c60f3999df5e5e1d65",
+      "path": "formal/SQSBatchDeletion.cfg",
+      "sha256": "38fce43e7bb3fe14328278fc178dfa0e9928674f4c206559d85a72215d9f01c7",
+      "disposition": "modeled",
+      "reason": "Binds the native validated batch request, fixed DeleteMessage permission, ordered semantic partitions, scoped expiry cleanup and final all-or-nothing infrastructure acknowledgement to the bounded batch model.",
+      "models": [
+        {
+          "id": "SQSBatchDeletion",
+          "properties": [
+            "TypeOK",
+            "PreflightBeforeEffects",
+            "IAMBinding",
+            "AuthorizationBeforeTransaction",
+            "ParentBeforeMutation",
+            "PendingInvisible",
+            "NoEarlyResponse",
+            "FailureAtomic",
+            "PeerFrame",
+            "ResolutionExact",
+            "BothArraysPresent",
+            "OrderedPartition",
+            "CommittedStateExact",
+            "DurableAck",
+            "SemanticFailuresCommit",
+            "PurgeBeforeResolution",
+            "VerifiedBeforeCommit",
+            "DeleteAcknowledged",
+            "SanitizedFailure"
+          ],
+          "limits": "Independent bounded initial-state/result oracle for simulator-specific ordered receipt consumption, per-entry failures and transaction publication. A repeated current handle under distinct IDs succeeds only at its first entry; all-invalid semantic results can commit legitimate scoped expiry cleanup. Transaction queue rereads use the current incarnation, with abstract final drift checks; no cached HTTP incarnation precondition is invented. Assumes immutable policy, collision-free ordinary receipt issuance, a frozen retention cutoff, and atomic transaction commit/rollback. Corrupt duplicate persisted handles and trigger-like ignored writes/reinsertions are explicit faults. No Go/SQL refinement, wire parser/URL/ARN/string/Unicode proof, policy evaluator proof, real wall-clock, crash/restart/disk durability, concurrent request, network, FIFO, other batch API, or full AWS behavior/parity claim. Native tests remain independent evidence."
+        }
+      ]
+    },
+    {
+      "path": "formal/SQSBatchDeletion.tla",
+      "sha256": "d0ed66c5b5f1690f58c202a53663c752ca68bec9c9f0455008e737c8e1ac8070",
+      "disposition": "modeled",
+      "reason": "Binds the native validated batch request, fixed DeleteMessage permission, ordered semantic partitions, scoped expiry cleanup and final all-or-nothing infrastructure acknowledgement to the bounded batch model.",
+      "models": [
+        {
+          "id": "SQSBatchDeletion",
+          "properties": [
+            "TypeOK",
+            "PreflightBeforeEffects",
+            "IAMBinding",
+            "AuthorizationBeforeTransaction",
+            "ParentBeforeMutation",
+            "PendingInvisible",
+            "NoEarlyResponse",
+            "FailureAtomic",
+            "PeerFrame",
+            "ResolutionExact",
+            "BothArraysPresent",
+            "OrderedPartition",
+            "CommittedStateExact",
+            "DurableAck",
+            "SemanticFailuresCommit",
+            "PurgeBeforeResolution",
+            "VerifiedBeforeCommit",
+            "DeleteAcknowledged",
+            "SanitizedFailure"
+          ],
+          "limits": "Independent bounded initial-state/result oracle for simulator-specific ordered receipt consumption, per-entry failures and transaction publication. A repeated current handle under distinct IDs succeeds only at its first entry; all-invalid semantic results can commit legitimate scoped expiry cleanup. Transaction queue rereads use the current incarnation, with abstract final drift checks; no cached HTTP incarnation precondition is invented. Assumes immutable policy, collision-free ordinary receipt issuance, a frozen retention cutoff, and atomic transaction commit/rollback. Corrupt duplicate persisted handles and trigger-like ignored writes/reinsertions are explicit faults. No Go/SQL refinement, wire parser/URL/ARN/string/Unicode proof, policy evaluator proof, real wall-clock, crash/restart/disk durability, concurrent request, network, FIFO, other batch API, or full AWS behavior/parity claim. Native tests remain independent evidence."
+        }
+      ]
+    },
+    {
+      "path": "formal/SSMBatchDeletion.cfg",
+      "sha256": "b9d305b900351124458afb21401707a7c199379fed08ee180bc29a9d8e153d5a",
+      "disposition": "modeled",
+      "reason": "Adds a bounded batch contract: validate raw names, capture complete immutable authorization, stage target deletion in one transaction, and expose ordered partitions only after successful commit.",
+      "models": [
+        {
+          "id": "SSMBatchDeletion",
+          "properties": [
+            "TypeOK",
+            "AdmissionBeforeMutation",
+            "PendingInvisible",
+            "NoEarlyResponse",
+            "CanceledPreservesState",
+            "FailureAtomic",
+            "DurableAck",
+            "PeerFrame",
+            "ExactDeletion",
+            "SuccessfulResultsExact",
+            "MissingIsNotFailure"
+          ],
+          "limits": "Bounded contract checking only. Raw 1..10 count and first-occurrence duplicate handling are the simulator policy; response order is not claimed as an AWS guarantee. Shape/name validity and immutable IAM decisions are abstract inputs, not parser/ARN/policy proofs. A single serial transaction stages writes privately; the model does not prove Go/SQL refinement, actual commit/cancellation races, snapshot acquisition, physical crash recovery, concurrent requests, all possible record contents, live AWS parity, or code coverage. Cancellation after committed success cannot undo a commit."
+        }
+      ]
+    },
+    {
+      "path": "formal/SSMBatchDeletion.tla",
+      "sha256": "8e2564b8353c7d34c9140d68ef85be04c4e8ba5431b82806808e62a8aab03ce7",
+      "disposition": "modeled",
+      "reason": "Adds a bounded batch contract: validate raw names, capture complete immutable authorization, stage target deletion in one transaction, and expose ordered partitions only after successful commit.",
+      "models": [
+        {
+          "id": "SSMBatchDeletion",
+          "properties": [
+            "TypeOK",
+            "AdmissionBeforeMutation",
+            "PendingInvisible",
+            "NoEarlyResponse",
+            "CanceledPreservesState",
+            "FailureAtomic",
+            "DurableAck",
+            "PeerFrame",
+            "ExactDeletion",
+            "SuccessfulResultsExact",
+            "MissingIsNotFailure"
+          ],
+          "limits": "Bounded contract checking only. Raw 1..10 count and first-occurrence duplicate handling are the simulator policy; response order is not claimed as an AWS guarantee. Shape/name validity and immutable IAM decisions are abstract inputs, not parser/ARN/policy proofs. A single serial transaction stages writes privately; the model does not prove Go/SQL refinement, actual commit/cancellation races, snapshot acquisition, physical crash recovery, concurrent requests, all possible record contents, live AWS parity, or code coverage. Cancellation after committed success cannot undo a commit."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "c85140484ad9391a01738ab1685ff88f19192b5a4df3a6f845c5e5fea4e83b2d",
       "disposition": "formal-infrastructure",
-      "reason": "Recognizes only one-level, regular nonexecutable prompt Markdown and preserves exact blob binding and registered state precedence. Negative controls reject nested paths, executable or symlink modes, runnable scripts, hooks/settings, stale prompt hashes and existing modeled state exemptions.",
+      "reason": "Adds and protects both independent bounded batch models, their required invariants, source scopes and exact sensitivity controls. Every inherited model registration and policy obligation remains unchanged. The literal inventory independently names all 72 models; source registration and detector code are not executed model evidence.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/parameters.go",
+      "sha256": "c5e5be8d51b205a04e938357154f542c63a13c7bb91a275d4a892030aa353d3e",
+      "disposition": "modeled",
+      "reason": "Adds a bounded batch contract: validate raw names, capture complete immutable authorization, stage target deletion in one transaction, and expose ordered partitions only after successful commit.",
+      "models": [
+        {
+          "id": "SSMBatchDeletion",
+          "properties": [
+            "TypeOK",
+            "AdmissionBeforeMutation",
+            "PendingInvisible",
+            "NoEarlyResponse",
+            "CanceledPreservesState",
+            "FailureAtomic",
+            "DurableAck",
+            "PeerFrame",
+            "ExactDeletion",
+            "SuccessfulResultsExact",
+            "MissingIsNotFailure"
+          ],
+          "limits": "Bounded contract checking only. Raw 1..10 count and first-occurrence duplicate handling are the simulator policy; response order is not claimed as an AWS guarantee. Shape/name validity and immutable IAM decisions are abstract inputs, not parser/ARN/policy proofs. A single serial transaction stages writes privately; the model does not prove Go/SQL refinement, actual commit/cancellation races, snapshot acquisition, physical crash recovery, concurrent requests, all possible record contents, live AWS parity, or code coverage. Cancellation after committed success cannot undo a commit."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sqs.go",
+      "sha256": "68a4b887cfdc50cc09c2eb3599b8816312b86f4fd0571f1d57854700271ed551",
+      "disposition": "modeled",
+      "reason": "Binds the native validated batch request, fixed DeleteMessage permission, ordered semantic partitions, scoped expiry cleanup and final all-or-nothing infrastructure acknowledgement to the bounded batch model.",
+      "models": [
+        {
+          "id": "SQSBatchDeletion",
+          "properties": [
+            "TypeOK",
+            "PreflightBeforeEffects",
+            "IAMBinding",
+            "AuthorizationBeforeTransaction",
+            "ParentBeforeMutation",
+            "PendingInvisible",
+            "NoEarlyResponse",
+            "FailureAtomic",
+            "PeerFrame",
+            "ResolutionExact",
+            "BothArraysPresent",
+            "OrderedPartition",
+            "CommittedStateExact",
+            "DurableAck",
+            "SemanticFailuresCommit",
+            "PurgeBeforeResolution",
+            "VerifiedBeforeCommit",
+            "DeleteAcknowledged",
+            "SanitizedFailure"
+          ],
+          "limits": "Independent bounded initial-state/result oracle for simulator-specific ordered receipt consumption, per-entry failures and transaction publication. A repeated current handle under distinct IDs succeeds only at its first entry; all-invalid semantic results can commit legitimate scoped expiry cleanup. Transaction queue rereads use the current incarnation, with abstract final drift checks; no cached HTTP incarnation precondition is invented. Assumes immutable policy, collision-free ordinary receipt issuance, a frozen retention cutoff, and atomic transaction commit/rollback. Corrupt duplicate persisted handles and trigger-like ignored writes/reinsertions are explicit faults. No Go/SQL refinement, wire parser/URL/ARN/string/Unicode proof, policy evaluator proof, real wall-clock, crash/restart/disk durability, concurrent request, network, FIFO, other batch API, or full AWS behavior/parity claim. Native tests remain independent evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sqs_batch_delete.go",
+      "sha256": "42bbf16d560cc0bd428c09a97d0f51b1480dcb737c787017859c47394d2ecf57",
+      "disposition": "modeled",
+      "reason": "Binds the native validated batch request, fixed DeleteMessage permission, ordered semantic partitions, scoped expiry cleanup and final all-or-nothing infrastructure acknowledgement to the bounded batch model.",
+      "models": [
+        {
+          "id": "SQSBatchDeletion",
+          "properties": [
+            "TypeOK",
+            "PreflightBeforeEffects",
+            "IAMBinding",
+            "AuthorizationBeforeTransaction",
+            "ParentBeforeMutation",
+            "PendingInvisible",
+            "NoEarlyResponse",
+            "FailureAtomic",
+            "PeerFrame",
+            "ResolutionExact",
+            "BothArraysPresent",
+            "OrderedPartition",
+            "CommittedStateExact",
+            "DurableAck",
+            "SemanticFailuresCommit",
+            "PurgeBeforeResolution",
+            "VerifiedBeforeCommit",
+            "DeleteAcknowledged",
+            "SanitizedFailure"
+          ],
+          "limits": "Independent bounded initial-state/result oracle for simulator-specific ordered receipt consumption, per-entry failures and transaction publication. A repeated current handle under distinct IDs succeeds only at its first entry; all-invalid semantic results can commit legitimate scoped expiry cleanup. Transaction queue rereads use the current incarnation, with abstract final drift checks; no cached HTTP incarnation precondition is invented. Assumes immutable policy, collision-free ordinary receipt issuance, a frozen retention cutoff, and atomic transaction commit/rollback. Corrupt duplicate persisted handles and trigger-like ignored writes/reinsertions are explicit faults. No Go/SQL refinement, wire parser/URL/ARN/string/Unicode proof, policy evaluator proof, real wall-clock, crash/restart/disk durability, concurrent request, network, FIFO, other batch API, or full AWS behavior/parity claim. Native tests remain independent evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sqs_batch_delete_test.go",
+      "sha256": "30e3891d11d0f11a2450b3ec59420e1cab5708eb5fcc575a0f5701ce83751fd4",
+      "disposition": "test-support",
+      "reason": "Exercises exact capability declarations, strict additive served-reference inventories, real SDK authority/lifecycle/batch partitions and storage-fault rollback. The standalone driver uses owned loopback processes and reports no receipt or token values; assertions are independent of the finite model.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/sqs_store.go",
+      "sha256": "1c54a2badadd47d226df5fa67cd82e067f4a0651455609a5db805c4151072dba",
+      "disposition": "modeled",
+      "reason": "Binds the native validated batch request, fixed DeleteMessage permission, ordered semantic partitions, scoped expiry cleanup and final all-or-nothing infrastructure acknowledgement to the bounded batch model.",
+      "models": [
+        {
+          "id": "SQSBatchDeletion",
+          "properties": [
+            "TypeOK",
+            "PreflightBeforeEffects",
+            "IAMBinding",
+            "AuthorizationBeforeTransaction",
+            "ParentBeforeMutation",
+            "PendingInvisible",
+            "NoEarlyResponse",
+            "FailureAtomic",
+            "PeerFrame",
+            "ResolutionExact",
+            "BothArraysPresent",
+            "OrderedPartition",
+            "CommittedStateExact",
+            "DurableAck",
+            "SemanticFailuresCommit",
+            "PurgeBeforeResolution",
+            "VerifiedBeforeCommit",
+            "DeleteAcknowledged",
+            "SanitizedFailure"
+          ],
+          "limits": "Independent bounded initial-state/result oracle for simulator-specific ordered receipt consumption, per-entry failures and transaction publication. A repeated current handle under distinct IDs succeeds only at its first entry; all-invalid semantic results can commit legitimate scoped expiry cleanup. Transaction queue rereads use the current incarnation, with abstract final drift checks; no cached HTTP incarnation precondition is invented. Assumes immutable policy, collision-free ordinary receipt issuance, a frozen retention cutoff, and atomic transaction commit/rollback. Corrupt duplicate persisted handles and trigger-like ignored writes/reinsertions are explicit faults. No Go/SQL refinement, wire parser/URL/ARN/string/Unicode proof, policy evaluator proof, real wall-clock, crash/restart/disk durability, concurrent request, network, FIFO, other batch API, or full AWS behavior/parity claim. Native tests remain independent evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "1ad97ea5065f608bde5a0fc537152cff4cefbefaeecdbf685df2d1578eb83088",
+      "disposition": "modeled",
+      "reason": "Adds a bounded batch contract: validate raw names, capture complete immutable authorization, stage target deletion in one transaction, and expose ordered partitions only after successful commit.",
+      "models": [
+        {
+          "id": "SSMBatchDeletion",
+          "properties": [
+            "TypeOK",
+            "AdmissionBeforeMutation",
+            "PendingInvisible",
+            "NoEarlyResponse",
+            "CanceledPreservesState",
+            "FailureAtomic",
+            "DurableAck",
+            "PeerFrame",
+            "ExactDeletion",
+            "SuccessfulResultsExact",
+            "MissingIsNotFailure"
+          ],
+          "limits": "Bounded contract checking only. Raw 1..10 count and first-occurrence duplicate handling are the simulator policy; response order is not claimed as an AWS guarantee. Shape/name validity and immutable IAM decisions are abstract inputs, not parser/ARN/policy proofs. A single serial transaction stages writes privately; the model does not prove Go/SQL refinement, actual commit/cancellation races, snapshot acquisition, physical crash recovery, concurrent requests, all possible record contents, live AWS parity, or code coverage. Cancellation after committed success cannot undo a commit."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm_delete_parameters_test.go",
+      "sha256": "66f30ccf45fd648b6b4d9bb941c9e5093906ace4457ae7be04a0a2d74ce3de3a",
+      "disposition": "test-support",
+      "reason": "Exercises native batch semantics or actual SDK/reference integration with explicit state, authority, rollback, isolation and observation oracles; does not change production execution.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "1336592a2ec004f958ba3e37da8d1eeb80c63a3943032cd8089a53c3e6d5440c",
+      "disposition": "presentation",
+      "reason": "Composes the two public batch API reference additions with exact request/result schemas, operation metadata, destructive examples and local ordering/atomicity limitations. Historical schemas, templates and routes are preserved by independently pinned delta projections. Static schema/reference tests and actual served SDK exchanges remain separate verification obligations.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "09cdd449b9482dbd1c2725c9bd7aab26ebde62b18a5c446a71ec168782f66a30",
+      "disposition": "modeled",
+      "reason": "Adds only SSM DeleteParameters and SQS DeleteMessageBatch capability metadata, including the bounded SQS batch size, single-delete permission and explicit remaining unsupported operations. The two existing model bindings cover unchanged admission/lifecycle abstractions, not these literal capability declarations. Native server and standalone SDK assertions independently check metadata and host-token boundaries; no semantic coverage or executed acceptance is inferred from this shared-file binding.",
+      "models": [
+        {
+          "id": "LandingAccessAdmission",
+          "properties": [
+            "TokenBoundary",
+            "UnknownNeverStatic"
+          ],
+          "limits": "Inherited unchanged admission abstraction only. The literal capability endpoint and its operation list are not represented among this model's Requests, so these properties do not prove the metadata addition or SSM behavior. Real binary SDK tests check missing/foreign host-token refusal and exact seven-operation metadata. SSM batch semantics are separately bounded by SSMBatchDeletion and tested natively."
+        },
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "AuthorizedMutations",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight"
+          ],
+          "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence. This file binding covers only its unchanged lifecycle/admission abstraction. Capability content, the ten-operation inventory, batch permission metadata and unsupported-operation list are not represented or proven by this model; exact native server and real SDK assertions verify those separately. SQSBatchDeletion binds the changed native implementation, not this metadata."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/sqs_batch_delete_test.go",
+      "sha256": "72fb1ba61ac6c6fb698fbcb6f8ce77a38dd52efb58b7a427fb8fc0ed16fc1006",
+      "disposition": "test-support",
+      "reason": "Exercises exact capability declarations, strict additive served-reference inventories, real SDK authority/lifecycle/batch partitions and storage-fault rollback. The standalone driver uses owned loopback processes and reports no receipt or token values; assertions are independent of the finite model.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "fa6219203c273895431f4960f1a9ba97e99346d2e93c3f5bb680e224b13a2403",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds and protects both independent bounded batch models, their required invariants, source scopes and exact sensitivity controls. Every inherited model registration and policy obligation remains unchanged. The literal inventory independently names all 72 models; source registration and detector code are not executed model evidence.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "b0f1ddbc392ac5768f83c55133df80c07e47a2a7491d07be17f7da3bb1be25d9",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds and protects both independent bounded batch models, their required invariants, source scopes and exact sensitivity controls. Every inherited model registration and policy obligation remains unchanged. The literal inventory independently names all 72 models; source registration and detector code are not executed model evidence.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/batch_reference_projection.py",
+      "disposition": "test-support",
+      "models": [],
+      "reason": "Validates exact SSM and SQS reference deltas before projecting only their reviewed additions. Preserves historical whole-document/component digests and all unknown fields, with independent two-guard sensitivity controls. This helper does not launch a server, browser or SDK and does not establish runtime acceptance.",
+      "sha256": "a91c30b71f6e658393743b15341da131cba89dd8bbcb5bf4eefeea185008de05"
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "51adb15b28e3451bec7400c9d1b272a99edeff69daff27067dc050f19cb444f4",
+      "disposition": "test-support",
+      "reason": "Registers both standalone batch SDK checks or maintains exact additive reference and schema assertions, preserving all historical hashes and SQS/DynamoDB templates. Cross-service sensitivity controls reject malformed new content, duplicate or missing union bindings, unknown fields and unrelated edits. Test source is not an execution receipt or a finite-model proof.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/openapi_json10.py",
+      "sha256": "ddd61fb5867461f3c4b41a58c5d4f76a60024a40c67a67a05a9e7d2853a62d5e",
+      "disposition": "test-support",
+      "reason": "Exercises exact capability declarations, strict additive served-reference inventories, real SDK authority/lifecycle/batch partitions and storage-fault rollback. The standalone driver uses owned loopback processes and reports no receipt or token values; assertions are independent of the finite model.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/sqs_batch_delete.py",
+      "sha256": "4aa0e2ee1aa2b5b9fbcbafe2f465ef1070fb6b0d39d4f82ac39d65104224d247",
+      "disposition": "test-support",
+      "reason": "Exercises exact capability declarations, strict additive served-reference inventories, real SDK authority/lifecycle/batch partitions and storage-fault rollback. The standalone driver uses owned loopback processes and reports no receipt or token values; assertions are independent of the finite model.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/sqs_docs.py",
+      "sha256": "d29a3f231a5a5c1b5e78756147eb6da5e2ee0e9999fa0b4635e49ced1b0f39c4",
+      "disposition": "test-support",
+      "reason": "Exercises exact capability declarations, strict additive served-reference inventories, real SDK authority/lifecycle/batch partitions and storage-fault rollback. The standalone driver uses owned loopback processes and reports no receipt or token values; assertions are independent of the finite model.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ssm_batch_delete.py",
+      "sha256": "b50ca73fbe758af6f6585d17b490de6daef6652e2d95f10c13cffe38743b3560",
+      "disposition": "test-support",
+      "reason": "Exercises native batch semantics or actual SDK/reference integration with explicit state, authority, rollback, isolation and observation oracles; does not change production execution.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "5dcada90d362539ae1bd267b8a798a38b7ac175f3b5d24dc1bb0f2579f7432dc",
+      "disposition": "test-support",
+      "reason": "Registers both standalone batch SDK checks or maintains exact additive reference and schema assertions, preserving all historical hashes and SQS/DynamoDB templates. Cross-service sensitivity controls reject malformed new content, duplicate or missing union bindings, unknown fields and unrelated edits. Test source is not an execution receipt or a finite-model proof.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "73e9b946aacc2cfc83b4a2536f8c627ef2f730b3d1cf58a42ca1fef2a3688dcc",
+      "disposition": "test-support",
+      "reason": "Registers both standalone batch SDK checks or maintains exact additive reference and schema assertions, preserving all historical hashes and SQS/DynamoDB templates. Cross-service sensitivity controls reject malformed new content, duplicate or missing union bindings, unknown fields and unrelated edits. Test source is not an execution receipt or a finite-model proof.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_ssm_batch_reference.py",
+      "sha256": "4e1f38a5f1b9e94595e9bd7e357e88f351205332aeaa15b17bff00c4cc89ec2b",
+      "disposition": "test-support",
+      "reason": "Registers both standalone batch SDK checks or maintains exact additive reference and schema assertions, preserving all historical hashes and SQS/DynamoDB templates. Cross-service sensitivity controls reject malformed new content, duplicate or missing union bindings, unknown fields and unrelated edits. Test source is not an execution receipt or a finite-model proof.",
       "models": []
     }
   ]
