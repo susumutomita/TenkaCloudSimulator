@@ -1,15 +1,11 @@
 ---
 paths:
-  - ".claude/skills/**"
-  - ".claude/scripts/**"
+  - ".claude/**"
 ---
 
-# スキル・フック authoring ルール
+# Agent instruction authoring
 
-`.claude/` 配下はモデルのコンテキストに注入されるサプライチェーン成果物として扱う (正本: `docs/adr/0002-skill-audit-invariants.md`)。
-
-- SKILL.md の `name` はディレクトリ名と一致させる。`description` には対象・サブコマンド・「いつ使うか」をトリガー語彙として 50〜1024 文字で書く。
-- `allowed-tools` は本体が実際に使う最小セットのみ宣言する。引数を取るなら `argument-hint`、ユーザー専用なら `disable-model-invocation: true` を付ける。
-- 不可視 Unicode・base64 ブロック・HTML コメント・リモート取得のシェルパイプ実行を置かない (harness の `INVARIANT_SKILL_*` で error になる)。
-- 検出対象パターンを説明するときはリテラルで書かず言い換える（このディレクトリ群は検出器のスコープ内であり、例示のつもりの 1 行が自己検出で error になる）。
-- 変更後は `make before-commit` と変更した文書の参照先検査 を通す。
+- `AGENTS.md` を作業契約の正本とし、スキルやエージェントへ矛盾する必須手順を加えない。
+- 名前、用途、使う場面、必要最小限のツールを明記する。既存の権限や公開範囲を広げない。
+- 不可視文字、難読化した指示、HTML コメント内の指示、外部取得した内容の自動シェル実行を含めない。秘匿値を埋め込まない。
+- 参照先とコマンドが実在することを確認する。存在しない検出器や品質ゲートを前提にしない。

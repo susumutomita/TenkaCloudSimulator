@@ -107,27 +107,19 @@ TLA_JAR=/path/to/pinned/tla2tools.jar make formal
 ```
 
 The repository requires both full-module statement and unfiltered Cobertura
-source-line coverage to reach 90%. On runtime/test checkpoint d61e0ed, a fresh
-single-profile before-commit run passed all race tests/build with 5583/5888
-statements (94.82%) and 7306/8098 source lines (90.22%). Earlier failed/interrupted
-attempts were retained as diagnostics and were not combined into this profile.
+source-line coverage to reach 90%. Record results against the exact tested commit
+in the relevant Issue or PR; focused or historical passes do not replace the
+complete gates.
 
-The complete local E2E gate on that checkpoint passed one reflow control,
-18 Conformance tests and the real make-start helper. The mandatory SQS driver
-uses two authenticated CLI processes, separate SQLite/token state and two
-regions; it checks all nine operations, permuted cross-region receives, an
-empty-region/peer-only oracle, token rejection, restart/persisted visibility,
-receipt rotation, actual delay/visibility and minimum60-second retention, prefix
-routing and cleanup. Its 338 calls, sends and responses matched. This proves the
-bounded native lifecycle tested, not UI or full service/problem completion.
-Native Go tests additionally exercise exact row/encoded-byte quota boundaries,
-two concurrent last-slot writers, expired foreign charging, legacy over-cap
-read/delete, corrupt persisted data, IAM and real SQL rollback/ack failures.
-
-The later main integration changes API-reference assets/helpers, not these Go
-runtime/test bytes. Its rebuilt combined Scalar check and immutable formal gate
-remain separate required results; new-head hosted CI/review are not implied by
-the earlier local checkpoint.
+The [SQS SDK driver](../test/e2e/sqs.py) uses two authenticated CLI processes,
+separate SQLite/token state and two regions. It checks all nine operations,
+permuted cross-region receives, an empty-region/peer-only oracle, token rejection,
+restart/persisted visibility, receipt rotation, actual delay/visibility and
+minimum 60-second retention, prefix routing and cleanup. This covers the bounded
+native lifecycle, not UI or full service/problem completion. Native Go tests
+additionally exercise exact row/encoded-byte quota boundaries, two concurrent
+last-slot writers, expired foreign charging, legacy over-cap read/delete, corrupt
+persisted data, IAM and real SQL rollback/ack failures.
 
 ## Finite model contracts
 
@@ -137,9 +129,9 @@ lifetime, scope/IAM, eligibility, rollback and current receipts. SQSStorageBudge
 bounds two trusted scopes, three possible legacy rows plus one fresh ID,
 abstract row weights1–2 and caps2rows/3units. Its seven mutants exercise row/byte
 caps, expired foreign charging, scoped purge, rollback, live-row preservation
-and legacy maintenance. All original, SSM, Startup and BrowserSessions models and protected
-properties remain required; the combined inventory has ten baselines and
-36 specified mutants. Exact immutable-head execution is required separately.
+and legacy maintenance. The [formal registry](../formal/models.json) is the
+executable inventory; all registered models and protected properties remain
+required. Exact immutable-head execution is required separately.
 
 These are finite abstract safety checks, not Go/SQLite refinement, actual
 UTF-8/JSON arithmetic, crypto, SQL concurrency/crash or filesystem-size proofs.
@@ -162,9 +154,8 @@ concrete tests. Bounds are exploration limits, not production quotas.
 
 The [Cloudscape console](sqs-console.md) uses these exact nine native operations
 for queues, Standard creation with the three supported attributes, details,
-send/poll, current-receipt visibility/deletion and queue deletion. Focused actual
-browser/SDK and served nine-example checks passed against the same SQLite;
-see the console document for precise verified states and remaining whole gates.
+send/poll, current-receipt visibility/deletion and queue deletion. See the console
+document for browser/SDK verification boundaries and the served API examples.
 This does not add native API/schema/IAM semantics, FIFO/CFN/Lambda/Challenge,
 resource policies, editing or encryption support. Static API examples require
 actual QueueUrl/current ReceiptHandle substitution and are never live state.

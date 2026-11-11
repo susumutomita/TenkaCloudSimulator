@@ -87,7 +87,15 @@ def changes(root, base, revision='HEAD'):
     return result
 
 
+def prompt_documentation(path):
+    # fnmatch '*' crosses '/', so keep these prompt-only categories one level.
+    return path == 'CLAUDE.md' or re.fullmatch(
+        r'\.claude/(?:agents/[^/]+\.md|rules/[^/]+\.md|skills/[^/]+/SKILL\.md)', path) is not None
+
+
 def disposition(path):
+    if prompt_documentation(path):
+        return 'documentation'
     if path in FORMAL_INFRA or path.startswith('.github/workflows/'):
         return 'formal-infrastructure'
     if path in KNOWN_VALIDATION:
@@ -150,6 +158,11 @@ def validate_record(root, base, registry=None):
         require(isinstance(path, str) and path not in seen and path in actual, 'extra or duplicate applicability path')
         seen.add(path)
         require(item['sha256'] == actual[path], 'stale applicability blob: ' + path)
+        if prompt_documentation(path):
+            for revision in (base, 'HEAD'):
+                entry = git(root, 'ls-tree', revision, '--', path).decode().split()
+                require(not entry or entry[0] == '100644',
+                        'prompt documentation must be regular nonexecutable Markdown: ' + path)
         require(isinstance(item['reason'], str) and item['reason'].strip(), 'an explicit applicability argument is required: ' + path)
         require(isinstance(item['models'], list), 'model bindings must be a list')
         if item['disposition'] == 'modeled':
