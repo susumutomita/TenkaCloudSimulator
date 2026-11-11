@@ -95,7 +95,7 @@
     },
     {
       "path": "internal/aws/autoscalingplans_http.go",
-      "sha256": "88c7a83d14244dd05d6eefd8e197f25184af8ea361f66e4441c1aad7ca0d54bf",
+      "sha256": "8ec7c9473cc4a66d858998ce866f32f9bb5ffed6e50b928263440a581984cd85",
       "disposition": "modeled",
       "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
       "models": [

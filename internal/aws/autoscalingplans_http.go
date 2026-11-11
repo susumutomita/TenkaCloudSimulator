@@ -353,7 +353,11 @@ func aspPageSize(input map[string]any) (int, error) {
 		return maxAutoScalingPageSize, nil
 	}
 	value, err := aspInteger(raw, "MaxResults", 1, maxAutoScalingPageSize)
-	return int(value), err
+	// Keep the bound at the conversion site; aspInteger already enforces it.
+	if err != nil || value < 1 || value > maxAutoScalingPageSize {
+		return 0, err
+	}
+	return int(value), nil
 }
 func aspNextToken(input map[string]any) (string, error) {
 	raw, present := input["NextToken"]
