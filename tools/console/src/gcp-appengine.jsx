@@ -84,7 +84,9 @@ export default function GCPAppEngineView({request, appEngine}) {
         call(appURL(endpoint, project, 'services') + '?pageSize=100'),
         call(appURL(endpoint, project, 'firewall', 'ingressRules') + '?pageSize=1000')]);
       const all = listed.services || [];
-      const chosen = all.some(s => s.id === prefer) ? prefer : all[0]?.id || '';
+      // Keep only server-listed IDs in state: a typed service name never
+      // becomes part of a link or path without the server naming it.
+      const chosen = (all.find(s => s.id === prefer) || all[0])?.id || '';
       const page = chosen ? await call(appURL(endpoint, project, 'services', chosen, 'versions') + '?pageSize=100') : {};
       if (!valid(epoch)) return;
       setApp({state: 'ready', value: application}); setServices(all); setService(chosen || 'default');
