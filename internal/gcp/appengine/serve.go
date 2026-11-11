@@ -97,7 +97,9 @@ func choose(s serviceRecord, r *http.Request, address netip.Addr) (string, *http
 		}
 		if point < 0 {
 			point = randomPoint()
-			cookie = &http.Cookie{Name: "GOOGAPPUID", Value: strconv.Itoa(point), HttpOnly: true, SameSite: http.SameSiteStrictMode}
+			// Like the simulator session cookie, Secure follows the
+			// connection: a plain-HTTP loopback client would drop it.
+			cookie = &http.Cookie{Name: "GOOGAPPUID", Value: strconv.Itoa(point), HttpOnly: true, Secure: r.TLS != nil, SameSite: http.SameSiteStrictMode}
 		}
 	case "RANDOM":
 		point = randomPoint()

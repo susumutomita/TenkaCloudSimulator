@@ -128,6 +128,17 @@ func TestRequestsReachVersionsThroughTheirHostnameSplitAndFirewall(t *testing.T)
 	if !strings.HasPrefix(w.Header().Get("Set-Cookie"), "GOOGAPPUID=") || !strings.Contains(w.Header().Get("Set-Cookie"), "Path="+DataPlanePrefix+host+"/") {
 		t.Fatalf("new cookie: %v", w.Header())
 	}
+	if strings.Contains(w.Header().Get("Set-Cookie"), "Secure") {
+		t.Fatalf("a plain-HTTP shard cookie must not be Secure: %v", w.Header())
+	}
+	secure := httptest.NewRequest("GET", "https://127.0.0.1/appspot/"+host+"/", nil)
+	secure.RemoteAddr = "127.0.0.1:1"
+	secure = secure.WithContext(context.WithValue(secure.Context(), subjectKey{}, "participant"))
+	rec := httptest.NewRecorder()
+	h.engine.ServeHTTP(rec, secure)
+	if !strings.Contains(rec.Header().Get("Set-Cookie"), "; Secure") {
+		t.Fatalf("a TLS shard cookie must be Secure: %v", rec.Header())
+	}
 	h.ok("PATCH", base+"/services/default?updateMask=split", map[string]any{"split": map[string]any{"shardBy": "IP", "allocations": map[string]any{"v1": 0.5, "v2": 0.5}}})
 	seen := map[string]bool{}
 	for i := 0; i < 64; i++ {
@@ -168,7 +179,7 @@ func TestRequestsReachVersionsThroughTheirHostnameSplitAndFirewall(t *testing.T)
 	}
 	// The data plane needs an authenticated session.
 	req := httptest.NewRequest("GET", "/appspot/"+host+"/", nil)
-	rec := httptest.NewRecorder()
+	rec = httptest.NewRecorder()
 	h.engine.ServeHTTP(rec, req)
 	if rec.Code != 401 {
 		t.Fatalf("anonymous: %d", rec.Code)
