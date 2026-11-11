@@ -26,6 +26,12 @@ import (
 // 256 KiB Lambda event limit, not the AWS 1 MB body limit.
 const elbEventBytes = apirouting.MaxProxyEventBytes
 
+// Runtime initialization is bounded to two minutes by LambdaStore.runner;
+// execution (including slot admission) is bounded to at most thirty seconds.
+// Keep the HTTP response writable for a short grace after that overall budget.
+const elbInvocationBudget = 2*time.Minute + 30*time.Second
+const elbResponseGrace = 10 * time.Second
+
 var (
 	errELBTargetTimeout = errors.New("the Lambda target did not respond before the deadline")
 	errELBTargetFailed  = errors.New("the Lambda target invocation failed")
@@ -367,7 +373,14 @@ func (g *Gateway) serveELBTraffic(w http.ResponseWriter, r *http.Request) {
 		elbPlainError(w, 400, "Request headers, query or body cannot form a bounded Lambda event.")
 		return
 	}
-	payload, err := g.invokeELBTarget(r.Context(), region, action.TargetGroupARN, route.target, event, 0)
+	deadline := time.Now().Add(elbInvocationBudget)
+	if err := http.NewResponseController(w).SetWriteDeadline(deadline.Add(elbResponseGrace)); err != nil && !errors.Is(err, http.ErrNotSupported) {
+		elbPlainError(w, 500, "The load balancer response deadline could not be configured.")
+		return
+	}
+	ctx, cancel := context.WithDeadline(r.Context(), deadline)
+	defer cancel()
+	payload, err := g.invokeELBTarget(ctx, region, action.TargetGroupARN, route.target, event, 0)
 	if errors.Is(err, errELBInternal) {
 		elbPlainError(w, 500, "The simulator could not read or run the Lambda target.")
 		return

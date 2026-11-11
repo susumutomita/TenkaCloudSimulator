@@ -105,6 +105,13 @@
       ]
     },
     {
+      "path": "internal/aws/elb_deadline_test.go",
+      "sha256": "2adce81395fc79f49533936ebeef84bad455a2131e2e8067a07b0b300cbabe2b",
+      "disposition": "test-support",
+      "reason": "Checks successful and timed-out Lambda target responses over a real HTTP connection whose initial write deadline is shorter than guest execution.",
+      "models": []
+    },
+    {
       "path": "internal/aws/elb_dispatch.go",
       "sha256": "7a5fb5fdb89363f1f4b6c73ae8e2c375232092372c3e95d7c75ca32233cfe2b5",
       "disposition": "modeled",
@@ -166,9 +173,9 @@
     },
     {
       "path": "internal/aws/elb_target.go",
-      "sha256": "8be7b639dd1fd1e50a2143c03941ff225f70b7b8fbaf0b1ede21e7088f680b81",
+      "sha256": "3f9d6e7253f5482fdc06a9b50e331bbe837fd724f3e384d22cb233f8c9b042f0",
       "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
+      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction. HTTP responses retain a bounded initialization/execution budget and write grace; deadline behavior is checked by a real-connection regression, not the finite model.",
       "models": [
         {
           "id": "ELBTargetLifecycle",
