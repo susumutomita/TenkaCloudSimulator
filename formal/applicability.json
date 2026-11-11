@@ -32,7 +32,7 @@
     },
     {
       "path": "docs/elb.md",
-      "sha256": "9e18a10735abd0d27fdf84975c679155af4a5ea81ac2ec19cb7b7f95c5e98582",
+      "sha256": "7d5a9f171ced56a06ad7e8d8b2d677c277cafb26a57c52b748d3e502e0a80807",
       "disposition": "documentation",
       "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
       "models": []
@@ -106,7 +106,7 @@
     },
     {
       "path": "internal/aws/elb_dispatch.go",
-      "sha256": "68e7d4f2353eafbc7a76bc93172e89643a525bfebd31b38f28c177bfd5e5659d",
+      "sha256": "7a5fb5fdb89363f1f4b6c73ae8e2c375232092372c3e95d7c75ca32233cfe2b5",
       "disposition": "modeled",
       "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
       "models": [
@@ -146,7 +146,7 @@
     },
     {
       "path": "internal/aws/elb_store.go",
-      "sha256": "1a044a33f8760b0660f4e6c28c875a82b749954af9c5c5767e7af1f303a9df3d",
+      "sha256": "30551c9098d3d4c9cf90ce8df2b555f66f0bf8dcc5d26dee57d1ab03ddd460ee",
       "disposition": "modeled",
       "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
       "models": [
@@ -166,7 +166,7 @@
     },
     {
       "path": "internal/aws/elb_target.go",
-      "sha256": "65d5f84dde9adcaee8452ab6ec26fa753b6be80ce93f96de1c195ff720250eaf",
+      "sha256": "8be7b639dd1fd1e50a2143c03941ff225f70b7b8fbaf0b1ede21e7088f680b81",
       "disposition": "modeled",
       "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
       "models": [
@@ -186,14 +186,14 @@
     },
     {
       "path": "internal/aws/elb_target_test.go",
-      "sha256": "58b27ef9c94169378e47899787f8f5eadda90307e1d9857cc78212a896afabe8",
+      "sha256": "4fbd6317eb19e54f401b0a9445d7cb08cdb2548d35fc38fd55316b195144ea50",
       "disposition": "test-support",
       "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
       "models": []
     },
     {
       "path": "internal/aws/elb_test.go",
-      "sha256": "5ea0309b7b81a62299ad6c44088df16932ae0ae97e215ada77beda6705607d8d",
+      "sha256": "4d726582684f36e3652b32677843fa373da438a833d34a55dc4fd383bc553d9c",
       "disposition": "test-support",
       "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
       "models": []
@@ -267,7 +267,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "487b5f66c5debbac42f904488cab5bd5b3df6b81d37bc3e81b043fad480e656e",
+      "sha256": "26751c242d0a25d354b377db6b218fb92d62ea6861a4aef4dde4daf8969909fb",
       "disposition": "modeled",
       "reason": "Composes the ELB store, owns the health-check loop lifecycle before runtime and store close, and publishes capabilities.",
       "models": [

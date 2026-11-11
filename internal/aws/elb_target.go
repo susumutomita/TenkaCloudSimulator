@@ -29,6 +29,7 @@ const elbEventBytes = apirouting.MaxProxyEventBytes
 var (
 	errELBTargetTimeout = errors.New("the Lambda target did not respond before the deadline")
 	errELBTargetFailed  = errors.New("the Lambda target invocation failed")
+	errELBInternal      = errors.New("the simulator could not read or run the target")
 )
 
 type elbEventContext struct {
@@ -61,6 +62,9 @@ func elbParseResponse(payload []byte) (int, map[string]string, []byte, error) {
 	if len(payload) > elbEventBytes || !utf8.Valid(payload) {
 		return 0, nil, nil, errELBTargetFailed
 	}
+	if !elbExactFields(payload, "statusCode", "statusDescription", "headers", "body", "isBase64Encoded") {
+		return 0, nil, nil, errELBTargetFailed
+	}
 	decoder := json.NewDecoder(bytes.NewReader(payload))
 	decoder.DisallowUnknownFields()
 	var response elbLambdaResponse
@@ -85,6 +89,30 @@ func elbParseResponse(payload []byte) (int, map[string]string, []byte, error) {
 		body = decoded
 	}
 	return status, response.Headers, body, nil
+}
+
+// elbExactFields requires one top-level object whose member names are spelled
+// exactly as documented and appear at most once. encoding/json alone would
+// accept other letter cases and silently keep the last duplicate.
+func elbExactFields(payload []byte, allowed ...string) bool {
+	decoder := json.NewDecoder(bytes.NewReader(payload))
+	if token, err := decoder.Token(); err != nil || token != json.Delim('{') {
+		return false
+	}
+	seen := map[string]bool{}
+	for decoder.More() {
+		token, err := decoder.Token()
+		name, ok := token.(string)
+		if err != nil || !ok || seen[name] || !slices.Contains(allowed, name) {
+			return false
+		}
+		seen[name] = true
+		var value json.RawMessage
+		if decoder.Decode(&value) != nil {
+			return false
+		}
+	}
+	return true
 }
 func elbHeader(name, value string) bool {
 	if name == "" {
@@ -162,49 +190,76 @@ func elbHealthEvent(targetGroup, path string) []byte {
 	return data
 }
 
+// elbGuestContext keeps the caller's cancellation but none of its values, so
+// an SDK session policy or identity attached to the incoming request can never
+// replace the saved execution role in the guest's bounded SDK calls.
+func elbGuestContext(parent context.Context) (context.Context, context.CancelFunc) {
+	ctx, cancel := context.WithCancel(context.Background())
+	stop := context.AfterFunc(parent, cancel)
+	return ctx, func() { stop(); cancel() }
+}
+
+// elbTargetError separates target configuration failures (missing function,
+// permission or trusted role) from simulator storage or runtime failures.
+func elbTargetError(err error, missing ...error) error {
+	var failure ssmFailure
+	if errors.As(err, &failure) || slices.ContainsFunc(missing, func(e error) bool { return errors.Is(err, e) }) {
+		return errELBTargetFailed
+	}
+	return errELBInternal
+}
+
 // invokeELBTarget runs the registered function with Elastic Load Balancing's
 // authority: the function's resource policy must allow this exact target group.
 // Function, policy and execution role are captured in one read transaction,
 // which closes before guest code runs and may call the same database.
 func (g *Gateway) invokeELBTarget(ctx context.Context, region, targetGroup, function string, event []byte, limit time.Duration) ([]byte, error) {
 	name, err := elbFunctionName(region, function)
-	if err != nil || g.Lambdas == nil {
+	if err != nil {
 		return nil, errELBTargetFailed
+	}
+	if g.Lambdas == nil {
+		return nil, errELBInternal
 	}
 	tx, err := g.Lambdas.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, errELBTargetFailed
+		return nil, errELBInternal
 	}
 	defer tx.Rollback()
 	var data string
 	if err = tx.QueryRowContext(ctx, "SELECT document FROM aws_lambda_functions WHERE region=? AND name=?", region, name).Scan(&data); err != nil {
-		return nil, errELBTargetFailed
+		return nil, elbTargetError(err, sql.ErrNoRows)
 	}
 	var saved LambdaFunction
 	if err = json.Unmarshal([]byte(data), &saved); err != nil || saved.Name != name || saved.Region != region {
-		return nil, errELBTargetFailed
+		return nil, errELBInternal
 	}
 	policy, _, err := lambdaPolicyRead(ctx, tx, region, name)
-	if err != nil || !lambdaPolicyAllowsELB(policy, region, name, targetGroup) {
+	if err != nil {
+		return nil, elbTargetError(err)
+	}
+	if !lambdaPolicyAllowsELB(policy, region, name, targetGroup) {
 		return nil, errELBTargetFailed
 	}
 	if err = iamExecutionRole(ctx, tx, saved.Role); err != nil {
-		return nil, errELBTargetFailed
+		return nil, elbTargetError(err)
 	}
 	if err = tx.Commit(); err != nil {
-		return nil, errELBTargetFailed
+		return nil, errELBInternal
 	}
 	timeout := time.Duration(saved.Timeout) * time.Second
-	bounded := limit > 0 && limit < timeout
+	bounded := limit > 0 && limit <= timeout
 	if bounded {
 		timeout = limit
 	}
+	guest, cancel := elbGuestContext(ctx)
+	defer cancel()
 	// One-time runtime initialization is not charged to the target deadline.
-	runner, err := g.Lambdas.runner(ctx)
+	runner, err := g.Lambdas.runner(guest)
 	if err != nil {
-		return nil, errELBTargetFailed
+		return nil, errELBInternal
 	}
-	result, err := runner.Run(ctx, pythonruntime.Invocation{Exchange: g.lambdaExchange(saved, region), Modules: lambdaSDKFiles(), Code: saved.Code, Handler: saved.Handler, Event: event, Environment: saved.Environment, Context: map[string]string{"function_name": saved.Name, "function_version": "$LATEST", "invoked_function_arn": lambdaARN(region, name)}, Timeout: timeout})
+	result, err := runner.Run(guest, pythonruntime.Invocation{Exchange: g.lambdaExchange(saved, region), Modules: lambdaSDKFiles(), Code: saved.Code, Handler: saved.Handler, Event: event, Environment: saved.Environment, Context: map[string]string{"function_name": saved.Name, "function_version": "$LATEST", "invoked_function_arn": lambdaARN(region, name)}, Timeout: timeout})
 	if err != nil && bounded && errors.Is(err, context.DeadlineExceeded) && ctx.Err() == nil {
 		return nil, errELBTargetTimeout // The health check timeout, not the function's own.
 	}
@@ -313,7 +368,10 @@ func (g *Gateway) serveELBTraffic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	payload, err := g.invokeELBTarget(r.Context(), region, action.TargetGroupARN, route.target, event, 0)
-	if err != nil {
+	if errors.Is(err, errELBInternal) {
+		elbPlainError(w, 500, "The simulator could not read or run the Lambda target.")
+		return
+	} else if err != nil {
 		elbPlainError(w, 502, "The Lambda target failed, timed out, was not permitted or no longer exists.")
 		return
 	}
@@ -351,22 +409,26 @@ type elbCheck struct {
 // returns how many results were recorded. A result is recorded only when the
 // target group epoch and registration still match the snapshot taken before
 // the guest ran; registration, health-setting and listener changes discard it.
-func (g *Gateway) RunELBHealthChecks(ctx context.Context, now time.Time, limit int) (int, error) {
+// Each check's next due time starts from that check's own start, read from now.
+func (g *Gateway) RunELBHealthChecks(ctx context.Context, now func() time.Time, limit int) (int, error) {
 	if g.ELB == nil {
 		return 0, nil
 	}
-	checks, err := g.ELB.dueChecks(ctx, now, limit)
+	checks, err := g.ELB.dueChecks(ctx, now(), limit)
 	if err != nil {
 		return 0, err
 	}
 	recorded := 0
 	for _, check := range checks {
 		region := elbTGARNPattern.FindStringSubmatch(check.group)[1]
+		started := now()
 		payload, err := g.invokeELBTarget(ctx, region, check.group, check.function, elbHealthEvent(check.group, check.health.Path), time.Duration(check.health.Timeout)*time.Second)
 		reason, description := "", ""
 		switch {
 		case errors.Is(err, errELBTargetTimeout):
 			reason, description = "Target.Timeout", "Request timed out"
+		case errors.Is(err, errELBInternal):
+			reason, description = "Elb.InternalError", "Health checks failed due to an internal error"
 		case err != nil:
 			reason, description = "Target.FailedHealthChecks", "Health checks failed"
 		default:
@@ -380,7 +442,7 @@ func (g *Gateway) RunELBHealthChecks(ctx context.Context, now time.Time, limit i
 		if ctx.Err() != nil {
 			return recorded, ctx.Err()
 		}
-		saved, err := g.ELB.recordCheck(ctx, check, now, reason, description)
+		saved, err := g.ELB.recordCheck(ctx, check, started, reason, description)
 		if err != nil {
 			return recorded, err
 		}
@@ -461,7 +523,9 @@ func (g *Gateway) ELBHealthLoop(ctx context.Context, tick time.Duration) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			_, _ = g.RunELBHealthChecks(ctx, time.Now(), 4)
+			// Failures are not hidden as health: an unreadable configuration or
+			// store leaves the recorded state unchanged and is retried next tick.
+			_, _ = g.RunELBHealthChecks(ctx, time.Now, 4)
 		}
 	}
 }

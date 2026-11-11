@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 )
 
 func elbZIP(t *testing.T, source string) []byte {
@@ -60,6 +62,8 @@ func elbSave(t *testing.T, h *elbHarness, name, health string, update bool) Lamb
 	}
 	return function
 }
+
+func elbAt(at time.Time) func() time.Time { return func() time.Time { return at } }
 
 func (h *elbHarness) traffic(method, path, body string, headers map[string]string) *httptest.ResponseRecorder {
 	r := httptest.NewRequest(method, "http://127.0.0.1"+path, strings.NewReader(body))
@@ -197,17 +201,21 @@ func TestELBRoutesToSavedLambdaAndTracksHealthTransitions(t *testing.T) {
 	later := time.Now().Add(time.Hour)
 	run := func(at time.Time) {
 		t.Helper()
-		if n, err := h.gateway.RunELBHealthChecks(ctx, at, 4); err != nil || n != 1 {
+		if n, err := h.gateway.RunELBHealthChecks(ctx, elbAt(at), 4); err != nil || n != 1 {
 			t.Fatal(n, err)
 		}
 	}
 	run(later)
 	elbState(t, h.health(tg.TargetGroupArn), "initial", "Elb.InitialHealthChecking")
-	if n, err := h.gateway.RunELBHealthChecks(ctx, later, 4); err != nil || n != 0 {
+	if n, err := h.gateway.RunELBHealthChecks(ctx, elbAt(later), 4); err != nil || n != 0 {
 		t.Fatal("a check ran again before its interval", n, err)
 	}
 	later = later.Add(5 * time.Second)
 	run(later)
+	elbState(t, h.health(tg.TargetGroupArn), "healthy", "")
+	// Re-applying identical settings is not a change and keeps the health.
+	h.ok("ModifyTargetGroup", "TargetGroupArn", tg.TargetGroupArn)
+	h.ok("ModifyTargetGroup", "TargetGroupArn", tg.TargetGroupArn, "HealthCheckIntervalSeconds", "5", "Matcher.HttpCode", "200")
 	elbState(t, h.health(tg.TargetGroupArn), "healthy", "")
 	elbSave(t, h, "alb-app", "500", true)
 	later = later.Add(5 * time.Second)
@@ -250,7 +258,7 @@ func TestELBRoutesToSavedLambdaAndTracksHealthTransitions(t *testing.T) {
 
 	h.ok("ModifyTargetGroup", "TargetGroupArn", tg.TargetGroupArn, "HealthCheckEnabled", "false")
 	elbState(t, h.health(tg.TargetGroupArn), "unavailable", "Target.HealthCheckDisabled")
-	if n, err := h.gateway.RunELBHealthChecks(ctx, later.Add(time.Hour), 4); err != nil || n != 0 {
+	if n, err := h.gateway.RunELBHealthChecks(ctx, elbAt(later.Add(time.Hour)), 4); err != nil || n != 0 {
 		t.Fatal("disabled health checks invoked the target", n, err)
 	}
 	if err := h.gateway.LambdaPermissions.Remove(ctx, "us-east-1", function.Name, "elb", ""); err != nil {
@@ -283,7 +291,7 @@ func TestELBHealthReportsUnusedTargetsAndSkipsUnusedGroups(t *testing.T) {
 	}
 	h.ok("RegisterTargets", "TargetGroupArn", tg.TargetGroupArn, "Targets.member.1.Id", lambdaARN("us-east-1", function.Name))
 	elbState(t, h.health(tg.TargetGroupArn), "unused", "Target.NotInUse")
-	if n, err := h.gateway.RunELBHealthChecks(ctx, time.Now().Add(time.Hour), 4); err != nil || n != 0 {
+	if n, err := h.gateway.RunELBHealthChecks(ctx, elbAt(time.Now().Add(time.Hour)), 4); err != nil || n != 0 {
 		t.Fatal("unused target group was health checked", n, err)
 	}
 	lb := h.loadBalancer("idle")
@@ -297,7 +305,7 @@ func TestELBHealthReportsUnusedTargetsAndSkipsUnusedGroups(t *testing.T) {
 		t.Fatal("target registration outlived its target group", rows, err)
 	}
 	var nilGateway Gateway
-	if n, err := nilGateway.RunELBHealthChecks(ctx, time.Now(), 1); n != 0 || err != nil {
+	if n, err := nilGateway.RunELBHealthChecks(ctx, elbAt(time.Now()), 1); n != 0 || err != nil {
 		t.Fatal(n, err)
 	}
 	loop, stop := context.WithCancel(ctx)
@@ -309,7 +317,7 @@ func TestELBHealthReportsUnusedTargetsAndSkipsUnusedGroups(t *testing.T) {
 }
 
 func TestELBResponseAndEventProjectionBoundaries(t *testing.T) {
-	for _, payload := range []string{`{"statusCode":99}`, `{"statusCode":200,"multiValueHeaders":{}}`, `{"body":"x"}`, `{"statusCode":200,"headers":{"Bad Name":"x"}}`, `{"statusCode":200,"headers":{"X":"a\nb"}}`, `{"statusCode":200,"isBase64Encoded":true,"body":"%%"}`, `{"statusCode":200} {}`, "\xff"} {
+	for _, payload := range []string{`{"StatusCode":200}`, `{"statusCode":200,"statusCode":201}`, `{"statusCode":200,"BODY":"x"}`, `[]`, `{"statusCode":99}`, `{"statusCode":200,"multiValueHeaders":{}}`, `{"body":"x"}`, `{"statusCode":200,"headers":{"Bad Name":"x"}}`, `{"statusCode":200,"headers":{"X":"a\nb"}}`, `{"statusCode":200,"isBase64Encoded":true,"body":"%%"}`, `{"statusCode":200} {}`, "\xff"} {
 		if _, _, _, err := elbParseResponse([]byte(payload)); err == nil {
 			t.Fatal("malformed response accepted:", payload)
 		}
@@ -342,7 +350,10 @@ func TestELBResponseAndEventProjectionBoundaries(t *testing.T) {
 		t.Fatal("matcher ranges")
 	}
 	g := &Gateway{}
-	if _, err := g.invokeELBTarget(context.Background(), "us-east-1", "tg", lambdaARN("us-east-1", "x"), []byte(`{}`), 0); err != errELBTargetFailed {
+	if _, err := g.invokeELBTarget(context.Background(), "us-east-1", "tg", "not-an-arn", []byte(`{}`), 0); err != errELBTargetFailed {
+		t.Fatal(err)
+	}
+	if _, err := g.invokeELBTarget(context.Background(), "us-east-1", "tg", lambdaARN("us-east-1", "x"), []byte(`{}`), 0); err != errELBInternal {
 		t.Fatal(err)
 	}
 	if w := httptest.NewRecorder(); true {
@@ -351,4 +362,64 @@ func TestELBResponseAndEventProjectionBoundaries(t *testing.T) {
 			t.Fatal(w.Code)
 		}
 	}
+}
+
+// A caller's SDK session policy on the data-plane request must not become the
+// guest's authority: SDK calls inside the target use only its execution role.
+func TestELBTargetGuestNeverInheritsCallerSessionAuthority(t *testing.T) {
+	ctx := context.Background()
+	h := newELBHarness(t)
+	parameters, err := NewParameterStore(h.store.Database())
+	if err != nil {
+		t.Fatal(err)
+	}
+	h.gateway.Parameters = parameters
+	if _, err = parameters.Put("us-east-1", "/elb/private", "String", "private-dummy", nil, false); err != nil {
+		t.Fatal(err)
+	}
+	none, err := core.ParsePolicy([]byte(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"s3:GetObject","Resource":"arn:aws:s3:::unrelated/*"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = h.gateway.Identities.Set("no-ssm", none); err != nil {
+		t.Fatal(err)
+	}
+	source := "import boto3\ndef handler(event, context):\n    try:\n        value = boto3.client('ssm').get_parameter(Name='/elb/private')['Parameter']['Value']\n    except Exception as exc:\n        value = 'denied:' + type(exc).__name__\n    return {'statusCode': 200, 'body': value}\n"
+	function := LambdaFunction{Name: "probe", Region: "us-east-1", Role: "arn:aws:iam::000000000000:role/no-ssm", Handler: "app.handler", Timeout: 10, Code: elbZIP(t, source)}
+	if err = h.gateway.Lambdas.save(&function, true, ""); err != nil {
+		t.Fatal(err)
+	}
+	lb := h.loadBalancer("probe")
+	tg := h.targetGroup("probe")
+	h.forward(lb.LoadBalancerArn, tg.TargetGroupArn, "80")
+	if _, err = h.gateway.LambdaPermissions.Add(ctx, "us-east-1", "probe", "elb", lambdaELBPrincipal, "lambda:InvokeFunction", tg.TargetGroupArn, ""); err != nil {
+		t.Fatal(err)
+	}
+	h.ok("RegisterTargets", "TargetGroupArn", tg.TargetGroupArn, "Targets.member.1.Id", lambdaARN("us-east-1", "probe"))
+	everything, err := core.ParsePolicy([]byte(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"*","Resource":"*"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := httptest.NewRequest("GET", "http://127.0.0.1/_elb/us-east-1/probe/80/", nil)
+	r = r.WithContext(context.WithValue(r.Context(), sdkPolicyContextKey{}, everything))
+	w := httptest.NewRecorder()
+	h.gateway.ServeHTTP(w, r)
+	if w.Code != 200 || !strings.HasPrefix(w.Body.String(), "denied:") || strings.Contains(w.Body.String(), "private-dummy") {
+		t.Fatal("guest used the caller's session authority:", w.Code, w.Body.String())
+	}
+	// Simulator-side failures are internal errors, not target health or 502.
+	if _, err = h.store.Database().Exec("UPDATE aws_lambda_functions SET document='{'"); err != nil {
+		t.Fatal(err)
+	}
+	if got := h.traffic("GET", "/_elb/us-east-1/probe/80/", "", nil); got.Code != 500 {
+		t.Fatal(got.Code, got.Body.String())
+	}
+	h.ok("ModifyTargetGroup", "TargetGroupArn", tg.TargetGroupArn, "HealthCheckEnabled", "true", "HealthCheckIntervalSeconds", "5", "HealthCheckTimeoutSeconds", "2", "UnhealthyThresholdCount", "2")
+	at := time.Now().Add(time.Hour)
+	for i := 0; i < 2; i++ {
+		if n, err := h.gateway.RunELBHealthChecks(ctx, elbAt(at.Add(time.Duration(i)*5*time.Second)), 4); err != nil || n != 1 {
+			t.Fatal(n, err)
+		}
+	}
+	elbState(t, h.health(tg.TargetGroupArn), "unhealthy", "Elb.InternalError")
 }

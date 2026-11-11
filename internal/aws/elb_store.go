@@ -439,9 +439,14 @@ func (s *ELBStore) ModifyTargetGroup(ctx context.Context, region, arn string, ch
 	if err != nil {
 		return ELBTargetGroup{}, err
 	}
-	if tg.Health, err = change(tg.Health); err != nil {
+	next, err := change(tg.Health)
+	if err != nil {
 		return ELBTargetGroup{}, err
 	}
+	if next == tg.Health {
+		return tg, tx.Commit() // An unchanged configuration keeps the current health.
+	}
+	tg.Health = next
 	data, _ := json.Marshal(tg)
 	if _, err = tx.ExecContext(ctx, "UPDATE aws_elb_target_groups SET document=?,checks=? WHERE arn=?", string(data), tg.Health.Enabled, arn); err != nil {
 		return ELBTargetGroup{}, err

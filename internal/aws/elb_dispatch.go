@@ -346,7 +346,10 @@ func elbCreateTargetGroup(s *ELBStore, r *http.Request, f *elbForm, region strin
 }
 
 func elbDescribeTargetGroups(s *ELBStore, r *http.Request, f *elbForm, region string, authorize func(string, string) error) (any, error) {
-	loadBalancer, _ := f.get("LoadBalancerArn")
+	loadBalancer, filtered := f.get("LoadBalancerArn")
+	if filtered && loadBalancer == "" {
+		return nil, elbInvalid("LoadBalancerArn must not be empty.")
+	}
 	arns, err := f.strings("TargetGroupArns", 20)
 	if err != nil {
 		return nil, err

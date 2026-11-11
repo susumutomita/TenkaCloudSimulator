@@ -314,6 +314,7 @@ func TestELBRefusesUnsupportedOrInvalidInputWithoutChangingState(t *testing.T) {
 		{"both filters", "ValidationError", "DescribeLoadBalancers", []string{"Names.member.1", "a", "LoadBalancerArns.member.1", lb.LoadBalancerArn}},
 		{"listener filters", "ValidationError", "DescribeListeners", nil},
 		{"tg filters", "ValidationError", "DescribeTargetGroups", []string{"Names.member.1", "a", "LoadBalancerArn", lb.LoadBalancerArn}},
+		{"empty lb filter", "ValidationError", "DescribeTargetGroups", []string{"LoadBalancerArn", ""}},
 		{"bare list value", "ValidationError", "DescribeLoadBalancers", []string{"Names", "a"}},
 		{"too many names", "ValidationError", "DescribeLoadBalancers", strings.Split(strings.Repeat("Names.member.1,a,", 1)+"Names.member.2,b,Names.member.3,c,Names.member.4,d,Names.member.5,e,Names.member.6,f,Names.member.7,g,Names.member.8,h,Names.member.9,i,Names.member.10,j,Names.member.11,k,Names.member.12,l,Names.member.13,m,Names.member.14,n,Names.member.15,o,Names.member.16,p,Names.member.17,q,Names.member.18,r,Names.member.19,s,Names.member.20,t,Names.member.21,u", ",")},
 		{"include", "ValidationError", "DescribeTargetHealth", []string{"TargetGroupArn", tg.TargetGroupArn, "Include.member.1", "AnomalyDetection"}},
@@ -495,7 +496,7 @@ func TestELBInternalFailuresAreNotReportedAsSuccess(t *testing.T) {
 	for _, c := range [][]string{
 		{"DescribeTargetHealth", "TargetGroupArn", tg.TargetGroupArn},
 		{"DeregisterTargets", "TargetGroupArn", tg.TargetGroupArn, "Targets.member.1.Id", lambdaARN("us-east-1", "fn")},
-		{"ModifyTargetGroup", "TargetGroupArn", tg.TargetGroupArn},
+		{"ModifyTargetGroup", "TargetGroupArn", tg.TargetGroupArn, "HealthCheckEnabled", "true"},
 	} {
 		h.fail("InternalFailure", 500, c[0], c[1:]...)
 	}
@@ -570,7 +571,7 @@ func TestELBStorageFailuresNeverReportSuccess(t *testing.T) {
 	if _, err := h.store.Database().Exec("UPDATE aws_elb_listeners SET target_group=?", tg.TargetGroupArn); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := h.gateway.RunELBHealthChecks(context.Background(), time.Now(), 1); err == nil {
+	if _, err := h.gateway.RunELBHealthChecks(context.Background(), time.Now, 1); err == nil {
 		t.Fatal("corrupted health configuration was checked")
 	}
 	// A closed database fails every operation and the health pass.
@@ -580,7 +581,7 @@ func TestELBStorageFailuresNeverReportSuccess(t *testing.T) {
 	for _, request := range requests {
 		h.fail("InternalFailure", 500, request[0], request[1:]...)
 	}
-	if _, err := h.gateway.RunELBHealthChecks(context.Background(), time.Now(), 1); err == nil {
+	if _, err := h.gateway.RunELBHealthChecks(context.Background(), time.Now, 1); err == nil {
 		t.Fatal("closed database reported a successful health pass")
 	}
 	if _, err := h.gateway.ELB.recordCheck(context.Background(), elbCheck{group: tg.TargetGroupArn}, time.Now(), "", ""); err == nil {

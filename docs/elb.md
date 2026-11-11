@@ -43,7 +43,7 @@ and packet routing, which are not available, so `TargetType` other than
   disabled, path `/`, interval 35 s (5–300), timeout 30 s (2–120, smaller than
   the interval), healthy and unhealthy thresholds 5 (2–10), matcher `200`
   (codes or ranges from 200 to 499). ModifyTargetGroup changes only these
-  health settings. A target group is used by at most one load balancer
+  health settings; re-applying identical settings is not a change. A target group is used by at most one load balancer
   (`TargetGroupAssociationLimit`); one in use by a listener cannot be deleted
   (`ResourceInUse`). Deleting a missing target group or load balancer succeeds.
 - **Targets** are one unqualified same-region Lambda function ARN per target
@@ -90,13 +90,17 @@ base64-encoded. `host`, `x-forwarded-for`, `x-forwarded-proto` and
 `x-forwarded-port` are added. Cookies, `X-Simulator-*` headers, SigV4
 `Authorization` and session tokens never reach the guest. The function runs
 with its saved execution role, region, timeout and the bounded SDK bridge, the
-same as Lambda Invoke. The response must contain `statusCode` and may contain
-`statusDescription`, `headers`, `body` and `isBase64Encoded`; any other field
+same as Lambda Invoke. The guest context carries no value from the incoming
+request, so a caller's SDK session policy or identity never replaces the
+execution role in guest SDK calls. The response must be one JSON object with
+`statusCode` and optionally `statusDescription`, `headers`, `body` and
+`isBase64Encoded`, each spelled exactly and at most once; any other member
 (including `multiValueHeaders`) makes it malformed.
 
 Status codes follow the load balancer's documented behavior where it is
 defined: no registered target is 503; a function error, timeout, malformed or
 oversized response, missing function or missing ELB invoke permission is 502.
+A simulator storage or runtime failure is 500.
 An unknown load balancer or a port without a listener is 404, because there is
 no network endpoint to refuse a connection. Bodies and events are limited to
 the simulator's 256 KiB Lambda event size, not the AWS 1 MB limit. As with
@@ -109,21 +113,27 @@ type is replaced, so exercise output never runs on the console origin.
 When a health-enabled target group is used by a listener and has a registered
 function, the process invokes the function with the documented health check
 event (`GET` of `HealthCheckPath`, `user-agent: ELB-HealthChecker/2.0`) every
-`HealthCheckIntervalSeconds`, one check at a time. A check succeeds when the
+`HealthCheckIntervalSeconds`, measured from the start of its previous check,
+one check at a time. A check succeeds when the
 response status matches the matcher. Consecutive results move the target
 between `initial` (`Elb.InitialHealthChecking`), `healthy` and `unhealthy`
 with `Target.ResponseCodeMismatch` ("Health checks failed with these codes:
-[N]"), `Target.Timeout` (no answer within `HealthCheckTimeoutSeconds`) or
-`Target.FailedHealthChecks` (error, malformed response or missing permission).
+[N]"), `Target.Timeout` (no answer within `HealthCheckTimeoutSeconds` when
+that is not longer than the function timeout), `Target.FailedHealthChecks`
+(function error or timeout, malformed response, missing function, permission
+or trusted role) or `Elb.InternalError` (simulator storage or runtime failure).
 A target group without listeners reports `unused`/`Target.NotInUse` and is not
 checked; disabled checks report `unavailable`/`Target.HealthCheckDisabled`;
 a requested unregistered target reports `unused`/`Target.NotRegistered`.
 
 Registration, listener and health-setting changes start a new health epoch
-and restart from `initial`. The configuration is read in one transaction,
-the guest runs with no transaction held, and the result is recorded only if
-the epoch and registration are unchanged, so a stale result cannot overwrite
-a newer configuration. A single unhealthy Lambda target still receives traffic
+and restart from `initial`. The due checks are selected first; the function,
+its resource policy and execution role are then read in one transaction that
+closes before the guest runs; the result is recorded only if the epoch and
+registration are still unchanged, so a stale result cannot overwrite a newer
+configuration. If the health configuration cannot be read, recorded health is
+left unchanged and the pass is retried on the next one-second tick; there is
+no separate error log. A single unhealthy Lambda target still receives traffic
 (the load balancer fails open). Health checks stop when the process stops;
 time spent stopped is not replayed. There are no CloudWatch metrics, access
 logs or anomaly detection.
