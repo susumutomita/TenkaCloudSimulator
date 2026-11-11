@@ -48,7 +48,7 @@ locally locked hashes detect later same-version replacement.
 
 ## Prepare from a fixed source
 
-Use Python 3.11+ with tarfile's data filter and Go 1.26.10. The repository embeds
+Use Python 3.11+ with tarfile's data filter and Go 1.26.11. The repository embeds
 its runtime/UI assets. Building needs the Go modules cached or registry access;
 running the binary needs no Go, Python, Node, Docker or external database.
 

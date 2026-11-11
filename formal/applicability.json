@@ -3,10 +3,24 @@
   "base_sha": "ade9f93970168c145b4189b636190eddb8271f09",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "3b28d1e5c2f6ed8be25d98760b375834e94e0f4457fe6bcb0eeef2ed07fd87b5",
+      "disposition": "formal-infrastructure",
+      "reason": "Pins both CI build jobs to Go 1.26.11; security scanning and every validation gate remain mandatory.",
+      "models": []
+    },
+    {
       "path": ".github/workflows/formal.yml",
       "sha256": "ca5ebe4f613a19ded222b824ad4b952732372ed1796a4ed87523e13f440a67b7",
       "disposition": "formal-infrastructure",
       "reason": "Extends only the outer serial validation job budget to 45 minutes for the 72-model registry and guard tests; all per-case deadlines, invariants, negative controls, applicability checks and retained evidence remain unchanged.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "sha256": "a725f9865d7a6c600d3626119e1c27fa15f7b375490bb99c59929f11003e60d7",
+      "disposition": "formal-infrastructure",
+      "reason": "Pins the release build toolchain to Go 1.26.11 without changing release authorization, draft-first publication or validation dependencies.",
       "models": []
     },
     {
@@ -21,6 +35,13 @@
       "sha256": "7aff7d456b38df793aedaa5bae36ec4e652d2d4dfe70879f95151ed4b6e8a7c0",
       "disposition": "documentation",
       "reason": "Documents the supported public SSM batch API, compatibility limits and permanent service reference links; no implementation state or progress record.",
+      "models": []
+    },
+    {
+      "path": "docs/releases.md",
+      "sha256": "9da628018e562bdd4d53a1e8986b6e08d88500760b458c36dd0b27eaa305853e",
+      "disposition": "documentation",
+      "reason": "Documents the required patched Go 1.26.11 release toolchain.",
       "models": []
     },
     {
@@ -370,6 +391,13 @@
       "models": []
     },
     {
+      "path": "scripts/build-release.py",
+      "sha256": "c201be3bad0171d5dbbf6bfaa8b6c4a2d047b0f6422c31524b4ba43e1bb4d72b",
+      "disposition": "validation-tooling",
+      "reason": "Requires exact Go 1.26.11 for release builds, refusing previous vulnerable patch versions before producing artifacts.",
+      "models": []
+    },
+    {
       "path": "scripts/formal_model_gate.py",
       "sha256": "fa6219203c273895431f4960f1a9ba97e99346d2e93c3f5bb680e224b13a2403",
       "disposition": "formal-infrastructure",
@@ -381,6 +409,20 @@
       "sha256": "b0f1ddbc392ac5768f83c55133df80c07e47a2a7491d07be17f7da3bb1be25d9",
       "disposition": "formal-infrastructure",
       "reason": "Adds and protects both independent bounded batch models, their required invariants, source scopes and exact sensitivity controls. Every inherited model registration and policy obligation remains unchanged. The literal inventory independently names all 72 models; source registration and detector code are not executed model evidence.",
+      "models": []
+    },
+    {
+      "path": "scripts/verify-release.py",
+      "sha256": "ddce7aec599479abf7d706328a5f396436c5937064706efcd089681d6372b11e",
+      "disposition": "validation-tooling",
+      "reason": "Requires exact Go 1.26.11 in release provenance and retains all existing verification requirements.",
+      "models": []
+    },
+    {
+      "path": "test/ci/release_pipeline.py",
+      "sha256": "cd96a02ea4e2547cc87b0e1dbc38fc2b58d9b5f704570d2f69ac0e4a701a5ac6",
+      "disposition": "test-support",
+      "reason": "Updates pinned toolchain fixtures and tests consistent workflow pins plus Go 1.26.10 refusal in builder and verifier.",
       "models": []
     },
     {
