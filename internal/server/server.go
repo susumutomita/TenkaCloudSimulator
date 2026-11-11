@@ -3,6 +3,7 @@ package server
 import (
 	"embed"
 	"encoding/json"
+	"errors"
 	"io/fs"
 	"net/http"
 	"net/url"
@@ -144,7 +145,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 			return nil, nil, err
 		}
 	}
-	gcpCatalog, err := registerCloudStorage(store.Database(), registry, cloudConfig)
+	gcpCatalog, appEngine, err := registerCloudStorage(store.Database(), registry, cloudConfig)
 	if err != nil {
 		_ = lambdas.Close()
 		_ = store.Close()
@@ -152,6 +153,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 	}
 	azureCatalog, err := registerAzureARM(store.Database(), registry, cloudConfig)
 	if err != nil {
+		_ = appEngine.Close()
 		_ = lambdas.Close()
 		_ = store.Close()
 		return nil, nil, err
@@ -178,7 +180,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(addConsoleHandoffCapabilities(w, r, addSakuraCapabilities(map[string]any{"protocolVersion": "2026-11-03", "principal": r.Header.Get("X-Simulator-Principal"), "identitySelection": r.Header.Get("X-Simulator-Access-Role") != "participant", "simulatorVersion": "0.1.0", "providers": registry.Names(), "cloudStorage": cloudStorageCapabilities(cloudConfig), "gcpCatalog": gcpCatalogCapabilities(gcpCatalog, cloudConfig), "azureCatalog": azureCatalogCapabilities(azureCatalog), "persistence": func() string {
+		_ = json.NewEncoder(w).Encode(addConsoleHandoffCapabilities(w, r, addSakuraCapabilities(map[string]any{"protocolVersion": "2026-11-03", "principal": r.Header.Get("X-Simulator-Principal"), "identitySelection": r.Header.Get("X-Simulator-Access-Role") != "participant", "simulatorVersion": "0.1.0", "providers": registry.Names(), "cloudStorage": cloudStorageCapabilities(cloudConfig), "gcpCatalog": gcpCatalogCapabilities(gcpCatalog, cloudConfig), "gcpAppEngine": gcpAppEngineCapabilities(appEngine, cloudConfig), "azureCatalog": azureCatalogCapabilities(azureCatalog), "persistence": func() string {
 			if path == "" || path == ":memory:" {
 				return "memory"
 			}
@@ -221,7 +223,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		mux.ServeHTTP(w, r)
 	})
 	return handler, func() error {
-		runtimeErr := lambdas.Close()
+		runtimeErr := errors.Join(lambdas.Close(), appEngine.Close())
 		storeErr := store.Close()
 		if runtimeErr != nil {
 			return runtimeErr
