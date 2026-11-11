@@ -30,6 +30,24 @@ class LandingPresentationBoundaryTests(unittest.TestCase):
             self.assertIsNone(disposition(path), path)
 
 
+class PromptDocumentationClassificationTests(unittest.TestCase):
+    def test_only_prompt_markdown_categories_are_documentation(self):
+        for path in ('CLAUDE.md', '.claude/agents/code-reviewer.md',
+                     '.claude/rules/test-authoring.md', '.claude/skills/feature/SKILL.md'):
+            self.assertEqual(disposition(path), 'documentation', path)
+
+    def test_runnable_hooks_settings_and_security_controls_are_not_exempt(self):
+        for path in ('CLAUDE.py', '.claude/settings.json', '.claude/settings.local.json',
+                     '.claude/hooks/pre-tool.sh', '.claude/hooks/guard.py',
+                     '.claude/hooks/policy.md', '.claude/permissions.json',
+                     '.claude/agents/code-reviewer.py', '.claude/rules/policy.json',
+                     '.claude/skills/feature/run.py', '.claude/skills/feature/run.sh',
+                     '.claude/skills/feature/SKILL.md.py',
+                     '.claude/agents/hooks/policy.md', '.claude/rules/hooks/policy.md',
+                     '.claude/skills/feature/hooks/SKILL.md', 'internal/server/access.go'):
+            self.assertIsNone(disposition(path), path)
+
+
 class ReleaseClassificationTests(unittest.TestCase):
     def test_release_validation_classification_is_exact(self):
         for name in ('build-release.py', 'verify-release.py', 'verify-release-tag.py'):
@@ -130,6 +148,68 @@ class ApplicabilityTests(unittest.TestCase):
         self.assertEqual(evidence['changes'][0]['disposition'], 'documentation')
         self.prepare('README.ja.go')
         with self.assertRaisesRegex(GateError, 'unclassified implementation/state path'):
+            validate_record(self.root, self.base)
+
+    def test_prompt_markdown_is_bound_and_settings_cannot_claim_documentation(self):
+        self.prepare('CLAUDE.md')
+        evidence = validate_record(self.root, self.base)
+        self.assertEqual(evidence['changes'][0]['disposition'], 'documentation')
+        self.prepare('.claude/skills/feature/SKILL.md')
+        self.assertEqual(len(validate_record(self.root, self.base)['changes']), 2)
+        self.prepare('.claude/settings.json')
+        with self.assertRaisesRegex(GateError, 'unclassified implementation/state path'):
+            validate_record(self.root, self.base)
+
+    def test_prompt_docs_classification_does_not_override_registered_state_scope(self):
+        path = '.claude/agents/code-reviewer.md'
+        record = self.prepare(path)
+        registry = copy.deepcopy(self.registry)
+        registry['models'][0]['source_scope'].append(path)
+        with self.assertRaisesRegex(GateError, 'declared state/model scope requires'):
+            validate_record(self.root, self.base, registry)
+
+    def test_prompt_markdown_digest_cannot_be_stale(self):
+        self.prepare('CLAUDE.md')
+        (self.root / 'CLAUDE.md').write_text('Different prompt contract')
+        self.commit('changed prompt without updated binding')
+        with self.assertRaisesRegex(GateError, 'stale applicability blob'):
+            validate_record(self.root, self.base)
+
+    def test_nested_prompt_path_cannot_claim_documentation(self):
+        self.prepare('.claude/skills/feature/hooks/SKILL.md')
+        with self.assertRaisesRegex(GateError, 'unclassified implementation/state path'):
+            validate_record(self.root, self.base)
+
+    def test_executable_prompt_path_is_not_documentation(self):
+        self.prepare('CLAUDE.md')
+        (self.root / 'CLAUDE.md').chmod(0o755)
+        self.commit('executable prompt lookalike')
+        with self.assertRaisesRegex(GateError, 'prompt documentation must be regular nonexecutable'):
+            validate_record(self.root, self.base)
+
+    def test_deleted_executable_prompt_requires_explicit_policy_work(self):
+        target = self.root / 'CLAUDE.md'
+        target.write_text('#!/bin/sh\nexit 0\n')
+        target.chmod(0o755)
+        self.commit('executable file existed before change')
+        self.base = git(self.root, 'rev-parse', 'HEAD').decode().strip()
+        target.unlink()
+        git(self.root, 'add', 'CLAUDE.md')
+        initialize(self.root, self.base)
+        record = json.loads((self.root / RECORD).read_text())
+        record['changes'][0].update(disposition='documentation', reason='Removal does not bypass mode checks.')
+        self.write_record(record)
+        self.commit('attempt to relabel executable removal as documentation')
+        with self.assertRaisesRegex(GateError, 'prompt documentation must be regular nonexecutable'):
+            validate_record(self.root, self.base)
+
+    def test_symlink_prompt_cannot_claim_documentation(self):
+        self.prepare('CLAUDE.md')
+        target = self.root / 'CLAUDE.md'
+        target.unlink()
+        target.symlink_to('go.mod')
+        self.commit('symlink prompt lookalike')
+        with self.assertRaisesRegex(GateError, 'symlink/submodule changes require explicit policy work'):
             validate_record(self.root, self.base)
 
     def test_native_provenance_validator_classification_is_exact(self):

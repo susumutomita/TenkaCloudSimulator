@@ -6,9 +6,10 @@ others, access AWS or start agents. Follow the user's current instructions and
 existing authorization without repeatedly requesting approval already given.
 Use the current [working contract](../../AGENTS.md) and
 [service integration contracts](../design/0005-parallel-service-contracts.md).
-Maintain current assignments and evidence in the single
-[development roster](../development-status.md); the service roadmap is a plan,
-not a second live roster. Update the snapshot at claims, handoffs and merges.
+Keep decisions and verification results with the relevant Issue or PR, or in the
+final response when no publication is needed. [Development status](../development-status.md)
+links to those sources; it is not a live roster. Routine work does not require a
+new plan, progress document or tracking file.
 
 ## Before starting an agent
 
@@ -31,9 +32,9 @@ Use explicit status: **planned** means proposed, **reserved** means awaiting an
 owner's acknowledgement, **claimed** means an acknowledged owner/branch/scope,
 **in progress** means work has started, **ready for integration** means a specific
 commit and focused evidence exist, and **merged** requires verified remote merge.
-For example, SQS/SNS/DynamoDB reservations with another team must be checked with
-that team before assignment; do not report them as active or completed merely
-because they appear in a roadmap. External owners retain their agreed files.
+Confirm reservations with the owning team before assignment; a roadmap entry
+alone does not establish active or completed work. External owners retain their
+agreed files.
 
 A useful claim is one paragraph:
 
@@ -44,10 +45,10 @@ A useful claim is one paragraph:
 
 When the user requests maximum parallel development, the integration owner checks
 actual agent state at work start, each handoff or failure, and periodic progress
-reviews. Record the check time, available slot limit, active owners and concrete
-work, vacant slots and reasons in the development roster. Count the integration
-owner as a slot. Track externally hosted workers separately and label unconfirmed
-activity explicitly.
+reviews. Check the available slot limit, acknowledged owners and concrete work
+with the integration owner rather than maintaining a tracked roster. Count the
+integration owner as a slot. Track externally hosted workers separately and label
+unconfirmed activity explicitly.
 
 Refill a completed or failed worker with an independent, authorized Issue scope
 as soon as ownership, dependencies and edit boundaries have been checked. An
@@ -84,10 +85,8 @@ owners when that interface changes; do not silently change another worker's API.
 The [Issues37–44 ownership table](../design/0005-parallel-service-contracts.md)
 is an example of this division: one CFN owner handles both service adapters and
 custom-resource orchestration, while callback, grader HTTP, WAF and UI workers
-own separate files. Issue37's native API Gateway work already has PR45; a worker
-must inspect that PR's actual current state before proposing overlapping work.
-Issue/PR state changes over time, so recheck it rather than treating this example
-as a live status report.
+own separate files. Check the actual current Issue/PR state before proposing
+overlapping work; the design table is not a live status report.
 
 Share native SQLite state, validation, quotas, IAM and ownership rules. Do not
 create a second emulator backend or hold a database transaction while waiting
@@ -103,8 +102,9 @@ a browser operation and a complete original-problem lifecycle. Report the exact
 source hashes used; preserve original problem/grader bytes and license notices.
 Do not include tokens, flags, credentials, private outputs or sensitive logs.
 
-If public logging or another action is denied, preserve a safe local worklog and
-tell the integration owner the exact action/target/status and stated reason.
+If public logging or another action is denied, preserve any necessary safe notes
+outside the repository and tell the integration owner the exact action, target,
+status and stated reason.
 Stop that action, not unrelated authorized work. Do not evade a denial through
 another API, Issue body, PR, account or agent, or by publishing the blocked payload
 inside documentation. Retry only under the applicable approval rules with new

@@ -184,4 +184,5 @@ Cloudscapeを使う独立Simulatorの画面であり、認証済み実AWSコン�
 検証入口は`make before-commit`、`make e2e`、`TLA_JAR=... make formal`。
 モデルは有限状態の抽象化で、Go/SQL/XML/IAMや実AWS互換性全体の形式証明ではない。
 本資料は現在HEADの全gate、coverage、モデル、hosted CIの成功を宣言するものではない。
-結果は[開発状況](development-status.md)と対象commitのCIを確認する。
+結果は対象Issue・PRと対象commitのCIを確認する。
+[開発時の参照先](development-status.md)から辿れる。
