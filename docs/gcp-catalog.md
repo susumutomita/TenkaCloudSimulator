@@ -244,11 +244,12 @@ discovery subsets.
 ## Not served
 
 These open Google Cloud Issues have no catalog API. The reason is either the
-pinned corpus or the service itself.
+pinned corpus or the service itself. App Engine (#318) is not a catalog API:
+its single permanent application and code deployments are served by the native
+[App Engine provider](gcp-appengine.md), which runs Python versions.
 
 | Issue | Service | Reason |
 | --- | --- | --- |
-| #318 | App Engine | `apps.create` creates the project's single application, which has no delete method, and `services.versions.create` deploys code |
 | #319 | Batch | The only create method, `jobs.create`, runs a workload |
 | #323 | Google Cloud Universal Ledger | No discovery document in the pinned corpus |
 | #325 | License Manager | No discovery document in the pinned corpus (`licensing.v1` is Workspace license assignment) |

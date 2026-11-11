@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "d096316726049261b1a1f9d5818c469027e04e2b",
+  "base_sha": "66287bb49d39b22b1974b59773096e9d51004627",
   "changes": [
     {
       "path": "AGENTS.md",
@@ -11,14 +11,14 @@
     },
     {
       "path": "README.ja.md",
-      "sha256": "cca2fb78d9fb64979f4225966d2cab482654f6af6bd0684b6b46d80a89fd40c2",
+      "sha256": "fdb4dc93ccf4c78777d0371674655f89d700b06e074c43cf3f29199a3be467e1",
       "disposition": "documentation",
       "reason": "Japanese link to the opt-in local Bedrock Runtime guide and its limits.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "d3866d9269935e9159dce2e278f6c4a61a73a1f9d09b770fe0d65d4be837363e",
+      "sha256": "1381bf1bbb61ae4fa0319acd09fd6c9aa0c70bad853f7034e80a43e4dfffbf98",
       "disposition": "documentation",
       "reason": "Links the opt-in local Bedrock Runtime guide and states its limits.",
       "models": []
@@ -146,7 +146,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "850258d1778b74b1144f8c48a64ecdf61041df0a39bdc6c8c59886aa63cfc746",
+      "sha256": "d3cd16ac0061dbbcc6330c4f9f6cc0efb9aa9972b0abd15fffef4160af024f73",
       "disposition": "formal-infrastructure",
       "reason": "Registers the Bedrock Runtime admission model with its invariants, fourteen controls and exact source scope without altering existing entries.",
       "models": []
@@ -326,7 +326,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "6324dca92cc5f7ce5b256d7e604f4411d4c91e7ff0f6f6b32c01b85323571f6e",
+      "sha256": "79f0858defff6ce189761a2b4ac88d018a437b16a5c24c32ae1a7241fd6bad06",
       "disposition": "modeled",
       "reason": "Passes the configured runtime to the gateway and adds its capability entry; existing composition and closing are unchanged.",
       "models": [
@@ -342,14 +342,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "6e441c06bcd7571a47b954e8bf304387b9ca05731d2b6931a0f634160089ce5e",
+      "sha256": "121cebbd7358e20be872f412d5cc015063e73cfda9a3c8c660c435089265dee1",
       "disposition": "formal-infrastructure",
       "reason": "Protects the new model's invariants, controls and exact source scope from silent removal.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "48eb3ab72d0305c7fedb548d761a91864fa19b3a8655d687a1f84f3e3689d923",
+      "sha256": "ecc6b8a4becf921a2286af81d553363d965235922a0b5e8ae5825e05c9224155",
       "disposition": "formal-infrastructure",
       "reason": "Adds removal detectors for the new model and names it in the complete registry inventory.",
       "models": []
@@ -363,7 +363,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "da209f1f60ac1fafe589caf04692fa81e22b8ec40ab69188849bc7b4806501b5",
+      "sha256": "f84e060c596435d95a91e00a5679fcd61fabd482bac771bec56934b73ca32572",
       "disposition": "test-support",
       "reason": "Registers the Bedrock Runtime boto3 acceptance in the mandatory E2E suite.",
       "models": []
