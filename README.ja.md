@@ -76,6 +76,7 @@ Python 3.12のみ、ゲストメモリ128 MiB、タイムアウト1〜30秒で�
   [SQS](docs/sqs.md)、[SNS](docs/sns.md)、[CloudWatch Logs](docs/cloudwatch-logs.md)。
 - **認可・シークレット：** [IAM](docs/iam.md)、[native SDK / STS](docs/sts-native.md)、
   [Secrets Manager](docs/secrets-manager.md)、[KMS](docs/kms.md)。
+- **スケーリング：** [ローカルDynamoDBテーブル向けAuto Scaling plans](docs/autoscaling-plans.md)。
 - **構成の作成：** [CloudFormation](docs/cloudformation-rest.md)、
   [SSM値パラメータ](docs/cloudformation-ssm-parameters.md)、
   [native IAM profile](docs/cloudformation-iam-profiles.md)、

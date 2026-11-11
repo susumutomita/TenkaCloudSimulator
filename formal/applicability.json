@@ -1,571 +1,278 @@
 {
   "version": 1,
-  "base_sha": "83c67934e923c6f8f9ea79e3c6335b353c5b2ac8",
+  "base_sha": "d096316726049261b1a1f9d5818c469027e04e2b",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "ae78c7513728ee3d5930e4aaebfded3fcc69ebac3b03ac254ca0cf48094cfb98",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers mandatory component checks or exact finite properties, mutation controls and source-removal guards without weakening existing gates.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-secret-description-workflow.md",
-      "sha256": "5d18300ba148d261f86e9aece9d9ddffcdcb5181bc2d4fedb79cd6421dbc756d",
+      "path": "README.ja.md",
+      "sha256": "b2a40e637d9ef272f81b4e2f23be262acc71aa274f26f7257acb04755e79ace8",
       "disposition": "documentation",
-      "reason": "Defines enduring description workflow semantics and finite assumptions/limits; no progress receipt or intermediate handoff.",
+      "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
       "models": []
     },
     {
-      "path": "docs/formal-secret-metadata-update.md",
-      "sha256": "57679335686780ac9da63bf0f6a8a81b85c49d8c1a9100eef75748e1e85595db",
+      "path": "README.md",
+      "sha256": "edf8ae0c8ceb74ab14cfe771d330f767801103cfbdb8ff1a8dfcb0e65faf5a12",
       "disposition": "documentation",
-      "reason": "Defines the enduring supported API contract or finite abstraction assumptions and limitations; does not record progress or interim validation receipts.",
+      "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
       "models": []
     },
     {
-      "path": "docs/secrets-manager-update-description.md",
-      "sha256": "797328ce35b8076109db4cf35d35ae406cfb5f7b2db1703140779aff949664a0",
+      "path": "docs/autoscaling-plans.md",
+      "sha256": "a7d16103cdfba1aa91600dc3e2b28df56fc189e8a83cdf48cae84108b51e6651",
       "disposition": "documentation",
-      "reason": "Defines the enduring supported API contract or finite abstraction assumptions and limitations; does not record progress or interim validation receipts.",
+      "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
       "models": []
     },
     {
-      "path": "formal/SecretDescriptionWorkflow.cfg",
-      "sha256": "17ab2bf119653872152b901ea065276626d7103b6903c935b4cca7921f548df8",
+      "path": "formal/AutoScalingPlanTargets.cfg",
+      "sha256": "24e0cbee679c3941f5b775c9c31b6104d1be3c1a20fe43a015a7a9585bece1c9",
       "disposition": "modeled",
-      "reason": "Binds the description editor lifecycle and preserved existing Secrets view boundaries to their finite abstractions. Backend commit after UI abort, stale response suppression, duplicate latch, uncertain reconciliation and read-only retry require separate native/component/browser validation; no React refinement is claimed.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
       "models": [
         {
-          "id": "SecretDescriptionWorkflow",
+          "id": "AutoScalingPlanTargets",
           "properties": [
-            "TypeOK",
-            "FreshEmissions",
-            "AcknowledgmentIdentity",
-            "MetadataIdentity",
-            "OnePendingSubmission",
-            "LiveWorkKeepsLatch",
-            "NoWriteWhileUncertain",
-            "UncertaintyFence",
-            "AcknowledgedStatusPreserved",
-            "NoValueRetrieval",
-            "ReadRetriesStayReadOnly",
-            "NoStaleFollowupRead",
-            "ServerCommitPreserved",
-            "UnmountHidesDisplay"
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Finite UI lifecycle abstraction against description component source d97f987f3a37d922860a894f9f98256975e5cfc0. Assumes validated confirmed input, captured authenticated callback and valid backend metadata. No Go/React/DOM/browser refinement, actual scheduling, Unicode/ARN parsing, auth, SQL/crash atomicity, network cancellation or rollback proof. Fresh explicit confirmed input may clear uncertainty; failed reconciliation may not."
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
         }
       ]
     },
     {
-      "path": "formal/SecretDescriptionWorkflow.tla",
-      "sha256": "5c3f0d7528ca6df73721ce11b7aafa39d2f17ecc33db8356eae9cb5bce34cde5",
+      "path": "formal/AutoScalingPlanTargets.tla",
+      "sha256": "db1de5c41a9b52120e6aa803e48a15d64081a8d683664dc204065223ed22b3fa",
       "disposition": "modeled",
-      "reason": "Binds the description editor lifecycle and preserved existing Secrets view boundaries to their finite abstractions. Backend commit after UI abort, stale response suppression, duplicate latch, uncertain reconciliation and read-only retry require separate native/component/browser validation; no React refinement is claimed.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
       "models": [
         {
-          "id": "SecretDescriptionWorkflow",
+          "id": "AutoScalingPlanTargets",
           "properties": [
-            "TypeOK",
-            "FreshEmissions",
-            "AcknowledgmentIdentity",
-            "MetadataIdentity",
-            "OnePendingSubmission",
-            "LiveWorkKeepsLatch",
-            "NoWriteWhileUncertain",
-            "UncertaintyFence",
-            "AcknowledgedStatusPreserved",
-            "NoValueRetrieval",
-            "ReadRetriesStayReadOnly",
-            "NoStaleFollowupRead",
-            "ServerCommitPreserved",
-            "UnmountHidesDisplay"
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Finite UI lifecycle abstraction against description component source d97f987f3a37d922860a894f9f98256975e5cfc0. Assumes validated confirmed input, captured authenticated callback and valid backend metadata. No Go/React/DOM/browser refinement, actual scheduling, Unicode/ARN parsing, auth, SQL/crash atomicity, network cancellation or rollback proof. Fresh explicit confirmed input may clear uncertainty; failed reconciliation may not."
-        }
-      ]
-    },
-    {
-      "path": "formal/SecretMetadataUpdate.cfg",
-      "sha256": "33f07507c5abdb7e9989ee3abf312b744a02ae13f44e2a17b40e61510ee6ac44",
-      "disposition": "modeled",
-      "reason": "Binds the bounded description-only update and preserved existing HTTP contracts to their declared finite models; no value reads or version/stage mutation are added. Native persistence and authorization tests remain independent obligations.",
-      "models": [
-        {
-          "id": "SecretMetadataUpdate",
-          "properties": [
-            "TypeOK",
-            "Authorized",
-            "ValidPresent",
-            "DurableAcknowledgement",
-            "NoPartialVisibility",
-            "RefusalUnchanged",
-            "ExactMetadata",
-            "PeerPreserved",
-            "IdentityPreserved",
-            "CreatedPreserved",
-            "VersionPreserved",
-            "ValuePreserved",
-            "StagePreserved"
-          ],
-          "limits": "One request with captured authorization and target identity. Abstract commit acknowledgement and final metadata checks; no Go/SQL refinement, IAM/ARN/JSON/Unicode parsing, crash recovery, concurrent requests, encryption, SDK or browser proof."
-        }
-      ]
-    },
-    {
-      "path": "formal/SecretMetadataUpdate.tla",
-      "sha256": "024b90a3673588630a740587a17de2239bbad8512bd456b785a041969809e0b8",
-      "disposition": "modeled",
-      "reason": "Binds the bounded description-only update and preserved existing HTTP contracts to their declared finite models; no value reads or version/stage mutation are added. Native persistence and authorization tests remain independent obligations.",
-      "models": [
-        {
-          "id": "SecretMetadataUpdate",
-          "properties": [
-            "TypeOK",
-            "Authorized",
-            "ValidPresent",
-            "DurableAcknowledgement",
-            "NoPartialVisibility",
-            "RefusalUnchanged",
-            "ExactMetadata",
-            "PeerPreserved",
-            "IdentityPreserved",
-            "CreatedPreserved",
-            "VersionPreserved",
-            "ValuePreserved",
-            "StagePreserved"
-          ],
-          "limits": "One request with captured authorization and target identity. Abstract commit acknowledgement and final metadata checks; no Go/SQL refinement, IAM/ARN/JSON/Unicode parsing, crash recovery, concurrent requests, encryption, SDK or browser proof."
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "7019dd279d09341ce5a189c07c3ec056c448b527634ec5a36cb9b96d711701df",
+      "sha256": "5faae729974a73d99e410b9eec8bb5b1c2fafd398e4eceecf998527c9700c457",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the metadata-update model and protects its full invariant, control and source inventory without removing or altering existing model entries.",
+      "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
       "models": []
     },
     {
-      "path": "internal/aws/secret_http.go",
-      "sha256": "69d3d209ff1a1ea3ace43c281d301b515026b0a4b508c604ed665cd322f79e04",
+      "path": "internal/aws/autoscalingplans_dispatch.go",
+      "sha256": "6b143c9ff39aef3d969e4c38d6122ae4a8cf9e106216cbf939cfef0afb111cbb",
       "disposition": "modeled",
-      "reason": "Binds the bounded description-only update and preserved existing HTTP contracts to their declared finite models; no value reads or version/stage mutation are added. Native persistence and authorization tests remain independent obligations.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
       "models": [
         {
-          "id": "SecretsDisclosureChannels",
+          "id": "AutoScalingPlanTargets",
           "properties": [
-            "TypeOK",
-            "RawRequiresAuthorizedGet",
-            "MetadataLogErrorRedacted",
-            "DeniedNoRaw",
-            "RawEmissionRequiresGet"
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Finite classification of plaintext acquisition/output call sites, not Go fmt/JSON/slog, SQL, encryption, memory secrecy or implementation refinement. The private plaintext() accessor itself has no authorization: its only production writer call site must follow successful native Get authorization. Actual private-holder formatting/JSON/slog sentinel tests and native denied-Get/error/metadata tests verify the Go mechanisms independently."
-        },
-        {
-          "id": "SecretVersionListing",
-          "properties": [
-            "TypeOK",
-            "ReadAfterAuthorization",
-            "NoDeniedEmission",
-            "TokenScopeBound",
-            "StrictForwardKeyset",
-            "FilterBeforePageLimit",
-            "ContinuationPosition",
-            "TerminalConverges",
-            "ReadFramePreserved"
-          ],
-          "limits": "Metadata-only live keyset projection of ListSecretVersionIds, not a stable snapshot. Parent resolution may precede saved-ARN authorization; version/stage scans and cursor validation follow it. Token signature, database key, region, domain, physical generation, filter and expiry are abstract predicates, not cryptography/byte parsing/time proofs. Does not prove SQL transaction/driver/commit failure, actual IAM/host token authority, HTTP/JSON/UTF8/ARN parsing, secret-value redaction implementation, timestamp ordering/UUIDs, variable page sizes, retention, UI or Go refinement. TerminalConverges is a finite page-shape safety equality, not liveness. Public contract: https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecretVersionIds.html (reviewed 2026-11-05)."
-        },
-        {
-          "id": "SecretMetadataUpdate",
-          "properties": [
-            "TypeOK",
-            "Authorized",
-            "ValidPresent",
-            "DurableAcknowledgement",
-            "NoPartialVisibility",
-            "RefusalUnchanged",
-            "ExactMetadata",
-            "PeerPreserved",
-            "IdentityPreserved",
-            "CreatedPreserved",
-            "VersionPreserved",
-            "ValuePreserved",
-            "StagePreserved"
-          ],
-          "limits": "One request with captured authorization and target identity. Abstract commit acknowledgement and final metadata checks; no Go/SQL refinement, IAM/ARN/JSON/Unicode parsing, crash recovery, concurrent requests, encryption, SDK or browser proof."
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
         }
       ]
     },
     {
-      "path": "internal/aws/secret_metadata_update.go",
-      "sha256": "c82169708cd7c1e8b31120942d3dbcd46919fa81ee53fcc6b99f21aceb0ca962",
+      "path": "internal/aws/autoscalingplans_http.go",
+      "sha256": "88c7a83d14244dd05d6eefd8e197f25184af8ea361f66e4441c1aad7ca0d54bf",
       "disposition": "modeled",
-      "reason": "Binds the bounded description-only update and preserved existing HTTP contracts to their declared finite models; no value reads or version/stage mutation are added. Native persistence and authorization tests remain independent obligations.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
       "models": [
         {
-          "id": "SecretMetadataUpdate",
+          "id": "AutoScalingPlanTargets",
           "properties": [
-            "TypeOK",
-            "Authorized",
-            "ValidPresent",
-            "DurableAcknowledgement",
-            "NoPartialVisibility",
-            "RefusalUnchanged",
-            "ExactMetadata",
-            "PeerPreserved",
-            "IdentityPreserved",
-            "CreatedPreserved",
-            "VersionPreserved",
-            "ValuePreserved",
-            "StagePreserved"
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "One request with captured authorization and target identity. Abstract commit acknowledgement and final metadata checks; no Go/SQL refinement, IAM/ARN/JSON/Unicode parsing, crash recovery, concurrent requests, encryption, SDK or browser proof."
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
         }
       ]
     },
     {
-      "path": "internal/aws/secret_metadata_update_test.go",
-      "sha256": "eec4b72ec1118c289fb0d5b36fba268fa65315dcad7d8a2191c7ae66c4751652",
+      "path": "internal/aws/autoscalingplans_store.go",
+      "sha256": "593c63829d662aa2b84f28370338371a6a51a112f54852d5cea6bd915d5d4d7a",
+      "disposition": "modeled",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
+      "models": [
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/autoscalingplans_test.go",
+      "sha256": "d1c75d5e279bdde0e14a30ff7d9b804fc77556c396e2dd6a5700510459748778",
       "disposition": "test-support",
-      "reason": "Checks description-only lifecycle, authorization, strict boundary refusals, isolation, immutable state preservation and failed-write rollback.",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
       "models": []
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "1d94272833d34cc3b9bc1360bb43f47751ed41cc7bb38f7237b2c51fc89a14b7",
+      "disposition": "modeled",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
+      "models": [
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "67f8b847f6be10c5771cec7c9d17c12b71f9633f1de191e4b8de3627a9e2e2c8",
+      "disposition": "modeled",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
+      "models": [
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+        }
+      ]
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "56981afe19c25dfee2f6452f1ead93345fef98c01af7321b97f96d46ecfbb7d5",
+      "sha256": "51ebd2309bd55488342835731425b03abd785580189ded9967de91af67d339d6",
       "disposition": "presentation",
-      "reason": "Adds the strict per-target metadata-only API schema/examples.",
+      "reason": "Static API reference: five Auto Scaling Plans templates, strict schemas, union bindings, operation mapping and guide tag on the existing shared root. Pinned and projected by test/e2e/autoscaling_plans_openapi.py; no runtime state.",
       "models": []
     },
     {
-      "path": "internal/server/secrets_composition_test.go",
-      "sha256": "9e49cb8f3f36e733078584d7766d58856fe86c618524f21a3a318c178edff774",
+      "path": "internal/server/autoscalingplans_composition_test.go",
+      "sha256": "416154ee00fc656bc16090c9ededcdabde32d90b4c51335f36534af4f1957e14",
       "disposition": "test-support",
-      "reason": "Adds composed-server coverage or mandatory official SDK acceptance with strict document mutation/removal detectors, IAM, isolation, restart and unchanged private state checks.",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "2a3cc7e102943cb48256d0aa8e918eb923a23d0f3c3d4c1489551f3e78981dc9",
+      "sha256": "6cc21f5619b8f7f60778a039a73baa942f70b51ef2c5429d452b82aa7b144378",
       "disposition": "modeled",
-      "reason": "Adds only the bounded UpdateSecret capability advertisement; existing native identity/version/stage lifecycle composition is preserved. Composed-server and SDK tests check that advertised operations actually execute; the finite model does not prove capability inventory or JSON rendering.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
       "models": [
         {
-          "id": "SecretsVersionLifecycle",
+          "id": "AutoScalingPlanTargets",
           "properties": [
-            "TypeOK",
-            "ImmutableVersions",
-            "NoOrphans",
-            "UniqueLabels",
-            "SeparateCurrentPrevious",
-            "ActiveHasCurrent",
-            "AuthorizedVersions",
-            "AuthorizedDisclosure"
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/web/app.js",
-      "sha256": "195f938407a35b1fafa012dc3aa646b32b7b2d7d11e24a03c5c9ebcad73f9b5e",
-      "disposition": "modeled",
-      "reason": "Binds the description editor lifecycle and preserved existing Secrets view boundaries to their finite abstractions. Backend commit after UI abort, stale response suppression, duplicate latch, uncertain reconciliation and read-only retry require separate native/component/browser validation; no React refinement is claimed.",
-      "models": [
-        {
-          "id": "SecretsRevealEpoch",
-          "properties": [
-            "TypeOK",
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
-          ],
-          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
-        },
-        {
-          "id": "SakuraDisksViewEpoch",
-          "properties": [
-            "TypeOK",
-            "AcceptedReadScope",
-            "SuccessfulReadOnly",
-            "RenderedScopeBound",
-            "RenderedResourceBound",
-            "StaleReadFrame",
-            "StaleWriteFrame",
-            "NavigationACKFrame",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryOnly",
-            "SingleWriteSend",
-            "LocaleFrame",
-            "CancelDraftClear"
-          ],
-          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
-        },
-        {
-          "id": "DynamoDBConsoleEpoch",
-          "properties": [
-            "TypeOK",
-            "NoStalePublication",
-            "ReadGenerationVerified",
-            "DisplayedKeyBound",
-            "CancelNoOrphanLoading",
-            "AckClosesDraft",
-            "AckBelongsToCurrentView",
-            "ReadRetryNeverWrites",
-            "SingleSendBeforeACK",
-            "LocalePreservesDraft"
-          ],
-          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
-        },
-        {
-          "id": "SecretMetadataViewEpoch",
-          "properties": [
-            "TypeOK",
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
-          ],
-          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
-        },
-        {
-          "id": "KMSAliasesViewEpoch",
-          "properties": [
-            "TypeOK",
-            "CurrentListOutcome",
-            "NoCachedRowsOnFailure",
-            "CurrentTargetMetadata",
-            "ClosedFormHasNoTarget",
-            "AckClosesForm",
-            "AckClearsDraft",
-            "ReadRetryNeverWrites",
-            "OnlyVerifiedTargetSubmitted",
-            "DeleteRequiresExactConfirmation",
-            "LocalePreservesIntent"
-          ],
-          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
-        },
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "TypeOK",
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model."
-        },
-        {
-          "id": "LoginInputIntent",
-          "properties": [
-            "TypeOK",
-            "NoEmptyPOST",
-            "NoPOSTWhileBlocked",
-            "StaleFileCompletionFrame",
-            "SubmissionSelectionExact",
-            "AdoptedValueExact",
-            "IntentInvalidatesAsync",
-            "LocaleIntentFrame"
-          ],
-          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
-        },
-        {
-          "id": "LambdaLogTailDisclosure",
-          "properties": [
-            "TypeOK",
-            "ResponseOptIn",
-            "ResponseSync",
-            "ResponseAuthorized",
-            "TailBound",
-            "DisplayCurrent",
-            "DisplayHasResponse"
-          ],
-          "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness."
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "47102417c7dd99a2e901a12b6a34cfca62fffae90c1af20d4f13b47ac1f8defc",
+      "sha256": "b42e3ae0c9e9379c613c17d6881edd9d483e8fdf86fec353bedb4dfbd69fdfac",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the metadata-update model and protects its full invariant, control and source inventory without removing or altering existing model entries.",
+      "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "3c5f6c11c0a5afeb172adae09fd3fe7bb575314fe0992c3fa493ff6a21166d18",
+      "sha256": "11df713b2bc48840ab135c474e8d4a379a8f0a3b4e4b369e317b4b8819e8b2a7",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the metadata-update model and protects its full invariant, control and source inventory without removing or altering existing model entries.",
+      "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/autoscaling_plans.py",
+      "sha256": "4cb799ea05edc506c177c16a471e4c9018336abd444e884b61125b7edec0c0ea",
+      "disposition": "test-support",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/autoscaling_plans_openapi.py",
+      "sha256": "6b364de13d8494b62172fc23a31679b81e33772263279ce36db07c9e9257758b",
+      "disposition": "test-support",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "600c3c3549204f661082bde07e40220bcddd510a797f7c98a5e223dee10f23aa",
+      "sha256": "fb1944d2c864ad39b9a202d14aa104e4578d1101147f980319a8fdc512b9f0a1",
       "disposition": "test-support",
-      "reason": "Adds composed-server coverage or mandatory official SDK acceptance with strict document mutation/removal detectors, IAM, isolation, restart and unchanged private state checks.",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
       "models": []
     },
     {
-      "path": "test/e2e/secret_description_console.py",
-      "sha256": "d0a542dcfcefc17228aacdb064d008638f26ac604993a4ee2165d97def5ef21c",
+      "path": "test/e2e/route53_openapi.py",
+      "sha256": "703b3fbc613cbd3130c8b54e59120444075102489d283c8d0270507e99fa9e0b",
       "disposition": "test-support",
-      "reason": "Registers or exercises actual description-edit UI behavior, IAM, deferred responses and metadata-only boundaries using the normal local fixture.",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
       "models": []
     },
     {
-      "path": "test/e2e/secret_reference_projection.py",
-      "sha256": "139225d89123e3a4e894dbddfdc89c9936d3060b39dd7b4d1b0340966e6f5fc0",
+      "path": "test/e2e/test_autoscaling_plans_openapi.py",
+      "sha256": "9cd3e7afe9ee7e22311936135bf0e0e946d1d14dfbfc998bcb44b8ae8ac4def9",
       "disposition": "test-support",
-      "reason": "Exact additive Secret UpdateSecret projection preserves SSM batch and Route53 reference baseline hashes; pins metadata-only schemas, examples and service description before removal. Static regression support, not runtime authority or proof.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/secrets_metadata_update.py",
-      "sha256": "d52cc141361ec559daa6442b15fe1d6e80e03728bafac1baf231ee3523e593c7",
-      "disposition": "test-support",
-      "reason": "Adds composed-server coverage or mandatory official SDK acceptance with strict document mutation/removal detectors, IAM, isolation, restart and unchanged private state checks.",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
       "models": []
     },
     {
       "path": "test/e2e/test_openapi_json10.py",
-      "sha256": "f5e253efee5455d9afe3fb44db30b9a8c4b8ce32e6d22aac3793a0b590c15427",
+      "sha256": "52fb96e6bca567a25f0a7b67b58dae23ede0d857fa791e76e2c133bb7235cc0f",
       "disposition": "test-support",
-      "reason": "Checks the additive UpdateSecret template against strict metadata-only request and response schemas, including unsupported-field and boundary rejection; no runtime or finite model changes.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "95267f77b15b8d59496cc9fdcdb3e4a9eed50cf322aa04e7099242ff2936b252",
-      "disposition": "test-support",
-      "reason": "Pins and projects only the reviewed UpdateSecret additions while preserving existing contract hashes, with mutation controls for missing, changed, duplicate and unrelated contracts; no runtime or finite model changes.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_ssm_batch_reference.py",
-      "sha256": "476b09f36e3f26abdc7648700dd625c5174a1915c74de2c8bb4ce74ffb60bbdf",
-      "disposition": "test-support",
-      "reason": "Exact additive Secret UpdateSecret projection preserves SSM batch and Route53 reference baseline hashes; pins metadata-only schemas, examples and service description before removal. Static regression support, not runtime authority or proof.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "b52b9d545b18f0901be427b24275877e3067c2a945752e98d20217d875fbeb66",
-      "disposition": "presentation",
-      "reason": "Adds or composes the bounded description editor, its generated product assets/build metadata or component tests; normal bundle provenance and UI acceptance remain separate obligations.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "77212056280496448605c24f2a09d5dc15d33b3b1768ee786576d6c4d8588f14",
-      "disposition": "presentation",
-      "reason": "Adds or composes the bounded description editor, its generated product assets/build metadata or component tests; normal bundle provenance and UI acceptance remain separate obligations.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/secret_description.jsx",
-      "sha256": "5988641b3f8ca0082c2c610811cea299fa3534d594b4be2edb932d4636b68acf",
-      "disposition": "modeled",
-      "reason": "Binds the description editor lifecycle and preserved existing Secrets view boundaries to their finite abstractions. Backend commit after UI abort, stale response suppression, duplicate latch, uncertain reconciliation and read-only retry require separate native/component/browser validation; no React refinement is claimed.",
-      "models": [
-        {
-          "id": "SecretDescriptionWorkflow",
-          "properties": [
-            "TypeOK",
-            "FreshEmissions",
-            "AcknowledgmentIdentity",
-            "MetadataIdentity",
-            "OnePendingSubmission",
-            "LiveWorkKeepsLatch",
-            "NoWriteWhileUncertain",
-            "UncertaintyFence",
-            "AcknowledgedStatusPreserved",
-            "NoValueRetrieval",
-            "ReadRetriesStayReadOnly",
-            "NoStaleFollowupRead",
-            "ServerCommitPreserved",
-            "UnmountHidesDisplay"
-          ],
-          "limits": "Finite UI lifecycle abstraction against description component source d97f987f3a37d922860a894f9f98256975e5cfc0. Assumes validated confirmed input, captured authenticated callback and valid backend metadata. No Go/React/DOM/browser refinement, actual scheduling, Unicode/ARN parsing, auth, SQL/crash atomicity, network cancellation or rollback proof. Fresh explicit confirmed input may clear uncertainty; failed reconciliation may not."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/secrets-manager.jsx",
-      "sha256": "e9d253da49b30bcd9e18b776401771e914cd32028ea2bb5810b49e5edaa27779",
-      "disposition": "modeled",
-      "reason": "Binds the description editor lifecycle and preserved existing Secrets view boundaries to their finite abstractions. Backend commit after UI abort, stale response suppression, duplicate latch, uncertain reconciliation and read-only retry require separate native/component/browser validation; no React refinement is claimed.",
-      "models": [
-        {
-          "id": "SecretsRevealEpoch",
-          "properties": [
-            "TypeOK",
-            "NoUnmountedDisplay",
-            "FreshEmissionHistory",
-            "ReturnedARNMatches",
-            "VisibleContextMatches"
-          ],
-          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
-        },
-        {
-          "id": "SecretsMutationRefresh",
-          "properties": [
-            "TypeOK",
-            "AckClosesForm",
-            "NoWriteOnReadRetry",
-            "AckClearsDraft",
-            "FreshFormHasToken"
-          ],
-          "limits": "UI ACK-to-metadata/form-state abstraction assuming live current ACK; not epoch/auth/SQL/server idempotency/refinement/liveness or disclosure proof. Excludes unacknowledged network ambiguity/delete/stage-label/rollback/further writes. Corresponds to the reviewed live-ACK form exit in mutate; historical d9 source omitted that exit. Keyboard, React scheduling, concrete HTTP and fresh-token entropy require executable checks."
-        },
-        {
-          "id": "SecretMetadataViewEpoch",
-          "properties": [
-            "TypeOK",
-            "MetadataRequestsOnly",
-            "CursorRequestBound",
-            "NoStaleCallbackAcceptance",
-            "NoStaleRenderedMetadata",
-            "NoStaleRenderedError",
-            "LoadingTracksLatest",
-            "PendingClearsMetadata",
-            "NoRowsOnError",
-            "ValidatedMetadataOnly",
-            "CurrentPageOnly",
-            "LocalePreservesQuery",
-            "ParentRevealClearedForMetadata"
-          ],
-          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/tests/secret-description.test.mjs",
-      "sha256": "11adbc43ea245705d32cdfd159ea311515b083a49d6b8942820da5e11ea1fdce",
-      "disposition": "presentation",
-      "reason": "Adds or composes the bounded description editor, its generated product assets/build metadata or component tests; normal bundle provenance and UI acceptance remain separate obligations.",
-      "models": []
-    },
-    {
-      "path": "tools/console/tests/secrets-manager-locale.test.mjs",
-      "sha256": "556b5352b8a379da5149e57b118e20900190e4de803a775678b40d7941d32b24",
-      "disposition": "presentation",
-      "reason": "Adds or composes the bounded description editor, its generated product assets/build metadata or component tests; normal bundle provenance and UI acceptance remain separate obligations.",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
       "models": []
     }
   ]
