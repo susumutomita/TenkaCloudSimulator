@@ -3,6 +3,9 @@ package aws
 import (
 	"context"
 	"encoding/xml"
+	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -597,3 +600,221 @@ func TestELBStorageFailuresNeverReportSuccess(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
+// Each mutation is one transaction: a write refused at any statement returns an
+// internal failure and leaves every table exactly as it was.
+func TestELBInjectedWriteFailuresRollBackCompletely(t *testing.T) {
+	h := newELBHarness(t)
+	db := h.store.Database()
+	fn := lambdaARN("us-east-1", "fn")
+	function := LambdaFunction{Name: "fn", Region: "us-east-1", Role: "arn:aws:iam::000000000000:role/executor", Handler: "app.handler", Timeout: 3, Code: elbZIP(t, "def handler(event, context):\n    return {'statusCode': 200}\n")}
+	if err := h.gateway.Lambdas.save(&function, true, ""); err != nil {
+		t.Fatal(err)
+	}
+	lb := h.loadBalancer("web")
+	used := h.targetGroup("used")
+	spare := h.targetGroup("spare")
+	listener := h.forward(lb.LoadBalancerArn, used.TargetGroupArn, "80")
+	for _, group := range []string{used.TargetGroupArn, spare.TargetGroupArn} {
+		if _, err := h.gateway.LambdaPermissions.Add(context.Background(), "us-east-1", "fn", "elb-"+group[len(group)-4:], lambdaELBPrincipal, "lambda:InvokeFunction", group, ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	h.ok("RegisterTargets", "TargetGroupArn", used.TargetGroupArn, "Targets.member.1.Id", fn)
+	snapshot := func() string {
+		var out strings.Builder
+		for _, table := range []string{"aws_elb_load_balancers", "aws_elb_target_groups", "aws_elb_listeners", "aws_elb_targets"} {
+			rows, err := db.Query("SELECT * FROM " + table + " ORDER BY 1")
+			if err != nil {
+				t.Fatal(err)
+			}
+			columns, _ := rows.Columns()
+			for rows.Next() {
+				values := make([]any, len(columns))
+				pointers := make([]any, len(columns))
+				for i := range values {
+					pointers[i] = &values[i]
+				}
+				if err = rows.Scan(pointers...); err != nil {
+					t.Fatal(err)
+				}
+				out.WriteString(table)
+				for _, value := range values {
+					out.WriteString("|")
+					out.WriteString(strings.TrimSpace(strings.ReplaceAll(strings.ReplaceAll(toString(value), "\n", ""), " ", "")))
+				}
+				out.WriteString("\n")
+			}
+			_ = rows.Close()
+		}
+		return out.String()
+	}
+	for _, c := range []struct {
+		name, trigger, action string
+		fields                []string
+	}{
+		{"insert load balancer", "BEFORE INSERT ON aws_elb_load_balancers", "CreateLoadBalancer", []string{"Name", "next", "Subnets.member.1", "subnet-11111111", "Subnets.member.2", "subnet-22222222"}},
+		{"insert target group", "BEFORE INSERT ON aws_elb_target_groups", "CreateTargetGroup", []string{"Name", "next", "TargetType", "lambda"}},
+		{"update target group", "BEFORE UPDATE ON aws_elb_target_groups", "ModifyTargetGroup", []string{"TargetGroupArn", spare.TargetGroupArn, "HealthCheckEnabled", "true"}},
+		{"bump on first listener", "BEFORE UPDATE ON aws_elb_target_groups", "CreateListener", []string{"LoadBalancerArn", lb.LoadBalancerArn, "Protocol", "HTTP", "Port", "81", "DefaultActions.member.1.Type", "forward", "DefaultActions.member.1.TargetGroupArn", spare.TargetGroupArn}},
+		{"bump on last listener", "BEFORE UPDATE ON aws_elb_target_groups", "DeleteListener", []string{"ListenerArn", listener.ListenerArn}},
+		{"bump on load balancer delete", "BEFORE UPDATE ON aws_elb_target_groups", "DeleteLoadBalancer", []string{"LoadBalancerArn", lb.LoadBalancerArn}},
+		{"bump on register", "BEFORE UPDATE ON aws_elb_target_groups", "RegisterTargets", []string{"TargetGroupArn", spare.TargetGroupArn, "Targets.member.1.Id", fn}},
+		{"bump on deregister", "BEFORE UPDATE ON aws_elb_target_groups", "DeregisterTargets", []string{"TargetGroupArn", used.TargetGroupArn, "Targets.member.1.Id", fn}},
+		{"reset target health", "BEFORE UPDATE ON aws_elb_targets", "ModifyTargetGroup", []string{"TargetGroupArn", used.TargetGroupArn, "HealthCheckEnabled", "true"}},
+		{"delete target group", "BEFORE DELETE ON aws_elb_target_groups", "DeleteTargetGroup", []string{"TargetGroupArn", spare.TargetGroupArn}},
+		{"insert target", "BEFORE INSERT ON aws_elb_targets", "RegisterTargets", []string{"TargetGroupArn", spare.TargetGroupArn, "Targets.member.1.Id", fn}},
+		{"delete target", "BEFORE DELETE ON aws_elb_targets", "DeregisterTargets", []string{"TargetGroupArn", used.TargetGroupArn, "Targets.member.1.Id", fn}},
+		{"insert listener", "BEFORE INSERT ON aws_elb_listeners", "CreateListener", []string{"LoadBalancerArn", lb.LoadBalancerArn, "Protocol", "HTTP", "Port", "82", "DefaultActions.member.1.Type", "fixed-response", "DefaultActions.member.1.FixedResponseConfig.StatusCode", "200"}},
+		{"delete listener", "BEFORE DELETE ON aws_elb_listeners", "DeleteListener", []string{"ListenerArn", listener.ListenerArn}},
+		{"cascade listeners", "BEFORE DELETE ON aws_elb_listeners", "DeleteLoadBalancer", []string{"LoadBalancerArn", lb.LoadBalancerArn}},
+		{"delete load balancer after listeners", "BEFORE DELETE ON aws_elb_load_balancers", "DeleteLoadBalancer", []string{"LoadBalancerArn", lb.LoadBalancerArn}},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			before := snapshot()
+			if _, err := db.Exec("CREATE TRIGGER elb_fault " + c.trigger + " BEGIN SELECT RAISE(ABORT, 'injected'); END"); err != nil {
+				t.Fatal(err)
+			}
+			defer func() {
+				if _, err := db.Exec("DROP TRIGGER elb_fault"); err != nil {
+					t.Fatal(err)
+				}
+			}()
+			h.fail("InternalFailure", 500, c.action, c.fields...)
+			if after := snapshot(); after != before {
+				t.Fatalf("failed %s left partial state:\n%s\nwant\n%s", c.action, after, before)
+			}
+		})
+	}
+	// A refused health-result write is reported and leaves the target unchanged.
+	h.ok("ModifyTargetGroup", "TargetGroupArn", used.TargetGroupArn, "HealthCheckEnabled", "true")
+	if _, err := db.Exec("CREATE TRIGGER elb_fault BEFORE UPDATE ON aws_elb_targets BEGIN SELECT RAISE(ABORT, 'injected'); END"); err != nil {
+		t.Fatal(err)
+	}
+	before := snapshot()
+	if _, err := h.gateway.RunELBHealthChecks(context.Background(), elbAt(time.Now().Add(time.Hour)), 4); err == nil {
+		t.Fatal("refused health write reported success")
+	}
+	if snapshot() != before {
+		t.Fatal("refused health write changed state")
+	}
+}
+
+func toString(value any) string {
+	switch v := value.(type) {
+	case nil:
+		return "<nil>"
+	case []byte:
+		return string(v)
+	case string:
+		return v
+	default:
+		return strings.TrimSpace(strings.ReplaceAll(fmtValue(v), "\n", ""))
+	}
+}
+func fmtValue(v any) string { return fmt.Sprint(v) }
+
+func TestELBRefusesMalformedListsTargetsAndForeignReferences(t *testing.T) {
+	h := newELBHarness(t)
+	lb := h.loadBalancer("web")
+	tg := h.targetGroup("fn")
+	listener := elbDecode(t, h.ok("CreateListener", "LoadBalancerArn", lb.LoadBalancerArn, "Protocol", "HTTP", "Port", "80", "DefaultActions.member.1.Type", "fixed-response", "DefaultActions.member.1.FixedResponseConfig.StatusCode", "200")).Listeners[0]
+	foreignTG := strings.Replace(tg.TargetGroupArn, "us-east-1", "eu-west-1", 1)
+	foreignLB := strings.Replace(lb.LoadBalancerArn, "us-east-1", "eu-west-1", 1)
+	fn := lambdaARN("us-east-1", "fn")
+	two := []string{"Subnets.member.1", "subnet-11111111", "Subnets.member.2", "subnet-22222222"}
+	for _, c := range []struct {
+		name, code, action string
+		fields             []string
+	}{
+		{"group gap", "ValidationError", "CreateLoadBalancer", append([]string{"Name", "n", "SecurityGroups.member.2", "sg-12345678"}, two...)},
+		{"member index", "ValidationError", "DescribeLoadBalancers", []string{"Names.member.x", "a"}},
+		{"empty member", "ValidationError", "DescribeLoadBalancers", []string{"Names.member.1", ""}},
+		{"lb arn list", "ValidationError", "DescribeLoadBalancers", []string{"LoadBalancerArns.member.1", foreignLB}},
+		{"tg name", "ValidationError", "CreateTargetGroup", []string{"Name", "-x", "TargetType", "lambda"}},
+		{"tg arn list gap", "ValidationError", "DescribeTargetGroups", []string{"TargetGroupArns.member.2", tg.TargetGroupArn}},
+		{"tg name list gap", "ValidationError", "DescribeTargetGroups", []string{"Names.member.2", "fn"}},
+		{"tg paging", "ValidationError", "DescribeTargetGroups", []string{"PageSize", "0"}},
+		{"tg marker", "ValidationError", "DescribeTargetGroups", []string{"Marker", "ELB1.x.y"}},
+		{"tg foreign lb", "ValidationError", "DescribeTargetGroups", []string{"LoadBalancerArn", foreignLB}},
+		{"tg foreign arn", "ValidationError", "DescribeTargetGroups", []string{"TargetGroupArns.member.1", foreignTG}},
+		{"listener list gap", "ValidationError", "DescribeListeners", []string{"ListenerArns.member.2", listener.ListenerArn}},
+		{"listener paging", "ValidationError", "DescribeListeners", []string{"LoadBalancerArn", lb.LoadBalancerArn, "PageSize", "x"}},
+		{"listener marker", "ValidationError", "DescribeListeners", []string{"LoadBalancerArn", lb.LoadBalancerArn, "Marker", "ELB1.x.y"}},
+		{"listener foreign lb", "ValidationError", "DescribeListeners", []string{"LoadBalancerArn", foreignLB}},
+		{"listener foreign arn", "ValidationError", "DescribeListeners", []string{"ListenerArns.member.1", lb.LoadBalancerArn}},
+		{"health foreign", "ValidationError", "DescribeTargetHealth", []string{"TargetGroupArn", foreignTG}},
+		{"health target gap", "ValidationError", "DescribeTargetHealth", []string{"TargetGroupArn", tg.TargetGroupArn, "Targets.member.2.Id", fn}},
+		{"modify foreign", "ValidationError", "ModifyTargetGroup", []string{"TargetGroupArn", foreignTG}},
+		{"register foreign", "ValidationError", "RegisterTargets", []string{"TargetGroupArn", foreignTG, "Targets.member.1.Id", fn}},
+		{"register gap", "ValidationError", "RegisterTargets", []string{"TargetGroupArn", tg.TargetGroupArn, "Targets.member.2.Id", fn}},
+		{"register extra", "ValidationError", "RegisterTargets", []string{"TargetGroupArn", tg.TargetGroupArn, "Targets.member.1.Id", fn, "Extra", "x"}},
+		{"deregister foreign", "ValidationError", "DeregisterTargets", []string{"TargetGroupArn", foreignTG, "Targets.member.1.Id", fn}},
+		{"deregister gap", "ValidationError", "DeregisterTargets", []string{"TargetGroupArn", tg.TargetGroupArn, "Targets.member.2.Id", fn}},
+		{"deregister extra", "ValidationError", "DeregisterTargets", []string{"TargetGroupArn", tg.TargetGroupArn, "Targets.member.1.Id", fn, "Extra", "x"}},
+		{"delete lb extra", "ValidationError", "DeleteLoadBalancer", []string{"LoadBalancerArn", lb.LoadBalancerArn, "Extra", "x"}},
+		{"delete listener extra", "ValidationError", "DeleteListener", []string{"ListenerArn", listener.ListenerArn, "Extra", "x"}},
+		{"weight text", "ValidationError", "CreateListener", []string{"LoadBalancerArn", lb.LoadBalancerArn, "Protocol", "HTTP", "Port", "81", "DefaultActions.member.1.Type", "forward", "DefaultActions.member.1.ForwardConfig.TargetGroups.member.1.TargetGroupArn", tg.TargetGroupArn, "DefaultActions.member.1.ForwardConfig.TargetGroups.member.1.Weight", "heavy"}},
+		{"sticky text", "ValidationError", "CreateListener", []string{"LoadBalancerArn", lb.LoadBalancerArn, "Protocol", "HTTP", "Port", "81", "DefaultActions.member.1.Type", "forward", "DefaultActions.member.1.ForwardConfig.TargetGroups.member.1.TargetGroupArn", tg.TargetGroupArn, "DefaultActions.member.1.ForwardConfig.TargetGroupStickinessConfig.Enabled", "maybe"}},
+		{"group list gap", "ValidationError", "CreateListener", []string{"LoadBalancerArn", lb.LoadBalancerArn, "Protocol", "HTTP", "Port", "81", "DefaultActions.member.1.Type", "forward", "DefaultActions.member.1.ForwardConfig.TargetGroups.member.2.TargetGroupArn", tg.TargetGroupArn, "DefaultActions.member.1.ForwardConfig.TargetGroups", ""}},
+		{"action gap", "ValidationError", "CreateListener", []string{"LoadBalancerArn", lb.LoadBalancerArn, "Protocol", "HTTP", "Port", "81", "DefaultActions.member.2.Type", "forward"}},
+		{"fixed control", "ValidationError", "CreateListener", []string{"LoadBalancerArn", lb.LoadBalancerArn, "Protocol", "HTTP", "Port", "81", "DefaultActions.member.1.Type", "fixed-response", "DefaultActions.member.1.FixedResponseConfig.StatusCode", "200", "DefaultActions.member.1.FixedResponseConfig.MessageBody", "a\x01b"}},
+	} {
+		t.Run(c.name, func(t *testing.T) { h.fail(c.code, 400, c.action, c.fields...) })
+	}
+	// Supported optional members are retained exactly in the listener.
+	weighted := elbDecode(t, h.ok("CreateListener", "LoadBalancerArn", lb.LoadBalancerArn, "Protocol", "HTTP", "Port", "81", "DefaultActions.member.1.Type", "forward", "DefaultActions.member.1.Order", "7",
+		"DefaultActions.member.1.ForwardConfig.TargetGroups.member.1.TargetGroupArn", tg.TargetGroupArn, "DefaultActions.member.1.ForwardConfig.TargetGroups.member.1.Weight", "5",
+		"DefaultActions.member.1.ForwardConfig.TargetGroupStickinessConfig.Enabled", "false")).Listeners[0].DefaultActions[0]
+	if weighted.Order != 7 || weighted.ForwardConfig.TargetGroups[0].Weight != 5 {
+		t.Fatalf("%+v", weighted)
+	}
+	none, err := core.ParsePolicy([]byte(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"s3:GetObject","Resource":"*"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = h.gateway.Identities.Set("no-elb", none); err != nil {
+		t.Fatal(err)
+	}
+	h.principal = "no-elb"
+	h.fail("AccessDenied", 403, "DescribeLoadBalancers")
+	h.principal = ""
+	// A body that cannot be read is refused rather than parsed partially.
+	r := httptest.NewRequest("POST", "http://127.0.0.1/", io.NopCloser(errorReader{}))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	r.Header.Set("X-Simulator-Service", "elasticloadbalancing")
+	w := httptest.NewRecorder()
+	h.gateway.ServeHTTP(w, r)
+	if w.Code != 400 || elbCode(w.Body.String()) != "ValidationError" {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	if elbSigningService("AWS4-HMAC-SHA256 Credential=short") != "" {
+		t.Fatal("malformed credential scope selected a service")
+	}
+	// A registered function deleted outside ELB fails as the target (502);
+	// an unavailable store is an internal failure.
+	function := LambdaFunction{Name: "fn", Region: "us-east-1", Role: "arn:aws:iam::000000000000:role/executor", Handler: "app.handler", Timeout: 3, Code: elbZIP(t, "def handler(event, context):\n    return {'statusCode': 200}\n")}
+	if err = h.gateway.Lambdas.save(&function, true, ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = h.gateway.LambdaPermissions.Add(context.Background(), "us-east-1", "fn", "elb", lambdaELBPrincipal, "lambda:InvokeFunction", tg.TargetGroupArn, ""); err != nil {
+		t.Fatal(err)
+	}
+	h.ok("RegisterTargets", "TargetGroupArn", tg.TargetGroupArn, "Targets.member.1.Id", fn)
+	if _, err = h.store.Database().Exec("DELETE FROM aws_lambda_functions"); err != nil {
+		t.Fatal(err)
+	}
+	if got := h.traffic("GET", "/_elb/us-east-1/web/81/", "", nil); got.Code != 502 {
+		t.Fatal(got.Code, got.Body.String())
+	}
+	if err = h.store.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = h.gateway.invokeELBTarget(context.Background(), "us-east-1", tg.TargetGroupArn, fn, []byte(`{}`), 0); err != errELBInternal {
+		t.Fatal(err)
+	}
+}
+
+type errorReader struct{}
+
+func (errorReader) Read([]byte) (int, error) { return 0, errors.New("broken body") }

@@ -324,7 +324,7 @@ func TestELBHealthReportsUnusedTargetsAndSkipsUnusedGroups(t *testing.T) {
 }
 
 func TestELBResponseAndEventProjectionBoundaries(t *testing.T) {
-	for _, payload := range []string{`{"StatusCode":200}`, `{"statusCode":200,"statusCode":201}`, `{"statusCode":200,"BODY":"x"}`, `[]`, `{"statusCode":99}`, `{"statusCode":200,"multiValueHeaders":{}}`, `{"body":"x"}`, `{"statusCode":200,"headers":{"Bad Name":"x"}}`, `{"statusCode":200,"headers":{"X":"a\nb"}}`, `{"statusCode":200,"isBase64Encoded":true,"body":"%%"}`, `{"statusCode":200} {}`, "\xff"} {
+	for _, payload := range []string{`{"statusCode":}`, `{"statusCode":200,"headers":{"":"x"}}`, `{"StatusCode":200}`, `{"statusCode":200,"statusCode":201}`, `{"statusCode":200,"BODY":"x"}`, `[]`, `{"statusCode":99}`, `{"statusCode":200,"multiValueHeaders":{}}`, `{"body":"x"}`, `{"statusCode":200,"headers":{"Bad Name":"x"}}`, `{"statusCode":200,"headers":{"X":"a\nb"}}`, `{"statusCode":200,"isBase64Encoded":true,"body":"%%"}`, `{"statusCode":200} {}`, "\xff"} {
 		if _, _, _, err := elbParseResponse([]byte(payload)); err == nil {
 			t.Fatal("malformed response accepted:", payload)
 		}
