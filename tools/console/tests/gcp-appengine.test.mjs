@@ -39,6 +39,10 @@ test('paths, hostnames and splits follow the official App Engine forms', () => {
   assert.equal(api.appURL(endpoint, 'tenkacloud-local', 'services', 'a b', 'versions'), endpoint + 'v1/apps/tenkacloud-local/services/a%20b/versions');
   assert.equal(api.versionHost('v1', 'default', 'tenkacloud-local'), 'v1-dot-default-dot-tenkacloud-local.appspot.com');
   assert.equal(api.dataPlaneURL(appEngine.dataPlane, 'h.appspot.com'), '/_simulator/providers/gcp/appspot/h.appspot.com/');
+  assert.equal(api.dataPlaneURL(appEngine.dataPlane, '../x/<b>'), '/_simulator/providers/gcp/appspot/..%2Fx%2F%3Cb%3E/');
+  for (const template of ['javascript:alert(1)//{hostname}', '//example.com/{hostname}', 'https://example.com/{hostname}', '/no-placeholder/', undefined]) {
+    assert.equal(api.dataPlaneURL(template, 'h.appspot.com'), '#', String(template));
+  }
   assert.equal(api.splitText({allocations: {v2: 0.25, v1: 0.75}}), 'v1 75%, v2 25%');
   assert.equal(api.percent(0.333), '33.3%');
   assert.deepEqual(plain(api.parseEnvironment('A=1\n\n B = x=y \n')), {A: '1', B: ' x=y'});
@@ -74,7 +78,7 @@ test('a missing application offers creation and reloads only after the acknowled
   assert.deepEqual(JSON.parse(post.body), {id: 'tenkacloud-local', locationId: 'us-central'});
   assert.ok(calls.indexOf(post) < calls.length - 1, 'the view reloads after the write');
   assert.match(h.text(), /Application tenkacloud-local created/);
-  assert.match(h.text(), /v1-dot-default-dot-tenkacloud-local.appspot.com/);
+  assert.ok(h.text().includes('v1-dot-default-dot-tenkacloud-local.appspot.com'));
   assert.match(h.text(), /v1 100%/);
 });
 

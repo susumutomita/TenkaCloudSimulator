@@ -12,7 +12,13 @@ export function appURL(endpoint, project, ...parts) {
   return endpoint + 'v1/apps/' + segment(project) + parts.map(p => '/' + segment(p)).join('');
 }
 export function versionHost(version, service, project) { return version + '-dot-' + service + '-dot-' + project + '.appspot.com'; }
-export function dataPlaneURL(template, host) { return String(template || '').replace('{hostname}', host); }
+// Same-origin paths only: the template comes from capabilities and the host
+// segment is percent-encoded, so a link never carries another scheme, origin
+// or path segment.
+export function dataPlaneURL(template, host) {
+  const value = String(template || '');
+  return value.startsWith('/') && !value.startsWith('//') && value.includes('{hostname}') ? value.replace('{hostname}', encodeURIComponent(host)) : '#';
+}
 export function percent(fraction) { return Math.round(Number(fraction) * 1000) / 10 + '%'; }
 export function splitText(split) {
   const allocations = split?.allocations || {};
