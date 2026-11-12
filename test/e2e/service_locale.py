@@ -172,6 +172,31 @@ def run():
 
             expect(page.get_by_role('button', name='Services', exact=True)).to_be_enabled()
             check_discovery_deep_links()
+            # Real wheel input must scroll the bounded flyout, not the page behind it.
+            # Small desktop and mobile viewports previously clipped its bottom rows.
+            for width in (1100, 390):
+                page.set_viewport_size({'width': width, 'height': 600})
+                page.get_by_role('button', name='Services', exact=True).click()
+                results = page.locator('.aws-service-results')
+                assert results.evaluate('(e) => e.scrollHeight > e.clientHeight')
+                results.hover()
+                page.mouse.wheel(0, 2000)
+                # Poll a function directly; wait_for_function string evaluation is
+                # blocked by the real console's strict CSP (keep that CSP intact).
+                for _ in range(50):
+                    if results.evaluate('(e) => e.scrollTop > 0'):
+                        break
+                    time.sleep(0.02)
+                assert results.evaluate('(e) => e.scrollTop > 0')
+                panel = page.locator('#cloud-service-catalog')
+                assert panel.evaluate('(e) => e.getBoundingClientRect().bottom <= innerHeight')
+                last = results.get_by_role('menuitem').last
+                last.focus()
+                assert last.evaluate('(e) => {const r=e.getBoundingClientRect(),p=e.closest(".aws-service-results").getBoundingClientRect();return r.bottom<=p.bottom+1 && r.top>=p.top;}')
+                page.keyboard.press('Escape')
+                expect(panel).to_have_count(0)
+                expect(page.get_by_role('button', name='Services', exact=True)).to_be_focused()
+            page.set_viewport_size({'width': 1440, 'height': 1000})
             locale('ja')
             service('SQS')
             page.get_by_role('button', name='キューを作成', exact=True).click()
