@@ -150,7 +150,9 @@ The JSON contains `bundleManifest`, `bundleArchive`, `manifestSha256`,
 files/directories are absolute. Layout entries are distinct manifest-listed
 relative paths. Image IDs are explicit aliases for that pinned bundle, not
 requests to download an image. Runtime lifetime is bounded to 24 hours from
-startup. Unknown or duplicate configuration fields are rejected.
+startup and defaults to 8 hours when `lifetimeUntilMs` is omitted; every VM in
+the runtime shares that window. Unknown or duplicate configuration fields are
+rejected.
 
 Use only an independently trusted bundle. The manifest SHA-256 and archive/file
 hash checks establish integrity, not vendor authenticity or containment. Loading

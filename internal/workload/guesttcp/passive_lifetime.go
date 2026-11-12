@@ -5,10 +5,16 @@ import (
 	"time"
 )
 
-// MaxPassiveLifetime bounds an explicitly requested boot-service window. It is
-// not a sliding timeout, renewable lease or permission to retain a physical NIC.
-// All cumulative frame, byte, attempt and worker limits remain unchanged.
-const MaxPassiveLifetime = 15 * time.Minute
+// MaxPassiveLifetime bounds an explicitly requested service window, including a
+// Battle VM's whole runtime. It is a hard upper bound, not a sliding timeout,
+// renewable lease or permission to retain a physical NIC beyond the requested
+// deadline. All cumulative frame, byte, attempt and worker limits remain
+// unchanged, so long windows still end at the first exhausted budget.
+const MaxPassiveLifetime = 24 * time.Hour
+
+// DefaultBattleLifetime is the runtime window used when an operator does not
+// request one explicitly: long enough for a typical Battle, never above the max.
+const DefaultBattleLifetime = 8 * time.Hour
 
 // passiveDeadline validates the original requested expiry before applying an
 // earlier parent deadline. The resulting equal-or-earlier deadline lets

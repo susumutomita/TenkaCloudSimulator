@@ -9,7 +9,7 @@ provider-policy authority. Construction requires the same trusted
 ## Lifetime and ownership
 
 `NewPersistentTransportUntil` captures one original absolute boot deadline, at
-most 15 minutes. The earlier parent or passive-service deadline wins. The service
+most `MaxPassiveLifetime` (24 hours). The earlier parent or passive-service deadline wins. The service
 must expose one finite immutable admission context, captured once. No traffic,
 probe creation or metadata token TTL extends the attachment.
 

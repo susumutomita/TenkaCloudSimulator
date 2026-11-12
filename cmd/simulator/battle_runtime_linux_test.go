@@ -52,6 +52,19 @@ func TestBattleRuntimeConfigurationValidationOnly(t *testing.T) {
 	if _, e := readBattleRuntimeFile(file, now); e != nil {
 		t.Fatal(e)
 	}
+	long := cfg
+	long.LifetimeUntilMs = 0
+	long.Clock.ValidUntilMs = now.Add(9 * time.Hour).UnixMilli()
+	write(long)
+	if got, e := readBattleRuntimeFile(file, now); e != nil || got.LifetimeUntilMs != now.Add(8*time.Hour).UnixMilli() {
+		t.Fatalf("default Battle lifetime not applied: %v %v", got.LifetimeUntilMs, e)
+	}
+	long.LifetimeUntilMs = now.Add(25 * time.Hour).UnixMilli()
+	long.Clock.ValidUntilMs = now.Add(26 * time.Hour).UnixMilli()
+	write(long)
+	if _, e := readBattleRuntimeFile(file, now); e == nil {
+		t.Fatal("lifetime beyond the bounded maximum accepted")
+	}
 	// No archive, execution, listener, or bundle extraction is used by this test.
 	for _, change := range []func(*battleRuntimeFile){func(c *battleRuntimeFile) { c.LifetimeUntilMs = now.UnixMilli() }, func(c *battleRuntimeFile) { c.ManifestSHA256 = "bad" }, func(c *battleRuntimeFile) { c.Layout.Emulator = c.Layout.BaseDisk }, func(c *battleRuntimeFile) { c.ImageIDs = []string{"arbitrary-url"} }, func(c *battleRuntimeFile) { c.Clock.Domain = "bad domain" }} {
 		changed := cfg

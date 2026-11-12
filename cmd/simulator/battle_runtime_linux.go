@@ -158,7 +158,10 @@ func readBattleRuntimeFile(path string, now time.Time) (battleRuntimeFile, error
 	if e != nil || !st.IsDir() || st.Mode().Perm()&0077 != 0 {
 		return cfg, errors.New("private nonsymlink runtime directory required")
 	}
-	if cfg.LifetimeUntilMs <= now.UnixMilli() || cfg.LifetimeUntilMs > now.Add(24*time.Hour).UnixMilli() || cfg.Clock.ValidFromMs < 1 || cfg.Clock.ValidFromMs > now.UnixMilli() || cfg.Clock.ValidUntilMs < cfg.LifetimeUntilMs || cfg.Clock.ValidUntilMs > 1<<53-1 || !regexp.MustCompile(`^[A-Za-z0-9_-]{1,64}$`).MatchString(cfg.Clock.Domain) {
+	if cfg.LifetimeUntilMs == 0 {
+		cfg.LifetimeUntilMs = now.Add(guesttcp.DefaultBattleLifetime).UnixMilli()
+	}
+	if cfg.LifetimeUntilMs <= now.UnixMilli() || cfg.LifetimeUntilMs > now.Add(guesttcp.MaxPassiveLifetime).UnixMilli() || cfg.Clock.ValidFromMs < 1 || cfg.Clock.ValidFromMs > now.UnixMilli() || cfg.Clock.ValidUntilMs < cfg.LifetimeUntilMs || cfg.Clock.ValidUntilMs > 1<<53-1 || !regexp.MustCompile(`^[A-Za-z0-9_-]{1,64}$`).MatchString(cfg.Clock.Domain) {
 		return cfg, errors.New("invalid bounded runtime lifetime or clock domain")
 	}
 	if len(cfg.ImageIDs) == 0 || len(cfg.ImageIDs) > 16 {
