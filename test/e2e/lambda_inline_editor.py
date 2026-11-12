@@ -60,7 +60,8 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     assert_csp('ordinary typing and Enter')
     editor.press('ControlOrMeta+z')
     expect(editor).not_to_contain_text('# typed with ordinary keys')
-    editor.press('ControlOrMeta+Shift+z')
+    # CodeMirror's primary redo binding is Mod-y (Mac: Mod-Shift-z).
+    editor.press('Meta+Shift+Z' if page.evaluate("/Mac/.test(navigator.platform)") else 'Control+y')
     expect(editor).to_contain_text('# typed with ordinary keys')
     assert_csp('undo redo')
     page.get_by_role('button',name='Create function',exact=True).click()
