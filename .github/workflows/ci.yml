@@ -40,12 +40,15 @@ jobs:
         run: |
           /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-console-audit
           AXE_SCRIPT=/tmp/simulator-console-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/secrets_manager_console.py
+      - name: Check inline Lambda editor and strict CSP in the real browser
+        run: /tmp/simulator-tests/bin/python test/e2e/lambda_inline_editor.py
       - name: Retain focused service console evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: service-console-focused-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
+            reports/lambda-inline-*.png
             reports/service-locale-*.png
             reports/scalar-aws-json.json
             reports/secrets-metadata-*.png
@@ -128,6 +131,7 @@ jobs:
         with:
           name: service-console-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
+            reports/lambda-inline-*.png
             reports/service-locale-*.png
             reports/scalar-aws-json.json
             reports/secrets-metadata-*.png
