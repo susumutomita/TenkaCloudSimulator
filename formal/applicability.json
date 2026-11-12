@@ -1,323 +1,371 @@
 {
   "version": 1,
-  "base_sha": "66287bb49d39b22b1974b59773096e9d51004627",
+  "base_sha": "e4d30099cd6bc8a70986eb3b634b34af621f24d0",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "dc4ebf23a6357f39cf35c1d8faa2044b658d1600e1f48db19a7647f018e0d11b",
+      "path": "AGENTS.md",
+      "sha256": "a88eb563f43ca1bc5bf3c793dbd7f8bc9f877660af26dd8272138279ec1d19ee",
       "disposition": "documentation",
-      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
+      "reason": "Records the new provider-neutral internal/inference ownership boundary and its no-fallback/no-storage rules.",
+      "models": []
+    },
+    {
+      "path": "README.ja.md",
+      "sha256": "0e2e951917ae83c56f9d7c79bdee7524c79d9acf4c837fbe3f2e444fb10ab2e0",
+      "disposition": "documentation",
+      "reason": "Japanese link to the opt-in local Bedrock Runtime guide and its limits.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "80ef1e53ff84cec24c1700744a08d23635e6f5d71dc65494d9239eab5b0af875",
+      "sha256": "054b980adec8a0e662292a4114be68dcb9ee8d28cd969b865af35f04667aa7ac",
       "disposition": "documentation",
-      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
+      "reason": "Links the opt-in local Bedrock Runtime guide and states its limits.",
       "models": []
     },
     {
       "path": "SECURITY.md",
-      "sha256": "d87d960439886caff29f2692140c139466c95507f77c2d22175af6eca91dc771",
+      "sha256": "79b525a3ead4e0a56dc471cb1a8ae7f77ff0186f8fa1191f180603c161bce689",
       "disposition": "documentation",
-      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
+      "reason": "Documents the opt-in loopback-only backend connection, authorization order, bounds, no storage, public mapped IDs and the Apple refusal.",
       "models": []
     },
     {
-      "path": "docs/apigateway.md",
-      "sha256": "0839967691c595f2de2d244f61762a2173445c098cfce506f92f26efb7375f39",
-      "disposition": "documentation",
-      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
-      "models": []
-    },
-    {
-      "path": "docs/elb.md",
-      "sha256": "7d5a9f171ced56a06ad7e8d8b2d677c277cafb26a57c52b748d3e502e0a80807",
-      "disposition": "documentation",
-      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
-      "models": []
-    },
-    {
-      "path": "formal/ELBTargetLifecycle.cfg",
-      "sha256": "397f2964183cabd86a83aa0caef50cfcecebdb830a317f20bf111faeae83278f",
+      "path": "cmd/simulator/bedrock_flags.go",
+      "sha256": "43f19dd7d28a9aa8a443980fb6c11957539315743f1221f33836da71a4ef8e7d",
       "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
+      "reason": "Builds the single operator-selected backend from explicit flags, refuses orphan, repeated, unauthenticated and Apple configuration before startup, and never selects another backend.",
       "models": [
         {
-          "id": "ELBTargetLifecycle",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
+            "BackendOnlyAfterAdmission",
+            "NoFallback",
+            "ConcurrencyBound"
           ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
     },
     {
-      "path": "formal/ELBTargetLifecycle.tla",
-      "sha256": "311402892b6035781bd03273cb45e27d6480d9bb2451a87d5d96226718ca381d",
+      "path": "cmd/simulator/bedrock_flags_test.go",
+      "sha256": "80218d8939e496afa4b8448773a355ace63afe44afcad59758f669da7f929346",
+      "disposition": "test-support",
+      "reason": "Checks flag validation, repeated-flag and pre-startup refusals and an actual authenticated CLI run against a synthetic Ollama test double.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/main.go",
+      "sha256": "4990a48fbd27f75d4b6cabc9ab870d147ad5d701ec6c03c03a0f168690de6103",
       "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
+      "reason": "Validates the Bedrock flags before any listener or startup file, passes the one runtime to the composition and cancels it when shutdown begins.",
       "models": [
         {
-          "id": "ELBTargetLifecycle",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
+            "NoCallAfterClose",
+            "NoFallback"
           ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
+    },
+    {
+      "path": "docs/bedrock-runtime.md",
+      "sha256": "6918606b62d0ef9d93d838ed483171f45ab681fd460c6e12ccf2044f955556a3",
+      "disposition": "documentation",
+      "reason": "Defines the supported Bedrock Runtime contract, errors, transport boundary, unsupported scope and verification; no progress receipt.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "a3fdf4d11bab096ece90e77afa159365018113ef5617554dfdf954aca41c2c8f",
+      "disposition": "documentation",
+      "reason": "Describes the internal/inference architecture boundary and Bedrock Runtime responsibilities.",
+      "models": []
+    },
+    {
+      "path": "docs/formal-bedrock-runtime.md",
+      "sha256": "910b83cb7f9fa99aa9cd54b3e90f484b42470c5b6f5bf6c3fa3b840fa6634682",
+      "disposition": "documentation",
+      "reason": "Defines the finite model, its invariants, controls, source correspondence and limits.",
+      "models": []
+    },
+    {
+      "path": "formal/BedrockRuntimeAdmission.cfg",
+      "sha256": "d367eca2115f916656be5c524738b9d6921b4e88e25cd742ac485caf8582427c",
+      "disposition": "modeled",
+      "reason": "Checks every declared Bedrock Runtime invariant on two requests with one slot.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "TypeOK",
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst",
+            "NoCallAfterClose",
+            "ConcurrencyBound",
+            "SuccessOnlyFromBackend",
+            "NoFallback",
+            "TruthfulFailure",
+            "NoPersistence"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "formal/BedrockRuntimeAdmission.tla",
+      "sha256": "7c8a5df4dfe745de86ddd951e00169d2c003d27c0a824d0ad83b2996605ebb64",
+      "disposition": "modeled",
+      "reason": "Defines the finite admission/result abstraction and its fourteen sensitivity anchors.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "TypeOK",
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst",
+            "NoCallAfterClose",
+            "ConcurrencyBound",
+            "SuccessOnlyFromBackend",
+            "NoFallback",
+            "TruthfulFailure",
+            "NoPersistence"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "formal/README.md",
+      "sha256": "5774ae4e422464e9efac262a7cbe838e22fe4b76b7e5bb3704a713d46a3ebe03",
+      "disposition": "documentation",
+      "reason": "Summarizes the registered Bedrock Runtime admission model and points to its contract.",
+      "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "26d8928614e687779a4c2dbe88c5d7b8c14c4a2bc1cb0223093e8d184fd222df",
+      "sha256": "5b87c7e6f15c272ab40084864ebbff448b367fcd0dd03d19022d238b7d218aa5",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
+      "reason": "Registers the Bedrock Runtime admission model with its invariants, fourteen controls and exact source scope without altering existing entries.",
       "models": []
     },
     {
-      "path": "internal/aws/apirouting/alb_headers.go",
-      "sha256": "8f605c5eecf480592b534d0551075cc0d73452e7270ec090fac1782a021e7319",
+      "path": "internal/aws/bedrock_runtime.go",
+      "sha256": "29db20c176af739417289f73689ecdc055f588aa33084159032efc61d97fe82f",
       "disposition": "modeled",
-      "reason": "Exposes the existing REST proxy header authority exclusion to the load balancer event projection without changing it.",
+      "reason": "Implements the admission order (route, enabled backend, IAM, mapping, input), shutdown refusal and the backend-result-to-error mapping; stores and logs no prompt or reply.",
       "models": [
         {
-          "id": "ELBTargetLifecycle",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst",
+            "NoCallAfterClose",
+            "SuccessOnlyFromBackend",
+            "TruthfulFailure",
+            "NoPersistence"
           ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
     },
     {
-      "path": "internal/aws/elb_deadline_test.go",
-      "sha256": "2adce81395fc79f49533936ebeef84bad455a2131e2e8067a07b0b300cbabe2b",
+      "path": "internal/aws/bedrock_runtime_messages.go",
+      "sha256": "4bf61a13b1072f9980cad2274810264dee3cb8ee1ed18f6d62f4c5253c593883",
+      "disposition": "modeled",
+      "reason": "Strict request decoding: unsupported, repeated or null members and non-text content are refused before the backend; reply encoding carries only the backend text.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "BackendOnlyAfterAdmission",
+            "SuccessOnlyFromBackend",
+            "NoPersistence"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/bedrock_runtime_test.go",
+      "sha256": "c88b3615117583dd42caed7bed48c27f6a30ea173957fa246d39dbab7ac84483",
       "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
+      "reason": "Checks routing before the catalog, admission order, strict refusals before the backend, IAM, failure mapping, throttling, timeout, shutdown, listener deadlines and no stored prompt over actual HTTP.",
       "models": []
-    },
-    {
-      "path": "internal/aws/elb_dispatch.go",
-      "sha256": "7a5fb5fdb89363f1f4b6c73ae8e2c375232092372c3e95d7c75ca32233cfe2b5",
-      "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_query.go",
-      "sha256": "3bc53f2f00840515529a316ca34dcad699ab2ee7dc74eee752548c5a816df3de",
-      "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_store.go",
-      "sha256": "30551c9098d3d4c9cf90ce8df2b555f66f0bf8dcc5d26dee57d1ab03ddd460ee",
-      "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_target.go",
-      "sha256": "3f9d6e7253f5482fdc06a9b50e331bbe837fd724f3e384d22cb233f8c9b042f0",
-      "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_target_test.go",
-      "sha256": "36905c8f0aaf1cf982392566da38321da765938b892897f6ce690efd9a59a1b8",
-      "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/elb_test.go",
-      "sha256": "ac42c14570c8f3104f8651d0a9906b6547406a4318a77fc297e6c27f4506af7f",
-      "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/lambda_permissions.go",
-      "sha256": "5e674117bcaeecc1f44c06aa0ff6a833e660e1d2b1ce0178d97f4badc52b813c",
-      "disposition": "modeled",
-      "reason": "Adds the bounded elasticloadbalancing.amazonaws.com target-group source to Lambda resource policies; API Gateway behavior is unchanged.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
     },
     {
       "path": "internal/aws/s3.go",
-      "sha256": "ceb905eb4682b1c21bc7e7213371bda20ab60864f75d73bda731a0b43be70e33",
+      "sha256": "a32931ae2747ee1427e4bc05e5819a57326c3150e10627b204f4d3eed7373599",
       "disposition": "modeled",
-      "reason": "Adds only the ELB store field to the shared gateway; existing service routing is unchanged.",
+      "reason": "Adds only the optional Gateway.BedrockRuntime field; nil keeps inference disabled with an explicit error. Existing S3 behavior is unchanged.",
       "models": [
         {
-          "id": "ELBTargetLifecycle",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
+            "BackendOnlyAfterAdmission",
+            "NoFallback"
           ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
     },
     {
       "path": "internal/aws/ssm.go",
-      "sha256": "e5d8fd17e7db082a22313301a7c89c59b4ca6ac8ac7709b1c2e705348a5d102d",
+      "sha256": "2239d50ddfae5d6ea284ebb4139985a2d2ac90c76762825bd22542d59f8f324e",
       "disposition": "modeled",
-      "reason": "Dispatches explicitly selected or ELB-scoped Query requests and the /_elb/ data plane before other services.",
+      "reason": "Adds only the first dispatch branch that recognizes Bedrock Runtime routes before the control-plane catalog; other services keep their dispatch order.",
       "models": [
         {
-          "id": "ELBTargetLifecycle",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst"
           ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
     },
     {
-      "path": "internal/server/elb_composition_test.go",
-      "sha256": "096dea06000e4a426c66ac9912e864368e6fcaff6bae011687b1c482e71da2b3",
+      "path": "internal/inference/apple.go",
+      "sha256": "d00de40c7d7d1410528f54c0066887fe0b0f3684f2e7b5fb1dc05f51a53afec5",
+      "disposition": "modeled",
+      "reason": "The Apple backend reports unavailable on every build and never substitutes another backend or a synthetic answer.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "NoFallback",
+            "SuccessOnlyFromBackend"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/inference/inference.go",
+      "sha256": "187ec504c88341f1c3dc7496e085cdd3f11f9933c387439e46778a882cc72f77",
+      "disposition": "modeled",
+      "reason": "Bounded backend: refuses ended contexts, fails fast when the slot is taken, releases it on every ending and reports deadlines and cancellation as themselves.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "ConcurrencyBound",
+            "NoCallAfterClose",
+            "TruthfulFailure"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/inference/ollama.go",
+      "sha256": "5b14ae586b10f48e8f0df2de82fa6d99d0762f28049bb9a9b727929488d6465c",
+      "disposition": "modeled",
+      "reason": "Ollama adapter: one pinned loopback endpoint, typed failures for every backend status or unusable reply, success only with text Ollama returned, no logging or storage.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "SuccessOnlyFromBackend",
+            "TruthfulFailure",
+            "NoFallback",
+            "NoPersistence"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/inference/ollama_test.go",
+      "sha256": "5b6aeefdf5d57c70fa6381a29bee629d7352dc87c1c6226e798f4614d4d5a68f",
       "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
+      "reason": "Checks URL/model validation, the actual Ollama HTTP boundary with a test double, every failure kind, size bounds and the concurrency/deadline gate.",
       "models": []
     },
     {
-      "path": "internal/server/server.go",
-      "sha256": "30273f4ce3252a9523fab85bdc69481a37f656ad91aa163db1da49cdc41b9fd3",
+      "path": "internal/server/bedrock_runtime.go",
+      "sha256": "9f66f9f17331276b43b184b292b029deb1df1dc6a002596688cfa68e911ad596",
       "disposition": "modeled",
-      "reason": "Composes the ELB store, owns the health-check loop lifecycle before runtime and store close, and publishes capabilities.",
+      "reason": "Advertises whether the single configured backend is enabled, its kind and mapped IDs; it exposes no backend address, backend model name, prompt or reply.",
       "models": [
         {
-          "id": "ELBTargetLifecycle",
+          "id": "BedrockRuntimeAdmission",
           "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
+            "NoFallback",
+            "NoPersistence"
           ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/bedrock_runtime_test.go",
+      "sha256": "5847f9db4ec091cadbc7dda6983a32a916b7d1acb797893224e6a85a7a31f289",
+      "disposition": "test-support",
+      "reason": "Checks default disabled capabilities beside the control plane and caller-owned runtime closing in the composed server.",
+      "models": []
+    },
+    {
+      "path": "internal/server/sakura_provider.go",
+      "sha256": "b0d44af3da2e3b1dc88400f21d6d1ad299f14adac656b457ed17978dd57e874e",
+      "disposition": "modeled",
+      "reason": "Adds the caller-owned ProviderConfig.BedrockRuntime field; the composition neither creates another backend nor closes the caller's runtime.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "NoFallback",
+            "NoCallAfterClose"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "51d99de1652495b20e2bd8488717629d2f302f86b3e2f6c36ea632e7d7c7f2a4",
+      "disposition": "modeled",
+      "reason": "Passes the configured runtime to the gateway and adds its capability entry; existing composition and closing are unchanged.",
+      "models": [
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "BackendOnlyAfterAdmission",
+            "NoFallback"
+          ],
+          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "e1034ad3fe81a75f2824fd6aa034412aecee048929a9e6f4eb1ed247bc022a47",
+      "sha256": "115c079e33fdd41a5f6e9fa099dba41da0a1cdacc9ef45e5ea7048402371256b",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
+      "reason": "Protects the new model's invariants, controls and exact source scope from silent removal.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "3a952fbd9b736983f846cf22316735c1ae699944995f2f7c149612e361f8a17b",
+      "sha256": "0685499942c2bbe6fadddc7dfda539c04eaade9445c50566f6ab452e44515a5f",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
+      "reason": "Adds removal detectors for the new model and names it in the complete registry inventory.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/bedrock_runtime.py",
+      "sha256": "05399ecffd2404c6bdf33531910ddeca6f15c4edbf27de1a9367a031b674d479",
+      "disposition": "test-support",
+      "reason": "Built binary with official boto3 against a fake Ollama process: operations, refusals, IAM, restart, stopped backend and no stored or logged prompt.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "a3741b5578c318e3664d734168501043ac57caf5965a294ec8b10f7503859191",
+      "sha256": "ed5ee493974f8fa420a8f715cd75e20490ea8e9d17b1df1a32a7af3002c166ce",
       "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/elb.py",
-      "sha256": "5719a85234df15841afbeb20b14a03b33eaeea69775f03c2e2355d0733569a54",
-      "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
+      "reason": "Registers the Bedrock Runtime boto3 acceptance in the mandatory E2E suite.",
       "models": []
     }
   ]
