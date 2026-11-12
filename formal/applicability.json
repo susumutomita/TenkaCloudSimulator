@@ -98,7 +98,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "717312983b3a9989321fda9752cc5cad8407546d312406263da885f135faf7c4",
+      "sha256": "954b952003896f714469274bf8ebd4c022f461790a155d9248d4f86fb1773a09",
       "disposition": "modeled",
       "reason": "Console source editing and nonce-bound static HTML preserve existing native APIs, authorization and invocation disclosure; no provider resource or token state changes.",
       "models": [
@@ -227,6 +227,20 @@
       ]
     },
     {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "0c8980070e90441cc71e27b412e0358f0030de02a9a448d8afb3aa0a059486e7",
+      "disposition": "formal-infrastructure",
+      "reason": "Fix the exact LandingAccessAdmission scope to include the new console HTML handler while preserving all existing source files, invariants and mutants; negative tests reject removal or unrelated additions. Does not model CSP or rendering.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "5bbb8d994bd00f6586560b39cf00f330322cbc27e1af274c637e38d2a5fd4c63",
+      "disposition": "formal-infrastructure",
+      "reason": "Fix the exact LandingAccessAdmission scope to include the new console HTML handler while preserving all existing source files, invariants and mutants; negative tests reject removal or unrelated additions. Does not model CSP or rendering.",
+      "models": []
+    },
+    {
       "path": "test/e2e/check.py",
       "sha256": "484ec627c7877e35ad663511266e8291a7a6847194bfc836a2a57ec5de480796",
       "disposition": "test-support",
@@ -256,14 +270,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "ed46037b5e335bc475a880e4ad4aac80494344fb295e708578b5e26b6efd57f0",
+      "sha256": "2cccfe40edaf81fc21de36c2c96b66495c87ad9c5781434f5a191a577cd37106",
       "disposition": "presentation",
       "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "ac2a6ac69da32466834cf4f09ff66961418395af02dd7c08c3396be33a2d1cea",
+      "sha256": "eeddba6fea2366ddbf416be23c2cc9b49fd6474b2d93954bf40eb6bd26d78ae9",
       "disposition": "presentation",
       "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
@@ -311,6 +325,13 @@
       ]
     },
     {
+      "path": "tools/console/src/plain-code-input.mjs",
+      "sha256": "5ec631b7d54ddf986493b551e47083f9ceb9691b9158cb2430827049b6457f58",
+      "disposition": "presentation",
+      "reason": "Bounded console plain-code input and regression tests; does not alter provider state or native protocol semantics.",
+      "models": []
+    },
+    {
       "path": "tools/console/src/python-editor.css",
       "sha256": "8c1ee63127eee15e2f91a3b090bfef3f93856c5c8166a6e56fae40313c1f5465",
       "disposition": "presentation",
@@ -319,7 +340,7 @@
     },
     {
       "path": "tools/console/src/python-editor.jsx",
-      "sha256": "a1de5e5c6a3aae3cc930a53107c6f43e160c0553e33c0ef7e2afb6c1a12ef50e",
+      "sha256": "cdfbc42feaf068fa7a21f6ce950e964fd224a0d6d9372f48af6ba30e81b5a11b",
       "disposition": "presentation",
       "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
@@ -332,24 +353,17 @@
       "models": []
     },
     {
+      "path": "tools/console/tests/lambda-native-input.test.mjs",
+      "sha256": "9bbb9f389935e0975af824552379935c3aa6ea5e1e79acdd40c0013b0695ac89",
+      "disposition": "presentation",
+      "reason": "Bounded console plain-code input and regression tests; does not alter provider state or native protocol semantics.",
+      "models": []
+    },
+    {
       "path": "tools/console/tests/lambda-source.test.mjs",
       "sha256": "4c1958723e58cad628a8cec888b17d2552583d1cf28e642ffcc0cd18e6e98416",
       "disposition": "presentation",
       "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "0c8980070e90441cc71e27b412e0358f0030de02a9a448d8afb3aa0a059486e7",
-      "disposition": "formal-infrastructure",
-      "reason": "Fix the exact LandingAccessAdmission scope to include the new console HTML handler while preserving all existing source files, invariants and mutants; negative tests reject removal or unrelated additions. Does not model CSP or rendering.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "5bbb8d994bd00f6586560b39cf00f330322cbc27e1af274c637e38d2a5fd4c63",
-      "disposition": "formal-infrastructure",
-      "reason": "Fix the exact LandingAccessAdmission scope to include the new console HTML handler while preserving all existing source files, invariants and mutants; negative tests reject removal or unrelated additions. Does not model CSP or rendering.",
       "models": []
     }
   ]
