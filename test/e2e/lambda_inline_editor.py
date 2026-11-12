@@ -33,11 +33,22 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     page.get_by_role('textbox',name='Execution role ARN',exact=True).fill('arn:aws:iam::000000000000:role/editor-executor')
     def edit(source):
         editor=page.locator('.lambda-python-editor .cm-content').first
+        expect(editor).to_have_attribute('contenteditable','plaintext-only')
         editor.click();assert_csp('editor clicked')
         editor.press('ControlOrMeta+A');assert_csp('editor select all')
         page.keyboard.insert_text(source);assert_csp('editor native insertText')
     assert_csp('create editor mounted')
     edit('def lambda_handler(event, context):\n    return {"answer": 41}\n')
+    editor=page.locator('.lambda-python-editor .cm-content').first
+    editor.press('ControlOrMeta+End');editor.press('Enter')
+    page.keyboard.type('# typed with ordinary keys')
+    expect(editor).to_contain_text('# typed with ordinary keys')
+    assert_csp('ordinary typing and Enter')
+    editor.press('ControlOrMeta+z')
+    expect(editor).not_to_contain_text('# typed with ordinary keys')
+    editor.press('ControlOrMeta+Shift+z')
+    expect(editor).to_contain_text('# typed with ordinary keys')
+    assert_csp('undo redo')
     page.get_by_role('button',name='Create function',exact=True).click()
     expect(page.get_by_text('Deployed code',exact=True)).to_be_visible()
     edit('def lambda_handler(event, context):\n    print("editor-output")\n    return {"answer": 42}\n')

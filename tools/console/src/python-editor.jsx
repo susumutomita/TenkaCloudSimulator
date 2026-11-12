@@ -9,7 +9,9 @@ import './python-editor.css';
 export default function PythonEditor({value,onChange,readOnly=false,label}) {
  const node=useRef(null),editor=useRef(null),change=useRef(onChange),settings=useRef(new Compartment()),syncing=useRef(false);
  change.current=onChange;
- const options=()=>[EditorState.readOnly.of(readOnly),EditorView.editable.of(!readOnly),EditorView.contentAttributes.of({'aria-label':label})];
+// Keep native typing/paste plain text: rich contenteditable editing can synthesize
+ // inline-style DOM fragments that conflict with the strict console CSP.
+ const options=()=>[EditorState.readOnly.of(readOnly),EditorView.editable.of(!readOnly),EditorView.contentAttributes.of({'aria-label':label,contenteditable:readOnly?'false':'plaintext-only'})];
  useEffect(()=>{
   const instance=new EditorView({parent:node.current,state:EditorState.create({doc:value,extensions:[basicSetup,python(),EditorView.lineWrapping,EditorView.cspNonce.of(document.querySelector('meta[name=editor-style-nonce]')?.content||''),settings.current.of(options()),EditorView.updateListener.of(update=>{if(update.docChanged&&!syncing.current)change.current(update.state.doc.toString())})]})});
   editor.current=instance;return()=>{instance.destroy();editor.current=null};
