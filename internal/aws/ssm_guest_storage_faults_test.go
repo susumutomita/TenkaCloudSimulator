@@ -3,7 +3,9 @@ package aws
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/guestcommand"
@@ -176,4 +178,109 @@ func TestSSMCommandStoreStorageFaults(t *testing.T) {
 			}
 		})
 	})
+}
+
+func nativeListFixture(t *testing.T, db *sql.DB, commands int) *SSMCommandAPI {
+	t.Helper()
+	ls := faultLeaseStore(t, db)
+	leases := faultLeases(t, ls, 1)
+	double := &ssmCommandDouble{dispatch: func(guestcommand.DurableIntent) error { return nil }, observe: func(i guestcommand.DurableIntent) (guestcommand.DurableObservation, error) {
+		return guestcommand.DurableObservation{Intent: i, State: "Unknown"}, nil
+	}}
+	backend := &nativeCommandBackendDouble{ssmCommandDouble: double}
+	backend.resolve = func(context.Context, string, string) (EC2GuestLease, error) { return leases[0], nil }
+	store, err := NewSSMCommandStore(db, backend)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := SSMCommandAuthority{Account: "000000000000", Region: "us-east-1", Principal: "organizer", Deployment: leaseOwner().Deployment}
+	for i := 0; i < commands; i++ {
+		if _, err = store.Send(context.Background(), a, ssmCommandRequestFixture(leases), leases); err != nil {
+			t.Fatal(err)
+		}
+	}
+	api, err := NewSSMCommandAPI(store)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return api
+}
+
+func TestSSMCommandNativeListStorageFaults(t *testing.T) {
+	sweepStorageFaults(t, false, func(t *testing.T, db *sql.DB) func(context.Context) error {
+		api := nativeListFixture(t, db, 3)
+		return func(ctx context.Context) error {
+			input := nativeCommandInput{InvokedAfter: "1970-01-01T00:00:00Z", MaxResults: 2}
+			first, token, err := api.list(ctx, "organizer", "us-east-1", input)
+			if err != nil {
+				return err
+			}
+			if len(first) != 2 || token == "" {
+				t.Fatalf("first page %d %q", len(first), token)
+			}
+			input.NextToken = token
+			rest, next, err := api.list(ctx, "organizer", "us-east-1", input)
+			if err == nil && (len(rest) != 1 || next != "") {
+				t.Fatalf("second page %d %q", len(rest), next)
+			}
+			return err
+		}
+	})
+}
+
+// A stored listing cursor is an immutable snapshot bound to its caller: tokens
+// are refused when malformed, foreign, out of range, or when the stored
+// snapshot was altered.
+func TestSSMCommandNativeListRefusesForeignOrAlteredCursors(t *testing.T) {
+	db := newFaultDB(t)
+	api := nativeListFixture(t, db.DB, 3)
+	ctx := context.Background()
+	input := nativeCommandInput{InvokedAfter: "1970-01-01T00:00:00Z", MaxResults: 1}
+	_, token, err := api.list(ctx, "organizer", "us-east-1", input)
+	if err != nil || token == "" {
+		t.Fatal(token, err)
+	}
+	prefix := token[:strings.Index(token, ".")]
+	for name, tc := range map[string]struct{ principal, region, token string }{
+		"malformed":       {"organizer", "us-east-1", "not-a-token"},
+		"zero offset":     {"organizer", "us-east-1", prefix + ".0"},
+		"padded offset":   {"organizer", "us-east-1", prefix + ".01"},
+		"unknown token":   {"organizer", "us-east-1", strings.Repeat("0", len(prefix)) + ".1"},
+		"other principal": {"intruder", "us-east-1", token},
+		"other region":    {"organizer", "us-west-2", token},
+	} {
+		in := input
+		in.NextToken = tc.token
+		if _, _, err := api.list(ctx, tc.principal, tc.region, in); err == nil {
+			t.Errorf("%s cursor accepted", name)
+		}
+	}
+	if _, _, err := api.list(ctx, "organizer", "us-east-1", nativeCommandInput{InvokedAfter: "yesterday", MaxResults: 1}); err == nil {
+		t.Error("unparseable InvokedAfter accepted")
+	}
+	var raw string
+	if err = db.QueryRow(`SELECT record FROM aws_ssm_native_command_pages WHERE token=?`, prefix).Scan(&raw); err != nil {
+		t.Fatal(err)
+	}
+	for name, alter := range map[string]func(*nativeCommandPage){
+		"duplicate command": func(p *nativeCommandPage) { p.Commands[1] = p.Commands[0] },
+		"reordered":         func(p *nativeCommandPage) { p.Commands[0], p.Commands[1] = p.Commands[1], p.Commands[0] },
+		"bad command ID":    func(p *nativeCommandPage) { p.Commands[1].CommandId = "bogus" },
+		"bad InvokedAfter":  func(p *nativeCommandPage) { p.InvokedAfter = "later" },
+		"forged request":    func(p *nativeCommandPage) { p.Commands[1].Request.Comment = "forged" },
+	} {
+		var page nativeCommandPage
+		if err = json.Unmarshal([]byte(raw), &page); err != nil {
+			t.Fatal(err)
+		}
+		alter(&page)
+		if _, err = db.Exec(`UPDATE aws_ssm_native_command_pages SET record=? WHERE token=?`, ssmEncode(page), prefix); err != nil {
+			t.Fatal(err)
+		}
+		in := input
+		in.NextToken = token
+		if _, _, err := api.list(ctx, "organizer", "us-east-1", in); err == nil {
+			t.Errorf("%s snapshot accepted", name)
+		}
+	}
 }
