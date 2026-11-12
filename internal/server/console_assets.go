@@ -13,7 +13,7 @@ import (
 func consoleAssetsHandler(web fs.FS) http.Handler {
 	files := http.FileServer(http.FS(web))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" || (r.Method != http.MethodGet && r.Method != http.MethodHead) {
+		if (r.URL.Path != "" && r.URL.Path != "/") || (r.Method != http.MethodGet && r.Method != http.MethodHead) {
 			files.ServeHTTP(w, r)
 			return
 		}

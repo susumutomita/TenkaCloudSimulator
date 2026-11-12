@@ -43,3 +43,32 @@ func TestConsoleEditorStyleNonce(t *testing.T) {
 		t.Fatal("local worker not served")
 	}
 }
+
+// StripPrefix removes the entire console prefix, including its trailing slash.
+// Exercise the real composition rather than only a direct slash-root request.
+func TestConsoleEditorNonceAfterStripPrefix(t *testing.T) {
+	h := http.StripPrefix("/_simulator/console/", consoleAssetsHandler(fstest.MapFS{"index.html": {Data: []byte("<html><head></head></html>")}}))
+	for _, method := range []string{"GET", "HEAD"} {
+		w := httptest.NewRecorder()
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'")
+		h.ServeHTTP(w, httptest.NewRequest(method, "/_simulator/console/", nil))
+		if w.Code != http.StatusOK || !strings.Contains(w.Header().Get("Content-Security-Policy"), "style-src 'self' 'nonce-") {
+			t.Fatal("console prefix lost nonce policy")
+		}
+		nonce := strings.Split(strings.Split(w.Header().Get("Content-Security-Policy"), "'nonce-")[1], "'")[0]
+		if w.Header().Get("Cache-Control") != "no-store" {
+			t.Fatal("nonce document must not be cached")
+		}
+		if method == "GET" && !strings.Contains(w.Body.String(), `meta name="editor-style-nonce" content="`+nonce+`"`) {
+			t.Fatal("console prefix lost nonce meta")
+		}
+		if method == "HEAD" && w.Body.Len() != 0 {
+			t.Fatal("HEAD body")
+		}
+	}
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest("GET", "/_simulator/console/", nil))
+	if w.Code != http.StatusInternalServerError {
+		t.Fatal("empty path must fail closed without policy")
+	}
+}
