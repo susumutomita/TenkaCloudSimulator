@@ -22,6 +22,7 @@ import (
 	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/guestbundle"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/guesttcp"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/guestvm"
+	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/probeclock"
 )
 
 // inertBattleConfig is a pinned but inert runtime: extraction and validation
@@ -96,6 +97,40 @@ func TestBattleRuntimeComposesConfiguredProviderWithoutVM(t *testing.T) {
 				t.Fatal("composed runtime did not shut down cleanly:", err)
 			}
 		})
+	}
+}
+
+func TestBattleRuntimeAdoptsOwnedMonotonicClockDomain(t *testing.T) {
+	config, _ := inertBattleConfig(t)
+	var clock *probeclock.Clock
+	for i := 0; i < 50 && clock == nil; i++ {
+		clock, _ = probeclock.New()
+	}
+	if clock == nil {
+		t.Fatal("owned monotonic clock unavailable")
+	}
+	h, closeAll, err := NewWithMonotonicBattleRuntime(filepath.Join(t.TempDir(), "state.db"), DefaultProviderConfig(), "http://127.0.0.1:4566", battleClock(), config, clock)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closeAll()
+	req := httptest.NewRequest("POST", battleCapabilitiesPath+"/availability", strings.NewReader(`{"version":1}`))
+	req = req.WithContext(provider.WithActor(req.Context(), provider.Actor{CredentialIdentity: "simulator-admin", ExerciseIdentity: "exercise", CredentialRole: provider.CredentialOperator}))
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != 400 {
+		t.Fatal("unsigned request served by monotonic registry", w.Code)
+	}
+	req = httptest.NewRequest("POST", battleCapabilitiesPath+"/availability", strings.NewReader(`{"version":1}`))
+	req = req.WithContext(provider.WithActor(req.Context(), provider.Actor{CredentialIdentity: "simulator-admin", ExerciseIdentity: "exercise", CredentialRole: provider.CredentialOperator}))
+	req.Header.Set("X-Simulator-Clock-Nonce", strings.Repeat("ab", 32))
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Header().Get("X-Simulator-Clock-Domain") != clock.Domain() || len(w.Header().Get("X-Simulator-Clock-MAC")) != 64 {
+		t.Fatal("reply not signed by the owned clock")
+	}
+	if w.Code != 200 || !strings.Contains(w.Body.String(), `"clockDomain":"`+clock.Domain()+`"`) {
+		t.Fatalf("monotonic domain not advertised: %d %s", w.Code, w.Body.String())
 	}
 }
 
