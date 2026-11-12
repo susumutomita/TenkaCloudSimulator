@@ -22,6 +22,7 @@ FORMAL_INFRA = {'formal/models.json', 'formal/tla2tools.sha256',
                 'scripts/formal_module_metadata.py'}
 KNOWN_VALIDATION = {
     'scripts/smithy-contracts.py',
+    'scripts/software_factory.py',  # Local development evidence/claim gate, never simulator runtime.
     'scripts/check-sts-formal-candidate.py',
     'scripts/build-release.py', 'scripts/verify-release.py', 'scripts/verify-release-tag.py',
     'scripts/build-vulndb-snapshot.py', 'scripts/catalog-matrix.py',

@@ -61,6 +61,14 @@ class PromptDocumentationClassificationTests(unittest.TestCase):
             self.assertIsNone(disposition(path), path)
 
 
+class FactoryClassificationTests(unittest.TestCase):
+    def test_only_exact_local_factory_gate_is_validation_tooling(self):
+        self.assertEqual(disposition('scripts/software_factory.py'), 'validation-tooling')
+        for path in ('scripts/software_factory_extra.py', 'scripts/software_factory.sh',
+                     'internal/core/software_factory.go', '.claude/hooks/software_factory.py'):
+            self.assertIsNone(disposition(path), path)
+
+
 class ReleaseClassificationTests(unittest.TestCase):
     def test_release_validation_classification_is_exact(self):
         for name in ('build-release.py', 'verify-release.py', 'verify-release-tag.py'):
