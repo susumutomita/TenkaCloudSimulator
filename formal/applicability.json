@@ -1,323 +1,73 @@
 {
   "version": 1,
-  "base_sha": "66287bb49d39b22b1974b59773096e9d51004627",
+  "base_sha": "e4d30099cd6bc8a70986eb3b634b34af621f24d0",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "dc4ebf23a6357f39cf35c1d8faa2044b658d1600e1f48db19a7647f018e0d11b",
+      "path": ".claude/agents/issue-finder.md",
+      "sha256": "22d628d2be6f7e6be21fd9a6a8d9ae676919e652a1a836fe03a7b3fe7103568b",
       "disposition": "documentation",
-      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
+      "reason": "Documents bounded developer-agent duties and local workflow; no simulator runtime behavior or permission grant.",
       "models": []
     },
     {
-      "path": "README.md",
-      "sha256": "80ef1e53ff84cec24c1700744a08d23635e6f5d71dc65494d9239eab5b0af875",
+      "path": ".claude/agents/issue-fixer.md",
+      "sha256": "95c6af0e702765e4e0a623ccfcc4da8bbefe823097f8a1b8e3e2c11279235e51",
       "disposition": "documentation",
-      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
+      "reason": "Documents bounded developer-agent duties and local workflow; no simulator runtime behavior or permission grant.",
       "models": []
     },
     {
-      "path": "SECURITY.md",
-      "sha256": "d87d960439886caff29f2692140c139466c95507f77c2d22175af6eca91dc771",
-      "disposition": "documentation",
-      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
-      "models": []
-    },
-    {
-      "path": "docs/apigateway.md",
-      "sha256": "0839967691c595f2de2d244f61762a2173445c098cfce506f92f26efb7375f39",
-      "disposition": "documentation",
-      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
-      "models": []
-    },
-    {
-      "path": "docs/elb.md",
-      "sha256": "7d5a9f171ced56a06ad7e8d8b2d677c277cafb26a57c52b748d3e502e0a80807",
-      "disposition": "documentation",
-      "reason": "Defines the enduring supported ELB contract, dependencies and limits; no progress receipt or intermediate handoff.",
-      "models": []
-    },
-    {
-      "path": "formal/ELBTargetLifecycle.cfg",
-      "sha256": "397f2964183cabd86a83aa0caef50cfcecebdb830a317f20bf111faeae83278f",
+      "path": "Makefile",
+      "sha256": "bfaec2685781452267160ce023a1d9d5323b6969868d63c6b8a357870440ef58",
       "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
+      "reason": "Preserves the registered startup/token target contract while adding a development-only regression command to test; existing gates are unchanged.",
       "models": [
         {
-          "id": "ELBTargetLifecycle",
+          "id": "StartupTokenVisibility",
           "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
           ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
+          "limits": "Existing finite startup/token abstraction is unchanged. This test-recipe addition is not modeled and is validated by the Python controller regression suite and CI; no claim of implementation refinement."
         }
       ]
     },
     {
-      "path": "formal/ELBTargetLifecycle.tla",
-      "sha256": "311402892b6035781bd03273cb45e27d6480d9bb2451a87d5d96226718ca381d",
-      "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
+      "path": "docs/contributing/software-factory.md",
+      "sha256": "975d2614d6944f65e59381d743e3045abeb17d6a1b3a628262a489fb32da18d6",
+      "disposition": "documentation",
+      "reason": "Documents bounded developer-agent duties and local workflow; no simulator runtime behavior or permission grant.",
+      "models": []
     },
     {
-      "path": "formal/models.json",
-      "sha256": "26d8928614e687779a4c2dbe88c5d7b8c14c4a2bc1cb0223093e8d184fd222df",
+      "path": "scripts/formal_applicability.py",
+      "sha256": "958bd128a1d1601f48eb744e2b557f5e6ea4dc6e18958ac59e994ecb00b5f4ee",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
+      "reason": "Exact path classification for the development-only evidence gate with negative controls; arbitrary scripts and runtime sources remain unclassified.",
       "models": []
     },
     {
-      "path": "internal/aws/apirouting/alb_headers.go",
-      "sha256": "8f605c5eecf480592b534d0551075cc0d73452e7270ec090fac1782a021e7319",
-      "disposition": "modeled",
-      "reason": "Exposes the existing REST proxy header authority exclusion to the load balancer event projection without changing it.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_deadline_test.go",
-      "sha256": "2adce81395fc79f49533936ebeef84bad455a2131e2e8067a07b0b300cbabe2b",
-      "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
+      "path": "scripts/software_factory.py",
+      "sha256": "29687e0efd9a7682bbe4b400cab3331fc7f072e8ce04e870888c0c3c80229842",
+      "disposition": "validation-tooling",
+      "reason": "Local development evidence and claim gate only; no simulator request, state, authentication or workload implementation.",
       "models": []
     },
     {
-      "path": "internal/aws/elb_dispatch.go",
-      "sha256": "7a5fb5fdb89363f1f4b6c73ae8e2c375232092372c3e95d7c75ca32233cfe2b5",
-      "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_query.go",
-      "sha256": "3bc53f2f00840515529a316ca34dcad699ab2ee7dc74eee752548c5a816df3de",
-      "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_store.go",
-      "sha256": "30551c9098d3d4c9cf90ce8df2b555f66f0bf8dcc5d26dee57d1ab03ddd460ee",
-      "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_target.go",
-      "sha256": "3f9d6e7253f5482fdc06a9b50e331bbe837fd724f3e384d22cb233f8c9b042f0",
-      "disposition": "modeled",
-      "reason": "Binds the Elastic Load Balancing reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result implementation to its finite abstraction.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_target_test.go",
-      "sha256": "36905c8f0aaf1cf982392566da38321da765938b892897f6ce690efd9a59a1b8",
-      "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/elb_test.go",
-      "sha256": "ac42c14570c8f3104f8651d0a9906b6547406a4318a77fc297e6c27f4506af7f",
-      "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/lambda_permissions.go",
-      "sha256": "5e674117bcaeecc1f44c06aa0ff6a833e660e1d2b1ce0178d97f4badc52b813c",
-      "disposition": "modeled",
-      "reason": "Adds the bounded elasticloadbalancing.amazonaws.com target-group source to Lambda resource policies; API Gateway behavior is unchanged.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/s3.go",
-      "sha256": "ceb905eb4682b1c21bc7e7213371bda20ab60864f75d73bda731a0b43be70e33",
-      "disposition": "modeled",
-      "reason": "Adds only the ELB store field to the shared gateway; existing service routing is unchanged.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ssm.go",
-      "sha256": "e5d8fd17e7db082a22313301a7c89c59b4ca6ac8ac7709b1c2e705348a5d102d",
-      "disposition": "modeled",
-      "reason": "Dispatches explicitly selected or ELB-scoped Query requests and the /_elb/ data plane before other services.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/elb_composition_test.go",
-      "sha256": "096dea06000e4a426c66ac9912e864368e6fcaff6bae011687b1c482e71da2b3",
-      "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "30273f4ce3252a9523fab85bdc69481a37f656ad91aa163db1da49cdc41b9fd3",
-      "disposition": "modeled",
-      "reason": "Composes the ELB store, owns the health-check loop lifecycle before runtime and store close, and publishes capabilities.",
-      "models": [
-        {
-          "id": "ELBTargetLifecycle",
-          "properties": [
-            "ListenerReferencesExist",
-            "TargetNeedsGroup",
-            "HealthCurrent",
-            "ReportedHealthInUse",
-            "OnlyAuthorizedChanges",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "Thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, Lambda resource-policy evaluation, guest execution, SQL/Go refinement, crashes and liveness are covered by native, server and SDK tests, not the model."
-        }
-      ]
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "e1034ad3fe81a75f2824fd6aa034412aecee048929a9e6f4eb1ed247bc022a47",
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "1176d29fc98dec3588e6007f516a4e063411644bfda811f4e538d5ef1f096f11",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
+      "reason": "Exact path classification for the development-only evidence gate with negative controls; arbitrary scripts and runtime sources remain unclassified.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "3a952fbd9b736983f846cf22316735c1ae699944995f2f7c149612e361f8a17b",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the ELB finite properties, eight mutation controls and exact source scope without weakening existing gates.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/check.py",
-      "sha256": "a3741b5578c318e3664d734168501043ac57caf5965a294ec8b10f7503859191",
+      "path": "scripts/test-software-factory.py",
+      "sha256": "9bd691cc8a88b9e1330e9e9736280a979f66685455b907e3923a17a551976ab9",
       "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/elb.py",
-      "sha256": "5719a85234df15841afbeb20b14a03b33eaeea69775f03c2e2355d0733569a54",
-      "disposition": "test-support",
-      "reason": "Native, composition or SDK acceptance evidence for the bounded ELB workflow; no runtime behavior.",
+      "reason": "Exercises local development handoff state and fail-closed validation; no runtime behavior changes.",
       "models": []
     }
   ]
