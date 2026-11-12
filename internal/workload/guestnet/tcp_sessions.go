@@ -15,8 +15,15 @@ const (
 	MaxProbeSessionLifetime        = 10 * time.Second
 	MaxNICSessionLifetime          = 24 * time.Hour
 	probeQueueSize                 = 16
-	maxNICFrames                   = 65536
-	maxNICBytes                    = 64 << 20
+	// TupleQuarantine is TCP's 2*MSL reuse rule: a retired tuple is offered to
+	// a new session only after its previous session drained and this long has
+	// passed, so a stale guest retransmission cannot reach the new exchange.
+	TupleQuarantine = 4 * time.Minute
+	// Per-connection budgets cover one session incarnation, including late
+	// traffic to its retired tuple. They are twice the engine's own per-exchange
+	// frame/byte caps, so the engine stays the binding limit for live traffic.
+	maxSessionFrames = 8192
+	maxSessionBytes  = 2 << 20
 )
 
 var (
@@ -42,11 +49,14 @@ type ProbeNIC struct {
 // the entire incarnation; creating a replacement registry cannot safely reset
 // its source-port tombstones while old packets or work may exist.
 //
-// Each accepted Open consumes one of 1024 lifetime tuples, never reused, even
-// after cancellation. Up to eight sessions (including unfinished cleanup) may
-// coexist. Every incoming/outgoing attempt consumes cumulative frame/byte budget,
-// including retired traffic. Malformed, unowned or overflowing input revokes the
-// registry. Retired exact tuples are discarded, never delivered to a new session.
+// Each accepted Open takes one of 1024 tuples. A tuple is reused only after its
+// previous session drained and TupleQuarantine passed; until then it stays a
+// tombstone, even after cancellation. Up to eight sessions (including unfinished
+// cleanup) may coexist. Every incoming/outgoing attempt consumes the frame/byte
+// budget of the session incarnation that owns the tuple, including retired
+// traffic; reuse starts a fresh budget. Malformed, unowned or overflowing input
+// revokes the registry. Quarantined retired tuples are discarded, never
+// delivered to a new session.
 // There is no OS attachment, ARP/IMDS routing, policy decision or physical drain
 // evidence here. A future persistent NIC owner must compose these independently.
 type TCPProbeSessions struct {
@@ -57,9 +67,10 @@ type TCPProbeSessions struct {
 	cancel                            context.CancelFunc
 	expires                           time.Time
 	records                           [MaxProbeSessions]*TCPProbeSession
-	allocated, live, frames, bytes    int
+	next, live                        int
 	sending, closed, watched, drained bool
 	done                              chan struct{}
+	now                               func() time.Time // retirement clock; a test seam
 }
 
 // TCPProbeSession is one immutable, single-use logical probe tuple. Incoming
@@ -77,6 +88,8 @@ type TCPProbeSession struct {
 	closed, watched, drained bool // guarded by registry.mu
 	reading                  bool
 	inflight                 int
+	frames, bytes            int       // this incarnation's budget use
+	retired                  time.Time // drain time; starts the tuple quarantine
 }
 
 func sessionContextError(ctx context.Context) error {
@@ -137,7 +150,7 @@ func NewTCPProbeSessions(ctx context.Context, nic ProbeNIC, deadline time.Time) 
 		return nil, err
 	}
 	nic.ServicePorts = append([]uint16(nil), nic.ServicePorts...)
-	r := &TCPProbeSessions{nic: nic, allowed: allowed, ctx: lifetime, cancel: cancel, expires: deadline, done: make(chan struct{})}
+	r := &TCPProbeSessions{nic: nic, allowed: allowed, ctx: lifetime, cancel: cancel, expires: deadline, done: make(chan struct{}), now: time.Now}
 	go func() {
 		<-lifetime.Done()
 		r.mu.Lock()
@@ -178,7 +191,11 @@ func (r *TCPProbeSessions) Open(ctx context.Context, port uint16) (*TCPProbeSess
 	if !r.allowed[port] {
 		return nil, ErrProbeSession
 	}
-	if r.live >= MaxActiveProbeSessions || r.allocated >= MaxProbeSessions {
+	if r.live >= MaxActiveProbeSessions {
+		return nil, ErrProbeCapacity
+	}
+	slot := r.freeSlotLocked()
+	if slot < 0 {
 		return nil, ErrProbeCapacity
 	}
 	deadline := time.Now().Add(MaxProbeSessionLifetime)
@@ -193,15 +210,15 @@ func (r *TCPProbeSessions) Open(ctx context.Context, port uint16) (*TCPProbeSess
 		cancel()
 		return nil, err
 	}
-	route := TCPRoute{LocalIP: r.nic.LocalIP, PeerIP: r.nic.PeerIP, LocalMAC: r.nic.LocalMAC, PeerMAC: r.nic.PeerMAC, LocalPort: ProbeSourcePort + uint16(r.allocated), PeerPort: port}
+	route := TCPRoute{LocalIP: r.nic.LocalIP, PeerIP: r.nic.PeerIP, LocalMAC: r.nic.LocalMAC, PeerMAC: r.nic.PeerMAC, LocalPort: ProbeSourcePort + uint16(slot), PeerPort: port}
 	classifier, err := NewTCPRoutes([]TCPRoute{route})
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 	s := &TCPProbeSession{registry: r, route: route, classifier: classifier, ctx: lifetime, cancel: cancel, expires: deadline, incoming: make(chan []byte, probeQueueSize), done: make(chan struct{})}
-	r.records[r.allocated] = s
-	r.allocated++
+	r.records[slot] = s
+	r.next = (slot + 1) % MaxProbeSessions
 	r.live++
 	go func() {
 		<-lifetime.Done()
@@ -212,6 +229,22 @@ func (r *TCPProbeSessions) Open(ctx context.Context, port uint16) (*TCPProbeSess
 		r.mu.Unlock()
 	}()
 	return s, nil
+}
+
+// freeSlotLocked returns the next never-used tuple, or the next tuple whose
+// previous session drained at least TupleQuarantine ago, scanning from the
+// slot after the last allocation. It returns -1 when every tuple is live or
+// still quarantined; that capacity error is temporary, not a lifetime limit.
+func (r *TCPProbeSessions) freeSlotLocked() int {
+	now := r.now()
+	for i := 0; i < MaxProbeSessions; i++ {
+		k := (r.next + i) % MaxProbeSessions
+		s := r.records[k]
+		if s == nil || (s.drained && !now.Before(s.retired.Add(TupleQuarantine))) {
+			return k
+		}
+	}
+	return -1
 }
 
 // Route returns immutable metadata only, never a delivery or ownership permit.
@@ -250,17 +283,26 @@ func (s *TCPProbeSession) admissionLocked() error {
 	}
 	return nil
 }
-func (r *TCPProbeSessions) accountLocked(n int) error {
+func (r *TCPProbeSessions) sizeLocked(n int) error {
 	if n < MinFrameBytes || n > MaxFrameBytes {
 		r.closeLocked()
 		return ErrFrameSize
 	}
-	if r.frames >= maxNICFrames || r.bytes > maxNICBytes-n {
+	return nil
+}
+
+// accountLocked charges one attempt to the owning session incarnation. An
+// exhausted budget is abuse of that tuple and revokes the whole registry.
+func (r *TCPProbeSessions) accountLocked(s *TCPProbeSession, n int) error {
+	if err := r.sizeLocked(n); err != nil {
+		return err
+	}
+	if s.frames >= maxSessionFrames || s.bytes > maxSessionBytes-n {
 		r.closeLocked()
 		return ErrProbeCapacity
 	}
-	r.frames++
-	r.bytes += n
+	s.frames++
+	s.bytes += n
 	return nil
 }
 
@@ -278,7 +320,7 @@ func (r *TCPProbeSessions) RouteIncoming(frame []byte) (bool, error) {
 	if err := r.admissionLocked(); err != nil {
 		return false, err
 	}
-	if err := r.accountLocked(len(frame)); err != nil {
+	if err := r.sizeLocked(len(frame)); err != nil {
 		return false, err
 	}
 	packet, err := ParseTCPFrame(frame)
@@ -287,11 +329,14 @@ func (r *TCPProbeSessions) RouteIncoming(frame []byte) (bool, error) {
 		return false, err
 	}
 	index := int(packet.DestinationPort) - int(ProbeSourcePort)
-	if index < 0 || index >= r.allocated {
+	if index < 0 || index >= MaxProbeSessions || r.records[index] == nil {
 		r.closeLocked()
 		return false, ErrTCPRoute
 	}
 	s := r.records[index]
+	if err = r.accountLocked(s, len(frame)); err != nil {
+		return false, err
+	}
 	if _, err = s.classifier.Classify(TCPFromPeer, frame); err != nil {
 		r.closeLocked()
 		return false, err
@@ -392,7 +437,7 @@ func (s *TCPProbeSession) Transmit(ctx context.Context, frame []byte, deliver fu
 		r.mu.Unlock()
 		return err
 	}
-	if err := r.accountLocked(len(frame)); err != nil {
+	if err := r.accountLocked(s, len(frame)); err != nil {
 		r.mu.Unlock()
 		return err
 	}
@@ -490,6 +535,7 @@ func (s *TCPProbeSession) finishLocked() {
 		return
 	}
 	s.drained = true
+	s.retired = s.registry.now()
 	close(s.done)
 	s.registry.live--
 	s.registry.finishLocked()
@@ -500,8 +546,10 @@ func (r *TCPProbeSessions) closeLocked() {
 	}
 	r.closed = true
 	r.cancel()
-	for _, s := range r.records[:r.allocated] {
-		s.closeLocked()
+	for _, s := range r.records {
+		if s != nil {
+			s.closeLocked()
+		}
 	}
 	r.finishLocked()
 }

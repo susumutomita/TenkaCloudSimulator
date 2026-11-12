@@ -10736,7 +10736,7 @@
    "id": "NICSessionBookkeeping",
    "model": "formal/NICSessionBookkeeping.tla",
    "config": "formal/NICSessionBookkeeping.cfg",
-   "bounds": "Eight explicitly reachable bookkeeping seeds, three transition suffixes, two lifetime tuples/two active sessions, one callback/one queued frame per session, three cumulative frames/four byte units.",
+   "bounds": "Eight explicitly reachable bookkeeping seeds, three transition suffixes, two reusable tuples/two active sessions, one callback/one queued frame per session, three frames/four byte units per tuple incarnation.",
    "properties": [
     "TypeOK",
     "TupleTombstones",
@@ -10755,7 +10755,7 @@
     "RewrapPreservesState",
     "EffectNotCleanupProof"
    ],
-   "limits": "Logical TCPProbeSessions bookkeeping only. Seed prefixes are documented; no unbounded safety/liveness, Go concurrency refinement, full limits arithmetic, timer/suspension, packet parsing/checksums/ARP/encoding, gVisor TCP sequence semantics, exact context hook scheduling, physical ownership/atomic revocation/delivery fencing, OS NIC cleanup or process restart proof. Parsed tuple/direction validity is an abstract input predicate. An admitted callback may already have effects after revocation; effectPossible remains sticky and does not certify cleanup. Persistent transport queues/pumps are separate obligations and not bound here.",
+   "limits": "Logical TCPProbeSessions bookkeeping only. Seed prefixes are documented; no unbounded safety/liveness, Go concurrency refinement, full limits arithmetic, timer/suspension (the 2*MSL tuple quarantine is an abstract quiesce step after drain), packet parsing/checksums/ARP/encoding, gVisor TCP sequence semantics, exact context hook scheduling, physical ownership/atomic revocation/delivery fencing, OS NIC cleanup or process restart proof. Parsed tuple/direction validity is an abstract input predicate. An admitted callback may already have effects after revocation; effectPossible remains sticky and does not certify cleanup. Persistent transport queues/pumps are separate obligations and not bound here.",
    "source_scope": [
     "internal/workload/guestnet/tcp_sessions.go"
    ],
@@ -10772,11 +10772,22 @@
      "expect_invariant": "TupleTombstones"
     },
     {
-     "id": "ForgetLifetimeAllocation",
+     "id": "ReuseBeforeQuarantine",
      "edits": [
       {
-       "old": "Rewrap == /\\ d' = d /\\ Record",
-       "new": "Rewrap == /\\ d' = [d EXCEPT !.allocated = 0] /\\ Record",
+       "old": "Free(x, k) == ~x.sessions[k].used \\/ (x.sessions[k].drained /\\ x.sessions[k].quiet)",
+       "new": "Free(x, k) == ~x.sessions[k].used \\/ x.sessions[k].drained",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TupleTombstones"
+    },
+    {
+     "id": "ReuseLiveTuple",
+     "edits": [
+      {
+       "old": "Free(x, k) == ~x.sessions[k].used \\/ (x.sessions[k].drained /\\ x.sessions[k].quiet)",
+       "new": "Free(x, k) == ~x.sessions[k].used \\/ x.sessions[k].closed",
        "count": 1
       }
      ],
@@ -10838,11 +10849,11 @@
      "expect_invariant": "DrainRequiresJoins"
     },
     {
-     "id": "ResetSharedBudget",
+     "id": "ResetIncarnationBudget",
      "edits": [
       {
        "old": "Rewrap == /\\ d' = d /\\ Record",
-       "new": "Rewrap == /\\ d' = [d EXCEPT !.frames = 0, !.bytes = 0] /\\ Record",
+       "new": "Rewrap == /\\ d' = [d EXCEPT !.sessions[1].frames = 0, !.sessions[1].bytes = 0] /\\ Record",
        "count": 1
       }
      ],
@@ -10852,8 +10863,8 @@
      "id": "SkipFrameCharge",
      "edits": [
       {
-       "old": "Charge(x, size) == [x EXCEPT !.frames = @ + 1, !.bytes = @ + size]",
-       "new": "Charge(x, size) == [x EXCEPT !.frames = @, !.bytes = @ + size]",
+       "old": "Charge(s, size) == [s EXCEPT !.frames = @ + 1, !.bytes = @ + size]",
+       "new": "Charge(s, size) == [s EXCEPT !.frames = @, !.bytes = @ + size]",
        "count": 1
       }
      ],
@@ -10863,8 +10874,8 @@
      "id": "SkipByteCharge",
      "edits": [
       {
-       "old": "Charge(x, size) == [x EXCEPT !.frames = @ + 1, !.bytes = @ + size]",
-       "new": "Charge(x, size) == [x EXCEPT !.frames = @ + 1, !.bytes = @]",
+       "old": "Charge(s, size) == [s EXCEPT !.frames = @ + 1, !.bytes = @ + size]",
+       "new": "Charge(s, size) == [s EXCEPT !.frames = @ + 1, !.bytes = @]",
        "count": 1
       }
      ],
@@ -10945,8 +10956,8 @@
        "count": 1
       },
       {
-       "old": "accepted == Chargeable(d, size) /\\ ok /\\ d.sending = 0",
-       "new": "accepted == Chargeable(d, size) /\\ ok",
+       "old": "accepted == Chargeable(d.sessions[k], size) /\\ ok /\\ d.sending = 0",
+       "new": "accepted == Chargeable(d.sessions[k], size) /\\ ok",
        "count": 1
       }
      ],
