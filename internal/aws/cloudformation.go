@@ -1190,6 +1190,7 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		fail("Use CloudFormation API version 2010-05-15.")
 		return
 	}
+	extendStackMutationWriteDeadline(w, action)
 	for key, values := range form {
 		if len(values) != 1 {
 			fail("Repeated Query fields are unsupported.")
@@ -1408,5 +1409,19 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		cfnResponse(w, action, "")
+	}
+}
+
+// cfnMutationWriteBudget bounds how long a synchronous stack mutation may hold
+// its response. CreateStack/DeleteStack can boot or stop guest VMs (about 40s
+// under TCG), which exceeds the server-wide 30s write timeout and made clients
+// see a closed connection although the stack completed.
+const cfnMutationWriteBudget = 5 * time.Minute
+
+// extendStackMutationWriteDeadline is best effort: writers that do not support
+// per-request deadlines keep the server default.
+func extendStackMutationWriteDeadline(w http.ResponseWriter, action string) {
+	if action == "CreateStack" || action == "DeleteStack" {
+		_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(cfnMutationWriteBudget))
 	}
 }

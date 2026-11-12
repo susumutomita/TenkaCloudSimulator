@@ -1994,7 +1994,7 @@
     },
     {
       "path": "internal/aws/cloudformation.go",
-      "sha256": "718edcfb8db4267d94cc8b66968330ff8bd33d248cac445fb3d41f7e5f7770f6",
+      "sha256": "bb959d814e9f866a8bd6e0105459deb55d21e29b07e0dd6517afdcee902a3970",
       "disposition": "modeled",
       "reason": "Canonical composition extension retains pending-before-physical-publication, exact attempt/incarnation and independently observed cleanup obligations. Delete authorizes retained incarnation, seals/joins outside SQL, then rereads exact ID before transaction deletion. Existing stack ownership, transaction and ACK models remain independent; factory dispatch and authentic backend/policy verdicts are explicit assumptions with focused native evidence. No actual process containment or full SQL refinement inferred.",
       "models": [
@@ -2243,6 +2243,13 @@
     {
       "path": "internal/aws/cloudformation_intrinsics_test.go",
       "sha256": "601cdaa233e32e3f28ef070a4b196ef127a8ee0eef02162d2aa4ea3196154735",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudformation_write_deadline_test.go",
+      "sha256": "bac7e01fd90c24868a93e6c7bdbdf7ea8a4c4a0f4b1458f336c6f986040b73a3",
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
