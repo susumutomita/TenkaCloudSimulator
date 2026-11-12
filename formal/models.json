@@ -10736,7 +10736,7 @@
    "id": "NICSessionBookkeeping",
    "model": "formal/NICSessionBookkeeping.tla",
    "config": "formal/NICSessionBookkeeping.cfg",
-   "bounds": "Eight explicitly reachable bookkeeping seeds, three transition suffixes, two lifetime tuples/two active sessions, one callback/one queued frame per session, three cumulative frames/four byte units.",
+   "bounds": "Eight explicitly reachable bookkeeping seeds, three transition suffixes, two reusable tuples/two active sessions, one callback/one queued frame per session, three frames/four byte units per tuple incarnation.",
    "properties": [
     "TypeOK",
     "TupleTombstones",
@@ -10755,7 +10755,7 @@
     "RewrapPreservesState",
     "EffectNotCleanupProof"
    ],
-   "limits": "Logical TCPProbeSessions bookkeeping only. Seed prefixes are documented; no unbounded safety/liveness, Go concurrency refinement, full limits arithmetic, timer/suspension, packet parsing/checksums/ARP/encoding, gVisor TCP sequence semantics, exact context hook scheduling, physical ownership/atomic revocation/delivery fencing, OS NIC cleanup or process restart proof. Parsed tuple/direction validity is an abstract input predicate. An admitted callback may already have effects after revocation; effectPossible remains sticky and does not certify cleanup. Persistent transport queues/pumps are separate obligations and not bound here.",
+   "limits": "Logical TCPProbeSessions bookkeeping only. Seed prefixes are documented; no unbounded safety/liveness, Go concurrency refinement, full limits arithmetic, timer/suspension (the 2*MSL tuple quarantine is an abstract quiesce step after drain), packet parsing/checksums/ARP/encoding, gVisor TCP sequence semantics, exact context hook scheduling, physical ownership/atomic revocation/delivery fencing, OS NIC cleanup or process restart proof. Parsed tuple/direction validity is an abstract input predicate. An admitted callback may already have effects after revocation; effectPossible remains sticky and does not certify cleanup. Persistent transport queues/pumps are separate obligations and not bound here.",
    "source_scope": [
     "internal/workload/guestnet/tcp_sessions.go"
    ],
@@ -10772,11 +10772,22 @@
      "expect_invariant": "TupleTombstones"
     },
     {
-     "id": "ForgetLifetimeAllocation",
+     "id": "ReuseBeforeQuarantine",
      "edits": [
       {
-       "old": "Rewrap == /\\ d' = d /\\ Record",
-       "new": "Rewrap == /\\ d' = [d EXCEPT !.allocated = 0] /\\ Record",
+       "old": "Free(x, k) == ~x.sessions[k].used \\/ (x.sessions[k].drained /\\ x.sessions[k].quiet)",
+       "new": "Free(x, k) == ~x.sessions[k].used \\/ x.sessions[k].drained",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TupleTombstones"
+    },
+    {
+     "id": "ReuseLiveTuple",
+     "edits": [
+      {
+       "old": "Free(x, k) == ~x.sessions[k].used \\/ (x.sessions[k].drained /\\ x.sessions[k].quiet)",
+       "new": "Free(x, k) == ~x.sessions[k].used \\/ x.sessions[k].closed",
        "count": 1
       }
      ],
@@ -10838,11 +10849,11 @@
      "expect_invariant": "DrainRequiresJoins"
     },
     {
-     "id": "ResetSharedBudget",
+     "id": "ResetIncarnationBudget",
      "edits": [
       {
        "old": "Rewrap == /\\ d' = d /\\ Record",
-       "new": "Rewrap == /\\ d' = [d EXCEPT !.frames = 0, !.bytes = 0] /\\ Record",
+       "new": "Rewrap == /\\ d' = [d EXCEPT !.sessions[1].frames = 0, !.sessions[1].bytes = 0] /\\ Record",
        "count": 1
       }
      ],
@@ -10852,8 +10863,8 @@
      "id": "SkipFrameCharge",
      "edits": [
       {
-       "old": "Charge(x, size) == [x EXCEPT !.frames = @ + 1, !.bytes = @ + size]",
-       "new": "Charge(x, size) == [x EXCEPT !.frames = @, !.bytes = @ + size]",
+       "old": "Charge(s, size) == [s EXCEPT !.frames = @ + 1, !.bytes = @ + size]",
+       "new": "Charge(s, size) == [s EXCEPT !.frames = @, !.bytes = @ + size]",
        "count": 1
       }
      ],
@@ -10863,8 +10874,8 @@
      "id": "SkipByteCharge",
      "edits": [
       {
-       "old": "Charge(x, size) == [x EXCEPT !.frames = @ + 1, !.bytes = @ + size]",
-       "new": "Charge(x, size) == [x EXCEPT !.frames = @ + 1, !.bytes = @]",
+       "old": "Charge(s, size) == [s EXCEPT !.frames = @ + 1, !.bytes = @ + size]",
+       "new": "Charge(s, size) == [s EXCEPT !.frames = @ + 1, !.bytes = @]",
        "count": 1
       }
      ],
@@ -10945,8 +10956,8 @@
        "count": 1
       },
       {
-       "old": "accepted == Chargeable(d, size) /\\ ok /\\ d.sending = 0",
-       "new": "accepted == Chargeable(d, size) /\\ ok",
+       "old": "accepted == Chargeable(d.sessions[k], size) /\\ ok /\\ d.sending = 0",
+       "new": "accepted == Chargeable(d.sessions[k], size) /\\ ok",
        "count": 1
       }
      ],
@@ -10984,6 +10995,22 @@
       }
      ],
      "expect_invariant": "RevocationRetainsDebt"
+    },
+    {
+     "id": "DeliverStaleServiceFrame",
+     "edits": [
+      {
+       "old": "     IN /\\ d' = IF ~fits THEN CloseNIC(charged) ELSE charged\n",
+       "new": "     IN /\\ d' = IF ~fits THEN CloseNIC(charged) ELSE [charged EXCEPT !.sessions[k].queued = 1]\n",
+       "count": 1
+      },
+      {
+       "old": "         delivered == FALSE",
+       "new": "         delivered == fits",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TupleDirectionGuard"
     }
    ]
   },
@@ -10991,7 +11018,7 @@
    "id": "ProbeOperationLifecycle",
    "model": "formal/ProbeOperationLifecycle.tla",
    "config": "formal/ProbeOperationLifecycle.cfg",
-   "bounds": "Three nonzero keys plus invalid zero; two opaque scope-owner labels and two service targets; two symbolic backend deadlines; per-NIC retained-handle bound2 and independent worker bound1;21 replay-verified reachable seeds with all three-transition suffixes; separate per-key monotonic Host expiry. Dispatch counts one observer/Dial invocation, not packets/SYN retransmissions.",
+   "bounds": "Three nonzero keys plus invalid zero; two opaque scope-owner labels and two service targets; two symbolic backend deadlines; per-NIC retained-handle bound2 and independent worker bound1;22 replay-verified reachable seeds with all three-transition suffixes; separate per-key monotonic Host expiry. Dispatch counts one observer/Dial invocation, not packets/SYN retransmissions.",
    "properties": [
     "TypeOK",
     "ScopeImmutable",
@@ -11017,9 +11044,10 @@
     "WireSettlement",
     "PoisonSticky",
     "PoisonExclusion",
-    "NoLateHostAcceptance"
+    "NoLateHostAcceptance",
+    "EvictedForgotten"
    ],
-   "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation.",
+   "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation.",
    "source_scope": [
     "internal/workload/guesttcp/http_probe_operation.go",
     "internal/workload/guesttcp/http_probe_operation_test.go",
@@ -11307,6 +11335,50 @@
       }
      ],
      "expect_invariant": "NoLateHostAcceptance"
+    },
+    {
+     "id": "EvictBeforeRetention",
+     "edits": [
+      {
+       "old": "Evict(k) ==\n /\\ ops[k].present /\\ ops[k].bound.mode = \"scoped\" /\\ ops[k].settled\n /\\ now >= ops[k].bound.deadline",
+       "new": "Evict(k) ==\n /\\ ops[k].present /\\ ops[k].bound.mode = \"scoped\" /\\ ops[k].settled\n /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EvictedForgotten"
+    },
+    {
+     "id": "EvictRunningHandle",
+     "edits": [
+      {
+       "old": "Evict(k) ==\n /\\ ops[k].present /\\ ops[k].bound.mode = \"scoped\" /\\ ops[k].settled\n /\\ now >= ops[k].bound.deadline",
+       "new": "Evict(k) ==\n /\\ ops[k].present /\\ ops[k].bound.mode = \"scoped\"\n /\\ now >= ops[k].bound.deadline",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EvictedForgotten"
+    },
+    {
+     "id": "EvictRawHandle",
+     "edits": [
+      {
+       "old": "Evict(k) ==\n /\\ ops[k].present /\\ ops[k].bound.mode = \"scoped\" /\\ ops[k].settled\n /\\ now >= ops[k].bound.deadline",
+       "new": "Evict(k) ==\n /\\ ops[k].present /\\ ops[k].settled\n /\\ now >= ops[k].bound.deadline",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EvictedForgotten"
+    },
+    {
+     "id": "ReplayForgottenKey",
+     "edits": [
+      {
+       "old": "/\\ deadline = original[k].deadline /\\ now < deadline",
+       "new": "/\\ deadline = original[k].deadline",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EvictedForgotten"
     }
    ]
   },

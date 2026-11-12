@@ -332,8 +332,17 @@ func TestOwnedProbeSessionCopiesPolicyAndBoundsEvidence(t *testing.T) {
 	if e := s.CommitProbeHTTPObservation(ctx, ownedObservation()); e != nil {
 		t.Fatal("caller mutation changed copied policy", e)
 	}
-	if e := s.CommitProbeHTTPObservation(ctx, ownedObservation()); !errors.Is(e, ErrCapacity) {
-		t.Fatal("evidence limit", e)
+	// The record keeps only the newest EvidenceLimit observations; probing never
+	// stops because the record filled.
+	for status := 201; status <= 203; status++ {
+		v := ownedObservation()
+		v.StatusCode = status
+		if e := s.CommitProbeHTTPObservation(ctx, v); e != nil {
+			t.Fatal("full evidence record refused a later observation", e)
+		}
+	}
+	if got, e := s.Evidence(ctx); e != nil || len(got) != 1 || got[0].StatusCode != 203 {
+		t.Fatal("evidence limit", got, e)
 	}
 	for _, change := range []func(*ProbeHTTPObservation){func(v *ProbeHTTPObservation) { v.Route.PeerPort = 443 }, func(v *ProbeHTTPObservation) { v.Route.LocalPort = 39999 }, func(v *ProbeHTTPObservation) { v.Route.LocalPort = 41024 }, func(v *ProbeHTTPObservation) { v.Route.PeerMAC[5]++ }} {
 		v := ownedObservation()

@@ -14,8 +14,8 @@ ReachInit ==
 ReachNext ==
   /\ depth < Len(Plans[chosen])
   /\ LET command == Plans[chosen][depth+1] IN
-       CASE command = "open-web" -> Open("web")
-         [] command = "open-health" -> Open("health")
+       CASE command = "open-web" -> Open("web") /\ last'.k = 1
+         [] command = "open-health" -> Open("health") /\ last'.k = 2
          [] command = "receive" -> Receive(1, TRUE, 1)
          [] command = "send" -> Send(1, TRUE, 1)
          [] command = "revoke-session" -> RevokeSession(1)

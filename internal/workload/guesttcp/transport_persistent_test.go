@@ -707,3 +707,87 @@ func TestPersistentDropsUnhandledGuestFramesButStillRevokesOwnedTupleAbuse(t *te
 	}
 	awaitSignal(t, tr.nic.base.done, "owned tuple abuse")
 }
+
+// persistentBudgetClock replaces the attachment budget clock. The clock is read
+// under budgetMu, so tests advance it under the same lock.
+func persistentBudgetClock(tr *PersistentTransport) func(time.Duration) {
+	tr.nic.base.budgetMu.Lock()
+	now := time.Now()
+	tr.nic.now = func() time.Time { return now }
+	tr.nic.base.budgetMu.Unlock()
+	return func(d time.Duration) {
+		tr.nic.base.budgetMu.Lock()
+		now = now.Add(d)
+		tr.nic.base.budgetMu.Unlock()
+	}
+}
+
+func TestPersistentBudgetIsPerWindowNotLifetime(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		frame int
+		limit int // frames admitted per window before the first refusal
+	}{
+		{"frames", 1024, maxPersistentFrames},
+		{"bytes", guestnet.MaxFrameBytes, maxPersistentBytes / guestnet.MaxFrameBytes},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tr, _, _ := persistentFixture(t, memoryCommitter)
+			advance := persistentBudgetClock(tr)
+			total := 0
+			// Three windows carry three times the old lifetime cap through one attachment.
+			for window := 0; window < 3; window++ {
+				for i := 0; i < tc.limit; i++ {
+					if err := tr.nic.base.account(tc.frame); err != nil {
+						t.Fatalf("window %d frame %d refused after %d total: %v", window, i, total, err)
+					}
+					total++
+				}
+				if !errors.Is(tr.nic.base.account(tc.frame), ErrCapacity) {
+					t.Fatalf("window %d admitted more than its budget", window)
+				}
+				advance(persistentBudgetWindow - time.Nanosecond)
+				if !errors.Is(tr.nic.base.account(tc.frame), ErrCapacity) {
+					t.Fatalf("window %d budget reset before the window ended", window)
+				}
+				advance(time.Nanosecond)
+			}
+			if total <= maxPersistentFrames*2 && tc.name == "frames" {
+				t.Fatalf("loop did not pass the old lifetime cap: %d", total)
+			}
+		})
+	}
+}
+
+func TestPersistentAttachmentKeepsServingAcrossBudgetWindows(t *testing.T) {
+	tr, remote, _ := persistentFixture(t, memoryCommitter)
+	advance := persistentBudgetClock(tr)
+	ac := arpBinding(config())
+	enc := guestnet.NewEncoder(remote)
+	dec := guestnet.NewDecoder(remote)
+	for window := 0; window < 3; window++ {
+		// The previous window is exhausted except for one frame; a stale lifetime
+		// counter would revoke the attachment on the ARP reply below.
+		tr.nic.base.budgetMu.Lock()
+		tr.nic.base.packets = maxPersistentFrames - 1
+		tr.nic.base.budgetMu.Unlock()
+		advance(persistentBudgetWindow)
+		if err := enc.WriteFrame(requestARP(ac)); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := dec.ReadFrame(); err != nil {
+			t.Fatalf("window %d: gateway reply missing: %v", window, err)
+		}
+		tr.nic.base.budgetMu.Lock()
+		count := tr.nic.base.packets
+		tr.nic.base.budgetMu.Unlock()
+		if count != 2 {
+			t.Fatalf("window %d charged %d frames, want request and reply only", window, count)
+		}
+		select {
+		case <-tr.nic.base.done:
+			t.Fatalf("window %d: attachment ended at a window boundary: %v", window, tr.WaitContext(context.Background()))
+		default:
+		}
+	}
+}

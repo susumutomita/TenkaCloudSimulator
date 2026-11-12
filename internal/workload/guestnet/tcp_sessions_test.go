@@ -251,8 +251,29 @@ func TestProbeSessionsRetainBlockedDeliveryAndCapacity(t *testing.T) {
 	}
 }
 
-func TestProbeSessionsNeverReuseLifetimePorts(t *testing.T) {
+// probeClock is a manual retirement clock for quarantine tests.
+type probeClock struct {
+	mu  sync.Mutex
+	now time.Time
+}
+
+func (c *probeClock) Now() time.Time { c.mu.Lock(); defer c.mu.Unlock(); return c.now }
+func (c *probeClock) Advance(d time.Duration) {
+	c.mu.Lock()
+	c.now = c.now.Add(d)
+	c.mu.Unlock()
+}
+func withProbeClock(r *TCPProbeSessions) *probeClock {
+	c := &probeClock{now: time.Now()}
+	r.mu.Lock()
+	r.now = c.Now
+	r.mu.Unlock()
+	return c
+}
+
+func TestProbeSessionsQuarantineRetiredPortsBeforeReuse(t *testing.T) {
 	r := probeRegistry(t)
+	clock := withProbeClock(r)
 	for i := 0; i < MaxProbeSessions; i++ {
 		s := openProbe(t, r, 80)
 		if want := ProbeSourcePort + uint16(i); s.Route().LocalPort != want {
@@ -260,8 +281,98 @@ func TestProbeSessionsNeverReuseLifetimePorts(t *testing.T) {
 		}
 		retireProbe(t, s)
 	}
+	// Every tuple is a drained tombstone inside its 2*MSL quarantine.
 	if _, err := r.Open(context.Background(), 80); !errors.Is(err, ErrProbeCapacity) {
-		t.Fatal("tombstones reused", err)
+		t.Fatal("quarantined tuple reused", err)
+	}
+	clock.Advance(TupleQuarantine - time.Nanosecond)
+	if _, err := r.Open(context.Background(), 80); !errors.Is(err, ErrProbeCapacity) {
+		t.Fatal("tuple reused before quarantine ended", err)
+	}
+	clock.Advance(time.Nanosecond)
+	old := r.records[0]
+	s := openProbe(t, r, 8080)
+	if s.Route().LocalPort != ProbeSourcePort || s == old || s.Route().PeerPort != 8080 {
+		t.Fatal("oldest quiet tuple not reused", s.Route())
+	}
+	// A late retransmission for the old incarnation (another service port of
+	// the same trusted peer) is charged to the new incarnation and dropped; it
+	// neither reaches the new session nor revokes the NIC.
+	stale := tcpRouteFrame(old.Route(), TCPFromPeer, old.Route().PeerPort)
+	if accepted, err := r.RouteIncoming(stale); accepted || err != nil {
+		t.Fatal("stale tuple traffic delivered or revoked the NIC", accepted, err)
+	}
+	if s.frames != 1 || r.Lifetime().Err() != nil {
+		t.Fatal("stale frame not charged to the reused tuple, or NIC revoked", s.frames)
+	}
+	// The same tuple from a port that is not a configured service still revokes.
+	forged := tcpRouteFrame(old.Route(), TCPFromPeer, 9999)
+	if accepted, err := r.RouteIncoming(forged); accepted || err == nil || r.Lifetime().Err() == nil {
+		t.Fatal("non-service source port got the stale exemption", err)
+	}
+}
+
+func TestProbeSessionsNeverReuseLivePorts(t *testing.T) {
+	r := probeRegistry(t)
+	clock := withProbeClock(r)
+	idle := openProbe(t, r, 80)
+	// A session with a delivery still in flight is live, however old.
+	busy := openProbe(t, r, 80)
+	entered, release, done := make(chan struct{}), make(chan struct{}), make(chan error, 1)
+	go func() {
+		done <- busy.Transmit(context.Background(), probeFrame(busy, TCPToPeer), func(context.Context, []byte) error {
+			close(entered)
+			<-release
+			return nil
+		})
+	}()
+	<-entered
+	for i := 2; i < MaxProbeSessions; i++ {
+		retireProbe(t, openProbe(t, r, 80))
+	}
+	clock.Advance(2 * TupleQuarantine)
+	seen := map[uint16]bool{}
+	for i := 0; i < MaxActiveProbeSessions-2; i++ {
+		port := openProbe(t, r, 80).Route().LocalPort
+		if port == idle.Route().LocalPort || port == busy.Route().LocalPort || seen[port] {
+			t.Fatal("live or duplicate tuple reused", port)
+		}
+		seen[port] = true
+	}
+	if _, err := r.Open(context.Background(), 80); !errors.Is(err, ErrProbeCapacity) {
+		t.Fatal("active-session bound bypassed", err)
+	}
+	close(release)
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Probes keep working far past the old 1024-connection lifetime as long as the
+// tuple quarantine is respected; this models a multi-hour Battle.
+func TestProbeSessionsOutliveTupleRangeAcrossQuarantineWindows(t *testing.T) {
+	r := probeRegistry(t)
+	clock := withProbeClock(r)
+	opened := 0
+	for window := 0; window < 4; window++ {
+		for i := 0; i < MaxProbeSessions; i++ {
+			s := openProbe(t, r, 80)
+			if err := s.Transmit(context.Background(), probeFrame(s, TCPToPeer), func(context.Context, []byte) error { return nil }); err != nil {
+				t.Fatal(window, i, err)
+			}
+			if accepted, err := r.RouteIncoming(probeFrame(s, TCPFromPeer)); !accepted || err != nil {
+				t.Fatal(window, i, accepted, err)
+			}
+			if !bytes.Equal(readProbe(t, s), probeFrame(s, TCPFromPeer)) {
+				t.Fatal("reply not delivered", window, i)
+			}
+			retireProbe(t, s)
+			opened++
+		}
+		clock.Advance(TupleQuarantine)
+	}
+	if opened != 4*MaxProbeSessions || r.Lifetime().Err() != nil {
+		t.Fatal("registry did not survive repeated tuple windows", opened, r.Lifetime().Err())
 	}
 }
 
@@ -310,7 +421,7 @@ func TestProbeSessionsRejectCrossSessionOutputAndUnownedInput(t *testing.T) {
 	}
 }
 
-func TestProbeSessionsRetiredTrafficUsesCumulativeBudgets(t *testing.T) {
+func TestProbeSessionsRetiredTrafficUsesItsConnectionBudget(t *testing.T) {
 	for _, kind := range []string{"frames", "bytes"} {
 		t.Run(kind, func(t *testing.T) {
 			r := probeRegistry(t)
@@ -319,9 +430,9 @@ func TestProbeSessionsRetiredTrafficUsesCumulativeBudgets(t *testing.T) {
 			retireProbe(t, s)
 			r.mu.Lock()
 			if kind == "frames" {
-				r.frames = maxNICFrames - 1
+				s.frames = maxSessionFrames - 1
 			} else {
-				r.bytes = maxNICBytes - len(frame)
+				s.bytes = maxSessionBytes - len(frame)
 			}
 			r.mu.Unlock()
 			if accepted, err := r.RouteIncoming(frame); accepted || err != nil {
@@ -331,6 +442,30 @@ func TestProbeSessionsRetiredTrafficUsesCumulativeBudgets(t *testing.T) {
 				t.Fatal("retired input bypassed budget", err)
 			}
 		})
+	}
+}
+
+func TestProbeSessionsBudgetIsPerConnectionNotPerNIC(t *testing.T) {
+	r := probeRegistry(t)
+	a := openProbe(t, r, 80)
+	r.mu.Lock()
+	a.frames = maxSessionFrames - 1
+	r.mu.Unlock()
+	b := openProbe(t, r, 8080)
+	// One exhausted connection does not consume another connection's budget.
+	for i := 0; i < 3; i++ {
+		if err := b.Transmit(context.Background(), probeFrame(b, TCPToPeer), func(context.Context, []byte) error { return nil }); err != nil {
+			t.Fatal(i, err)
+		}
+	}
+	if err := a.Transmit(context.Background(), probeFrame(a, TCPToPeer), func(context.Context, []byte) error { return nil }); err != nil {
+		t.Fatal("last frame of exhausted connection refused", err)
+	}
+	if err := a.Transmit(context.Background(), probeFrame(a, TCPToPeer), func(context.Context, []byte) error { return nil }); !errors.Is(err, ErrProbeCapacity) {
+		t.Fatal("exhausted connection kept sending", err)
+	}
+	if r.Lifetime().Err() == nil {
+		t.Fatal("budget abuse did not revoke the registry")
 	}
 }
 

@@ -126,14 +126,18 @@ type probeHTTPFixture struct {
 // Both listeners belong to one independent gVisor stack. All framing, ARP,
 // TCP handshakes and HTTP requests use memoryStreams; there are no OS sockets.
 // The peer outlives every logical probe and accepts concurrent/repeated ports.
+// probeHTTPFixtureLifetime bounds the fixture's attachment and passive service.
+// Only the opt-in soak test lengthens it.
+var probeHTTPFixtureLifetime = time.Minute
+
 func newProbeHTTPFixture(t *testing.T, owner *probeHTTPMemoryOwner, parent context.Context, nic guestnet.ProbeNIC, reply func(net.Conn, probeHTTPRequest)) *probeHTTPFixture {
 	t.Helper()
 	ctx, cancel := context.WithCancel(parent)
-	serviceCtx, cancelService := context.WithTimeout(context.Background(), time.Minute)
+	serviceCtx, cancelService := context.WithTimeout(context.Background(), probeHTTPFixtureLifetime)
 	service := &persistentServiceFixture{transportServiceFixture: newTransportServiceFixture(), ctx: serviceCtx}
 	local, remote := memoryStreams()
 	ac := arpBinding(config())
-	tr, err := NewPersistentTransportUntil(ctx, nic, local, owner, &ac, service, transportServiceRoute(), time.Now().Add(time.Minute))
+	tr, err := NewPersistentTransportUntil(ctx, nic, local, owner, &ac, service, transportServiceRoute(), time.Now().Add(probeHTTPFixtureLifetime))
 	if err != nil {
 		cancel()
 		cancelService()

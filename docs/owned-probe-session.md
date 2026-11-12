@@ -36,7 +36,8 @@ releases cleanup debt. Generic failed writes, ambiguous effects, provider wrappi
 replayed tokens, observation callbacks and owner expiry remain fail-closed.
 
 The provider transaction encloses observation acceptance. Evidence is bounded,
-copied local data, hidden until the transaction returns successfully and context
+copied local data that keeps the newest `EvidenceLimit` observations (older ones
+are dropped, so a long-lived session keeps accepting probes), hidden until the transaction returns successfully and context
 checks pass. A provider error, duplicate callback or panic retracts tentative
 records; late callbacks fail closed. This is a local acceptance point, not an
 atomic transaction with Host scoring or external guest lifecycle. Physical alias

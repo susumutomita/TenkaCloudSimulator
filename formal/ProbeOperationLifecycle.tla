@@ -18,7 +18,7 @@ BlankBound == [mode |-> "raw", owner |-> 0, target |-> 0, deadline |-> 1]
 BlankOp == [present |-> FALSE, bound |-> BlankBound, valid |-> FALSE,
             started |-> FALSE, done |-> FALSE, route |-> 0, sends |-> 0,
             ready |-> FALSE, result |-> "none", settled |-> FALSE,
-            at |-> 0, outcome |-> "none"]
+            at |-> 0, outcome |-> "none", evicted |-> FALSE]
 BlankWire == [known |-> FALSE, key |-> 0, bound |-> BlankBound,
               route |-> 0, ready |-> FALSE, result |-> "none",
               settled |-> FALSE, ended |-> FALSE, at |-> 0]
@@ -63,9 +63,12 @@ ExpiredSuccess == [WireSuccess EXCEPT !.hostExpired = {1}]
 FullRetired == SeedRecord(Settled, 2, "raw", 2, 2)
 BusySecond == SeedRecord(Worker, 2, "raw", 2, 2)
 ExpiredRetained == SeedRecord([EmptyState EXCEPT !.now = 1], 1, "raw", 1, 1)
+ScopedRetired == [ScopedOne EXCEPT !.now = 1, !.ops[1].ready = TRUE, !.ops[1].result = "failure",
+                                   !.firstResult[1] = "failure", !.ops[1].settled = TRUE]
 SeedTargets == <<EmptyState, Sealed, One, ScopedOne, Worker, Routed, Dispatched,
  TimedOut, Ended, Published, Settled, Rejected, FailedEnded, FailedSettled,
- WireSuccess, WireFailure, PoisonedSuccess, ExpiredSuccess, FullRetired, BusySecond, ExpiredRetained>>
+ WireSuccess, WireFailure, PoisonedSuccess, ExpiredSuccess, FullRetired, BusySecond, ExpiredRetained,
+ ScopedRetired>>
 Seeds == {SeedTargets[i]: i \in 1..Len(SeedTargets)}
 Initialize(s) ==
  /\ now = s.now
@@ -104,15 +107,21 @@ Bound(mode, owner, target, deadline) ==
 \* a later admission failure; valid abstracts the pre-retention validation only.
 \* Even a validated scoped caller may inherit an already-expired NIC deadline.
 \* The selected execution deadline therefore need not exceed now at retention.
+\* A forgotten key can come back only as a replay of its original command,
+\* whose caller deadline has passed; scoped Start rejects that before retention.
+\* evicted is carried so a successful replay would be visible to EvictedForgotten.
 Start(k, mode, target, deadline, valid) ==
  /\ ~ops[k].present
  /\ k \in Keys
  /\ valid
+ /\ ops[k].evicted => /\ mode = original[k].mode /\ target = original[k].target
+                      /\ deadline = original[k].deadline /\ now < deadline
  /\ mode = "raw" \/ scope # 0
  /\ Cardinality(issued) < HandleCap
  /\ LET b == Bound(mode, scope, target, deadline) IN
      /\ ops' = [ops EXCEPT ![k] = [BlankOp EXCEPT !.present = TRUE,
-                                               !.bound = b, !.valid = valid]]
+                                               !.bound = b, !.valid = valid,
+                                               !.evicted = ops[k].evicted]]
      /\ original' = [original EXCEPT ![k] = b]
  /\ issued' = issued \cup {k}
  /\ UNCHANGED <<now, scope, originalScope, revoked, slots,
@@ -241,6 +250,16 @@ HostExpire(k) ==
                 firstResult, firstRoute, wire, poisoned, scored, duplicateSafe,
                 lookupAllowed, wireRouteExpected, everPoisoned, lateAccepted>>
 
+\* A full NIC may forget a settled scoped handle once its caller deadline (plus
+\* the abstract retention window) has passed. Raw handles are never forgotten.
+Evict(k) ==
+ /\ ops[k].present /\ ops[k].bound.mode = "scoped" /\ ops[k].settled
+ /\ now >= ops[k].bound.deadline
+ /\ ops' = [ops EXCEPT ![k].present = FALSE, ![k].evicted = TRUE]
+ /\ issued' = issued \ {k}
+ /\ UNCHANGED <<now, scope, originalScope, revoked, original, slots,
+                firstResult, firstRoute, wire, poisoned, scored, duplicateSafe, lookupAllowed, wireRouteExpected, everPoisoned, hostExpired, lateAccepted>>
+
 Tick == /\ now < 2 /\ now' = now + 1
         /\ UNCHANGED <<scope, originalScope, revoked, ops, original, issued, slots,
                        firstResult, firstRoute, wire, poisoned, scored, duplicateSafe, lookupAllowed, wireRouteExpected, everPoisoned, hostExpired, lateAccepted>>
@@ -257,7 +276,7 @@ Step == (\E owner \in Owners: Bind(owner))
                         \/ Dispatch(k) \/ Timeout(k) \/ Publish(k) \/ Settle(k))
  \/ (\E k \in QueryKeys, outcome \in {"failure", "success"}: WorkerEnd(k, outcome))
  \/ (\E k \in QueryKeys, mode \in Modes, owner \in Owners: Lookup(k, mode, owner))
- \/ (\E k \in Keys: MalformedRead(k)) \/ (\E k \in Keys: HostExpire(k)) \/ AcceptWire \/ Tick \/ Revoke
+ \/ (\E k \in Keys: MalformedRead(k)) \/ (\E k \in Keys: HostExpire(k)) \/ (\E k \in Keys: Evict(k)) \/ AcceptWire \/ Tick \/ Revoke
 
 Next == /\ depth < MaxDepth /\ depth' = depth + 1 /\ Step
 
@@ -272,7 +291,7 @@ TypeOK == /\ depth \in 0..MaxDepth /\ now \in 0..2 /\ scope \in Owners \cup {0} 
                /\ ops[k].route \in QueryKeys /\ ops[k].sends \in 0..2
                /\ ops[k].ready \in BOOLEAN /\ ops[k].result \in Results
                /\ ops[k].settled \in BOOLEAN /\ ops[k].at \in 0..2
-               /\ ops[k].outcome \in Results
+               /\ ops[k].outcome \in Results /\ ops[k].evicted \in BOOLEAN
 ScopeImmutable == scope = originalScope
 RetainedExact == issued = {k \in QueryKeys: ops[k].present}
 RetainedBound == Cardinality(issued) <= HandleCap
@@ -294,11 +313,13 @@ TimelySuccess == \A k \in QueryKeys: ops[k].result = "success" =>
 WireUnknown == ~wire.known => ~wire.ready /\ ~wire.settled /\ wire.result = "none"
 DuplicateIsolation == duplicateSafe
 LookupIsolation == wire.known => lookupAllowed
-WireIdentity == wire.known => wire.key \in issued /\ wire.bound = original[wire.key]
+WireIdentity == wire.known => (wire.key \in issued \/ ops[wire.key].evicted) /\ wire.bound = original[wire.key]
 WireRoute == wire.route = wireRouteExpected
 WireResult == wire.known /\ wire.ready => wire.result = firstResult[wire.key]
 WireSettlement == wire.settled => wire.known /\ wire.ready /\ wire.ended
 PoisonSticky == poisoned = everPoisoned
 PoisonExclusion == scored \cap everPoisoned = {}
 NoLateHostAcceptance == lateAccepted = {}
+EvictedForgotten == \A k \in Keys: ops[k].evicted =>
+  ~ops[k].present /\ original[k].mode = "scoped" /\ ops[k].settled /\ now >= original[k].deadline
 =============================================================================

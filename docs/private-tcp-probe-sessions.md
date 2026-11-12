@@ -8,18 +8,24 @@ It does not open, attach, close or qualify a physical NIC, byte stream or VM.
 
 The trusted caller fixes the two IPv4 addresses, Ethernet addresses and up to eight
 service ports. Incoming frames cannot teach the registry a destination. Each
-successful `Open` consumes a new source port, starting at 40000. At most 1024 tuples
-are allocated during one registry lifetime, and no tuple is reused after a probe
-finishes. The caller must retain the same registry for the entire NIC incarnation.
+successful `Open` takes a source port from the fixed range 40000-41023 (1024
+tuples). A tuple is reused only after its session has drained and a further
+`TupleQuarantine` of four minutes (TCP 2*MSL) has passed, so a delayed segment of
+the old connection cannot reach its successor. If no tuple is free, `Open` returns
+`ErrProbeCapacity`; this is temporary. The sustained rate is about 1024 probes per
+four minutes per NIC, which is enough to keep probing for a whole battle.
+The caller must retain the same registry for the entire NIC incarnation.
 Creating another registry while old packets or work can survive does not safely
-reset this limit.
+skip the quarantine.
 
 At most eight registries and eight live sessions per registry are admitted.
 Unfinished local work retains its capacity. Each session has a copied-frame queue
 of 16 entries and permits one pending reader. A registry permits one synchronous
 transmit callback; concurrent transmit attempts return `ErrProbeBusy` rather than
-queueing. Incoming traffic and admitted outgoing attempts share cumulative limits
-of 65536 frames and 64 MiB, including valid retired traffic and busy attempts.
+queueing. Each tuple incarnation has its own budget of 8192 frames and 2 MiB for
+incoming traffic and admitted outgoing attempts, including its retired traffic and
+busy attempts; exceeding it closes the whole registry. Frames for an unknown tuple
+also close the registry. A reused tuple starts a fresh budget.
 
 The registry captures an absolute expiry, no later than 24 hours or its parent's
 deadline. Each probe is limited to ten seconds, its parent's original deadline and
