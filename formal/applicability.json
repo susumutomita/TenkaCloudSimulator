@@ -1,371 +1,73 @@
 {
   "version": 1,
-  "base_sha": "e4d30099cd6bc8a70986eb3b634b34af621f24d0",
+  "base_sha": "48f0686b70dab6d1e291175ff7c43a1d74f16767",
   "changes": [
     {
-      "path": "AGENTS.md",
-      "sha256": "a88eb563f43ca1bc5bf3c793dbd7f8bc9f877660af26dd8272138279ec1d19ee",
+      "path": ".claude/agents/issue-finder.md",
+      "sha256": "22d628d2be6f7e6be21fd9a6a8d9ae676919e652a1a836fe03a7b3fe7103568b",
       "disposition": "documentation",
-      "reason": "Records the new provider-neutral internal/inference ownership boundary and its no-fallback/no-storage rules.",
+      "reason": "Documents bounded developer-agent duties and local workflow; no simulator runtime behavior or permission grant.",
       "models": []
     },
     {
-      "path": "README.ja.md",
-      "sha256": "0e2e951917ae83c56f9d7c79bdee7524c79d9acf4c837fbe3f2e444fb10ab2e0",
+      "path": ".claude/agents/issue-fixer.md",
+      "sha256": "95c6af0e702765e4e0a623ccfcc4da8bbefe823097f8a1b8e3e2c11279235e51",
       "disposition": "documentation",
-      "reason": "Japanese link to the opt-in local Bedrock Runtime guide and its limits.",
+      "reason": "Documents bounded developer-agent duties and local workflow; no simulator runtime behavior or permission grant.",
       "models": []
     },
     {
-      "path": "README.md",
-      "sha256": "054b980adec8a0e662292a4114be68dcb9ee8d28cd969b865af35f04667aa7ac",
-      "disposition": "documentation",
-      "reason": "Links the opt-in local Bedrock Runtime guide and states its limits.",
-      "models": []
-    },
-    {
-      "path": "SECURITY.md",
-      "sha256": "79b525a3ead4e0a56dc471cb1a8ae7f77ff0186f8fa1191f180603c161bce689",
-      "disposition": "documentation",
-      "reason": "Documents the opt-in loopback-only backend connection, authorization order, bounds, no storage, public mapped IDs and the Apple refusal.",
-      "models": []
-    },
-    {
-      "path": "cmd/simulator/bedrock_flags.go",
-      "sha256": "43f19dd7d28a9aa8a443980fb6c11957539315743f1221f33836da71a4ef8e7d",
+      "path": "Makefile",
+      "sha256": "bfaec2685781452267160ce023a1d9d5323b6969868d63c6b8a357870440ef58",
       "disposition": "modeled",
-      "reason": "Builds the single operator-selected backend from explicit flags, refuses orphan, repeated, unauthenticated and Apple configuration before startup, and never selects another backend.",
+      "reason": "Preserves the registered startup/token target contract while adding a development-only regression command to test; existing gates are unchanged.",
       "models": [
         {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "BackendOnlyAfterAdmission",
-            "NoFallback",
-            "ConcurrencyBound"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "cmd/simulator/bedrock_flags_test.go",
-      "sha256": "80218d8939e496afa4b8448773a355ace63afe44afcad59758f669da7f929346",
-      "disposition": "test-support",
-      "reason": "Checks flag validation, repeated-flag and pre-startup refusals and an actual authenticated CLI run against a synthetic Ollama test double.",
-      "models": []
-    },
-    {
-      "path": "cmd/simulator/main.go",
-      "sha256": "4990a48fbd27f75d4b6cabc9ab870d147ad5d701ec6c03c03a0f168690de6103",
-      "disposition": "modeled",
-      "reason": "Validates the Bedrock flags before any listener or startup file, passes the one runtime to the composition and cancels it when shutdown begins.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "NoCallAfterClose",
-            "NoFallback"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "docs/bedrock-runtime.md",
-      "sha256": "6918606b62d0ef9d93d838ed483171f45ab681fd460c6e12ccf2044f955556a3",
-      "disposition": "documentation",
-      "reason": "Defines the supported Bedrock Runtime contract, errors, transport boundary, unsupported scope and verification; no progress receipt.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "a3fdf4d11bab096ece90e77afa159365018113ef5617554dfdf954aca41c2c8f",
-      "disposition": "documentation",
-      "reason": "Describes the internal/inference architecture boundary and Bedrock Runtime responsibilities.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-bedrock-runtime.md",
-      "sha256": "910b83cb7f9fa99aa9cd54b3e90f484b42470c5b6f5bf6c3fa3b840fa6634682",
-      "disposition": "documentation",
-      "reason": "Defines the finite model, its invariants, controls, source correspondence and limits.",
-      "models": []
-    },
-    {
-      "path": "formal/BedrockRuntimeAdmission.cfg",
-      "sha256": "d367eca2115f916656be5c524738b9d6921b4e88e25cd742ac485caf8582427c",
-      "disposition": "modeled",
-      "reason": "Checks every declared Bedrock Runtime invariant on two requests with one slot.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
+          "id": "StartupTokenVisibility",
           "properties": [
             "TypeOK",
-            "BackendOnlyAfterAdmission",
-            "AuthorizationFirst",
-            "NoCallAfterClose",
-            "ConcurrencyBound",
-            "SuccessOnlyFromBackend",
-            "NoFallback",
-            "TruthfulFailure",
-            "NoPersistence"
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
           ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
+          "limits": "Existing finite startup/token abstraction is unchanged. This test-recipe addition is not modeled and is validated by the Python controller regression suite and CI; no claim of implementation refinement."
         }
       ]
     },
     {
-      "path": "formal/BedrockRuntimeAdmission.tla",
-      "sha256": "7c8a5df4dfe745de86ddd951e00169d2c003d27c0a824d0ad83b2996605ebb64",
-      "disposition": "modeled",
-      "reason": "Defines the finite admission/result abstraction and its fourteen sensitivity anchors.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "TypeOK",
-            "BackendOnlyAfterAdmission",
-            "AuthorizationFirst",
-            "NoCallAfterClose",
-            "ConcurrencyBound",
-            "SuccessOnlyFromBackend",
-            "NoFallback",
-            "TruthfulFailure",
-            "NoPersistence"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "formal/README.md",
-      "sha256": "5774ae4e422464e9efac262a7cbe838e22fe4b76b7e5bb3704a713d46a3ebe03",
+      "path": "docs/contributing/software-factory.md",
+      "sha256": "975d2614d6944f65e59381d743e3045abeb17d6a1b3a628262a489fb32da18d6",
       "disposition": "documentation",
-      "reason": "Summarizes the registered Bedrock Runtime admission model and points to its contract.",
+      "reason": "Documents bounded developer-agent duties and local workflow; no simulator runtime behavior or permission grant.",
       "models": []
     },
     {
-      "path": "formal/models.json",
-      "sha256": "5b87c7e6f15c272ab40084864ebbff448b367fcd0dd03d19022d238b7d218aa5",
+      "path": "scripts/formal_applicability.py",
+      "sha256": "958bd128a1d1601f48eb744e2b557f5e6ea4dc6e18958ac59e994ecb00b5f4ee",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the Bedrock Runtime admission model with its invariants, fourteen controls and exact source scope without altering existing entries.",
+      "reason": "Exact path classification for the development-only evidence gate with negative controls; arbitrary scripts and runtime sources remain unclassified.",
       "models": []
     },
     {
-      "path": "internal/aws/bedrock_runtime.go",
-      "sha256": "29db20c176af739417289f73689ecdc055f588aa33084159032efc61d97fe82f",
-      "disposition": "modeled",
-      "reason": "Implements the admission order (route, enabled backend, IAM, mapping, input), shutdown refusal and the backend-result-to-error mapping; stores and logs no prompt or reply.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "BackendOnlyAfterAdmission",
-            "AuthorizationFirst",
-            "NoCallAfterClose",
-            "SuccessOnlyFromBackend",
-            "TruthfulFailure",
-            "NoPersistence"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/bedrock_runtime_messages.go",
-      "sha256": "4bf61a13b1072f9980cad2274810264dee3cb8ee1ed18f6d62f4c5253c593883",
-      "disposition": "modeled",
-      "reason": "Strict request decoding: unsupported, repeated or null members and non-text content are refused before the backend; reply encoding carries only the backend text.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "BackendOnlyAfterAdmission",
-            "SuccessOnlyFromBackend",
-            "NoPersistence"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/bedrock_runtime_test.go",
-      "sha256": "c88b3615117583dd42caed7bed48c27f6a30ea173957fa246d39dbab7ac84483",
-      "disposition": "test-support",
-      "reason": "Checks routing before the catalog, admission order, strict refusals before the backend, IAM, failure mapping, throttling, timeout, shutdown, listener deadlines and no stored prompt over actual HTTP.",
+      "path": "scripts/software_factory.py",
+      "sha256": "29687e0efd9a7682bbe4b400cab3331fc7f072e8ce04e870888c0c3c80229842",
+      "disposition": "validation-tooling",
+      "reason": "Local development evidence and claim gate only; no simulator request, state, authentication or workload implementation.",
       "models": []
     },
     {
-      "path": "internal/aws/s3.go",
-      "sha256": "a32931ae2747ee1427e4bc05e5819a57326c3150e10627b204f4d3eed7373599",
-      "disposition": "modeled",
-      "reason": "Adds only the optional Gateway.BedrockRuntime field; nil keeps inference disabled with an explicit error. Existing S3 behavior is unchanged.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "BackendOnlyAfterAdmission",
-            "NoFallback"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ssm.go",
-      "sha256": "2239d50ddfae5d6ea284ebb4139985a2d2ac90c76762825bd22542d59f8f324e",
-      "disposition": "modeled",
-      "reason": "Adds only the first dispatch branch that recognizes Bedrock Runtime routes before the control-plane catalog; other services keep their dispatch order.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "BackendOnlyAfterAdmission",
-            "AuthorizationFirst"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "internal/inference/apple.go",
-      "sha256": "d00de40c7d7d1410528f54c0066887fe0b0f3684f2e7b5fb1dc05f51a53afec5",
-      "disposition": "modeled",
-      "reason": "The Apple backend reports unavailable on every build and never substitutes another backend or a synthetic answer.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "NoFallback",
-            "SuccessOnlyFromBackend"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "internal/inference/inference.go",
-      "sha256": "187ec504c88341f1c3dc7496e085cdd3f11f9933c387439e46778a882cc72f77",
-      "disposition": "modeled",
-      "reason": "Bounded backend: refuses ended contexts, fails fast when the slot is taken, releases it on every ending and reports deadlines and cancellation as themselves.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "ConcurrencyBound",
-            "NoCallAfterClose",
-            "TruthfulFailure"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "internal/inference/ollama.go",
-      "sha256": "5b14ae586b10f48e8f0df2de82fa6d99d0762f28049bb9a9b727929488d6465c",
-      "disposition": "modeled",
-      "reason": "Ollama adapter: one pinned loopback endpoint, typed failures for every backend status or unusable reply, success only with text Ollama returned, no logging or storage.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "SuccessOnlyFromBackend",
-            "TruthfulFailure",
-            "NoFallback",
-            "NoPersistence"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "internal/inference/ollama_test.go",
-      "sha256": "5b6aeefdf5d57c70fa6381a29bee629d7352dc87c1c6226e798f4614d4d5a68f",
-      "disposition": "test-support",
-      "reason": "Checks URL/model validation, the actual Ollama HTTP boundary with a test double, every failure kind, size bounds and the concurrency/deadline gate.",
-      "models": []
-    },
-    {
-      "path": "internal/server/bedrock_runtime.go",
-      "sha256": "9f66f9f17331276b43b184b292b029deb1df1dc6a002596688cfa68e911ad596",
-      "disposition": "modeled",
-      "reason": "Advertises whether the single configured backend is enabled, its kind and mapped IDs; it exposes no backend address, backend model name, prompt or reply.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "NoFallback",
-            "NoPersistence"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/bedrock_runtime_test.go",
-      "sha256": "5847f9db4ec091cadbc7dda6983a32a916b7d1acb797893224e6a85a7a31f289",
-      "disposition": "test-support",
-      "reason": "Checks default disabled capabilities beside the control plane and caller-owned runtime closing in the composed server.",
-      "models": []
-    },
-    {
-      "path": "internal/server/sakura_provider.go",
-      "sha256": "b0d44af3da2e3b1dc88400f21d6d1ad299f14adac656b457ed17978dd57e874e",
-      "disposition": "modeled",
-      "reason": "Adds the caller-owned ProviderConfig.BedrockRuntime field; the composition neither creates another backend nor closes the caller's runtime.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "NoFallback",
-            "NoCallAfterClose"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "51d99de1652495b20e2bd8488717629d2f302f86b3e2f6c36ea632e7d7c7f2a4",
-      "disposition": "modeled",
-      "reason": "Passes the configured runtime to the gateway and adds its capability entry; existing composition and closing are unchanged.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "BackendOnlyAfterAdmission",
-            "NoFallback"
-          ],
-          "limits": "Finite admission/result abstraction only; no Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, streaming, tool use, Apple backend or Claude Code proof. Native, CLI and boto3 tests cover the implementation independently."
-        }
-      ]
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "115c079e33fdd41a5f6e9fa099dba41da0a1cdacc9ef45e5ea7048402371256b",
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "1176d29fc98dec3588e6007f516a4e063411644bfda811f4e538d5ef1f096f11",
       "disposition": "formal-infrastructure",
-      "reason": "Protects the new model's invariants, controls and exact source scope from silent removal.",
+      "reason": "Exact path classification for the development-only evidence gate with negative controls; arbitrary scripts and runtime sources remain unclassified.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "0685499942c2bbe6fadddc7dfda539c04eaade9445c50566f6ab452e44515a5f",
-      "disposition": "formal-infrastructure",
-      "reason": "Adds removal detectors for the new model and names it in the complete registry inventory.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/bedrock_runtime.py",
-      "sha256": "05399ecffd2404c6bdf33531910ddeca6f15c4edbf27de1a9367a031b674d479",
+      "path": "scripts/test-software-factory.py",
+      "sha256": "9bd691cc8a88b9e1330e9e9736280a979f66685455b907e3923a17a551976ab9",
       "disposition": "test-support",
-      "reason": "Built binary with official boto3 against a fake Ollama process: operations, refusals, IAM, restart, stopped backend and no stored or logged prompt.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/check.py",
-      "sha256": "ed5ee493974f8fa420a8f715cd75e20490ea8e9d17b1df1a32a7af3002c166ce",
-      "disposition": "test-support",
-      "reason": "Registers the Bedrock Runtime boto3 acceptance in the mandatory E2E suite.",
+      "reason": "Exercises local development handoff state and fail-closed validation; no runtime behavior changes.",
       "models": []
     }
   ]
