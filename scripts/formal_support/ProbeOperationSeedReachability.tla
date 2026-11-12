@@ -22,7 +22,8 @@ Plans == << <<>>, << <<"Bind",1>> >>, OnePlan, << <<"Bind",1>>, ScopedStart >>,
  WirePlan, Append(FailedSettlePlan, <<"Lookup",1,"raw",0>>),
  Append(WirePlan, <<"Malformed",1>>), Append(WirePlan, <<"HostExpire",1>>),
  Append(SettlePlan, SecondStart), Append(WorkerPlan, SecondStart),
- << <<"Tick">>, RawStart >> >>
+ << <<"Tick">>, RawStart >>,
+ << <<"Bind",1>>, ScopedStart, <<"Reject",1>>, <<"Settle",1>>, <<"Tick">> >> >>
 ReachInit == /\ chosen \in 1..Len(Plans) /\ Initialize(EmptyState) /\ depth = 0
 ReachNext ==
  /\ depth < Len(Plans[chosen])

@@ -51,6 +51,14 @@ type persistentNIC struct {
 	now func() time.Time
 }
 
+// clock is the NIC's budget and handle-retention clock.
+func (n *persistentNIC) clock() time.Time {
+	if n.now == nil {
+		return time.Now()
+	}
+	return n.now()
+}
+
 type persistentWrite struct {
 	ctx   context.Context
 	probe *ProbeExchange

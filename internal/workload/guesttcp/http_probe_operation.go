@@ -15,6 +15,12 @@ type HTTPProbeOperationKey [16]byte
 
 var ErrHTTPProbeOperationBinding = errors.New("HTTP probe operation key already binds a different target")
 
+// HTTPProbeOperationRetention is how long a settled scoped handle stays
+// discoverable after its original caller deadline. Only then may a full NIC
+// forget it. A replay of the same command carries that same past deadline, so
+// scoped Start rejects it before retention and cannot dispatch it twice.
+const HTTPProbeOperationRetention = time.Minute
+
 // HTTPProbeOperationSnapshot separates a bounded observation result from actual
 // worker settlement. ResultError is immutable once ResultReady is true. Settled
 // implies ResultReady, not success or whole-NIC cleanup.
@@ -35,7 +41,9 @@ type HTTPProbeOperationSnapshot struct {
 // HTTPProbeOperation owns exactly one concrete observer invocation. It cannot be
 // canceled, renewed or retried through discovery or waiting. Its original start
 // context still cancels execution. NIC-local tombstones retain failed operations
-// as well as successes until the NIC itself is discarded.
+// as well as successes. Raw handles stay until the NIC is discarded; a settled
+// scoped handle may be forgotten HTTPProbeOperationRetention after its caller
+// deadline, and only when the NIC's handle map is full.
 type HTTPProbeOperation struct {
 	mu      sync.Mutex
 	state   HTTPProbeOperationSnapshot
@@ -43,6 +51,8 @@ type HTTPProbeOperation struct {
 	settled chan struct{}
 	scope   *sealedHTTPProbeScope
 	service string
+	// forgetAfter is zero (never) for raw handles.
+	forgetAfter time.Time
 }
 
 // StartHTTPObservation records an operation before dispatching its single
@@ -52,7 +62,8 @@ type HTTPProbeOperation struct {
 //
 // Only trusted callers may select the port/path. The concrete observer enforces
 // the NIC allowlist and same-owner publication contract. Keys provide no authority.
-// Each NIC retains at most MaxProbeSessions handles, with no eviction or reuse.
+// Each NIC retains at most MaxProbeSessions handles. When full, it forgets only
+// settled scoped handles whose retention has passed; raw handles are never evicted.
 func (t *PersistentTransport) StartHTTPObservation(ctx context.Context, key HTTPProbeOperationKey, port uint16, path string) (*HTTPProbeOperation, error) {
 	return t.startHTTPObservation(ctx, key, port, path, nil, "")
 }
@@ -78,7 +89,7 @@ func (t *PersistentTransport) startHTTPObservation(ctx context.Context, key HTTP
 		n.operationsMu.Unlock()
 		return nil, ErrConfig
 	}
-	if len(n.operations) >= guestnet.MaxProbeSessions {
+	if !n.roomLocked() {
 		n.operationsMu.Unlock()
 		return nil, ErrCapacity
 	}
@@ -107,6 +118,9 @@ func (t *PersistentTransport) startHTTPObservation(ctx context.Context, key HTTP
 		state: HTTPProbeOperationSnapshot{Key: key, Port: port, Path: path, StartedAt: started, Deadline: deadline},
 		ready: make(chan struct{}), settled: make(chan struct{}), scope: scope, service: service,
 	}
+	if scope != nil {
+		h.forgetAfter = callerDeadline.Add(HTTPProbeOperationRetention)
+	}
 	// Deadline methods belong to the supplied contexts, so run them outside
 	// the map lock. A racing start may have won while we captured the deadline.
 	// Recheck identity and quota before recording or constructing any observer.
@@ -118,7 +132,7 @@ func (t *PersistentTransport) startHTTPObservation(ctx context.Context, key HTTP
 		}
 		return existing, nil
 	}
-	if len(n.operations) >= guestnet.MaxProbeSessions {
+	if !n.roomLocked() {
 		n.operationsMu.Unlock()
 		return nil, ErrCapacity
 	}
@@ -139,6 +153,30 @@ func (t *PersistentTransport) startHTTPObservation(ctx context.Context, key HTTP
 	call, cancel := context.WithDeadline(ctx, deadline)
 	go h.run(o, call, cancel)
 	return h, nil
+}
+
+// roomLocked reports whether another handle fits, first forgetting settled
+// scoped handles whose retention has passed if the map is full.
+func (n *persistentNIC) roomLocked() bool {
+	if len(n.operations) < guestnet.MaxProbeSessions {
+		return true
+	}
+	now := n.clock()
+	for key, h := range n.operations {
+		if h.forgettable(now) {
+			delete(n.operations, key)
+		}
+	}
+	return len(n.operations) < guestnet.MaxProbeSessions
+}
+
+func (h *HTTPProbeOperation) forgettable(now time.Time) bool {
+	if h.scope == nil || h.forgetAfter.IsZero() || now.Before(h.forgetAfter) {
+		return false
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return h.state.Settled
 }
 
 // LookupHTTPObservation never starts work or changes its lifetime. An unknown

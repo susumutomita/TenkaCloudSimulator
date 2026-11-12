@@ -10,11 +10,57 @@
       "models": []
     },
     {
+      "path": "docs/formal-probe-operation-lifecycle.md",
+      "sha256": "3299fb4ba0c6630450b45dcec539c5ab8847310c5deef7c57e097ea0fc3c7e0a",
+      "disposition": "documentation",
+      "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
+      "models": []
+    },
+    {
       "path": "docs/owned-probe-session.md",
       "sha256": "e7cc3c7187fd6bae9cb72a78c933ec3777ffa1490e4c4b11204018fe472742e6",
       "disposition": "documentation",
       "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
       "models": []
+    },
+    {
+      "path": "docs/private-http-probe-operations.md",
+      "sha256": "5d6a8962cc270d71bdf6db3a82da5a1123c7fd7d7c014e503a7e41e9c218e721",
+      "disposition": "modeled",
+      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "models": [
+        {
+          "id": "ProbeOperationLifecycle",
+          "properties": [
+            "ScopeImmutable",
+            "RetainedExact",
+            "RetainedBound",
+            "ValidatedAdmission",
+            "ScopedIdentity",
+            "ImmutableBinding",
+            "WorkerBound",
+            "WorkerDebt",
+            "AtMostOnce",
+            "RouteBeforeDispatch",
+            "RouteRetained",
+            "ResultSticky",
+            "SettlementEvidence",
+            "TimelySuccess",
+            "WireUnknown",
+            "DuplicateIsolation",
+            "LookupIsolation",
+            "WireIdentity",
+            "WireRoute",
+            "WireResult",
+            "WireSettlement",
+            "PoisonSticky",
+            "PoisonExclusion",
+            "NoLateHostAcceptance",
+            "EvictedForgotten"
+          ],
+          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
+        }
+      ]
     },
     {
       "path": "docs/private-persistent-transport.md",
@@ -60,8 +106,86 @@
       ]
     },
     {
+      "path": "formal/ProbeOperationLifecycle.cfg",
+      "sha256": "9936857f609180b2d162c06c71768609d35722844fb00dfb3dced69c6f3695cd",
+      "disposition": "modeled",
+      "reason": "Changed executable specification/configuration requires the listed own semantic properties and exact baseline plus required sensitivity controls; tests do not prove Go refinement.",
+      "models": [
+        {
+          "id": "ProbeOperationLifecycle",
+          "properties": [
+            "ScopeImmutable",
+            "RetainedExact",
+            "RetainedBound",
+            "ValidatedAdmission",
+            "ScopedIdentity",
+            "ImmutableBinding",
+            "WorkerBound",
+            "WorkerDebt",
+            "AtMostOnce",
+            "RouteBeforeDispatch",
+            "RouteRetained",
+            "ResultSticky",
+            "SettlementEvidence",
+            "TimelySuccess",
+            "WireUnknown",
+            "DuplicateIsolation",
+            "LookupIsolation",
+            "WireIdentity",
+            "WireRoute",
+            "WireResult",
+            "WireSettlement",
+            "PoisonSticky",
+            "PoisonExclusion",
+            "NoLateHostAcceptance",
+            "EvictedForgotten"
+          ],
+          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
+        }
+      ]
+    },
+    {
+      "path": "formal/ProbeOperationLifecycle.tla",
+      "sha256": "2cd62b6c21c8227e2ba4e381e7b1b2472c724439bc354d474c8786dbb681e03d",
+      "disposition": "modeled",
+      "reason": "Changed executable specification/configuration requires the listed own semantic properties and exact baseline plus required sensitivity controls; tests do not prove Go refinement.",
+      "models": [
+        {
+          "id": "ProbeOperationLifecycle",
+          "properties": [
+            "ScopeImmutable",
+            "RetainedExact",
+            "RetainedBound",
+            "ValidatedAdmission",
+            "ScopedIdentity",
+            "ImmutableBinding",
+            "WorkerBound",
+            "WorkerDebt",
+            "AtMostOnce",
+            "RouteBeforeDispatch",
+            "RouteRetained",
+            "ResultSticky",
+            "SettlementEvidence",
+            "TimelySuccess",
+            "WireUnknown",
+            "DuplicateIsolation",
+            "LookupIsolation",
+            "WireIdentity",
+            "WireRoute",
+            "WireResult",
+            "WireSettlement",
+            "PoisonSticky",
+            "PoisonExclusion",
+            "NoLateHostAcceptance",
+            "EvictedForgotten"
+          ],
+          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
+        }
+      ]
+    },
+    {
       "path": "formal/models.json",
-      "sha256": "932ec401389affb984e8e99eb4ace35e1b770cc53caa640765130c7b9aab334e",
+      "sha256": "a14cce41b9e41cfc63e5c1668015a36f3b02475392e2b65628ad9dcf99d1e0ef",
       "disposition": "formal-infrastructure",
       "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
       "models": []
@@ -101,6 +225,123 @@
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
+    },
+    {
+      "path": "internal/workload/guesttcp/http_probe_observation_test.go",
+      "sha256": "8557bf9d29463ac24684415ce5a83d2929efb44e8bb35da5e7b18f3da7103a24",
+      "disposition": "modeled",
+      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "models": [
+        {
+          "id": "ProbeOperationLifecycle",
+          "properties": [
+            "ScopeImmutable",
+            "RetainedExact",
+            "RetainedBound",
+            "ValidatedAdmission",
+            "ScopedIdentity",
+            "ImmutableBinding",
+            "WorkerBound",
+            "WorkerDebt",
+            "AtMostOnce",
+            "RouteBeforeDispatch",
+            "RouteRetained",
+            "ResultSticky",
+            "SettlementEvidence",
+            "TimelySuccess",
+            "WireUnknown",
+            "DuplicateIsolation",
+            "LookupIsolation",
+            "WireIdentity",
+            "WireRoute",
+            "WireResult",
+            "WireSettlement",
+            "PoisonSticky",
+            "PoisonExclusion",
+            "NoLateHostAcceptance",
+            "EvictedForgotten"
+          ],
+          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guesttcp/http_probe_operation.go",
+      "sha256": "3d6e6be8530c48a36ccb651c433f790bf0deaf41d60fc1d5db3e185714a462a3",
+      "disposition": "modeled",
+      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "models": [
+        {
+          "id": "ProbeOperationLifecycle",
+          "properties": [
+            "ScopeImmutable",
+            "RetainedExact",
+            "RetainedBound",
+            "ValidatedAdmission",
+            "ScopedIdentity",
+            "ImmutableBinding",
+            "WorkerBound",
+            "WorkerDebt",
+            "AtMostOnce",
+            "RouteBeforeDispatch",
+            "RouteRetained",
+            "ResultSticky",
+            "SettlementEvidence",
+            "TimelySuccess",
+            "WireUnknown",
+            "DuplicateIsolation",
+            "LookupIsolation",
+            "WireIdentity",
+            "WireRoute",
+            "WireResult",
+            "WireSettlement",
+            "PoisonSticky",
+            "PoisonExclusion",
+            "NoLateHostAcceptance",
+            "EvictedForgotten"
+          ],
+          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guesttcp/http_probe_scope_test.go",
+      "sha256": "58d819f3590399506e1af9f66c816e2418eb98c54b298e9dbb6b1fdd49328955",
+      "disposition": "modeled",
+      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "models": [
+        {
+          "id": "ProbeOperationLifecycle",
+          "properties": [
+            "ScopeImmutable",
+            "RetainedExact",
+            "RetainedBound",
+            "ValidatedAdmission",
+            "ScopedIdentity",
+            "ImmutableBinding",
+            "WorkerBound",
+            "WorkerDebt",
+            "AtMostOnce",
+            "RouteBeforeDispatch",
+            "RouteRetained",
+            "ResultSticky",
+            "SettlementEvidence",
+            "TimelySuccess",
+            "WireUnknown",
+            "DuplicateIsolation",
+            "LookupIsolation",
+            "WireIdentity",
+            "WireRoute",
+            "WireResult",
+            "WireSettlement",
+            "PoisonSticky",
+            "PoisonExclusion",
+            "NoLateHostAcceptance",
+            "EvictedForgotten"
+          ],
+          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
+        }
+      ]
     },
     {
       "path": "internal/workload/guesttcp/owned_probe_session.go",
@@ -148,8 +389,15 @@
       "models": []
     },
     {
+      "path": "internal/workload/guesttcp/probe_soak_test.go",
+      "sha256": "24b5e2fe99f077086af7a663416e231b07c6a65fe9f91e825e28dcbf5632dea2",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
+    },
+    {
       "path": "internal/workload/guesttcp/transport.go",
-      "sha256": "a512d64cc922c421e1e893096a3ddfec51c88239b0d812be02757930fb2710fd",
+      "sha256": "92d204da275817f5f4a60dc642007d946d0bea1be39930eda059ce171ef449a8",
       "disposition": "modeled",
       "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
       "models": [
@@ -205,7 +453,7 @@
     },
     {
       "path": "internal/workload/guesttcp/transport_persistent.go",
-      "sha256": "a2d4cb115c156ca9f2b8e5a11c6021d0f0e1f7db18cfd102031cd76aa3138b26",
+      "sha256": "4f3e2225df9733164e0e881de2f53065896a2a04fd81512143ebca475657ab06",
       "disposition": "modeled",
       "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
       "models": [
@@ -297,14 +545,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "aa3b8a24ac815d3244c0056c0e2171967e9b2dea930bf70d9b49f332bbc5d5e1",
+      "sha256": "6964d5cf586cbbc6cc5ef462241c6735c41d0c48efd4c02aaa2935e1f1572e6a",
       "disposition": "formal-infrastructure",
       "reason": "Formal execution infrastructure: DynamoDBAdmission baseline and unchanged controls use exactly two workers, other families one, families remain serial. All 60-second deadlines, model inputs, exact invariant checks and no-retry failure handling preserved; independent regression checks enforce allocation and timeout behavior.",
       "models": []
     },
     {
       "path": "scripts/formal_seed_replay.py",
-      "sha256": "f170e8ac8adecd922b6fabb4b63bf48beea1debbe760cc54072d2f69d6c0227d",
+      "sha256": "6e95c553a57d457da24cff317940c1e8b2ebe29d79effe9acb48ae864529986c",
       "disposition": "formal-infrastructure",
       "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
       "models": []
@@ -317,8 +565,15 @@
       "models": []
     },
     {
+      "path": "scripts/formal_support/ProbeOperationSeedReachability.tla",
+      "sha256": "a78e3d2e8a41a6405a071186c5e645e07737e8959040cab5e73ed71721da8b6a",
+      "disposition": "formal-infrastructure",
+      "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
+      "models": []
+    },
+    {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "1d4b004c60906e9a94f44ff40d2dac4050ef37fad357e2e37b26e67f0b146c2a",
+      "sha256": "dec66abd4f67842e01a91192e64ed43b9da7e8a28c0b6e047a15620ebd61e9ca",
       "disposition": "formal-infrastructure",
       "reason": "Formal execution infrastructure: DynamoDBAdmission baseline and unchanged controls use exactly two workers, other families one, families remain serial. All 60-second deadlines, model inputs, exact invariant checks and no-retry failure handling preserved; independent regression checks enforce allocation and timeout behavior.",
       "models": []

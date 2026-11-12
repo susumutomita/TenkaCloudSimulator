@@ -481,7 +481,7 @@ func (t *Transport) account(n int) error {
 	frames, bytes := maxFrames, maxBytes
 	if t.persistent != nil {
 		frames, bytes = maxPersistentFrames, maxPersistentBytes
-		if now := t.persistent.now(); !now.Before(t.budgetWindow.Add(persistentBudgetWindow)) {
+		if now := t.persistent.clock(); !now.Before(t.budgetWindow.Add(persistentBudgetWindow)) {
 			t.budgetWindow, t.packets, t.bytes = now, 0, 0
 		}
 	}
