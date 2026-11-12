@@ -33,6 +33,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveBedrockRuntime(w, r)
 		return
 	}
+	if isELB(r) {
+		g.serveELB(w, r)
+		return
+	}
 	if isRoute53(r) {
 		g.serveRoute53(w, r)
 		return

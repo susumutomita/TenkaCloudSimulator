@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "66287bb49d39b22b1974b59773096e9d51004627",
+  "base_sha": "e4d30099cd6bc8a70986eb3b634b34af621f24d0",
   "changes": [
     {
       "path": "AGENTS.md",
@@ -11,21 +11,21 @@
     },
     {
       "path": "README.ja.md",
-      "sha256": "fdb4dc93ccf4c78777d0371674655f89d700b06e074c43cf3f29199a3be467e1",
+      "sha256": "0e2e951917ae83c56f9d7c79bdee7524c79d9acf4c837fbe3f2e444fb10ab2e0",
       "disposition": "documentation",
       "reason": "Japanese link to the opt-in local Bedrock Runtime guide and its limits.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "1381bf1bbb61ae4fa0319acd09fd6c9aa0c70bad853f7034e80a43e4dfffbf98",
+      "sha256": "054b980adec8a0e662292a4114be68dcb9ee8d28cd969b865af35f04667aa7ac",
       "disposition": "documentation",
       "reason": "Links the opt-in local Bedrock Runtime guide and states its limits.",
       "models": []
     },
     {
       "path": "SECURITY.md",
-      "sha256": "20bee3bd8875866490013b4398e622bd45a0f3aab371ac9d3e13ddb4aba0e5e5",
+      "sha256": "79b525a3ead4e0a56dc471cb1a8ae7f77ff0186f8fa1191f180603c161bce689",
       "disposition": "documentation",
       "reason": "Documents the opt-in loopback-only backend connection, authorization order, bounds, no storage, public mapped IDs and the Apple refusal.",
       "models": []
@@ -146,7 +146,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "d3cd16ac0061dbbcc6330c4f9f6cc0efb9aa9972b0abd15fffef4160af024f73",
+      "sha256": "5b87c7e6f15c272ab40084864ebbff448b367fcd0dd03d19022d238b7d218aa5",
       "disposition": "formal-infrastructure",
       "reason": "Registers the Bedrock Runtime admission model with its invariants, fourteen controls and exact source scope without altering existing entries.",
       "models": []
@@ -197,7 +197,7 @@
     },
     {
       "path": "internal/aws/s3.go",
-      "sha256": "5c801d893636d43441921390166c89f2f9a6b3fec840e6ec528f84f73d1eeaa8",
+      "sha256": "a32931ae2747ee1427e4bc05e5819a57326c3150e10627b204f4d3eed7373599",
       "disposition": "modeled",
       "reason": "Adds only the optional Gateway.BedrockRuntime field; nil keeps inference disabled with an explicit error. Existing S3 behavior is unchanged.",
       "models": [
@@ -213,7 +213,7 @@
     },
     {
       "path": "internal/aws/ssm.go",
-      "sha256": "48804bfe69bb2a1bd3df0c6941e3e27daaa213f010254bdb60796cb42458cdcf",
+      "sha256": "2239d50ddfae5d6ea284ebb4139985a2d2ac90c76762825bd22542d59f8f324e",
       "disposition": "modeled",
       "reason": "Adds only the first dispatch branch that recognizes Bedrock Runtime routes before the control-plane catalog; other services keep their dispatch order.",
       "models": [
@@ -326,7 +326,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "79f0858defff6ce189761a2b4ac88d018a437b16a5c24c32ae1a7241fd6bad06",
+      "sha256": "51d99de1652495b20e2bd8488717629d2f302f86b3e2f6c36ea632e7d7c7f2a4",
       "disposition": "modeled",
       "reason": "Passes the configured runtime to the gateway and adds its capability entry; existing composition and closing are unchanged.",
       "models": [
@@ -342,14 +342,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "121cebbd7358e20be872f412d5cc015063e73cfda9a3c8c660c435089265dee1",
+      "sha256": "115c079e33fdd41a5f6e9fa099dba41da0a1cdacc9ef45e5ea7048402371256b",
       "disposition": "formal-infrastructure",
       "reason": "Protects the new model's invariants, controls and exact source scope from silent removal.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "ecc6b8a4becf921a2286af81d553363d965235922a0b5e8ae5825e05c9224155",
+      "sha256": "0685499942c2bbe6fadddc7dfda539c04eaade9445c50566f6ab452e44515a5f",
       "disposition": "formal-infrastructure",
       "reason": "Adds removal detectors for the new model and names it in the complete registry inventory.",
       "models": []
@@ -363,7 +363,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "f84e060c596435d95a91e00a5679fcd61fabd482bac771bec56934b73ca32572",
+      "sha256": "ed5ee493974f8fa420a8f715cd75e20490ea8e9d17b1df1a32a7af3002c166ce",
       "disposition": "test-support",
       "reason": "Registers the Bedrock Runtime boto3 acceptance in the mandatory E2E suite.",
       "models": []
