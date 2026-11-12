@@ -446,7 +446,7 @@
     },
     {
       "path": "docs/start.md",
-      "sha256": "f12e3f1e231c33e492d49f98c947850292c9f878de7ff717fa0a8b745a3cf627",
+      "sha256": "cc4922061a7f26443dcc1d4227700d700c84420f18a7e1ca801f43365fff6ca1",
       "disposition": "documentation",
       "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
       "models": []
@@ -2248,6 +2248,20 @@
       "models": []
     },
     {
+      "path": "internal/aws/cloudformation_ssm_parameters.go",
+      "sha256": "aedbc6970d3438eda3acc0de7a80ab5849988b01e57fef67d44a616afa7f34e2",
+      "disposition": "needs-review",
+      "reason": "",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudformation_ssm_parameters_test.go",
+      "sha256": "7855188f2b5061b35bf5a1bfc867033e19a183ef9c63daa69811297bf39d39a7",
+      "disposition": "needs-review",
+      "reason": "",
+      "models": []
+    },
+    {
       "path": "internal/aws/cloudformation_write_deadline_test.go",
       "sha256": "bac7e01fd90c24868a93e6c7bdbdf7ea8a4c4a0f4b1458f336c6f986040b73a3",
       "disposition": "test-support",
@@ -2293,7 +2307,7 @@
     },
     {
       "path": "internal/aws/ec2_cloudformation_runtime_linux.go",
-      "sha256": "3f38f0449fd414ec588db361e795c869537d3cde43527c566253468201124324",
+      "sha256": "ccfe15797af863581023ea2e45aee6df393a55a7b4b35858259395092cdf2c50",
       "disposition": "modeled",
       "reason": "Immutable plan/image binding, durable journal before launch, paused exact control, attachment before activation, private readiness, typed provider/creator authorization, same saved network/role association, no reconstruction and independently observed containment before release.",
       "models": [
@@ -2330,7 +2344,7 @@
     },
     {
       "path": "internal/aws/ec2_cloudformation_runtime_linux_test.go",
-      "sha256": "da62ba636fa9b5a4ccf6f825835f4a47153fcd36a36da9c8391877e6bf6cd77a",
+      "sha256": "b747f33f438e1325722a610cdc6bb924ead1ae291fd0860f79ccfeb260915306",
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
@@ -3488,7 +3502,7 @@
     },
     {
       "path": "internal/aws/ssm_commands_native_wire.go",
-      "sha256": "73868f9193c4cda6a4d81fd11fc85fd764e463d1386c5084d5aaea542c0ae0ae",
+      "sha256": "68ece9a71e1f0ab6a6dc5eb1064a6d3c5e1c62244a8303ae5602b3a4ec8a2bc3",
       "disposition": "modeled",
       "reason": "Signed native SSM command reservation/dispatch/readback uses exact role generation, region and target incarnation; unknown dispatch is not retried and query recovery is bounded to original issuer.",
       "models": [
@@ -3515,7 +3529,7 @@
     },
     {
       "path": "internal/aws/ssm_commands_native_wire_test.go",
-      "sha256": "e89f639ca9bcb5235cf5d15b3612b5cfa1e7b17e5b8f6a844d8e2e539341ec09",
+      "sha256": "1478d02b9525a09113cdf5fecc558e0c5a1fdecbc2b0fd93131a9a616a94a0c9",
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
@@ -4093,7 +4107,7 @@
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "c64f7d32bcb7b656b2d304b7b3447228701d273e19971dbaf47fca5380429918",
+      "sha256": "d87d87edf2db1bd62f99b12ee5a5d45e62cbf7abd1fffed9f911a712095133a3",
       "disposition": "presentation",
       "reason": "Static API reference schemas/descriptions for bounded implemented document/command/session surfaces; checked against native/reference tests. This file grants no runtime permission and is not evidence of guest execution. Classified presentation under current exact gate; stateful handler code remains modeled.",
       "models": []
@@ -7219,7 +7233,7 @@
     },
     {
       "path": "test/e2e/ssm_command_reference.py",
-      "sha256": "43627edb31af01d6ce861f72bed50c43df9a331ef7ce0dfd710890cc544b8aee",
+      "sha256": "c53c3e437470b555e0c157c4b674c33efd4b2f65e5b3ec4c219f63c4c15596cc",
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
@@ -7261,7 +7275,7 @@
     },
     {
       "path": "test/e2e/test_ssm_command_reference.py",
-      "sha256": "5ca1fe120e41dfcafb781345d9c67267d47306f9cbc1583761e65fc91fd28b76",
+      "sha256": "280c65f48d478e87cf9595db52c2c05dcf049314ddf048794a695993af0c58e5",
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []

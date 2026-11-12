@@ -153,3 +153,19 @@ func TestCanonicalInstanceShutdownRejectsPreparedLaunchMemoryOnly(t *testing.T) 
 		t.Fatal("shutdown admitted reservation", err, count)
 	}
 }
+
+func TestEC2RuntimePublicImageParameterUsesFirstPinnedImageOnly(t *testing.T) {
+	r := &EC2InstanceRuntime{config: EC2InstanceRuntimeConfig{ImageIDs: []string{"ami-0a1b2c3d4e5f60718", "ami-11111111"}}}
+	if v, ok := r.PublicImageParameter("/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64"); !ok || v != "ami-0a1b2c3d4e5f60718" {
+		t.Fatal(v, ok)
+	}
+	for _, name := range []string{"/aws/service/ami-amazon-linux-latest/", "/aws/service/ami-windows-latest/x", "/tc/ami", ""} {
+		if _, ok := r.PublicImageParameter(name); ok {
+			t.Fatal("unexpected alias for", name)
+		}
+	}
+	var none *EC2InstanceRuntime
+	if _, ok := none.PublicImageParameter("/aws/service/ami-amazon-linux-latest/x"); ok {
+		t.Fatal("nil runtime resolved an alias")
+	}
+}

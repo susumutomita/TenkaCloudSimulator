@@ -21,6 +21,7 @@ class CommandReference(unittest.TestCase):
         v=Draft202012Validator(self.spec['components']['schemas']['SSMSendCommandInput'])
         for changes in [{'DocumentName':'stored-custom'},{'TimeoutSeconds':29},{'InstanceIds':['i-0123456789abcdef0']*2},{'Parameters':{'commands':['a'],'other':['b']}}]:
             with self.assertRaises(ValidationError):v.validate(dict(examples['SendCommand'],**changes))
+        v.validate({k:x for k,x in examples['SendCommand'].items() if k!='TimeoutSeconds'})  # AWS default 3600 applies
         v=Draft202012Validator(self.spec['components']['schemas']['SSMListCommandsInput'])
         for bad in [{},{'Filters':None},dict(examples['ListCommands'],MaxResults=None),dict(examples['ListCommands'],MaxResults=51)]:
             with self.assertRaises(ValidationError):v.validate(bad)

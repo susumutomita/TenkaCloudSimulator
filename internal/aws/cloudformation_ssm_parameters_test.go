@@ -294,3 +294,44 @@ func TestStackSSMParameterExactARNPreflightAndRollback(t *testing.T) {
 		t.Fatal("failed create leaked partial snapshot/resources/events", w.Code)
 	}
 }
+
+type publicImageRuntime struct{ alias string }
+
+func (publicImageRuntime) PrepareStackInstance(context.Context, StackRecord, StackResource) (StackInstanceAttempt, error) {
+	return nil, errors.New("no instance in this template")
+}
+func (r publicImageRuntime) PublicImageParameter(name string) (string, bool) {
+	if strings.HasPrefix(name, "/aws/service/ami-amazon-linux-latest/") {
+		return r.alias, true
+	}
+	return "", false
+}
+
+func TestStackSSMPublicAMIAliasResolvesThroughConfiguredRuntime(t *testing.T) {
+	g := ssmValueGateway(t)
+	if err := g.Stacks.ConfigureInstanceRuntime(publicImageRuntime{alias: "ami-0a1b2c3d4e5f60718"}); err != nil {
+		t.Fatal(err)
+	}
+	ssmValuePut(t, g, "ap-northeast-1", "/practice/message", "String", "hello")
+	public := "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64"
+	body := strings.Replace(strings.Replace(ssmValueTemplate, "Default: /practice/image", "Default: "+public, 1), "AllowedValues: [/practice/image]", "AllowedValues: ["+public+"]", 1)
+	w := conditionBoundarySend(g, "CreateStack", body, "", nil)
+	if w.Code != 200 {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	records, err := g.Stacks.Records("ap-northeast-1", "boundary")
+	if err != nil || len(records) != 1 || records[0].Parameters["Image"] != public || records[0].ResolvedParameters["Image"] != "ami-0a1b2c3d4e5f60718" {
+		t.Fatal("public alias did not resolve to the pinned runtime image", records, err)
+	}
+	if w = conditionBoundarySend(g, "DeleteStack", "", "", nil); w.Code != 200 {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	// Non-AMI public names are never synthesized.
+	g2 := ssmValueGateway(t)
+	if err := g2.Stacks.ConfigureInstanceRuntime(publicImageRuntime{alias: "ami-0a1b2c3d4e5f60718"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := g2.Stacks.resolveSSMParameters(context.Background(), "ap-northeast-1", map[string]string{"Image": "/aws/service/other/thing"}, func(string, string) error { return nil }); err == nil {
+		t.Fatal("non-AMI public parameter was synthesized")
+	}
+}

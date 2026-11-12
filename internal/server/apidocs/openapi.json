@@ -18375,14 +18375,14 @@
           "TimeoutSeconds": {
             "type": "integer",
             "minimum": 30,
-            "maximum": 3600
+            "maximum": 3600,
+            "default": 3600
           }
         },
         "required": [
           "DocumentName",
           "InstanceIds",
-          "Parameters",
-          "TimeoutSeconds"
+          "Parameters"
         ]
       },
       "SSMGetCommandInvocationInput": {

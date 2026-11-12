@@ -18,6 +18,9 @@ type nativeCommandInput struct {
 	MaxResults                                     int
 }
 
+// nativeCommandDefaultTimeout is AWS SendCommand's TimeoutSeconds default.
+const nativeCommandDefaultTimeout = 3600
+
 func decodeNativeCommand(operation string, raw []byte) (nativeCommandInput, error) {
 	var out nativeCommandInput
 	var fields map[string]json.RawMessage
@@ -44,6 +47,9 @@ func decodeNativeCommand(operation string, raw []byte) (nativeCommandInput, erro
 	case "SendCommand":
 		if err := strictDocumentJSON(raw, &out.Send); err != nil {
 			return out, err
+		}
+		if _, ok := fields["TimeoutSeconds"]; !ok {
+			out.Send.TimeoutSeconds = nativeCommandDefaultTimeout // AWS default; explicit null stays invalid.
 		}
 		sort.Strings(out.Send.InstanceIds)
 		if !ssmRequestValid(out.Send) {

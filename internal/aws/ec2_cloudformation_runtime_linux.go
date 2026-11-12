@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"net/netip"
+	"strings"
 	"sync"
 	"time"
 
@@ -499,4 +500,16 @@ func (r *EC2InstanceRuntime) Shutdown(ctx context.Context) error {
 		result = errors.Join(result, sessions.WaitCleanup(ctx))
 	}
 	return result
+}
+
+// publicAMIParameterPrefix is the AWS public Amazon Linux AMI alias namespace.
+const publicAMIParameterPrefix = "/aws/service/ami-amazon-linux-latest/"
+
+// PublicImageParameter maps AWS public Amazon Linux AMI aliases to the first
+// configured pinned image. It never selects an unconfigured or remote image.
+func (r *EC2InstanceRuntime) PublicImageParameter(name string) (string, bool) {
+	if r == nil || len(r.config.ImageIDs) == 0 || !strings.HasPrefix(name, publicAMIParameterPrefix) || len(name) == len(publicAMIParameterPrefix) {
+		return "", false
+	}
+	return r.config.ImageIDs[0], true
 }

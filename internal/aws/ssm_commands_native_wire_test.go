@@ -71,3 +71,15 @@ func TestNativeCommandUnknownNeverBecomesSuccess(t *testing.T) {
 		t.Fatal("pending exit invented")
 	}
 }
+func TestNativeCommandTimeoutDefaultsToAWSValueOnlyWhenOmitted(t *testing.T) {
+	got, err := decodeNativeCommand("SendCommand", []byte(`{"DocumentName":"AWS-RunShellScript","InstanceIds":["i-0123456789abcdef0"],"Parameters":{"commands":["true"]}}`))
+	if err != nil || got.Send.TimeoutSeconds != 3600 {
+		t.Fatalf("omitted TimeoutSeconds: %+v %v", got.Send, err)
+	}
+	for _, timeout := range []string{"null", "29", "3601", "0"} {
+		body := `{"DocumentName":"AWS-RunShellScript","InstanceIds":["i-0123456789abcdef0"],"Parameters":{"commands":["true"]},"TimeoutSeconds":` + timeout + `}`
+		if _, err := decodeNativeCommand("SendCommand", []byte(body)); err == nil {
+			t.Fatalf("accepted TimeoutSeconds %s", timeout)
+		}
+	}
+}

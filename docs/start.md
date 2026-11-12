@@ -149,7 +149,10 @@ The JSON contains `bundleManifest`, `bundleArchive`, `manifestSha256`,
 `lifetimeUntilMs`, and `clock` (`domain`, `validFromMs`, `validUntilMs`). Paths to
 files/directories are absolute. Layout entries are distinct manifest-listed
 relative paths. Image IDs are explicit aliases for that pinned bundle, not
-requests to download an image. Runtime lifetime is bounded to 24 hours from
+requests to download an image. Template SSM parameter types that reference the
+AWS public Amazon Linux AMI aliases (`/aws/service/ami-amazon-linux-latest/...`)
+resolve to the first image ID unless a local parameter of that name exists.
+Runtime lifetime is bounded to 24 hours from
 startup and defaults to 8 hours when `lifetimeUntilMs` is omitted; every VM in
 the runtime shares that window. Unknown or duplicate configuration fields are
 rejected.

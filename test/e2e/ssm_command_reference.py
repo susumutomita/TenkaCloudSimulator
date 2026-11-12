@@ -7,7 +7,7 @@ SCHEMAS = ['SSMSendCommandInput', 'SSMGetCommandInvocationInput', 'SSMListComman
 def project_ssm_commands(spec):
     post=spec['paths']['/']['post']
     delta={'description':TEXT,'mapping':post.pop('x-simulator-ssm-command-operation-schemas',None),'schemas':{n:spec['components']['schemas'].pop(n,None) for n in SCHEMAS}}
-    assert hashlib.sha256(json.dumps(delta,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()=='5cb58c303e786a0147ec94529ac16bea31062f625b97944f6e6c0c0d1dec6156','RunCommand contract changed'
+    assert hashlib.sha256(json.dumps(delta,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()=='6b3e64de5d96c1489d6c3351af41b5db8d85dbea59ef3493aea9ea7151e304f9','RunCommand contract changed'
     suffix='\n\n'+TEXT
     assert post['description'].endswith(suffix) and post['description'].count(TEXT)==1
     post['description']=post['description'][:-len(suffix)]
