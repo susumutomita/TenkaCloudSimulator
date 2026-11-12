@@ -6,6 +6,7 @@ import unittest
 
 from jsonschema import ValidationError
 from route53_openapi import validate_route53
+from autoscaling_plans_openapi import validate_autoscaling_plans
 from openapi_json10 import (DYNAMODB_OPERATIONS, MEDIA, request_schema,
                             validate_json10_examples, validate_json10_response, validator)
 
@@ -180,10 +181,57 @@ class SharedJSON10Schemas(unittest.TestCase):
             'GetSecretValue', 'UpdateSecretVersionStage', 'DeleteSecret',
             'KMSCreateAlias', 'KMSListAliases', 'KMSUpdateAlias', 'KMSDeleteAlias',
             'ListSecretVersionIds', 'UpdateSecret',
+            'AutoScalingCreateScalingPlan', 'AutoScalingDescribeScalingPlans',
+            'AutoScalingDescribeScalingPlanResources', 'AutoScalingUpdateScalingPlan',
+            'AutoScalingDeleteScalingPlan',
         })
-        self.assertEqual(len(media['examples']), 31)
+        self.assertEqual(len(media['examples']), 36)
         for example in media['examples'].values():
             shared.validate(example['value'])
+
+    def test_autoscaling_plan_templates_match_strict_target_schemas(self):
+        validate_autoscaling_plans(self.spec)
+        operation = self.spec['paths']['/']['post']
+        requests = operation['requestBody']['content']['application/x-amz-json-1.1']['examples']
+        responses = operation['responses']['200']['content']['application/x-amz-json-1.1']['examples']
+        mapping = operation['x-simulator-autoscaling-plans-operation-schemas']
+        self.assertEqual(set(mapping), {'AnyScaleScalingPlannerFrontendService.' + name for name in (
+            'CreateScalingPlan', 'DescribeScalingPlans', 'DescribeScalingPlanResources',
+            'UpdateScalingPlan', 'DeleteScalingPlan', 'GetScalingPlanResourceForecastData')})
+        self.assertIn('501', mapping['AnyScaleScalingPlannerFrontendService.GetScalingPlanResourceForecastData']['unsupported'])
+        for target, contract in mapping.items():
+            if 'request' not in contract:
+                continue
+            name = 'AutoScaling' + target.rsplit('.', 1)[1]
+            self.assertEqual(requests[name]['summary'], 'X-Amz-Target: ' + target)
+            validator(self.spec, {'$ref': contract['request']}).validate(requests[name]['value'])
+            validator(self.spec, {'$ref': contract['response']}).validate(responses[name]['value'])
+        create = requests['AutoScalingCreateScalingPlan']['value']
+        strict = validator(self.spec, {'$ref': mapping['AnyScaleScalingPlannerFrontendService.CreateScalingPlan']['request']})
+        instruction = create['ScalingInstructions'][0]
+        invalid = [{**create, 'Extra': 1}, {**create, 'ScalingPlanName': 'a/b'}, {**create, 'ScalingPlanName': 'a:b'},
+                   {**create, 'ScalingPlanName': 'a|b'}, {**create, 'ScalingInstructions': []},
+                   {**create, 'ApplicationSource': {}},
+                   {**create, 'ApplicationSource': {'TagFilters': [{'Key': 'a'}], 'CloudFormationStackARN': 'arn:aws:cloudformation:us-east-1:000000000000:stack/s/1'}}]
+        for field, value in (('ServiceNamespace', 'autoscaling'), ('ResourceId', 'table/t/index/i'),
+                             ('ScalableDimension', 'dynamodb:index:ReadCapacityUnits'), ('MinCapacity', 0),
+                             ('MaxCapacity', 40001), ('PredictiveScalingMode', 'ForecastOnly'),
+                             ('TargetTrackingConfigurations', [instruction['TargetTrackingConfigurations'][0]] * 2)):
+            invalid.append({**create, 'ScalingInstructions': [{**instruction, field: value}]})
+        tracking = instruction['TargetTrackingConfigurations'][0]
+        for field, value in (('EstimatedInstanceWarmup', 60), ('CustomizedScalingMetricSpecification', {}), ('ScaleInCooldown', -1)):
+            invalid.append({**create, 'ScalingInstructions': [{**instruction, 'TargetTrackingConfigurations': [{**tracking, field: value}]}]})
+        for value in invalid:
+            with self.subTest(value=value), self.assertRaises(ValidationError):
+                strict.validate(value)
+        describe = validator(self.spec, {'$ref': mapping['AnyScaleScalingPlannerFrontendService.DescribeScalingPlans']['request']})
+        for value in ({'ScalingPlanNames': ['a'], 'ApplicationSources': [create['ApplicationSource']]},
+                      {'ScalingPlanVersion': 1}, {'MaxResults': 51}, {'ScalingPlanNames': ['a'], 'ScalingPlanVersion': 2}):
+            with self.subTest(value=value), self.assertRaises(ValidationError):
+                describe.validate(value)
+        empty = validator(self.spec, {'$ref': mapping['AnyScaleScalingPlannerFrontendService.DeleteScalingPlan']['response']})
+        with self.assertRaises(ValidationError):
+            empty.validate({'ScalingPlanVersion': 1})
 
     def test_update_secret_template_uses_strict_metadata_only_contract(self):
         operation = self.spec['paths']['/']['post']

@@ -1,101 +1,278 @@
 {
   "version": 1,
-  "base_sha": "d27aa296a50e07784725306f1b6b60d4b5963a6d",
+  "base_sha": "bc7a71beb76ecd65cd4b44faa4dc8d23bcfe02bb",
   "changes": [
     {
-      "path": "Makefile",
-      "sha256": "6fbc0246292d9e39926f17e635736cf8c7d3bf0e5f1c0b1addd7da6a7acc9a45",
+      "path": "README.ja.md",
+      "sha256": "640178e901a1d7d5bdd0e06d7a512bca5e39fed4928979208280ce8d1b536316",
+      "disposition": "documentation",
+      "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "9b601c544ac752874ef4a761971b4a4bcf636b5f482e8adca9e8906c85e92809",
+      "disposition": "documentation",
+      "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
+      "models": []
+    },
+    {
+      "path": "docs/autoscaling-plans.md",
+      "sha256": "a7d16103cdfba1aa91600dc3e2b28df56fc189e8a83cdf48cae84108b51e6651",
+      "disposition": "documentation",
+      "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
+      "models": []
+    },
+    {
+      "path": "formal/AutoScalingPlanTargets.cfg",
+      "sha256": "24e0cbee679c3941f5b775c9c31b6104d1be3c1a20fe43a015a7a9585bece1c9",
       "disposition": "modeled",
-      "reason": "Preserves registered startup/token targets while adding test-only offline Smithy validation; existing runtime targets and gates unchanged.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
       "models": [
         {
-          "id": "StartupTokenVisibility",
+          "id": "AutoScalingPlanTargets",
           "properties": [
-            "TypeOK",
-            "FileIdentityFrozen",
-            "CreatedFilePrivate",
-            "HistoryVisibility",
-            "InvalidFileNeverEmits"
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
           ],
-          "limits": "Existing finite startup/token abstraction unchanged; new test recipe is validated by Python generator regression tests, not this finite model. No implementation refinement claim."
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
         }
       ]
     },
     {
-      "path": "docs/contributing/smithy-contracts.md",
-      "sha256": "2be47b82f57e0952539a7c45e1fd77a5d2642a6b97e6756f9e5286ad9d591a89",
-      "disposition": "documentation",
-      "reason": "Documents pinned model provenance, Apache attribution, commands and bounded test-only guarantees.",
-      "models": []
+      "path": "formal/AutoScalingPlanTargets.tla",
+      "sha256": "db1de5c41a9b52120e6aa803e48a15d64081a8d683664dc204065223ed22b3fa",
+      "disposition": "modeled",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
+      "models": [
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+        }
+      ]
     },
     {
-      "path": "internal/aws/sqs_smithy_contract_test.go",
-      "sha256": "434a9710db40c768d162f72b16a11f64832f6fe625181e9cbf79a0aeb42f0a33",
-      "disposition": "test-support",
-      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/testdata/smithy/LICENSE.txt",
-      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-      "disposition": "test-support",
-      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/testdata/smithy/NOTICE.txt",
-      "sha256": "a6e830174d62dafad3a718384772ea1f4c0e27989f050932dc442a5e3ddad080",
-      "disposition": "test-support",
-      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/testdata/smithy/source.json",
-      "sha256": "17da0c5e9c8d7bc75d798a91c83018fab751ae3e4958247d50edad7b81e53c96",
-      "disposition": "test-support",
-      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/testdata/smithy/sqs-contracts.json",
-      "sha256": "d53ce7aa621639f7687bbde2721438d2d5d3e5cf8dbf9628893311fcb7cfed05",
-      "disposition": "test-support",
-      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/testdata/smithy/sqs.json",
-      "sha256": "38eef06ce5642b8a052282fd19a3ab275e0046d375474e2ff022d3e33aaeab72",
-      "disposition": "test-support",
-      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "bbb95cb13278d6c8c872e4d2a03dc685a6ec77f1ad25137d1d48c142b33faf3e",
+      "path": "formal/models.json",
+      "sha256": "c26fa24f535fd4679b632fa2c120f2b5bce5ce693b2b83ca721b4ee3e051ccab",
       "disposition": "formal-infrastructure",
-      "reason": "Exact test fixture/generator classification with unknown-runtime negative controls; no model/property weakening.",
+      "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
       "models": []
     },
     {
-      "path": "scripts/smithy-contracts.py",
-      "sha256": "bc87ebd4d1d74fb55fb5aa73460f6d90e7cfd372004c8cc917603420fe46b0b0",
-      "disposition": "validation-tooling",
-      "reason": "Offline deterministic source-model projection/check; not imported or embedded by simulator runtime.",
-      "models": []
+      "path": "internal/aws/autoscalingplans_dispatch.go",
+      "sha256": "6b143c9ff39aef3d969e4c38d6122ae4a8cf9e106216cbf939cfef0afb111cbb",
+      "disposition": "modeled",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
+      "models": [
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+        }
+      ]
     },
     {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "3357f7cb7f26b0648809172abee24e8066d3f13cc2fc4a31cb8e67a1330b7cf5",
-      "disposition": "formal-infrastructure",
-      "reason": "Exact test fixture/generator classification with unknown-runtime negative controls; no model/property weakening.",
-      "models": []
+      "path": "internal/aws/autoscalingplans_http.go",
+      "sha256": "8ec7c9473cc4a66d858998ce866f32f9bb5ffed6e50b928263440a581984cd85",
+      "disposition": "modeled",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
+      "models": [
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+        }
+      ]
     },
     {
-      "path": "scripts/test-smithy-contracts.py",
-      "sha256": "ac97bbae4d73626589925bce33e8913894e7017fbf45344f97505e264498e724",
+      "path": "internal/aws/autoscalingplans_store.go",
+      "sha256": "593c63829d662aa2b84f28370338371a6a51a112f54852d5cea6bd915d5d4d7a",
+      "disposition": "modeled",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
+      "models": [
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/autoscalingplans_test.go",
+      "sha256": "d1c75d5e279bdde0e14a30ff7d9b804fc77556c396e2dd6a5700510459748778",
       "disposition": "test-support",
-      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "3922c352f8401d5beae7bccdbcab788117af7e8250a1e9184601823b9a65aca5",
+      "disposition": "modeled",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
+      "models": [
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "a1928ba5a13e75c80a55dfbca22b22af736cef9e504bb1ea80a0ec7127935525",
+      "disposition": "modeled",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
+      "models": [
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "51ebd2309bd55488342835731425b03abd785580189ded9967de91af67d339d6",
+      "disposition": "presentation",
+      "reason": "Static API reference: five Auto Scaling Plans templates, strict schemas, union bindings, operation mapping and guide tag on the existing shared root. Pinned and projected by test/e2e/autoscaling_plans_openapi.py; no runtime state.",
+      "models": []
+    },
+    {
+      "path": "internal/server/autoscalingplans_composition_test.go",
+      "sha256": "416154ee00fc656bc16090c9ededcdabde32d90b4c51335f36534af4f1957e14",
+      "disposition": "test-support",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "db9c3c737ec4afa6ba9a31a1ba43c1dc7b76650bd4f3f1a839283847ef809b52",
+      "disposition": "modeled",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
+      "models": [
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "191eea7a89a4b601e2001d804828df92388f14cbd573bf88f9b0e29855e23263",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "eca1a681461ded949fb622c487ca6c61eb06d26c61b915d231c9c778db7c7d81",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/autoscaling_plans.py",
+      "sha256": "4cb799ea05edc506c177c16a471e4c9018336abd444e884b61125b7edec0c0ea",
+      "disposition": "test-support",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/autoscaling_plans_openapi.py",
+      "sha256": "6b364de13d8494b62172fc23a31679b81e33772263279ce36db07c9e9257758b",
+      "disposition": "test-support",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "da7d62adb93af2f41990a41dc63460d44ecfc6776c16e7316ad5e87b7290ff89",
+      "disposition": "test-support",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/route53_openapi.py",
+      "sha256": "703b3fbc613cbd3130c8b54e59120444075102489d283c8d0270507e99fa9e0b",
+      "disposition": "test-support",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_autoscaling_plans_openapi.py",
+      "sha256": "9cd3e7afe9ee7e22311936135bf0e0e946d1d14dfbfc998bcb44b8ae8ac4def9",
+      "disposition": "test-support",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "52fb96e6bca567a25f0a7b67b58dae23ede0d857fa791e76e2c133bb7235cc0f",
+      "disposition": "test-support",
+      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
       "models": []
     }
   ]

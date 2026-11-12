@@ -82,6 +82,7 @@ console, CloudFormation adapter or Challenge integration.
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Networking:** [Elastic Load Balancing](docs/elb.md) (Lambda targets),
   [Route 53](docs/route53.md).
+- **Scaling:** [Auto Scaling plans for local DynamoDB tables](docs/autoscaling-plans.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
   [SSM value parameters](docs/cloudformation-ssm-parameters.md),
   [native IAM profiles](docs/cloudformation-iam-profiles.md),

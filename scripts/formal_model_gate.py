@@ -1186,6 +1186,12 @@ BASE_INVARIANTS['SQSBatchDeletion'] = {'DurableAck', 'ParentBeforeMutation', 'Pe
 REQUIRED_MUTANTS['SQSBatchDeletion'] = {'ReuseSelectedReceipt', 'LeakInternalFailure', 'IgnoreDeny', 'ReplyBeforeCommit', 'AcceptRetiredQueueReceipt', 'ReverseFailed', 'ReverseSuccessful', 'OmitSuccessfulArray', 'SkipShape', 'SkipFinalQueueCheck', 'SkipQueueURL', 'PurgePeerRows', 'SkipExpiryCleanup', 'UseBatchIAMAction', 'IgnorePersistedDuplicate', 'AcknowledgeUncommittedDeletion', 'DropResolvedFailure', 'ValidateFirstIDOnly', 'WrongSenderFault', 'IgnorePurgeFailure', 'ResolvePeerReceipts', 'DropResolvedSuccess', 'RejectAllInvalidHandles', 'SkipMaximumCount', 'OmitFailedArray', 'AcceptPreviousReceipt', 'DiscardCommittedExpiry', 'IgnoreCommitFailure', 'SkipMinimumCount', 'SkipFinalIDCheck', 'SkipQueueRecheck', 'SkipFinalReceiptCheck', 'PublishFailedTransaction', 'AuthorizePeerQueue', 'IgnoreAffectedCount', 'ExposeStagedCleanup', 'ValidateFirstReceiptOnly', 'SkipFinalExpiryCheck', 'SkipDistinctIDs'}
 REQUIRED_SOURCE_SCOPES['SQSBatchDeletion'] = {'internal/aws/sqs_store.go', 'internal/aws/sqs_batch_delete.go', 'internal/aws/sqs.go'}
 
+# Independent bounded Auto Scaling plan capacity-target contract.
+BASE_MODELS.add('AutoScalingPlanTargets')
+BASE_INVARIANTS['AutoScalingPlanTargets'] = {'TypeOK', 'BoundedWhileOwned', 'OnlyAuthorizedValid', 'NoOwnershipSteal', 'DeleteKeepsCapacity', 'RejectionFrame', 'OtherTeamUnchanged', 'PendingInvisible'}
+REQUIRED_MUTANTS['AutoScalingPlanTargets'] = {'OmitAuthorization', 'OmitValidation', 'SkipCapacityBound', 'ClampLowerOnly', 'StealOwnership', 'RevertOnDelete', 'WriteOtherTeam', 'ExposePendingState', 'ReuseTableGeneration', 'RejectWritesCapacity', 'RejectClaimsOwner'}
+REQUIRED_SOURCE_SCOPES['AutoScalingPlanTargets'] = {'internal/aws/autoscalingplans_store.go', 'internal/aws/autoscalingplans_http.go', 'internal/aws/autoscalingplans_dispatch.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/server/server.go'}
+
 class GateError(ValueError):
     pass
 

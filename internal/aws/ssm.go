@@ -37,6 +37,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveELB(w, r)
 		return
 	}
+	if isAutoScalingPlans(r) {
+		g.serveAutoScalingPlans(w, r)
+		return
+	}
 	if isRoute53(r) {
 		g.serveRoute53(w, r)
 		return

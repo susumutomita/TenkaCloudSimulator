@@ -196,6 +196,21 @@
                   },
                   {
                     "$ref": "#/components/schemas/SecretsUpdateSecretInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AutoScalingPlansCreateScalingPlanInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AutoScalingPlansDescribeScalingPlansInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AutoScalingPlansDescribeScalingPlanResourcesInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AutoScalingPlansUpdateScalingPlanInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AutoScalingPlansDeleteScalingPlanInput"
                   }
                 ],
                 "description": "SSM, KMS, CloudWatch Logs or Secrets Manager JSON 1.1 as selected by X-Amz-Target. The generic object alternative preserves SSM and Secrets Manager templates; named KMS and Logs schemas document their bounded shapes. Exact KMS per-target schemas are in x-simulator-kms-operation-schemas; body alone cannot discriminate routing."
@@ -484,6 +499,91 @@
                   "value": {
                     "SecretId": "training/metadata-update",
                     "Description": "Updated practice description"
+                  }
+                },
+                "AutoScalingCreateScalingPlan": {
+                  "summary": "X-Amz-Target: AnyScaleScalingPlannerFrontendService.CreateScalingPlan",
+                  "description": "Static template. Prerequisite: a PROVISIONED DynamoDB table autoscaling-practice in the same region (the DynamoDBCreateTable template uses PAY_PER_REQUEST; change BillingMode and add ProvisionedThroughput). Bounds the table read capacity to 5..20 in the same transaction. Set X-Amz-Target and Content-Type application/x-amz-json-1.1 manually; no real AWS is contacted.",
+                  "value": {
+                    "ScalingPlanName": "practice-plan",
+                    "ApplicationSource": {
+                      "TagFilters": [
+                        {
+                          "Key": "app",
+                          "Values": [
+                            "autoscaling-practice"
+                          ]
+                        }
+                      ]
+                    },
+                    "ScalingInstructions": [
+                      {
+                        "ServiceNamespace": "dynamodb",
+                        "ResourceId": "table/autoscaling-practice",
+                        "ScalableDimension": "dynamodb:table:ReadCapacityUnits",
+                        "MinCapacity": 5,
+                        "MaxCapacity": 20,
+                        "TargetTrackingConfigurations": [
+                          {
+                            "PredefinedScalingMetricSpecification": {
+                              "PredefinedScalingMetricType": "DynamoDBReadCapacityUtilization"
+                            },
+                            "TargetValue": 70
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "AutoScalingDescribeScalingPlans": {
+                  "summary": "X-Amz-Target: AnyScaleScalingPlannerFrontendService.DescribeScalingPlans",
+                  "description": "Static template. Lists saved plans in name order. Set X-Amz-Target and Content-Type application/x-amz-json-1.1 manually; no real AWS is contacted.",
+                  "value": {
+                    "ScalingPlanNames": [
+                      "practice-plan"
+                    ],
+                    "ScalingPlanVersion": 1
+                  }
+                },
+                "AutoScalingDescribeScalingPlanResources": {
+                  "summary": "X-Amz-Target: AnyScaleScalingPlannerFrontendService.DescribeScalingPlanResources",
+                  "description": "Static template. Status is derived from the current table generation. Set X-Amz-Target and Content-Type application/x-amz-json-1.1 manually; no real AWS is contacted.",
+                  "value": {
+                    "ScalingPlanName": "practice-plan",
+                    "ScalingPlanVersion": 1
+                  }
+                },
+                "AutoScalingUpdateScalingPlan": {
+                  "summary": "X-Amz-Target: AnyScaleScalingPlannerFrontendService.UpdateScalingPlan",
+                  "description": "Static template. Re-applies the new limits: read capacity becomes 8. Set X-Amz-Target and Content-Type application/x-amz-json-1.1 manually; no real AWS is contacted.",
+                  "value": {
+                    "ScalingPlanName": "practice-plan",
+                    "ScalingPlanVersion": 1,
+                    "ScalingInstructions": [
+                      {
+                        "ServiceNamespace": "dynamodb",
+                        "ResourceId": "table/autoscaling-practice",
+                        "ScalableDimension": "dynamodb:table:ReadCapacityUnits",
+                        "MinCapacity": 8,
+                        "MaxCapacity": 8,
+                        "TargetTrackingConfigurations": [
+                          {
+                            "PredefinedScalingMetricSpecification": {
+                              "PredefinedScalingMetricType": "DynamoDBReadCapacityUtilization"
+                            },
+                            "TargetValue": 70
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "AutoScalingDeleteScalingPlan": {
+                  "summary": "X-Amz-Target: AnyScaleScalingPlannerFrontendService.DeleteScalingPlan",
+                  "description": "Static template. Removes the plan; table capacity stays as last applied. Set X-Amz-Target and Content-Type application/x-amz-json-1.1 manually; no real AWS is contacted.",
+                  "value": {
+                    "ScalingPlanName": "practice-plan",
+                    "ScalingPlanVersion": 1
                   }
                 }
               }
@@ -1231,6 +1331,18 @@
                     },
                     {
                       "$ref": "#/components/schemas/SecretsUpdateSecretOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AutoScalingPlansCreateScalingPlanOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AutoScalingPlansDescribeScalingPlansOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AutoScalingPlansDescribeScalingPlanResourcesOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AutoScalingPlansEmptyOutput"
                     }
                   ],
                   "description": "Shared JSON1.1 response envelope selected by native target; the generic object preserves other services. Exact ListSecretVersionIds output is documented by the supplementary operation-schema mapping, not a global discriminator."
@@ -1285,6 +1397,90 @@
                       "ARN": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/metadata-update-AbCd12",
                       "Name": "training/metadata-update"
                     }
+                  },
+                  "AutoScalingCreateScalingPlan": {
+                    "summary": "CreateScalingPlan local response",
+                    "value": {
+                      "ScalingPlanVersion": 1
+                    }
+                  },
+                  "AutoScalingDescribeScalingPlans": {
+                    "summary": "DescribeScalingPlans local response",
+                    "value": {
+                      "ScalingPlans": [
+                        {
+                          "ScalingPlanName": "practice-plan",
+                          "ScalingPlanVersion": 1,
+                          "ApplicationSource": {
+                            "TagFilters": [
+                              {
+                                "Key": "app",
+                                "Values": [
+                                  "autoscaling-practice"
+                                ]
+                              }
+                            ]
+                          },
+                          "ScalingInstructions": [
+                            {
+                              "ServiceNamespace": "dynamodb",
+                              "ResourceId": "table/autoscaling-practice",
+                              "ScalableDimension": "dynamodb:table:ReadCapacityUnits",
+                              "MinCapacity": 5,
+                              "MaxCapacity": 20,
+                              "TargetTrackingConfigurations": [
+                                {
+                                  "PredefinedScalingMetricSpecification": {
+                                    "PredefinedScalingMetricType": "DynamoDBReadCapacityUtilization"
+                                  },
+                                  "TargetValue": 70
+                                }
+                              ]
+                            }
+                          ],
+                          "StatusCode": "ActiveWithProblems",
+                          "StatusMessage": "One or more scaling instructions are not fully applied. Describe the scaling plan resources for details.",
+                          "StatusStartTime": 1762862400.123,
+                          "CreationTime": 1762862400.123
+                        }
+                      ]
+                    }
+                  },
+                  "AutoScalingDescribeScalingPlanResources": {
+                    "summary": "DescribeScalingPlanResources local response",
+                    "value": {
+                      "ScalingPlanResources": [
+                        {
+                          "ScalingPlanName": "practice-plan",
+                          "ScalingPlanVersion": 1,
+                          "ServiceNamespace": "dynamodb",
+                          "ResourceId": "table/autoscaling-practice",
+                          "ScalableDimension": "dynamodb:table:ReadCapacityUnits",
+                          "ScalingPolicies": [
+                            {
+                              "PolicyName": "ScalingPlan-practice-plan-DynamoDBReadCapacityUtilization",
+                              "PolicyType": "TargetTrackingScaling",
+                              "TargetTrackingConfiguration": {
+                                "PredefinedScalingMetricSpecification": {
+                                  "PredefinedScalingMetricType": "DynamoDBReadCapacityUtilization"
+                                },
+                                "TargetValue": 70
+                              }
+                            }
+                          ],
+                          "ScalingStatusCode": "PartiallyActive",
+                          "ScalingStatusMessage": "Capacity limits were applied to the local DynamoDB table. Target tracking policies are stored but not evaluated because the simulator has no CloudWatch metrics."
+                        }
+                      ]
+                    }
+                  },
+                  "AutoScalingUpdateScalingPlan": {
+                    "summary": "UpdateScalingPlan local response",
+                    "value": {}
+                  },
+                  "AutoScalingDeleteScalingPlan": {
+                    "summary": "DeleteScalingPlan local response",
+                    "value": {}
                   }
                 }
               }
@@ -1621,6 +1817,96 @@
               ]
             },
             "note": "Supplemental per-target schema; the shared body union does not select a target. Partial semantic failures remain HTTP200."
+          }
+        },
+        "x-simulator-autoscaling-plans-operation-schemas": {
+          "AnyScaleScalingPlannerFrontendService.CreateScalingPlan": {
+            "request": "#/components/schemas/AutoScalingPlansCreateScalingPlanInput",
+            "response": "#/components/schemas/AutoScalingPlansCreateScalingPlanOutput",
+            "permission": "autoscaling-plans:CreateScalingPlan on *; dynamodb:DescribeTable and dynamodb:UpdateTable on every target table ARN",
+            "errors": {
+              "400": [
+                "ValidationException",
+                "LimitExceededException"
+              ],
+              "403": [
+                "AccessDeniedException"
+              ],
+              "500": [
+                "InternalServiceException"
+              ]
+            }
+          },
+          "AnyScaleScalingPlannerFrontendService.DescribeScalingPlans": {
+            "request": "#/components/schemas/AutoScalingPlansDescribeScalingPlansInput",
+            "response": "#/components/schemas/AutoScalingPlansDescribeScalingPlansOutput",
+            "permission": "autoscaling-plans:DescribeScalingPlans on *",
+            "errors": {
+              "400": [
+                "ValidationException",
+                "InvalidNextTokenException"
+              ],
+              "403": [
+                "AccessDeniedException"
+              ],
+              "500": [
+                "InternalServiceException"
+              ]
+            }
+          },
+          "AnyScaleScalingPlannerFrontendService.DescribeScalingPlanResources": {
+            "request": "#/components/schemas/AutoScalingPlansDescribeScalingPlanResourcesInput",
+            "response": "#/components/schemas/AutoScalingPlansDescribeScalingPlanResourcesOutput",
+            "permission": "autoscaling-plans:DescribeScalingPlanResources on *",
+            "errors": {
+              "400": [
+                "ValidationException",
+                "InvalidNextTokenException"
+              ],
+              "403": [
+                "AccessDeniedException"
+              ],
+              "500": [
+                "InternalServiceException"
+              ]
+            }
+          },
+          "AnyScaleScalingPlannerFrontendService.UpdateScalingPlan": {
+            "request": "#/components/schemas/AutoScalingPlansUpdateScalingPlanInput",
+            "response": "#/components/schemas/AutoScalingPlansEmptyOutput",
+            "permission": "autoscaling-plans:UpdateScalingPlan on *; dynamodb:DescribeTable and dynamodb:UpdateTable on every target table in supplied instructions",
+            "errors": {
+              "400": [
+                "ValidationException",
+                "ObjectNotFoundException"
+              ],
+              "403": [
+                "AccessDeniedException"
+              ],
+              "500": [
+                "InternalServiceException"
+              ]
+            }
+          },
+          "AnyScaleScalingPlannerFrontendService.DeleteScalingPlan": {
+            "request": "#/components/schemas/AutoScalingPlansDeleteScalingPlanInput",
+            "response": "#/components/schemas/AutoScalingPlansEmptyOutput",
+            "permission": "autoscaling-plans:DeleteScalingPlan on *",
+            "errors": {
+              "400": [
+                "ValidationException",
+                "ObjectNotFoundException"
+              ],
+              "403": [
+                "AccessDeniedException"
+              ],
+              "500": [
+                "InternalServiceException"
+              ]
+            }
+          },
+          "AnyScaleScalingPlannerFrontendService.GetScalingPlanResourceForecastData": {
+            "unsupported": "Returns 501 UnknownOperationException: forecasts need EC2 Auto Scaling groups and CloudWatch load history, which the simulator does not provide."
           }
         }
       }
@@ -17462,6 +17748,483 @@
           }
         },
         "description": "Updated physical identity only. No VersionId, version stages, secret value or KMS metadata."
+      },
+      "AutoScalingPlansName": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[ -.0-9;-{}~]+$",
+        "description": "Printable ASCII without vertical bars, colons or forward slashes."
+      },
+      "AutoScalingPlansVersion": {
+        "type": "integer",
+        "const": 1,
+        "description": "The only valid scaling plan version is 1."
+      },
+      "AutoScalingPlansTagFilter": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Key"
+        ],
+        "properties": {
+          "Key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "Values": {
+            "type": "array",
+            "maxItems": 20,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          }
+        }
+      },
+      "AutoScalingPlansApplicationSource": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "maxProperties": 1,
+        "properties": {
+          "CloudFormationStackARN": {
+            "type": "string",
+            "pattern": "^arn:aws:cloudformation:[a-z0-9-]+:000000000000:stack/[A-Za-z][A-Za-z0-9-]{0,127}/[A-Za-z0-9-]{1,128}$"
+          },
+          "TagFilters": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/AutoScalingPlansTagFilter"
+            }
+          }
+        },
+        "description": "Exactly one of a same-region stack ARN or tag filters. One plan per source; the simulator does not discover resources from stacks or tags, and tag keys cannot repeat."
+      },
+      "AutoScalingPlansTargetTracking": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "PredefinedScalingMetricSpecification",
+          "TargetValue"
+        ],
+        "properties": {
+          "PredefinedScalingMetricSpecification": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "PredefinedScalingMetricType"
+            ],
+            "properties": {
+              "PredefinedScalingMetricType": {
+                "type": "string",
+                "enum": [
+                  "DynamoDBReadCapacityUtilization",
+                  "DynamoDBWriteCapacityUtilization"
+                ]
+              }
+            }
+          },
+          "TargetValue": {
+            "type": "number",
+            "minimum": -2.348542582773833e+108,
+            "maximum": 2.348542582773833e+108
+          },
+          "DisableScaleIn": {
+            "type": "boolean"
+          },
+          "ScaleOutCooldown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "ScaleInCooldown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          }
+        },
+        "description": "Stored and returned as a target tracking policy; never evaluated because the simulator has no CloudWatch metrics. The metric must match the dimension (read or write). Customized metrics, ResourceLabel and EstimatedInstanceWarmup are rejected."
+      },
+      "AutoScalingPlansScalingInstruction": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ServiceNamespace",
+          "ResourceId",
+          "ScalableDimension",
+          "MinCapacity",
+          "MaxCapacity",
+          "TargetTrackingConfigurations"
+        ],
+        "properties": {
+          "ServiceNamespace": {
+            "type": "string",
+            "const": "dynamodb"
+          },
+          "ResourceId": {
+            "type": "string",
+            "pattern": "^table/[a-zA-Z0-9_.-]{3,255}$"
+          },
+          "ScalableDimension": {
+            "type": "string",
+            "enum": [
+              "dynamodb:table:ReadCapacityUnits",
+              "dynamodb:table:WriteCapacityUnits"
+            ]
+          },
+          "MinCapacity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 40000
+          },
+          "MaxCapacity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 40000
+          },
+          "TargetTrackingConfigurations": {
+            "type": "array",
+            "maxItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/AutoScalingPlansTargetTracking"
+            }
+          },
+          "ScalingPolicyUpdateBehavior": {
+            "type": "string",
+            "enum": [
+              "KeepExternalPolicies",
+              "ReplaceExternalPolicies"
+            ]
+          },
+          "DisableDynamicScaling": {
+            "type": "boolean"
+          }
+        },
+        "description": "Only an existing PROVISIONED local DynamoDB table in the request region. MaxCapacity must be at least MinCapacity. At least one target tracking configuration is required unless DisableDynamicScaling is true; each metric is unique, so one per dimension. Create/update bounds the table capacity to MinCapacity..MaxCapacity atomically. Other namespaces, index targets and predictive-scaling fields are rejected."
+      },
+      "AutoScalingPlansCreateScalingPlanInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ScalingPlanName",
+          "ApplicationSource",
+          "ScalingInstructions"
+        ],
+        "properties": {
+          "ScalingPlanName": {
+            "$ref": "#/components/schemas/AutoScalingPlansName"
+          },
+          "ApplicationSource": {
+            "$ref": "#/components/schemas/AutoScalingPlansApplicationSource"
+          },
+          "ScalingInstructions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/AutoScalingPlansScalingInstruction"
+            }
+          }
+        },
+        "description": "Requires autoscaling-plans:CreateScalingPlan on * and caller dynamodb:DescribeTable plus dynamodb:UpdateTable on every target table ARN. Each table dimension appears at most once across all plans."
+      },
+      "AutoScalingPlansCreateScalingPlanOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ScalingPlanVersion"
+        ],
+        "properties": {
+          "ScalingPlanVersion": {
+            "$ref": "#/components/schemas/AutoScalingPlansVersion"
+          }
+        }
+      },
+      "AutoScalingPlansUpdateScalingPlanInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ScalingPlanName",
+          "ScalingPlanVersion"
+        ],
+        "properties": {
+          "ScalingPlanName": {
+            "$ref": "#/components/schemas/AutoScalingPlansName"
+          },
+          "ScalingPlanVersion": {
+            "$ref": "#/components/schemas/AutoScalingPlansVersion"
+          },
+          "ApplicationSource": {
+            "$ref": "#/components/schemas/AutoScalingPlansApplicationSource"
+          },
+          "ScalingInstructions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/AutoScalingPlansScalingInstruction"
+            }
+          }
+        },
+        "description": "Supplied parts replace the stored ones. Replaced instructions re-apply capacity limits; removed targets keep their capacity."
+      },
+      "AutoScalingPlansDeleteScalingPlanInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ScalingPlanName",
+          "ScalingPlanVersion"
+        ],
+        "properties": {
+          "ScalingPlanName": {
+            "$ref": "#/components/schemas/AutoScalingPlansName"
+          },
+          "ScalingPlanVersion": {
+            "$ref": "#/components/schemas/AutoScalingPlansVersion"
+          }
+        },
+        "description": "Deletes the plan and its instructions; table capacity is not reverted."
+      },
+      "AutoScalingPlansEmptyOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "maxProperties": 0
+      },
+      "AutoScalingPlansDescribeScalingPlansInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "ScalingPlanNames": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/AutoScalingPlansName"
+            }
+          },
+          "ScalingPlanVersion": {
+            "$ref": "#/components/schemas/AutoScalingPlansVersion"
+          },
+          "ApplicationSources": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/AutoScalingPlansApplicationSource"
+            }
+          },
+          "MaxResults": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "NextToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "not": {
+          "required": [
+            "ScalingPlanNames",
+            "ApplicationSources"
+          ]
+        },
+        "dependentRequired": {
+          "ScalingPlanVersion": [
+            "ScalingPlanNames"
+          ]
+        },
+        "description": "Names and sources are mutually exclusive. Results are in name order; NextToken is a live position bound to region and filter."
+      },
+      "AutoScalingPlansScalingPlan": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ScalingPlanName",
+          "ScalingPlanVersion",
+          "ApplicationSource",
+          "ScalingInstructions",
+          "StatusCode",
+          "StatusStartTime",
+          "CreationTime"
+        ],
+        "properties": {
+          "ScalingPlanName": {
+            "$ref": "#/components/schemas/AutoScalingPlansName"
+          },
+          "ScalingPlanVersion": {
+            "$ref": "#/components/schemas/AutoScalingPlansVersion"
+          },
+          "ApplicationSource": {
+            "$ref": "#/components/schemas/AutoScalingPlansApplicationSource"
+          },
+          "ScalingInstructions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AutoScalingPlansScalingInstruction"
+            }
+          },
+          "StatusCode": {
+            "type": "string",
+            "enum": [
+              "Active",
+              "ActiveWithProblems"
+            ]
+          },
+          "StatusMessage": {
+            "type": "string"
+          },
+          "StatusStartTime": {
+            "type": "number"
+          },
+          "CreationTime": {
+            "type": "number"
+          }
+        },
+        "description": "Active only when every resource is Active. StatusStartTime is the last successful create or update."
+      },
+      "AutoScalingPlansDescribeScalingPlansOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ScalingPlans"
+        ],
+        "properties": {
+          "ScalingPlans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AutoScalingPlansScalingPlan"
+            }
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        }
+      },
+      "AutoScalingPlansDescribeScalingPlanResourcesInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ScalingPlanName",
+          "ScalingPlanVersion"
+        ],
+        "properties": {
+          "ScalingPlanName": {
+            "$ref": "#/components/schemas/AutoScalingPlansName"
+          },
+          "ScalingPlanVersion": {
+            "$ref": "#/components/schemas/AutoScalingPlansVersion"
+          },
+          "MaxResults": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "NextToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "description": "An unknown plan returns ValidationException. NextToken is bound to the plan generation."
+      },
+      "AutoScalingPlansScalingPolicy": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "PolicyName",
+          "PolicyType",
+          "TargetTrackingConfiguration"
+        ],
+        "properties": {
+          "PolicyName": {
+            "type": "string"
+          },
+          "PolicyType": {
+            "type": "string",
+            "const": "TargetTrackingScaling"
+          },
+          "TargetTrackingConfiguration": {
+            "$ref": "#/components/schemas/AutoScalingPlansTargetTracking"
+          }
+        }
+      },
+      "AutoScalingPlansScalingPlanResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ScalingPlanName",
+          "ScalingPlanVersion",
+          "ServiceNamespace",
+          "ResourceId",
+          "ScalableDimension",
+          "ScalingStatusCode"
+        ],
+        "properties": {
+          "ScalingPlanName": {
+            "$ref": "#/components/schemas/AutoScalingPlansName"
+          },
+          "ScalingPlanVersion": {
+            "$ref": "#/components/schemas/AutoScalingPlansVersion"
+          },
+          "ServiceNamespace": {
+            "type": "string",
+            "const": "dynamodb"
+          },
+          "ResourceId": {
+            "type": "string"
+          },
+          "ScalableDimension": {
+            "type": "string",
+            "enum": [
+              "dynamodb:table:ReadCapacityUnits",
+              "dynamodb:table:WriteCapacityUnits"
+            ]
+          },
+          "ScalingPolicies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AutoScalingPlansScalingPolicy"
+            }
+          },
+          "ScalingStatusCode": {
+            "type": "string",
+            "enum": [
+              "Active",
+              "PartiallyActive",
+              "Inactive"
+            ]
+          },
+          "ScalingStatusMessage": {
+            "type": "string"
+          }
+        },
+        "description": "PartiallyActive: capacity limits applied, target tracking stored but not evaluated. Active: dynamic scaling disabled. Inactive: the table generation no longer exists."
+      },
+      "AutoScalingPlansDescribeScalingPlanResourcesOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ScalingPlanResources"
+        ],
+        "properties": {
+          "ScalingPlanResources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AutoScalingPlansScalingPlanResource"
+            }
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        }
       }
     },
     "responses": {
@@ -17582,6 +18345,10 @@
     {
       "name": "Route53 public hosted zones",
       "description": "Bounded public zones and saved-state answers only. No external DNS, private VPC zones, aliases, routing policies, console or CloudFormation."
+    },
+    {
+      "name": "AWS Auto Scaling plans",
+      "description": "Use JSON 1.1 with `X-Amz-Target: AnyScaleScalingPlannerFrontendService.<operation>`. Five `AutoScaling...` templates create, describe, update and delete scaling plans whose only targets are local PROVISIONED DynamoDB tables. Create/update bounds table capacity to the instruction limits; target tracking is stored, not evaluated (no CloudWatch metrics). No predictive scaling, forecasts, resource discovery from stacks or tags, console or CloudFormation.\n\nThese are static documentation instructions, not saved state. This service uses the existing shared AWS root POST (`awsRegionalOperation`), shown under **Shared AWS JSON/Query endpoint**. Choose the matching Content-Type, routing header and named body example manually; selecting an example does not automatically change headers. Use Test Request \u2192 Send for a real local response. No real cloud is contacted."
     }
   ],
   "x-tagGroups": [
@@ -17600,7 +18367,8 @@
         "Secrets Manager",
         "DynamoDB tables and items",
         "KMS local symmetric keys",
-        "Route53 public hosted zones"
+        "Route53 public hosted zones",
+        "AWS Auto Scaling plans"
       ]
     },
     {

@@ -11216,6 +11216,154 @@
      "expect_invariant": "NoPersistence"
     }
    ]
+  },
+  {
+   "id": "AutoScalingPlanTargets",
+   "model": "formal/AutoScalingPlanTargets.tla",
+   "config": "formal/AutoScalingPlanTargets.cfg",
+   "bounds": "Two teams with one PROVISIONED table dimension each, two plans, capacities 0..2, at most two create/update/reject/delete steps and one table recreation per team.",
+   "properties": [
+    "TypeOK",
+    "BoundedWhileOwned",
+    "OnlyAuthorizedValid",
+    "NoOwnershipSteal",
+    "DeleteKeepsCapacity",
+    "RejectionFrame",
+    "OtherTeamUnchanged",
+    "PendingInvisible"
+   ],
+   "limits": "Capacity-bound/ownership/authority/rollback/team-frame abstraction only; no Go/SQL/JSON parsing, IAM matching, pagination, status derivation text, quotas, crash recovery, target tracking evaluation or liveness proof. Native Go, composed-server and SDK tests provide separate implementation evidence.",
+   "source_scope": [
+    "internal/aws/autoscalingplans_store.go",
+    "internal/aws/autoscalingplans_http.go",
+    "internal/aws/autoscalingplans_dispatch.go",
+    "internal/aws/s3.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "OmitAuthorization",
+     "edits": [
+      {
+       "old": "/\\ r \\in pending /\\ r.authorized /\\ r.valid",
+       "new": "/\\ r \\in pending /\\ r.valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyAuthorizedValid"
+    },
+    {
+     "id": "OmitValidation",
+     "edits": [
+      {
+       "old": "/\\ r \\in pending /\\ r.authorized /\\ r.valid",
+       "new": "/\\ r \\in pending /\\ r.authorized",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyAuthorizedValid"
+    },
+    {
+     "id": "SkipCapacityBound",
+     "edits": [
+      {
+       "old": "/\\ capacity' = [capacity EXCEPT ![r.team] = Clamp(@, r.low, r.high)]",
+       "new": "/\\ capacity' = capacity",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BoundedWhileOwned"
+    },
+    {
+     "id": "ClampLowerOnly",
+     "edits": [
+      {
+       "old": "Clamp(c, lo, hi) == IF c < lo THEN lo ELSE IF c > hi THEN hi ELSE c",
+       "new": "Clamp(c, lo, hi) == IF c < lo THEN lo ELSE c",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BoundedWhileOwned"
+    },
+    {
+     "id": "StealOwnership",
+     "edits": [
+      {
+       "old": "    /\\ owner[r.team] \\in {NoPlan, r.plan}\n",
+       "new": "",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOwnershipSteal"
+    },
+    {
+     "id": "RevertOnDelete",
+     "edits": [
+      {
+       "old": "    /\\ capacity' = capacity\n    /\\ owner' = [owner EXCEPT ![t] = NoPlan]",
+       "new": "    /\\ capacity' = [capacity EXCEPT ![t] = 0]\n    /\\ owner' = [owner EXCEPT ![t] = NoPlan]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeleteKeepsCapacity"
+    },
+    {
+     "id": "WriteOtherTeam",
+     "edits": [
+      {
+       "old": "/\\ capacity' = [capacity EXCEPT ![r.team] = Clamp(@, r.low, r.high)]",
+       "new": "/\\ capacity' = [u \\in Teams |-> Clamp(capacity[u], r.low, r.high)]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OtherTeamUnchanged"
+    },
+    {
+     "id": "ExposePendingState",
+     "edits": [
+      {
+       "old": "    /\\ UNCHANGED <<capacity, generation, owner, bounds, receipts, steps>>\nCommit(r) ==",
+       "new": "    /\\ capacity' = [capacity EXCEPT ![t] = Clamp(@, lo, hi)]\n    /\\ UNCHANGED <<generation, owner, bounds, receipts, steps>>\nCommit(r) ==",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PendingInvisible"
+    },
+    {
+     "id": "ReuseTableGeneration",
+     "edits": [
+      {
+       "old": "/\\ generation' = [generation EXCEPT ![t] = @ + 1]",
+       "new": "/\\ generation' = generation",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BoundedWhileOwned"
+    },
+    {
+     "id": "RejectWritesCapacity",
+     "edits": [
+      {
+       "old": "/\\ capacity' = capacity /\\ owner' = owner /\\ bounds' = bounds",
+       "new": "/\\ capacity' = [capacity EXCEPT ![r.team] = Clamp(@, r.low, r.high)] /\\ owner' = owner /\\ bounds' = bounds",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RejectionFrame"
+    },
+    {
+     "id": "RejectClaimsOwner",
+     "edits": [
+      {
+       "old": "/\\ capacity' = capacity /\\ owner' = owner /\\ bounds' = bounds",
+       "new": "/\\ capacity' = capacity /\\ owner' = [owner EXCEPT ![r.team] = r.plan] /\\ bounds' = bounds",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RejectionFrame"
+    }
+   ]
   }
  ]
 }
