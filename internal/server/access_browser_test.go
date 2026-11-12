@@ -84,10 +84,7 @@ func TestBrowserSessionLogoutAndCredentialSeparation(t *testing.T) {
 		if logout.Code != 204 || logout.Header().Get("Cache-Control") != "no-store" {
 			t.Fatal("logout did not succeed without caching")
 		}
-		cleared := logout.Result().Cookies()
-		if len(cleared) != 1 || cleared[0].Value != "" || cleared[0].MaxAge != -1 || !cleared[0].HttpOnly || cleared[0].SameSite != http.SameSiteStrictMode || !cleared[0].Expires.Before(time.Now()) {
-			t.Fatal("logout did not expire the browser cookie")
-		}
+		assertLogoutCookies(t, a, logout, false)
 		if got := browserRequest(a, "GET", "/", "", "", cookie, nil); got.Code != 401 {
 			t.Fatal("revoked browser cookie replay accepted")
 		}
@@ -266,7 +263,28 @@ func TestBrowserSecureCookieLogout(t *testing.T) {
 	r.Header.Set("Origin", "https://127.0.0.1:4566")
 	w = httptest.NewRecorder()
 	a.ServeHTTP(w, r)
-	if w.Code != 204 || !w.Result().Cookies()[0].Secure {
+	if w.Code != 204 {
 		t.Fatal("TLS logout cookie attributes changed")
+	}
+	assertLogoutCookies(t, a, w, true)
+}
+
+// Logout expires both independent credential cookies; order is not authority.
+func assertLogoutCookies(t *testing.T, a *Access, response *httptest.ResponseRecorder, secure bool) {
+	t.Helper()
+	expected := map[string]bool{a.cookie: false, a.cookie + "_terminal": false}
+	cookies := response.Result().Cookies()
+	if len(cookies) != len(expected) {
+		t.Fatalf("logout must expire exactly both credential cookies, got %d", len(cookies))
+	}
+	for _, cookie := range cookies {
+		seen, known := expected[cookie.Name]
+		if !known || seen {
+			t.Fatalf("unexpected or duplicate logout cookie %q", cookie.Name)
+		}
+		expected[cookie.Name] = true
+		if cookie.Value != "" || cookie.MaxAge != -1 || !cookie.HttpOnly || cookie.SameSite != http.SameSiteStrictMode || cookie.Path != "/" || cookie.Domain != "" || cookie.Secure != secure || cookie.Expires.IsZero() || !cookie.Expires.Before(time.Now()) {
+			t.Fatalf("logout cookie %q did not retain required expiry and security attributes", cookie.Name)
+		}
 	}
 }

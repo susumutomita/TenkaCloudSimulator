@@ -15,8 +15,11 @@ machine-discovered semantic coverage. A newly added implementation file is not
 covered merely because an existing model passes: its exact path must have an
 appropriate reviewed scope mapping and property argument.
 
-The combined registry requires **57 baselines/474 required named mutation
-controls (531 executions)**. All 55 public-base entries are unchanged. STS adds
+The following counts and commit receipts are historical, not the current inventory
+or acceptance evidence. Read `formal/models.json` for the current exact set.
+
+A historical combined registry required **57 baselines/474 required named mutation
+controls (531 executions)**; it preserved its 55 public-base entries. STS adds
 one baseline/eight issue-use guard controls, and [CFN event history](formal-cfn-event-history.md)
 adds one baseline/sixteen transaction, retention and scoped-read controls. Main's 52/415 inventory is preserved: the earlier
 50/398 plus CatalogResourceLifecycle (twelve controls) and CatalogConsoleEpoch
@@ -115,6 +118,28 @@ models, bounds, the 60-second default and all required executions stay unchanged
 No Poteto configuration/toolchain was found in the tracked baseline instructions
 or files. No Poteto, proof-assistant, implementation-refinement or complete
 simulator proof is claimed.
+
+## Battle integration correspondence
+
+These additive models retain the existing attachment, durable-command, browser,
+and console-handoff models. The registry pins each exact source path, finite
+configuration, invariant and sensitivity control; registration is not execution.
+
+| Model | Bounded source obligation | Important limit |
+| --- | --- | --- |
+| `CanonicalVMComposition` | Intent persistence, prepared-record readback, captured paused QMP ownership, attachment/activation, private QGA readiness, publication fencing, cleanup and saved provider association | Separate finite launch/network/creator/configuration/registry scenarios do not prove arbitrary cross-scenario interference or real VM/network behavior. |
+| `InstanceMetadataTokens` | Local token binding, clipped expiry, supported read fields and closed admission | One symbolic token slot is not a proof of randomness, the full quota, HTTP parsing or isolation of a real socket. |
+| `IAMConditionEvaluation` | Strict bounded condition admission, trusted context, literal variable substitution and deny precedence | Fifteen input witnesses do not establish exhaustive IAM or parser correctness; provider context provenance remains a concrete obligation. |
+| `NativeCommandIssuer` | Durable command reservation before dispatch, retained-worker/lease fencing, no replay after restart, one policy snapshot and frozen pagination scope | Local joins do not establish physical guest cleanup. SQL, QGA and protocol correctness require independent tests. |
+| `ParticipantSessionLifecycle` | Current credential/target authority, one-use channels, post-read revocation, same-driver resume and exact exit plus cleanup evidence | A prepared image or packaged overlay is not a live guest handshake. PTY, process and service-manager behavior remain unverified by the model. |
+| `OwnedClockQualification` | Owned bootstrap/incarnation binding, a finite original-deadline witness (3→2), current-owner reads and invalidation on stop | Fractional offsets, rounding and overflow require arithmetic tests. Actual kernel clock/namespace ownership, FFI and cryptography require separate qualification. |
+| `TerminalClientEpoch` | Disposed/pending-operation fences, current component and channel callbacks, one-open token use, preserved remote outcome | Bounded two-component client lifecycle only. JSX projection tests and bundle hashes do not prove React, browser, WebSocket or guest behavior. |
+
+The original Battle template is unchanged. Signed native bootstrap and command
+contract tests exercise real provider handlers with explicitly injected local
+transport fixtures; they do not stand in for VM boot, guest repair, browser use,
+or a completed Battle. Required exact-HEAD aggregate checks still apply after
+any later source or integration change.
 
 ## Exact-change applicability record
 
@@ -269,3 +294,22 @@ ghost capture provenance, the separately checked lifecycle/epoch assumptions and
 concrete native/browser obligations.
 
 The physical-row model is limited to the selected SSM/S3 SQLite rows after all cleanup writes. It is distinct from the final stack/claim model, which assumes physical handler success. Canonical CFG formatting preserves its five properties and nine fault modes; both combined 429-case and fresh scoped execution passed at `c298972`; later revisions require their own immutable checks.
+
+
+### Bounded worker allocation for DynamoDB admission
+
+The runner uses two TLC workers for `DynamoDBAdmission` and every one of its
+required mutation controls; all other families retain one worker. Families
+still run serially. This changes execution parallelism, not the explored state
+space: the same model/configuration, invariants, exact expected counterexamples,
+60-second per-case deadline and failure behavior remain mandatory. No retry,
+state/depth cutoff, reduced domain, or timeout fallback is introduced.
+
+On the measured environment, the unchanged model's single-worker baseline
+completed near 58 seconds or timed out at 60 seconds. Two repeated two-worker
+baselines completed in approximately 34 and 32 seconds, each exploring 7,788,018
+generated states and 16,730 distinct states to depth 7 with an empty queue. All
+22 existing controls still produced their exact required invariant violations.
+These focused measurements are not whole-registry or physical Battle acceptance.
+Parallel scheduling can change counterexample order; an unexpected invariant,
+resource failure or timeout must still fail the gate, never loosen its oracle.

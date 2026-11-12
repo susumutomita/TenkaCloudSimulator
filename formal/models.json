@@ -10734,6 +10734,6482 @@
    ]
   },
   {
+   "id": "NICSessionBookkeeping",
+   "model": "formal/NICSessionBookkeeping.tla",
+   "config": "formal/NICSessionBookkeeping.cfg",
+   "bounds": "Eight explicitly reachable bookkeeping seeds, three transition suffixes, two lifetime tuples/two active sessions, one callback/one queued frame per session, three cumulative frames/four byte units.",
+   "properties": [
+    "TypeOK",
+    "TupleTombstones",
+    "ImmutableTuples",
+    "LiveAccounting",
+    "DrainRequiresJoins",
+    "SingleDelivery",
+    "RevocationRetainsDebt",
+    "NoClosedAdmission",
+    "BudgetMonotone",
+    "ChargedAttempts",
+    "TupleDirectionGuard",
+    "IncomingIsolation",
+    "ClosedQueuesEmpty",
+    "LateSuccessRejected",
+    "RewrapPreservesState",
+    "EffectNotCleanupProof"
+   ],
+   "limits": "Logical TCPProbeSessions bookkeeping only. Seed prefixes are documented; no unbounded safety/liveness, Go concurrency refinement, full limits arithmetic, timer/suspension, packet parsing/checksums/ARP/encoding, gVisor TCP sequence semantics, exact context hook scheduling, physical ownership/atomic revocation/delivery fencing, OS NIC cleanup or process restart proof. Parsed tuple/direction validity is an abstract input predicate. An admitted callback may already have effects after revocation; effectPossible remains sticky and does not certify cleanup. Persistent transport queues/pumps are separate obligations and not bound here.",
+   "source_scope": [
+    "internal/workload/guestnet/tcp_sessions.go"
+   ],
+   "mutants": [
+    {
+     "id": "ReuseFirstTuple",
+     "edits": [
+      {
+       "old": "!.sessions[k] = Live(k, service)",
+       "new": "!.sessions[k] = Live(1, service)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TupleTombstones"
+    },
+    {
+     "id": "ForgetLifetimeAllocation",
+     "edits": [
+      {
+       "old": "Rewrap == /\\ d' = d /\\ Record",
+       "new": "Rewrap == /\\ d' = [d EXCEPT !.allocated = 0] /\\ Record",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TupleTombstones"
+    },
+    {
+     "id": "ReleaseWithoutWatcher",
+     "edits": [
+      {
+       "old": "/\\ d.sessions[k].closed /\\ d.sessions[k].watched /\\ ~d.sessions[k].drained",
+       "new": "/\\ d.sessions[k].closed /\\ ~d.sessions[k].drained",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DrainRequiresJoins"
+    },
+    {
+     "id": "ReleaseWithPendingCallback",
+     "edits": [
+      {
+       "old": "/\\ ~d.sessions[k].reading /\\ ~d.sessions[k].writing\n  /\\ d'",
+       "new": "/\\ ~d.sessions[k].reading\n  /\\ d'",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DrainRequiresJoins"
+    },
+    {
+     "id": "ReleaseWithPendingRead",
+     "edits": [
+      {
+       "old": "/\\ ~d.sessions[k].reading /\\ ~d.sessions[k].writing\n  /\\ d'",
+       "new": "/\\ ~d.sessions[k].writing\n  /\\ d'",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DrainRequiresJoins"
+    },
+    {
+     "id": "ReleaseLiveOnRevoke",
+     "edits": [
+      {
+       "old": "d' = [d EXCEPT !.sessions[k] = CloseSession(@)]",
+       "new": "d' = [d EXCEPT !.sessions[k] = CloseSession(@), !.live = @ - 1]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LiveAccounting"
+    },
+    {
+     "id": "NICDrainWithoutChildren",
+     "edits": [
+      {
+       "old": "/\\ d.closed /\\ d.watched /\\ ~d.drained /\\ d.live = 0",
+       "new": "/\\ d.closed /\\ d.watched /\\ ~d.drained",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DrainRequiresJoins"
+    },
+    {
+     "id": "ResetSharedBudget",
+     "edits": [
+      {
+       "old": "Rewrap == /\\ d' = d /\\ Record",
+       "new": "Rewrap == /\\ d' = [d EXCEPT !.frames = 0, !.bytes = 0] /\\ Record",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BudgetMonotone"
+    },
+    {
+     "id": "SkipFrameCharge",
+     "edits": [
+      {
+       "old": "Charge(x, size) == [x EXCEPT !.frames = @ + 1, !.bytes = @ + size]",
+       "new": "Charge(x, size) == [x EXCEPT !.frames = @, !.bytes = @ + size]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ChargedAttempts"
+    },
+    {
+     "id": "SkipByteCharge",
+     "edits": [
+      {
+       "old": "Charge(x, size) == [x EXCEPT !.frames = @ + 1, !.bytes = @ + size]",
+       "new": "Charge(x, size) == [x EXCEPT !.frames = @ + 1, !.bytes = @]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ChargedAttempts"
+    },
+    {
+     "id": "AcceptWrongIncomingTuple",
+     "edits": [
+      {
+       "old": "valid == k \\in IDs /\\ d.sessions[k].used /\\ ok",
+       "new": "valid == k \\in IDs /\\ d.sessions[k].used",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TupleDirectionGuard"
+    },
+    {
+     "id": "CrossSessionQueue",
+     "edits": [
+      {
+       "old": "[charged EXCEPT !.sessions[k].queued = @ + 1]",
+       "new": "[charged EXCEPT !.sessions[3-k].queued = @ + 1]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IncomingIsolation"
+    },
+    {
+     "id": "KeepRevokedQueue",
+     "edits": [
+      {
+       "old": "CloseSession(s) == [s EXCEPT !.closed = TRUE, !.queued = 0]",
+       "new": "CloseSession(s) == [s EXCEPT !.closed = TRUE]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ClosedQueuesEmpty"
+    },
+    {
+     "id": "PublishLateWriteSuccess",
+     "edits": [
+      {
+       "old": "publish == callbackOK /\\ Admitted(d, k)",
+       "new": "publish == callbackOK",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LateSuccessRejected"
+    },
+    {
+     "id": "RewrapDropsPendingQueue",
+     "edits": [
+      {
+       "old": "Rewrap == /\\ d' = d /\\ Record",
+       "new": "Rewrap == /\\ d' = [d EXCEPT !.sessions[1].queued = 0] /\\ Record",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RewrapPreservesState"
+    },
+    {
+     "id": "ErasePossibleEffect",
+     "edits": [
+      {
+       "old": "CloseSession(s) == [s EXCEPT !.closed = TRUE, !.queued = 0]",
+       "new": "CloseSession(s) == [s EXCEPT !.closed = TRUE, !.queued = 0, !.effectPossible = FALSE]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EffectNotCleanupProof"
+    },
+    {
+     "id": "AdmitSecondDelivery",
+     "edits": [
+      {
+       "old": "ELSE IF d.sending # 0 THEN charged",
+       "new": "ELSE IF FALSE THEN charged",
+       "count": 1
+      },
+      {
+       "old": "accepted == Chargeable(d, size) /\\ ok /\\ d.sending = 0",
+       "new": "accepted == Chargeable(d, size) /\\ ok",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SingleDelivery"
+    },
+    {
+     "id": "MutateAllocatedService",
+     "edits": [
+      {
+       "old": "d' = [d EXCEPT !.sessions[k] = CloseSession(@)]",
+       "new": "d' = [d EXCEPT !.sessions[k] = CloseSession(@), !.sessions[k].service = IF @ = \"web\" THEN \"health\" ELSE \"web\"]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ImmutableTuples"
+    },
+    {
+     "id": "ReadAdmittedAfterClose",
+     "edits": [
+      {
+       "old": "/\\ Admitted(d, k) /\\ ~d.sessions[k].reading",
+       "new": "/\\ d.sessions[k].used /\\ ~d.sessions[k].drained /\\ ~d.sessions[k].reading",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoClosedAdmission"
+    },
+    {
+     "id": "RevokeErasesReadDebt",
+     "edits": [
+      {
+       "old": "d' = [d EXCEPT !.sessions[k] = CloseSession(@)]",
+       "new": "d' = [d EXCEPT !.sessions[k] = CloseSession(@), !.sessions[k].reading = FALSE]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RevocationRetainsDebt"
+    }
+   ]
+  },
+  {
+   "id": "ProbeOperationLifecycle",
+   "model": "formal/ProbeOperationLifecycle.tla",
+   "config": "formal/ProbeOperationLifecycle.cfg",
+   "bounds": "Three nonzero keys plus invalid zero; two opaque scope-owner labels and two service targets; two symbolic backend deadlines; per-NIC retained-handle bound2 and independent worker bound1;21 replay-verified reachable seeds with all three-transition suffixes; separate per-key monotonic Host expiry. Dispatch counts one observer/Dial invocation, not packets/SYN retransmissions.",
+   "properties": [
+    "TypeOK",
+    "ScopeImmutable",
+    "RetainedExact",
+    "RetainedBound",
+    "ValidatedAdmission",
+    "ScopedIdentity",
+    "ImmutableBinding",
+    "WorkerBound",
+    "WorkerDebt",
+    "AtMostOnce",
+    "RouteBeforeDispatch",
+    "RouteRetained",
+    "ResultSticky",
+    "SettlementEvidence",
+    "TimelySuccess",
+    "WireUnknown",
+    "DuplicateIsolation",
+    "LookupIsolation",
+    "WireIdentity",
+    "WireRoute",
+    "WireResult",
+    "WireSettlement",
+    "PoisonSticky",
+    "PoisonExclusion",
+    "NoLateHostAcceptance"
+   ],
+   "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation.",
+   "source_scope": [
+    "internal/workload/guesttcp/http_probe_operation.go",
+    "internal/workload/guesttcp/http_probe_operation_test.go",
+    "internal/workload/guesttcp/http_probe_scope.go",
+    "internal/workload/guesttcp/http_probe_scope_test.go",
+    "internal/workload/guesttcp/http_probe_wire.go",
+    "internal/workload/guesttcp/http_probe_wire_test.go",
+    "internal/workload/guesttcp/http_probe_observation.go",
+    "internal/workload/guesttcp/http_probe_observation_test.go",
+    "internal/workload/guesttcp/http_probe_context_test.go",
+    "docs/private-http-probe-operations.md"
+   ],
+   "mutants": [
+    {
+     "id": "RebindScope",
+     "edits": [
+      {
+       "old": "ELSE /\\ scope' = scope /\\ UNCHANGED originalScope",
+       "new": "ELSE /\\ scope' = owner /\\ UNCHANGED originalScope",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ScopeImmutable"
+    },
+    {
+     "id": "EvictSettledHandle",
+     "edits": [
+      {
+       "old": "ops' = [ops EXCEPT ![k].settled = TRUE]",
+       "new": "ops' = [ops EXCEPT ![k].settled = TRUE, ![k].present = FALSE]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RetainedExact"
+    },
+    {
+     "id": "OmitHandleBudget",
+     "edits": [
+      {
+       "old": "Cardinality(issued) < HandleCap",
+       "new": "Cardinality(issued) < Cardinality(Keys)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RetainedBound"
+    },
+    {
+     "id": "RetainInvalidContext",
+     "edits": [
+      {
+       "old": " /\\ valid\n",
+       "new": " /\\ TRUE\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValidatedAdmission"
+    },
+    {
+     "id": "AdmitZeroKey",
+     "edits": [
+      {
+       "old": " /\\ k \\in Keys\n /\\ valid",
+       "new": " /\\ TRUE\n /\\ valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValidatedAdmission"
+    },
+    {
+     "id": "UnsealedScopedStart",
+     "edits": [
+      {
+       "old": " /\\ mode = \"raw\" \\/ scope # 0",
+       "new": " /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ScopedIdentity"
+    },
+    {
+     "id": "RenewDuplicateDeadline",
+     "edits": [
+      {
+       "old": " /\\ ops' = ops\n",
+       "new": " /\\ ops' = [ops EXCEPT ![k].bound.deadline = deadline]\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ImmutableBinding"
+    },
+    {
+     "id": "AdoptForeignDuplicate",
+     "edits": [
+      {
+       "old": "        accepted == matched",
+       "new": "        accepted == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DuplicateIsolation"
+    },
+    {
+     "id": "RepeatDuplicateDispatch",
+     "edits": [
+      {
+       "old": " /\\ ops' = ops\n",
+       "new": " /\\ ops' = IF ops[k].sends = 1 THEN [ops EXCEPT ![k].sends = 2] ELSE ops\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AtMostOnce"
+    },
+    {
+     "id": "OmitWorkerBudget",
+     "edits": [
+      {
+       "old": "Cardinality(slots) < WorkerCap",
+       "new": "Cardinality(slots) < HandleCap",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "WorkerBound"
+    },
+    {
+     "id": "ReleaseTimeoutWorker",
+     "edits": [
+      {
+       "old": " /\\ slots' = slots\n",
+       "new": " /\\ slots' = slots \\ {k}\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "WorkerDebt"
+    },
+    {
+     "id": "DispatchBeforeRoute",
+     "edits": [
+      {
+       "old": " /\\ ops[k].route # 0\n",
+       "new": " /\\ TRUE\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RouteBeforeDispatch"
+    },
+    {
+     "id": "ForgetFailedRoute",
+     "edits": [
+      {
+       "old": " /\\ ops' = [ops EXCEPT ![k].ready = TRUE, ![k].result = \"failure\"]\n /\\ firstResult' = [firstResult EXCEPT ![k] = \"failure\"]\n /\\ slots' = slots",
+       "new": " /\\ ops' = [ops EXCEPT ![k].ready = TRUE, ![k].result = \"failure\", ![k].route = 0]\n /\\ firstResult' = [firstResult EXCEPT ![k] = \"failure\"]\n /\\ slots' = slots",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RouteRetained"
+    },
+    {
+     "id": "OverwriteReadyResult",
+     "edits": [
+      {
+       "old": " /\\ ops[k].done /\\ ~ops[k].ready",
+       "new": " /\\ ops[k].done",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResultSticky"
+    },
+    {
+     "id": "SettleRunningWorker",
+     "edits": [
+      {
+       "old": " /\\ ~ops[k].started \\/ ops[k].done\n",
+       "new": " /\\ TRUE\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SettlementEvidence"
+    },
+    {
+     "id": "PublishLateSuccess",
+     "edits": [
+      {
+       "old": "LET r == IF ops[k].outcome = \"success\" /\\ ~revoked /\\ now < ops[k].bound.deadline",
+       "new": "LET r == IF ops[k].outcome = \"success\" /\\ ~revoked",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TimelySuccess"
+    },
+    {
+     "id": "UnknownMeansSettled",
+     "edits": [
+      {
+       "old": "       ELSE BlankWire\n",
+       "new": "       ELSE [BlankWire EXCEPT !.settled = TRUE]\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "WireUnknown"
+    },
+    {
+     "id": "IgnoreLookupOwnership",
+     "edits": [
+      {
+       "old": "LET known == ops[k].present /\\ ops[k].bound.mode = mode /\\\n                  (mode = \"raw\" \\/ ops[k].bound.owner = owner)",
+       "new": "LET known == ops[k].present",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LookupIsolation"
+    },
+    {
+     "id": "WireWrongIdentity",
+     "edits": [
+      {
+       "old": "[known |-> TRUE, key |-> k, bound |-> v.bound, route |-> v.route,\n        ready",
+       "new": "[known |-> TRUE, key |-> k, bound |-> [v.bound EXCEPT !.target = 3 - @], route |-> v.route,\n        ready",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "WireIdentity"
+    },
+    {
+     "id": "WireDropsAllocatedRoute",
+     "edits": [
+      {
+       "old": "[known |-> TRUE, key |-> k, bound |-> v.bound, route |-> v.route,\n        ready",
+       "new": "[known |-> TRUE, key |-> k, bound |-> v.bound, route |-> 0,\n        ready",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "WireRoute"
+    },
+    {
+     "id": "WireRehabilitatesFailure",
+     "edits": [
+      {
+       "old": "ready |-> v.ready, result |-> v.result, settled |-> v.settled,\n        ended",
+       "new": "ready |-> v.ready, result |-> IF v.ready THEN \"success\" ELSE \"none\", settled |-> v.settled,\n        ended",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "WireResult"
+    },
+    {
+     "id": "WireReadyMeansSettled",
+     "edits": [
+      {
+       "old": "ready |-> v.ready, result |-> v.result, settled |-> v.settled,\n        ended",
+       "new": "ready |-> v.ready, result |-> v.result, settled |-> v.ready,\n        ended",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "WireSettlement"
+    },
+    {
+     "id": "ClearPoisonOnValidRead",
+     "edits": [
+      {
+       "old": " /\\ poisoned' = poisoned\n",
+       "new": " /\\ poisoned' = IF ops[k].present /\\ ops[k].bound.mode = mode /\\ (mode = \"raw\" \\/ ops[k].bound.owner = owner) THEN poisoned \\ {k} ELSE poisoned\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PoisonSticky"
+    },
+    {
+     "id": "ScorePoisonedResult",
+     "edits": [
+      {
+       "old": " /\\ wire.key \\notin poisoned\n",
+       "new": " /\\ TRUE\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PoisonExclusion"
+    },
+    {
+     "id": "AcceptAfterHostDeadline",
+     "edits": [
+      {
+       "old": " /\\ wire.key \\notin hostExpired\n",
+       "new": " /\\ TRUE\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoLateHostAcceptance"
+    }
+   ]
+  },
+  {
+   "id": "TCPRouteClassification",
+   "model": "formal/TCPRouteClassification.tla",
+   "config": "formal/TCPRouteClassification.cfg",
+   "properties": [
+    "TypeOK",
+    "ConstructorGuard",
+    "CopiedConfiguration",
+    "NoAmbiguousRoutes",
+    "FailClosed",
+    "NonzeroPorts",
+    "ExactDirectionalTuple",
+    "SoleIndex",
+    "CompleteSelection"
+   ],
+   "source_scope": [
+    "internal/workload/guestnet/tcp_routes.go"
+   ],
+   "bounds": "Exhaustive acyclic construction and one classification over 43 route lists (0..2 entries from six route profiles), 729 independent six-field packet tuples (0..2), three directions and two parser outcomes. No seeded starts.",
+   "limits": "Finite classifier abstraction only: two-route bound instead of eight; representative configurations, symbolic IPv4/MAC validity. Parser success/nonzero ports is supplied contract, not byte parsing or checksum/options proof. Does not prove Go slice ownership/race behavior, IP address classification, physical authority, TCP state, frame encoding, timers, delivery or arbitrary-length behavior.",
+   "mutants": [
+    {
+     "id": "AcceptOverlappingConstructor",
+     "edits": [
+      {
+       "old": "ready' = ValidConfig(raw)",
+       "new": "ready' = (Len(raw) > 0)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ConstructorGuard"
+    },
+    {
+     "id": "SkipSyntax",
+     "edits": [
+      {
+       "old": "dir \\in {\"from\",\"to\"} /\\ parsed /\\ p.sp",
+       "new": "dir \\in {\"from\",\"to\"} /\\ p.sp",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailClosed"
+    },
+    {
+     "id": "SkipDirection",
+     "edits": [
+      {
+       "old": "ready /\\ dir \\in {\"from\",\"to\"} /\\ parsed",
+       "new": "ready /\\ parsed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailClosed"
+    },
+    {
+     "id": "ZeroPeerPort",
+     "edits": [
+      {
+       "old": "/\\ parsed /\\ p.sp # 0 /\\ p.dp # 0",
+       "new": "/\\ parsed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NonzeroPorts"
+    },
+    {
+     "id": "ReverseDirection",
+     "edits": [
+      {
+       "old": "IF dir = \"to\"\n THEN",
+       "new": "IF dir = \"from\"\n THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDirectionalTuple"
+    },
+    {
+     "id": "Ignore_lip",
+     "edits": [
+      {
+       "old": "<<r.lip,r.pip,r.lm,r.pm,r.lp>> = <<n.lip,n.pip,n.lm,n.pm,n.lp>>",
+       "new": "<<n.lip,r.pip,r.lm,r.pm,r.lp>> = <<n.lip,n.pip,n.lm,n.pm,n.lp>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDirectionalTuple"
+    },
+    {
+     "id": "Ignore_pip",
+     "edits": [
+      {
+       "old": "<<r.lip,r.pip,r.lm,r.pm,r.lp>> = <<n.lip,n.pip,n.lm,n.pm,n.lp>>",
+       "new": "<<r.lip,n.pip,r.lm,r.pm,r.lp>> = <<n.lip,n.pip,n.lm,n.pm,n.lp>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDirectionalTuple"
+    },
+    {
+     "id": "Ignore_lm",
+     "edits": [
+      {
+       "old": "<<r.lip,r.pip,r.lm,r.pm,r.lp>> = <<n.lip,n.pip,n.lm,n.pm,n.lp>>",
+       "new": "<<r.lip,r.pip,n.lm,r.pm,r.lp>> = <<n.lip,n.pip,n.lm,n.pm,n.lp>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDirectionalTuple"
+    },
+    {
+     "id": "Ignore_pm",
+     "edits": [
+      {
+       "old": "<<r.lip,r.pip,r.lm,r.pm,r.lp>> = <<n.lip,n.pip,n.lm,n.pm,n.lp>>",
+       "new": "<<r.lip,r.pip,r.lm,n.pm,r.lp>> = <<n.lip,n.pip,n.lm,n.pm,n.lp>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDirectionalTuple"
+    },
+    {
+     "id": "Ignore_lp",
+     "edits": [
+      {
+       "old": "<<r.lip,r.pip,r.lm,r.pm,r.lp>> = <<n.lip,n.pip,n.lm,n.pm,n.lp>>",
+       "new": "<<r.lip,r.pip,r.lm,r.pm,n.lp>> = <<n.lip,n.pip,n.lm,n.pm,n.lp>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDirectionalTuple"
+    },
+    {
+     "id": "IgnoreFixedPeerPort",
+     "edits": [
+      {
+       "old": "(r.any \\/ r.pp = n.pp)",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDirectionalTuple"
+    },
+    {
+     "id": "LoseWildcard",
+     "edits": [
+      {
+       "old": "(r.any \\/ r.pp = n.pp)",
+       "new": "(r.pp = n.pp)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CompleteSelection"
+    },
+    {
+     "id": "AlwaysFirstIndex",
+     "edits": [
+      {
+       "old": "(CHOOSE i \\in candidates: \\A j \\in candidates: i <= j)-1",
+       "new": "0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDirectionalTuple"
+    },
+    {
+     "id": "DiscardCopiedRouteList",
+     "edits": [
+      {
+       "old": "UNCHANGED <<raw,routes,ready>>",
+       "new": "UNCHANGED <<raw,ready>> /\\ routes' = <<>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CopiedConfiguration"
+    }
+   ]
+  },
+  {
+   "id": "FrameCodecLifecycle",
+   "model": "formal/FrameCodecLifecycle.tla",
+   "config": "formal/FrameCodecLifecycle.cfg",
+   "bounds": "Exhaustive finite graph from one empty decoder and encoder, two calls per codec, Boolean full/valid/error outcomes and serialized header/body/write phases; no symmetry or seeded suffix.",
+   "properties": [
+    "TypeOK",
+    "DecoderPoison",
+    "EncoderPoison",
+    "DecoderNoRetry",
+    "EncoderNoRetry",
+    "HeaderBeforeBody",
+    "DecoderSuccess",
+    "DecoderSerialization",
+    "EncoderSerialization",
+    "BoundedReads",
+    "OneWrite",
+    "LocalRejectNoIO",
+    "EncoderSuccess",
+    "UncertainSticky",
+    "NoBodyForInvalidHeader"
+   ],
+   "limits": "Logical codec sequencing only. Size validity and exact I/O completion are abstract Booleans, not byte encoding, uint32/arithmetic, reader/writer API refinement, mutex fairness, Go memory model, cancellation/interruption, blocked I/O liveness, physical ownership or actual delivery proof. Uncertain writes may have effects; later poison cannot undo them.",
+   "source_scope": [
+    "internal/workload/guestnet/frame.go"
+   ],
+   "mutants": [
+    {
+     "id": "IgnoreInvalidLength",
+     "edits": [
+      {
+       "old": "bad == ~full \\/ ~valid",
+       "new": "bad == ~full",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderBeforeBody"
+    },
+    {
+     "id": "IgnorePartialHeader",
+     "edits": [
+      {
+       "old": "bad == ~full \\/ ~valid",
+       "new": "bad == ~valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderBeforeBody"
+    },
+    {
+     "id": "IgnoreWriteError",
+     "edits": [
+      {
+       "old": "ok == exact /\\ noerror",
+       "new": "ok == exact",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EncoderSuccess"
+    },
+    {
+     "id": "IgnoreShortWrite",
+     "edits": [
+      {
+       "old": "ok == exact /\\ noerror",
+       "new": "ok == noerror",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EncoderSuccess"
+    },
+    {
+     "id": "DecoderForgetsPoison",
+     "edits": [
+      {
+       "old": "!.phase=IF bad THEN \"idle\" ELSE \"header\",\n       !.failed=bad",
+       "new": "!.phase=IF bad THEN \"idle\" ELSE \"header\",\n       !.failed=FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DecoderPoison"
+    },
+    {
+     "id": "EncoderForgetsPoison",
+     "edits": [
+      {
+       "old": "!.failed=~ok, !.fault=@ \\/ ~ok",
+       "new": "!.failed=FALSE, !.fault=@ \\/ ~ok",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EncoderPoison"
+    },
+    {
+     "id": "DecoderRetriesPoison",
+     "edits": [
+      {
+       "old": "!.calls=@+1, !.header=FALSE",
+       "new": "!.calls=@+1, !.headers=@ + (IF d.failed THEN 1 ELSE 0), !.header=FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DecoderNoRetry"
+    },
+    {
+     "id": "EncoderRetriesPoison",
+     "edits": [
+      {
+       "old": "!.calls=@+1, !.valid=valid",
+       "new": "!.calls=@+1, !.writes=@ + (IF e.failed THEN 1 ELSE 0), !.valid=valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EncoderNoRetry"
+    },
+    {
+     "id": "HeaderFailureEntersBody",
+     "edits": [
+      {
+       "old": "!.phase=IF bad THEN \"idle\" ELSE \"body\"",
+       "new": "!.phase=\"body\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderBeforeBody"
+    },
+    {
+     "id": "PartialBodySuccess",
+     "edits": [
+      {
+       "old": "!.result=IF full THEN \"success\" ELSE \"error\"",
+       "new": "!.result=\"success\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DecoderSuccess"
+    },
+    {
+     "id": "ConcurrentDecoderStart",
+     "edits": [
+      {
+       "old": "d.phase=\"idle\" /\\ d.calls<2",
+       "new": "d.calls<2",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DecoderSerialization"
+    },
+    {
+     "id": "ConcurrentEncoderStart",
+     "edits": [
+      {
+       "old": "e.phase=\"idle\" /\\ e.calls<2",
+       "new": "e.calls<2",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EncoderSerialization"
+    },
+    {
+     "id": "DuplicateHeaderRead",
+     "edits": [
+      {
+       "old": "!.headers=@+1",
+       "new": "!.headers=@+2",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BoundedReads"
+    },
+    {
+     "id": "DuplicateWrite",
+     "edits": [
+      {
+       "old": "!.writes=@+1",
+       "new": "!.writes=@+2",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OneWrite"
+    },
+    {
+     "id": "InvalidLocalWrites",
+     "edits": [
+      {
+       "old": "!.calls=@+1, !.valid=valid",
+       "new": "!.calls=@+1, !.writes=@ + (IF ~bad /\\ ~valid THEN 1 ELSE 0), !.valid=valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LocalRejectNoIO"
+    },
+    {
+     "id": "InvalidLocalPoison",
+     "edits": [
+      {
+       "old": "!.failed=bad, !.fault=@ \\/ bad,\n       !.result=IF bad THEN \"error\" ELSE IF ~valid",
+       "new": "!.failed=bad \\/ ~valid, !.fault=@ \\/ bad,\n       !.result=IF bad THEN \"error\" ELSE IF ~valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LocalRejectNoIO"
+    },
+    {
+     "id": "FalseWriteSuccess",
+     "edits": [
+      {
+       "old": "!.result=IF ok THEN \"success\" ELSE \"error\"",
+       "new": "!.result=\"success\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EncoderSuccess"
+    },
+    {
+     "id": "ForgetPartialEffect",
+     "edits": [
+      {
+       "old": "!.calls=@+1, !.valid=valid",
+       "new": "!.calls=@+1, !.uncertain=FALSE, !.valid=valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UncertainSticky"
+    }
+   ]
+  },
+  {
+   "id": "PersistentTransportLifecycle",
+   "model": "formal/PersistentTransportLifecycle.tla",
+   "config": "formal/PersistentTransportLifecycle.cfg",
+   "properties": [
+    "TypeOK",
+    "NoInvalidAdmission",
+    "QueueSealed",
+    "QueueOwnership",
+    "SelectedDebt",
+    "ProbePumpDebt",
+    "ReadJoin",
+    "ChildJoin",
+    "CompletionJoin",
+    "CapacityRelease",
+    "NoLateSuccess",
+    "EffectRetained"
+   ],
+   "mutants": [
+    {
+     "id": "ExitWithSelectedDebt",
+     "expect_invariant": "SelectedDebt",
+     "edits": [
+      {
+       "old": "WriterExit == /\\ closed /\\ writer /\\ selected=0",
+       "new": "WriterExit == /\\ closed /\\ writer",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "LoseQueuedAcknowledgement",
+     "expect_invariant": "QueueOwnership",
+     "edits": [
+      {
+       "old": "stage'=[i \\in Requests |-> IF stage[i]=1 THEN 4 ELSE stage[i]]",
+       "new": "stage'=stage",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "EnqueueAfterClosure",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": "Enqueue(i) == /\\ ~closed /\\ ~queueClosed",
+       "new": "Enqueue(i) == /\\ ~queueClosed",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AdmitAfterRevocation",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": "Enter == /\\ selected # 0 /\\ stage[selected]=2 /\\ ~closed /\\ ~(selected=1 /\\ expired)",
+       "new": "Enter == /\\ selected # 0 /\\ stage[selected]=2",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForgetPendingSend",
+     "expect_invariant": "ProbePumpDebt",
+     "edits": [
+      {
+       "old": "JoinProbePumps == /\\ pclosing /\\ stage[1] \\in {0,4} /\\ ~readCall",
+       "new": "JoinProbePumps == /\\ pclosing /\\ ~readCall",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForgetPendingRead",
+     "expect_invariant": "ReadJoin",
+     "edits": [
+      {
+       "old": "JoinProbePumps == /\\ pclosing /\\ stage[1] \\in {0,4} /\\ ~readCall",
+       "new": "JoinProbePumps == /\\ pclosing /\\ stage[1] \\in {0,4}",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForgetPendingDial",
+     "expect_invariant": "ChildJoin",
+     "edits": [
+      {
+       "old": "JoinChild == /\\ pclosing /\\ ~sendPump /\\ ~receivePump /\\ ~dial /\\ ~childDone",
+       "new": "JoinChild == /\\ pclosing /\\ ~sendPump /\\ ~receivePump /\\ ~childDone",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "FinishBeforeWriter",
+     "expect_invariant": "CompletionJoin",
+     "edits": [
+      {
+       "old": "Finish == /\\ closed /\\ ~writer /\\ ~reader /\\ ~servicePump /\\ childDone",
+       "new": "Finish == /\\ closed /\\ ~reader /\\ ~servicePump /\\ childDone",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "FinishBeforeOwnedClose",
+     "expect_invariant": "CompletionJoin",
+     "edits": [
+      {
+       "old": " /\\ streamClose # 0 /\\ serviceClose # 0 /\\ ~done",
+       "new": " /\\ ~done",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReleaseUncertainResources",
+     "expect_invariant": "CapacityRelease",
+     "edits": [
+      {
+       "old": "slot'=~(streamClose=1 /\\ serviceClose=1)",
+       "new": "slot'=FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PublishLateWriteSuccess",
+     "expect_invariant": "NoLateSuccess",
+     "edits": [
+      {
+       "old": "LET accepted == ~closed /\\ ~(selected=1 /\\ expired) IN",
+       "new": "LET accepted == TRUE IN",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "EraseUncertainWriteEffect",
+     "expect_invariant": "EffectRetained",
+     "edits": [
+      {
+       "old": "Return == /\\ selected # 0 /\\ stage[selected]=3",
+       "new": "Return == /\\ selected # 0 /\\ stage[selected]=3\n /\\ effects'=effects \\ {selected}",
+       "count": 1
+      },
+      {
+       "old": "childDone,streamClose,serviceClose,done,slot,effects,enteredEver,badAdmission>>",
+       "new": "childDone,streamClose,serviceClose,done,slot,enteredEver,badAdmission>>",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ExitWithoutQueueSeal",
+     "expect_invariant": "QueueSealed",
+     "edits": [
+      {
+       "old": "writer'=FALSE /\\ queueClosed'=TRUE",
+       "new": "writer'=FALSE /\\ queueClosed'=FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "SelectAfterProbeClose",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": "reject==i=1 /\\ pclosing",
+       "new": "reject==FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "EnqueueAfterSendJoined",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": "(IF i=1 THEN sendPump ELSE TRUE)",
+       "new": "TRUE",
+       "count": 1
+      }
+     ]
+    }
+   ],
+   "source_scope": [
+    "internal/workload/guesttcp/transport_persistent.go",
+    "internal/workload/guesttcp/transport_persistent_test.go",
+    "internal/workload/guesttcp/transport.go"
+   ],
+   "bounds": "Exhaustive from one admitted transport/child; two one-shot producers, queue capacity one, one selected write, one read and Dial call; independent stream/service close outcomes. No seeds, symmetry or depth cutoff.",
+   "limits": "Bookkeeping/atomic orchestration abstraction only, not constructor validation, parser, TCP stack, arbitrary callbacks, physical fencing, engine correctness, full source refinement or liveness. Only persistent mode of shared Transport modeled; ordinary exchange and ARP behavior remain separate obligations. Production capacities and repeated traffic unproved. Close completion is not physical settlement; uncertain Close retains its slot. No dependency behavior or provenance exemption."
+  },
+  {
+   "id": "PacketAdmission",
+   "model": "formal/PacketAdmission.tla",
+   "config": "formal/PacketAdmission.cfg",
+   "properties": [
+    "HeaderSound",
+    "OptionSound",
+    "OptionComplete",
+    "Progress",
+    "BoundedCursor"
+   ],
+   "source_scope": [
+    "internal/workload/guestnet/packet.go"
+   ],
+   "bounds": "26 numeric header witnesses; all option byte sequences from zero/one/two finite chunks up to40bytes; four SYN/ACK combinations; actual bounded scanner to terminal state, no seeded starts.",
+   "limits": "Partial source-specific guard/option abstraction, not whole byte-parser refinement. Header corpus tests individual guard boundaries, not full cross-product. Checksum folded values are inputs; checksum arithmetic, byte offsets/endianness/copy ownership, Go concurrency and concrete IPv4 address values are not proved. No ARP/framing/route/TCP engine or physical authority coverage.",
+   "mutants": [
+    {
+     "id": "SkipFrameMax",
+     "edits": [
+      {
+       "old": "h.frame <= 1514",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipEtherType",
+     "edits": [
+      {
+       "old": "h.eth = 2048",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipVersionIHL",
+     "edits": [
+      {
+       "old": "h.vihl = 69",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipProtocol",
+     "edits": [
+      {
+       "old": "h.protocol = 6",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipTTL",
+     "edits": [
+      {
+       "old": "h.ttl # 0",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipTotalMax",
+     "edits": [
+      {
+       "old": "h.total <= h.frame-14",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipFragment",
+     "edits": [
+      {
+       "old": "h.fragment \\in {0,16384}",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipIPChecksum",
+     "edits": [
+      {
+       "old": "h.ipsum = 65535",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipTCPHeaderMin",
+     "edits": [
+      {
+       "old": "h.words*4 >= 20",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipTCPHeaderMax",
+     "edits": [
+      {
+       "old": "h.words*4 <= h.total-20",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipReserved",
+     "edits": [
+      {
+       "old": "h.reserved = 0",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipSourcePort",
+     "edits": [
+      {
+       "old": "h.sp # 0",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipDestinationPort",
+     "edits": [
+      {
+       "old": "h.dp # 0",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "SkipTCPChecksum",
+     "edits": [
+      {
+       "old": "h.tcpsum = 65535",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HeaderSound"
+    },
+    {
+     "id": "IgnoreEOLTail",
+     "edits": [
+      {
+       "old": "accepted' = AllZero(SubSeq(options,pos+1,Len(options)))",
+       "new": "accepted' = TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "RejectNOP",
+     "edits": [
+      {
+       "old": "ELSE IF k = 1 THEN",
+       "new": "ELSE IF FALSE THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionComplete"
+    },
+    {
+     "id": "AllowDuplicate",
+     "edits": [
+      {
+       "old": "k \\notin seen",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "RejectMSS",
+     "edits": [
+      {
+       "old": "k = 2 -> n = 4",
+       "new": "k = 2 -> FALSE /\\ n = 4",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionComplete"
+    },
+    {
+     "id": "ZeroMSS",
+     "edits": [
+      {
+       "old": "options[pos+2]*256+options[pos+3] # 0",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "MSSWithoutSYN",
+     "edits": [
+      {
+       "old": "n = 4 /\\ syn /\\ options",
+       "new": "n = 4 /\\ TRUE /\\ options",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "LargeScale",
+     "edits": [
+      {
+       "old": "options[pos+2] <= 14",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "ScaleWithoutSYN",
+     "edits": [
+      {
+       "old": "n = 3 /\\ syn /\\ options",
+       "new": "n = 3 /\\ TRUE /\\ options",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "SACKPermWithoutSYN",
+     "edits": [
+      {
+       "old": "k = 4 -> n = 2 /\\ syn",
+       "new": "k = 4 -> n = 2",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "SACKWithSYN",
+     "edits": [
+      {
+       "old": "k = 5 -> ~syn /\\ ack",
+       "new": "k = 5 -> TRUE /\\ ack",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "SACKWithoutACK",
+     "edits": [
+      {
+       "old": "k = 5 -> ~syn /\\ ack",
+       "new": "k = 5 -> ~syn /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "SACKInvalidBlockWidth",
+     "edits": [
+      {
+       "old": "(n-2)%8 = 0",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "TimestampWrongLength",
+     "edits": [
+      {
+       "old": "k = 8 -> n = 10",
+       "new": "k = 8 -> TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "AllowUnknown",
+     "edits": [
+      {
+       "old": "[] OTHER -> FALSE",
+       "new": "[] OTHER -> TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "RejectAllOptions",
+     "edits": [
+      {
+       "old": "Finish == /\\ mode = \"options\" /\\ ~done /\\ pos > Len(options)\n /\\ done' = TRUE /\\ accepted' = TRUE",
+       "new": "Finish == /\\ mode = \"options\" /\\ ~done /\\ pos > Len(options)\n /\\ done' = TRUE /\\ accepted' = FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionComplete"
+    },
+    {
+     "id": "AllowTruncatedTimestamp",
+     "edits": [
+      {
+       "old": "n <= remaining",
+       "new": "(n <= remaining \\/ k = 8)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BoundedCursor"
+    },
+    {
+     "id": "MSSWrongLength",
+     "edits": [
+      {
+       "old": "k = 2 -> n = 4",
+       "new": "k = 2 -> (n = 4 \\/ n = 5)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "SACKTooShort",
+     "edits": [
+      {
+       "old": "n >= 10",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    },
+    {
+     "id": "SACKPermWrongLength",
+     "edits": [
+      {
+       "old": "k = 4 -> n = 2",
+       "new": "k = 4 -> TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionSound"
+    }
+   ]
+  },
+  {
+   "id": "EngineLifecycle",
+   "model": "formal/EngineLifecycle.tla",
+   "config": "formal/EngineLifecycle.cfg",
+   "properties": [
+    "TypeOK",
+    "WorkerBound",
+    "WorkerDebt",
+    "WorkerReservation",
+    "RejectedRollback",
+    "SingleDial",
+    "NoInvalidAdmission",
+    "EndpointJoin",
+    "ConnectionOwnership",
+    "RegistrationBeforeDone",
+    "CloseWaitsMutation",
+    "DeadlineBound",
+    "NoTimerAfterReset",
+    "DialJoin",
+    "CaptureRetained",
+    "ConnectionJoin",
+    "TimerJoin",
+    "ReleaseAfterDestroy",
+    "LateConnectionJoin"
+   ],
+   "mutants": [
+    {
+     "id": "ExceedWorkerBudget",
+     "expect_invariant": "WorkerBound",
+     "edits": [
+      {
+       "old": "n<=2",
+       "new": "n<=3",
+       "count": 3
+      }
+     ]
+    },
+    {
+     "id": "LoseReservedSlot",
+     "expect_invariant": "WorkerReservation",
+     "edits": [
+      {
+       "old": "!.slot=IF n<=2 THEN TRUE ELSE FALSE",
+       "new": "!.slot=FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "LeakRejectedSlot",
+     "expect_invariant": "RejectedRollback",
+     "edits": [
+      {
+       "old": "!.slot=IF n<=2 THEN TRUE ELSE FALSE",
+       "new": "!.slot=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadmitDial",
+     "expect_invariant": "SingleDial",
+     "edits": [
+      {
+       "old": " /\\ ~s.started\n",
+       "new": "\n",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DialAfterCancellation",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": "DialStart == /\\ s.ready /\\ ~s.closed /\\ ~s.canceled",
+       "new": "DialStart == /\\ s.ready",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForgetRegistration",
+     "expect_invariant": "RegistrationBeforeDone",
+     "edits": [
+      {
+       "old": "!.registered=ok /\\ ~s.closed /\\ ~s.canceled",
+       "new": "!.registered=FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "CloseOverDeadlineMutation",
+     "expect_invariant": "CloseWaitsMutation",
+     "edits": [
+      {
+       "old": "CloseBegin == /\\ s.built /\\ ~s.closed /\\ ~s.mutation",
+       "new": "CloseBegin == /\\ s.built /\\ ~s.closed",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ExtendAbsoluteLifetime",
+     "expect_invariant": "DeadlineBound",
+     "edits": [
+      {
+       "old": "!.timer=IF s.requested=0 \\/ s.requested>2 THEN 2 ELSE s.requested",
+       "new": "!.timer=s.requested",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RetainDeadlineTimer",
+     "expect_invariant": "NoTimerAfterReset",
+     "edits": [
+      {
+       "old": "!.timerReset=TRUE, !.timer=0",
+       "new": "!.timerReset=TRUE, !.timer=1",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DestroyBeforeDialDone",
+     "expect_invariant": "DialJoin",
+     "edits": [
+      {
+       "old": "Destroy == /\\ s.closed /\\ s.dial=\"none\" /\\ ~s.destroyed",
+       "new": "Destroy == /\\ s.closed /\\ ~s.destroyed",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DestroyBeforeConnectionClosed",
+     "expect_invariant": "ConnectionJoin",
+     "edits": [
+      {
+       "old": " /\\ (~s.captured \\/ s.connClosed)\n",
+       "new": "\n",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "CloseBeforeTimerReset",
+     "expect_invariant": "TimerJoin",
+     "edits": [
+      {
+       "old": "CloseConnection == /\\ s.closed /\\ s.captured /\\ s.timerReset",
+       "new": "CloseConnection == /\\ s.closed /\\ s.captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReleaseWorkersEarly",
+     "expect_invariant": "WorkerDebt",
+     "edits": [
+      {
+       "old": "ReleaseWorkers == /\\ s.destroyed /\\ s.workers # 0",
+       "new": "ReleaseWorkers == /\\ s.workers # 0",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReleaseSlotEarly",
+     "expect_invariant": "ReleaseAfterDestroy",
+     "edits": [
+      {
+       "old": "ReleaseSlot == /\\ s.destroyed /\\ s.workers=0 /\\ s.slot",
+       "new": "ReleaseSlot == /\\ s.workers=0 /\\ s.slot",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForgetLateConnectionClose",
+     "expect_invariant": "LateConnectionJoin",
+     "edits": [
+      {
+       "old": "!.dial=\"error\", !.conn=\"closed\", !.connClosed=TRUE",
+       "new": "!.dial=\"error\", !.connClosed=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForgetConnectionPointer",
+     "expect_invariant": "ConnectionOwnership",
+     "edits": [
+      {
+       "old": "!.conn=IF ~ok THEN \"none\" ELSE IF s.closed \\/ s.canceled THEN \"late\" ELSE \"owned\"",
+       "new": "!.conn=IF ~ok THEN \"none\" ELSE IF s.closed \\/ s.canceled THEN \"late\" ELSE \"none\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DoneBeforeEndpointReturn",
+     "expect_invariant": "EndpointJoin",
+     "edits": [
+      {
+       "old": "s.dial \\in {\"registered\",\"error\"}",
+       "new": "s.dial \\in {\"registered\",\"error\",\"pending\"}",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "MutationAfterAbsoluteExpiry",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": " /\\ s.now<2 /\\ ~s.mutationOnce",
+       "new": " /\\ ~s.mutationOnce",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "MutationAfterCancellation",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": "MutationStart(t) == /\\ s.conn=\"owned\" /\\ s.dialCompleted /\\ ~s.closed /\\ ~s.canceled",
+       "new": "MutationStart(t) == /\\ s.conn=\"owned\" /\\ s.dialCompleted /\\ ~s.closed",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RepeatCloseCapture",
+     "expect_invariant": "CaptureRetained",
+     "edits": [
+      {
+       "old": "CloseBegin == /\\ s.built /\\ ~s.closed /\\ ~s.mutation",
+       "new": "CloseBegin == /\\ s.built /\\ ~s.mutation",
+       "count": 1
+      }
+     ]
+    }
+   ],
+   "source_scope": [
+    "internal/workload/guesttcp/engine.go",
+    "go.mod",
+    "go.sum"
+   ],
+   "bounds": "Complete finite graph: one constructor/engine, worker requests1or3 against budget2, one accepted Dial with second-attempt sensitivity, one deadline mutation, absolute clock0..2 and requested deadline0..3. No seeds, depth cutoff or symmetry.",
+   "limits": "Atomic adapter bookkeeping only, not gVisor/TCP/socket correctness, constructor config predicate proof, multi-engine budget refinement, packet parsing/tuple filtering/accounting, Read/Write task joining, caller Dial context validation/cancellation, AfterFunc scheduling, wall-clock enforcement or physical authority. Timer reset/connection close/stack destroy are explicit real-return signals. An already-entered deadline mutation may finish after expiry; Close must wait for its mutex. Dependency provenance/security remain independent obligations."
+  },
+  {
+   "id": "ARPTrustedReply",
+   "model": "formal/ARPTrustedReply.tla",
+   "config": "formal/ARPTrustedReply.cfg",
+   "properties": [
+    "ConstructorExact",
+    "ImmutableBinding",
+    "AdmissionSound",
+    "AdmissionComplete",
+    "TrustedReply",
+    "ReplyFormat"
+   ],
+   "source_scope": [
+    "internal/workload/guestnet/arp.go"
+   ],
+   "bounds": "Unseeded finite construction/caller-mutation/reply; seven symbolic binding profiles,23 request profiles(8allowed/15single-guard-invalid),all seven post-binding caller mutations.",
+   "limits": "Logical trusted binding/guard/output-field model, not Go memory/refinement proof. IP/MAC classes and padding are symbolic; byte offsets/endianness/zero-copy/fresh allocation/concurrency are native obligations. Does not grant physical admission, networking, neighbor learning or delivery authority.",
+   "mutants": [
+    {
+     "id": "AcceptBadBinding",
+     "edits": [
+      {
+       "old": "ready' = Valid(caller)",
+       "new": "ready' = TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ConstructorExact"
+    },
+    {
+     "id": "RetainCallerAlias",
+     "edits": [
+      {
+       "old": "caller' \\in Configs /\\ phase' = \"call\"\n /\\ UNCHANGED <<original,binding,request,ready,sent,reply>>",
+       "new": "caller' \\in Configs /\\ binding' = caller' /\\ phase' = \"call\"\n /\\ UNCHANGED <<original,request,ready,sent,reply>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ImmutableBinding"
+    },
+    {
+     "id": "SkipMinimumLength",
+     "edits": [
+      {
+       "old": "q.length >= 42",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipMaximumLength",
+     "edits": [
+      {
+       "old": "q.length <= 60",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipEtherType",
+     "edits": [
+      {
+       "old": "q.eth = 2054",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipPadding",
+     "edits": [
+      {
+       "old": "q.padding = 0",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipDestination",
+     "edits": [
+      {
+       "old": "q.dst \\in {3,c.gatewayMAC}",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipEtherSource",
+     "edits": [
+      {
+       "old": "q.src = c.guestMAC",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipHardware",
+     "edits": [
+      {
+       "old": "q.htype = 1",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipProtocol",
+     "edits": [
+      {
+       "old": "q.ptype = 2048",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipHardwareLength",
+     "edits": [
+      {
+       "old": "q.hlen = 6",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipProtocolLength",
+     "edits": [
+      {
+       "old": "q.plen = 4",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipOpcode",
+     "edits": [
+      {
+       "old": "q.op = 1",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipSenderMAC",
+     "edits": [
+      {
+       "old": "q.smac = c.guestMAC",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipSenderIP",
+     "edits": [
+      {
+       "old": "q.sip = c.guestIP",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipTargetIP",
+     "edits": [
+      {
+       "old": "q.tip = c.gatewayIP",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "SkipTargetMAC",
+     "edits": [
+      {
+       "old": "q.tmac \\in {0,c.gatewayMAC}",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionSound"
+    },
+    {
+     "id": "RejectBroadcast",
+     "edits": [
+      {
+       "old": "q.dst \\in {3,c.gatewayMAC}",
+       "new": "q.dst = c.gatewayMAC",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionComplete"
+    },
+    {
+     "id": "RejectDirectedRefresh",
+     "edits": [
+      {
+       "old": "q.tmac \\in {0,c.gatewayMAC}",
+       "new": "q.tmac = 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AdmissionComplete"
+    },
+    {
+     "id": "WrongReplyDestination",
+     "edits": [
+      {
+       "old": "dst |-> c.guestMAC",
+       "new": "dst |-> c.gatewayMAC",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TrustedReply"
+    },
+    {
+     "id": "WrongReplySource",
+     "edits": [
+      {
+       "old": "src |-> c.gatewayMAC",
+       "new": "src |-> c.guestMAC",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TrustedReply"
+    },
+    {
+     "id": "WrongReplySenderMAC",
+     "edits": [
+      {
+       "old": "smac |-> c.gatewayMAC",
+       "new": "smac |-> c.guestMAC",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TrustedReply"
+    },
+    {
+     "id": "WrongReplySenderIP",
+     "edits": [
+      {
+       "old": "sip |-> c.gatewayIP",
+       "new": "sip |-> c.guestIP",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TrustedReply"
+    },
+    {
+     "id": "WrongReplyTargetMAC",
+     "edits": [
+      {
+       "old": "tmac |-> c.guestMAC",
+       "new": "tmac |-> c.gatewayMAC",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TrustedReply"
+    },
+    {
+     "id": "WrongReplyTargetIP",
+     "edits": [
+      {
+       "old": "tip |-> c.guestIP",
+       "new": "tip |-> c.gatewayIP",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TrustedReply"
+    },
+    {
+     "id": "WrongReplyLength",
+     "edits": [
+      {
+       "old": "Encode(c) == [length |-> 60",
+       "new": "Encode(c) == [length |-> 42",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReplyFormat"
+    },
+    {
+     "id": "WrongReplyPadding",
+     "edits": [
+      {
+       "old": "Encode(c) == [length |-> 60, eth |-> 2054, padding |-> 0",
+       "new": "Encode(c) == [length |-> 60, eth |-> 2054, padding |-> 1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReplyFormat"
+    },
+    {
+     "id": "WrongReplyOpcode",
+     "edits": [
+      {
+       "old": "plen |-> 4, op |-> 2",
+       "new": "plen |-> 4, op |-> 1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReplyFormat"
+    }
+   ]
+  },
+  {
+   "id": "PassiveServiceBoundary",
+   "model": "formal/PassiveServiceBoundary.tla",
+   "config": "formal/PassiveServiceBoundary.cfg",
+   "properties": [
+    "DeadlineExact",
+    "ExpiryExact",
+    "ConstructorExact",
+    "NoOwnershipTransfer",
+    "DelegationExact",
+    "ReceiveExact",
+    "AccountRejected",
+    "OutputExact",
+    "PreserveFailure",
+    "ErrorPrecedence"
+   ],
+   "source_scope": [
+    "internal/workload/guesttcp/passive_lifetime.go",
+    "internal/workload/guesttcp/transport_passive.go",
+    "internal/workload/guesttcp/transport_service.go"
+   ],
+   "bounds": "Independent one-step finite scenarios: fixed now2/window3, requested0..7 and parent0..6; 13 symbolic route profiles; classified indices -1/0/1, two-unit budget, exact/ wrapped/distinct errors. Exhaustive from inputs, no seeds or symmetry.",
+   "limits": "Partial wrapper boundaries, not all implementation or physical lifecycle. Route/address validation is symbolic; route parser and netip correctness are separate. newTransport owns lifetime capture, ownership transfer and Close orchestration and is not proved here. Commit/queue delegation is not callback entry or delivery; account arithmetic/side effects, serviceLifetimeError implementation and dependency behavior are separate obligations. Short/default deadline constructor selection is represented only by validated numeric deadlines, not wall-clock sampling.",
+   "mutants": [
+    {
+     "id": "IgnoreParentPresence",
+     "edits": [
+      {
+       "old": "ok==i.present /\\ ~i.canceled",
+       "new": "ok==TRUE /\\ ~i.canceled",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeadlineExact"
+    },
+    {
+     "id": "IgnoreParentCancellation",
+     "edits": [
+      {
+       "old": "ok==i.present /\\ ~i.canceled",
+       "new": "ok==i.present /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeadlineExact"
+    },
+    {
+     "id": "AcceptExpiredRequest",
+     "edits": [
+      {
+       "old": "i.requested>2 /\\ i.requested<=5",
+       "new": "TRUE /\\ i.requested<=5",
+       "count": 1
+      },
+      {
+       "old": "/\\ Effective(i.requested,i.parent)>2",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeadlineExact"
+    },
+    {
+     "id": "ClampBeforeWindowValidation",
+     "edits": [
+      {
+       "old": "i.requested<=5",
+       "new": "Effective(i.requested,i.parent)<=5",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeadlineExact"
+    },
+    {
+     "id": "IgnoreElapsedParent",
+     "edits": [
+      {
+       "old": "/\\ Effective(i.requested,i.parent)>2",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeadlineExact"
+    },
+    {
+     "id": "IgnoreEarlierParent",
+     "edits": [
+      {
+       "old": "expiry'=IF ok THEN Effective(i.requested,i.parent) ELSE 0",
+       "new": "expiry'=IF ok THEN i.requested ELSE 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExpiryExact"
+    },
+    {
+     "id": "MissingService",
+     "edits": [
+      {
+       "old": "ok==i.service /\\ i.route.any",
+       "new": "ok==TRUE /\\ i.route.any",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ConstructorExact"
+    },
+    {
+     "id": "SkipRouteValidation",
+     "edits": [
+      {
+       "old": "/\\ ValidRoute(i.route)",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ConstructorExact"
+    },
+    {
+     "id": "SkipMixedBinding",
+     "edits": [
+      {
+       "old": "Binding(i.route) /\\ ~Overlap(i.route)",
+       "new": "TRUE /\\ ~Overlap(i.route)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ConstructorExact"
+    },
+    {
+     "id": "AllowOverlappingRoute",
+     "edits": [
+      {
+       "old": "Binding(i.route) /\\ ~Overlap(i.route)",
+       "new": "Binding(i.route) /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ConstructorExact"
+    },
+    {
+     "id": "RequireSameLocalIP",
+     "edits": [
+      {
+       "old": "ok==i.service /\\ i.route.any",
+       "new": "ok==i.service /\\ i.route.lip=1 /\\ i.route.any",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ConstructorExact"
+    },
+    {
+     "id": "PrematureOwnership",
+     "edits": [
+      {
+       "old": "/\\ done'=TRUE /\\ UNCHANGED <<input,expiry,accounted,result,transferred>>",
+       "new": "/\\ done'=TRUE /\\ transferred'=TRUE /\\ UNCHANGED <<input,expiry,accounted,result>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOwnershipTransfer"
+    },
+    {
+     "id": "WrongReceiveEngine",
+     "edits": [
+      {
+       "old": "i.engine /\\ i.route=0 THEN \"engineCommit\"",
+       "new": "i.engine /\\ i.route=1 THEN \"engineCommit\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReceiveExact"
+    },
+    {
+     "id": "WrongServiceReceive",
+     "edits": [
+      {
+       "old": "i.service /\\ i.route=i.expected THEN \"serviceCommit\"",
+       "new": "i.service THEN \"serviceCommit\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReceiveExact"
+    },
+    {
+     "id": "UnaccountedOutput",
+     "edits": [
+      {
+       "old": "accounted'=TRUE",
+       "new": "accounted'=FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AccountRejected"
+    },
+    {
+     "id": "IgnoreOutputBudget",
+     "edits": [
+      {
+       "old": "i.used+i.bytes>2 \\/ i.route=-1",
+       "new": "FALSE \\/ i.route=-1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OutputExact"
+    },
+    {
+     "id": "CrossRouteOutput",
+     "edits": [
+      {
+       "old": "i.route=-1 \\/ i.route # i.expected",
+       "new": "i.route=-1 \\/ FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OutputExact"
+    },
+    {
+     "id": "BypassPersistentQueue",
+     "edits": [
+      {
+       "old": "IF i.persistent THEN \"queue\" ELSE \"ownerCommit\"",
+       "new": "IF FALSE THEN \"queue\" ELSE \"ownerCommit\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OutputExact"
+    },
+    {
+     "id": "EraseWrappedFailure",
+     "edits": [
+      {
+       "old": "ELSE i.err)\n /\\ done",
+       "new": "ELSE \"closed\")\n /\\ done",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreserveFailure"
+    },
+    {
+     "id": "IgnoreServiceRevocation",
+     "edits": [
+      {
+       "old": "i.err=\"closed\" /\\ i.lifetime # \"none\" THEN i.lifetime",
+       "new": "FALSE THEN i.lifetime",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ErrorPrecedence"
+    },
+    {
+     "id": "IgnoreContextCause",
+     "edits": [
+      {
+       "old": "i.err=\"closed\" /\\ i.context THEN \"context\"",
+       "new": "FALSE THEN \"context\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ErrorPrecedence"
+    }
+   ]
+  },
+  {
+   "id": "HTTPObservationLifecycle",
+   "model": "formal/HTTPObservationLifecycle.tla",
+   "config": "formal/HTTPObservationLifecycle.cfg",
+   "properties": [
+    "TypeOK",
+    "RequestBound",
+    "DeadlineImmutable",
+    "RawAccounting",
+    "InfoAccounting",
+    "RawHeaderBound",
+    "InformationalBound",
+    "NoBodyConsumption",
+    "RetainedWorkerDebt",
+    "PublicationEvidence",
+    "NoPostTimeoutPublication",
+    "StatusPreserved",
+    "ReceivedAtObserved",
+    "TimeoutRequestsClose",
+    "CleanupRequested"
+   ],
+   "mutants": [
+    {
+     "id": "AcceptArbitraryPath",
+     "expect_invariant": "RequestBound",
+     "edits": [
+      {
+       "old": "IF path \\in {\"/\",\"/healthz\"} THEN \"ready\" ELSE \"rejected\"",
+       "new": "\"ready\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreRawByteLimit",
+     "expect_invariant": "RawHeaderBound",
+     "edits": [
+      {
+       "old": "s.bytes+bytes<=3 /\\ s.fields+fields<=2",
+       "new": "s.fields+fields<=2",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreCumulativeFields",
+     "expect_invariant": "RawHeaderBound",
+     "edits": [
+      {
+       "old": "s.bytes+bytes<=3 /\\ s.fields+fields<=2",
+       "new": "s.bytes+bytes<=3",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptBareOrFoldedLines",
+     "expect_invariant": "RawHeaderBound",
+     "edits": [
+      {
+       "old": " /\\ line=\"crlf\"",
+       "new": " /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptUnsupportedVersion",
+     "expect_invariant": "RawHeaderBound",
+     "edits": [
+      {
+       "old": "accepted==version \\in {10,11} /\\ status>=100",
+       "new": "accepted==status>=100",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptSwitchingProtocols",
+     "expect_invariant": "RawHeaderBound",
+     "edits": [
+      {
+       "old": " /\\ status # 101",
+       "new": " /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptOutOfRangeStatus",
+     "expect_invariant": "RawHeaderBound",
+     "edits": [
+      {
+       "old": " /\\ status>=100 /\\ status<=599",
+       "new": " /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreInformationalLimit",
+     "expect_invariant": "InformationalBound",
+     "edits": [
+      {
+       "old": "overflow==s.infos+1>1",
+       "new": "overflow==FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ConsumeResponseBody",
+     "expect_invariant": "NoBodyConsumption",
+     "edits": [
+      {
+       "old": "!.acceptedStatus=IF accepted /\\ ~info THEN status ELSE @,",
+       "new": "!.acceptedStatus=IF accepted /\\ ~info THEN status ELSE @, !.bodyReads=@+1,",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RenewOriginalDeadline",
+     "expect_invariant": "DeadlineImmutable",
+     "edits": [
+      {
+       "old": "Tick== /\\ s.started /\\ s.now<2 /\\ s'=[s EXCEPT !.now=@+1]",
+       "new": "Tick== /\\ s.started /\\ s.now<2 /\\ s'=[s EXCEPT !.now=@+1, !.deadline=2]",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReleaseOnCallerTimeout",
+     "expect_invariant": "RetainedWorkerDebt",
+     "edits": [
+      {
+       "old": "!.timedOut=TRUE, !.published=0, !.closeRequested=TRUE]",
+       "new": "!.timedOut=TRUE, !.published=0, !.closeRequested=TRUE, !.slot=FALSE]",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PublishUncertainCleanup",
+     "expect_invariant": "PublicationEvidence",
+     "edits": [
+      {
+       "old": "s.phase=\"closing\" /\\ ok /\\ cause=\"exactCanceled\"",
+       "new": "s.phase=\"closing\" /\\ cause=\"exactCanceled\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptJoinedCancellationError",
+     "expect_invariant": "PublicationEvidence",
+     "edits": [
+      {
+       "old": " /\\ cause=\"exactCanceled\" /\\ ~s.canceled",
+       "new": " /\\ ~s.canceled",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptOwnerFailure",
+     "expect_invariant": "PublicationEvidence",
+     "edits": [
+      {
+       "old": "!.phase=IF ok /\\ ~s.canceled /\\ s.now<s.deadline THEN \"result\" ELSE \"failed\"",
+       "new": "!.phase=IF ~s.canceled /\\ s.now<s.deadline THEN \"result\" ELSE \"failed\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreFinalDeadline",
+     "expect_invariant": "PublicationEvidence",
+     "edits": [
+      {
+       "old": "accept==s.phase=\"result\" /\\ ~s.canceled /\\ s.now<s.deadline",
+       "new": "accept==s.phase=\"result\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PromoteErrorStatus",
+     "expect_invariant": "StatusPreserved",
+     "edits": [
+      {
+       "old": "!.published=IF accept THEN s.status ELSE 0",
+       "new": "!.published=IF accept THEN 200 ELSE 0",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "LateWorkerPublishes",
+     "expect_invariant": "NoPostTimeoutPublication",
+     "edits": [
+      {
+       "old": "!.workerDone=TRUE, !.slot=FALSE]",
+       "new": "!.workerDone=TRUE, !.slot=FALSE, !.published=IF s.timedOut THEN 200 ELSE @]",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RetryShortWrite",
+     "expect_invariant": "RequestBound",
+     "edits": [
+      {
+       "old": "!.phase=IF full THEN \"raw\" ELSE \"failure\"",
+       "new": "!.phase=IF full THEN \"raw\" ELSE \"request\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForgeHeaderTimestamp",
+     "expect_invariant": "ReceivedAtObserved",
+     "edits": [
+      {
+       "old": "!.received=IF accepted /\\ ~info THEN s.now ELSE @",
+       "new": "!.received=IF accepted /\\ ~info THEN 3 ELSE @",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "TimeoutOmitsClose",
+     "expect_invariant": "TimeoutRequestsClose",
+     "edits": [
+      {
+       "old": "!.timedOut=TRUE, !.published=0, !.closeRequested=TRUE]",
+       "new": "!.timedOut=TRUE, !.published=0]",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "FailureOmitsCleanup",
+     "expect_invariant": "CleanupRequested",
+     "edits": [
+      {
+       "old": "!.phase=\"failedclose\", !.closeRequested=TRUE",
+       "new": "!.phase=\"failedclose\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ResetCumulativeFieldCount",
+     "expect_invariant": "RawAccounting",
+     "edits": [
+      {
+       "old": "!.fields=@+fields,",
+       "new": "!.fields=fields,",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ResetSharedByteBudget",
+     "expect_invariant": "RawAccounting",
+     "edits": [
+      {
+       "old": "!.bytes=@+bytes,",
+       "new": "!.bytes=bytes,",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ResetInformationalHistory",
+     "expect_invariant": "InfoAccounting",
+     "edits": [
+      {
+       "old": "overflow==s.infos+1>1",
+       "new": "overflow==FALSE",
+       "count": 1
+      },
+      {
+       "old": "!.infos=IF accepted /\\ info THEN @+1 ELSE @,",
+       "new": "!.infos=IF accepted /\\ info THEN 1 ELSE @,",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptUnsupportedMinor",
+     "expect_invariant": "RawHeaderBound",
+     "edits": [
+      {
+       "old": "accepted==version \\in {10,11}",
+       "new": "accepted==version \\in {10,11,12}",
+       "count": 1
+      }
+     ]
+    }
+   ],
+   "source_scope": [
+    "internal/workload/guesttcp/http_observation.go"
+   ],
+   "bounds": "One observer, two permitted paths plus invalid path; fixed minimum deadline0or1or2 (zero represents expiry during admission), clock0..2; cumulative rawbytes3/rawfields2/informational1 scaled from8192/64/8; separate CRLF/folding/parser-error/version/status classes. Complete finite graph without depth cutoff, seeds or symmetry.",
+   "limits": "Adapter control-flow and parsed-field abstraction, not net/http grammar/normalization, wire byte parser proof, HTTP compliance, body transport implementation, provider/physical-owner enforcement, early Dial/SetDeadline failure traces, concurrent observer binding, real-time scheduling or implementation refinement. Cleanup completion may return uncertainty and release observation worker slot while transport retains its own debt. Owner callback outcome is a trusted external return, not proof of physical authority."
+  },
+  {
+   "id": "ListenerLifecycle",
+   "model": "formal/ListenerLifecycle.tla",
+   "config": "formal/ListenerLifecycle.cfg",
+   "properties": [
+    "AttemptRetention",
+    "OwnerRetention",
+    "OnePendingAccept",
+    "BudgetAccounting",
+    "NoLateAdmission",
+    "OneAcceptAdmission",
+    "JoinBeforeDestroy",
+    "CapacityAfterJoin",
+    "SharedCapacity",
+    "NoEarlyRelease",
+    "BoundedDeadline",
+    "TimerResetAttempted",
+    "SequenceRetention"
+   ],
+   "source_scope": [
+    "internal/workload/guesttcp/listener.go",
+    "go.mod",
+    "go.sum"
+   ],
+   "bounds": "One constructed listener, one fixed external worker reservation, two lifetime Accept calls, one retained connection/port capacity, two source ports/sequences, two frames/three byte units, absolute deadline1; finite unseeded lifecycle.",
+   "limits": "Abstract local callback/packet contracts, not gVisor TCP/byte parser/physical authority proof. Runtime capacities8/32/4096/1MiB not arithmetic-refined. Construction failures/global cross-instance reservation races and ReadFrame context cancellation internals excluded; no invented reader join. Accepted raw close return may be error and does not prove physical cleanup.",
+   "mutants": [
+    {
+     "id": "ParallelAccept",
+     "edits": [
+      {
+       "old": "/\\ Active /\\ Pending = {} /\\ calls[j] = \"unused\"",
+       "new": "/\\ Active /\\ calls[j] = \"unused\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnePendingAccept"
+    },
+    {
+     "id": "LateAcceptStart",
+     "edits": [
+      {
+       "old": "/\\ Active /\\ Pending = {} /\\ calls[j] = \"unused\"",
+       "new": "/\\ phase = \"ready\" /\\ Pending = {} /\\ calls[j] = \"unused\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoLateAdmission"
+    },
+    {
+     "id": "LateAcceptPublish",
+     "edits": [
+      {
+       "old": "ok == Active /\\ rawOK",
+       "new": "ok == rawOK",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoLateAdmission"
+    },
+    {
+     "id": "AcceptUnrecordedPort",
+     "edits": [
+      {
+       "old": "ok == Active /\\ rawOK /\\ p \\in attempts",
+       "new": "ok == Active /\\ rawOK",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttemptRetention"
+    },
+    {
+     "id": "ForgetAttempt",
+     "edits": [
+      {
+       "old": "attempts' = IF ok THEN attempts \\cup {p} ELSE attempts",
+       "new": "attempts' = attempts",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttemptRetention"
+    },
+    {
+     "id": "ForgetOwnedWrapper",
+     "edits": [
+      {
+       "old": "conns' = IF ok THEN [conns EXCEPT ![j] = \"open\"] ELSE conns",
+       "new": "conns' = conns",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OwnerRetention"
+    },
+    {
+     "id": "SkipAggregateFrameCharge",
+     "edits": [
+      {
+       "old": "frames' = frames + (IF fits THEN 1 ELSE 0)",
+       "new": "frames' = frames",
+       "count": 2
+      }
+     ],
+     "expect_invariant": "BudgetAccounting"
+    },
+    {
+     "id": "SkipAggregateByteCharge",
+     "edits": [
+      {
+       "old": "bytes' = bytes + (IF fits THEN size ELSE 0)",
+       "new": "bytes' = bytes",
+       "count": 2
+      }
+     ],
+     "expect_invariant": "BudgetAccounting"
+    },
+    {
+     "id": "AcceptBadSYNFlags",
+     "edits": [
+      {
+       "old": "k \\notin {\"bad-tuple\",\"bad-parse\",\"syn-payload\",\"syn-flags\"}",
+       "new": "k \\notin {\"bad-tuple\",\"bad-parse\",\"syn-payload\"}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoLateAdmission"
+    },
+    {
+     "id": "AcceptSYNPayload",
+     "edits": [
+      {
+       "old": "k \\notin {\"bad-tuple\",\"bad-parse\",\"syn-payload\",\"syn-flags\"}",
+       "new": "k \\notin {\"bad-tuple\",\"bad-parse\",\"syn-flags\"}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoLateAdmission"
+    },
+    {
+     "id": "AcceptBadTuple",
+     "edits": [
+      {
+       "old": "k \\notin {\"bad-tuple\",\"bad-parse\",\"syn-payload\",\"syn-flags\"}",
+       "new": "k \\notin {\"bad-parse\",\"syn-payload\",\"syn-flags\"}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoLateAdmission"
+    },
+    {
+     "id": "AllowChangedSYN",
+     "edits": [
+      {
+       "old": "THEN p \\notin sealed /\\ sequences[p] = (IF k = \"syn\" THEN 1 ELSE 2)",
+       "new": "THEN p \\notin sealed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoLateAdmission"
+    },
+    {
+     "id": "AllowSealedSYN",
+     "edits": [
+      {
+       "old": "THEN p \\notin sealed /\\ sequences[p] = (IF k = \"syn\" THEN 1 ELSE 2)",
+       "new": "THEN sequences[p] = (IF k = \"syn\" THEN 1 ELSE 2)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoLateAdmission"
+    },
+    {
+     "id": "UnrecordedData",
+     "edits": [
+      {
+       "old": "IF k = \"data\" THEN p \\in attempts",
+       "new": "IF k = \"data\" THEN TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoLateAdmission"
+    },
+    {
+     "id": "DestroyWithAcceptDebt",
+     "edits": [
+      {
+       "old": "/\\ phase = \"closing\" /\\ shutdown /\\ Debts = {} /\\ Owned = Returned /\\ ~destroyed",
+       "new": "/\\ phase = \"closing\" /\\ shutdown /\\ Owned = Returned /\\ ~destroyed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "JoinBeforeDestroy"
+    },
+    {
+     "id": "DestroyWithConnectionDebt",
+     "edits": [
+      {
+       "old": "/\\ phase = \"closing\" /\\ shutdown /\\ Debts = {} /\\ Owned = Returned /\\ ~destroyed",
+       "new": "/\\ phase = \"closing\" /\\ shutdown /\\ Debts = {} /\\ ~destroyed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "JoinBeforeDestroy"
+    },
+    {
+     "id": "DestroyBeforeShutdown",
+     "edits": [
+      {
+       "old": "/\\ phase = \"closing\" /\\ shutdown /\\ Debts = {} /\\ Owned = Returned /\\ ~destroyed",
+       "new": "/\\ phase = \"closing\" /\\ Debts = {} /\\ Owned = Returned /\\ ~destroyed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "JoinBeforeDestroy"
+    },
+    {
+     "id": "ReleaseBeforeDestroy",
+     "edits": [
+      {
+       "old": "/\\ phase = \"closing\" /\\ destroyed /\\ reserved",
+       "new": "/\\ phase = \"closing\" /\\ reserved",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CapacityAfterJoin"
+    },
+    {
+     "id": "EraseExternalWorkers",
+     "edits": [
+      {
+       "old": "workers' = workers-1",
+       "new": "workers' = 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SharedCapacity"
+    },
+    {
+     "id": "SkipCleanupTimer",
+     "edits": [
+      {
+       "old": "/\\ calls[j] = \"reset-attempted\" /\\ calls' = [calls EXCEPT ![j] = \"returned\"]",
+       "new": "/\\ calls[j] = \"cleanup\" /\\ calls' = [calls EXCEPT ![j] = \"returned\"]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TimerResetAttempted"
+    },
+    {
+     "id": "SkipConnectionTimer",
+     "edits": [
+      {
+       "old": "/\\ conns[j] = \"reset-attempted\"\n /\\ conns'",
+       "new": "/\\ conns[j] = \"closed-flag\"\n /\\ conns'",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TimerResetAttempted"
+    },
+    {
+     "id": "UnclampedDeadline",
+     "edits": [
+      {
+       "old": "IF requested = 0 \\/ requested > 1 THEN 1 ELSE requested",
+       "new": "requested",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BoundedDeadline"
+    },
+    {
+     "id": "ForgetWrapperOnCloseError",
+     "edits": [
+      {
+       "old": "IF error THEN \"returned-error\" ELSE \"returned-ok\"",
+       "new": "IF error THEN \"absent\" ELSE \"returned-ok\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OwnerRetention"
+    },
+    {
+     "id": "ForgetPortOnConnectionClose",
+     "edits": [
+      {
+       "old": "ConnectionClose(j) ==\n /\\ conns[j] = \"open\" /\\ conns' = [conns EXCEPT ![j] = \"closed-flag\"]\n /\\ UNCHANGED <<phase,cancelled,now,attempts,sequences,firstSequences,sealed,everPorts,frames,bytes,\n                chargedFrames,chargedBytes,calls,everConns,resetCalls,resetConns,deadlines,shutdown,destroyed,reserved,workers,admissionViolation,pendingViolation>>\n",
+       "new": "ConnectionClose(j) ==\n /\\ conns[j] = \"open\" /\\ conns' = [conns EXCEPT ![j] = \"closed-flag\"] /\\ attempts' = {}\n /\\ UNCHANGED <<phase,cancelled,now,sequences,firstSequences,sealed,everPorts,frames,bytes,\n                chargedFrames,chargedBytes,calls,everConns,resetCalls,resetConns,deadlines,shutdown,destroyed,reserved,workers,admissionViolation,pendingViolation>>\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AttemptRetention"
+    },
+    {
+     "id": "ResetBudgetOnClose",
+     "edits": [
+      {
+       "old": "CloseStart ==\n /\\ phase = \"ready\" /\\ phase' = \"closing\" /\\ cancelled' = TRUE\n /\\ UNCHANGED <<now,attempts,sequences,firstSequences,sealed,everPorts,frames,bytes,chargedFrames,\n                chargedBytes,calls,conns,everConns,resetCalls,resetConns,deadlines,shutdown,destroyed,reserved,workers,admissionViolation,pendingViolation>>\n",
+       "new": "CloseStart ==\n /\\ phase = \"ready\" /\\ phase' = \"closing\" /\\ cancelled' = TRUE /\\ frames' = 0 /\\ bytes' = 0\n /\\ UNCHANGED <<now,attempts,sequences,firstSequences,sealed,everPorts,chargedFrames,\n                chargedBytes,calls,conns,everConns,resetCalls,resetConns,deadlines,shutdown,destroyed,reserved,workers,admissionViolation,pendingViolation>>\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BudgetAccounting"
+    },
+    {
+     "id": "IgnoreRegisteredAcceptJoin",
+     "edits": [
+      {
+       "old": "/\\ phase = \"closing\" /\\ shutdown /\\ Debts = {} /\\ Owned = Returned /\\ ~destroyed",
+       "new": "/\\ phase = \"closing\" /\\ shutdown /\\ {j \\in Jobs: calls[j] \\in {\"pending\",\"cleanup\",\"reset-attempted\"}} = {} /\\ Owned = Returned /\\ ~destroyed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "JoinBeforeDestroy"
+    },
+    {
+     "id": "ClosedFlagIsNotReturn",
+     "edits": [
+      {
+       "old": "/\\ phase = \"closing\" /\\ shutdown /\\ Debts = {} /\\ Owned = Returned /\\ ~destroyed",
+       "new": "/\\ phase = \"closing\" /\\ shutdown /\\ Debts = {} /\\ (\\A j \\in Owned: conns[j] # \"open\") /\\ ~destroyed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "JoinBeforeDestroy"
+    },
+    {
+     "id": "RewriteFirstSequence",
+     "edits": [
+      {
+       "old": "sequences' = IF ok /\\ p \\notin attempts THEN [sequences EXCEPT ![p] = IF k = \"syn\" THEN 1 ELSE 2] ELSE sequences",
+       "new": "sequences' = IF ok THEN [sequences EXCEPT ![p] = 2] ELSE sequences",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SequenceRetention"
+    }
+   ]
+  },
+  {
+   "id": "CommandDispatchLifecycle",
+   "model": "formal/CommandDispatchLifecycle.tla",
+   "config": "formal/CommandDispatchLifecycle.cfg",
+   "bounds": "One selected capability/key, two sequential commands, clock0..3 and original requested deadlines1..4; existing key classes none/exact/foreign, independent lower-layer admission/refusal. Forwarded deadline is not effective scope-capped deadline.",
+   "properties": [
+    "TypeOK",
+    "Admission",
+    "OriginalDeadline",
+    "ReadOnly",
+    "UnknownNotSettled",
+    "DuplicatePreserved",
+    "ExactDomain",
+    "ReadAfterExpiry",
+    "AtMostOnce",
+    "ReadAdmission"
+   ],
+   "limits": "No byte parser refinement, constructor copying proof, clock synchronization, concurrent key insertion, physical authority or production qualification; lower-layer lifecycle obligations remain separate.",
+   "source_scope": [
+    "internal/workload/guesttcp/http_probe_command.go"
+   ],
+   "mutants": [
+    {
+     "id": "IgnoreShape",
+     "expect_invariant": "Admission",
+     "edits": [
+      {
+       "old": "entered == kind = \"start\" /\\ matched",
+       "new": "entered == kind = \"start\" /\\ binding /\\ service",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreBinding",
+     "expect_invariant": "Admission",
+     "edits": [
+      {
+       "old": "entered == kind = \"start\" /\\ matched",
+       "new": "entered == kind = \"start\" /\\ shape /\\ service",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreService",
+     "expect_invariant": "Admission",
+     "edits": [
+      {
+       "old": "entered == kind = \"start\" /\\ matched",
+       "new": "entered == kind = \"start\" /\\ shape /\\ binding",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreDomain",
+     "expect_invariant": "Admission",
+     "edits": [
+      {
+       "old": "domainOK == domain",
+       "new": "domainOK == TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RenewFromReceipt",
+     "expect_invariant": "OriginalDeadline",
+     "edits": [
+      {
+       "old": "forwardedDeadline' = (IF newExecution THEN deadline ELSE forwardedDeadline)",
+       "new": "forwardedDeadline' = (IF newExecution THEN now+1 ELSE forwardedDeadline)",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "FreshCheckBeforeDuplicate",
+     "expect_invariant": "DuplicatePreserved",
+     "edits": [
+      {
+       "old": "(duplicate \\/ (retained = \"none\" /\\ fresh))",
+       "new": "((duplicate /\\ fresh) \\/ (retained = \"none\" /\\ fresh))",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadRequiresLiveClock",
+     "expect_invariant": "ReadAfterExpiry",
+     "edits": [
+      {
+       "old": "readable == kind = \"read\" /\\ matched",
+       "new": "readable == kind = \"read\" /\\ matched /\\ now<3",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnknownMeansSettled",
+     "expect_invariant": "UnknownNotSettled",
+     "edits": [
+      {
+       "old": "readResponse == IF readable /\\ retained=\"none\" THEN \"unknown\"",
+       "new": "readResponse == IF readable /\\ retained=\"none\" THEN \"settled\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreExpiry",
+     "expect_invariant": "Admission",
+     "edits": [
+      {
+       "old": "fresh == qualified /\\ now < deadline",
+       "new": "fresh == qualified",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreQualification",
+     "expect_invariant": "Admission",
+     "edits": [
+      {
+       "old": "fresh == qualified /\\ now < deadline",
+       "new": "fresh == now < deadline",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RepeatDuplicateExecution",
+     "expect_invariant": "AtMostOnce",
+     "edits": [
+      {
+       "old": "executions' = (executions + (IF newExecution THEN 1 ELSE 0))",
+       "new": "executions' = (executions + (IF entered THEN 1 ELSE 0))",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadEntersStart",
+     "expect_invariant": "ReadOnly",
+     "edits": [
+      {
+       "old": "entered == kind = \"start\" /\\ matched",
+       "new": "entered == matched",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "StartRefusalMeansSettled",
+     "expect_invariant": "UnknownNotSettled",
+     "edits": [
+      {
+       "old": "startResponse == IF entered /\\ ~admitted THEN \"unknown\"",
+       "new": "startResponse == IF entered /\\ ~admitted THEN \"settled\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadIgnoresShape",
+     "expect_invariant": "ReadAdmission",
+     "edits": [
+      {
+       "old": "readable == kind = \"read\" /\\ matched",
+       "new": "readable == kind = \"read\" /\\ binding /\\ service",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadIgnoresBinding",
+     "expect_invariant": "ReadAdmission",
+     "edits": [
+      {
+       "old": "readable == kind = \"read\" /\\ matched",
+       "new": "readable == kind = \"read\" /\\ shape /\\ service",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadIgnoresService",
+     "expect_invariant": "ReadAdmission",
+     "edits": [
+      {
+       "old": "readable == kind = \"read\" /\\ matched",
+       "new": "readable == kind = \"read\" /\\ shape /\\ binding",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "OwnedProbeSessionLifecycle",
+   "model": "formal/OwnedProbeSessionLifecycle.tla",
+   "config": "formal/OwnedProbeSessionLifecycle.cfg",
+   "bounds": "Original one-session/transaction and two facade calls retained, plus finite private-token provenance, three cancellation windows and exact provider propagation. No liveness.",
+   "source_scope": [
+    "internal/workload/guesttcp/owned_probe_session.go",
+    "internal/workload/guesttcp/local_injection_outcome.go",
+    "internal/workload/guesttcp/transport.go",
+    "internal/workload/guesttcp/transport_persistent.go"
+   ],
+   "properties": [
+    "TypeOK",
+    "NoInvalidAdmission",
+    "NoInvalidPublication",
+    "TentativeHidden",
+    "CloseOnce",
+    "CloseBeforeJoin",
+    "DebtUntilDrain",
+    "ImmutableBinding",
+    "OneApply",
+    "TerminalSeal",
+    "EvidenceHasSuccess",
+    "NoUnsafeException",
+    "NoTokenReplay",
+    "FailedPacketNotPublished",
+    "NoNeedlessSeal"
+   ],
+   "limits": "Only private local-injection producer/owner-consumer branch in added source paths; not all transport methods. Tokens do not prove physical authority. No Go pointer/atomic refinement, generic parser proof or clock rebasing. Foreign marker is explicit malformed-provider abstraction.",
+   "mutants": [
+    {
+     "id": "AdmitAfterSeal",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": "s.phase=\"fresh\" /\\ Live /\\ ~s.gate",
+       "new": "s.phase=\"fresh\" /\\ ~s.gate",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IOAfterSeal",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": "IOStart == /\\ Live /\\ s.ioStarted<2",
+       "new": "IOStart == /\\ s.ioStarted<2",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PublishAfterRevoke",
+     "expect_invariant": "NoInvalidPublication",
+     "edits": [
+      {
+       "old": "ok /\\ s.called /\\ ~s.invalid /\\ s.appliedOK /\\ Live",
+       "new": "ok /\\ s.called /\\ ~s.invalid /\\ s.appliedOK",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PublishProviderError",
+     "expect_invariant": "NoInvalidPublication",
+     "edits": [
+      {
+       "old": "accepted == ok /\\ s.called",
+       "new": "accepted == s.called",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PublishFailedApply",
+     "expect_invariant": "NoInvalidPublication",
+     "edits": [
+      {
+       "old": "ok /\\ s.called /\\ ~s.invalid /\\ s.appliedOK /\\ Live",
+       "new": "ok /\\ s.called /\\ ~s.invalid /\\ Live",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadTentative",
+     "expect_invariant": "TentativeHidden",
+     "edits": [
+      {
+       "old": "ReadEvidence == /\\ ~s.gate",
+       "new": "ReadEvidence == /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReleaseBeforeIODrain",
+     "expect_invariant": "DebtUntilDrain",
+     "edits": [
+      {
+       "old": "s.io=0 /\\ ~s.gate /\\ ~s.joined",
+       "new": "~s.gate /\\ ~s.joined",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReleaseBeforeGateDrain",
+     "expect_invariant": "DebtUntilDrain",
+     "edits": [
+      {
+       "old": "s.io=0 /\\ ~s.gate /\\ ~s.joined",
+       "new": "s.io=0 /\\ ~s.joined",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReleaseCloseError",
+     "expect_invariant": "DebtUntilDrain",
+     "edits": [
+      {
+       "old": "!.released=(s.closeResult=\"ok\")",
+       "new": "!.released=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "JoinBeforeCloseReturn",
+     "expect_invariant": "CloseBeforeJoin",
+     "edits": [
+      {
+       "old": "Join == /\\ s.closeResult # \"pending\"",
+       "new": "Join == /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RebindOnRevoke",
+     "expect_invariant": "ImmutableBinding",
+     "edits": [
+      {
+       "old": "!.terminal=TRUE, !.closing=TRUE, !.closes=@+1]",
+       "new": "!.terminal=TRUE, !.closing=TRUE, !.closes=@+1, !.binding=2]",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ExposeFailedTentative",
+     "expect_invariant": "EvidenceHasSuccess",
+     "edits": [
+      {
+       "old": "!.evidence=accepted /\\ s.tentative",
+       "new": "!.evidence=s.tentative",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RepeatClose",
+     "expect_invariant": "CloseOnce",
+     "edits": [
+      {
+       "old": "Revoke == /\\ ~s.terminal",
+       "new": "Revoke == /\\ s.closes<2",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DuplicateApply",
+     "expect_invariant": "OneApply",
+     "edits": [
+      {
+       "old": "!.invalid=TRUE, !.poison=TRUE",
+       "new": "!.invalid=TRUE, !.effects=@+1, !.poison=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "SealWithoutClose",
+     "expect_invariant": "TerminalSeal",
+     "edits": [
+      {
+       "old": "!.terminal=TRUE, !.closing=TRUE, !.closes=@+1]",
+       "new": "!.terminal=TRUE, !.closes=@+1]",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReuseSuccessfulContext",
+     "expect_invariant": "NoTokenReplay",
+     "edits": [
+      {
+       "old": "s.tokenState \\notin {\"used\",\"completed\"}",
+       "new": "TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreClaimedToken",
+     "expect_invariant": "NoUnsafeException",
+     "edits": [
+      {
+       "old": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "new": "SafeLocal == s.called /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "count": 1
+      },
+      {
+       "old": "(local => token # \"absent\")",
+       "new": "TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "FailedInjectionCreatesProof",
+     "expect_invariant": "NoUnsafeException",
+     "edits": [
+      {
+       "old": "!.completed=s.rawOK /\\ s.inbound",
+       "new": "!.completed=s.inbound",
+       "count": 1
+      },
+      {
+       "old": "!.eligible=s.rawOK /\\ s.inbound /\\ s.sharedLive",
+       "new": "!.eligible=s.inbound /\\ s.sharedLive",
+       "count": 1
+      },
+      {
+       "old": "!.producerResult=IF s.rawOK /\\ s.inbound /\\ s.sharedLive",
+       "new": "!.producerResult=IF s.inbound /\\ s.sharedLive",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreMixedTransportFailure",
+     "expect_invariant": "NoUnsafeException",
+     "edits": [
+      {
+       "old": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "new": "SafeLocal == s.called /\\ s.claimed /\\ s.completed\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "count": 1
+      },
+      {
+       "old": "!.producerResult=IF s.rawOK /\\ s.inbound /\\ s.sharedLive",
+       "new": "!.producerResult=IF s.rawOK /\\ s.inbound",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptForeignMarker",
+     "expect_invariant": "NoUnsafeException",
+     "edits": [
+      {
+       "old": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "new": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\")) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptProviderWrap",
+     "expect_invariant": "NoUnsafeException",
+     "edits": [
+      {
+       "old": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "new": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation \\in {\"same\",\"wrapped\"}))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptIndependentProviderError",
+     "expect_invariant": "NoUnsafeException",
+     "edits": [
+      {
+       "old": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "new": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation \\in {\"same\",\"other\"}))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptSwallowedCallback",
+     "expect_invariant": "NoUnsafeException",
+     "edits": [
+      {
+       "old": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "new": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreOriginalCancellation",
+     "expect_invariant": "NoUnsafeException",
+     "edits": [
+      {
+       "old": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "new": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ Live /\\ ~s.invalid\n",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreOwnerSeal",
+     "expect_invariant": "NoUnsafeException",
+     "edits": [
+      {
+       "old": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "new": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ ~s.invalid\n",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "OutboundException",
+     "expect_invariant": "NoUnsafeException",
+     "edits": [
+      {
+       "old": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "new": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "count": 1
+      },
+      {
+       "old": "!.completed=s.rawOK /\\ s.inbound",
+       "new": "!.completed=s.rawOK",
+       "count": 1
+      },
+      {
+       "old": "!.eligible=s.rawOK /\\ s.inbound /\\ s.sharedLive",
+       "new": "!.eligible=s.rawOK /\\ s.sharedLive",
+       "count": 1
+      },
+      {
+       "old": "!.producerResult=IF s.rawOK /\\ s.inbound /\\ s.sharedLive",
+       "new": "!.producerResult=IF s.rawOK /\\ s.sharedLive",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ObservationException",
+     "expect_invariant": "NoUnsafeException",
+     "edits": [
+      {
+       "old": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound /\\ s.kind=\"frame\"\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "new": "SafeLocal == s.called /\\ s.claimed /\\ s.completed /\\ s.eligible\n /\\ (s.producerResult=\"nil\" \\/ (s.producerResult=\"marker\" /\\ s.markerMatches)) /\\ s.inbound\n /\\ ((s.callbackResult=\"nil\" /\\ s.propagation=\"nil\") \\/\n       (s.callbackResult=\"wrapper\" /\\ s.propagation=\"same\"))\n /\\ s.childCanceled /\\ Live /\\ ~s.invalid\n",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DiscardCompletedInboundException",
+     "expect_invariant": "NoNeedlessSeal",
+     "edits": [
+      {
+       "old": "(s.called /\\ ~accepted /\\ ~SafeLocal)",
+       "new": "(s.called /\\ ~accepted)",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ResetTokenAfterSuccessfulCall",
+     "expect_invariant": "NoTokenReplay",
+     "edits": [
+      {
+       "old": "!.success=accepted,",
+       "new": "!.success=accepted, !.tokenUsed=IF accepted THEN FALSE ELSE @,",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "OwnedProbeAttachmentLifecycle",
+   "model": "formal/OwnedProbeAttachmentLifecycle.tla",
+   "config": "formal/OwnedProbeAttachmentLifecycle.cfg",
+   "source_scope": [
+    "internal/workload/guesttcp/owned_probe_attachment.go"
+   ],
+   "bounds": "One preissued owner and immutable descriptor, two attachment attempts, one constructor, independent pending/ok/error owner and transport joins. Exhaustive finite safety abstraction.",
+   "properties": [
+    "TypeOK",
+    "NoInvalidAdmission",
+    "SingleAttach",
+    "TransferredOnlySuccess",
+    "ReturnedTransferExact",
+    "PublishedOnlyBound",
+    "NoLatePublish",
+    "RetainedFailureHandle",
+    "IndependentJoins",
+    "OwnerDebt",
+    "TransportDebt",
+    "ImmutableDescriptor",
+    "AdmissionOnlyContext"
+   ],
+   "limits": "Actual provider fencing, descriptor byte validation/copying, ARP/TCP parsers, constructor internals, global quota contention and physical completion are external obligations; component Done means actual successful component join, not elapsed time. No liveness proof.",
+   "mutants": [
+    {
+     "id": "IgnoreRevokedAdmission",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": "admit == Admission",
+       "new": "admit == ~s.callerExpired /\\ ~s.reserved",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreExpiredAdmission",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": "admit == Admission",
+       "new": "admit == ~s.terminal /\\ ~s.reserved",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReuseReservedOwner",
+     "expect_invariant": "NoInvalidAdmission",
+     "edits": [
+      {
+       "old": "admit == Admission",
+       "new": "admit == ~s.terminal /\\ ~s.callerExpired",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "TransferOnFailedConstruction",
+     "expect_invariant": "TransferredOnlySuccess",
+     "edits": [
+      {
+       "old": "!.buildSuccess=ok, !.transportSlot=ok",
+       "new": "!.buildSuccess=ok, !.transportSlot=ok, !.transferred=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForgetTransferredService",
+     "expect_invariant": "ReturnedTransferExact",
+     "edits": [
+      {
+       "old": "!.retainedTransport=TRUE, !.transferred=TRUE",
+       "new": "!.retainedTransport=TRUE, !.transferred=FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PublishFailedBinding",
+     "expect_invariant": "PublishedOnlyBound",
+     "edits": [
+      {
+       "old": "!.phase=IF ok THEN \"bound\" ELSE \"failed\", !.bound=ok",
+       "new": "!.phase=\"bound\", !.bound=ok",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PublishAfterRevoke",
+     "expect_invariant": "NoLatePublish",
+     "edits": [
+      {
+       "old": "allowed == ~s.terminal /\\ ~s.callerExpired",
+       "new": "allowed == ~s.callerExpired",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PublishAfterCallerExpiry",
+     "expect_invariant": "NoLatePublish",
+     "edits": [
+      {
+       "old": "allowed == ~s.terminal /\\ ~s.callerExpired",
+       "new": "allowed == ~s.terminal",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DropFailureHandle",
+     "expect_invariant": "RetainedFailureHandle",
+     "edits": [
+      {
+       "old": "!.phase=\"done\", !.returned=TRUE, !.handle=TRUE]",
+       "new": "!.phase=\"done\", !.returned=TRUE, !.handle=FALSE]",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "InferTransportFromOwner",
+     "expect_invariant": "IndependentJoins",
+     "edits": [
+      {
+       "old": "(~s.retainedTransport \\/ s.transportResult=\"ok\") /\\ ~s.composedSuccess",
+       "new": "TRUE /\\ ~s.composedSuccess",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "InferOwnerFromTransport",
+     "expect_invariant": "IndependentJoins",
+     "edits": [
+      {
+       "old": "WaitSuccess == /\\ s.returned /\\ s.ownerResult=\"ok\"",
+       "new": "WaitSuccess == /\\ s.returned",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReleaseFailedOwner",
+     "expect_invariant": "OwnerDebt",
+     "edits": [
+      {
+       "old": "!.ownerSlot=~ok",
+       "new": "!.ownerSlot=FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReleaseFailedTransport",
+     "expect_invariant": "TransportDebt",
+     "edits": [
+      {
+       "old": "!.transportSlot=~ok",
+       "new": "!.transportSlot=FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RebindAtConstruction",
+     "expect_invariant": "ImmutableDescriptor",
+     "edits": [
+      {
+       "old": "!.phase=\"constructing\", !.constructions=@+1",
+       "new": "!.phase=\"constructing\", !.constructions=@+1, !.descriptor=2",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UseCallerLifetime",
+     "expect_invariant": "AdmissionOnlyContext",
+     "edits": [
+      {
+       "old": "!.phase=\"constructing\", !.constructions=@+1",
+       "new": "!.phase=\"constructing\", !.constructions=@+1, !.requestLifetimeUsed=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RepeatConstructor",
+     "expect_invariant": "SingleAttach",
+     "edits": [
+      {
+       "old": "Construct == /\\ s.phase=\"reserved\"",
+       "new": "Construct == /\\ s.phase \\in {\"reserved\",\"constructing\"} /\\ s.constructions<2",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "OwnedProbeDispatchPolicy",
+   "model": "formal/OwnedProbeDispatchPolicy.tla",
+   "config": "formal/OwnedProbeDispatchPolicy.cfg",
+   "source_scope": [
+    "internal/workload/guestnet/arp.go",
+    "internal/workload/guesttcp/owned_probe_session.go"
+   ],
+   "bounds": "Canonical reply plus14single-field corruptions, immutable original/caller mutation; explicit normalized probe/passive tuples including source port boundaries; five frame classes, three directions and independent opt-in/presence/readiness booleans.",
+   "properties": [
+    "ImmutableCanonical",
+    "ExactReplyMatch",
+    "DispatchSound",
+    "DispatchComplete"
+   ],
+   "limits": "Only MatchesReply canonical field equality and owner frame branch/normalized tuple selection. Existing ARP request parser/TCP parser assumed separate validated operations; no complete byte grammar/refinement, raw-to-normalized tuple orientation proof, physical authority, descriptor issuance or runtime lifecycle claim.",
+   "mutants": [
+    {
+     "id": "IgnoreReply_length",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.length=60]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_eth",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.eth=2054]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_padding",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.padding=0]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_dst",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.dst=1]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_src",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.src=2]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_htype",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.htype=1]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_ptype",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.ptype=2048]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_hlen",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.hlen=6]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_plen",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.plen=4]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_op",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.op=2]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_smac",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.smac=2]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_sip",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.sip=2]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_tmac",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.tmac=1]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreReply_tip",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "[packet EXCEPT !.tip=1]=captured",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreResponderPresence",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "MatchReply == present /\\ ready",
+       "new": "MatchReply == ready",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreResponderReady",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "MatchReply == present /\\ ready",
+       "new": "MatchReply == present",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UseMutatedCallerBinding",
+     "expect_invariant": "ExactReplyMatch",
+     "edits": [
+      {
+       "old": "packet=captured",
+       "new": "packet=caller",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreARPOptIn",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "IF arpEnabled /\\ kind",
+       "new": "IF kind",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReverseARPDirection",
+     "expect_invariant": "DispatchComplete",
+     "edits": [
+      {
+       "old": "IF direction=\"from\" THEN kind=\"request\"",
+       "new": "IF direction=\"to\" THEN kind=\"request\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RemoveReplyDirection",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "ELSE direction=\"to\" /\\ kind=\"reply\"",
+       "new": "ELSE kind=\"reply\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DropARPEarlyBranch",
+     "expect_invariant": "DispatchComplete",
+     "edits": [
+      {
+       "old": "IF arpEnabled /\\ kind",
+       "new": "IF FALSE /\\ kind",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnorePassiveOptIn",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "((passiveEnabled /\\ PassiveAllowed) \\/ ProbeAllowed)",
+       "new": "(PassiveAllowed \\/ ProbeAllowed)",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreTCPDirection",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "kind=\"tcp\" /\\ DirectionOK",
+       "new": "kind=\"tcp\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AllowMalformedTCP",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "ELSE kind=\"tcp\" /\\ DirectionOK",
+       "new": "ELSE kind \\in {\"tcp\",\"malformed\"} /\\ DirectionOK",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreProbe_localIP",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "ProbeAllowed == tuple.localIP=2 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort>=40000 /\\ tuple.localPort<=41023 /\\ tuple.peerPort=80",
+       "new": "ProbeAllowed == TRUE /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort>=40000 /\\ tuple.localPort<=41023 /\\ tuple.peerPort=80",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreProbe_peerIP",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "ProbeAllowed == tuple.localIP=2 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort>=40000 /\\ tuple.localPort<=41023 /\\ tuple.peerPort=80",
+       "new": "ProbeAllowed == tuple.localIP=2 /\\ TRUE /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort>=40000 /\\ tuple.localPort<=41023 /\\ tuple.peerPort=80",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreProbe_localMAC",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "ProbeAllowed == tuple.localIP=2 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort>=40000 /\\ tuple.localPort<=41023 /\\ tuple.peerPort=80",
+       "new": "ProbeAllowed == tuple.localIP=2 /\\ tuple.peerIP=1 /\\ TRUE /\\ tuple.peerMAC=1\n /\\ tuple.localPort>=40000 /\\ tuple.localPort<=41023 /\\ tuple.peerPort=80",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreProbe_peerMAC",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "ProbeAllowed == tuple.localIP=2 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort>=40000 /\\ tuple.localPort<=41023 /\\ tuple.peerPort=80",
+       "new": "ProbeAllowed == tuple.localIP=2 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ TRUE\n /\\ tuple.localPort>=40000 /\\ tuple.localPort<=41023 /\\ tuple.peerPort=80",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreProbe_peerPort",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "ProbeAllowed == tuple.localIP=2 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort>=40000 /\\ tuple.localPort<=41023 /\\ tuple.peerPort=80",
+       "new": "ProbeAllowed == tuple.localIP=2 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort>=40000 /\\ tuple.localPort<=41023 /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreProbeLowerPort",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "tuple.localPort>=40000",
+       "new": "TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnoreProbeUpperPort",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "tuple.localPort<=41023",
+       "new": "TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnorePassive_localIP",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "PassiveAllowed == tuple.localIP=3 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort=8080",
+       "new": "PassiveAllowed == TRUE /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort=8080",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnorePassive_peerIP",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "PassiveAllowed == tuple.localIP=3 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort=8080",
+       "new": "PassiveAllowed == tuple.localIP=3 /\\ TRUE /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort=8080",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnorePassive_localMAC",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "PassiveAllowed == tuple.localIP=3 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort=8080",
+       "new": "PassiveAllowed == tuple.localIP=3 /\\ tuple.peerIP=1 /\\ TRUE /\\ tuple.peerMAC=1\n /\\ tuple.localPort=8080",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnorePassive_peerMAC",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "PassiveAllowed == tuple.localIP=3 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort=8080",
+       "new": "PassiveAllowed == tuple.localIP=3 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ TRUE\n /\\ tuple.localPort=8080",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IgnorePassive_localPort",
+     "expect_invariant": "DispatchSound",
+     "edits": [
+      {
+       "old": "PassiveAllowed == tuple.localIP=3 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ tuple.localPort=8080",
+       "new": "PassiveAllowed == tuple.localIP=3 /\\ tuple.peerIP=1 /\\ tuple.localMAC=2 /\\ tuple.peerMAC=1\n /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "CaptureWrongCanonical",
+     "expect_invariant": "ImmutableCanonical",
+     "edits": [
+      {
+       "old": "captured'=caller",
+       "new": "captured'=[caller EXCEPT !.sip=9]",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "EC2GuestAttachmentLifecycle",
+   "model": "formal/EC2GuestAttachmentLifecycle.tla",
+   "config": "formal/EC2GuestAttachmentLifecycle.cfg",
+   "bounds": "One held lease, one retained association/reservation, one owner and transport construction, one seal, one profile mutation, one held-to-contain advance and one restart. Symbolic fixed deadlines and exact identity; all finite schedules from empty journal, no seeds or depth cutoff.",
+   "source_scope": [
+    "internal/aws/ec2_guest_attachment.go",
+    "internal/aws/ec2_guest_lease.go",
+    "internal/aws/iam_instance_profiles.go"
+   ],
+   "properties": [
+    "TypeOK",
+    "PreparationExact",
+    "DurableBeforeConsumption",
+    "RegisteredBeforeIO",
+    "PublicationAdmission",
+    "SealBeforeAck",
+    "DurableSealAck",
+    "BackendIndependent",
+    "IndependentDrain",
+    "AdvanceGuard",
+    "ProfileGuard",
+    "ImmutableAssociation",
+    "RetainedScope",
+    "NoReconstruction"
+   ],
+   "limits": "Only attachment coordinator ordering and the held-to-contain Advance/profile association guard seams; later release transitions are not modeled. SQL atomicity and qualified provider transaction are assumptions, not Go/SQLite/physical proof. No role trust or inline policy guard, actual issuer, native termination, quota contention or liveness. Local drain is not backend containment. Restart cannot fence a surviving external process.",
+   "mutants": [
+    {
+     "id": "IgnoreAssociation",
+     "expect_invariant": "PreparationExact",
+     "edits": [
+      {
+       "old": "s.known /\\ s.match",
+       "new": "s.known",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PrepareAfterLeaseAdvance",
+     "expect_invariant": "PreparationExact",
+     "edits": [
+      {
+       "old": "s.db=\"absent\" /\\ s.lease=\"held\" /\\ s.profile",
+       "new": "s.db=\"absent\" /\\ s.profile",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PrepareDeletedProfile",
+     "expect_invariant": "PreparationExact",
+     "edits": [
+      {
+       "old": "s.lease=\"held\" /\\ s.profile /\\ (ack => write)",
+       "new": "s.lease=\"held\" /\\ (ack => write)",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ConsumeBeforeJournal",
+     "expect_invariant": "DurableBeforeConsumption",
+     "edits": [
+      {
+       "old": "s.stage=\"prepared\" /\\ s.known /\\ s.prepAck",
+       "new": "s.stage=\"reserved\" /\\ s.known",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AdoptUnknownPrepare",
+     "expect_invariant": "DurableBeforeConsumption",
+     "edits": [
+      {
+       "old": "!.stage=IF ack THEN \"prepared\" ELSE \"abandoned\",\n !.sealed=@ \\/ ~ack",
+       "new": "!.stage=\"prepared\",\n !.sealed=@",
+       "count": 1
+      },
+      {
+       "old": "s.known /\\ s.prepAck /\\ ~s.sealed",
+       "new": "s.known /\\ ~s.sealed",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "TransportBeforeRegistration",
+     "expect_invariant": "RegisteredBeforeIO",
+     "edits": [
+      {
+       "old": "s.stage=\"registered\" /\\ s.known /\\ s.registered",
+       "new": "s.stage=\"constructing\" /\\ s.known",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "TransportAfterSeal",
+     "expect_invariant": "RegisteredBeforeIO",
+     "edits": [
+      {
+       "old": "/\\ ~s.sealed /\\ ~s.revoked /\\ ~s.canceled",
+       "new": "/\\ ~s.canceled",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PublishAfterSeal",
+     "expect_invariant": "PublicationAdmission",
+     "edits": [
+      {
+       "old": "s.stage=\"committed\" /\\ s.known /\\ ~s.sealed /\\ ~s.canceled",
+       "new": "s.stage=\"committed\" /\\ s.known /\\ ~s.canceled",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PublishAfterCancellation",
+     "expect_invariant": "PublicationAdmission",
+     "edits": [
+      {
+       "old": "s.stage=\"committed\" /\\ s.known /\\ ~s.sealed /\\ ~s.canceled",
+       "new": "s.stage=\"committed\" /\\ s.known /\\ ~s.sealed",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "PublishUnknownCommit",
+     "expect_invariant": "PublicationAdmission",
+     "edits": [
+      {
+       "old": "!.attachedAck=ack, !.stage=IF ack THEN \"committed\" ELSE \"failed\"",
+       "new": "!.attachedAck=ack, !.stage=\"committed\"",
+       "count": 1
+      },
+      {
+       "old": "s.prepAck /\\ s.attachedAck /\\ s.transportOK",
+       "new": "s.prepAck /\\ s.transportOK",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "SealWithoutOwnerRevoke",
+     "expect_invariant": "SealBeforeAck",
+     "edits": [
+      {
+       "old": "!.revoked=@ \\/ s.capturedOwner",
+       "new": "!.revoked=@",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcknowledgeUnwrittenSeal",
+     "expect_invariant": "DurableSealAck",
+     "edits": [
+      {
+       "old": "s.db#\"absent\" /\\ (ack => write)",
+       "new": "s.db#\"absent\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DrainWithoutOwnerJoin",
+     "expect_invariant": "IndependentDrain",
+     "edits": [
+      {
+       "old": "/\\ s.ownerDrain /\\ (~s.transport \\/ s.transportDrain)",
+       "new": "/\\ (~s.transport \\/ s.transportDrain)",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DrainWithoutTransportJoin",
+     "expect_invariant": "IndependentDrain",
+     "edits": [
+      {
+       "old": "/\\ s.ownerDrain /\\ (~s.transport \\/ s.transportDrain)",
+       "new": "/\\ s.ownerDrain",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DrainDuringConstruction",
+     "expect_invariant": "IndependentDrain",
+     "edits": [
+      {
+       "old": "/\\ s.constructorDone",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "LocalDrainClaimsBackend",
+     "expect_invariant": "BackendIndependent",
+     "edits": [
+      {
+       "old": "!.db=\"drained\",",
+       "new": "!.db=\"drained\", !.lease=\"contained\",",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "OrdinaryAdvanceBypass",
+     "expect_invariant": "AdvanceGuard",
+     "edits": [
+      {
+       "old": "(coordinated /\\ s.known /\\ s.db=\"sealed\" /\\ s.sealed /\\ s.sealAck)",
+       "new": "(s.known /\\ s.db=\"sealed\" /\\ s.sealed /\\ s.sealAck)",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AdvanceBeforeSeal",
+     "expect_invariant": "AdvanceGuard",
+     "edits": [
+      {
+       "old": "(coordinated /\\ s.known /\\ s.db=\"sealed\" /\\ s.sealed /\\ s.sealAck)",
+       "new": "(coordinated /\\ s.known)",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AdvanceWrongIdentity",
+     "expect_invariant": "AdvanceGuard",
+     "edits": [
+      {
+       "old": "s.lease=\"held\" /\\ exact",
+       "new": "s.lease=\"held\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ProfileGuardRemoved",
+     "expect_invariant": "ProfileGuard",
+     "edits": [
+      {
+       "old": "(~same \\/ s.db \\in {\"absent\",\"drained\"})",
+       "new": "TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RestartRestoresReceipt",
+     "expect_invariant": "NoReconstruction",
+     "edits": [
+      {
+       "old": "!.known=FALSE, !.restarted=TRUE",
+       "new": "!.known=TRUE, !.restarted=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RenewAttachmentDeadline",
+     "expect_invariant": "ImmutableAssociation",
+     "edits": [
+      {
+       "old": "!.stage=\"registered\", !.owner=TRUE",
+       "new": "!.stage=\"registered\", !.deadline=2, !.owner=TRUE",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "SSMDocumentState",
+   "model": "formal/SSMDocumentState.tla",
+   "config": "formal/SSMDocumentState.cfg",
+   "bounds": "Two independent addresses, two abstract values, at most two versions and one live document. Two versions is an exploration cutoff, not runtime quota.",
+   "properties": [
+    "TypeOK",
+    "DeniedPreserves",
+    "RefusalPreserves",
+    "AddressIsolation",
+    "HistoryImmutable",
+    "DefaultPreserved",
+    "DeleteCleanup",
+    "LatestPrecondition",
+    "CreateOnlyAbsent"
+   ],
+   "limits": "Definition management only. Atomic abstract transitions assume transaction commit/rollback; no SQL refinement, parser, IAM evaluation, byte quota, wire, persistence, concurrency or execution proof.",
+   "source_scope": [
+    "internal/aws/ssm_documents.go",
+    "internal/aws/ssm_documents_api.go",
+    "internal/aws/ssm_documents_validation.go",
+    "internal/aws/s3.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "IgnoreExplicitDeny",
+     "edits": [
+      {
+       "old": "Permitted(allow, deny) == allow /\\ ~deny",
+       "new": "Permitted(allow, deny) == allow",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeniedPreserves"
+    },
+    {
+     "id": "SkipLatestVersion",
+     "edits": [
+      {
+       "old": "expected = Len(versions[a])",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LatestPrecondition"
+    },
+    {
+     "id": "ReplaceHistory",
+     "edits": [
+      {
+       "old": "ELSE Append(@, value)",
+       "new": "ELSE <<value>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HistoryImmutable"
+    },
+    {
+     "id": "KeepDeletedVersions",
+     "edits": [
+      {
+       "old": "IF op = \"delete\" THEN <<>> ELSE Append(@, value)",
+       "new": "IF op = \"delete\" THEN @ ELSE Append(@, value)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeleteCleanup"
+    },
+    {
+     "id": "SkipGlobalCount",
+     "edits": [
+      {
+       "old": "Cardinality(Present(versions)) < MaxDocuments",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TypeOK"
+    }
+   ]
+  },
+  {
+   "id": "CanonicalVMComposition",
+   "model": "formal/CanonicalVMComposition.tla",
+   "config": "formal/CanonicalVMComposition.cfg",
+   "bounds": "Five disjoint initial modes: one canonical launch, one network ownership operation, one asynchronous creator, or one explicit runtime configuration, or one saved typed provider/Host association and operation. One immutable identity compared with a foreign identity; one cancellation, restart, child, pending stack generation and cleanup. All finite schedules, no depth cutoff.",
+   "source_scope": [
+    "internal/aws/ec2_cloudformation_adapter_linux.go",
+    "internal/aws/ec2_cloudformation_runtime_linux.go",
+    "internal/aws/ec2_vm_backend_linux.go",
+    "internal/aws/ec2_vm_nic_guard.go",
+    "internal/aws/ec2_vm_nic_linux.go",
+    "internal/aws/ec2_vm_qga_readiness_linux.go",
+    "internal/workload/guestbundle/bundle.go",
+    "internal/workload/guestbundle/embedded.go",
+    "internal/workload/guestprocess/attempt_linux.go",
+    "internal/workload/guestprocess/attempt_other.go",
+    "internal/workload/guestprocess/nic_linux.go",
+    "internal/workload/guestprocess/process.go",
+    "internal/workload/guestprocess/process_linux.go",
+    "internal/workload/guestprocess/process_other.go",
+    "internal/workload/guestprocess/supervisor_linux.go",
+    "internal/workload/guestseed/network.go",
+    "internal/workload/guestseed/seed.go",
+    "internal/workload/guestvm/control.go",
+    "internal/workload/guestvm/launch.go",
+    "internal/workload/guestvm/network.go",
+    "internal/workload/guestvm/nic_linux.go",
+    "internal/workload/guestvm/prepare.go",
+    "internal/workload/guestvm/recover.go",
+    "internal/workload/qmp/client.go",
+    "internal/workload/qmp/protocol.go",
+    "internal/aws/cloudformation_instance.go",
+    "internal/aws/ec2_instance_cloudformation.go",
+    "internal/aws/ec2_network.go",
+    "internal/aws/ec2_network_actor.go",
+    "internal/aws/ec2_network_cloudformation.go",
+    "cmd/simulator/battle_runtime_linux.go",
+    "cmd/simulator/battle_runtime_other.go",
+    "internal/server/battle_runtime_linux.go",
+    "internal/server/ssm_runtime_capabilities.go",
+    "internal/server/battle_capabilities_linux.go",
+    "cmd/simulator/main.go",
+    "internal/aws/cloudformation.go",
+    "internal/server/server.go",
+    "internal/server/sakura_provider.go"
+   ],
+   "properties": [
+    "TypeOK",
+    "PinnedPlan",
+    "JournalBeforeLaunch",
+    "PreparedIdentity",
+    "PausedExactControl",
+    "ExactAttachment",
+    "AttachBeforeActivation",
+    "PrivateAgentReadiness",
+    "PublicationAdmission",
+    "IndependentCleanup",
+    "ObservedContainment",
+    "ReleaseAfterContainment",
+    "NetworkOwnership",
+    "FrozenNetwork",
+    "AuthorizedDelete",
+    "CreatorAdmission",
+    "NoReconstruction",
+    "UncertainDebtRetained",
+    "ConfigurationAdmission",
+    "ConfiguredIsNotReady",
+    "TypedProvider",
+    "SavedAssociation",
+    "NoRebinding",
+    "SavedOperationAuthority"
+   ],
+   "limits": "Companion to unchanged EC2GuestAttachmentLifecycle, not a replacement. Checks ordering of pinned planning, durable readback, captured paused QMP ownership, attachment/activation, private QGA readiness, generation publication, teardown, network ownership and child admission. Equality/validity predicates abstract byte validation and SQL/OS APIs; no proof of parser correctness, actual networking, cryptography, PID/FD identity, resource quota cardinality, packet routing, real image execution, liveness or Go refinement. Separate modes do not prove arbitrary cross-mode interference. Restart cannot recover physical authority. Successful checking is not physical Battle acceptance.",
+   "mutants": [
+    {
+     "id": "UnpinnedPlan",
+     "expect_invariant": "PinnedPlan",
+     "edits": [
+      {
+       "old": "/\\ pinned /\\ sameStack /\\ Valid",
+       "new": "/\\ sameStack /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignStackPlan",
+     "expect_invariant": "PinnedPlan",
+     "edits": [
+      {
+       "old": "/\\ pinned /\\ sameStack /\\ Valid",
+       "new": "/\\ pinned /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnknownJournalReadback",
+     "expect_invariant": "JournalBeforeLaunch",
+     "edits": [
+      {
+       "old": "/\\ Valid /\\ intentWrite /\\ intentReadback",
+       "new": "/\\ Valid /\\ intentWrite",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnwrittenReservation",
+     "expect_invariant": "JournalBeforeLaunch",
+     "edits": [
+      {
+       "old": "/\\ Valid /\\ intentWrite /\\ intentReadback",
+       "new": "/\\ Valid /\\ intentReadback",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "WrongPreparedIdentity",
+     "expect_invariant": "PreparedIdentity",
+     "edits": [
+      {
+       "old": "s.phase=\"reserved\" /\\ exact /\\ Valid",
+       "new": "s.phase=\"reserved\" /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignControl",
+     "expect_invariant": "PausedExactControl",
+     "edits": [
+      {
+       "old": "/\\ exact /\\ stopped /\\ Valid",
+       "new": "/\\ stopped /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RunningBeforeAttachment",
+     "expect_invariant": "PausedExactControl",
+     "edits": [
+      {
+       "old": "/\\ exact /\\ stopped /\\ Valid",
+       "new": "/\\ exact /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignAttachment",
+     "expect_invariant": "ExactAttachment",
+     "edits": [
+      {
+       "old": "/\\ exact /\\ ack /\\ Valid",
+       "new": "/\\ ack /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnknownAttachmentCommit",
+     "expect_invariant": "ExactAttachment",
+     "edits": [
+      {
+       "old": "/\\ exact /\\ ack /\\ Valid",
+       "new": "/\\ exact /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ActivateAfterSeal",
+     "expect_invariant": "AttachBeforeActivation",
+     "edits": [
+      {
+       "old": "s.phase=\"attached\" /\\ Valid",
+       "new": "s.phase=\"attached\" /\\ s.live",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignAgent",
+     "expect_invariant": "PrivateAgentReadiness",
+     "edits": [
+      {
+       "old": "/\\ exact /\\ ready /\\ Valid",
+       "new": "/\\ ready /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnreadyAgent",
+     "expect_invariant": "PrivateAgentReadiness",
+     "edits": [
+      {
+       "old": "/\\ exact /\\ ready /\\ Valid",
+       "new": "/\\ exact /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignPublication",
+     "expect_invariant": "PublicationAdmission",
+     "edits": [
+      {
+       "old": "/\\ s.pending /\\ s.qga /\\ sameGeneration /\\ Valid",
+       "new": "/\\ s.pending /\\ s.qga /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "LatePublication",
+     "expect_invariant": "PublicationAdmission",
+     "edits": [
+      {
+       "old": "/\\ s.pending /\\ s.qga /\\ sameGeneration /\\ Valid",
+       "new": "/\\ s.pending /\\ s.qga /\\ sameGeneration /\\ s.live",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "SkipOwnerJoin",
+     "expect_invariant": "IndependentCleanup",
+     "edits": [
+      {
+       "old": "/\\ s.sealed /\\ s.captured /\\ s.ownerJoin /\\ s.transportJoin",
+       "new": "/\\ s.sealed /\\ s.captured /\\ s.transportJoin",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "SkipTransportJoin",
+     "expect_invariant": "IndependentCleanup",
+     "edits": [
+      {
+       "old": "/\\ s.sealed /\\ s.captured /\\ s.ownerJoin /\\ s.transportJoin",
+       "new": "/\\ s.sealed /\\ s.captured /\\ s.ownerJoin",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AssumeContainment",
+     "expect_invariant": "ObservedContainment",
+     "edits": [
+      {
+       "old": "/\\ s.live /\\ exact /\\ observed /\\ ~s.contained",
+       "new": "/\\ s.live /\\ exact /\\ ~s.contained",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReleaseBeforeContainment",
+     "expect_invariant": "ReleaseAfterContainment",
+     "edits": [
+      {
+       "old": "s.mode=\"launch\" /\\ s.contained /\\ s.live /\\ ~s.released",
+       "new": "s.mode=\"launch\" /\\ s.localDrained /\\ s.live /\\ ~s.released",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignNetwork",
+     "expect_invariant": "NetworkOwnership",
+     "edits": [
+      {
+       "old": "/\\ same /\\ valid",
+       "new": "/\\ valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "MutateLeasedNetwork",
+     "expect_invariant": "FrozenNetwork",
+     "edits": [
+      {
+       "old": "/\\ ~s.mutated /\\ (~same \\/ ~s.held)",
+       "new": "/\\ ~s.mutated",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnauthorizedSeal",
+     "expect_invariant": "AuthorizedDelete",
+     "edits": [
+      {
+       "old": "/\\ authorized /\\ same /\\ ~s.sealed",
+       "new": "/\\ same /\\ ~s.sealed",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignDelete",
+     "expect_invariant": "AuthorizedDelete",
+     "edits": [
+      {
+       "old": "/\\ authorized /\\ same /\\ ~s.sealed",
+       "new": "/\\ authorized /\\ ~s.sealed",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnqualifiedChildFD",
+     "expect_invariant": "CreatorAdmission",
+     "edits": [
+      {
+       "old": "/\\ Valid /\\ validFD /\\ budget",
+       "new": "/\\ Valid /\\ budget",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnboundedCreators",
+     "expect_invariant": "CreatorAdmission",
+     "edits": [
+      {
+       "old": "/\\ Valid /\\ validFD /\\ budget",
+       "new": "/\\ Valid /\\ validFD",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "LateChildPublication",
+     "expect_invariant": "PublicationAdmission",
+     "edits": [
+      {
+       "old": "s.phase=\"returned\" /\\ Valid",
+       "new": "s.phase=\"returned\" /\\ s.live",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RestartRestoresAuthority",
+     "expect_invariant": "NoReconstruction",
+     "edits": [
+      {
+       "old": "!.restarted=TRUE, !.live=FALSE",
+       "new": "!.restarted=TRUE, !.live=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "LoseLateChildDebt",
+     "expect_invariant": "UncertainDebtRetained",
+     "edits": [
+      {
+       "old": "!.phase=\"returned\", !.captured=TRUE",
+       "new": "!.phase=\"returned\", !.debt=FALSE, !.captured=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnsupportedPlatform",
+     "expect_invariant": "ConfigurationAdmission",
+     "edits": [
+      {
+       "old": "/\\ platform /\\ strictFile /\\ pin /\\ explicit",
+       "new": "/\\ TRUE /\\ strictFile /\\ pin /\\ explicit",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "InvalidOperatorFile",
+     "expect_invariant": "ConfigurationAdmission",
+     "edits": [
+      {
+       "old": "/\\ platform /\\ strictFile /\\ pin /\\ explicit",
+       "new": "/\\ platform /\\ TRUE /\\ pin /\\ explicit",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnpinnedRuntime",
+     "expect_invariant": "ConfigurationAdmission",
+     "edits": [
+      {
+       "old": "/\\ platform /\\ strictFile /\\ pin /\\ explicit",
+       "new": "/\\ platform /\\ strictFile /\\ TRUE /\\ explicit",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ImplicitRuntime",
+     "expect_invariant": "ConfigurationAdmission",
+     "edits": [
+      {
+       "old": "/\\ platform /\\ strictFile /\\ pin /\\ explicit",
+       "new": "/\\ platform /\\ strictFile /\\ pin /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ConfiguredAdvertisesReady",
+     "expect_invariant": "ConfiguredIsNotReady",
+     "edits": [
+      {
+       "old": "!.advertised=TRUE]",
+       "new": "!.advertised=TRUE, !.published=TRUE]",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UntypedProvider",
+     "expect_invariant": "TypedProvider",
+     "edits": [
+      {
+       "old": "/\\ typed /\\ ready /\\ services /\\ Valid",
+       "new": "/\\ TRUE /\\ ready /\\ services /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnreadyProvider",
+     "expect_invariant": "TypedProvider",
+     "edits": [
+      {
+       "old": "/\\ typed /\\ ready /\\ services /\\ Valid",
+       "new": "/\\ typed /\\ TRUE /\\ services /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignProviderService",
+     "expect_invariant": "TypedProvider",
+     "edits": [
+      {
+       "old": "/\\ typed /\\ ready /\\ services /\\ Valid",
+       "new": "/\\ typed /\\ ready /\\ TRUE /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignHostOwner",
+     "expect_invariant": "SavedAssociation",
+     "edits": [
+      {
+       "old": "/\\ exactOwner /\\ exactBinding /\\ exactService",
+       "new": "/\\ TRUE /\\ exactBinding /\\ exactService",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignHostBinding",
+     "expect_invariant": "SavedAssociation",
+     "edits": [
+      {
+       "old": "/\\ exactOwner /\\ exactBinding /\\ exactService",
+       "new": "/\\ exactOwner /\\ TRUE /\\ exactService",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignHostService",
+     "expect_invariant": "SavedAssociation",
+     "edits": [
+      {
+       "old": "/\\ exactOwner /\\ exactBinding /\\ exactService",
+       "new": "/\\ exactOwner /\\ exactBinding /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReuseSourceNewKey",
+     "expect_invariant": "NoRebinding",
+     "edits": [
+      {
+       "old": "/\\ sameKey /\\ sameService /\\ s.phase=\"new\"",
+       "new": "/\\ sameService /\\ s.phase=\"new\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RebindSavedService",
+     "expect_invariant": "NoRebinding",
+     "edits": [
+      {
+       "old": "/\\ sameKey /\\ sameService /\\ s.phase=\"new\"",
+       "new": "/\\ sameKey /\\ s.phase=\"new\"",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "StartAfterRegistrySeal",
+     "expect_invariant": "SavedOperationAuthority",
+     "edits": [
+      {
+       "old": "/\\ ~s.operation /\\ operator /\\ savedBinding /\\ Valid",
+       "new": "/\\ ~s.operation /\\ operator /\\ savedBinding /\\ s.live",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "StartForeignTarget",
+     "expect_invariant": "SavedOperationAuthority",
+     "edits": [
+      {
+       "old": "/\\ ~s.operation /\\ operator /\\ savedBinding /\\ Valid",
+       "new": "/\\ ~s.operation /\\ operator /\\ Valid",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadForeignOperation",
+     "expect_invariant": "SavedOperationAuthority",
+     "edits": [
+      {
+       "old": "/\\ ~s.observed /\\ operator /\\ savedBinding",
+       "new": "/\\ ~s.observed /\\ operator",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadWithoutOperator",
+     "expect_invariant": "SavedOperationAuthority",
+     "edits": [
+      {
+       "old": "/\\ ~s.observed /\\ operator /\\ savedBinding",
+       "new": "/\\ ~s.observed /\\ savedBinding",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnknownPreparedReadback",
+     "expect_invariant": "JournalBeforeLaunch",
+     "edits": [
+      {
+       "old": "/\\ Valid /\\ write /\\ readback",
+       "new": "/\\ Valid /\\ write",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnwrittenPreparedRecord",
+     "expect_invariant": "JournalBeforeLaunch",
+     "edits": [
+      {
+       "old": "/\\ Valid /\\ write /\\ readback",
+       "new": "/\\ Valid /\\ readback",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "InstanceMetadataTokens",
+   "model": "formal/InstanceMetadataTokens.tla",
+   "config": "formal/InstanceMetadataTokens.cfg",
+   "bounds": "One instance-owned token slot (abstracts capacity eight), one request, one foreign token, time 0..2, lifetime2, TTL1or2. Every finite interleaving; no depth cutoff. Issue/read checks linearize at request admission, not response emission.",
+   "source_scope": [
+    "internal/aws/ec2_metadata_service_linux.go",
+    "internal/aws/ec2_instance_alias.go"
+   ],
+   "properties": [
+    "TypeOK",
+    "TokenAdmission",
+    "InstanceBoundRead",
+    "NoCredentials",
+    "BoundedExpiry"
+   ],
+   "limits": "Token identity is symbolic and belongs to exactly one private service map; random-byte uniqueness, TCP isolation, HTTP parsing and actual context-clock semantics are assumptions. local alias is data only, not routing authority. Four metadata fields only; credentials/signatures unsupported. Already admitted in-flight response may race Close; model does not falsely claim synchronous cancellation retracts it. Slot1 abstracts bounded quota, not full eight-entry eviction. Not a Go refinement or physical network proof.",
+   "mutants": [
+    {
+     "id": "ForeignToken",
+     "expect_invariant": "InstanceBoundRead",
+     "edits": [
+      {
+       "old": "token \\in s.tokens /\\ s.now<s.expires",
+       "new": "TRUE /\\ s.now<s.expires",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ExpiredToken",
+     "expect_invariant": "InstanceBoundRead",
+     "edits": [
+      {
+       "old": "token \\in s.tokens /\\ s.now<s.expires",
+       "new": "token \\in s.tokens",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "CredentialEndpoint",
+     "expect_invariant": "InstanceBoundRead",
+     "edits": [
+      {
+       "old": "path \\in {\"instance\",\"alias\",\"ip\",\"region\"}",
+       "new": "path \\in {\"instance\",\"alias\",\"ip\",\"region\",\"credentials\"}",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "WrongReadMethod",
+     "expect_invariant": "InstanceBoundRead",
+     "edits": [
+      {
+       "old": "s.now<s.expires /\\ methodOK",
+       "new": "s.now<s.expires",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "WrongTokenMethod",
+     "expect_invariant": "TokenAdmission",
+     "edits": [
+      {
+       "old": "/\\ s.request=\"none\" /\\ methodOK /\\ ttlOK /\\ ~forwarded /\\ randomOK",
+       "new": "/\\ s.request=\"none\" /\\ TRUE /\\ ttlOK /\\ ~forwarded /\\ randomOK",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "InvalidTTL",
+     "expect_invariant": "TokenAdmission",
+     "edits": [
+      {
+       "old": "/\\ s.request=\"none\" /\\ methodOK /\\ ttlOK /\\ ~forwarded /\\ randomOK",
+       "new": "/\\ s.request=\"none\" /\\ methodOK /\\ TRUE /\\ ~forwarded /\\ randomOK",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForwardedToken",
+     "expect_invariant": "TokenAdmission",
+     "edits": [
+      {
+       "old": "/\\ s.request=\"none\" /\\ methodOK /\\ ttlOK /\\ ~forwarded /\\ randomOK",
+       "new": "/\\ s.request=\"none\" /\\ methodOK /\\ ttlOK /\\ TRUE /\\ randomOK",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RandomFailure",
+     "expect_invariant": "TokenAdmission",
+     "edits": [
+      {
+       "old": "/\\ s.request=\"none\" /\\ methodOK /\\ ttlOK /\\ ~forwarded /\\ randomOK",
+       "new": "/\\ s.request=\"none\" /\\ methodOK /\\ ttlOK /\\ ~forwarded /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "IssueAfterClose",
+     "expect_invariant": "TokenAdmission",
+     "edits": [
+      {
+       "old": "Issue(methodOK,ttlOK,forwarded,randomOK,ttl) == /\\ ~s.closed",
+       "new": "Issue(methodOK,ttlOK,forwarded,randomOK,ttl) == /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadAfterClose",
+     "expect_invariant": "InstanceBoundRead",
+     "edits": [
+      {
+       "old": "Read(token,methodOK,path) == /\\ ~s.closed",
+       "new": "Read(token,methodOK,path) == /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnboundedExpiry",
+     "expect_invariant": "BoundedExpiry",
+     "edits": [
+      {
+       "old": "!.expires=IF s.now+ttl<s.deadline THEN s.now+ttl ELSE s.deadline",
+       "new": "!.expires=s.now+ttl",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "IAMConditionEvaluation",
+   "model": "formal/IAMConditionEvaluation.tla",
+   "config": "formal/IAMConditionEvaluation.cfg",
+   "properties": [
+    "TypeOK",
+    "StrictAdmission",
+    "TrustedContextRequired",
+    "AbsentContextDenyNotDiscarded",
+    "MissingOrDuplicateKeyRefuses",
+    "AllTermsRequired",
+    "ProviderContextOnly",
+    "VariableIsLiteral",
+    "EqualityNotGlob",
+    "ExplicitDenyPrecedence",
+    "AllowedWitness"
+   ],
+   "source_scope": [
+    "internal/core/policy_conditions.go",
+    "internal/core/policy.go"
+   ],
+   "mutants": [
+    {
+     "id": "AdmitOperator",
+     "edits": [
+      {
+       "old": "ParseOK(i) == i.defect=\"none\"",
+       "new": "ParseOK(i) == i.defect \\in {\"none\",\"operator\"}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StrictAdmission"
+    },
+    {
+     "id": "AdmitNull",
+     "edits": [
+      {
+       "old": "ParseOK(i) == i.defect=\"none\"",
+       "new": "ParseOK(i) == i.defect \\in {\"none\",\"null\"}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StrictAdmission"
+    },
+    {
+     "id": "AdmitDuplicate",
+     "edits": [
+      {
+       "old": "ParseOK(i) == i.defect=\"none\"",
+       "new": "ParseOK(i) == i.defect \\in {\"none\",\"duplicate\"}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StrictAdmission"
+    },
+    {
+     "id": "AdmitVariable",
+     "edits": [
+      {
+       "old": "ParseOK(i) == i.defect=\"none\"",
+       "new": "ParseOK(i) == i.defect \\in {\"none\",\"variable\"}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StrictAdmission"
+    },
+    {
+     "id": "MissingContextAccepted",
+     "edits": [
+      {
+       "old": "ContextOK(i) == i.trusted",
+       "new": "ContextOK(i) == i.trusted \\/ ~i.deny",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TrustedContextRequired"
+    },
+    {
+     "id": "MissingContextDropsDeny",
+     "edits": [
+      {
+       "old": "ContextOK(i) == i.trusted",
+       "new": "ContextOK(i) == i.trusted \\/ i.deny",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AbsentContextDenyNotDiscarded"
+    },
+    {
+     "id": "RequestContextOverride",
+     "edits": [
+      {
+       "old": "BoundTeam(i) == i.team",
+       "new": "BoundTeam(i) == IF i.team=\"b\" THEN \"a\" ELSE i.team",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllTermsRequired"
+    },
+    {
+     "id": "VariableExpandedAsWildcard",
+     "edits": [
+      {
+       "old": "THEN i.resource=i.user",
+       "new": "THEN (i.resource=i.user \\/ i.user=\"a*\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "VariableIsLiteral"
+    },
+    {
+     "id": "EqualsBecomesGlob",
+     "edits": [
+      {
+       "old": "ELSE i.resource=i.pattern",
+       "new": "ELSE (i.resource=i.pattern \\/ i.pattern=\"a*\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EqualityNotGlob"
+    },
+    {
+     "id": "DenyLosesPrecedence",
+     "edits": [
+      {
+       "old": "IF s.input.deny THEN \"explicitDeny\"",
+       "new": "IF s.input.deny THEN \"allowed\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExplicitDenyPrecedence"
+    },
+    {
+     "id": "LikeDisabled",
+     "edits": [
+      {
+       "old": "i.resource \\in {\"a\",\"abc\"}",
+       "new": "FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllowedWitness"
+    },
+    {
+     "id": "MissingClauseDropped",
+     "edits": [
+      {
+       "old": "KeyOK(i) /\\ BoundTeam(i) \\in {\"a\",\"c\"} /\\ Match(i)",
+       "new": "(KeyOK(i) /\\ BoundTeam(i) \\in {\"a\",\"c\"} /\\ Match(i)) \\/ i.team=\"missing\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "MissingOrDuplicateKeyRefuses"
+    }
+   ],
+   "bounds": "15 immutable finite input witnesses, parse/context/match/resolve phases, two context keys, literal/variable/glob representatives, matching explicit Deny and legacy nil-context Deny case. No request loop.",
+   "limits": "Finite admission/evaluation abstraction, not JSON/regex/UTF8 correctness or exhaustive IAM. Providers must construct trusted immutable context; core cannot establish trust from arbitrary caller maps. Concrete duplicate parser, escaping, limits and actual immutable provider snapshot require native tests. Scope policy.go only EvaluateWithContext preflight and explicit Deny precedence; unrelated identity storage not modeled."
+  },
+  {
+   "id": "NativeCommandIssuer",
+   "model": "formal/NativeCommandIssuer.tla",
+   "config": "formal/NativeCommandIssuer.cfg",
+   "properties": [
+    "TypeOK",
+    "ReservationBeforeEffect",
+    "AtMostOneEffect",
+    "CurrentOwnerFence",
+    "RestartNoWorker",
+    "WorkerRequiresReservation",
+    "NoReplayAfterRestart",
+    "KnownExitOnly",
+    "NoCleanupFromLostReply",
+    "JoinAfterPublication",
+    "SinglePolicySnapshot",
+    "PageScope",
+    "PageRecordRevalidated",
+    "PageSnapshotImmutable"
+   ],
+   "source_scope": [
+    "internal/aws/ec2_command_backend_linux.go",
+    "internal/aws/ssm_commands_native.go",
+    "internal/aws/ssm_commands_native_state.go",
+    "internal/aws/ssm_commands_native_wire.go"
+   ],
+   "mutants": [
+    {
+     "id": "IgnoreOwnerSeal",
+     "edits": [
+      {
+       "old": "/\\ ~s.sealed /\\ s.lease=1 /\\ s.effects=0",
+       "new": "/\\ s.lease=1 /\\ s.effects=0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CurrentOwnerFence"
+    },
+    {
+     "id": "IgnoreLeaseIncarnation",
+     "edits": [
+      {
+       "old": "/\\ ~s.sealed /\\ s.lease=1 /\\ s.effects=0",
+       "new": "/\\ ~s.sealed /\\ s.effects=0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CurrentOwnerFence"
+    },
+    {
+     "id": "OrphanWorkerRestart",
+     "edits": [
+      {
+       "old": "StartWorker == /\\ s.phase=\"worker\" /\\ s.live /\\ ~s.restarted",
+       "new": "StartWorker == /\\ s.phase=\"worker\" /\\ s.live",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RestartNoWorker"
+    },
+    {
+     "id": "InventSuccessFromLostReply",
+     "edits": [
+      {
+       "old": "IF s.reply=\"exit0\" THEN \"Success\" ELSE \"Unknown\"",
+       "new": "IF s.reply \\in {\"exit0\",\"lost\"} THEN \"Success\" ELSE \"Unknown\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "KnownExitOnly"
+    },
+    {
+     "id": "InventSuccessFromPending",
+     "edits": [
+      {
+       "old": "IF s.reply=\"exit0\" THEN \"Success\" ELSE \"Unknown\"",
+       "new": "IF s.reply \\in {\"exit0\",\"nonterminal\"} THEN \"Success\" ELSE \"Unknown\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "KnownExitOnly"
+    },
+    {
+     "id": "MixedPolicyRevisions",
+     "edits": [
+      {
+       "old": "!.doc=s.revision \\in {1,3}",
+       "new": "!.doc=s.doc",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SinglePolicySnapshot"
+    },
+    {
+     "id": "ReserveAfterEffect",
+     "edits": [
+      {
+       "old": "!.reserved=ok, !.readback=ok",
+       "new": "!.reserved=FALSE, !.readback=FALSE",
+       "count": 1
+      },
+      {
+       "old": "/\\ s.reserved /\\ s.readback /\\ ~s.worker",
+       "new": "/\\ ~s.worker",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "WorkerRequiresReservation"
+    },
+    {
+     "id": "DuplicateGuestEffect",
+     "edits": [
+      {
+       "old": "/\\ s.phase=\"submit\" /\\ s.live /\\ ~s.restarted\n /\\ s.parentIntent",
+       "new": "/\\ s.phase \\in {\"submit\",\"reply\"} /\\ s.live /\\ ~s.restarted\n /\\ s.parentIntent",
+       "count": 1
+      },
+      {
+       "old": "/\\ ~s.sealed /\\ s.lease=1 /\\ s.effects=0",
+       "new": "/\\ ~s.sealed /\\ s.lease=1 /\\ s.effects<2",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AtMostOneEffect"
+    },
+    {
+     "id": "PageRole",
+     "edits": [
+      {
+       "old": "s.role=s.pageRole",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PageScope"
+    },
+    {
+     "id": "PageRegion",
+     "edits": [
+      {
+       "old": "s.region=s.pageRegion",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PageScope"
+    },
+    {
+     "id": "PageFilter",
+     "edits": [
+      {
+       "old": "s.filter=s.pageFilter",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PageScope"
+    },
+    {
+     "id": "PageSize",
+     "edits": [
+      {
+       "old": "s.size=s.pageSize",
+       "new": "TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PageScope"
+    },
+    {
+     "id": "PageExpiry",
+     "edits": [
+      {
+       "old": "~s.expired /\\ s.unchangedRequest",
+       "new": "s.unchangedRequest",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PageScope"
+    },
+    {
+     "id": "PageRetainedRequest",
+     "edits": [
+      {
+       "old": "/\\ s.unchangedRequest\n    IN",
+       "new": "/\\ TRUE\n IN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PageRecordRevalidated"
+    },
+    {
+     "id": "PageUsesLiveItems",
+     "edits": [
+      {
+       "old": "IF ok THEN s.frozen ELSE {}",
+       "new": "IF ok THEN s.items ELSE {}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PageSnapshotImmutable"
+    }
+   ],
+   "bounds": "Three disjoint finite scenarios: one parent intent/token/worker with two delivery opportunities and a single crash/restart, two lease incarnations and three reply classes; three immutable policy revisions for document+target; one two-item page with one append or binding/expiry/record change.",
+   "limits": "Concrete backend/admission extension of unchanged SSMDurableCommands abstraction. Durable atomic reservation/readback and serialized submit fence are modeled ordering obligations, not a proof of SQLite fsync or Go mutex/OS/QGA behavior. Join denotes local worker completion only, never physical guest cleanup; Unknown cannot imply success. Captured QGA identity, byte parser, exact output bytes/timestamps, quotas, multi-target conjunction and host clock arithmetic remain native obligations or existing SSMDurableCommands properties. Page identity is role generation plus region; this is deliberately narrower than AWS account-wide visibility. No liveness/real guest/SDK/browser claim."
+  },
+  {
+   "id": "ParticipantSessionLifecycle",
+   "model": "formal/ParticipantSessionLifecycle.tla",
+   "config": "formal/ParticipantSessionLifecycle.cfg",
+   "bounds": "One session with two driver generations, one Resume per generation, two-valued identity/role/target/origin witnesses, one-use expiring tokens, three independently draining guest tasks, Boolean reviewed image pin/private channel/explicit opt-in and independent exclusive overlay packaging verdicts. No pruning constraints or fairness.",
+   "properties": [
+    "TypeOK",
+    "PreparedEvidence",
+    "PreparationOptIn",
+    "PackageEvidence",
+    "BoundAdmission",
+    "CurrentAdmission",
+    "ChannelTokenBinding",
+    "HandoffExpiry",
+    "SingleUse",
+    "HelloEvidence",
+    "ReadyEvidence",
+    "NoPostRevokeOutput",
+    "ResumeKeepsDriver",
+    "NoResurrection",
+    "GuestDrainEvidence",
+    "TerminalEvidence",
+    "FreshEvidence",
+    "RevokeIsNotExit"
+   ],
+   "limits": "Bounded authority/lifecycle composition only; assumes trusted immutable auth/policy decisions, atomic DB CAS/one-use claims, authentic correlated protocol evidence, reliable owned runtime witnesses, bundle hash validation and exclusive packaging filesystem inputs. Does not prove Go/SQL/JSON/WebSocket/cryptography/OS/PTY/systemd refinement or real process cleanup, full ConsoleHandoff/BrowserSessions subcontracts, numeric timeout/quotas or liveness.",
+   "source_scope": [
+    "guest/ssm-relay/io_linux.go",
+    "guest/ssm-relay/main_linux.go",
+    "guest/ssm-relay/tenkacloud-session-relay.service",
+    "internal/aws/ec2_session_backend_linux.go",
+    "internal/aws/ssm_session_auth.go",
+    "internal/aws/ssm_sessions.go",
+    "internal/aws/ssm_sessions_native.go",
+    "internal/aws/ssm_sessions_shutdown.go",
+    "internal/aws/ssm_sessions_state.go",
+    "internal/aws/sts_terminal_binding.go",
+    "internal/server/terminal_channel.go",
+    "internal/server/terminal_handoff.go",
+    "internal/server/terminal_json.go",
+    "internal/workload/guestsession/driver.go",
+    "internal/workload/guestsession/protocol.go",
+    "internal/workload/guestvm/session.go",
+    "scripts/guest-image/session-overlay.py",
+    "internal/aws/ssm.go",
+    "internal/aws/sts_signature.go",
+    "internal/server/access.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "MissingImagePin",
+     "edits": [
+      {
+       "old": "~d.prepared /\\ pin /\\ private /\\ optin",
+       "new": "~d.prepared /\\ private /\\ optin",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreparedEvidence"
+    },
+    {
+     "id": "QGAFallback",
+     "edits": [
+      {
+       "old": "~d.prepared /\\ pin /\\ private /\\ optin",
+       "new": "~d.prepared /\\ pin /\\ optin",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreparedEvidence"
+    },
+    {
+     "id": "ImplicitSessionOptIn",
+     "edits": [
+      {
+       "old": "~d.prepared /\\ pin /\\ private /\\ optin",
+       "new": "~d.prepared /\\ pin /\\ private",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreparationOptIn"
+    },
+    {
+     "id": "UnverifiedOverlay",
+     "edits": [
+      {
+       "old": "d.artifact = \"absent\" /\\ valid /\\ absent",
+       "new": "d.artifact = \"absent\" /\\ absent",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PackageEvidence"
+    },
+    {
+     "id": "OverwriteOverlay",
+     "edits": [
+      {
+       "old": "d.artifact = \"absent\" /\\ valid /\\ absent",
+       "new": "d.artifact = \"absent\" /\\ valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PackageEvidence"
+    },
+    {
+     "id": "StaleChannelToken",
+     "edits": [
+      {
+       "old": "ClaimGuard(i) == IdentityOK(i) /\\ i.token /\\ Current",
+       "new": "ClaimGuard(i) == IdentityOK(i) /\\ Current",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ChannelTokenBinding"
+    },
+    {
+     "id": "ExpiredHandoff",
+     "edits": [
+      {
+       "old": "d.handoff = \"fresh\" /\\ AdmitGuard(i)",
+       "new": "d.handoff \\in {\"fresh\",\"expired\"} /\\ AdmitGuard(i)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HandoffExpiry"
+    },
+    {
+     "id": "OperatorAdmission",
+     "edits": [
+      {
+       "old": "IdentityOK(i) == i.participant /\\ i.credential",
+       "new": "IdentityOK(i) == i.credential",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BoundAdmission"
+    },
+    {
+     "id": "CredentialRebind",
+     "edits": [
+      {
+       "old": "ClaimGuard(i) == IdentityOK(i) /\\ i.token /\\ Current",
+       "new": "ClaimGuard(i) == i.participant /\\ i.role /\\ i.target /\\ i.origin /\\ i.token /\\ Current",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BoundAdmission"
+    },
+    {
+     "id": "RoleGenerationRebind",
+     "edits": [
+      {
+       "old": "ClaimGuard(i) == IdentityOK(i) /\\ i.token /\\ Current",
+       "new": "ClaimGuard(i) == i.participant /\\ i.credential /\\ i.target /\\ i.origin /\\ i.token /\\ Current",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BoundAdmission"
+    },
+    {
+     "id": "TargetRebind",
+     "edits": [
+      {
+       "old": "ClaimGuard(i) == IdentityOK(i) /\\ i.token /\\ Current",
+       "new": "ClaimGuard(i) == i.participant /\\ i.credential /\\ i.role /\\ i.origin /\\ i.token /\\ Current",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BoundAdmission"
+    },
+    {
+     "id": "CrossOriginChannel",
+     "edits": [
+      {
+       "old": "ClaimGuard(i) == IdentityOK(i) /\\ i.token /\\ Current",
+       "new": "ClaimGuard(i) == i.participant /\\ i.credential /\\ i.role /\\ i.target /\\ i.token /\\ Current",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BoundAdmission"
+    },
+    {
+     "id": "RevokedAdmission",
+     "edits": [
+      {
+       "old": "AdmitGuard(i) == IdentityOK(i) /\\ Current /\\ ~d.closed",
+       "new": "AdmitGuard(i) == IdentityOK(i) /\\ ~d.closed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CurrentAdmission"
+    },
+    {
+     "id": "ChannelReplay",
+     "edits": [
+      {
+       "old": "ClaimGuard(i) == IdentityOK(i) /\\ i.token /\\ Current /\\ d.token = \"fresh\"",
+       "new": "ClaimGuard(i) == IdentityOK(i) /\\ i.token /\\ Current /\\ d.token \\in {\"fresh\",\"used\"}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SingleUse"
+    },
+    {
+     "id": "ExpiredChannel",
+     "edits": [
+      {
+       "old": "ClaimGuard(i) == IdentityOK(i) /\\ i.token /\\ Current /\\ d.token = \"fresh\"",
+       "new": "ClaimGuard(i) == IdentityOK(i) /\\ i.token /\\ Current /\\ d.token \\in {\"fresh\",\"expired\"}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SingleUse"
+    },
+    {
+     "id": "HandoffReplay",
+     "edits": [
+      {
+       "old": "d.handoff = \"used\" /\\ FALSE",
+       "new": "d.handoff = \"used\" /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SingleUse"
+    },
+    {
+     "id": "WrongHello",
+     "edits": [
+      {
+       "old": "~d.hello /\\ matches",
+       "new": "~d.hello /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HelloEvidence"
+    },
+    {
+     "id": "ReadyAfterClose",
+     "edits": [
+      {
+       "old": "ReadyGuard == d.hello /\\ d.live /\\ ~d.closed /\\ Current",
+       "new": "ReadyGuard == d.hello /\\ ~d.closed /\\ Current",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReadyEvidence"
+    },
+    {
+     "id": "PublishAfterRevoke",
+     "edits": [
+      {
+       "old": "ReadGuard == Current /\\ ~d.closed /\\ d.live /\\ d.channel",
+       "new": "ReadGuard == ~d.closed /\\ d.live /\\ d.channel",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoPostRevokeOutput"
+    },
+    {
+     "id": "ResumeNewDriver",
+     "edits": [
+      {
+       "old": "!.driver = d.driver",
+       "new": "!.driver = IF d.driver = 1 THEN 2 ELSE 1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResumeKeepsDriver"
+    },
+    {
+     "id": "ResumeAfterShutdown",
+     "edits": [
+      {
+       "old": "ResumeGuard == d.phase = \"resuming\" /\\ ~d.closed /\\ d.live /\\ Current",
+       "new": "ResumeGuard == d.phase \\in {\"resuming\",\"closing\"} /\\ d.live /\\ Current",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoResurrection"
+    },
+    {
+     "id": "ExitBeforeDrain",
+     "edits": [
+      {
+       "old": "ExitGuard == d.drains = {\"process\", \"input\", \"output\"} /\\ d.clean",
+       "new": "ExitGuard == d.clean",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "GuestDrainEvidence"
+    },
+    {
+     "id": "ExitOnUncertainClose",
+     "edits": [
+      {
+       "old": "ExitGuard == d.drains = {\"process\", \"input\", \"output\"} /\\ d.clean",
+       "new": "ExitGuard == d.drains = {\"process\", \"input\", \"output\"}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "GuestDrainEvidence"
+    },
+    {
+     "id": "TerminalBeforeJoin",
+     "edits": [
+      {
+       "old": "TerminalGuard == d.exit /\\ d.joins /\\ d.clean",
+       "new": "TerminalGuard == d.exit /\\ d.clean",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TerminalEvidence"
+    },
+    {
+     "id": "FabricatedExit",
+     "edits": [
+      {
+       "old": "TerminalGuard == d.exit /\\ d.joins /\\ d.clean",
+       "new": "TerminalGuard == d.joins /\\ d.clean",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TerminalEvidence"
+    },
+    {
+     "id": "FreshBeforeJoin",
+     "edits": [
+      {
+       "old": "FreshGuard == d.phase = \"terminated\" /\\ d.exit /\\ d.joins /\\ d.clean /\\ ~d.closed",
+       "new": "FreshGuard == d.phase = \"closing\" /\\ d.exit /\\ d.clean /\\ ~d.closed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FreshEvidence"
+    }
+   ]
+  },
+  {
+   "id": "OwnedClockQualification",
+   "model": "formal/OwnedClockQualification.tla",
+   "config": "formal/OwnedClockQualification.cfg",
+   "bounds": "One owned process and pending sample, two process incarnations, logical time0..5, expiry4 and original deadline3; Boolean namespace/FD/platform/cryptographic witnesses; one retained command.",
+   "properties": [
+    "TypeOK",
+    "OwnedProof",
+    "QualifiedOnlyCurrent",
+    "AuthenticatedResponses",
+    "StopInvalidates",
+    "V2Admission",
+    "ConservativeOriginalDeadline",
+    "RetainedReadAfterExpiry",
+    "ReadRequiresCurrentOwner"
+   ],
+   "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged.",
+   "source_scope": [
+    "internal/workload/probeclock/bootstrap_linux.go",
+    "internal/workload/probeclock/bootstrap_other.go",
+    "internal/workload/probeclock/clock.go",
+    "internal/workload/probeclock/clock_linux.go",
+    "internal/workload/probeclock/clock_other.go",
+    "internal/workload/probeclock/http.go",
+    "internal/workload/guesttcp/http_probe_command_v2.go",
+    "cmd/simulator/main.go"
+   ],
+   "mutants": [
+    {
+     "id": "ArbitraryHTTPProof",
+     "expect_invariant": "OwnedProof",
+     "edits": [
+      {
+       "old": "admitted == owned /\\ ns /\\ fd /\\ platform",
+       "new": "admitted == TRUE /\\ ns /\\ fd /\\ platform",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignNamespace",
+     "expect_invariant": "OwnedProof",
+     "edits": [
+      {
+       "old": "admitted == owned /\\ ns /\\ fd /\\ platform",
+       "new": "admitted == owned /\\ TRUE /\\ fd /\\ platform",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UncheckedInheritedFD",
+     "expect_invariant": "OwnedProof",
+     "edits": [
+      {
+       "old": "admitted == owned /\\ ns /\\ fd /\\ platform",
+       "new": "admitted == owned /\\ ns /\\ TRUE /\\ platform",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnsupportedPlatform",
+     "expect_invariant": "OwnedProof",
+     "edits": [
+      {
+       "old": "admitted == owned /\\ ns /\\ fd /\\ platform",
+       "new": "admitted == owned /\\ ns /\\ fd /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "SampleWrongIncarnation",
+     "expect_invariant": "QualifiedOnlyCurrent",
+     "edits": [
+      {
+       "old": "current == proof /\\ ~stopped /\\ owner=proofOwner /\\ pendingOwner=owner",
+       "new": "current == proof /\\ ~stopped",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "WrongSampleMAC",
+     "expect_invariant": "QualifiedOnlyCurrent",
+     "edits": [
+      {
+       "old": "authenticated == mac /\\ nonce /\\ domain",
+       "new": "authenticated == TRUE /\\ nonce /\\ domain",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReplayedSampleNonce",
+     "expect_invariant": "QualifiedOnlyCurrent",
+     "edits": [
+      {
+       "old": "authenticated == mac /\\ nonce /\\ domain",
+       "new": "authenticated == mac /\\ TRUE /\\ domain",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignSampleDomain",
+     "expect_invariant": "QualifiedOnlyCurrent",
+     "edits": [
+      {
+       "old": "authenticated == mac /\\ nonce /\\ domain",
+       "new": "authenticated == mac /\\ nonce /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnboundedSample",
+     "expect_invariant": "QualifiedOnlyCurrent",
+     "edits": [
+      {
+       "old": "accepted == current /\\ authenticated /\\ bounds /\\ now<4",
+       "new": "accepted == current /\\ authenticated /\\ now<4",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ExpiredSample",
+     "expect_invariant": "QualifiedOnlyCurrent",
+     "edits": [
+      {
+       "old": "accepted == current /\\ authenticated /\\ bounds /\\ now<4",
+       "new": "accepted == current /\\ authenticated /\\ bounds",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "LateSampleAfterStop",
+     "expect_invariant": "QualifiedOnlyCurrent",
+     "edits": [
+      {
+       "old": "current == proof /\\ ~stopped /\\ owner=proofOwner /\\ pendingOwner=owner",
+       "new": "current == proof /\\ owner=proofOwner /\\ pendingOwner=owner",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "WrongResponseMAC",
+     "expect_invariant": "AuthenticatedResponses",
+     "edits": [
+      {
+       "old": "accepted == proof /\\ ~stopped /\\ owner=proofOwner /\\ mac /\\ nonce /\\ domain /\\ pathBodyStatus",
+       "new": "accepted == proof /\\ ~stopped /\\ owner=proofOwner /\\ TRUE /\\ nonce /\\ domain /\\ pathBodyStatus",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReplayedResponseNonce",
+     "expect_invariant": "AuthenticatedResponses",
+     "edits": [
+      {
+       "old": "accepted == proof /\\ ~stopped /\\ owner=proofOwner /\\ mac /\\ nonce /\\ domain /\\ pathBodyStatus",
+       "new": "accepted == proof /\\ ~stopped /\\ owner=proofOwner /\\ mac /\\ TRUE /\\ domain /\\ pathBodyStatus",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ForeignResponseDomain",
+     "expect_invariant": "AuthenticatedResponses",
+     "edits": [
+      {
+       "old": "accepted == proof /\\ ~stopped /\\ owner=proofOwner /\\ mac /\\ nonce /\\ domain /\\ pathBodyStatus",
+       "new": "accepted == proof /\\ ~stopped /\\ owner=proofOwner /\\ mac /\\ nonce /\\ TRUE /\\ pathBodyStatus",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ChangedResponseRequest",
+     "expect_invariant": "AuthenticatedResponses",
+     "edits": [
+      {
+       "old": "accepted == proof /\\ ~stopped /\\ owner=proofOwner /\\ mac /\\ nonce /\\ domain /\\ pathBodyStatus",
+       "new": "accepted == proof /\\ ~stopped /\\ owner=proofOwner /\\ mac /\\ nonce /\\ domain /\\ TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "StopKeepsQualification",
+     "expect_invariant": "StopInvalidates",
+     "edits": [
+      {
+       "old": "stopped'=TRUE /\\ qualified'=FALSE",
+       "new": "stopped'=TRUE /\\ qualified'=qualified",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "V1WallAccepted",
+     "expect_invariant": "V2Admission",
+     "edits": [
+      {
+       "old": "format == version=2 /\\ ticks /\\ domain",
+       "new": "format == domain",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "StartAfterOwnerRotation",
+     "expect_invariant": "V2Admission",
+     "edits": [
+      {
+       "old": "admitted == current /\\ live /\\ format /\\ now<3 /\\ converted>now",
+       "new": "admitted == proof /\\ ~stopped /\\ live /\\ format /\\ now<3 /\\ converted>now",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "UnqualifiedStart",
+     "expect_invariant": "V2Admission",
+     "edits": [
+      {
+       "old": "live == qualified /\\ now<4",
+       "new": "live == TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RenewAtReceipt",
+     "expect_invariant": "ConservativeOriginalDeadline",
+     "edits": [
+      {
+       "old": "absolute == 3",
+       "new": "absolute == now+3",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "RoundDeadlineLater",
+     "expect_invariant": "ConservativeOriginalDeadline",
+     "edits": [
+      {
+       "old": "converted == absolute-1",
+       "new": "converted == absolute+1",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ExpiredReadBlocked",
+     "expect_invariant": "RetainedReadAfterExpiry",
+     "edits": [
+      {
+       "old": "readable == current /\\ retained",
+       "new": "readable == current /\\ retained /\\ now<4",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadAfterStop",
+     "expect_invariant": "ReadRequiresCurrentOwner",
+     "edits": [
+      {
+       "old": "readable == current /\\ retained",
+       "new": "readable == proof /\\ owner=proofOwner /\\ retained",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ReadAfterRotation",
+     "expect_invariant": "ReadRequiresCurrentOwner",
+     "edits": [
+      {
+       "old": "readable == current /\\ retained",
+       "new": "readable == proof /\\ ~stopped /\\ retained",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "TerminalClientEpoch",
+   "model": "formal/TerminalClientEpoch.tla",
+   "config": "formal/TerminalClientEpoch.cfg",
+   "bounds": "Two sequential mounted components, at most two explicitly invoked native operations, one retained pending response and one current channel with stale-callback input. No fairness or state pruning. Remote result and local disposition independent.",
+   "properties": [
+    "TypeOK",
+    "ReceiptEvidence",
+    "SocketEvidence",
+    "SingleOpen",
+    "UIEvidence",
+    "DisposeNotRemoteTermination",
+    "NoAutomaticStartRetry",
+    "DiscardPreservesIdentity"
+   ],
+   "limits": "Finite client lifecycle contract, not JS/React/browser/fetch/WebSocket refinement. Single abstract remote lifecycle does not represent arbitrary concurrent sessions. Assumes authentic native response and component/channel identity checks; parsing, transport, DOM, token cryptography and guest termination are independent. Operation epoch is defense in depth under busy/permanent-disposal guards; no impossible overlapping operation is invented to produce an epoch-only counterexample.",
+   "source_scope": [
+    "tools/console/src/ssm-terminal-client.mjs",
+    "tools/console/src/ssm-terminal.jsx",
+    "tools/console/src/main.jsx",
+    "internal/server/web/app.js"
+   ],
+   "mutants": [
+    {
+     "id": "LateNativeReceipt",
+     "edits": [
+      {
+       "old": "d.pending=\"receipt\" /\\ ReceiptCurrent",
+       "new": "d.pending=\"receipt\" /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReceiptEvidence"
+    },
+    {
+     "id": "ReplacementReceipt",
+     "edits": [
+      {
+       "old": "/\\ d.opComponent=d.component /\\ d.opEpoch=d.epoch",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReceiptEvidence"
+    },
+    {
+     "id": "StaleSocketCallback",
+     "edits": [
+      {
+       "old": "/\\ d.socketComponent=d.component /\\ c",
+       "new": "/\\ d.socketComponent=d.component",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SocketEvidence"
+    },
+    {
+     "id": "OpenTokenReplay",
+     "edits": [
+      {
+       "old": "/\\ d.phase=\"connecting\" /\\ d.opens=0",
+       "new": "/\\ d.phase=\"connecting\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "SingleOpen"
+    },
+    {
+     "id": "UnmountedUI",
+     "edits": [
+      {
+       "old": "UICurrent == d.mounted /\\ d.uiComponent=d.component",
+       "new": "UICurrent == d.uiComponent=d.component",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UIEvidence"
+    },
+    {
+     "id": "ReplacementUI",
+     "edits": [
+      {
+       "old": "UICurrent == d.mounted /\\ d.uiComponent=d.component",
+       "new": "UICurrent == d.mounted",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "UIEvidence"
+    },
+    {
+     "id": "DisposeFabricatesTermination",
+     "edits": [
+      {
+       "old": "!.channel=FALSE,!.phase=\"disconnected\"]\n /\\ Record(\"dispose\",TRUE)",
+       "new": "!.channel=FALSE,!.phase=\"disconnected\",!.remote=\"terminated\"]\n /\\ Record(\"dispose\",TRUE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DisposeNotRemoteTermination"
+    },
+    {
+     "id": "AmbiguousStartRetry",
+     "edits": [
+      {
+       "old": "StartAllowed == ~d.disposed /\\ d.mounted /\\ ~d.started",
+       "new": "StartAllowed == ~d.disposed /\\ d.mounted",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoAutomaticStartRetry"
+    },
+    {
+     "id": "DiscardClearsKnownSession",
+     "edits": [
+      {
+       "old": "!.uiComponent=d.opComponent,\n   !.phase=IF ReceiptCurrent",
+       "new": "!.uiComponent=d.opComponent,!.known=FALSE,\n   !.phase=IF ReceiptCurrent",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DiscardPreservesIdentity"
+    }
+   ]
+  },
+  {
    "id": "AppEngineTraffic",
    "model": "formal/AppEngineTraffic.tla",
    "config": "formal/AppEngineTraffic.cfg",
@@ -11365,6 +17841,94 @@
      "expect_invariant": "RejectionFrame"
     }
    ]
+  },
+  {
+   "id": "PersistentIngressPolicy",
+   "model": "formal/PersistentIngressPolicy.tla",
+   "config": "formal/PersistentIngressPolicy.cfg",
+   "properties": [
+    "TypeOK",
+    "UnownedNeverRevokes",
+    "DroppedNotChargedOrAccepted",
+    "OwnedNeverDropped",
+    "OwnedProbeAbuseRevokes",
+    "AcceptOnlyOwnedValid"
+   ],
+   "mutants": [
+    {
+     "id": "RevokeUnhandled",
+     "expect_invariant": "UnownedNeverRevokes",
+     "edits": [
+      {
+       "old": "THEN outcome'=\"drop\" /\\ charged'=FALSE /\\ accepted'=FALSE",
+       "new": "THEN outcome'=\"revoke\" /\\ charged'=FALSE /\\ accepted'=FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ChargeDropped",
+     "expect_invariant": "DroppedNotChargedOrAccepted",
+     "edits": [
+      {
+       "old": "THEN outcome'=\"drop\" /\\ charged'=FALSE",
+       "new": "THEN outcome'=\"drop\" /\\ charged'=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DropOwnedProbe",
+     "expect_invariant": "OwnedNeverDropped",
+     "edits": [
+      {
+       "old": "(~frame.dstLocal \\/ ~frame.portInRange)",
+       "new": "TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptSpoofedProbe",
+     "expect_invariant": "OwnedProbeAbuseRevokes",
+     "edits": [
+      {
+       "old": "ELSE outcome'=\"revoke\" /\\ accepted'=FALSE",
+       "new": "ELSE outcome'=\"handle\" /\\ accepted'=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "HandleUntrustedARP",
+     "expect_invariant": "UnownedNeverRevokes",
+     "edits": [
+      {
+       "old": "\\/ (frame.eth=ARP /\\ ~frame.arpTrusted)",
+       "new": "\\/ FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "SkipTCPParse",
+     "expect_invariant": "UnownedNeverRevokes",
+     "edits": [
+      {
+       "old": "(~frame.tcpParse \\/ (~frame.passiveRoute",
+       "new": "((~frame.passiveRoute",
+       "count": 1
+      }
+     ]
+    }
+   ],
+   "source_scope": [
+    "internal/workload/guesttcp/transport.go",
+    "internal/workload/guesttcp/transport_persistent.go",
+    "internal/workload/guesttcp/transport_persistent_test.go"
+   ],
+   "bounds": "Exhaustive over one guest frame with every combination of EtherType class {ARP, IPv4, IPv6, other} and the six boolean classification facts (trusted ARP request, TCP parse, passive route, local destination, probe source-port range, owned-tuple peer validity). No seeds, symmetry or depth cutoff.",
+   "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
   }
  ]
 }

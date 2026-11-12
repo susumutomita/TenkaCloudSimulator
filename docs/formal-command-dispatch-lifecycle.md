@@ -1,0 +1,17 @@
+# Command dispatcher boundary: draft model correspondence
+
+This is a bounded source-correspondence model, not implementation refinement or production qualification.
+
+One independently selected capability, one retained key (none/exact/foreign), two sequential commands and backend clock classes0..3 and requested deadlines1..4 (including beyond qualification) are modeled. Shape, binding, service and domain are separate input predicates. Constructor copying and decoder bytes remain native-test obligations. Binding equality is not authority issuance.
+
+Read denotes invoking read-only snapshot discovery, not successful returned data. It remains possible after clock expiry. Missing retained state returns unknown, never synthetic settlement. No model step authenticates physical ownership or proves clock synchronization.
+
+Exact duplicate lookup after domain matching precedes fresh expiry/qualification checks. The command forwards the supplied original absolute deadline, never receipt time plus a duration. forwardedDeadline/originalForwardedDeadline are command-forwarding history, NOT the effective retained operation deadline. Scope.Start separately computes min(request deadline, start+8 seconds, NIC deadline); that cap may shorten expiry and is outside this narrow model. No equality between requested and effective retained deadline is claimed. The trusted Host→backend mapping remains external and must be conservative. This model does not infer that mapping from equal numeric clocks.
+
+The model variable entered represents eligible selected-scope forwarding after lower-layer foreign-key rejection, not a literal count of scope.Start calls. Actual Dispatch may invoke scope.Start for a foreign/raw key after scoped Snapshot reports unknown; the lower layer rejects that key without adopting it. Start invocation itself is not admission or execution proof. An independent admitted outcome now branches after valid Start entry: failed/uncertain lower-layer entry retains no new modeled handle and returns no settlement; successful retention records the original forwarded command deadline (not the shorter effective operation deadline). Read never enters Start. Preflight-to-retention time races are represented by lower-layer refusal, not an invented command expiry rebase. Concurrent raw/scoped key insertion remains omitted and owned by the existing scope model; this is not a full concurrent dispatcher proof. Underlying dispatch count is an abstract retained-operation event, not raw port call count or packet count. The existing scope/operation model owns those lower-level transitions. No settlement timing or unknown raw acknowledgement is promoted to success.
+
+Sensitivity controls remove each input match, renew from receipt time, reject duplicates after fresh expiry, block expired reads, turn unknown into settlement, ignore qualification/expiry and repeat duplicate operation execution. Every oracle must use independent original input/history rather than a mutated local predicate. The exhaustive instance checks two sequential commands; it makes no unbounded-history or concurrency claim.
+
+Narrow proposed source scope is http_probe_command.go only after source correspondence review. No existing model scope is widened and no production handler, socket, VM or dependency claim is included.
+
+Unknown read responses and unknown/refused Start outcomes have separate response branches and mutation controls. Neither can synthesize settlement.

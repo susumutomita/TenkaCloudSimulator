@@ -12,10 +12,9 @@ jobs:
   formal:
     name: Formal validation
     runs-on: ubuntu-latest
-    # Budget the complete serial registry plus negative/applicability guards.
-    # The 72-model/801-case registry plus guard tests exceeds 30 minutes on CI.
+    # Allow headroom for the whole serial model registry and gate/applicability tests.
     # Per-TLC-case deadlines, invariants and counterexample requirements are unchanged.
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:

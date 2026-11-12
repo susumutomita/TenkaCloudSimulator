@@ -19,6 +19,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
@@ -27,7 +28,11 @@ import (
 
 var stackCreateName = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-]{0,127}$`)
 
-type StackStore struct{ db *sql.DB }
+type StackStore struct {
+	db               *sql.DB
+	instanceRuntime  StackInstanceRuntime
+	instanceAttempts sync.Map
+}
 type StackResource struct {
 	LogicalID, Type, PhysicalID string
 	Properties                  map[string]any
@@ -36,6 +41,7 @@ type StackResource struct {
 	StateParts                  map[string]string `json:",omitempty"`
 }
 type StackRecord struct {
+	Status                    string `json:",omitempty"`
 	ClientToken               string
 	RequestHash               string
 	Tags                      map[string]string
@@ -47,6 +53,9 @@ type StackRecord struct {
 }
 
 func NewStackStore(db *sql.DB) (*StackStore, error) {
+	if _, err := NewEC2NetworkStore(db); err != nil {
+		return nil, err
+	}
 	if _, err := NewAPIGatewayStore(db); err != nil {
 		return nil, err
 	}
@@ -60,7 +69,7 @@ func NewStackStore(db *sql.DB) (*StackStore, error) {
 	if err == nil {
 		err = initStackEvents(db)
 	}
-	return &StackStore{db}, err
+	return &StackStore{db: db}, err
 }
 func taggedYAML(n *yaml.Node) (any, error) {
 	nodes := 0
@@ -455,7 +464,7 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 	for _, value := range resources {
 		r := object(value)
 		kind := stringValue(r["Type"])
-		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::IAM::InstanceProfile" && kind != "AWS::S3::Bucket" && kind != "AWS::Lambda::Function" && !stackAPIKind(kind) {
+		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::IAM::InstanceProfile" && kind != "AWS::S3::Bucket" && kind != "AWS::Lambda::Function" && !stackAPIKind(kind) && !stackNetworkKind(kind) && kind != "AWS::EC2::Instance" {
 			return fail("Unsupported resource type: " + kind)
 		}
 		for k := range r {
@@ -570,7 +579,17 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 		}
 		physical := ""
 		var nativeIAM *stackNativeIAM
-		if stackAPIKind(kind) {
+		if kind == "AWS::EC2::Instance" {
+			physical, e = compileStackInstance(id, key, properties, attrs)
+			if e != nil {
+				return fail(e.Error())
+			}
+		} else if stackNetworkKind(kind) {
+			physical, e = compileStackNetwork(region, id, key, kind, properties, attrs)
+			if e != nil {
+				return fail(e.Error())
+			}
+		} else if stackAPIKind(kind) {
 			physical, e = compileStackAPI(region, id, key, kind, properties, attrs)
 			if e != nil {
 				return fail(e.Error())
@@ -697,6 +716,16 @@ func (s *StackStore) Create(record StackRecord) error {
 	return s.createChecked(record, nil)
 }
 func (s *StackStore) createChecked(record StackRecord, authorize func(string, string) error) error {
+	return s.createCheckedContext(context.Background(), record, authorize)
+}
+func (s *StackStore) createCheckedContext(ctx context.Context, record StackRecord, authorize func(string, string) error) error {
+	entry, prepareErr := s.prepareStackInstance(ctx, record)
+	if prepareErr != nil {
+		return prepareErr
+	}
+	if entry != nil {
+		record.Status = "CREATE_IN_PROGRESS"
+	}
 	// Admission/generation snapshots belong to this attempt. A rolled-back
 	// creation must not mutate a caller's reusable compiled record.
 	record.Resources = append([]StackResource(nil), record.Resources...)
@@ -744,11 +773,29 @@ func (s *StackStore) createChecked(record StackRecord, authorize func(string, st
 		if err = appendStackEvent(tx, record, &r, "CREATE_IN_PROGRESS"); err != nil {
 			return err
 		}
+		if r.Type == "AWS::EC2::Instance" {
+			if entry == nil {
+				return fmt.Errorf("missing local instance attempt")
+			}
+			if _, err = tx.Exec("INSERT INTO aws_cfn_ownership VALUES(?,?,?,?)", stackResourceNamespace(record.Region, r.Type), r.Type, r.PhysicalID, record.ID); err != nil {
+				return err
+			}
+			continue // Remains IN_PROGRESS until actual readiness outside SQL.
+		}
 		if r.NativeIAM != nil {
 			if err = createStackIAM(tx, record, &r); err != nil {
 				return err
 			}
 			record.Resources[index] = r
+			if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
+				return err
+			}
+			continue
+		}
+		if stackNetworkKind(r.Type) {
+			if err = createStackNetwork(context.Background(), tx, record, r); err != nil {
+				return err
+			}
 			if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
 				return err
 			}
@@ -820,8 +867,10 @@ func (s *StackStore) createChecked(record StackRecord, authorize func(string, st
 	if err = saveStackAPIFingerprints(tx, &record); err != nil {
 		return err
 	}
-	if err = finishStackEvents(tx, record, false); err != nil {
-		return err
+	if entry == nil {
+		if err = finishStackEvents(tx, record, false); err != nil {
+			return err
+		}
 	}
 	if err = checkStackIAM(tx, record, "created"); err != nil {
 		return err
@@ -829,7 +878,17 @@ func (s *StackStore) createChecked(record StackRecord, authorize func(string, st
 	if err = checkStackIAMDocument(tx, record); err != nil {
 		return err
 	}
-	return tx.Commit()
+	if entry == nil {
+		return tx.Commit()
+	}
+	if _, loaded := s.instanceAttempts.LoadOrStore(record.ID, entry); loaded {
+		return fmt.Errorf("instance attempt already retained")
+	}
+	if err = tx.Commit(); err != nil {
+		s.instanceAttempts.Delete(record.ID)
+		return err
+	}
+	return s.launchStackInstance(ctx, record, entry)
 }
 
 type stackQuery interface {
@@ -869,6 +928,37 @@ func (s *StackStore) Delete(region, name string) error {
 	return s.deleteChecked(region, name, nil)
 }
 func (s *StackStore) deleteChecked(region, name string, authorize func(StackRecord) error) error {
+	// Capture and authorize an incarnation before invalidating live network NICs.
+	// No SQL transaction is held while seal/join waits for packet callbacks.
+	captured, err := stackRecords(s.db, region, name)
+	if err != nil {
+		return err
+	}
+	if len(captured) != 1 {
+		return ssmFailure{"ValidationError", "Specify exactly one stack."}
+	}
+	if authorize != nil {
+		if err = authorize(captured[0]); err != nil {
+			return err
+		}
+	}
+	cleanupCtx, cancelCleanup := context.WithTimeout(context.Background(), 15*time.Second)
+	cleanupErr := s.sealStackInstance(cleanupCtx, captured[0])
+	cancelCleanup()
+	if cleanupErr != nil {
+		return cleanupErr
+	}
+	hasNetwork := false
+	for _, resource := range captured[0].Resources {
+		if stackNetworkKind(resource.Type) {
+			hasNetwork = true
+		}
+	}
+	if hasNetwork {
+		release := (&EC2NetworkStore{db: s.db}).BeginMutation(region, captured[0].ID)
+		defer release()
+	}
+
 	// Acquire the immediate write transaction before reading the stack. A stale
 	// delete must never remove a replacement stack that reclaimed physical names.
 	tx, err := s.db.Begin()
@@ -882,6 +972,9 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 	}
 	if len(records) != 1 {
 		return ssmFailure{"ValidationError", "Specify exactly one stack."}
+	}
+	if records[0].ID != captured[0].ID {
+		return ssmFailure{"ValidationError", "Stack incarnation changed before cleanup."}
 	}
 
 	// Resolve and authorize the exact ID while holding the same write lock;
@@ -918,6 +1011,11 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		}
 		if r.NativeIAM != nil {
 			err = deleteStackIAM(tx, r)
+		} else if r.Type == "AWS::EC2::Instance" {
+			// Actual retained owner cleanup completed outside this transaction.
+			err = nil
+		} else if stackNetworkKind(r.Type) {
+			err = deleteStackNetwork(context.Background(), tx, records[0], r)
 		} else if stackAPIKind(r.Type) {
 			err = deleteStackAPI(context.Background(), tx, region, r)
 		} else if r.Type == "AWS::SSM::Parameter" {
@@ -983,6 +1081,15 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 	// resource/claim/stack/event/history write must not resurrect a resource.
 	for _, resource := range records[0].Resources {
 		var remaining int
+		if stackNetworkKind(resource.Type) {
+			if err = tx.QueryRow("SELECT count(*) FROM aws_ec2_network_resources WHERE region=? AND id=?", region, resource.PhysicalID).Scan(&remaining); err != nil {
+				return err
+			}
+			if remaining != 0 {
+				return errors.New("network cleanup postcondition failed")
+			}
+			continue
+		}
 		switch resource.Type {
 		case "AWS::SSM::Parameter":
 			err = tx.QueryRow("SELECT count(*) FROM aws_ssm_parameters WHERE region=? AND name=?", region, resource.PhysicalID).Scan(&remaining)
@@ -998,7 +1105,11 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 			return errors.New("stack physical resource cleanup postcondition failed")
 		}
 	}
-	return tx.Commit()
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	s.instanceAttempts.Delete(records[0].ID)
+	return nil
 }
 func xmlText(s string) string {
 	var b bytes.Buffer
@@ -1079,6 +1190,7 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		fail("Use CloudFormation API version 2010-05-15.")
 		return
 	}
+	extendStackMutationWriteDeadline(w, action)
 	for key, values := range form {
 		if len(values) != 1 {
 			fail("Repeated Query fields are unsupported.")
@@ -1226,7 +1338,7 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			record.Tags, record.ClientToken, record.RequestHash = tags, clientToken, requestHash
 			if err = authorize(record.ID); err == nil {
-				err = g.Stacks.createChecked(record, authorizeAction)
+				err = g.Stacks.createCheckedContext(r.Context(), record, authorizeAction)
 			}
 		}
 		if err != nil {
@@ -1265,7 +1377,7 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 				cfnError(w, err)
 				return
 			}
-			out.WriteString("<member><StackId>" + xmlText(record.ID) + "</StackId><StackName>" + xmlText(record.Name) + "</StackName><CreationTime>" + record.Created + "</CreationTime><StackStatus>CREATE_COMPLETE</StackStatus><Outputs>")
+			out.WriteString("<member><StackId>" + xmlText(record.ID) + "</StackId><StackName>" + xmlText(record.Name) + "</StackName><CreationTime>" + record.Created + "</CreationTime><StackStatus>" + xmlText(stackStatus(record)) + "</StackStatus><Outputs>")
 			keys := []string{}
 			for k := range record.Outputs {
 				keys = append(keys, k)
@@ -1297,5 +1409,19 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		cfnResponse(w, action, "")
+	}
+}
+
+// cfnMutationWriteBudget bounds how long a synchronous stack mutation may hold
+// its response. CreateStack/DeleteStack can boot or stop guest VMs (about 40s
+// under TCG), which exceeds the server-wide 30s write timeout and made clients
+// see a closed connection although the stack completed.
+const cfnMutationWriteBudget = 5 * time.Minute
+
+// extendStackMutationWriteDeadline is best effort: writers that do not support
+// per-request deadlines keep the server default.
+func extendStackMutationWriteDeadline(w http.ResponseWriter, action string) {
+	if action == "CreateStack" || action == "DeleteStack" {
+		_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(cfnMutationWriteBudget))
 	}
 }

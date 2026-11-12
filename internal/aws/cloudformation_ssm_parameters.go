@@ -74,6 +74,10 @@ func (s *StackStore) resolveSSMParameters(ctx context.Context, region string, ke
 		var kind, value string
 		err = tx.QueryRowContext(ctx, "SELECT type,value FROM aws_ssm_parameters WHERE region=? AND name=?", region, keys[logical]).Scan(&kind, &value)
 		if err == sql.ErrNoRows {
+			if alias, ok := s.publicImageParameter(keys[logical]); ok {
+				values[logical] = alias
+				continue
+			}
 			return nil, ssmFailure{"ValidationError", "A referenced local SSM parameter does not exist."}
 		}
 		if err != nil {
@@ -88,6 +92,23 @@ func (s *StackStore) resolveSSMParameters(ctx context.Context, region string, ke
 		return nil, err
 	}
 	return values, nil
+}
+
+// StackPublicImageResolver is an optional StackInstanceRuntime capability. It
+// answers AWS public AMI alias parameters with an image the runtime itself
+// pins, so unmodified templates defaulting to those aliases deploy locally. A
+// stored local parameter of the same name always wins; nothing is fetched.
+type StackPublicImageResolver interface {
+	PublicImageParameter(name string) (string, bool)
+}
+
+func (s *StackStore) publicImageParameter(name string) (string, bool) {
+	resolver, ok := s.instanceRuntime.(StackPublicImageResolver)
+	if !ok {
+		return "", false
+	}
+	value, ok := resolver.PublicImageParameter(name)
+	return value, ok && stackSSMString(value)
 }
 
 // Existing ordinary parameter output behavior is unchanged. Only this new

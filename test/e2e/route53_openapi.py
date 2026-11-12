@@ -6,6 +6,9 @@ import runpy
 from pathlib import Path
 
 # Loaded by path so scripts/check-assets.py can keep using runpy.run_path here.
+project_ssm_documents = runpy.run_path(
+    str(Path(__file__).with_name("ssm_document_reference.py"))
+)["project_ssm_documents"]
 _autoscaling = runpy.run_path(str(Path(__file__).with_name('autoscaling_plans_openapi.py')))
 project_before_autoscaling_plans = _autoscaling['project_before_autoscaling_plans']
 
@@ -42,8 +45,10 @@ def validate_route53(spec):
 
 def project_before_route53(spec):
     validate_route53(spec)
-    # The later Auto Scaling Plans additions are absent from the pre-Route53 base.
+    # The later Auto Scaling Plans and SSM document additions are absent from
+    # the pre-Route53 base.
     projected = project_before_autoscaling_plans(spec)
+    project_ssm_documents(projected)
     for path in ROUTE53_PATHS:
         del projected['paths'][path]
     projected['tags'] = [tag for tag in projected['tags'] if tag.get('name') != TAG]

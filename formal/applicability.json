@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "749d8a86014d08fc6085ecff36984fc97a56f595",
+  "base_sha": "bf5585f5230f7cc284a89024e6d4a8462b0306e8",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
@@ -11,7 +11,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "e71cbce184277b37e2d97995371a8312f779bd4a6d53b49f9ae59210291d0931",
+      "sha256": "998dfcc6dd03b208b3eca694587cb63ba0994b36c1dcca70d2c4509fe78cfb81",
       "disposition": "documentation",
       "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
@@ -32,7 +32,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "b502302aa1b7a0cb1058b47783772ee88cdee3fc32149c36a39b9b79bd631a38",
+      "sha256": "f6fd1b7dcc1537b93043e8eca340d13fb2804f72f5832674baf2aba774f13149",
       "disposition": "formal-infrastructure",
       "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
@@ -72,7 +72,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "d101fb9bd8708d8cbac7e0ff176b240923920c09b05156ba861f4adb87ddda85",
+      "sha256": "e4ae2375efeb014c31c57ef400b3f7ec743b7c684455e1c38f09e4231f6fa1fb",
       "disposition": "modeled",
       "reason": "Console source editing and nonce-bound static HTML preserve existing native APIs, authorization and invocation disclosure; no provider resource or token state changes.",
       "models": [
@@ -98,7 +98,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "954b952003896f714469274bf8ebd4c022f461790a155d9248d4f86fb1773a09",
+      "sha256": "89904d077c668fc61dd9d03834580390559da1958c6688fbd5aab8bd52dbaa96",
       "disposition": "modeled",
       "reason": "Console source editing and nonce-bound static HTML preserve existing native APIs, authorization and invocation disclosure; no provider resource or token state changes.",
       "models": [
@@ -228,14 +228,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "0c8980070e90441cc71e27b412e0358f0030de02a9a448d8afb3aa0a059486e7",
+      "sha256": "c32817cc24b0ab57e52d80f1d10f6b6ad9b681b3104fb7b777cebefd076f0d25",
       "disposition": "formal-infrastructure",
       "reason": "Fix the exact LandingAccessAdmission scope to include the new console HTML handler while preserving all existing source files, invariants and mutants; negative tests reject removal or unrelated additions. Does not model CSP or rendering.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "5bbb8d994bd00f6586560b39cf00f330322cbc27e1af274c637e38d2a5fd4c63",
+      "sha256": "9efc083d7a7c2c1de94112baf3df24caa6d5fdf7f5db4606a45e4e5b266df379",
       "disposition": "formal-infrastructure",
       "reason": "Fix the exact LandingAccessAdmission scope to include the new console HTML handler while preserving all existing source files, invariants and mutants; negative tests reject removal or unrelated additions. Does not model CSP or rendering.",
       "models": []
@@ -249,7 +249,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "484ec627c7877e35ad663511266e8291a7a6847194bfc836a2a57ec5de480796",
+      "sha256": "3accc3d7bf218cbad526dcde5175088923388fe49a5778ec58abe03c0df2fa63",
       "disposition": "test-support",
       "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
@@ -277,14 +277,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "2cccfe40edaf81fc21de36c2c96b66495c87ad9c5781434f5a191a577cd37106",
+      "sha256": "ad12265a38bbc078e2f0a5e725e0dfddd8c21a42f2d71b04155211ebe18dee81",
       "disposition": "presentation",
       "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "eeddba6fea2366ddbf416be23c2cc9b49fd6474b2d93954bf40eb6bd26d78ae9",
+      "sha256": "32206997119a4880a226ce3b06e0521067857f4a412db3c8882c09ce7a240fc0",
       "disposition": "presentation",
       "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []

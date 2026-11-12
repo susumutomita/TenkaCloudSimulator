@@ -180,12 +180,12 @@ class SharedJSON10Schemas(unittest.TestCase):
             'CreateSecret', 'DescribeSecret', 'ListSecrets', 'PutSecretValue',
             'GetSecretValue', 'UpdateSecretVersionStage', 'DeleteSecret',
             'KMSCreateAlias', 'KMSListAliases', 'KMSUpdateAlias', 'KMSDeleteAlias',
-            'ListSecretVersionIds', 'UpdateSecret',
+            'ListSecretVersionIds', 'UpdateSecret', 'SSMCreateDocument', 'SSMGetDocument', 'SSMDescribeDocument', 'SSMListDocuments', 'SSMUpdateDocument', 'SSMDeleteDocument',
             'AutoScalingCreateScalingPlan', 'AutoScalingDescribeScalingPlans',
             'AutoScalingDescribeScalingPlanResources', 'AutoScalingUpdateScalingPlan',
             'AutoScalingDeleteScalingPlan',
         })
-        self.assertEqual(len(media['examples']), 36)
+        self.assertEqual(len(media['examples']), 42)
         for example in media['examples'].values():
             shared.validate(example['value'])
 

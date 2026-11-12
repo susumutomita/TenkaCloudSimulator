@@ -34,6 +34,9 @@ func stackConditionalLinks(value any, resources map[string]any, refs map[string]
 			}
 			kind := stringValue(object(resource)["Type"])
 			valid := field == "Arn" && (kind == "AWS::IAM::Role" || kind == "AWS::IAM::InstanceProfile" || kind == "AWS::S3::Bucket" || kind == "AWS::Lambda::Function") || field == "Value" && kind == "AWS::SSM::Parameter" || field == "RootResourceId" && kind == "AWS::ApiGateway::RestApi"
+			if stackNetworkAttribute(kind, field) || kind == "AWS::EC2::Instance" && field == "PublicDnsName" {
+				valid = true
+			}
 			if !valid {
 				return fmt.Errorf("unsupported resource attribute reference")
 			}

@@ -78,7 +78,7 @@
       },
       "post": {
         "summary": "AWS native JSON or Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request \u2192 Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, DeleteMessageBatch, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, SendMessageBatch, ChangeMessageVisibilityBatch and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter, DeleteParameters. DeleteParameters requires 1\u201310 names and ssm:DeleteParameters on every distinct target, including missing names. The simulator validates and authorizes the complete batch before one atomic transaction. Duplicate names appear once in first-occurrence order within DeletedParameters or InvalidParameters. These ordering and atomicity guarantees are local bounds, not AWS equivalence. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM customer-managed policies and role attachments are also available through the dedicated IAM provider template, with explicit ListPolicies Scope=Local. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. Customer-managed grants and the exact read-only AmazonSSMManagedInstanceCore v2 builtin are supported; no general AWS policy catalog or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1\u20134096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.\n\nKMS aliases: TrentService.CreateAlias, ListAliases, UpdateAlias, DeleteAlias. Customer alias names include alias/ and are case-sensitive; alias/aws/ is reserved. Alias targets are concrete local key IDs/ARNs in the same account/Region. Create requires kms:CreateAlias on alias+target, Update kms:UpdateAlias on alias+old+new, Delete kms:DeleteAlias on alias+target, List kms:ListAliases on *. Local aliases are capped at1000 total/50 per key; ListAliases defaults50 and accepts1\u2013100. Create/Update/Delete return empty200. Encrypt/Decrypt accept aliases, resolving and authorizing the concrete key in the same transaction. No alias identifiers for DescribeKey/EnableKey/DisableKey/GetKeyPolicy, AWS-managed aliases, alias ABAC, key deletion lifecycle, grants or CFN KMS resources.\n\nSQS DeleteMessageBatch: 1\u201310 distinct entry IDs, IAM sqs:DeleteMessage on the queue ARN. HTTP200 always includes Successful and Failed arrays; inspect both even on success. Invalid/stale/expired/peer receipts are per-entry SenderFault failures. Local partitions retain input order and repeated handles with different IDs succeed only on the first occurrence, unlike an AWS ordering guarantee. A required SQL, cancellation, commit or acknowledgement failure returns sanitized500 and rolls back every deletion and scoped expiry cleanup, without a success list. No batch console action is added.",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request \u2192 Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, DeleteMessageBatch, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, SendMessageBatch, ChangeMessageVisibilityBatch and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter, DeleteParameters. DeleteParameters requires 1\u201310 names and ssm:DeleteParameters on every distinct target, including missing names. The simulator validates and authorizes the complete batch before one atomic transaction. Duplicate names appear once in first-occurrence order within DeletedParameters or InvalidParameters. These ordering and atomicity guarantees are local bounds, not AWS equivalence. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM customer-managed policies and role attachments are also available through the dedicated IAM provider template, with explicit ListPolicies Scope=Local. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. Customer-managed grants and the exact read-only AmazonSSMManagedInstanceCore v2 builtin are supported; no general AWS policy catalog or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1\u20134096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.\n\nKMS aliases: TrentService.CreateAlias, ListAliases, UpdateAlias, DeleteAlias. Customer alias names include alias/ and are case-sensitive; alias/aws/ is reserved. Alias targets are concrete local key IDs/ARNs in the same account/Region. Create requires kms:CreateAlias on alias+target, Update kms:UpdateAlias on alias+old+new, Delete kms:DeleteAlias on alias+target, List kms:ListAliases on *. Local aliases are capped at1000 total/50 per key; ListAliases defaults50 and accepts1\u2013100. Create/Update/Delete return empty200. Encrypt/Decrypt accept aliases, resolving and authorizing the concrete key in the same transaction. No alias identifiers for DescribeKey/EnableKey/DisableKey/GetKeyPolicy, AWS-managed aliases, alias ABAC, key deletion lifecycle, grants or CFN KMS resources.\n\nSQS DeleteMessageBatch: 1\u201310 distinct entry IDs, IAM sqs:DeleteMessage on the queue ARN. HTTP200 always includes Successful and Failed arrays; inspect both even on success. Invalid/stale/expired/peer receipts are per-entry SenderFault failures. Local partitions retain input order and repeated handles with different IDs succeed only on the first occurrence, unlike an AWS ordering guarantee. A required SQL, cancellation, commit or acknowledgement failure returns sanitized500 and rolls back every deletion and scoped expiry cleanup, without a success list. No batch console action is added.\n\nSSM documents: CreateDocument, GetDocument, DescribeDocument, ListDocuments,\nUpdateDocument and DeleteDocument manage local definitions only. Stored Command\nschema 2.2 JSON contains bounded literal aws:runShellScript steps but is never\nexecuted by these APIs. Status Active means the definition is stored, not that\ncommands ran. No SendCommand, inventory or sessions are added.\n\nAll calls require the existing host session/token and action-specific IAM on\narn:aws:ssm:<region>:000000000000:document/<name>; ListDocuments uses *. Update\nrequires both ssm:UpdateDocument and ssm:GetDocument. Create starts version 1;\nUpdate appends a version only when DocumentVersion is current or $LATEST.\nDefault remains 1. Get/Describe accept $DEFAULT/$LATEST or a saved version.\nDelete removes all versions and returns HTTP 200 with an empty body. Examples\nare static and destructive examples must use disposable local definitions.\n\nOnly the declared input fields are accepted. Names 3..128 ASCII letters/digits/\nunderscore/hyphen/dot, no aws/amazon/amzn prefix. Content <=64 KiB, envelope <=512\nKiB, global <=100 documents/8 MiB content, <=100 versions/document. List page\nsize 1..50; tokens bind caller/region/page size/current snapshot and expire by\nmutation. Unsupported formats, tags, attachments, roles, sharing, interpolation,\nversion-specific deletion and other schema features fail rather than being\nsilently ignored. Local transactions/pagination/quota are simulator contracts,\nnot promises of identical AWS behavior. No batch console UI or document console\nis added by this increment.\n\nOpt-in native RunCommand: SendCommand, GetCommandInvocation and ListCommands require the configured canonical guest backend, host access token and verified assumed-role SigV4 SSM credentials. They are unavailable by default; console cookies or dummy signature credentials alone cannot invoke them. Only AWS-RunShellScript is accepted; saved custom document definitions remain non-executable. SendCommand can execute guest shell code and is intentionally not prefilled as a runnable example. It requires ssm:SendCommand on the AWS document ARN and every instance, from one current policy snapshot. Targets must share one retained deployment. List/Get require their IAM action on * and additionally restrict visibility to the current role incarnation and region (a local restriction, not AWS account-wide parity). ListCommands requires exactly one InvokedAfter RFC3339 filter, page size 1..50, and immutable ten-minute cursors. Command quota 128 retained; at most eight targets, 32 script strings totaling 8192 UTF-8 bytes, 4096 output bytes per stream. Unknown results are errors, never successful execution; discover existing commands instead of resubmitting after an uncertain response. No CancelCommand, arbitrary documents, session-manager-plugin compatibility or real-guest acceptance is implied. The document-management section above describes a separate definition-only API.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -196,6 +196,33 @@
                   },
                   {
                     "$ref": "#/components/schemas/SecretsUpdateSecretInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSMCreateDocumentInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSMGetDocumentInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSMDescribeDocumentInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSMListDocumentsInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSMUpdateDocumentInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSMDeleteDocumentInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSMSendCommandInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSMGetCommandInvocationInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSMListCommandsInput"
                   },
                   {
                     "$ref": "#/components/schemas/AutoScalingPlansCreateScalingPlanInput"
@@ -499,6 +526,45 @@
                   "value": {
                     "SecretId": "training/metadata-update",
                     "Description": "Updated practice description"
+                  }
+                },
+                "SSMCreateDocument": {
+                  "summary": "X-Amz-Target: AmazonSSM.CreateDocument (definition only)",
+                  "value": {
+                    "Name": "local-definition",
+                    "Content": "{\"schemaVersion\":\"2.2\",\"mainSteps\":[{\"action\":\"aws:runShellScript\",\"name\":\"example\",\"inputs\":{\"runCommand\":[\"echo definition-only\"]}}]}"
+                  }
+                },
+                "SSMGetDocument": {
+                  "summary": "X-Amz-Target: AmazonSSM.GetDocument (definition only)",
+                  "value": {
+                    "Name": "local-definition"
+                  }
+                },
+                "SSMDescribeDocument": {
+                  "summary": "X-Amz-Target: AmazonSSM.DescribeDocument (definition only)",
+                  "value": {
+                    "Name": "local-definition"
+                  }
+                },
+                "SSMListDocuments": {
+                  "summary": "X-Amz-Target: AmazonSSM.ListDocuments (definition only)",
+                  "value": {
+                    "MaxResults": 10
+                  }
+                },
+                "SSMUpdateDocument": {
+                  "summary": "X-Amz-Target: AmazonSSM.UpdateDocument (definition only)",
+                  "value": {
+                    "Name": "local-definition",
+                    "Content": "{\"schemaVersion\":\"2.2\",\"mainSteps\":[{\"action\":\"aws:runShellScript\",\"name\":\"example\",\"inputs\":{\"runCommand\":[\"echo definition-only\"]}}]}",
+                    "DocumentVersion": "$LATEST"
+                  }
+                },
+                "SSMDeleteDocument": {
+                  "summary": "X-Amz-Target: AmazonSSM.DeleteDocument (definition only)",
+                  "value": {
+                    "Name": "local-definition"
                   }
                 },
                 "AutoScalingCreateScalingPlan": {
@@ -1299,8 +1365,8 @@
                 "schema": {
                   "anyOf": [
                     {
-                      "type": "object",
-                      "description": "Other shared-root SSM/Logs/Secrets Manager JSON1.1 responses retain their existing native shapes."
+                      "description": "Other shared-root SSM/Logs/Secrets Manager JSON1.1 responses retain their existing native shapes.",
+                      "type": "object"
                     },
                     {
                       "$ref": "#/components/schemas/KMSKeyResponse"
@@ -1331,6 +1397,30 @@
                     },
                     {
                       "$ref": "#/components/schemas/SecretsUpdateSecretOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SSMCreateDocumentOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SSMUpdateDocumentOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SSMDescribeDocumentOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SSMGetDocumentOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SSMListDocumentsOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SSMSendCommandOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SSMGetCommandInvocationOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SSMListCommandsOutput"
                     },
                     {
                       "$ref": "#/components/schemas/AutoScalingPlansCreateScalingPlanOutput"
@@ -1396,6 +1486,102 @@
                     "value": {
                       "ARN": "arn:aws:secretsmanager:us-east-1:000000000000:secret:training/metadata-update-AbCd12",
                       "Name": "training/metadata-update"
+                    }
+                  },
+                  "SSMCreateDocument": {
+                    "summary": "Static definition metadata; no command executed",
+                    "value": {
+                      "DocumentDescription": {
+                        "Name": "local-definition",
+                        "DocumentVersion": "1",
+                        "DefaultVersion": "1",
+                        "LatestVersion": "1",
+                        "Hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "HashType": "Sha256",
+                        "Owner": "000000000000",
+                        "Status": "Active",
+                        "DocumentType": "Command",
+                        "DocumentFormat": "JSON",
+                        "SchemaVersion": "2.2",
+                        "CreatedDate": 1735689600,
+                        "PlatformTypes": [
+                          "Linux"
+                        ]
+                      }
+                    }
+                  },
+                  "SSMUpdateDocument": {
+                    "summary": "Static definition metadata; no command executed",
+                    "value": {
+                      "DocumentDescription": {
+                        "Name": "local-definition",
+                        "DocumentVersion": "1",
+                        "DefaultVersion": "1",
+                        "LatestVersion": "1",
+                        "Hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "HashType": "Sha256",
+                        "Owner": "000000000000",
+                        "Status": "Active",
+                        "DocumentType": "Command",
+                        "DocumentFormat": "JSON",
+                        "SchemaVersion": "2.2",
+                        "CreatedDate": 1735689600,
+                        "PlatformTypes": [
+                          "Linux"
+                        ]
+                      }
+                    }
+                  },
+                  "SSMDescribeDocument": {
+                    "summary": "Static definition metadata; no command executed",
+                    "value": {
+                      "Document": {
+                        "Name": "local-definition",
+                        "DocumentVersion": "1",
+                        "DefaultVersion": "1",
+                        "LatestVersion": "1",
+                        "Hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "HashType": "Sha256",
+                        "Owner": "000000000000",
+                        "Status": "Active",
+                        "DocumentType": "Command",
+                        "DocumentFormat": "JSON",
+                        "SchemaVersion": "2.2",
+                        "CreatedDate": 1735689600,
+                        "PlatformTypes": [
+                          "Linux"
+                        ]
+                      }
+                    }
+                  },
+                  "SSMGetDocument": {
+                    "summary": "Static definition metadata; no command executed",
+                    "value": {
+                      "Name": "local-definition",
+                      "DocumentVersion": "1",
+                      "DocumentType": "Command",
+                      "DocumentFormat": "JSON",
+                      "Status": "Active",
+                      "CreatedDate": 1735689600,
+                      "Content": "{\"schemaVersion\":\"2.2\",\"mainSteps\":[{\"action\":\"aws:runShellScript\",\"name\":\"example\",\"inputs\":{\"runCommand\":[\"echo definition-only\"]}}]}"
+                    }
+                  },
+                  "SSMListDocuments": {
+                    "summary": "Static definition metadata; no command executed",
+                    "value": {
+                      "DocumentIdentifiers": [
+                        {
+                          "Name": "local-definition",
+                          "DocumentVersion": "1",
+                          "DocumentType": "Command",
+                          "DocumentFormat": "JSON",
+                          "SchemaVersion": "2.2",
+                          "Owner": "000000000000",
+                          "PlatformTypes": [
+                            "Linux"
+                          ]
+                        }
+                      ]
                     }
                   },
                   "AutoScalingCreateScalingPlan": {
@@ -1817,6 +2003,63 @@
               ]
             },
             "note": "Supplemental per-target schema; the shared body union does not select a target. Partial semantic failures remain HTTP200."
+          }
+        },
+        "x-simulator-ssm-document-operation-schemas": {
+          "AmazonSSM.CreateDocument": {
+            "request": "#/components/schemas/SSMCreateDocumentInput",
+            "permission": "ssm:CreateDocument on the local document ARN",
+            "responseBody": "JSON metadata; GetDocument additionally returns definition content, never execution output",
+            "response": "#/components/schemas/SSMCreateDocumentOutput"
+          },
+          "AmazonSSM.GetDocument": {
+            "request": "#/components/schemas/SSMGetDocumentInput",
+            "permission": "ssm:GetDocument on the local document ARN",
+            "responseBody": "JSON metadata; GetDocument additionally returns definition content, never execution output",
+            "response": "#/components/schemas/SSMGetDocumentOutput"
+          },
+          "AmazonSSM.DescribeDocument": {
+            "request": "#/components/schemas/SSMDescribeDocumentInput",
+            "permission": "ssm:DescribeDocument on the local document ARN",
+            "responseBody": "JSON metadata; GetDocument additionally returns definition content, never execution output",
+            "response": "#/components/schemas/SSMDescribeDocumentOutput"
+          },
+          "AmazonSSM.ListDocuments": {
+            "request": "#/components/schemas/SSMListDocumentsInput",
+            "permission": "ssm:ListDocuments on *",
+            "responseBody": "JSON metadata; GetDocument additionally returns definition content, never execution output",
+            "response": "#/components/schemas/SSMListDocumentsOutput"
+          },
+          "AmazonSSM.UpdateDocument": {
+            "request": "#/components/schemas/SSMUpdateDocumentInput",
+            "permission": "ssm:UpdateDocument and ssm:GetDocument on the local document ARN",
+            "responseBody": "JSON metadata; GetDocument additionally returns definition content, never execution output",
+            "response": "#/components/schemas/SSMUpdateDocumentOutput"
+          },
+          "AmazonSSM.DeleteDocument": {
+            "request": "#/components/schemas/SSMDeleteDocumentInput",
+            "permission": "ssm:DeleteDocument on the local document ARN",
+            "responseBody": "empty HTTP 200"
+          }
+        },
+        "x-simulator-ssm-command-operation-schemas": {
+          "AmazonSSM.SendCommand": {
+            "request": "#/components/schemas/SSMSendCommandInput",
+            "response": "#/components/schemas/SSMSendCommandOutput",
+            "availability": "Configured canonical backend and verified assumed-role credentials only; unavailable by default",
+            "permission": "ssm:SendCommand on AWS-RunShellScript and every instance"
+          },
+          "AmazonSSM.GetCommandInvocation": {
+            "request": "#/components/schemas/SSMGetCommandInvocationInput",
+            "response": "#/components/schemas/SSMGetCommandInvocationOutput",
+            "availability": "Configured canonical backend and verified assumed-role credentials only; unavailable by default",
+            "permission": "ssm:GetCommandInvocation on *; local same-role-incarnation/region visibility"
+          },
+          "AmazonSSM.ListCommands": {
+            "request": "#/components/schemas/SSMListCommandsInput",
+            "response": "#/components/schemas/SSMListCommandsOutput",
+            "availability": "Configured canonical backend and verified assumed-role credentials only; unavailable by default",
+            "permission": "ssm:ListCommands on *; local same-role-incarnation/region visibility"
           }
         },
         "x-simulator-autoscaling-plans-operation-schemas": {
@@ -17748,6 +17991,620 @@
           }
         },
         "description": "Updated physical identity only. No VersionId, version stages, secret value or KMS metadata."
+      },
+      "SSMCreateDocumentInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Name",
+          "Content"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 128,
+            "pattern": "^(?![Aa][Ww][Ss]|[Aa][Mm][Aa][Zz][Oo][Nn]|[Aa][Mm][Zz][Nn])[a-zA-Z0-9_.-]{3,128}$"
+          },
+          "Content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 65536,
+            "description": "1..65536 UTF-8 bytes; the native parser enforces the stricter byte limit and bounded JSON Command schema 2.2 shape. Never executed by this API."
+          },
+          "DocumentType": {
+            "type": "string",
+            "enum": [
+              "Command"
+            ]
+          },
+          "DocumentFormat": {
+            "type": "string",
+            "enum": [
+              "JSON"
+            ]
+          }
+        }
+      },
+      "SSMGetDocumentInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Name"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 128,
+            "pattern": "^(?![Aa][Ww][Ss]|[Aa][Mm][Aa][Zz][Oo][Nn]|[Aa][Mm][Zz][Nn])[a-zA-Z0-9_.-]{3,128}$"
+          },
+          "DocumentVersion": {
+            "type": "string",
+            "pattern": "^(\\$LATEST|\\$DEFAULT|[1-9][0-9]*)$"
+          },
+          "DocumentFormat": {
+            "type": "string",
+            "enum": [
+              "JSON"
+            ]
+          }
+        }
+      },
+      "SSMDescribeDocumentInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Name"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 128,
+            "pattern": "^(?![Aa][Ww][Ss]|[Aa][Mm][Aa][Zz][Oo][Nn]|[Aa][Mm][Zz][Nn])[a-zA-Z0-9_.-]{3,128}$"
+          },
+          "DocumentVersion": {
+            "type": "string",
+            "pattern": "^(\\$LATEST|\\$DEFAULT|[1-9][0-9]*)$"
+          }
+        }
+      },
+      "SSMListDocumentsInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [],
+        "properties": {
+          "MaxResults": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "NextToken": {
+            "type": "string",
+            "maxLength": 2048
+          }
+        }
+      },
+      "SSMUpdateDocumentInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Name",
+          "Content",
+          "DocumentVersion"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 128,
+            "pattern": "^(?![Aa][Ww][Ss]|[Aa][Mm][Aa][Zz][Oo][Nn]|[Aa][Mm][Zz][Nn])[a-zA-Z0-9_.-]{3,128}$"
+          },
+          "Content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 65536,
+            "description": "1..65536 UTF-8 bytes; the native parser enforces the stricter byte limit and bounded JSON Command schema 2.2 shape. Never executed by this API."
+          },
+          "DocumentVersion": {
+            "type": "string",
+            "pattern": "^(\\$LATEST|[1-9][0-9]*)$"
+          },
+          "DocumentFormat": {
+            "type": "string",
+            "enum": [
+              "JSON"
+            ]
+          }
+        }
+      },
+      "SSMDeleteDocumentInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Name"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 128,
+            "pattern": "^(?![Aa][Ww][Ss]|[Aa][Mm][Aa][Zz][Oo][Nn]|[Aa][Mm][Zz][Nn])[a-zA-Z0-9_.-]{3,128}$"
+          }
+        }
+      },
+      "SSMDocumentDescription": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Name",
+          "DocumentVersion",
+          "DefaultVersion",
+          "LatestVersion",
+          "Hash",
+          "HashType",
+          "Owner",
+          "Status",
+          "DocumentType",
+          "DocumentFormat",
+          "SchemaVersion",
+          "CreatedDate",
+          "PlatformTypes"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "DocumentVersion": {
+            "type": "string"
+          },
+          "DefaultVersion": {
+            "type": "string"
+          },
+          "LatestVersion": {
+            "type": "string"
+          },
+          "Hash": {
+            "type": "string"
+          },
+          "HashType": {
+            "type": "string"
+          },
+          "Owner": {
+            "type": "string"
+          },
+          "Status": {
+            "type": "string"
+          },
+          "DocumentType": {
+            "type": "string"
+          },
+          "DocumentFormat": {
+            "type": "string"
+          },
+          "SchemaVersion": {
+            "type": "string"
+          },
+          "CreatedDate": {
+            "type": "number"
+          },
+          "PlatformTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Linux"
+              ]
+            }
+          }
+        }
+      },
+      "SSMDocumentIdentifier": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Name",
+          "DocumentVersion",
+          "DocumentType",
+          "DocumentFormat",
+          "SchemaVersion",
+          "Owner",
+          "PlatformTypes"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "DocumentVersion": {
+            "type": "string"
+          },
+          "DocumentType": {
+            "type": "string"
+          },
+          "DocumentFormat": {
+            "type": "string"
+          },
+          "SchemaVersion": {
+            "type": "string"
+          },
+          "Owner": {
+            "type": "string"
+          },
+          "PlatformTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Linux"
+              ]
+            }
+          }
+        }
+      },
+      "SSMCreateDocumentOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "DocumentDescription"
+        ],
+        "properties": {
+          "DocumentDescription": {
+            "$ref": "#/components/schemas/SSMDocumentDescription"
+          }
+        }
+      },
+      "SSMUpdateDocumentOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "DocumentDescription"
+        ],
+        "properties": {
+          "DocumentDescription": {
+            "$ref": "#/components/schemas/SSMDocumentDescription"
+          }
+        }
+      },
+      "SSMDescribeDocumentOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Document"
+        ],
+        "properties": {
+          "Document": {
+            "$ref": "#/components/schemas/SSMDocumentDescription"
+          }
+        }
+      },
+      "SSMGetDocumentOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Name",
+          "Content",
+          "DocumentVersion",
+          "DocumentType",
+          "DocumentFormat",
+          "Status",
+          "CreatedDate"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Content": {
+            "type": "string"
+          },
+          "DocumentVersion": {
+            "type": "string"
+          },
+          "DocumentType": {
+            "type": "string"
+          },
+          "DocumentFormat": {
+            "type": "string"
+          },
+          "Status": {
+            "type": "string"
+          },
+          "CreatedDate": {
+            "type": "number"
+          }
+        }
+      },
+      "SSMListDocumentsOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "DocumentIdentifiers"
+        ],
+        "properties": {
+          "DocumentIdentifiers": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/SSMDocumentIdentifier"
+            }
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        }
+      },
+      "SSMSendCommandInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "DocumentName": {
+            "const": "AWS-RunShellScript"
+          },
+          "InstanceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^i-[a-f0-9]{17}$"
+            },
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true
+          },
+          "Parameters": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "commands": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 8192
+                },
+                "minItems": 1,
+                "maxItems": 32
+              }
+            },
+            "required": [
+              "commands"
+            ]
+          },
+          "Comment": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "TimeoutSeconds": {
+            "type": "integer",
+            "minimum": 30,
+            "maximum": 3600,
+            "default": 3600
+          }
+        },
+        "required": [
+          "DocumentName",
+          "InstanceIds",
+          "Parameters"
+        ]
+      },
+      "SSMGetCommandInvocationInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "CommandId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$"
+          },
+          "InstanceId": {
+            "type": "string",
+            "pattern": "^i-[a-f0-9]{17}$"
+          }
+        },
+        "required": [
+          "CommandId",
+          "InstanceId"
+        ]
+      },
+      "SSMListCommandsInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Filters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "const": "InvokedAfter"
+                },
+                "value": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "key",
+                "value"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 1
+          },
+          "MaxResults": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 50
+          },
+          "NextToken": {
+            "type": "string",
+            "maxLength": 512
+          }
+        },
+        "required": [
+          "Filters"
+        ]
+      },
+      "SSMCommandSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "CommandId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$"
+          },
+          "DocumentName": {
+            "const": "AWS-RunShellScript"
+          },
+          "InstanceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^i-[a-f0-9]{17}$"
+            },
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true
+          },
+          "Parameters": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "commands": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 8192
+                },
+                "minItems": 1,
+                "maxItems": 32
+              }
+            },
+            "required": [
+              "commands"
+            ]
+          },
+          "Comment": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "TimeoutSeconds": {
+            "type": "integer",
+            "minimum": 30,
+            "maximum": 3600
+          },
+          "RequestedDateTime": {
+            "type": "number",
+            "minimum": 0,
+            "description": "UTC Unix seconds, not milliseconds."
+          }
+        },
+        "required": [
+          "CommandId",
+          "DocumentName",
+          "InstanceIds",
+          "Parameters",
+          "Comment",
+          "TimeoutSeconds",
+          "RequestedDateTime"
+        ]
+      },
+      "SSMSendCommandOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Command": {
+            "$ref": "#/components/schemas/SSMCommandSummary"
+          }
+        },
+        "required": [
+          "Command"
+        ]
+      },
+      "SSMListCommandsOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Commands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SSMCommandSummary"
+            },
+            "minItems": 0,
+            "maxItems": 50
+          },
+          "NextToken": {
+            "type": "string",
+            "maxLength": 512
+          }
+        },
+        "required": [
+          "Commands",
+          "NextToken"
+        ]
+      },
+      "SSMGetCommandInvocationOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "CommandId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$"
+          },
+          "InstanceId": {
+            "type": "string",
+            "pattern": "^i-[a-f0-9]{17}$"
+          },
+          "DocumentName": {
+            "const": "AWS-RunShellScript"
+          },
+          "Comment": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "Status": {
+            "enum": [
+              "InProgress",
+              "Failed",
+              "Success",
+              "TimedOut"
+            ]
+          },
+          "StatusDetails": {
+            "type": "string"
+          },
+          "ResponseCode": {
+            "type": "integer",
+            "minimum": -1,
+            "maximum": 255
+          },
+          "StandardOutputContent": {
+            "type": "string",
+            "maxLength": 4096
+          },
+          "StandardErrorContent": {
+            "type": "string",
+            "maxLength": 4096
+          },
+          "ExecutionStartDateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ExecutionEndDateTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "CommandId",
+          "InstanceId",
+          "DocumentName",
+          "Comment",
+          "Status",
+          "StatusDetails",
+          "ResponseCode",
+          "StandardOutputContent",
+          "StandardErrorContent"
+        ]
       },
       "AutoScalingPlansName": {
         "type": "string",

@@ -10,6 +10,11 @@ One Go binary includes the consoles, API reference, SQLite and Python Lambda run
 **Running a built binary needs no Go, Node.js, host Python, Docker, external database
 or real cloud connection. Use dummy credentials and practice data only.**
 
+An explicitly configured Battle VM runtime is separate from these default API
+simulation requirements: it needs Linux/amd64, a trusted pinned QEMU/firmware/image
+bundle and private operator configuration. Host clock qualification is also
+required; enabling the flag does not establish it. See [opt-in runtime setup](docs/start.md#explicit-linux-battle-runtime).
+
 ## Start and sign in
 
 From the repository root, with **Go 1.26, GNU make and a POSIX shell** installed:

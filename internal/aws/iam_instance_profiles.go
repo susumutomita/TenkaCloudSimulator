@@ -211,6 +211,10 @@ func iamDeleteInstanceProfileTx(ctx context.Context, tx *sql.Tx, name, id string
 	if err = iamProfileExpected(p, id); err != nil {
 		return err
 	}
+	if err = ec2AttachmentProfileGuard(ctx, tx, name, id); err != nil {
+		return err
+	}
+
 	if len(p.Roles) != 0 {
 		return ssmFailure{"DeleteConflict", "Remove the role before deleting the instance profile."}
 	}
@@ -256,6 +260,10 @@ func iamChangeInstanceProfileRoleTx(ctx context.Context, tx *sql.Tx, name, id, r
 	if err = iamManagedExpectedRole(role, []string{roleID}); err != nil {
 		return err
 	}
+	if err = ec2AttachmentProfileGuard(ctx, tx, name, id); err != nil {
+		return err
+	}
+
 	if add {
 		if len(p.Roles) != 0 {
 			if p.Roles[0].RoleID == role.RoleID {
