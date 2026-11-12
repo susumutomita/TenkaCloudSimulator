@@ -37,15 +37,28 @@ func (c *Clock) SignedHandler(next http.Handler) http.Handler {
 			return
 		}
 		for k, v := range recorder.header {
-			w.Header()[k] = v
+			if k != "Content-Type" {
+				w.Header()[k] = v
+			}
 		}
-		digest := sha256.Sum256(recorder.body.Bytes())
+		// Replies are JSON or plain-text errors only; never reflect a
+		// handler-chosen media type that a browser could render as markup.
+		if recorder.header.Get("Content-Type") == "application/json" {
+			w.Header().Set("Content-Type", "application/json")
+		} else {
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		}
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		// The reply body is authenticated directly by the keyed MAC
+		// (length-prefixed), not by an unkeyed digest of its bytes.
+		body := recorder.body.Bytes()
 		mac := hmac.New(sha256.New, c.key[:])
-		fmt.Fprintf(mac, "TCS-RESPONSE-2\n%s\n%s\n%s\n%s\n%x\n%d\n%x\n", c.domain, nonce, r.Method, r.URL.EscapedPath(), requestDigest, recorder.status, digest)
+		fmt.Fprintf(mac, "TCS-RESPONSE-3\n%s\n%s\n%s\n%s\n%x\n%d\n%d\n", c.domain, nonce, r.Method, r.URL.EscapedPath(), requestDigest, recorder.status, len(body))
+		_, _ = mac.Write(body)
 		w.Header().Set("X-Simulator-Clock-Domain", c.domain)
 		w.Header().Set("X-Simulator-Clock-MAC", hex.EncodeToString(mac.Sum(nil)))
 		w.WriteHeader(recorder.status)
-		_, _ = w.Write(recorder.body.Bytes())
+		_, _ = w.Write(body)
 	})
 }
 

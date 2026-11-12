@@ -20,7 +20,7 @@ func (p *Prepared) NICInvocation(mac [6]byte) (Invocation, error) {
 		return Invocation{}, fmt.Errorf("invalid VM NIC MAC")
 	}
 	inv := p.Invocation()
-	args := make([]string, 0, len(inv.Args)+4)
+	args := make([]string, 0, len(inv.Args))
 	replaced := false
 	for i := 0; i < len(inv.Args); i++ {
 		if inv.Args[i] == "-nic" && i+1 < len(inv.Args) && inv.Args[i+1] == "none" {

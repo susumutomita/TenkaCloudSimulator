@@ -6708,7 +6708,7 @@
     },
     {
       "path": "internal/workload/guestvm/nic_linux.go",
-      "sha256": "d1b5f3bf1884da93d1281b64299538e0a20c142044f1b5b623357060ca3f275d",
+      "sha256": "749f23ed162b59e534ec5aef7e7b7042ea4337cbde8cf455541c4ef351430970",
       "disposition": "modeled",
       "reason": "Immutable plan/image binding, durable journal before launch, paused exact control, attachment before activation, private readiness, typed provider/creator authorization, same saved network/role association, no reconstruction and independently observed containment before release.",
       "models": [
@@ -6995,14 +6995,14 @@
     },
     {
       "path": "internal/workload/probeclock/clock_test.go",
-      "sha256": "71d6dedada0ede1f8f215b897871bfaa5ddcace94dd5dc4acf8906640d9e6cce",
+      "sha256": "dcf51078d31d01eb2445e6d2db25619e80748cc485666207c5cc926975fdfe61",
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
     },
     {
       "path": "internal/workload/probeclock/http.go",
-      "sha256": "fbf5c67be402167c15382a21c1788966383c04822d4fc84c502003671095cdde",
+      "sha256": "9a798178cf500d553be63524b3ddbef7e81effd9e4c6708b2e91c37a9dede29b",
       "disposition": "modeled",
       "reason": "Owned platform/process/domain proof and frozen provider clock relation precede command timestamp admission; HTTP timestamps or configured transport alone are not clock authority.",
       "models": [

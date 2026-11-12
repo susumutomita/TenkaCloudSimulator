@@ -70,12 +70,33 @@ func TestSignedResponseBindsPathStatusBody(t *testing.T) {
 	r.Header.Set("X-Simulator-Clock-Nonce", strings.Repeat("ab", 32))
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, r)
-	digest := sha256.Sum256([]byte("retained"))
 	req := sha256.Sum256(nil)
 	m := hmac.New(sha256.New, c.key[:])
-	fmt.Fprintf(m, "TCS-RESPONSE-2\n%s\n%s\nPOST\n/probe/read\n%x\n202\n%x\n", c.Domain(), strings.Repeat("ab", 32), req, digest)
+	fmt.Fprintf(m, "TCS-RESPONSE-3\n%s\n%s\nPOST\n/probe/read\n%x\n202\n8\nretained", c.Domain(), strings.Repeat("ab", 32), req)
 	if w.Header().Get("X-Simulator-Clock-MAC") != hex.EncodeToString(m.Sum(nil)) {
 		t.Fatal("response authentication")
+	}
+	if w.Body.String() != "retained" || w.Header().Get("Content-Type") != "text/plain; charset=utf-8" || w.Header().Get("X-Content-Type-Options") != "nosniff" {
+		t.Fatal("reply body or media type changed")
+	}
+}
+func TestSignedResponseNeverReflectsMarkupMediaType(t *testing.T) {
+	c, _ := newClock(time.Now(), 100000, bytes.NewReader(bytes.Repeat([]byte{6}, 48)))
+	for in, want := range map[string]string{"application/json": "application/json", "text/html; charset=utf-8": "text/plain; charset=utf-8", "": "text/plain; charset=utf-8"} {
+		h := c.SignedHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if in != "" {
+				w.Header().Set("Content-Type", in)
+			}
+			w.Header().Set("Cache-Control", "no-store")
+			_, _ = w.Write([]byte("<b>x</b>"))
+		}))
+		r := httptest.NewRequest("POST", "http://localhost/probe/read", nil)
+		r.Header.Set("X-Simulator-Clock-Nonce", strings.Repeat("cd", 32))
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, r)
+		if got := w.Header().Get("Content-Type"); got != want || w.Header().Get("Cache-Control") != "no-store" {
+			t.Fatalf("content type %q -> %q", in, got)
+		}
 	}
 }
 func TestMonotonicMillisBeyondNanosecondSafeInteger(t *testing.T) {
