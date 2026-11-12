@@ -204,7 +204,10 @@ func TestRoute53StoreStorageFaultsNeverPartiallyCommit(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			return func(ctx context.Context) error { _, _, err := s.create(ctx, "fresh.test", "ref", "comment"); return err }
+			return func(ctx context.Context) error {
+				_, _, err := s.create(ctx, "fresh.test", "ref", "comment")
+				return err
+			}
 		})
 	})
 	t.Run("change records", func(t *testing.T) {
