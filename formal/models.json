@@ -10995,6 +10995,22 @@
       }
      ],
      "expect_invariant": "RevocationRetainsDebt"
+    },
+    {
+     "id": "DeliverStaleServiceFrame",
+     "edits": [
+      {
+       "old": "     IN /\\ d' = IF ~fits THEN CloseNIC(charged) ELSE charged\n",
+       "new": "     IN /\\ d' = IF ~fits THEN CloseNIC(charged) ELSE [charged EXCEPT !.sessions[k].queued = 1]\n",
+       "count": 1
+      },
+      {
+       "old": "         delivered == FALSE",
+       "new": "         delivered == fits",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TupleDirectionGuard"
     }
    ]
   },

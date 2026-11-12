@@ -338,6 +338,9 @@ func (r *TCPProbeSessions) RouteIncoming(frame []byte) (bool, error) {
 		return false, err
 	}
 	if _, err = s.classifier.Classify(TCPFromPeer, frame); err != nil {
+		if r.staleServiceLocked(s, packet) {
+			return false, nil
+		}
 		r.closeLocked()
 		return false, err
 	}
@@ -355,6 +358,25 @@ func (r *TCPProbeSessions) RouteIncoming(frame []byte) (bool, error) {
 		r.closeLocked()
 		return false, ErrProbeCapacity
 	}
+}
+
+// staleServiceLocked reports a frame from the exact trusted peer to an owned
+// tuple whose only difference is another configured service port. That is a
+// late retransmission (for example a FIN) of an earlier incarnation of a reused
+// tuple: guest TCP may keep retrying past TupleQuarantine. It is charged to the
+// current incarnation and discarded rather than revoking the whole NIC. Any
+// other mismatch still revokes.
+func (r *TCPProbeSessions) staleServiceLocked(s *TCPProbeSession, p TCPPacket) bool {
+	route := s.route
+	if p.SourceMAC != route.PeerMAC || p.DestinationMAC != route.LocalMAC || p.SourceIP != route.PeerIP || p.DestinationIP != route.LocalIP || p.SourcePort == route.PeerPort {
+		return false
+	}
+	for _, port := range r.nic.ServicePorts {
+		if port == p.SourcePort {
+			return true
+		}
+	}
+	return false
 }
 
 // ReadFrame rejects buffered data once revocation is observed. Only one read may

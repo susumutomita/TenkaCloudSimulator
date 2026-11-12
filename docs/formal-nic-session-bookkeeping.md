@@ -15,6 +15,10 @@ TCP sequence/state correctness, or Go refinement.
   incarnation's frames/bytes before classification, reject unknown or malformed
   tuple/direction, discard known retired tuples, enqueue only to exact active
   session, close registry on queue overflow or budget exhaustion.
+- `ReceiveStale`: `staleServiceLocked` drops (after charging the current
+  incarnation) a frame from the exact trusted peer whose only mismatch is
+  another configured service port, i.e. a late retransmission for an earlier
+  incarnation of a reused tuple; every other mismatch still revokes.
 - `ReadFrame`: one read per session; inflight debt remains across revocation;
   buffered frames are not returned after observed revocation.
 - `Transmit`: charge the session's own budget before busy check, exact route validation, one registry-wide
@@ -82,7 +86,7 @@ or a proof of the implementation.
 
 ## Regression boundary
 
-The registration regression pins all 16 properties, 21 semantic controls,
+The registration regression pins all 16 properties, 22 semantic controls,
 the single concrete source scope, and declared compact bounds. Model controls
 must fail their intended invariant after a real transition, not from an
 inconsistent initial state or syntax error. Changing model bounds or seed

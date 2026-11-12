@@ -66,6 +66,17 @@ Receive(k, ok, size) ==
                 ELSE [charged EXCEPT !.sessions[k].queued = @ + 1]
         /\ Record("receive", k, ok, size, accepted)
 
+\* A frame from the trusted peer whose only mismatch is another configured service
+\* port: a late retransmission for an earlier incarnation of a reused tuple. It is
+\* charged to the current incarnation and dropped, never delivered.
+ReceiveStale(k, size) ==
+  /\ ~d.closed /\ k \in IDs /\ d.sessions[k].used
+  /\ LET fits == Chargeable(d.sessions[k], size)
+         charged == Charged(d, k, size)
+         delivered == FALSE
+     IN /\ d' = IF ~fits THEN CloseNIC(charged) ELSE charged
+        /\ Record("receive", k, FALSE, size, delivered)
+
 Send(k, ok, size) ==
   /\ Admitted(d, k)
   /\ LET charged == Charged(d, k, size)
@@ -134,6 +145,7 @@ Next ==
   /\ depth < MaxDepth
   /\ \/ \E service \in Services: Open(service)
      \/ \E k \in 0..2, ok \in BOOLEAN, size \in 0..2: Receive(k, ok, size)
+     \/ \E k \in IDs, size \in 0..2: ReceiveStale(k, size)
      \/ \E k \in IDs, ok \in BOOLEAN, size \in 0..2: Send(k, ok, size)
      \/ \E k \in IDs: ReadStart(k) \/ ReadReturn(k) \/ RevokeSession(k) \/ WatchSession(k) \/ DrainSession(k) \/ Quiesce(k)
      \/ \E k \in IDs, ok \in BOOLEAN: WriteReturn(k, ok)

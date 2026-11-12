@@ -295,11 +295,20 @@ func TestProbeSessionsQuarantineRetiredPortsBeforeReuse(t *testing.T) {
 	if s.Route().LocalPort != ProbeSourcePort || s == old || s.Route().PeerPort != 8080 {
 		t.Fatal("oldest quiet tuple not reused", s.Route())
 	}
-	// A late frame for the old incarnation now classifies against the new
-	// session's exact tuple; with a different service it is unowned input.
+	// A late retransmission for the old incarnation (another service port of
+	// the same trusted peer) is charged to the new incarnation and dropped; it
+	// neither reaches the new session nor revokes the NIC.
 	stale := tcpRouteFrame(old.Route(), TCPFromPeer, old.Route().PeerPort)
-	if accepted, err := r.RouteIncoming(stale); accepted || err == nil {
-		t.Fatal("stale tuple traffic delivered to new session", err)
+	if accepted, err := r.RouteIncoming(stale); accepted || err != nil {
+		t.Fatal("stale tuple traffic delivered or revoked the NIC", accepted, err)
+	}
+	if s.frames != 1 || r.Lifetime().Err() != nil {
+		t.Fatal("stale frame not charged to the reused tuple, or NIC revoked", s.frames)
+	}
+	// The same tuple from a port that is not a configured service still revokes.
+	forged := tcpRouteFrame(old.Route(), TCPFromPeer, 9999)
+	if accepted, err := r.RouteIncoming(forged); accepted || err == nil || r.Lifetime().Err() == nil {
+		t.Fatal("non-service source port got the stale exemption", err)
 	}
 }
 

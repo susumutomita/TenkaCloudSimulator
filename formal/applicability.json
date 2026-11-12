@@ -4,7 +4,7 @@
   "changes": [
     {
       "path": "docs/formal-nic-session-bookkeeping.md",
-      "sha256": "c9dbe7030690714af1b923a021892a75df526d64d387a0c6bd0dff13b6506ccb",
+      "sha256": "16f6ead87dd9e83fc96a811cf8f062bb7846e9f01936d0505b0dd8c553a898d2",
       "disposition": "documentation",
       "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
       "models": []
@@ -78,7 +78,7 @@
     },
     {
       "path": "formal/NICSessionBookkeeping.tla",
-      "sha256": "1e19323da1c543176b5e460d13f97be4f0b8249537b4ddef69d1fac1108575bf",
+      "sha256": "9df2b999f750854d2a963fc2b5042314eab3f1fcdaf68fa402d5cab6e939e88a",
       "disposition": "modeled",
       "reason": "Changed executable specification/configuration requires the listed own semantic properties and exact baseline plus required sensitivity controls; tests do not prove Go refinement.",
       "models": [
@@ -185,14 +185,14 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "a14cce41b9e41cfc63e5c1668015a36f3b02475392e2b65628ad9dcf99d1e0ef",
+      "sha256": "2527685d176af2f03aabba40e595aa3bb862675815895b4a9263339b65703236",
       "disposition": "formal-infrastructure",
       "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
       "models": []
     },
     {
       "path": "internal/workload/guestnet/tcp_sessions.go",
-      "sha256": "7d3965eb9fa4e546ca8fa7f5eab99ceb1ae5a0232a89d986a251165015555390",
+      "sha256": "ecf1bde8d76b8dab417f4ee410cfc0f5fd22c17b709ec6624777fdeae41f1c7d",
       "disposition": "modeled",
       "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
       "models": [
@@ -221,7 +221,7 @@
     },
     {
       "path": "internal/workload/guestnet/tcp_sessions_test.go",
-      "sha256": "a77b4e5174c2cad12440ce1daae800e5885764054eae51d1064e238302e7e216",
+      "sha256": "2e09f7ed72e7032b42e9019de66ad602e6c22881bbdc4fff40eb9bba55b31d30",
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
@@ -545,14 +545,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "6964d5cf586cbbc6cc5ef462241c6735c41d0c48efd4c02aaa2935e1f1572e6a",
+      "sha256": "14afdad6c930eb5c707857aeeb997fe15d5205ca45bd974f2741c1177dd9df6e",
       "disposition": "formal-infrastructure",
       "reason": "Formal execution infrastructure: DynamoDBAdmission baseline and unchanged controls use exactly two workers, other families one, families remain serial. All 60-second deadlines, model inputs, exact invariant checks and no-retry failure handling preserved; independent regression checks enforce allocation and timeout behavior.",
       "models": []
     },
     {
       "path": "scripts/formal_seed_replay.py",
-      "sha256": "6e95c553a57d457da24cff317940c1e8b2ebe29d79effe9acb48ae864529986c",
+      "sha256": "3ff7962259777cc15f4e82c718d8a1ed9b54761427df8a274af98bc27a9b5a88",
       "disposition": "formal-infrastructure",
       "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
       "models": []
@@ -573,7 +573,7 @@
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "dec66abd4f67842e01a91192e64ed43b9da7e8a28c0b6e047a15620ebd61e9ca",
+      "sha256": "29951fa147818610de68269e42794db3a55f2c5e3b1beae17063c410b6d8c962",
       "disposition": "formal-infrastructure",
       "reason": "Formal execution infrastructure: DynamoDBAdmission baseline and unchanged controls use exactly two workers, other families one, families remain serial. All 60-second deadlines, model inputs, exact invariant checks and no-retry failure handling preserved; independent regression checks enforce allocation and timeout behavior.",
       "models": []

@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 NIC_PROPERTIES = ['TypeOK', 'TupleTombstones', 'ImmutableTuples', 'LiveAccounting', 'DrainRequiresJoins', 'SingleDelivery', 'RevocationRetainsDebt', 'NoClosedAdmission', 'BudgetMonotone', 'ChargedAttempts', 'TupleDirectionGuard', 'IncomingIsolation', 'ClosedQueuesEmpty', 'LateSuccessRejected', 'RewrapPreservesState', 'EffectNotCleanupProof']
-NIC_MUTANTS = ['ReuseFirstTuple', 'ReuseBeforeQuarantine', 'ReuseLiveTuple', 'ReleaseWithoutWatcher', 'ReleaseWithPendingCallback', 'ReleaseWithPendingRead', 'ReleaseLiveOnRevoke', 'NICDrainWithoutChildren', 'ResetIncarnationBudget', 'SkipFrameCharge', 'SkipByteCharge', 'AcceptWrongIncomingTuple', 'CrossSessionQueue', 'KeepRevokedQueue', 'PublishLateWriteSuccess', 'RewrapDropsPendingQueue', 'ErasePossibleEffect', 'AdmitSecondDelivery', 'MutateAllocatedService', 'ReadAdmittedAfterClose', 'RevokeErasesReadDebt']
+NIC_MUTANTS = ['ReuseFirstTuple', 'ReuseBeforeQuarantine', 'ReuseLiveTuple', 'ReleaseWithoutWatcher', 'ReleaseWithPendingCallback', 'ReleaseWithPendingRead', 'ReleaseLiveOnRevoke', 'NICDrainWithoutChildren', 'ResetIncarnationBudget', 'SkipFrameCharge', 'SkipByteCharge', 'AcceptWrongIncomingTuple', 'CrossSessionQueue', 'KeepRevokedQueue', 'PublishLateWriteSuccess', 'RewrapDropsPendingQueue', 'ErasePossibleEffect', 'AdmitSecondDelivery', 'MutateAllocatedService', 'ReadAdmittedAfterClose', 'RevokeErasesReadDebt', 'DeliverStaleServiceFrame']
 NIC_BOUNDS = 'Eight explicitly reachable bookkeeping seeds, three transition suffixes, two reusable tuples/two active sessions, one callback/one queued frame per session, three frames/four byte units per tuple incarnation.'
 
 
