@@ -201,6 +201,19 @@ func (f *faultDB) dump(t *testing.T) string {
 // failed; at least one must.
 func sweepStorageFaults(t *testing.T, atomic bool, setup func(t *testing.T, db *sql.DB) func(context.Context) error) int {
 	t.Helper()
+	return sweepFaults(t, atomic, false, setup)
+}
+
+// sweepStorageFaultsRecover is sweepStorageFaults for durable multi-step
+// protocols: a failed run may leave a durable intent behind, but retrying the
+// same operation without faults must then complete.
+func sweepStorageFaultsRecover(t *testing.T, setup func(t *testing.T, db *sql.DB) func(context.Context) error) int {
+	t.Helper()
+	return sweepFaults(t, false, true, setup)
+}
+
+func sweepFaults(t *testing.T, atomic, recover bool, setup func(t *testing.T, db *sql.DB) func(context.Context) error) int {
+	t.Helper()
 	clean := newFaultDB(t)
 	op := setup(t, clean.DB)
 	clean.arm(1 << 62)
@@ -227,6 +240,11 @@ func sweepStorageFaults(t *testing.T, atomic bool, setup func(t *testing.T, db *
 		if atomic {
 			if after := db.dump(t); after != before {
 				t.Fatalf("fault at operation %d/%d (%v) left a partial write:\nbefore:\n%s\nafter:\n%s", at, total, err, before, after)
+			}
+		}
+		if recover {
+			if err := op(context.Background()); err != nil {
+				t.Fatalf("retry after fault at operation %d/%d did not recover: %v", at, total, err)
 			}
 		}
 	}
