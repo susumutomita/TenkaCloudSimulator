@@ -2482,6 +2482,13 @@
       ]
     },
     {
+      "path": "internal/aws/ec2_guest_attachment_refusals_test.go",
+      "sha256": "90fc9bcc605d31f9b0a9ece2a372126cd10f27a3f449b880e8d8ffd0a0b25923",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
+    },
+    {
       "path": "internal/aws/ec2_guest_attachment_test.go",
       "sha256": "10cf0046d636bf05efb88b9a16ab20593e005e207dc477cc3c952db296eea76a",
       "disposition": "test-support",
@@ -3541,6 +3548,13 @@
     {
       "path": "internal/aws/ssm_command_positive_test.go",
       "sha256": "7c815368186664ed7373b8a7d3e9df48c39934da346bb30fe876f7af9ec28c80",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ssm_command_record_validation_test.go",
+      "sha256": "525c2fe295b3ffe971f012b203a94be6e72a640750032e63593a1a1b1adfb6ef",
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
