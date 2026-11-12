@@ -18,7 +18,7 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     assert context.request.post(endpoint+'/_simulator/login',form={'token':operator},max_redirects=0).status==303
     page=context.new_page();errors=[];outside=[]
     page.on('pageerror',lambda error:errors.append(str(error)))
-    page.add_init_script("window.cspViolations=[];document.addEventListener('securitypolicyviolation',e=>window.cspViolations.push({directive:e.violatedDirective,blocked:e.blockedURI,source:e.sourceFile,line:e.lineNumber,column:e.columnNumber}));")
+    page.add_init_script("window.cspViolations=[];document.addEventListener('securitypolicyviolation',e=>window.cspViolations.push({directive:e.violatedDirective,blocked:e.blockedURI,source:e.sourceFile,line:e.lineNumber,column:e.columnNumber,target:e.target?.localName,style:e.target?.getAttribute?.('style')}));")
     def guard(route):
         if route.request.url.startswith(endpoint+'/'):route.continue_()
         else:outside.append(route.request.url);route.abort()
@@ -33,7 +33,9 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     page.get_by_role('textbox',name='Execution role ARN',exact=True).fill('arn:aws:iam::000000000000:role/editor-executor')
     def edit(source):
         editor=page.locator('.lambda-python-editor .cm-content').first
-        editor.click();editor.press('ControlOrMeta+A');page.keyboard.insert_text(source)
+        editor.click();assert_csp('editor clicked')
+        editor.press('ControlOrMeta+A');assert_csp('editor select all')
+        page.keyboard.insert_text(source);assert_csp('editor native insertText')
     assert_csp('create editor mounted')
     edit('def lambda_handler(event, context):\n    return {"answer": 41}\n')
     page.get_by_role('button',name='Create function',exact=True).click()
