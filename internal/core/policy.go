@@ -32,10 +32,11 @@ func (s *StringList) UnmarshalJSON(data []byte) error {
 }
 
 type Statement struct {
-	Sid      string     `json:"Sid,omitempty"`
-	Effect   string     `json:"Effect"`
-	Action   StringList `json:"Action"`
-	Resource StringList `json:"Resource"`
+	Sid       string           `json:"Sid,omitempty"`
+	Effect    string           `json:"Effect"`
+	Action    StringList       `json:"Action"`
+	Resource  StringList       `json:"Resource"`
+	Condition PolicyConditions `json:"Condition,omitempty"`
 }
 type Statements []Statement
 
@@ -62,6 +63,9 @@ type Policy struct {
 }
 
 func strictJSON(data []byte, target any) error {
+	if err := rejectPolicyDuplicateKeys(data); err != nil {
+		return err
+	}
 	d := json.NewDecoder(bytes.NewReader(data))
 	d.DisallowUnknownFields()
 	if err := d.Decode(target); err != nil {
@@ -84,6 +88,19 @@ func ParsePolicy(data []byte) (Policy, error) {
 		if s.Effect != "Allow" && s.Effect != "Deny" {
 			return p, fmt.Errorf("Effect must be Allow or Deny")
 		}
+		for _, resource := range s.Resource {
+			if !supportedPolicyVariables(resource) {
+				return p, fmt.Errorf("unsupported resource policy variable")
+			}
+		}
+		for _, action := range s.Action {
+			if strings.Contains(action, "${") {
+				return p, fmt.Errorf("policy variables are unsupported in Action")
+			}
+		}
+		if err := s.Condition.validate(); err != nil {
+			return p, err
+		}
 		for _, list := range []StringList{s.Action, s.Resource} {
 			if len(list) == 0 || len(list) > 100 {
 				return p, fmt.Errorf("Action and Resource require 1–100 values")
@@ -104,6 +121,41 @@ func wildcard(pattern, value string) bool {
 	return regexp.MustCompile("(?s)^" + quoted + "$").MatchString(value)
 }
 func Evaluate(policy Policy, action, resource string) string {
+	return EvaluateWithContext(policy, action, resource, nil)
+}
+
+// EvaluateWithContext accepts only provider-derived context, never request-supplied
+// tags or a caller-selected user ID. Missing context does not satisfy conditions.
+func EvaluateWithContext(policy Policy, action, resource string, values PolicyContext) string {
+	// Typed policies also pass through this boundary; invalid conditional Deny
+	// must not disappear beside an otherwise unconditional Allow.
+	for _, statement := range policy.Statement {
+		// nil means the provider has not implemented trusted context. Do not
+		// drop a conditional Deny beside an unconditional Allow in old callers.
+		if values == nil && statement.Condition != nil {
+			return "implicitDeny"
+		}
+		if values == nil {
+			for _, r := range statement.Resource {
+				if strings.Contains(r, "${") {
+					return "implicitDeny"
+				}
+			}
+		}
+		if statement.Condition.validate() != nil {
+			return "implicitDeny"
+		}
+		for _, resource := range statement.Resource {
+			if !supportedPolicyVariables(resource) {
+				return "implicitDeny"
+			}
+		}
+		for _, action := range statement.Action {
+			if strings.Contains(action, "${") {
+				return "implicitDeny"
+			}
+		}
+	}
 	allowed := false
 	for _, s := range policy.Statement {
 		aMatch, rMatch := false, false
@@ -114,12 +166,12 @@ func Evaluate(policy Policy, action, resource string) string {
 			}
 		}
 		for _, r := range s.Resource {
-			if wildcard(r, resource) {
+			if policyValueMatch(r, resource, values, true) {
 				rMatch = true
 				break
 			}
 		}
-		if aMatch && rMatch {
+		if aMatch && rMatch && s.Condition.matches(values) {
 			if s.Effect == "Deny" {
 				return "explicitDeny"
 			}

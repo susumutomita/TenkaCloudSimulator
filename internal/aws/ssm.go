@@ -95,6 +95,16 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "AmazonSSM.") {
+		if isNativeRunCommand(r) {
+			g.Commands.ServeNative(w, r)
+			return
+		}
+		if isSSMSessionOperation(r) {
+			// ServeNative independently rejects parameter/terminal handoffs and
+			// requires the original verified participant SigV4 identity.
+			g.Sessions.ServeNative(w, r)
+			return
+		}
 		g.serveSSM(w, r)
 		return
 	}
@@ -184,6 +194,10 @@ func (g *Gateway) serveSSM(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	op := strings.TrimPrefix(r.Header.Get("X-Amz-Target"), "AmazonSSM.")
+	if isSSMDocumentOperation(op) {
+		g.serveSSMDocuments(w, r, g.Documents, region, op)
+		return
+	}
 	allowed := map[string][]string{
 		"PutParameter": {"Name", "Value", "Type", "Description", "Overwrite", "Tier", "DataType"},
 		"GetParameter": {"Name", "WithDecryption"}, "GetParameters": {"Names", "WithDecryption"}, "DeleteParameter": {"Name"},

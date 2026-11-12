@@ -99,7 +99,13 @@ func TestSSMPaginationAndValidation(t *testing.T) {
 	} {
 		ssmCall(t, s, tc.op, tc.body, 400, nil)
 	}
-	ssmCall(t, s, "StartSession", map[string]any{}, 501, nil)
+	// The host access token authorizes ordinary simulator APIs, not an assumed
+	// role's guest execution. Native session/command routes require verified STS
+	// participant credentials before parsing payloads or checking backend setup.
+	for _, action := range []string{"StartSession", "SendCommand"} {
+		ssmCall(t, s, action, map[string]any{}, 403, nil)
+		ssmCall(t, s, action, map[string]any{}, 403, map[string]string{"X-Simulator-Principal": "simulator-admin"})
+	}
 	ssmCall(t, s, "GetParameter", nil, 400, nil)
 	ssmCall(t, s, "GetParameter", map[string]any{"Name": "/team/a"}, 403, map[string]string{"X-Simulator-Principal": "unknown"})
 	for _, headers := range []map[string]string{{"X-Amz-Security-Token": "dummy"}, {"X-Simulator-Region": "invalid"}, {"Authorization": "AWS4-HMAC-SHA256 Credential=TCSIMEXAMPLE/date/us-east-1/ssm/aws4_request", "X-Simulator-Region": "ap-northeast-1"}} {

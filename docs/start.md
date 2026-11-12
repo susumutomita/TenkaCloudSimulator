@@ -135,3 +135,42 @@ The current registry combines StartupTokenVisibility, SSMParameterState and the
 original five protected models. Exact changed-blob records and required model/
 property guards are maintained together. New integration-head Go/PTY/TLC and
 hosted CI are separate checks; source-only restacking is not fresh execution.
+
+### Explicit Linux Battle runtime
+
+`--battle-runtime-config /absolute/private/runtime.json` selects the bounded
+Linux/amd64 VM provider. It requires authenticated numeric loopback operation;
+`--unsafe-no-auth` and `--allow-remote` cannot be combined with it. Default startup
+still does not enable VM workloads. The configuration file and runtime directory
+must be private; the directory cannot be a symlink.
+
+The JSON contains `bundleManifest`, `bundleArchive`, `manifestSha256`,
+`runtimeDirectory`, `layout` (`emulator`, `firmware`, `baseDisk`), `imageIds`,
+`lifetimeUntilMs`, and `clock` (`domain`, `validFromMs`, `validUntilMs`). Paths to
+files/directories are absolute. Layout entries are distinct manifest-listed
+relative paths. Image IDs are explicit aliases for that pinned bundle, not
+requests to download an image. Template SSM parameter types that reference the
+AWS public Amazon Linux AMI aliases (`/aws/service/ami-amazon-linux-latest/...`)
+resolve to the first image ID unless a local parameter of that name exists.
+Runtime lifetime is bounded to 24 hours from
+startup and defaults to 8 hours when `lifetimeUntilMs` is omitted; every VM in
+the runtime shares that window. Unknown or duplicate configuration fields are
+rejected.
+
+Use only an independently trusted bundle. The manifest SHA-256 and archive/file
+hash checks establish integrity, not vendor authenticity or containment. Loading
+configuration extracts verified assets but does not start a VM. A CloudFormation
+instance becomes ready only through the configured provider's real launch path;
+metadata, a stack ID, or an HTTP capability handle is not physical authority.
+
+The clock domain and interval are **not Host clock qualification**. Host must also
+supply an independently qualified conservative mapping from its original
+monotonic deadlines into this domain. Without that mapping, the Host must keep
+Battle unavailable. No automatic synchronizer or real-machine qualification is
+provided by the configuration file.
+
+The provider's `PublicDnsName`/IMDS hostname is a reserved `.simulator.invalid`
+label, not publicly resolvable DNS. Host probing uses authenticated, owner-bound
+local capabilities instead of fetching that label. Shutdown reports unresolved
+cleanup as an error and retains its database/bundle rather than claiming cleanup
+from an HTTP timeout.

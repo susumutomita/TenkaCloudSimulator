@@ -159,6 +159,9 @@ func TestSakuraCLIActualRunDefaultAndOptInUseRealHTTP(t *testing.T) {
 				}
 				invoke("GET", path, "", 404)
 			}
+			// A spare dialed-but-unused client connection is StateNew on the
+			// server and would hold Shutdown for its 5s grace; release it first.
+			transport.CloseIdleConnections()
 			cancel()
 			select {
 			case e = <-done:

@@ -15,7 +15,9 @@ ExpectedSize(k) == CASE k="small" -> 2 [] k \in {"binary","escaped"} -> 3
 WireSize(k) == IF k \in {"binary","escaped"} THEN 8 ELSE ExpectedSize(k)
 Size(k) == ExpectedSize(k)
 Empty == [k \in Keys |-> 0]
-Count(values) == Cardinality({k \in Keys : values[k] # 0})
+Count(values) == (IF values["N1"] # 0 THEN 1 ELSE 0) +
+ (IF values["N2"] # 0 THEN 1 ELSE 0) + (IF values["S1"] # 0 THEN 1 ELSE 0) +
+ (IF values["B1"] # 0 THEN 1 ELSE 0) + (IF values["invalid"] # 0 THEN 1 ELSE 0)
 TableCount(value) == Cardinality({s \in Scopes : value[s]})
 Sum(values) == values["N1"]+values["N2"]+values["S1"]+values["B1"]+values["invalid"]
 ExpectedPermit(ready,tableReady,itemPresent,itemCount,t,k,allow,deny) ==

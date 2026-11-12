@@ -11,9 +11,23 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from formal_model_gate import BASE_MODELS, REQUIRED_MUTANTS, GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs
+from formal_model_gate import validate_guesttcp_module_pins, require, BASE_MODELS, REQUIRED_MUTANTS, GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs
+
+from formal_seed_replay import SPECS, prepare_seed_replays, run_seed_replays
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+NIC_PROPERTIES = ['TypeOK', 'TupleTombstones', 'ImmutableTuples', 'LiveAccounting', 'DrainRequiresJoins', 'SingleDelivery', 'RevocationRetainsDebt', 'NoClosedAdmission', 'BudgetMonotone', 'ChargedAttempts', 'TupleDirectionGuard', 'IncomingIsolation', 'ClosedQueuesEmpty', 'LateSuccessRejected', 'RewrapPreservesState', 'EffectNotCleanupProof']
+NIC_MUTANTS = ['ReuseFirstTuple', 'ForgetLifetimeAllocation', 'ReleaseWithoutWatcher', 'ReleaseWithPendingCallback', 'ReleaseWithPendingRead', 'ReleaseLiveOnRevoke', 'NICDrainWithoutChildren', 'ResetSharedBudget', 'SkipFrameCharge', 'SkipByteCharge', 'AcceptWrongIncomingTuple', 'CrossSessionQueue', 'KeepRevokedQueue', 'PublishLateWriteSuccess', 'RewrapDropsPendingQueue', 'ErasePossibleEffect', 'AdmitSecondDelivery', 'MutateAllocatedService', 'ReadAdmittedAfterClose', 'RevokeErasesReadDebt']
+NIC_BOUNDS = 'Eight explicitly reachable bookkeeping seeds, three transition suffixes, two lifetime tuples/two active sessions, one callback/one queued frame per session, three cumulative frames/four byte units.'
+
+
+PROBE_PROPERTIES = ['TypeOK', 'ScopeImmutable', 'RetainedExact', 'RetainedBound', 'ValidatedAdmission', 'ScopedIdentity', 'ImmutableBinding', 'WorkerBound', 'WorkerDebt', 'AtMostOnce', 'RouteBeforeDispatch', 'RouteRetained', 'ResultSticky', 'SettlementEvidence', 'TimelySuccess', 'WireUnknown', 'DuplicateIsolation', 'LookupIsolation', 'WireIdentity', 'WireRoute', 'WireResult', 'WireSettlement', 'PoisonSticky', 'PoisonExclusion', 'NoLateHostAcceptance']
+PROBE_MUTANTS = ['RebindScope', 'EvictSettledHandle', 'OmitHandleBudget', 'RetainInvalidContext', 'AdmitZeroKey', 'UnsealedScopedStart', 'RenewDuplicateDeadline', 'AdoptForeignDuplicate', 'RepeatDuplicateDispatch', 'OmitWorkerBudget', 'ReleaseTimeoutWorker', 'DispatchBeforeRoute', 'ForgetFailedRoute', 'OverwriteReadyResult', 'SettleRunningWorker', 'PublishLateSuccess', 'UnknownMeansSettled', 'IgnoreLookupOwnership', 'WireWrongIdentity', 'WireDropsAllocatedRoute', 'WireRehabilitatesFailure', 'WireReadyMeansSettled', 'ClearPoisonOnValidRead', 'ScorePoisonedResult', 'AcceptAfterHostDeadline']
+PROBE_SCOPES = ['internal/workload/guesttcp/http_probe_operation.go', 'internal/workload/guesttcp/http_probe_operation_test.go', 'internal/workload/guesttcp/http_probe_scope.go', 'internal/workload/guesttcp/http_probe_scope_test.go', 'internal/workload/guesttcp/http_probe_wire.go', 'internal/workload/guesttcp/http_probe_wire_test.go', 'internal/workload/guesttcp/http_probe_observation.go', 'internal/workload/guesttcp/http_probe_observation_test.go', 'internal/workload/guesttcp/http_probe_context_test.go', 'docs/private-http-probe-operations.md']
+PROBE_BOUNDS = 'Three nonzero keys plus invalid zero; two opaque scope-owner labels and two service targets; two symbolic backend deadlines; per-NIC retained-handle bound2 and independent worker bound1;21 replay-verified reachable seeds with all three-transition suffixes; separate per-key monotonic Host expiry. Dispatch counts one observer/Dial invocation, not packets/SYN retransmissions.'
+PROBE_SEEDS = 'SeedTargets == <<EmptyState, Sealed, One, ScopedOne, Worker, Routed, Dispatched,\n TimedOut, Ended, Published, Settled, Rejected, FailedEnded, FailedSettled,\n WireSuccess, WireFailure, PoisonedSuccess, ExpiredSuccess, FullRetired, BusySecond, ExpiredRetained>>\n'
 
 
 class FormalGateTests(unittest.TestCase):
@@ -25,6 +39,7 @@ class FormalGateTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         shutil.copytree(ROOT / 'formal', self.root / 'formal')
+        shutil.copytree(ROOT / 'scripts/formal_support', self.root / 'scripts/formal_support')
         for path in ('go.mod', 'go.sum'):
             shutil.copyfile(ROOT / path, self.root / path)
         registry = json.loads((ROOT / 'formal/models.json').read_text())
@@ -837,7 +852,7 @@ class FormalGateTests(unittest.TestCase):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'AutoScalingPlanTargets', 'BedrockRuntimeAdmission', 'ELBTargetLifecycle', 'AppEngineTraffic', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'Route53AtomicBatch', 'SSMBatchDeletion', 'SQSBatchDeletion', 'SNSQueueFanout', 'SSMDurableCommands', 'SakuraDiskMetadata', 'DynamoDBAdmission', 'CFNFinalCleanupACK', 'SecretVersionListing', 'ProviderPath', 'CatalogConsoleEpoch', 'SakuraDiskAdmission', 'CFNConditionMemoDepth', 'WAFRequestEvaluation', 'LoginInputIntent', 'SakuraDisksViewEpoch', 'CloudWatchLogsViewEpoch', 'SakuraStartupAdmission', 'ProviderActor', 'S3MultipartState', 'StartupTokenVisibility', 'DynamoDBConsoleEpoch', 'IAMInstanceProfiles', 'CFNConditionAdmission', 'BrowserSessions', 'KMSKeyState', 'ProjectAuthority', 'BlobRange', 'KMSAliasesViewEpoch', 'SQSConsoleEpoch', 'SecretsRevealEpoch', 'LandingAccessAdmission', 'RESTRouteMatching', 'CFNPhysicalResourceACK', 'WAFAssociationAuthorization', 'SNSAdmission', 'IAMManagedPolicies', 'AzurePropertiesEpoch', 'NativeWireProjection', 'DurableGuestLease', 'CFNParameterSnapshot', 'CatalogResourceLifecycle', 'RESTDeploymentSnapshot', 'SQSLifecycle', 'SQSStorageBudget', 'SecretsDisclosureChannels', 'KMSAliasCatalog', 'SecretsVersionLifecycle', 'KMSAliasCrypto', 'ConsoleHandoff', 'IAMBuiltinPinTransaction', 'SNSLifecycle', 'LandingTopologyState', 'CFNEventHistory', 'CloudWatchLogsLifecycle', 'GuestCommandLifecycle', 'SSMParameterState', 'STSSessionLifecycle', 'SecretMetadataViewEpoch', 'SecretsMutationRefresh', 'RESTProxyEventBoundary', 'CFNNativeIAMTransaction', 'KMSProtocolAdmission', 'S3Versions', 'StackOwnership', 'AzureBlobState', 'KMSBootstrapTransaction', 'LambdaLogTailDisclosure', 'GCPStorageState', 'NativeIAMOwnership', 'AzurePropertiesTarget', 'DynamoDBLifecycle', 'ObjectStore'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:
@@ -1198,6 +1213,9 @@ class FormalGateTests(unittest.TestCase):
                 return real_run(command, **kwargs)
             self.assertEqual(Path(command[2]).read_bytes(), jar.read_bytes())
             name = Path(command[-1]).stem
+            if name.endswith('_InvalidTarget'):
+                return subprocess.CompletedProcess(command, 12,
+                    'Invariant SeedTargetReached is violated.\nState 1:\nState 2:', '')
             if tamper[0] and name == 'ObjectStore':
                 source = self.root / 'formal/ObjectStore.tla'
                 source.write_text(source.read_text() + '\nchanged while process was running\n')
@@ -2715,6 +2733,1315 @@ class FormalGateTests(unittest.TestCase):
             '"edit","sync","focus","keydown","flush","submit","fileok","fileerr"',
         ):
             self.assertIn(unchanged, mutated)
+
+    def test_nic_exact_inventory_and_compact_bounds(self):
+        registry = json.loads((self.root / "formal/models.json").read_text())
+        entry = next(m for m in registry["models"] if m["id"] == "NICSessionBookkeeping")
+        load_registry(self.root)
+        self.assertEqual(entry["properties"], NIC_PROPERTIES)
+        self.assertEqual([m["id"] for m in entry["mutants"]], NIC_MUTANTS)
+        self.assertEqual(entry["source_scope"], ["internal/workload/guestnet/tcp_sessions.go"])
+        self.assertEqual(entry["bounds"], NIC_BOUNDS)
+        cfg = (self.root / entry["config"]).read_text()
+        self.assertEqual(cfg.splitlines()[0], "CONSTANT MaxDepth = 3")
+        source = (self.root / entry["model"]).read_text()
+        for sentinel in (
+            "IDs == 1..2", "MaxFrames == 3", "MaxBytes == 4", "MaxQueue == 1",
+            "Seeds == {Empty, One, Two, Queued, Writing, ClosingWrite, Retired, ClosingRead}",
+            r"/\ depth < MaxDepth",
+        ):
+            self.assertIn(sentinel, source)
+        for limit in ("no unbounded", "physical ownership", "Persistent transport"):
+            self.assertIn(limit, entry["limits"])
+
+    def test_nic_gate_rejects_each_missing_property_control_or_scope(self):
+        registry = json.loads((self.root / "formal/models.json").read_text())
+        entry = next(m for m in registry["models"] if m["id"] == "NICSessionBookkeeping")
+        for field in ("properties", "mutants", "source_scope"):
+            for item in entry[field]:
+                changed = json.loads(json.dumps(registry))
+                target = next(m for m in changed["models"] if m["id"] == entry["id"])
+                target[field].remove(item)
+                (self.root / "formal/models.json").write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+
+    def test_nic_gate_rejects_removed_model_even_if_artifacts_removed(self):
+        registry = json.loads((self.root / "formal/models.json").read_text())
+        entry = next(m for m in registry["models"] if m["id"] == "NICSessionBookkeeping")
+        changed = json.loads(json.dumps(registry))
+        changed["models"] = [m for m in changed["models"] if m["id"] != entry["id"]]
+        (self.root / "formal/models.json").write_text(json.dumps(changed))
+        (self.root / entry["model"]).unlink()
+        (self.root / entry["config"]).unlink()
+        with self.assertRaises(GateError):
+            load_registry(self.root)
+
+    def test_nic_gate_rejects_widened_scope_and_missing_bounds(self):
+        registry = json.loads((self.root / "formal/models.json").read_text())
+        entry = next(m for m in registry["models"] if m["id"] == "NICSessionBookkeeping")
+        for field, value in (("source_scope", entry["source_scope"] + ["go.mod"]),
+                             ("bounds", ""), ("limits", "")):
+            changed = json.loads(json.dumps(registry))
+            target = next(m for m in changed["models"] if m["id"] == entry["id"])
+            target[field] = value
+            (self.root / "formal/models.json").write_text(json.dumps(changed))
+            with self.subTest(field=field), self.assertRaises(GateError):
+                load_registry(self.root)
+
+    def test_probe_exact_inventory_and_compact_bounds(self):
+        registry = json.loads((self.root / "formal/models.json").read_text())
+        entry = next(m for m in registry["models"] if m["id"] == "ProbeOperationLifecycle")
+        load_registry(self.root)
+        self.assertEqual(entry["properties"], PROBE_PROPERTIES)
+        self.assertEqual([m["id"] for m in entry["mutants"]], PROBE_MUTANTS)
+        self.assertEqual(entry["source_scope"], PROBE_SCOPES)
+        self.assertEqual(entry["bounds"], PROBE_BOUNDS)
+        cfg = (self.root / entry["config"]).read_text()
+        for line in ("CONSTANT HandleCap = 2", "CONSTANT WorkerCap = 1", "CONSTANT MaxDepth = 3"):
+            self.assertIn(line, cfg.splitlines())
+        source = (self.root / entry["model"]).read_text()
+        for sentinel in ("Keys == 1..3", "Owners == {1,2}", "Targets == {1,2}", "Deadlines == {1, 2}", r"/\ depth < MaxDepth"):
+            self.assertIn(sentinel, source)
+        self.assertIn(PROBE_SEEDS, source)
+        self.assertNotIn("SYMMETRY", cfg)
+        for limit in ("three-transition suffixes", "not all unbounded histories", "not a Simulator runtime implementation claim"):
+            self.assertIn(limit, entry["bounds"] + entry["limits"])
+
+    def test_probe_gate_rejects_each_missing_property_control_or_scope(self):
+        registry = json.loads((self.root / "formal/models.json").read_text())
+        entry = next(m for m in registry["models"] if m["id"] == "ProbeOperationLifecycle")
+        for field in ("properties", "mutants", "source_scope"):
+            for item in entry[field]:
+                changed = json.loads(json.dumps(registry))
+                target = next(m for m in changed["models"] if m["id"] == entry["id"])
+                target[field].remove(item)
+                (self.root / "formal/models.json").write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+
+    def test_probe_gate_rejects_removed_model_and_artifacts(self):
+        registry = json.loads((self.root / "formal/models.json").read_text())
+        entry = next(m for m in registry["models"] if m["id"] == "ProbeOperationLifecycle")
+        registry["models"] = [m for m in registry["models"] if m["id"] != entry["id"]]
+        (self.root / "formal/models.json").write_text(json.dumps(registry))
+        (self.root / entry["model"]).unlink()
+        (self.root / entry["config"]).unlink()
+        with self.assertRaises(GateError):
+            load_registry(self.root)
+
+    def test_probe_gate_rejects_coordinated_property_config_control_removal(self):
+        registry = json.loads((self.root / "formal/models.json").read_text())
+        entry = next(m for m in registry["models"] if m["id"] == "ProbeOperationLifecycle")
+        original_cfg = (self.root / entry["config"]).read_text()
+        for prop in entry["properties"]:
+            changed = json.loads(json.dumps(registry))
+            target = next(m for m in changed["models"] if m["id"] == entry["id"])
+            target["properties"].remove(prop)
+            target["mutants"] = [m for m in target["mutants"] if m["expect_invariant"] != prop]
+            (self.root / "formal/models.json").write_text(json.dumps(changed))
+            (self.root / entry["config"]).write_text(original_cfg.replace("INVARIANT " + prop + "\n", ""))
+            with self.subTest(property=prop), self.assertRaises(GateError):
+                load_registry(self.root)
+
+    def test_seed_replay_all_inputs_and_required_mapping(self):
+        registry = load_registry(self.root)
+        entries = prepare_seed_replays(self.root, registry, None, require)
+        self.assertEqual([s["model"] for s, _ in entries],
+                         ["NICSessionBookkeeping", "ProbeOperationLifecycle"])
+        self.assertEqual(len(entries), 2)
+        for count in (0, 1):
+            with patch("formal_seed_replay.SPECS", SPECS[:count]):
+                with self.assertRaisesRegex(GateError, "mapping changed"):
+                    prepare_seed_replays(self.root, registry, None, require)
+
+    def test_seed_replay_missing_or_changed_inputs_fail_closed(self):
+        registry = load_registry(self.root)
+        for spec in SPECS:
+            for path in spec["files"]:
+                target = self.root / path
+                original = target.read_bytes()
+                try:
+                    target.unlink()
+                    with self.subTest(path=path, action="removed"), self.assertRaises(GateError):
+                        prepare_seed_replays(self.root, registry, None, require)
+                    target.write_bytes(original + b"\nchanged\n")
+                    with self.subTest(path=path, action="changed"), self.assertRaises(GateError):
+                        prepare_seed_replays(self.root, registry, None, require)
+                finally:
+                    target.write_bytes(original)
+
+    def test_seed_replay_cannot_fallback_from_incomplete_head_snapshot(self):
+        registry = load_registry(self.root)
+        with self.assertRaisesRegex(GateError, "absent from immutable HEAD"):
+            prepare_seed_replays(self.root, registry, {"content": {}}, require)
+
+    def test_seed_replay_required_properties_are_checked(self):
+        registry = load_registry(self.root)
+        specs = json.loads(json.dumps(SPECS))
+        path = next(p for p in specs[0]["files"] if p.endswith(".cfg"))
+        target = self.root / path
+        target.write_text(target.read_text().replace("INVARIANT SeedTargetReached\n", ""))
+        specs[0]["files"][path] = hashlib.sha256(target.read_bytes()).hexdigest()
+        with patch("formal_seed_replay.SPECS", tuple(specs)):
+            with self.assertRaisesRegex(GateError, "properties missing"):
+                prepare_seed_replays(self.root, registry, None, require)
+
+    def test_seed_replay_invalid_target_must_have_transition_counterexample(self):
+        registry = load_registry(self.root)
+        reports = self.root / "seed-reports"
+        reports.mkdir()
+        for bad in (subprocess.CompletedProcess([], 0, "No error has been found", ""),
+                    subprocess.CompletedProcess([], 12, "Invariant SeedTargetReached is violated.", ""),
+                    subprocess.CompletedProcess([], 12, "Invariant PrefixHasNext is violated.\nState 2:", "")):
+            with tempfile.TemporaryDirectory() as directory:
+                evidence = {"runs": []}
+                baseline = subprocess.CompletedProcess([], 0, "No error has been found", "")
+                with patch("formal_seed_replay.subprocess.run", side_effect=[baseline, bad]):
+                    with self.assertRaises(GateError):
+                        run_seed_replays(self.root, registry, None, Path(directory),
+                                         Path("/fixture.jar"), "/fixture/java", reports,
+                                         5, evidence, require, validate_result)
+                self.assertFalse(evidence["runs"][-1]["success"])
+
+    def test_standard_formal_suite_requires_seed_replay_success(self):
+        jar = self.root / "seed-fixture.jar"
+        jar.write_bytes(b"controlled registration fixture, not TLC")
+        (self.root / "formal/tla2tools.sha256").write_text(
+            hashlib.sha256(jar.read_bytes()).hexdigest() + "  tla2tools.jar\n")
+        registry = load_registry(self.root)
+        expected = {m["id"] + "_" + c["id"]: c["expect_invariant"]
+                    for m in registry["models"] for c in m["mutants"]}
+        def completed(command, **kwargs):
+            name = Path(command[-1]).stem
+            if name in expected:
+                return subprocess.CompletedProcess(command, 12,
+                    "Invariant " + expected[name] + " is violated.", "")
+            return subprocess.CompletedProcess(command, 0, "No error has been found.", "")
+        reports = self.root / "mandatory-replay"
+        with patch("formal_model_gate.shutil.which", return_value="/fixture/java"), \
+             patch("formal_model_gate.subprocess.run", side_effect=completed), \
+             patch("formal_seed_replay.run_seed_replays", side_effect=GateError("required seed failure")) as replay:
+            with self.assertRaisesRegex(GateError, "required seed failure"):
+                run_suite(self.root, jar, reports)
+            replay.assert_called_once()
+        self.assertFalse(json.loads((reports / "evidence.json").read_text())["success"])
+
+    def test_tcprouteclassification_reviewed_registration_is_required(self):
+        original = (self.root / 'formal/models.json').read_text()
+        registry = json.loads(original)
+        entry = next(m for m in registry['models'] if m['id'] == 'TCPRouteClassification')
+        self.assertEqual(entry['properties'], ['TypeOK', 'ConstructorGuard', 'CopiedConfiguration', 'NoAmbiguousRoutes', 'FailClosed', 'NonzeroPorts', 'ExactDirectionalTuple', 'SoleIndex', 'CompleteSelection'])
+        self.assertEqual([m['id'] for m in entry['mutants']], ['AcceptOverlappingConstructor', 'SkipSyntax', 'SkipDirection', 'ZeroPeerPort', 'ReverseDirection', 'Ignore_lip', 'Ignore_pip', 'Ignore_lm', 'Ignore_pm', 'Ignore_lp', 'IgnoreFixedPeerPort', 'LoseWildcard', 'AlwaysFirstIndex', 'DiscardCopiedRouteList'])
+        self.assertEqual(entry['source_scope'], ['internal/workload/guestnet/tcp_routes.go'])
+        self.assertEqual(entry['bounds'], 'Exhaustive acyclic construction and one classification over 43 route lists (0..2 entries from six route profiles), 729 independent six-field packet tuples (0..2), three directions and two parser outcomes. No seeded starts.')
+        config_path = self.root / entry['config']
+        config = config_path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == 'TCPRouteClassification')
+                target[field].remove(item)
+                if field == 'properties':
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                    config_path.write_text(config.replace('INVARIANT ' + item + '\n', ''))
+                (self.root / 'formal/models.json').write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config_path.write_text(config)
+        changed = json.loads(original)
+        target = next(m for m in changed['models'] if m['id'] == 'TCPRouteClassification')
+        target['source_scope'].append('go.mod')
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != 'TCPRouteClassification']
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        for path in (entry['model'], entry['config']):
+            (self.root / path).unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_framecodeclifecycle_reviewed_registration_is_required(self):
+        original = (self.root / 'formal/models.json').read_text()
+        registry = json.loads(original)
+        entry = next(m for m in registry['models'] if m['id'] == 'FrameCodecLifecycle')
+        self.assertEqual(entry['properties'], ['TypeOK', 'DecoderPoison', 'EncoderPoison', 'DecoderNoRetry', 'EncoderNoRetry', 'HeaderBeforeBody', 'DecoderSuccess', 'DecoderSerialization', 'EncoderSerialization', 'BoundedReads', 'OneWrite', 'LocalRejectNoIO', 'EncoderSuccess', 'UncertainSticky', 'NoBodyForInvalidHeader'])
+        self.assertEqual([m['id'] for m in entry['mutants']], ['IgnoreInvalidLength', 'IgnorePartialHeader', 'IgnoreWriteError', 'IgnoreShortWrite', 'DecoderForgetsPoison', 'EncoderForgetsPoison', 'DecoderRetriesPoison', 'EncoderRetriesPoison', 'HeaderFailureEntersBody', 'PartialBodySuccess', 'ConcurrentDecoderStart', 'ConcurrentEncoderStart', 'DuplicateHeaderRead', 'DuplicateWrite', 'InvalidLocalWrites', 'InvalidLocalPoison', 'FalseWriteSuccess', 'ForgetPartialEffect'])
+        self.assertEqual(entry['source_scope'], ['internal/workload/guestnet/frame.go'])
+        self.assertEqual(entry['bounds'], 'Exhaustive finite graph from one empty decoder and encoder, two calls per codec, Boolean full/valid/error outcomes and serialized header/body/write phases; no symmetry or seeded suffix.')
+        config_path = self.root / entry['config']
+        config = config_path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == 'FrameCodecLifecycle')
+                target[field].remove(item)
+                if field == 'properties':
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                    config_path.write_text(config.replace('INVARIANT ' + item + '\n', ''))
+                (self.root / 'formal/models.json').write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config_path.write_text(config)
+        changed = json.loads(original)
+        target = next(m for m in changed['models'] if m['id'] == 'FrameCodecLifecycle')
+        target['source_scope'].append('go.mod')
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != 'FrameCodecLifecycle']
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        for path in (entry['model'], entry['config']):
+            (self.root / path).unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_persistenttransportlifecycle_reviewed_registration_is_required(self):
+        original = (self.root / 'formal/models.json').read_text()
+        registry = json.loads(original)
+        entry = next(m for m in registry['models'] if m['id'] == 'PersistentTransportLifecycle')
+        self.assertEqual(entry['properties'], ['TypeOK', 'NoInvalidAdmission', 'QueueSealed', 'QueueOwnership', 'SelectedDebt', 'ProbePumpDebt', 'ReadJoin', 'ChildJoin', 'CompletionJoin', 'CapacityRelease', 'NoLateSuccess', 'EffectRetained'])
+        self.assertEqual([m['id'] for m in entry['mutants']], ['ExitWithSelectedDebt', 'LoseQueuedAcknowledgement', 'EnqueueAfterClosure', 'AdmitAfterRevocation', 'ForgetPendingSend', 'ForgetPendingRead', 'ForgetPendingDial', 'FinishBeforeWriter', 'FinishBeforeOwnedClose', 'ReleaseUncertainResources', 'PublishLateWriteSuccess', 'EraseUncertainWriteEffect', 'ExitWithoutQueueSeal', 'SelectAfterProbeClose', 'EnqueueAfterSendJoined'])
+        self.assertEqual(entry['source_scope'], ['internal/workload/guesttcp/transport_persistent.go', 'internal/workload/guesttcp/transport_persistent_test.go', 'internal/workload/guesttcp/transport.go'])
+        self.assertEqual(entry['bounds'], 'Exhaustive from one admitted transport/child; two one-shot producers, queue capacity one, one selected write, one read and Dial call; independent stream/service close outcomes. No seeds, symmetry or depth cutoff.')
+        config_path = self.root / entry['config']
+        config = config_path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == 'PersistentTransportLifecycle')
+                target[field].remove(item)
+                if field == 'properties':
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                    config_path.write_text(config.replace('INVARIANT ' + item + '\n', ''))
+                (self.root / 'formal/models.json').write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config_path.write_text(config)
+        changed = json.loads(original)
+        target = next(m for m in changed['models'] if m['id'] == 'PersistentTransportLifecycle')
+        target['source_scope'].append('go.mod')
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != 'PersistentTransportLifecycle']
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        for path in (entry['model'], entry['config']):
+            (self.root / path).unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_packetadmission_reviewed_registration_is_required(self):
+        original = (self.root / 'formal/models.json').read_text()
+        registry = json.loads(original)
+        entry = next(m for m in registry['models'] if m['id'] == 'PacketAdmission')
+        self.assertEqual(entry['properties'], ['HeaderSound', 'OptionSound', 'OptionComplete', 'Progress', 'BoundedCursor'])
+        self.assertEqual([m['id'] for m in entry['mutants']], ['SkipFrameMax', 'SkipEtherType', 'SkipVersionIHL', 'SkipProtocol', 'SkipTTL', 'SkipTotalMax', 'SkipFragment', 'SkipIPChecksum', 'SkipTCPHeaderMin', 'SkipTCPHeaderMax', 'SkipReserved', 'SkipSourcePort', 'SkipDestinationPort', 'SkipTCPChecksum', 'IgnoreEOLTail', 'RejectNOP', 'AllowDuplicate', 'RejectMSS', 'ZeroMSS', 'MSSWithoutSYN', 'LargeScale', 'ScaleWithoutSYN', 'SACKPermWithoutSYN', 'SACKWithSYN', 'SACKWithoutACK', 'SACKInvalidBlockWidth', 'TimestampWrongLength', 'AllowUnknown', 'RejectAllOptions', 'AllowTruncatedTimestamp', 'MSSWrongLength', 'SACKTooShort', 'SACKPermWrongLength'])
+        self.assertEqual(entry['source_scope'], ['internal/workload/guestnet/packet.go'])
+        self.assertEqual(entry['bounds'], '26 numeric header witnesses; all option byte sequences from zero/one/two finite chunks up to40bytes; four SYN/ACK combinations; actual bounded scanner to terminal state, no seeded starts.')
+        config_path = self.root / entry['config']
+        config = config_path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == 'PacketAdmission')
+                target[field].remove(item)
+                if field == 'properties':
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                    config_path.write_text(config.replace('INVARIANT ' + item + '\n', ''))
+                (self.root / 'formal/models.json').write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config_path.write_text(config)
+        changed = json.loads(original)
+        target = next(m for m in changed['models'] if m['id'] == 'PacketAdmission')
+        target['source_scope'].append('go.mod')
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != 'PacketAdmission']
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        for path in (entry['model'], entry['config']):
+            (self.root / path).unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_enginelifecycle_reviewed_registration_is_required(self):
+        original = (self.root / 'formal/models.json').read_text()
+        registry = json.loads(original)
+        entry = next(m for m in registry['models'] if m['id'] == 'EngineLifecycle')
+        self.assertEqual(entry['properties'], ['TypeOK', 'WorkerBound', 'WorkerDebt', 'WorkerReservation', 'RejectedRollback', 'SingleDial', 'NoInvalidAdmission', 'EndpointJoin', 'ConnectionOwnership', 'RegistrationBeforeDone', 'CloseWaitsMutation', 'DeadlineBound', 'NoTimerAfterReset', 'DialJoin', 'CaptureRetained', 'ConnectionJoin', 'TimerJoin', 'ReleaseAfterDestroy', 'LateConnectionJoin'])
+        self.assertEqual([m['id'] for m in entry['mutants']], ['ExceedWorkerBudget', 'LoseReservedSlot', 'LeakRejectedSlot', 'ReadmitDial', 'DialAfterCancellation', 'ForgetRegistration', 'CloseOverDeadlineMutation', 'ExtendAbsoluteLifetime', 'RetainDeadlineTimer', 'DestroyBeforeDialDone', 'DestroyBeforeConnectionClosed', 'CloseBeforeTimerReset', 'ReleaseWorkersEarly', 'ReleaseSlotEarly', 'ForgetLateConnectionClose', 'ForgetConnectionPointer', 'DoneBeforeEndpointReturn', 'MutationAfterAbsoluteExpiry', 'MutationAfterCancellation', 'RepeatCloseCapture'])
+        self.assertEqual(entry['source_scope'], ['internal/workload/guesttcp/engine.go', 'go.mod', 'go.sum'])
+        self.assertEqual(entry['bounds'], 'Complete finite graph: one constructor/engine, worker requests1or3 against budget2, one accepted Dial with second-attempt sensitivity, one deadline mutation, absolute clock0..2 and requested deadline0..3. No seeds, depth cutoff or symmetry.')
+        config_path = self.root / entry['config']
+        config = config_path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == 'EngineLifecycle')
+                target[field].remove(item)
+                if field == 'properties':
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                    config_path.write_text(config.replace('INVARIANT ' + item + '\n', ''))
+                (self.root / 'formal/models.json').write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config_path.write_text(config)
+        changed = json.loads(original)
+        target = next(m for m in changed['models'] if m['id'] == 'EngineLifecycle')
+        target['source_scope'].append('go.work')
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != 'EngineLifecycle']
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        for path in (entry['model'], entry['config']):
+            (self.root / path).unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_arptrustedreply_reviewed_registration_is_required(self):
+        original = (self.root / 'formal/models.json').read_text()
+        registry = json.loads(original)
+        entry = next(m for m in registry['models'] if m['id'] == 'ARPTrustedReply')
+        self.assertEqual(entry['properties'], ['ConstructorExact', 'ImmutableBinding', 'AdmissionSound', 'AdmissionComplete', 'TrustedReply', 'ReplyFormat'])
+        self.assertEqual([m['id'] for m in entry['mutants']], ['AcceptBadBinding', 'RetainCallerAlias', 'SkipMinimumLength', 'SkipMaximumLength', 'SkipEtherType', 'SkipPadding', 'SkipDestination', 'SkipEtherSource', 'SkipHardware', 'SkipProtocol', 'SkipHardwareLength', 'SkipProtocolLength', 'SkipOpcode', 'SkipSenderMAC', 'SkipSenderIP', 'SkipTargetIP', 'SkipTargetMAC', 'RejectBroadcast', 'RejectDirectedRefresh', 'WrongReplyDestination', 'WrongReplySource', 'WrongReplySenderMAC', 'WrongReplySenderIP', 'WrongReplyTargetMAC', 'WrongReplyTargetIP', 'WrongReplyLength', 'WrongReplyPadding', 'WrongReplyOpcode'])
+        self.assertEqual(entry['source_scope'], ['internal/workload/guestnet/arp.go'])
+        self.assertEqual(entry['bounds'], 'Unseeded finite construction/caller-mutation/reply; seven symbolic binding profiles,23 request profiles(8allowed/15single-guard-invalid),all seven post-binding caller mutations.')
+        config_path = self.root / entry['config']
+        config = config_path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == 'ARPTrustedReply')
+                target[field].remove(item)
+                if field == 'properties':
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                    config_path.write_text(config.replace('INVARIANT ' + item + '\n', ''))
+                (self.root / 'formal/models.json').write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config_path.write_text(config)
+        changed = json.loads(original)
+        target = next(m for m in changed['models'] if m['id'] == 'ARPTrustedReply')
+        target['source_scope'].append('go.mod')
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != 'ARPTrustedReply']
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        for path in (entry['model'], entry['config']):
+            (self.root / path).unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_passiveserviceboundary_reviewed_registration_is_required(self):
+        original = (self.root / 'formal/models.json').read_text()
+        registry = json.loads(original)
+        entry = next(m for m in registry['models'] if m['id'] == 'PassiveServiceBoundary')
+        self.assertEqual(entry['properties'], ['DeadlineExact', 'ExpiryExact', 'ConstructorExact', 'NoOwnershipTransfer', 'DelegationExact', 'ReceiveExact', 'AccountRejected', 'OutputExact', 'PreserveFailure', 'ErrorPrecedence'])
+        self.assertEqual([m['id'] for m in entry['mutants']], ['IgnoreParentPresence', 'IgnoreParentCancellation', 'AcceptExpiredRequest', 'ClampBeforeWindowValidation', 'IgnoreElapsedParent', 'IgnoreEarlierParent', 'MissingService', 'SkipRouteValidation', 'SkipMixedBinding', 'AllowOverlappingRoute', 'RequireSameLocalIP', 'PrematureOwnership', 'WrongReceiveEngine', 'WrongServiceReceive', 'UnaccountedOutput', 'IgnoreOutputBudget', 'CrossRouteOutput', 'BypassPersistentQueue', 'EraseWrappedFailure', 'IgnoreServiceRevocation', 'IgnoreContextCause'])
+        self.assertEqual(entry['source_scope'], ['internal/workload/guesttcp/passive_lifetime.go', 'internal/workload/guesttcp/transport_passive.go', 'internal/workload/guesttcp/transport_service.go'])
+        self.assertEqual(entry['bounds'], 'Independent one-step finite scenarios: fixed now2/window3, requested0..7 and parent0..6; 13 symbolic route profiles; classified indices -1/0/1, two-unit budget, exact/ wrapped/distinct errors. Exhaustive from inputs, no seeds or symmetry.')
+        config_path = self.root / entry['config']
+        config = config_path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == 'PassiveServiceBoundary')
+                target[field].remove(item)
+                if field == 'properties':
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                    config_path.write_text(config.replace('INVARIANT ' + item + '\n', ''))
+                (self.root / 'formal/models.json').write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config_path.write_text(config)
+        changed = json.loads(original)
+        target = next(m for m in changed['models'] if m['id'] == 'PassiveServiceBoundary')
+        target['source_scope'].append('go.mod')
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != 'PassiveServiceBoundary']
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        for path in (entry['model'], entry['config']):
+            (self.root / path).unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_httpobservationlifecycle_reviewed_registration_is_required(self):
+        original = (self.root / 'formal/models.json').read_text()
+        registry = json.loads(original)
+        entry = next(m for m in registry['models'] if m['id'] == 'HTTPObservationLifecycle')
+        self.assertEqual(entry['properties'], ['TypeOK', 'RequestBound', 'DeadlineImmutable', 'RawAccounting', 'InfoAccounting', 'RawHeaderBound', 'InformationalBound', 'NoBodyConsumption', 'RetainedWorkerDebt', 'PublicationEvidence', 'NoPostTimeoutPublication', 'StatusPreserved', 'ReceivedAtObserved', 'TimeoutRequestsClose', 'CleanupRequested'])
+        self.assertEqual([m['id'] for m in entry['mutants']], ['AcceptArbitraryPath', 'IgnoreRawByteLimit', 'IgnoreCumulativeFields', 'AcceptBareOrFoldedLines', 'AcceptUnsupportedVersion', 'AcceptSwitchingProtocols', 'AcceptOutOfRangeStatus', 'IgnoreInformationalLimit', 'ConsumeResponseBody', 'RenewOriginalDeadline', 'ReleaseOnCallerTimeout', 'PublishUncertainCleanup', 'AcceptJoinedCancellationError', 'AcceptOwnerFailure', 'IgnoreFinalDeadline', 'PromoteErrorStatus', 'LateWorkerPublishes', 'RetryShortWrite', 'ForgeHeaderTimestamp', 'TimeoutOmitsClose', 'FailureOmitsCleanup', 'ResetCumulativeFieldCount', 'ResetSharedByteBudget', 'ResetInformationalHistory', 'AcceptUnsupportedMinor'])
+        self.assertEqual(entry['source_scope'], ['internal/workload/guesttcp/http_observation.go'])
+        self.assertEqual(entry['bounds'], 'One observer, two permitted paths plus invalid path; fixed minimum deadline0or1or2 (zero represents expiry during admission), clock0..2; cumulative rawbytes3/rawfields2/informational1 scaled from8192/64/8; separate CRLF/folding/parser-error/version/status classes. Complete finite graph without depth cutoff, seeds or symmetry.')
+        config_path = self.root / entry['config']
+        config = config_path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == 'HTTPObservationLifecycle')
+                target[field].remove(item)
+                if field == 'properties':
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                    config_path.write_text(config.replace('INVARIANT ' + item + '\n', ''))
+                (self.root / 'formal/models.json').write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config_path.write_text(config)
+        changed = json.loads(original)
+        target = next(m for m in changed['models'] if m['id'] == 'HTTPObservationLifecycle')
+        target['source_scope'].append('go.mod')
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != 'HTTPObservationLifecycle']
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        for path in (entry['model'], entry['config']):
+            (self.root / path).unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_listenerlifecycle_reviewed_registration_is_required(self):
+        original = (self.root / 'formal/models.json').read_text()
+        registry = json.loads(original)
+        entry = next(m for m in registry['models'] if m['id'] == 'ListenerLifecycle')
+        self.assertEqual(entry['properties'], ['AttemptRetention', 'OwnerRetention', 'OnePendingAccept', 'BudgetAccounting', 'NoLateAdmission', 'OneAcceptAdmission', 'JoinBeforeDestroy', 'CapacityAfterJoin', 'SharedCapacity', 'NoEarlyRelease', 'BoundedDeadline', 'TimerResetAttempted', 'SequenceRetention'])
+        self.assertEqual([m['id'] for m in entry['mutants']], ['ParallelAccept', 'LateAcceptStart', 'LateAcceptPublish', 'AcceptUnrecordedPort', 'ForgetAttempt', 'ForgetOwnedWrapper', 'SkipAggregateFrameCharge', 'SkipAggregateByteCharge', 'AcceptBadSYNFlags', 'AcceptSYNPayload', 'AcceptBadTuple', 'AllowChangedSYN', 'AllowSealedSYN', 'UnrecordedData', 'DestroyWithAcceptDebt', 'DestroyWithConnectionDebt', 'DestroyBeforeShutdown', 'ReleaseBeforeDestroy', 'EraseExternalWorkers', 'SkipCleanupTimer', 'SkipConnectionTimer', 'UnclampedDeadline', 'ForgetWrapperOnCloseError', 'ForgetPortOnConnectionClose', 'ResetBudgetOnClose', 'IgnoreRegisteredAcceptJoin', 'ClosedFlagIsNotReturn', 'RewriteFirstSequence'])
+        self.assertEqual(entry['source_scope'], ['internal/workload/guesttcp/listener.go', 'go.mod', 'go.sum'])
+        self.assertEqual(entry['bounds'], 'One constructed listener, one fixed external worker reservation, two lifetime Accept calls, one retained connection/port capacity, two source ports/sequences, two frames/three byte units, absolute deadline1; finite unseeded lifecycle.')
+        config_path = self.root / entry['config']
+        config = config_path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == 'ListenerLifecycle')
+                target[field].remove(item)
+                if field == 'properties':
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                    config_path.write_text(config.replace('INVARIANT ' + item + '\n', ''))
+                (self.root / 'formal/models.json').write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config_path.write_text(config)
+        changed = json.loads(original)
+        target = next(m for m in changed['models'] if m['id'] == 'ListenerLifecycle')
+        target['source_scope'].append('go.work')
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != 'ListenerLifecycle']
+        (self.root / 'formal/models.json').write_text(json.dumps(changed))
+        for path in (entry['model'], entry['config']):
+            (self.root / path).unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+    def test_guesttcp_exact_dependency_pins_and_checksums_are_required(self):
+        expected = {'gvisor.dev/gvisor': ['gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8 h1:Zy8IV/+FMLxy6j6p87vk/vQGKcdnbprwjTxc8UiUtsA=', 'gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8/go.mod h1:QkHjoMIBaYtpVufgwv3keYAbln78mBoCuShZrPrer1Q='], 'github.com/google/btree': ['github.com/google/btree v1.1.2 h1:xf4v41cLI2Z6FxbKm+8Bu+m8ifhj15JuZ9sa0jZCMUU=', 'github.com/google/btree v1.1.2/go.mod h1:qOPhT0dTNdNzV6Z/lhRX0YXUafgPLFUh+gZMl761Gm4='], 'golang.org/x/exp': ['golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa h1:FRnLl4eNAQl8hwxVVC17teOw8kdjVDVAiFMtgUdTSRQ=', 'golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa/go.mod h1:zk2irFbV9DP96SEBUUAy67IdHUaZuSnrz1n472HUCLE='], 'golang.org/x/time': ['golang.org/x/time v0.12.0 h1:ScB/8o8olJvc+CQPWrK3fPZNfh7qgwCrY0zJmoEQLSE=', 'golang.org/x/time v0.12.0/go.mod h1:CDIdPxbZBQxdj6cxyCIdrNogrJKMJ7pr37NYpMcMDSg=']}
+        original_mod = (self.root / 'go.mod').read_text()
+        original_sum = (self.root / 'go.sum').read_text()
+        for module, lines in expected.items():
+            version = lines[0].split()[1]
+            with self.subTest(module=module, case='version'):
+                (self.root / 'go.mod').write_text(original_mod.replace(module + ' ' + version, module + ' v0.0.0'))
+                with self.assertRaisesRegex(GateError, 'reviewed module pin changed'):
+                    validate_guesttcp_module_pins(self.root)
+                (self.root / 'go.mod').write_text(original_mod)
+            for line in lines:
+                with self.subTest(module=module, checksum=line):
+                    (self.root / 'go.sum').write_text(original_sum.replace(line + '\n', ''))
+                    with self.assertRaisesRegex(GateError, 'reviewed module checksum changed'):
+                        validate_guesttcp_module_pins(self.root)
+                    (self.root / 'go.sum').write_text(original_sum)
+        (self.root / 'go.mod').write_text(original_mod + '\nreplace gvisor.dev/gvisor => ./unreviewed\n')
+        with self.assertRaisesRegex(GateError, 'replacement or exclusion requires review'):
+            validate_guesttcp_module_pins(self.root)
+
+    def test_guesttcp_module_obligations_preserve_waf(self):
+        registry = load_registry(self.root)
+        by_id = {m['id']: m for m in registry['models']}
+        for name in ('WAFRequestEvaluation', 'EngineLifecycle', 'ListenerLifecycle'):
+            for path in ('go.mod', 'go.sum'):
+                self.assertIn(path, by_id[name]['source_scope'])
+
+    def test_guesttcp_require_parser_rejects_commented_pin_spoof(self):
+        original = (self.root / 'go.mod').read_text()
+        module = 'gvisor.dev/gvisor'
+        version = 'v0.0.0-20260224225140-573d5e7127a8'
+        pin = module + ' ' + version
+        for comment, expected in (('/*\n' + pin + '\n*/', 'malformed guesttcp module comment'), ('// ' + pin, 'reviewed module pin changed')):
+            altered = original.replace(pin, '') + '\n' + comment + '\nrequire ' + module + ' v0.0.0\n'
+            (self.root / 'go.mod').write_text(altered)
+            with self.subTest(comment=comment), self.assertRaisesRegex(GateError, expected):
+                validate_guesttcp_module_pins(self.root)
+
+    def test_guesttcp_require_parser_accepts_real_single_line(self):
+        original = (self.root / 'go.mod').read_text()
+        pin = 'gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8'
+        (self.root / 'go.mod').write_text(original.replace(pin, '') + '\nrequire ' + pin + ' // selected\n')
+        validate_guesttcp_module_pins(self.root)
+
+    def test_guesttcp_require_parser_rejects_duplicates_and_malformed_input(self):
+        original = (self.root / 'go.mod').read_text()
+        pin = 'gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8'
+        for suffix in ('require ' + pin, 'require (', '/* unclosed', 'require extra tokens v1.0.0', 'unknown directive'):
+            (self.root / 'go.mod').write_text(original + '\n' + suffix + '\n')
+            with self.subTest(suffix=suffix), self.assertRaises(GateError):
+                validate_guesttcp_module_pins(self.root)
+
+    def test_guesttcp_altered_pin_blocks_suite_before_tlc(self):
+        original = (self.root / 'go.mod').read_text()
+        (self.root / 'go.mod').write_text(original.replace('gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8', 'gvisor.dev/gvisor v0.0.0'))
+        # Registry/schema and historical applicability do not enforce current pins.
+        load_registry(self.root)
+        with patch('formal_model_gate.subprocess.run') as process:
+            with self.assertRaisesRegex(GateError, 'reviewed module pin changed'):
+                run_suite(self.root, self.root / 'absent.jar', self.root / 'pin-reports')
+            process.assert_not_called()
+
+    def test_guesttcp_required_suite_guard_removal_is_detected(self):
+        import inspect
+        import formal_model_gate as gate
+        source = inspect.getsource(gate.run_suite)
+        call = "        validate_guesttcp_module_pins(root, snapshot['content'] if snapshot else None)\n"
+        self.assertEqual(source.count(call), 1)
+        namespace = dict(vars(gate))
+        exec(compile(source.replace(call, ''), '<removed-pin-guard>', 'exec'), namespace)
+        original = (self.root / 'go.mod').read_text()
+        (self.root / 'go.mod').write_text(original.replace('gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8', 'gvisor.dev/gvisor v0.0.0'))
+        jar = self.root / 'fixture.jar'
+        jar.write_bytes(b'controlled guard-removal fixture only')
+        (self.root / 'formal/tla2tools.sha256').write_text(hashlib.sha256(jar.read_bytes()).hexdigest() + '  tla2tools.jar\n')
+        with patch('formal_model_gate.shutil.which', return_value='/fixture/java'), patch('formal_model_gate.subprocess.run', side_effect=OSError('fixture process reached')) as process:
+            with self.assertRaisesRegex(GateError, 'TLC could not finish'):
+                namespace['run_suite'](self.root, jar, self.root / 'removed-pin-reports')
+            process.assert_called_once()
+
+    def test_guesttcp_pin_guard_uses_immutable_module_content(self):
+        content = {name: (self.root / name).read_bytes() for name in ('go.mod', 'go.sum')}
+        (self.root / 'go.mod').write_text('unrelated current worktree')
+        validate_guesttcp_module_pins(self.root, content)
+        content['go.mod'] = content['go.mod'].replace(b'gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8', b'gvisor.dev/gvisor v0.0.0')
+        with self.assertRaisesRegex(GateError, 'reviewed module pin changed'):
+            validate_guesttcp_module_pins(self.root, content)
+
+    def test_command_dispatch_registration_scope_and_controls_are_required(self):
+        registry_path = self.root / 'formal/models.json'
+        original = registry_path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'CommandDispatchLifecycle')
+        self.assertEqual(entry['properties'], ['TypeOK', 'Admission', 'OriginalDeadline', 'ReadOnly', 'UnknownNotSettled', 'DuplicatePreserved', 'ExactDomain', 'ReadAfterExpiry', 'AtMostOnce', 'ReadAdmission'])
+        self.assertEqual([x['id'] for x in entry['mutants']], ['IgnoreShape', 'IgnoreBinding', 'IgnoreService', 'IgnoreDomain', 'RenewFromReceipt', 'FreshCheckBeforeDuplicate', 'ReadRequiresLiveClock', 'UnknownMeansSettled', 'IgnoreExpiry', 'IgnoreQualification', 'RepeatDuplicateExecution', 'ReadEntersStart', 'StartRefusalMeansSettled', 'ReadIgnoresShape', 'ReadIgnoresBinding', 'ReadIgnoresService'])
+        self.assertEqual(entry['source_scope'], ['internal/workload/guesttcp/http_probe_command.go'])
+        config_path = self.root / entry['config']
+        config = config_path.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == 'CommandDispatchLifecycle')
+                target[field].remove(item)
+                if field == 'properties':
+                    target['mutants'] = [x for x in target['mutants'] if x['expect_invariant'] != item]
+                    config_path.write_text(config.replace('INVARIANT ' + item + '\n', ''))
+                registry_path.write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config_path.write_text(config)
+        registry_path.write_text(original)
+        changed = json.loads(original)
+        next(m for m in changed['models'] if m['id'] == 'CommandDispatchLifecycle')['source_scope'].append('go.mod')
+        registry_path.write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+
+    def test_command_dispatch_bounds_configuration_and_artifacts_are_required(self):
+        registry_path = self.root / 'formal/models.json'
+        original = registry_path.read_text()
+        changed = json.loads(original)
+        entry = next(m for m in changed['models'] if m['id'] == 'CommandDispatchLifecycle')
+        self.assertEqual(entry['bounds'], 'One selected capability/key, two sequential commands, clock0..3 and original requested deadlines1..4; existing key classes none/exact/foreign, independent lower-layer admission/refusal. Forwarded deadline is not effective scope-capped deadline.')
+        entry['bounds'] = 'unreviewed bounds'
+        registry_path.write_text(json.dumps(changed))
+        with self.assertRaisesRegex(GateError, 'command dispatch bounds changed'):
+            load_registry(self.root)
+        registry_path.write_text(original)
+        config_path = self.root / entry['config']
+        config = config_path.read_text()
+        config_path.write_text(config.replace('NEXT Next', 'NEXT Tick'))
+        with self.assertRaisesRegex(GateError, 'command dispatch configuration changed'):
+            load_registry(self.root)
+        config_path.write_text(config)
+        for name in (entry['model'], entry['config']):
+            path = self.root / name
+            contents = path.read_bytes()
+            path.unlink()
+            with self.subTest(path=name), self.assertRaises(GateError):
+                load_registry(self.root)
+            path.write_bytes(contents)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != 'CommandDispatchLifecycle']
+        registry_path.write_text(json.dumps(changed))
+        (self.root / entry['model']).unlink()
+        config_path.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
+
+
+    def test_owned_composition_registration_and_sensitivity_are_required(self):
+        expected = {'OwnedProbeSessionLifecycle': {'properties': ['TypeOK', 'NoInvalidAdmission', 'NoInvalidPublication', 'TentativeHidden', 'CloseOnce', 'CloseBeforeJoin', 'DebtUntilDrain', 'ImmutableBinding', 'OneApply', 'TerminalSeal', 'EvidenceHasSuccess', 'NoUnsafeException', 'NoTokenReplay', 'FailedPacketNotPublished', 'NoNeedlessSeal'], 'source_scope': ['internal/workload/guesttcp/owned_probe_session.go', 'internal/workload/guesttcp/local_injection_outcome.go', 'internal/workload/guesttcp/transport.go', 'internal/workload/guesttcp/transport_persistent.go'], 'bounds': 'Original one-session/transaction and two facade calls retained, plus finite private-token provenance, three cancellation windows and exact provider propagation. No liveness.', 'mutants': ['AdmitAfterSeal', 'IOAfterSeal', 'PublishAfterRevoke', 'PublishProviderError', 'PublishFailedApply', 'ReadTentative', 'ReleaseBeforeIODrain', 'ReleaseBeforeGateDrain', 'ReleaseCloseError', 'JoinBeforeCloseReturn', 'RebindOnRevoke', 'ExposeFailedTentative', 'RepeatClose', 'DuplicateApply', 'SealWithoutClose', 'ReuseSuccessfulContext', 'IgnoreClaimedToken', 'FailedInjectionCreatesProof', 'IgnoreMixedTransportFailure', 'AcceptForeignMarker', 'AcceptProviderWrap', 'AcceptIndependentProviderError', 'AcceptSwallowedCallback', 'IgnoreOriginalCancellation', 'IgnoreOwnerSeal', 'OutboundException', 'ObservationException', 'DiscardCompletedInboundException', 'ResetTokenAfterSuccessfulCall']}, 'OwnedProbeAttachmentLifecycle': {'properties': ['TypeOK', 'NoInvalidAdmission', 'SingleAttach', 'TransferredOnlySuccess', 'ReturnedTransferExact', 'PublishedOnlyBound', 'NoLatePublish', 'RetainedFailureHandle', 'IndependentJoins', 'OwnerDebt', 'TransportDebt', 'ImmutableDescriptor', 'AdmissionOnlyContext'], 'source_scope': ['internal/workload/guesttcp/owned_probe_attachment.go'], 'bounds': 'One preissued owner and immutable descriptor, two attachment attempts, one constructor, independent pending/ok/error owner and transport joins. Exhaustive finite safety abstraction.', 'mutants': ['IgnoreRevokedAdmission', 'IgnoreExpiredAdmission', 'ReuseReservedOwner', 'TransferOnFailedConstruction', 'ForgetTransferredService', 'PublishFailedBinding', 'PublishAfterRevoke', 'PublishAfterCallerExpiry', 'DropFailureHandle', 'InferTransportFromOwner', 'InferOwnerFromTransport', 'ReleaseFailedOwner', 'ReleaseFailedTransport', 'RebindAtConstruction', 'UseCallerLifetime', 'RepeatConstructor']}, 'OwnedProbeDispatchPolicy': {'properties': ['ImmutableCanonical', 'ExactReplyMatch', 'DispatchSound', 'DispatchComplete'], 'source_scope': ['internal/workload/guestnet/arp.go', 'internal/workload/guesttcp/owned_probe_session.go'], 'bounds': 'Canonical reply plus14single-field corruptions, immutable original/caller mutation; explicit normalized probe/passive tuples including source port boundaries; five frame classes, three directions and independent opt-in/presence/readiness booleans.', 'mutants': ['IgnoreReply_length', 'IgnoreReply_eth', 'IgnoreReply_padding', 'IgnoreReply_dst', 'IgnoreReply_src', 'IgnoreReply_htype', 'IgnoreReply_ptype', 'IgnoreReply_hlen', 'IgnoreReply_plen', 'IgnoreReply_op', 'IgnoreReply_smac', 'IgnoreReply_sip', 'IgnoreReply_tmac', 'IgnoreReply_tip', 'IgnoreResponderPresence', 'IgnoreResponderReady', 'UseMutatedCallerBinding', 'IgnoreARPOptIn', 'ReverseARPDirection', 'RemoveReplyDirection', 'DropARPEarlyBranch', 'IgnorePassiveOptIn', 'IgnoreTCPDirection', 'AllowMalformedTCP', 'IgnoreProbe_localIP', 'IgnoreProbe_peerIP', 'IgnoreProbe_localMAC', 'IgnoreProbe_peerMAC', 'IgnoreProbe_peerPort', 'IgnoreProbeLowerPort', 'IgnoreProbeUpperPort', 'IgnorePassive_localIP', 'IgnorePassive_peerIP', 'IgnorePassive_localMAC', 'IgnorePassive_peerMAC', 'IgnorePassive_localPort', 'CaptureWrongCanonical']}}
+        registry_path = self.root / 'formal/models.json'
+        original = registry_path.read_text()
+        for name, pins in expected.items():
+            entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
+            for field in ('properties', 'source_scope', 'bounds'):
+                self.assertEqual(entry[field], pins[field])
+            self.assertEqual([x['id'] for x in entry['mutants']], pins['mutants'])
+            config_path = self.root / entry['config']
+            config = config_path.read_text()
+            for field in ('properties', 'mutants', 'source_scope'):
+                for item in entry[field]:
+                    changed = json.loads(original)
+                    target = next(m for m in changed['models'] if m['id'] == name)
+                    target[field].remove(item)
+                    if field == 'properties':
+                        target['mutants'] = [x for x in target['mutants'] if x['expect_invariant'] != item]
+                        changed_config = config.replace('INVARIANTS ' + ' '.join(entry['properties']), 'INVARIANTS ' + ' '.join(p for p in entry['properties'] if p != item))
+                        self.assertNotEqual(changed_config, config)
+                        config_path.write_text(changed_config)
+                    registry_path.write_text(json.dumps(changed))
+                    with self.subTest(model=name, field=field, item=item), self.assertRaises(GateError):
+                        load_registry(self.root)
+                    config_path.write_text(config)
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == name)['source_scope'].append('go.mod')
+            registry_path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+            registry_path.write_text(original)
+
+    def test_owned_composition_bounds_artifacts_and_registration_are_required(self):
+        for name in ['OwnedProbeSessionLifecycle', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy']:
+            registry_path = self.root / 'formal/models.json'
+            original = registry_path.read_text()
+            changed = json.loads(original)
+            entry = next(m for m in changed['models'] if m['id'] == name)
+            entry['bounds'] = 'unreviewed smaller bounds'
+            registry_path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'owned composition bounds changed'):
+                load_registry(self.root)
+            registry_path.write_text(original)
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == name)['limits'] = ''
+            registry_path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'model bounds/limits must be explicit'):
+                load_registry(self.root)
+            registry_path.write_text(original)
+            config_path = self.root / entry['config']
+            config = config_path.read_text()
+            changed_config = config.replace('SPECIFICATION Spec', 'SPECIFICATION MissingSpec')
+            self.assertNotEqual(changed_config, config)
+            config_path.write_text(changed_config)
+            with self.assertRaises(GateError):
+                load_registry(self.root)
+            config_path.write_text(config)
+            for path in (self.root / entry['model'], config_path):
+                content = path.read_bytes()
+                path.unlink()
+                with self.subTest(model=name, path=path), self.assertRaises(GateError):
+                    load_registry(self.root)
+                path.write_bytes(content)
+            changed = json.loads(original)
+            changed['models'] = [m for m in changed['models'] if m['id'] != name]
+            registry_path.write_text(json.dumps(changed))
+            model_path = self.root / entry['model']
+            model_bytes, config_bytes = model_path.read_bytes(), config_path.read_bytes()
+            model_path.unlink()
+            config_path.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            model_path.write_bytes(model_bytes)
+            config_path.write_bytes(config_bytes)
+            registry_path.write_text(original)
+
+
+    def test_dynamodb_count_indicator_domain_and_equivalence(self):
+        import itertools
+        source = (self.root / 'formal/DynamoDBAdmission.tla').read_text()
+        keys = ['N1', 'N2', 'S1', 'B1', 'invalid']
+        self.assertIn('Keys == {"N1","N2","S1","B1","invalid"}', source)
+        start = source.index('Count(values) ==')
+        end = source.index('Sum(values) ==', start)
+        expression = source[start:end]
+        for key in keys:
+            self.assertEqual(expression.count('(IF values["' + key + '"] # 0 THEN 1 ELSE 0)'), 1)
+        self.assertEqual(expression.count('THEN 1 ELSE 0'), len(keys))
+        # Every combination of empty/nonempty classes is included; representative
+        # nonzero magnitudes also ensure counting is not sum-of-item-sizes.
+        for values in itertools.product((0, 1, 8), repeat=len(keys)):
+            cardinality = len({key for key, value in zip(keys, values) if value != 0})
+            indicators = sum(1 if value != 0 else 0 for value in values)
+            self.assertEqual(cardinality, indicators)
+
+    def test_ec2_attachment_registration_and_sensitivity_are_required(self):
+        expected = {'EC2GuestAttachmentLifecycle': {'properties': ['TypeOK', 'PreparationExact', 'DurableBeforeConsumption', 'RegisteredBeforeIO', 'PublicationAdmission', 'SealBeforeAck', 'DurableSealAck', 'BackendIndependent', 'IndependentDrain', 'AdvanceGuard', 'ProfileGuard', 'ImmutableAssociation', 'RetainedScope', 'NoReconstruction'], 'source_scope': ['internal/aws/ec2_guest_attachment.go', 'internal/aws/ec2_guest_lease.go', 'internal/aws/iam_instance_profiles.go'], 'bounds': 'One held lease, one retained association/reservation, one owner and transport construction, one seal, one profile mutation, one held-to-contain advance and one restart. Symbolic fixed deadlines and exact identity; all finite schedules from empty journal, no seeds or depth cutoff.', 'mutants': ['IgnoreAssociation', 'PrepareAfterLeaseAdvance', 'PrepareDeletedProfile', 'ConsumeBeforeJournal', 'AdoptUnknownPrepare', 'TransportBeforeRegistration', 'TransportAfterSeal', 'PublishAfterSeal', 'PublishAfterCancellation', 'PublishUnknownCommit', 'SealWithoutOwnerRevoke', 'AcknowledgeUnwrittenSeal', 'DrainWithoutOwnerJoin', 'DrainWithoutTransportJoin', 'DrainDuringConstruction', 'LocalDrainClaimsBackend', 'OrdinaryAdvanceBypass', 'AdvanceBeforeSeal', 'AdvanceWrongIdentity', 'ProfileGuardRemoved', 'RestartRestoresReceipt', 'RenewAttachmentDeadline']}}
+        registry_path = self.root / 'formal/models.json'
+        original = registry_path.read_text()
+        for name, pins in expected.items():
+            entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
+            for field in ('properties', 'source_scope', 'bounds'):
+                self.assertEqual(entry[field], pins[field])
+            self.assertEqual([x['id'] for x in entry['mutants']], pins['mutants'])
+            config_path = self.root / entry['config']
+            config = config_path.read_text()
+            for field in ('properties', 'mutants', 'source_scope'):
+                for item in entry[field]:
+                    changed = json.loads(original)
+                    target = next(m for m in changed['models'] if m['id'] == name)
+                    target[field].remove(item)
+                    if field == 'properties':
+                        target['mutants'] = [x for x in target['mutants'] if x['expect_invariant'] != item]
+                        changed_config = config.replace('INVARIANTS ' + ' '.join(entry['properties']), 'INVARIANTS ' + ' '.join(p for p in entry['properties'] if p != item))
+                        self.assertNotEqual(changed_config, config)
+                        config_path.write_text(changed_config)
+                    registry_path.write_text(json.dumps(changed))
+                    with self.subTest(model=name, field=field, item=item), self.assertRaises(GateError):
+                        load_registry(self.root)
+                    config_path.write_text(config)
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == name)['source_scope'].append('go.mod')
+            registry_path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+            registry_path.write_text(original)
+
+    def test_ec2_attachment_bounds_artifacts_and_registration_are_required(self):
+        for name in ['EC2GuestAttachmentLifecycle']:
+            registry_path = self.root / 'formal/models.json'
+            original = registry_path.read_text()
+            changed = json.loads(original)
+            entry = next(m for m in changed['models'] if m['id'] == name)
+            entry['bounds'] = 'unreviewed smaller bounds'
+            registry_path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'EC2 attachment bounds changed'):
+                load_registry(self.root)
+            registry_path.write_text(original)
+            changed = json.loads(original)
+            next(m for m in changed['models'] if m['id'] == name)['limits'] = ''
+            registry_path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'model bounds/limits must be explicit'):
+                load_registry(self.root)
+            registry_path.write_text(original)
+            config_path = self.root / entry['config']
+            config = config_path.read_text()
+            changed_config = config.replace('SPECIFICATION Spec', 'SPECIFICATION MissingSpec')
+            self.assertNotEqual(changed_config, config)
+            config_path.write_text(changed_config)
+            with self.assertRaises(GateError):
+                load_registry(self.root)
+            config_path.write_text(config)
+            for path in (self.root / entry['model'], config_path):
+                content = path.read_bytes()
+                path.unlink()
+                with self.subTest(model=name, path=path), self.assertRaises(GateError):
+                    load_registry(self.root)
+                path.write_bytes(content)
+            changed = json.loads(original)
+            changed['models'] = [m for m in changed['models'] if m['id'] != name]
+            registry_path.write_text(json.dumps(changed))
+            model_path = self.root / entry['model']
+            model_bytes, config_bytes = model_path.read_bytes(), config_path.read_bytes()
+            model_path.unlink()
+            config_path.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            model_path.write_bytes(model_bytes)
+            config_path.write_bytes(config_bytes)
+            registry_path.write_text(original)
+
+    def test_battle_integration_exact_registration_and_removal_detectors(self):
+        expected = {'CanonicalVMComposition': {'bounds': 'Five disjoint initial modes: one canonical launch, one '
+                                              'network ownership operation, one asynchronous creator, or '
+                                              'one explicit runtime configuration, or one saved typed '
+                                              'provider/Host association and operation. One immutable '
+                                              'identity compared with a foreign identity; one '
+                                              'cancellation, restart, child, pending stack generation and '
+                                              'cleanup. All finite schedules, no depth cutoff.',
+                                    'mutants': ['UnpinnedPlan',
+                                                'ForeignStackPlan',
+                                                'UnknownJournalReadback',
+                                                'UnwrittenReservation',
+                                                'WrongPreparedIdentity',
+                                                'ForeignControl',
+                                                'RunningBeforeAttachment',
+                                                'ForeignAttachment',
+                                                'UnknownAttachmentCommit',
+                                                'ActivateAfterSeal',
+                                                'ForeignAgent',
+                                                'UnreadyAgent',
+                                                'ForeignPublication',
+                                                'LatePublication',
+                                                'SkipOwnerJoin',
+                                                'SkipTransportJoin',
+                                                'AssumeContainment',
+                                                'ReleaseBeforeContainment',
+                                                'ForeignNetwork',
+                                                'MutateLeasedNetwork',
+                                                'UnauthorizedSeal',
+                                                'ForeignDelete',
+                                                'UnqualifiedChildFD',
+                                                'UnboundedCreators',
+                                                'LateChildPublication',
+                                                'RestartRestoresAuthority',
+                                                'LoseLateChildDebt',
+                                                'UnsupportedPlatform',
+                                                'InvalidOperatorFile',
+                                                'UnpinnedRuntime',
+                                                'ImplicitRuntime',
+                                                'ConfiguredAdvertisesReady',
+                                                'UntypedProvider',
+                                                'UnreadyProvider',
+                                                'ForeignProviderService',
+                                                'ForeignHostOwner',
+                                                'ForeignHostBinding',
+                                                'ForeignHostService',
+                                                'ReuseSourceNewKey',
+                                                'RebindSavedService',
+                                                'StartAfterRegistrySeal',
+                                                'StartForeignTarget',
+                                                'ReadForeignOperation',
+                                                'ReadWithoutOperator',
+                                                'UnknownPreparedReadback',
+                                                'UnwrittenPreparedRecord'],
+                                    'properties': ['TypeOK',
+                                                   'PinnedPlan',
+                                                   'JournalBeforeLaunch',
+                                                   'PreparedIdentity',
+                                                   'PausedExactControl',
+                                                   'ExactAttachment',
+                                                   'AttachBeforeActivation',
+                                                   'PrivateAgentReadiness',
+                                                   'PublicationAdmission',
+                                                   'IndependentCleanup',
+                                                   'ObservedContainment',
+                                                   'ReleaseAfterContainment',
+                                                   'NetworkOwnership',
+                                                   'FrozenNetwork',
+                                                   'AuthorizedDelete',
+                                                   'CreatorAdmission',
+                                                   'NoReconstruction',
+                                                   'UncertainDebtRetained',
+                                                   'ConfigurationAdmission',
+                                                   'ConfiguredIsNotReady',
+                                                   'TypedProvider',
+                                                   'SavedAssociation',
+                                                   'NoRebinding',
+                                                   'SavedOperationAuthority'],
+                                    'source_scope': ['internal/aws/ec2_cloudformation_adapter_linux.go',
+                                                     'internal/aws/ec2_cloudformation_runtime_linux.go',
+                                                     'internal/aws/ec2_vm_backend_linux.go',
+                                                     'internal/aws/ec2_vm_nic_guard.go',
+                                                     'internal/aws/ec2_vm_nic_linux.go',
+                                                     'internal/aws/ec2_vm_qga_readiness_linux.go',
+                                                     'internal/workload/guestbundle/bundle.go',
+                                                     'internal/workload/guestbundle/embedded.go',
+                                                     'internal/workload/guestprocess/attempt_linux.go',
+                                                     'internal/workload/guestprocess/attempt_other.go',
+                                                     'internal/workload/guestprocess/nic_linux.go',
+                                                     'internal/workload/guestprocess/process.go',
+                                                     'internal/workload/guestprocess/process_linux.go',
+                                                     'internal/workload/guestprocess/process_other.go',
+                                                     'internal/workload/guestprocess/supervisor_linux.go',
+                                                     'internal/workload/guestseed/network.go',
+                                                     'internal/workload/guestseed/seed.go',
+                                                     'internal/workload/guestvm/control.go',
+                                                     'internal/workload/guestvm/launch.go',
+                                                     'internal/workload/guestvm/network.go',
+                                                     'internal/workload/guestvm/nic_linux.go',
+                                                     'internal/workload/guestvm/prepare.go',
+                                                     'internal/workload/guestvm/recover.go',
+                                                     'internal/workload/qmp/client.go',
+                                                     'internal/workload/qmp/protocol.go',
+                                                     'internal/aws/cloudformation_instance.go',
+                                                     'internal/aws/ec2_instance_cloudformation.go',
+                                                     'internal/aws/ec2_network.go',
+                                                     'internal/aws/ec2_network_actor.go',
+                                                     'internal/aws/ec2_network_cloudformation.go',
+                                                     'cmd/simulator/battle_runtime_linux.go',
+                                                     'cmd/simulator/battle_runtime_other.go',
+                                                     'internal/server/battle_runtime_linux.go',
+                                                     'internal/server/ssm_runtime_capabilities.go',
+                                                     'internal/server/battle_capabilities_linux.go',
+                                                     'cmd/simulator/main.go',
+                                                     'internal/aws/cloudformation.go',
+                                                     'internal/server/server.go',
+                                                     'internal/server/sakura_provider.go']},
+         'IAMConditionEvaluation': {'bounds': '15 immutable finite input witnesses, '
+                                              'parse/context/match/resolve phases, two context keys, '
+                                              'literal/variable/glob representatives, matching explicit '
+                                              'Deny and legacy nil-context Deny case. No request loop.',
+                                    'mutants': ['AdmitOperator',
+                                                'AdmitNull',
+                                                'AdmitDuplicate',
+                                                'AdmitVariable',
+                                                'MissingContextAccepted',
+                                                'MissingContextDropsDeny',
+                                                'RequestContextOverride',
+                                                'VariableExpandedAsWildcard',
+                                                'EqualsBecomesGlob',
+                                                'DenyLosesPrecedence',
+                                                'LikeDisabled',
+                                                'MissingClauseDropped'],
+                                    'properties': ['TypeOK',
+                                                   'StrictAdmission',
+                                                   'TrustedContextRequired',
+                                                   'AbsentContextDenyNotDiscarded',
+                                                   'MissingOrDuplicateKeyRefuses',
+                                                   'AllTermsRequired',
+                                                   'ProviderContextOnly',
+                                                   'VariableIsLiteral',
+                                                   'EqualityNotGlob',
+                                                   'ExplicitDenyPrecedence',
+                                                   'AllowedWitness'],
+                                    'source_scope': ['internal/core/policy_conditions.go',
+                                                     'internal/core/policy.go']},
+         'InstanceMetadataTokens': {'bounds': 'One instance-owned token slot (abstracts capacity eight), '
+                                              'one request, one foreign token, time 0..2, lifetime2, '
+                                              'TTL1or2. Every finite interleaving; no depth cutoff. '
+                                              'Issue/read checks linearize at request admission, not '
+                                              'response emission.',
+                                    'mutants': ['ForeignToken',
+                                                'ExpiredToken',
+                                                'CredentialEndpoint',
+                                                'WrongReadMethod',
+                                                'WrongTokenMethod',
+                                                'InvalidTTL',
+                                                'ForwardedToken',
+                                                'RandomFailure',
+                                                'IssueAfterClose',
+                                                'ReadAfterClose',
+                                                'UnboundedExpiry'],
+                                    'properties': ['TypeOK',
+                                                   'TokenAdmission',
+                                                   'InstanceBoundRead',
+                                                   'NoCredentials',
+                                                   'BoundedExpiry'],
+                                    'source_scope': ['internal/aws/ec2_metadata_service_linux.go',
+                                                     'internal/aws/ec2_instance_alias.go']},
+         'NativeCommandIssuer': {'bounds': 'Three disjoint finite scenarios: one parent '
+                                           'intent/token/worker with two delivery opportunities and a '
+                                           'single crash/restart, two lease incarnations and three reply '
+                                           'classes; three immutable policy revisions for document+target; '
+                                           'one two-item page with one append or binding/expiry/record '
+                                           'change.',
+                                 'mutants': ['IgnoreOwnerSeal',
+                                             'IgnoreLeaseIncarnation',
+                                             'OrphanWorkerRestart',
+                                             'InventSuccessFromLostReply',
+                                             'InventSuccessFromPending',
+                                             'MixedPolicyRevisions',
+                                             'ReserveAfterEffect',
+                                             'DuplicateGuestEffect',
+                                             'PageRole',
+                                             'PageRegion',
+                                             'PageFilter',
+                                             'PageSize',
+                                             'PageExpiry',
+                                             'PageRetainedRequest',
+                                             'PageUsesLiveItems'],
+                                 'properties': ['TypeOK',
+                                                'ReservationBeforeEffect',
+                                                'AtMostOneEffect',
+                                                'CurrentOwnerFence',
+                                                'RestartNoWorker',
+                                                'WorkerRequiresReservation',
+                                                'NoReplayAfterRestart',
+                                                'KnownExitOnly',
+                                                'NoCleanupFromLostReply',
+                                                'JoinAfterPublication',
+                                                'SinglePolicySnapshot',
+                                                'PageScope',
+                                                'PageRecordRevalidated',
+                                                'PageSnapshotImmutable'],
+                                 'source_scope': ['internal/aws/ec2_command_backend_linux.go',
+                                                  'internal/aws/ssm_commands_native.go',
+                                                  'internal/aws/ssm_commands_native_state.go',
+                                                  'internal/aws/ssm_commands_native_wire.go']},
+         'OwnedClockQualification': {'bounds': 'One owned process and pending sample, two process '
+                                               'incarnations, logical time0..5, expiry4 and original '
+                                               'deadline3; Boolean namespace/FD/platform/cryptographic '
+                                               'witnesses; one retained command.',
+                                     'mutants': ['ArbitraryHTTPProof',
+                                                 'ForeignNamespace',
+                                                 'UncheckedInheritedFD',
+                                                 'UnsupportedPlatform',
+                                                 'SampleWrongIncarnation',
+                                                 'WrongSampleMAC',
+                                                 'ReplayedSampleNonce',
+                                                 'ForeignSampleDomain',
+                                                 'UnboundedSample',
+                                                 'ExpiredSample',
+                                                 'LateSampleAfterStop',
+                                                 'WrongResponseMAC',
+                                                 'ReplayedResponseNonce',
+                                                 'ForeignResponseDomain',
+                                                 'ChangedResponseRequest',
+                                                 'StopKeepsQualification',
+                                                 'V1WallAccepted',
+                                                 'StartAfterOwnerRotation',
+                                                 'UnqualifiedStart',
+                                                 'RenewAtReceipt',
+                                                 'RoundDeadlineLater',
+                                                 'ExpiredReadBlocked',
+                                                 'ReadAfterStop',
+                                                 'ReadAfterRotation'],
+                                     'properties': ['TypeOK',
+                                                    'OwnedProof',
+                                                    'QualifiedOnlyCurrent',
+                                                    'AuthenticatedResponses',
+                                                    'StopInvalidates',
+                                                    'V2Admission',
+                                                    'ConservativeOriginalDeadline',
+                                                    'RetainedReadAfterExpiry',
+                                                    'ReadRequiresCurrentOwner'],
+                                     'source_scope': ['internal/workload/probeclock/bootstrap_linux.go',
+                                                      'internal/workload/probeclock/bootstrap_other.go',
+                                                      'internal/workload/probeclock/clock.go',
+                                                      'internal/workload/probeclock/clock_linux.go',
+                                                      'internal/workload/probeclock/clock_other.go',
+                                                      'internal/workload/probeclock/http.go',
+                                                      'internal/workload/guesttcp/http_probe_command_v2.go',
+                                                      'cmd/simulator/main.go']},
+         'ParticipantSessionLifecycle': {'bounds': 'One session with two driver generations, one Resume '
+                                                   'per generation, two-valued identity/role/target/origin '
+                                                   'witnesses, one-use expiring tokens, three '
+                                                   'independently draining guest tasks, Boolean reviewed '
+                                                   'image pin/private channel/explicit opt-in and '
+                                                   'independent exclusive overlay packaging verdicts. No '
+                                                   'pruning constraints or fairness.',
+                                         'mutants': ['MissingImagePin',
+                                                     'QGAFallback',
+                                                     'ImplicitSessionOptIn',
+                                                     'UnverifiedOverlay',
+                                                     'OverwriteOverlay',
+                                                     'StaleChannelToken',
+                                                     'ExpiredHandoff',
+                                                     'OperatorAdmission',
+                                                     'CredentialRebind',
+                                                     'RoleGenerationRebind',
+                                                     'TargetRebind',
+                                                     'CrossOriginChannel',
+                                                     'RevokedAdmission',
+                                                     'ChannelReplay',
+                                                     'ExpiredChannel',
+                                                     'HandoffReplay',
+                                                     'WrongHello',
+                                                     'ReadyAfterClose',
+                                                     'PublishAfterRevoke',
+                                                     'ResumeNewDriver',
+                                                     'ResumeAfterShutdown',
+                                                     'ExitBeforeDrain',
+                                                     'ExitOnUncertainClose',
+                                                     'TerminalBeforeJoin',
+                                                     'FabricatedExit',
+                                                     'FreshBeforeJoin'],
+                                         'properties': ['TypeOK',
+                                                        'PreparedEvidence',
+                                                        'PreparationOptIn',
+                                                        'PackageEvidence',
+                                                        'BoundAdmission',
+                                                        'CurrentAdmission',
+                                                        'ChannelTokenBinding',
+                                                        'HandoffExpiry',
+                                                        'SingleUse',
+                                                        'HelloEvidence',
+                                                        'ReadyEvidence',
+                                                        'NoPostRevokeOutput',
+                                                        'ResumeKeepsDriver',
+                                                        'NoResurrection',
+                                                        'GuestDrainEvidence',
+                                                        'TerminalEvidence',
+                                                        'FreshEvidence',
+                                                        'RevokeIsNotExit'],
+                                         'source_scope': ['guest/ssm-relay/io_linux.go',
+                                                          'guest/ssm-relay/main_linux.go',
+                                                          'guest/ssm-relay/tenkacloud-session-relay.service',
+                                                          'internal/aws/ec2_session_backend_linux.go',
+                                                          'internal/aws/ssm_session_auth.go',
+                                                          'internal/aws/ssm_sessions.go',
+                                                          'internal/aws/ssm_sessions_native.go',
+                                                          'internal/aws/ssm_sessions_shutdown.go',
+                                                          'internal/aws/ssm_sessions_state.go',
+                                                          'internal/aws/sts_terminal_binding.go',
+                                                          'internal/server/terminal_channel.go',
+                                                          'internal/server/terminal_handoff.go',
+                                                          'internal/server/terminal_json.go',
+                                                          'internal/workload/guestsession/driver.go',
+                                                          'internal/workload/guestsession/protocol.go',
+                                                          'internal/workload/guestvm/session.go',
+                                                          'scripts/guest-image/session-overlay.py',
+                                                          'internal/aws/ssm.go',
+                                                          'internal/aws/sts_signature.go',
+                                                          'internal/server/access.go',
+                                                          'internal/server/server.go']},
+         'TerminalClientEpoch': {'bounds': 'Two sequential mounted components, at most two explicitly '
+                                           'invoked native operations, one retained pending response and '
+                                           'one current channel with stale-callback input. No fairness or '
+                                           'state pruning. Remote result and local disposition '
+                                           'independent.',
+                                 'mutants': ['LateNativeReceipt',
+                                             'ReplacementReceipt',
+                                             'StaleSocketCallback',
+                                             'OpenTokenReplay',
+                                             'UnmountedUI',
+                                             'ReplacementUI',
+                                             'DisposeFabricatesTermination',
+                                             'AmbiguousStartRetry',
+                                             'DiscardClearsKnownSession'],
+                                 'properties': ['TypeOK',
+                                                'ReceiptEvidence',
+                                                'SocketEvidence',
+                                                'SingleOpen',
+                                                'UIEvidence',
+                                                'DisposeNotRemoteTermination',
+                                                'NoAutomaticStartRetry',
+                                                'DiscardPreservesIdentity'],
+                                 'source_scope': ['tools/console/src/ssm-terminal-client.mjs',
+                                                  'tools/console/src/ssm-terminal.jsx',
+                                                  'tools/console/src/main.jsx',
+                                                  'internal/server/web/app.js']}}
+        registry_path = self.root / 'formal/models.json'
+        original = registry_path.read_text()
+        for name, pins in expected.items():
+            entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
+            for field in ('properties', 'source_scope', 'bounds'):
+                self.assertEqual(entry[field], pins[field])
+            self.assertEqual([m['id'] for m in entry['mutants']], pins['mutants'])
+            config_path = self.root / entry['config']
+            config = config_path.read_text()
+            for field in ('properties', 'mutants', 'source_scope'):
+                for item in entry[field]:
+                    changed = json.loads(original)
+                    target = next(m for m in changed['models'] if m['id'] == name)
+                    target[field].remove(item)
+                    if field == 'properties':
+                        target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                        modified = config.replace('INVARIANTS ' + ' '.join(entry['properties']), 'INVARIANTS ' + ' '.join(p for p in entry['properties'] if p != item))
+                        if modified == config:
+                            modified = config.replace('INVARIANT ' + item + '\n', '')
+                        self.assertNotEqual(modified, config)
+                        config_path.write_text(modified)
+                    registry_path.write_text(json.dumps(changed))
+                    with self.subTest(model=name, field=field, item=item), self.assertRaises(GateError):
+                        load_registry(self.root)
+                    config_path.write_text(config)
+                    registry_path.write_text(original)
+            for field, value in (('bounds', 'smaller unreviewed universe'), ('limits', ''), ('source_scope', entry['source_scope'] + ['go.mod'])):
+                changed = json.loads(original)
+                next(m for m in changed['models'] if m['id'] == name)[field] = value
+                registry_path.write_text(json.dumps(changed))
+                with self.subTest(model=name, field=field), self.assertRaises(GateError):
+                    load_registry(self.root)
+                registry_path.write_text(original)
+            spec_changed = config.replace('SPECIFICATION Spec', 'SPECIFICATION MissingSpec') if 'SPECIFICATION Spec' in config else config.replace('INIT Init', 'INIT MissingInit')
+            for altered in (spec_changed, config + '\nCONSTANT Unreviewed = 1\n', config.replace('CHECK_DEADLOCK FALSE', 'CHECK_DEADLOCK TRUE')):
+                self.assertNotEqual(config, altered)
+                config_path.write_text(altered)
+                with self.subTest(model=name, configuration=altered), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config_path.write_text(config)
+            for relative in (entry['model'], entry['config']):
+                path = self.root / relative
+                content = path.read_bytes()
+                path.unlink()
+                with self.subTest(model=name, missing=relative), self.assertRaises(GateError):
+                    load_registry(self.root)
+                path.write_bytes(content)
+            changed = json.loads(original)
+            changed['models'] = [m for m in changed['models'] if m['id'] != name]
+            registry_path.write_text(json.dumps(changed))
+            model_path = self.root / entry['model']
+            source = model_path.read_bytes()
+            model_path.unlink()
+            config_path.unlink()
+            with self.subTest(model=name, whole_registration=True), self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            model_path.write_bytes(source)
+            config_path.write_text(config)
+            registry_path.write_text(original)
+
+    def test_battle_integration_corrupted_controls_are_rejected(self):
+        names = ['CanonicalVMComposition',
+         'InstanceMetadataTokens',
+         'IAMConditionEvaluation',
+         'NativeCommandIssuer',
+         'ParticipantSessionLifecycle',
+         'OwnedClockQualification',
+         'TerminalClientEpoch']
+        registry_path = self.root / 'formal/models.json'
+        original = registry_path.read_text()
+        for name in names:
+            for corruption in ('anchor', 'count', 'replacement', 'invariant'):
+                changed = json.loads(original)
+                entry = next(m for m in changed['models'] if m['id'] == name)
+                mutant = entry['mutants'][0]
+                if corruption == 'anchor':
+                    mutant['edits'][0]['old'] = 'UNREVIEWED MISSING ANCHOR'
+                elif corruption == 'count':
+                    mutant['edits'][0]['count'] += 1
+                elif corruption == 'replacement':
+                    # Still a nonempty different replacement: schema-only checks
+                    # cannot substitute for the exact reviewed control.
+                    mutant['edits'][0]['new'] += ' \\* unreviewed replacement'
+                else:
+                    mutant['expect_invariant'] = 'TypeOK'
+                registry_path.write_text(json.dumps(changed))
+                with self.subTest(model=name, corruption=corruption), self.assertRaises(GateError):
+                    load_registry(self.root)
+                registry_path.write_text(original)
+
+    def test_dynamodb_workers_are_bounded_for_whole_family_without_timeout_fallback(self):
+        jar = self.root / 'fixture.jar'
+        jar.write_bytes(b'controlled worker-command fixture only, not TLC')
+        (self.root / 'formal/tla2tools.sha256').write_text(hashlib.sha256(jar.read_bytes()).hexdigest() + '  tla2tools.jar\n')
+        validated = load_registry(self.root)
+        # Reorder a fully validated registry only to inspect each family's first
+        # baseline/control invocation. No actual TLC acceptance is claimed.
+        for name, workers in (('DynamoDBAdmission', '2'), ('ObjectStore', '1')):
+            registry = dict(validated)
+            registry['models'] = sorted(validated['models'], key=lambda m: m['id'] != name)
+            reports = self.root / ('worker-fixture-' + name)
+            results = [subprocess.CompletedProcess([], 0, 'Model checking completed. No error has been found.', ''), subprocess.TimeoutExpired('fixture', 60)]
+            with patch('formal_model_gate.load_registry', return_value=registry), patch('formal_model_gate.shutil.which', return_value='/fixture/java'), patch('formal_model_gate.subprocess.run', side_effect=results) as process:
+                with self.assertRaisesRegex(GateError, 'TLC could not finish'):
+                    run_suite(self.root, jar, reports)
+            self.assertEqual(process.call_count, 2)  # No retry or fallback.
+            for call in process.call_args_list:
+                command = call.args[0]
+                self.assertEqual(command[command.index('-workers') + 1], workers)
+                self.assertEqual(command.count('-workers'), 1)
+                self.assertEqual(call.kwargs['timeout'], 60)
+                self.assertNotIn('-depth', command)
+                self.assertNotIn('-simulate', command)
+            evidence = json.loads((reports / 'evidence.json').read_text())
+            self.assertFalse(evidence['success'])
+            self.assertEqual(len(evidence['runs']), 1)
+            self.assertEqual(evidence['failure']['deadline_seconds'], 60)
+
 
 
 if __name__ == '__main__':

@@ -74,3 +74,17 @@ assert version_example == {'SecretId': 'training/version-list', 'IncludeDeprecat
 assert 'SecretsListSecretVersionIdsInput' in spec['components']['schemas']
 assert 'SecretsListSecretVersionIdsOutput' in spec['components']['schemas']
 assert 'application/x-amz-json-1.1' in regional['responses']['200']['content']
+
+# Optional private TCP dependency remains pinned and ships its original notices,
+# even while production networking is disabled.
+guesttcp=json.loads(Path('third_party/guesttcp.json').read_text())
+assert guesttcp['module']+' '+guesttcp['version'] in Path('go.mod').read_text()
+assert guesttcp['module']+' '+guesttcp['version']+' '+guesttcp['moduleSum'] in Path('go.sum').read_text()
+assert guesttcp['module']+' '+guesttcp['version']+'/go.mod '+guesttcp['goModSum'] in Path('go.sum').read_text()
+assert Path('third_party/GUESTTCP-NOTICES.txt').read_bytes()==Path('internal/legal/assets/GUESTTCP-NOTICES.txt').read_bytes()
+assert hashlib.sha256(Path('third_party/GUESTTCP-NOTICES.txt').read_bytes()).hexdigest()==guesttcp['noticeSha256']
+print('Pinned optional private TCP module and original notices verified.')
+
+# Terminal source must be part of the actual embedded bundle, not only unit-tested.
+for module in ['src/ssm-terminal.jsx', 'src/ssm-terminal-client.mjs']:
+ assert module in inputs, 'Missing embedded participant terminal input: '+module

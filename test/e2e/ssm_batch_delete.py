@@ -131,7 +131,7 @@ def main():
             root, provider = client(endpoint, operator), client(endpoint + '/_simulator/providers/aws', operator)
             peer, west = client(peer_url, peer_operator), client(endpoint, operator, 'us-west-2')
             capabilities = request(endpoint, operator, '/_simulator/v1/capabilities')['services']['ssm']
-            assert set(capabilities['operations']) == {'PutParameter', 'GetParameter', 'GetParameters', 'GetParametersByPath', 'DescribeParameters', 'DeleteParameter', 'DeleteParameters'}
+            assert set(capabilities['operations']) == {'PutParameter', 'GetParameter', 'GetParameters', 'GetParametersByPath', 'DescribeParameters', 'DeleteParameter', 'DeleteParameters', 'CreateDocument', 'GetDocument', 'DescribeDocument', 'ListDocuments', 'UpdateDocument', 'DeleteDocument'}
             spec = request(endpoint, operator, '/_simulator/docs/openapi.json')
             mapping = spec['paths']['/']['post']['x-simulator-ssm-operation-schemas']['DeleteParameters']
             assert mapping['target'] == 'AmazonSSM.DeleteParameters' and mapping['iamAction'] == 'ssm:DeleteParameters'

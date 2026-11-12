@@ -1,15 +1,22 @@
 package server
 
 import (
+	"database/sql"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/sakura"
+	"net/http"
 )
 
 // ProviderConfig preserves the existing cloud storage configuration and enables
 // Sakura Disk metadata only with an explicit nonnil, fully specified scope.
 type ProviderConfig struct {
-	CloudStorage CloudStorageConfig
-	SakuraDisks  *sakura.Config
+	configureInstances func(*sql.DB, *aws.StackStore) error
+	closeInstances     func() error
+	battleCapabilities http.Handler
+	terminalSessions   http.Handler
+	commandAPI         func() *aws.SSMCommandAPI
+	CloudStorage       CloudStorageConfig
+	SakuraDisks        *sakura.Config
 	// BedrockRuntime is the trusted, operator-built local inference adapter.
 	// nil keeps Bedrock Runtime inference disabled with explicit errors. The
 	// caller owns it and closes it; closing the composition does not.

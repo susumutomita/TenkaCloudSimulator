@@ -50,6 +50,9 @@ type Gateway struct {
 	S3                *S3Store
 	Identities        *core.Identities
 	Parameters        *ParameterStore
+	Documents         *SSMDocumentStore
+	Sessions          *SSMSessionStore
+	Commands          *SSMCommandAPI
 	Queues            *SQSStore
 	Stacks            *StackStore
 	Lambdas           *LambdaStore

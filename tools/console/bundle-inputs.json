@@ -16,6 +16,27 @@
       ],
       "format": "cjs"
     },
+    "src/ssm-terminal-client.mjs": {
+      "bytes": 6207,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/ssm-terminal.jsx": {
+      "bytes": 4218,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "src/ssm-terminal-client.mjs",
+          "kind": "import-statement",
+          "original": "./ssm-terminal-client.mjs"
+        }
+      ],
+      "format": "esm"
+    },
     "node_modules/clsx/dist/clsx.m.js": {
       "bytes": 374,
       "imports": [],
@@ -32785,8 +32806,13 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 48474,
+      "bytes": 48564,
       "imports": [
+        {
+          "path": "src/ssm-terminal.jsx",
+          "kind": "import-statement",
+          "original": "./ssm-terminal.jsx"
+        },
         {
           "path": "src/login.jsx",
           "kind": "import-statement",
@@ -33129,6 +33155,12 @@
         },
         "node_modules/react-is/index.js": {
           "bytesInOutput": 52
+        },
+        "src/ssm-terminal.jsx": {
+          "bytesInOutput": 3473
+        },
+        "src/ssm-terminal-client.mjs": {
+          "bytesInOutput": 4085
         },
         "src/login.jsx": {
           "bytesInOutput": 15618
@@ -33740,7 +33772,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 45045
+          "bytesInOutput": 45108
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -34385,7 +34417,7 @@
           "bytesInOutput": 2919
         },
         "node_modules/@dnd-kit/core/dist/core.esm.js": {
-          "bytesInOutput": 39287
+          "bytesInOutput": 39297
         },
         "node_modules/@dnd-kit/utilities/dist/utilities.esm.js": {
           "bytesInOutput": 3216
@@ -36068,7 +36100,7 @@
           "bytesInOutput": 0
         }
       },
-      "bytes": 1870215
+      "bytes": 1877846
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],

@@ -9,7 +9,7 @@ import tempfile
 from contextlib import ExitStack
 from pathlib import Path
 
-from check import REPORTS, running
+from check import REPORTS, running, ClientError
 from iam_managed import client, error, forbidden_host_token, participant
 from iam_instance_profiles import TRUST
 
@@ -22,6 +22,20 @@ PHASE = "startup"
 
 def policy(action="*", effect="Allow"):
     return {"Version": "2012-10-17", "Statement": [{"Effect": effect, "Action": action, "Resource": "*"}]}
+
+
+
+def native_participant_required(callback, message):
+    """Host participant tokens are not verified temporary STS credentials."""
+    try:
+        callback()
+    except ClientError as failure:
+        response = failure.response
+        assert response["ResponseMetadata"]["HTTPStatusCode"] == 403, "Native participant boundary must be HTTP403"
+        assert response["Error"]["Code"] == "AccessDeniedException", "Wrong native participant error code"
+        assert response["Error"]["Message"] == message, "Wrong native participant admission boundary"
+    else:
+        raise AssertionError("Host participant token unexpectedly admitted guest operation")
 
 
 def fragment():
@@ -125,8 +139,12 @@ def run():
                 assert reader.get_parameters(Names=[PARAMETER])["Parameters"][0]["Value"] == value
                 error("AccessDeniedException", lambda: reader.put_parameter(Name=PARAMETER, Type="String", Value="denied", Overwrite=True))
                 error("AccessDeniedException", lambda: reader.get_parameters_by_path(Path="/practice"))
-                error("UnknownOperationException", lambda: reader.start_session(Target="i-0123456789abcdef0"))
-                error("UnknownOperationException", lambda: reader.send_command(InstanceIds=["i-0123456789abcdef0"], DocumentName="Dummy"))
+                # This SDK uses dummy wire credentials plus a host participant
+                # token, not a verified temporary STS assumed-role session.
+                # Refusal is authentication admission, not an IAM grant or a
+                # statement that configured native guest operations do not exist.
+                native_participant_required(lambda: reader.start_session(Target="i-0123456789abcdef0"), "A verified participant session is required.")
+                native_participant_required(lambda: reader.send_command(InstanceIds=["i-0123456789abcdef0"], DocumentName="Dummy"), "A verified assumed-role request is required.")
                 iam.put_role_policy(RoleName=READER, PolicyName="Deny", PolicyDocument=json.dumps(policy("ssm:GetParameter", "Deny")))
                 error("AccessDeniedException", lambda: reader.get_parameter(Name=PARAMETER))
                 iam.delete_role_policy(RoleName=READER, PolicyName="Deny")
@@ -166,7 +184,7 @@ def run():
             assert saved[0]["role"]["RoleId"] != saved[1]["role"]["RoleId"]
             forbidden_host_token(runtimes[1][0], saved[0]["token"])
             forbidden_host_token(runtimes[0][0], saved[1]["operator"])
-        checks.extend(["v2-readonly-document-roundtrip", "no-invented-v1", "no-general-AWS-catalog", "parameter-read-and-write-deny", "inline-deny", "detach-revocation", "same-name-exact-ARN-pagination", "customer-only-local-list", "independent-namespace-detach-delete", "absent-session-command-fail-closed", "original-resource-fragment", "attach-passrole-detach-denial", "two-team-isolation"])
+        checks.extend(["v2-readonly-document-roundtrip", "no-invented-v1", "no-general-AWS-catalog", "parameter-read-and-write-deny", "inline-deny", "detach-revocation", "same-name-exact-ARN-pagination", "customer-only-local-list", "independent-namespace-detach-delete", "host-token-cannot-mint-native-session-command-authority", "original-resource-fragment", "attach-passrole-detach-denial", "two-team-isolation"])
         with ExitStack() as stack:
             runtimes = [stack.enter_context(running(db=db, authenticated=True)) for db in databases]
             for index, (endpoint, operator) in enumerate(runtimes):

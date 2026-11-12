@@ -32,17 +32,19 @@ type browserSession struct {
 // Access binds opaque local credentials to exercise identities. A separate
 // Access instance and database must be assigned to each team by the host.
 type Access struct {
-	next          http.Handler
-	sdk           *sdkAuthority
-	operator      [32]byte
-	cookie        string
-	remote        bool
-	mu            sync.Mutex
-	sessions      map[[32]byte]accessSession
-	browsers      map[[32]byte]browserSession
-	handoffs      map[[32]byte]consoleHandoff
-	boundBrowsers map[[32]byte]consoleHandoff
-	now           func() time.Time
+	next             http.Handler
+	sdk              *sdkAuthority
+	operator         [32]byte
+	cookie           string
+	remote           bool
+	mu               sync.Mutex
+	sessions         map[[32]byte]accessSession
+	browsers         map[[32]byte]browserSession
+	handoffs         map[[32]byte]consoleHandoff
+	terminalHandoffs map[[32]byte]terminalHandoff
+	terminalBrowsers map[[32]byte]terminalHandoff
+	boundBrowsers    map[[32]byte]consoleHandoff
+	now              func() time.Time
 }
 
 func NewAccess(next http.Handler, operatorToken string, allowRemote bool) (*Access, error) {
@@ -50,7 +52,7 @@ func NewAccess(next http.Handler, operatorToken string, allowRemote bool) (*Acce
 		return nil, fmt.Errorf("operator token must contain 32–256 URL-safe characters")
 	}
 	sum := sha256.Sum256([]byte(operatorToken))
-	return &Access{next: next, sdk: newSDKAuthority(operatorToken), operator: sum, cookie: "tcsim_" + hex.EncodeToString(sum[:6]), remote: allowRemote, sessions: map[[32]byte]accessSession{}, browsers: map[[32]byte]browserSession{}, handoffs: map[[32]byte]consoleHandoff{}, boundBrowsers: map[[32]byte]consoleHandoff{}, now: time.Now}, nil
+	return &Access{next: next, sdk: newSDKAuthority(operatorToken), operator: sum, cookie: "tcsim_" + hex.EncodeToString(sum[:6]), remote: allowRemote, sessions: map[[32]byte]accessSession{}, browsers: map[[32]byte]browserSession{}, handoffs: map[[32]byte]consoleHandoff{}, terminalHandoffs: map[[32]byte]terminalHandoff{}, terminalBrowsers: map[[32]byte]terminalHandoff{}, boundBrowsers: map[[32]byte]consoleHandoff{}, now: time.Now}, nil
 }
 func (a *Access) credential(token string) (accessSession, bool) {
 	sum := sha256.Sum256([]byte(token))
@@ -129,8 +131,20 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	loginNavigation := r.Method == "GET" && r.URL.Path == "/_simulator/login" && r.URL.RawQuery == "" && r.Header.Get("Sec-Fetch-Mode") == "navigate" && r.Header.Get("Sec-Fetch-Dest") == "document"
-	if r.Header.Get("Sec-Fetch-Site") == "cross-site" && !loginNavigation {
+	terminalNavigation := r.Method == "GET" && r.URL.Path == "/_simulator/terminal" && r.URL.RawQuery == "" && r.Header.Get("Sec-Fetch-Mode") == "navigate" && r.Header.Get("Sec-Fetch-Dest") == "document"
+	if r.Header.Get("Sec-Fetch-Site") == "cross-site" && !loginNavigation && !terminalNavigation {
 		http.Error(w, "Cross-site request rejected", 403)
+		return
+	}
+	if r.URL.Path == "/_simulator/terminal" {
+		serveTerminalRedemption(w, r)
+		return
+	}
+	if r.URL.Path == "/_simulator/terminal-redeem" {
+		a.redeemTerminalHandoff(w, r)
+		return
+	}
+	if a.terminalBrowserRequest(w, r) {
 		return
 	}
 	// Public product information is an exact asset allowlist. Host/origin checks
@@ -147,10 +161,18 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		a.mu.Lock()
 		a.revokeBrowser(r)
+		if terminalCookie, e := r.Cookie(a.cookie + "_terminal"); e == nil {
+			key := sha256.Sum256([]byte(terminalCookie.Value))
+			if session, ok := a.terminalBrowsers[key]; ok && session.cancel != nil {
+				session.cancel()
+			}
+			delete(a.terminalBrowsers, key)
+		}
 		a.mu.Unlock()
 		cookie := a.browserCookie(r, "", time.Unix(1, 0))
 		cookie.MaxAge = -1
 		http.SetCookie(w, cookie)
+		http.SetCookie(w, &http.Cookie{Name: a.cookie + "_terminal", Value: "", Path: "/", HttpOnly: true, SameSite: http.SameSiteStrictMode, Secure: r.TLS != nil, Expires: time.Unix(1, 0), MaxAge: -1})
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -221,6 +243,13 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		a.revokeBrowser(r)
+		if terminalCookie, e := r.Cookie(a.cookie + "_terminal"); e == nil {
+			key := sha256.Sum256([]byte(terminalCookie.Value))
+			if session, ok := a.terminalBrowsers[key]; ok && session.cancel != nil {
+				session.cancel()
+			}
+			delete(a.terminalBrowsers, key)
+		}
 		a.browsers[sha256.Sum256([]byte(browserToken))] = browserSession{accessSession{parent.principal, expires}, parentHash}
 		a.mu.Unlock()
 		http.SetCookie(w, a.browserCookie(r, browserToken, expires))
@@ -335,6 +364,10 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		a.mu.Unlock()
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{"AccessToken": newToken, "Principal": input.Principal, "ExpiresAt": expires.Format(time.RFC3339)})
+		return
+	}
+	if r.URL.Path == "/_simulator/v1/terminal-handoffs" {
+		a.issueTerminalHandoff(w, r)
 		return
 	}
 	if r.URL.Path == "/_simulator/v1/console-handoffs" {

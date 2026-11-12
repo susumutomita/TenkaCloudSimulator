@@ -99,6 +99,7 @@ class Conformance(unittest.TestCase):
   subprocess.run([sys.executable,str(Path(__file__).with_name('scalar_aws_json.py'))],check=True,timeout=180)
 
  def test_iam_ssm_builtin_sdk_pin_authority_and_cleanup(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_iam_ssm_builtin_admission.py'))],check=True,timeout=60)
   subprocess.run([sys.executable,str(Path(__file__).with_name('iam_ssm_builtin.py'))],check=True,timeout=180)
  def test_cfn_iam_profiles_sdk_composition_restart_and_cleanup(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('cfn_iam_profiles.py'))],check=True,timeout=180)
@@ -666,6 +667,9 @@ def handler(event,context):
  def test_cloudwatch_logs_console_and_native_sdk_share_state(self):
   from cloudwatch_logs_console import run
   run()
+
+ def test_ssm_document_definition_native_sdk_and_restart(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('ssm_documents.py'))],check=True,timeout=180)
 
  def test_secrets_manager_native_two_teams_restart_and_redaction(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager.py'))],check=True)
