@@ -14,8 +14,12 @@ import (
 
 const (
 	persistentQueueSize = 16
-	maxPersistentFrames = 65536
-	maxPersistentBytes  = 64 << 20
+	// The attachment budget is a rate, not a lifetime total: at most this many
+	// frames/bytes in each fixed persistentBudgetWindow. A day-long attachment
+	// keeps its probes; a flood inside one window still ends the attachment.
+	maxPersistentFrames    = 65536
+	maxPersistentBytes     = 64 << 20
+	persistentBudgetWindow = time.Minute
 )
 
 // PersistentTransport owns one explicitly supplied framed stream, one retained
@@ -43,6 +47,8 @@ type persistentNIC struct {
 	sealed         bool
 	probes         map[*ProbeExchange]struct{}
 	children       sync.WaitGroup
+	// now is read under base.budgetMu; tests replace it before any traffic.
+	now func() time.Time
 }
 
 type persistentWrite struct {
@@ -65,8 +71,8 @@ func (s *capturedPassiveService) Lifetime() context.Context { return s.lifetime 
 // at the earliest parent, service or requested deadline; traffic never renews it.
 //
 // The passive route and optional gateway ARP must identify the same guest/MAC as
-// nic. The service cannot overlap ANY future probe tuple. Aggregate traffic has
-// fixed lifetime caps of 65536 frames/64 MiB; endpoint and registry caps remain.
+// nic. The service cannot overlap ANY future probe tuple. Aggregate traffic is
+// capped at 65536 frames/64 MiB per one-minute window; endpoint and registry caps remain.
 // No capability or public runtime is enabled by this opt-in constructor.
 func NewPersistentTransportUntil(ctx context.Context, nic guestnet.ProbeNIC, stream io.ReadWriteCloser, owner FrameCommitter, arpConfig *guestnet.ARPConfig, service RevocablePassiveService, route guestnet.TCPRoute, deadline time.Time) (*PersistentTransport, error) {
 	expires, err := passiveDeadline(ctx, deadline)
@@ -102,7 +108,7 @@ func NewPersistentTransportUntil(ctx context.Context, nic guestnet.ProbeNIC, str
 		return nil, err
 	}
 	nic.ServicePorts = append([]uint16(nil), nic.ServicePorts...)
-	n := &persistentNIC{registry: registry, lifetime: registry.Lifetime(), config: nic, queue: make(chan *persistentWrite, persistentQueueSize), probes: make(map[*ProbeExchange]struct{})}
+	n := &persistentNIC{registry: registry, lifetime: registry.Lifetime(), config: nic, queue: make(chan *persistentWrite, persistentQueueSize), probes: make(map[*ProbeExchange]struct{}), now: time.Now}
 	c := Config{LocalIP: nic.LocalIP, PeerIP: nic.PeerIP, LocalMAC: nic.LocalMAC, PeerMAC: nic.PeerMAC}
 	_, err = newTransportMode(ctx, c, stream, owner, arpConfig, &capturedPassiveService{service, lifetime}, routes, expires, true, n)
 	if err != nil {

@@ -6,14 +6,18 @@ TCP sequence/state correctness, or Go refinement.
 
 ## Concrete correspondence
 
-- `Open`: immutable `records[allocated]`, `allocated++`, `live++`, port
-  `ProbeSourcePort + allocated`; tuple tombstones survive cancellation/drain.
-- `RouteIncoming`: charge frames/bytes before parsing/classification, reject
-  unknown or malformed tuple/direction, discard known retired tuples, enqueue
-  only to exact active session, close registry on queue overflow.
+- `Open`: `freeSlotLocked` picks an unused slot, or a drained one whose
+  `TupleQuarantine` has passed (`Free`: unused, or `drained /\ quiet`); `live++`,
+  port `ProbeSourcePort + slot`. Tombstones survive cancellation/drain until
+  reused. The model chooses any free slot, over-approximating the Go cursor.
+- `Quiesce`: abstracts the 2*MSL quarantine timer. It may fire only after drain.
+- `RouteIncoming`: reject an over-size frame, then charge the tuple
+  incarnation's frames/bytes before classification, reject unknown or malformed
+  tuple/direction, discard known retired tuples, enqueue only to exact active
+  session, close registry on queue overflow or budget exhaustion.
 - `ReadFrame`: one read per session; inflight debt remains across revocation;
   buffered frames are not returned after observed revocation.
-- `Transmit`: charge before busy check, exact route validation, one registry-wide
+- `Transmit`: charge the session's own budget before busy check, exact route validation, one registry-wide
   callback, inflight retained until callback returns, late result rejected.
 - `closeLocked`: close admission and purge queue without claiming callback
   completion. `finishLocked` requires watcher completion and zero inflight.
@@ -30,8 +34,9 @@ recalls or prevents effects of an already-admitted callback.
 
 ## Bounds and seeds
 
-Two lifetime tuple slots, two active sessions, one pending callback, one queued
-frame per session, three cumulative frames, four abstract byte units, and
+Two reusable tuple slots, two active sessions, one pending callback, one queued
+frame per session, three frames and four abstract byte units per tuple
+incarnation, and
 three-step suffixes from eight explicit reachable seeds. These stand for much
 larger implementation limits; no arithmetic scaling proof is claimed. Seeds:
 empty; one open; two open; one queued incoming frame; one admitted callback;
@@ -77,7 +82,7 @@ or a proof of the implementation.
 
 ## Regression boundary
 
-The registration regression pins all 16 properties, 20 semantic controls,
+The registration regression pins all 16 properties, 21 semantic controls,
 the single concrete source scope, and declared compact bounds. Model controls
 must fail their intended invariant after a real transition, not from an
 inconsistent initial state or syntax error. Changing model bounds or seed

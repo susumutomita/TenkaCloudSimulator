@@ -3,6 +3,34 @@
   "base_sha": "bf5585f5230f7cc284a89024e6d4a8462b0306e8",
   "changes": [
     {
+      "path": "docs/formal-nic-session-bookkeeping.md",
+      "sha256": "c9dbe7030690714af1b923a021892a75df526d64d387a0c6bd0dff13b6506ccb",
+      "disposition": "documentation",
+      "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
+      "models": []
+    },
+    {
+      "path": "docs/owned-probe-session.md",
+      "sha256": "e7cc3c7187fd6bae9cb72a78c933ec3777ffa1490e4c4b11204018fe472742e6",
+      "disposition": "documentation",
+      "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
+      "models": []
+    },
+    {
+      "path": "docs/private-persistent-transport.md",
+      "sha256": "c2b177788c443115c6eb8017dd866a511186de23ee0daa0ad127cd289a80fdc6",
+      "disposition": "documentation",
+      "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
+      "models": []
+    },
+    {
+      "path": "docs/private-tcp-probe-sessions.md",
+      "sha256": "989545b2547f9cd2a9da68453d607a1c4ffa7cb2ee7c65e6bd981d5b7ea08ed9",
+      "disposition": "documentation",
+      "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
+      "models": []
+    },
+    {
       "path": "formal/NICSessionBookkeeping.tla",
       "sha256": "1e19323da1c543176b5e460d13f97be4f0b8249537b4ddef69d1fac1108575bf",
       "disposition": "modeled",
@@ -73,6 +101,199 @@
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
+    },
+    {
+      "path": "internal/workload/guesttcp/owned_probe_session.go",
+      "sha256": "c43151185f00d1a899bd14a490eb7a18d0e8f0ebef26944cf4bc8f439d99578d",
+      "disposition": "modeled",
+      "reason": "Bounded owned-session lifecycle, single-use attachment handoff, or normalized fixed TCP/ARP policy obligations apply only to their exact declared source and artifact scopes. Prior ARP trusted-reply obligations remain retained. Authoritative provider fencing/issuance, byte-parser refinement, real VM ownership, clock qualification, and full Host integration are not established by these models. Native tests independently exercise actual in-memory TCP/ARP/passive composition.",
+      "models": [
+        {
+          "id": "OwnedProbeSessionLifecycle",
+          "properties": [
+            "NoInvalidAdmission",
+            "NoInvalidPublication",
+            "TentativeHidden",
+            "CloseOnce",
+            "CloseBeforeJoin",
+            "DebtUntilDrain",
+            "ImmutableBinding",
+            "OneApply",
+            "TerminalSeal",
+            "EvidenceHasSuccess",
+            "NoUnsafeException",
+            "NoTokenReplay",
+            "FailedPacketNotPublished",
+            "NoNeedlessSeal"
+          ],
+          "limits": "Only private local-injection producer/owner-consumer branch in added source paths; not all transport methods. Tokens do not prove physical authority. No Go pointer/atomic refinement, generic parser proof or clock rebasing. Foreign marker is explicit malformed-provider abstraction."
+        },
+        {
+          "id": "OwnedProbeDispatchPolicy",
+          "properties": [
+            "ImmutableCanonical",
+            "ExactReplyMatch",
+            "DispatchSound",
+            "DispatchComplete"
+          ],
+          "limits": "Only MatchesReply canonical field equality and owner frame branch/normalized tuple selection. Existing ARP request parser/TCP parser assumed separate validated operations; no complete byte grammar/refinement, raw-to-normalized tuple orientation proof, physical authority, descriptor issuance or runtime lifecycle claim."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guesttcp/owned_probe_session_test.go",
+      "sha256": "c53188b75acd27c7bec17b3ae2b6e595b1b1b6288d38e957024d85b4eede43cf",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guesttcp/transport.go",
+      "sha256": "a512d64cc922c421e1e893096a3ddfec51c88239b0d812be02757930fb2710fd",
+      "disposition": "modeled",
+      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "models": [
+        {
+          "id": "PersistentTransportLifecycle",
+          "properties": [
+            "NoInvalidAdmission",
+            "QueueSealed",
+            "QueueOwnership",
+            "SelectedDebt",
+            "ProbePumpDebt",
+            "ReadJoin",
+            "ChildJoin",
+            "CompletionJoin",
+            "CapacityRelease",
+            "NoLateSuccess",
+            "EffectRetained"
+          ],
+          "limits": "Bookkeeping/atomic orchestration abstraction only, not constructor validation, parser, TCP stack, arbitrary callbacks, physical fencing, engine correctness, full source refinement or liveness. Only persistent mode of shared Transport modeled; ordinary exchange and ARP behavior remain separate obligations. Production capacities and repeated traffic unproved. Close completion is not physical settlement; uncertain Close retains its slot. No dependency behavior or provenance exemption."
+        },
+        {
+          "id": "OwnedProbeSessionLifecycle",
+          "properties": [
+            "NoInvalidAdmission",
+            "NoInvalidPublication",
+            "TentativeHidden",
+            "CloseOnce",
+            "CloseBeforeJoin",
+            "DebtUntilDrain",
+            "ImmutableBinding",
+            "OneApply",
+            "TerminalSeal",
+            "EvidenceHasSuccess",
+            "NoUnsafeException",
+            "NoTokenReplay",
+            "FailedPacketNotPublished",
+            "NoNeedlessSeal"
+          ],
+          "limits": "Only private local-injection producer/owner-consumer branch in added source paths; not all transport methods. Tokens do not prove physical authority. No Go pointer/atomic refinement, generic parser proof or clock rebasing. Foreign marker is explicit malformed-provider abstraction."
+        },
+        {
+          "id": "PersistentIngressPolicy",
+          "properties": [
+            "UnownedNeverRevokes",
+            "DroppedNotChargedOrAccepted",
+            "OwnedNeverDropped",
+            "OwnedProbeAbuseRevokes",
+            "AcceptOnlyOwnedValid"
+          ],
+          "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guesttcp/transport_persistent.go",
+      "sha256": "a2d4cb115c156ca9f2b8e5a11c6021d0f0e1f7db18cfd102031cd76aa3138b26",
+      "disposition": "modeled",
+      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "models": [
+        {
+          "id": "PersistentTransportLifecycle",
+          "properties": [
+            "NoInvalidAdmission",
+            "QueueSealed",
+            "QueueOwnership",
+            "SelectedDebt",
+            "ProbePumpDebt",
+            "ReadJoin",
+            "ChildJoin",
+            "CompletionJoin",
+            "CapacityRelease",
+            "NoLateSuccess",
+            "EffectRetained"
+          ],
+          "limits": "Bookkeeping/atomic orchestration abstraction only, not constructor validation, parser, TCP stack, arbitrary callbacks, physical fencing, engine correctness, full source refinement or liveness. Only persistent mode of shared Transport modeled; ordinary exchange and ARP behavior remain separate obligations. Production capacities and repeated traffic unproved. Close completion is not physical settlement; uncertain Close retains its slot. No dependency behavior or provenance exemption."
+        },
+        {
+          "id": "OwnedProbeSessionLifecycle",
+          "properties": [
+            "NoInvalidAdmission",
+            "NoInvalidPublication",
+            "TentativeHidden",
+            "CloseOnce",
+            "CloseBeforeJoin",
+            "DebtUntilDrain",
+            "ImmutableBinding",
+            "OneApply",
+            "TerminalSeal",
+            "EvidenceHasSuccess",
+            "NoUnsafeException",
+            "NoTokenReplay",
+            "FailedPacketNotPublished",
+            "NoNeedlessSeal"
+          ],
+          "limits": "Only private local-injection producer/owner-consumer branch in added source paths; not all transport methods. Tokens do not prove physical authority. No Go pointer/atomic refinement, generic parser proof or clock rebasing. Foreign marker is explicit malformed-provider abstraction."
+        },
+        {
+          "id": "PersistentIngressPolicy",
+          "properties": [
+            "UnownedNeverRevokes",
+            "DroppedNotChargedOrAccepted",
+            "OwnedNeverDropped",
+            "OwnedProbeAbuseRevokes",
+            "AcceptOnlyOwnedValid"
+          ],
+          "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guesttcp/transport_persistent_test.go",
+      "sha256": "a9f0d7b51271b81dfb8c3e2f8f12e332a2bfe7e095683948fdc810ca925fbc57",
+      "disposition": "modeled",
+      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "models": [
+        {
+          "id": "PersistentTransportLifecycle",
+          "properties": [
+            "NoInvalidAdmission",
+            "QueueSealed",
+            "QueueOwnership",
+            "SelectedDebt",
+            "ProbePumpDebt",
+            "ReadJoin",
+            "ChildJoin",
+            "CompletionJoin",
+            "CapacityRelease",
+            "NoLateSuccess",
+            "EffectRetained"
+          ],
+          "limits": "Bookkeeping/atomic orchestration abstraction only, not constructor validation, parser, TCP stack, arbitrary callbacks, physical fencing, engine correctness, full source refinement or liveness. Only persistent mode of shared Transport modeled; ordinary exchange and ARP behavior remain separate obligations. Production capacities and repeated traffic unproved. Close completion is not physical settlement; uncertain Close retains its slot. No dependency behavior or provenance exemption."
+        },
+        {
+          "id": "PersistentIngressPolicy",
+          "properties": [
+            "UnownedNeverRevokes",
+            "DroppedNotChargedOrAccepted",
+            "OwnedNeverDropped",
+            "OwnedProbeAbuseRevokes",
+            "AcceptOnlyOwnedValid"
+          ],
+          "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
+        }
+      ]
     },
     {
       "path": "scripts/formal_model_gate.py",
