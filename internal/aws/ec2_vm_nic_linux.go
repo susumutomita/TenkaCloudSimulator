@@ -14,6 +14,7 @@ import (
 	"reflect"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/guestnet"
@@ -332,7 +333,9 @@ func canonicalVMNICOperations() vmNICOperations {
 			return n, e
 		},
 		control: func(ctx context.Context, p *guestvm.Prepared) (vmNICControl, error) {
-			conn, e := (&net.Dialer{}).DialContext(ctx, "unix", p.QMPSocket())
+			conn, e := dialPrivateQMP(ctx, p.QMPSocket(), func(ctx context.Context, path string) (net.Conn, error) {
+				return (&net.Dialer{}).DialContext(ctx, "unix", path)
+			})
 			if e != nil {
 				return nil, e
 			}
@@ -575,4 +578,37 @@ func (c *EC2GuestAttachmentCoordinator) reserveVMNIC(ctx context.Context, expect
 		return errGuestLease
 	}
 	return tx.Commit()
+}
+
+// vmQMPStartupBudget bounds waiting for the launched emulator to create its
+// private QMP listener. Exec success precedes socket creation, so an immediate
+// dial can race QEMU startup. Only "not yet listening" errors are retried; any
+// other error, the caller's deadline or this budget ends the wait.
+const vmQMPStartupBudget = 10 * time.Second
+
+func dialPrivateQMP(parent context.Context, path string, dial func(context.Context, string) (net.Conn, error)) (net.Conn, error) {
+	if parent == nil {
+		return nil, errGuestLease
+	}
+	ctx, cancel := context.WithTimeout(parent, vmQMPStartupBudget)
+	defer cancel()
+	for {
+		conn, err := dial(ctx, path)
+		if err == nil {
+			return conn, nil
+		}
+		if conn != nil {
+			_ = conn.Close()
+		}
+		if !errors.Is(err, syscall.ENOENT) && !errors.Is(err, syscall.ECONNREFUSED) {
+			return nil, err
+		}
+		timer := time.NewTimer(50 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return nil, errors.Join(err, ctx.Err())
+		case <-timer.C:
+		}
+	}
 }

@@ -12,12 +12,14 @@ import (
 	"encoding/hex"
 	"errors"
 	"io"
+	"net"
 	"net/netip"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"sync/atomic"
+	"syscall"
 	"testing"
 	"time"
 
@@ -401,5 +403,58 @@ func TestCanonicalReceiptReadinessLifetimeMemoryOnly(t *testing.T) {
 	}
 	if _, err := r.Descriptor(); err != nil {
 		t.Fatal("historical descriptor lost", err)
+	}
+}
+
+func TestDialPrivateQMPWaitsForLateListener(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "qmp.sock")
+	ready := make(chan net.Listener, 1)
+	go func() {
+		time.Sleep(150 * time.Millisecond)
+		l, err := net.Listen("unix", path)
+		if err != nil {
+			ready <- nil
+			return
+		}
+		ready <- l
+	}()
+	conn, err := dialPrivateQMP(context.Background(), path, func(ctx context.Context, p string) (net.Conn, error) {
+		return (&net.Dialer{}).DialContext(ctx, "unix", p)
+	})
+	l := <-ready
+	if l == nil {
+		t.Fatal("listener failed")
+	}
+	defer l.Close()
+	if err != nil {
+		t.Fatalf("dial after late listen: %v", err)
+	}
+	_ = conn.Close()
+}
+
+func TestDialPrivateQMPDoesNotRetryOtherErrors(t *testing.T) {
+	calls := 0
+	want := errors.New("permission")
+	_, err := dialPrivateQMP(context.Background(), "x", func(context.Context, string) (net.Conn, error) {
+		calls++
+		return nil, want
+	})
+	if !errors.Is(err, want) || calls != 1 {
+		t.Fatalf("err=%v calls=%d", err, calls)
+	}
+}
+
+func TestDialPrivateQMPStopsAtCallerDeadline(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Millisecond)
+	defer cancel()
+	start := time.Now()
+	_, err := dialPrivateQMP(ctx, "x", func(context.Context, string) (net.Conn, error) {
+		return nil, &net.OpError{Op: "dial", Err: syscall.ECONNREFUSED}
+	})
+	if !errors.Is(err, syscall.ECONNREFUSED) || !errors.Is(err, context.DeadlineExceeded) || time.Since(start) > 2*time.Second {
+		t.Fatalf("err=%v elapsed=%v", err, time.Since(start))
+	}
+	if _, err = dialPrivateQMP(nil, "x", nil); err == nil { //nolint:staticcheck // nil parent is rejected
+		t.Fatal("nil parent accepted")
 	}
 }
