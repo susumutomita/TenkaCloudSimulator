@@ -1,26 +1,12 @@
 {
   "version": 1,
-  "base_sha": "48f0686b70dab6d1e291175ff7c43a1d74f16767",
+  "base_sha": "d27aa296a50e07784725306f1b6b60d4b5963a6d",
   "changes": [
     {
-      "path": ".claude/agents/issue-finder.md",
-      "sha256": "22d628d2be6f7e6be21fd9a6a8d9ae676919e652a1a836fe03a7b3fe7103568b",
-      "disposition": "documentation",
-      "reason": "Documents bounded developer-agent duties and local workflow; no simulator runtime behavior or permission grant.",
-      "models": []
-    },
-    {
-      "path": ".claude/agents/issue-fixer.md",
-      "sha256": "95c6af0e702765e4e0a623ccfcc4da8bbefe823097f8a1b8e3e2c11279235e51",
-      "disposition": "documentation",
-      "reason": "Documents bounded developer-agent duties and local workflow; no simulator runtime behavior or permission grant.",
-      "models": []
-    },
-    {
       "path": "Makefile",
-      "sha256": "bfaec2685781452267160ce023a1d9d5323b6969868d63c6b8a357870440ef58",
+      "sha256": "6fbc0246292d9e39926f17e635736cf8c7d3bf0e5f1c0b1addd7da6a7acc9a45",
       "disposition": "modeled",
-      "reason": "Preserves the registered startup/token target contract while adding a development-only regression command to test; existing gates are unchanged.",
+      "reason": "Preserves registered startup/token targets while adding test-only offline Smithy validation; existing runtime targets and gates unchanged.",
       "models": [
         {
           "id": "StartupTokenVisibility",
@@ -31,43 +17,85 @@
             "HistoryVisibility",
             "InvalidFileNeverEmits"
           ],
-          "limits": "Existing finite startup/token abstraction is unchanged. This test-recipe addition is not modeled and is validated by the Python controller regression suite and CI; no claim of implementation refinement."
+          "limits": "Existing finite startup/token abstraction unchanged; new test recipe is validated by Python generator regression tests, not this finite model. No implementation refinement claim."
         }
       ]
     },
     {
-      "path": "docs/contributing/software-factory.md",
-      "sha256": "975d2614d6944f65e59381d743e3045abeb17d6a1b3a628262a489fb32da18d6",
+      "path": "docs/contributing/smithy-contracts.md",
+      "sha256": "2be47b82f57e0952539a7c45e1fd77a5d2642a6b97e6756f9e5286ad9d591a89",
       "disposition": "documentation",
-      "reason": "Documents bounded developer-agent duties and local workflow; no simulator runtime behavior or permission grant.",
+      "reason": "Documents pinned model provenance, Apache attribution, commands and bounded test-only guarantees.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/sqs_smithy_contract_test.go",
+      "sha256": "434a9710db40c768d162f72b16a11f64832f6fe625181e9cbf79a0aeb42f0a33",
+      "disposition": "test-support",
+      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/testdata/smithy/LICENSE.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "disposition": "test-support",
+      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/testdata/smithy/NOTICE.txt",
+      "sha256": "a6e830174d62dafad3a718384772ea1f4c0e27989f050932dc442a5e3ddad080",
+      "disposition": "test-support",
+      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/testdata/smithy/source.json",
+      "sha256": "17da0c5e9c8d7bc75d798a91c83018fab751ae3e4958247d50edad7b81e53c96",
+      "disposition": "test-support",
+      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/testdata/smithy/sqs-contracts.json",
+      "sha256": "d53ce7aa621639f7687bbde2721438d2d5d3e5cf8dbf9628893311fcb7cfed05",
+      "disposition": "test-support",
+      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/testdata/smithy/sqs.json",
+      "sha256": "38eef06ce5642b8a052282fd19a3ab275e0046d375474e2ff022d3e33aaeab72",
+      "disposition": "test-support",
+      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
       "models": []
     },
     {
       "path": "scripts/formal_applicability.py",
-      "sha256": "958bd128a1d1601f48eb744e2b557f5e6ea4dc6e18958ac59e994ecb00b5f4ee",
+      "sha256": "bbb95cb13278d6c8c872e4d2a03dc685a6ec77f1ad25137d1d48c142b33faf3e",
       "disposition": "formal-infrastructure",
-      "reason": "Exact path classification for the development-only evidence gate with negative controls; arbitrary scripts and runtime sources remain unclassified.",
+      "reason": "Exact test fixture/generator classification with unknown-runtime negative controls; no model/property weakening.",
       "models": []
     },
     {
-      "path": "scripts/software_factory.py",
-      "sha256": "29687e0efd9a7682bbe4b400cab3331fc7f072e8ce04e870888c0c3c80229842",
+      "path": "scripts/smithy-contracts.py",
+      "sha256": "bc87ebd4d1d74fb55fb5aa73460f6d90e7cfd372004c8cc917603420fe46b0b0",
       "disposition": "validation-tooling",
-      "reason": "Local development evidence and claim gate only; no simulator request, state, authentication or workload implementation.",
+      "reason": "Offline deterministic source-model projection/check; not imported or embedded by simulator runtime.",
       "models": []
     },
     {
       "path": "scripts/test-formal-applicability.py",
-      "sha256": "1176d29fc98dec3588e6007f516a4e063411644bfda811f4e538d5ef1f096f11",
+      "sha256": "3357f7cb7f26b0648809172abee24e8066d3f13cc2fc4a31cb8e67a1330b7cf5",
       "disposition": "formal-infrastructure",
-      "reason": "Exact path classification for the development-only evidence gate with negative controls; arbitrary scripts and runtime sources remain unclassified.",
+      "reason": "Exact test fixture/generator classification with unknown-runtime negative controls; no model/property weakening.",
       "models": []
     },
     {
-      "path": "scripts/test-software-factory.py",
-      "sha256": "9bd691cc8a88b9e1330e9e9736280a979f66685455b907e3923a17a551976ab9",
+      "path": "scripts/test-smithy-contracts.py",
+      "sha256": "ac97bbae4d73626589925bce33e8913894e7017fbf45344f97505e264498e724",
       "disposition": "test-support",
-      "reason": "Exercises local development handoff state and fail-closed validation; no runtime behavior changes.",
+      "reason": "Pinned model fixture or isolated shape/lifecycle contract tests only; no runtime behavior or state transition changed.",
       "models": []
     }
   ]
