@@ -112,6 +112,8 @@ class Conformance(unittest.TestCase):
   subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart_docs.py'))],check=True,timeout=120)
  def test_s3_multipart_native_persistence_and_console(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart.py'))],check=True)
+ def test_bedrock_runtime_local_backend_boto3(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('bedrock_runtime.py'))],check=True,timeout=180)
  def test_sts_native_sdk_original_hello_world(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('sts_sdk.py'))],check=True,timeout=180)
  def test_sns_native_admission_persistence_and_isolation(self):

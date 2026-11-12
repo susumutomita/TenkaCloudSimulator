@@ -60,6 +60,9 @@ type Gateway struct {
 	Catalog http.Handler
 	// CatalogOwns reports whether a request belongs to Catalog.
 	CatalogOwns func(*http.Request) bool
+	// BedrockRuntime is the opt-in local inference adapter; nil means
+	// disabled, which answers every inference request with an explicit error.
+	BedrockRuntime *BedrockRuntime
 }
 type failure struct {
 	XMLName   xml.Name `xml:"Error"`
