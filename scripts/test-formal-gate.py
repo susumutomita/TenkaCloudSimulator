@@ -1161,6 +1161,17 @@ class FormalGateTests(unittest.TestCase):
                     load_registry(self.root)
             path.write_text(original)
 
+    def test_console_nonce_handler_scope_is_exact_and_cannot_expand(self):
+        path = self.root / 'formal/models.json'
+        registry = json.loads(path.read_text())
+        entry = next(m for m in registry['models'] if m['id'] == 'LandingAccessAdmission')
+        self.assertIn('internal/server/console_assets.go', entry['source_scope'])
+        entry['source_scope'].append('internal/server/unrelated_console.go')
+        (self.root / 'internal/server/unrelated_console.go').write_text('package server\n')
+        path.write_text(json.dumps(registry))
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
+
     def test_cfg_view_constraints_and_unknown_keywords_are_not_invariants(self):
         for directive in ('VIEW V', 'CONSTRAINT Bound', 'CONSTRAINTS Bound', 'ACTION_CONSTRAINT Bound', 'ACTION_CONSTRAINTS Bound', 'TYPE T', 'TYPE_CONSTRAINT T', 'SYMMETRY Permutations'):
             with self.subTest(directive=directive), self.assertRaises(GateError):

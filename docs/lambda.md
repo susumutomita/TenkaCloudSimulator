@@ -39,7 +39,7 @@ CPythonは変更していない。WASIの絶対時刻poll非対応に合わせ�
 
 ## Cloudscape画面と検証
 
-Lambda→Functions→Create function（Author from scratch、Python 3.12、既存local role）→Test。Services→IAM→Roles→Create roleでローカルroleを作り、LambdaのPermissions→Existing roleから選べる。初期policyは明示Denyでservice権限なし。Code tabからZIPをDeployし、同じnative API/SDKで読戻す。Configurationは実設定を表示する。Invokeのみ許可された参加者には、一覧/configurationを許可せず、hostから渡された名前のTestを用意する。inline code editor、monitoring、role自動作成等は未再現。実AWSログイン済み画面とのpixel一致は未検証。
+Lambda→Functions→Create function（Author from scratch、Python 3.12、既存local role）→CodeMirrorのPython編集→作成/Deploy→Test。Services→IAM→Roles→Create roleでローカルroleを作り、LambdaのPermissions→Existing roleから選べる。初期policyは明示Denyでservice権限なし。Code tabからZIPをDeployし、同じnative API/SDKで読戻す。Configurationは実設定を表示する。Invokeのみ許可された参加者には、一覧/configurationを許可せず、hostから渡された名前のTestを用意する。CodeMirror（同梱エディタ。VS Code/Code-OSSそのものではない）で、このLambda画面で作成した単一ファイル関数を編集できる。作成時は入力したソースをZIP化してnative APIへ送信し、編集後はRevisionId付きDeployが成功するまでTestを無効化する。ソースはメモリのみで保持し、ページ再読込/他サービスへの移動後は取得できない。既存・アップロード済みZIPは推測して編集せず、完全なZIP更新を使う。ソースのダウンロードで手元に保存できる。これはCode-OSS全体や拡張機能/ターミナルではない。monitoring、role自動作成等は未再現。実AWSログイン済み画面とのpixel一致は未検証。
 
 Test の「このテストのログ末尾を取得」を明示的に選ぶと、その同期呼び出しの実出力を表示する。既定では要求しない。選択解除、入力変更、新しい呼び出し、関数やサービスの移動で以前の表示を消し、遅れて返った別の呼び出し結果を破棄する。中断は表示と待機を取り消すもので、既に実行した関数の副作用を巻き戻す保証はない。CloudWatch の永続履歴や Monitor tab の対応を意味しない。
 

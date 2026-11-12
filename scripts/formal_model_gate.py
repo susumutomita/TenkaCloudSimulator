@@ -907,6 +907,7 @@ REQUIRED_SOURCE_SCOPES = {'BedrockRuntimeAdmission': {'cmd/simulator/bedrock_fla
                           'internal/aws/secrets_manager_versions_http_test.go',
                           'internal/aws/secrets_manager_versions_test.go'},
  'LandingAccessAdmission': {'internal/server/access.go',
+                            'internal/server/console_assets.go',
                             'internal/server/landing.go',
                             'internal/server/server.go'},
  'LandingTopologyState': {'internal/server/landing/landing.mjs',

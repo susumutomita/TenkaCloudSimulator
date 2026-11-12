@@ -179,7 +179,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 	docs, _ := fs.Sub(assets, "apidocs")
 	mux.Handle("/_simulator/docs/", http.StripPrefix("/_simulator/docs/", http.FileServer(http.FS(docs))))
 	web, _ := fs.Sub(assets, "web")
-	mux.Handle("/_simulator/console/", http.StripPrefix("/_simulator/console/", http.FileServer(http.FS(web))))
+	mux.Handle("/_simulator/console/", http.StripPrefix("/_simulator/console/", consoleAssetsHandler(web)))
 	mux.HandleFunc("/_simulator/health", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
 			w.WriteHeader(405)

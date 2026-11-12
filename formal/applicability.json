@@ -1,278 +1,355 @@
 {
   "version": 1,
-  "base_sha": "bc7a71beb76ecd65cd4b44faa4dc8d23bcfe02bb",
+  "base_sha": "749d8a86014d08fc6085ecff36984fc97a56f595",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "640178e901a1d7d5bdd0e06d7a512bca5e39fed4928979208280ce8d1b536316",
-      "disposition": "documentation",
-      "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "2f6f78adc8725a59c4f1aa08bf3b61f81d245b8a89ee7706c1b5ed7ef09ecce0",
+      "disposition": "formal-infrastructure",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "9b601c544ac752874ef4a761971b4a4bcf636b5f482e8adca9e8906c85e92809",
+      "sha256": "e71cbce184277b37e2d97995371a8312f779bd4a6d53b49f9ae59210291d0931",
       "disposition": "documentation",
-      "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
     },
     {
-      "path": "docs/autoscaling-plans.md",
-      "sha256": "a7d16103cdfba1aa91600dc3e2b28df56fc189e8a83cdf48cae84108b51e6651",
+      "path": "docs/console.md",
+      "sha256": "d5cab473211fe42ec59479e2b4bbd9f18bb6c8b882500a07c4f07aec498de8f3",
       "disposition": "documentation",
-      "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
     },
     {
-      "path": "formal/AutoScalingPlanTargets.cfg",
-      "sha256": "24e0cbee679c3941f5b775c9c31b6104d1be3c1a20fe43a015a7a9585bece1c9",
-      "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
-      "models": [
-        {
-          "id": "AutoScalingPlanTargets",
-          "properties": [
-            "BoundedWhileOwned",
-            "OnlyAuthorizedValid",
-            "NoOwnershipSteal",
-            "DeleteKeepsCapacity",
-            "RejectionFrame",
-            "OtherTeamUnchanged",
-            "PendingInvisible"
-          ],
-          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
-        }
-      ]
-    },
-    {
-      "path": "formal/AutoScalingPlanTargets.tla",
-      "sha256": "db1de5c41a9b52120e6aa803e48a15d64081a8d683664dc204065223ed22b3fa",
-      "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
-      "models": [
-        {
-          "id": "AutoScalingPlanTargets",
-          "properties": [
-            "BoundedWhileOwned",
-            "OnlyAuthorizedValid",
-            "NoOwnershipSteal",
-            "DeleteKeepsCapacity",
-            "RejectionFrame",
-            "OtherTeamUnchanged",
-            "PendingInvisible"
-          ],
-          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
-        }
-      ]
+      "path": "docs/lambda.md",
+      "sha256": "fa11c681bfad82eb3a02681b155a92018b220b7fa9a549bad251b2e53dff47a3",
+      "disposition": "documentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "c26fa24f535fd4679b632fa2c120f2b5bce5ce693b2b83ca721b4ee3e051ccab",
+      "sha256": "b502302aa1b7a0cb1058b47783772ee88cdee3fc32149c36a39b9b79bd631a38",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
     },
     {
-      "path": "internal/aws/autoscalingplans_dispatch.go",
-      "sha256": "6b143c9ff39aef3d969e4c38d6122ae4a8cf9e106216cbf939cfef0afb111cbb",
+      "path": "internal/legal/assets/CONSOLE-NOTICES.txt",
+      "sha256": "f8b7a4acf9de8bfe47539b69999a0c58c964690e985893a780e61e7586337fe9",
+      "disposition": "documentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/server/console_assets.go",
+      "sha256": "b131e274539fc8696ae61b74d2bc5e1e6247c8116db13c8e62969714f279feb8",
       "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
+      "reason": "Console source editing and nonce-bound static HTML preserve existing native APIs, authorization and invocation disclosure; no provider resource or token state changes.",
       "models": [
         {
-          "id": "AutoScalingPlanTargets",
+          "id": "LandingAccessAdmission",
           "properties": [
-            "BoundedWhileOwned",
-            "OnlyAuthorizedValid",
-            "NoOwnershipSteal",
-            "DeleteKeepsCapacity",
-            "RejectionFrame",
-            "OtherTeamUnchanged",
-            "PendingInvisible"
+            "TypeOK",
+            "ExternalBoundary",
+            "PublicResponse",
+            "TokenBoundary",
+            "UnknownNeverStatic"
           ],
-          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented. This console-only change does not claim browser rendering, CSP enforcement or source editor implementation correctness from the model; those require focused and real-browser tests."
         }
       ]
     },
     {
-      "path": "internal/aws/autoscalingplans_http.go",
-      "sha256": "8ec7c9473cc4a66d858998ce866f32f9bb5ffed6e50b928263440a581984cd85",
-      "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
-      "models": [
-        {
-          "id": "AutoScalingPlanTargets",
-          "properties": [
-            "BoundedWhileOwned",
-            "OnlyAuthorizedValid",
-            "NoOwnershipSteal",
-            "DeleteKeepsCapacity",
-            "RejectionFrame",
-            "OtherTeamUnchanged",
-            "PendingInvisible"
-          ],
-          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/autoscalingplans_store.go",
-      "sha256": "593c63829d662aa2b84f28370338371a6a51a112f54852d5cea6bd915d5d4d7a",
-      "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
-      "models": [
-        {
-          "id": "AutoScalingPlanTargets",
-          "properties": [
-            "BoundedWhileOwned",
-            "OnlyAuthorizedValid",
-            "NoOwnershipSteal",
-            "DeleteKeepsCapacity",
-            "RejectionFrame",
-            "OtherTeamUnchanged",
-            "PendingInvisible"
-          ],
-          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/autoscalingplans_test.go",
-      "sha256": "d1c75d5e279bdde0e14a30ff7d9b804fc77556c396e2dd6a5700510459748778",
+      "path": "internal/server/console_assets_test.go",
+      "sha256": "f6645eeb7e321f925e79300356c76ce45ead33f355556c81b59119c0414b5f6c",
       "disposition": "test-support",
-      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/s3.go",
-      "sha256": "3922c352f8401d5beae7bccdbcab788117af7e8250a1e9184601823b9a65aca5",
-      "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
-      "models": [
-        {
-          "id": "AutoScalingPlanTargets",
-          "properties": [
-            "BoundedWhileOwned",
-            "OnlyAuthorizedValid",
-            "NoOwnershipSteal",
-            "DeleteKeepsCapacity",
-            "RejectionFrame",
-            "OtherTeamUnchanged",
-            "PendingInvisible"
-          ],
-          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ssm.go",
-      "sha256": "a1928ba5a13e75c80a55dfbca22b22af736cef9e504bb1ea80a0ec7127935525",
-      "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
-      "models": [
-        {
-          "id": "AutoScalingPlanTargets",
-          "properties": [
-            "BoundedWhileOwned",
-            "OnlyAuthorizedValid",
-            "NoOwnershipSteal",
-            "DeleteKeepsCapacity",
-            "RejectionFrame",
-            "OtherTeamUnchanged",
-            "PendingInvisible"
-          ],
-          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "51ebd2309bd55488342835731425b03abd785580189ded9967de91af67d339d6",
-      "disposition": "presentation",
-      "reason": "Static API reference: five Auto Scaling Plans templates, strict schemas, union bindings, operation mapping and guide tag on the existing shared root. Pinned and projected by test/e2e/autoscaling_plans_openapi.py; no runtime state.",
-      "models": []
-    },
-    {
-      "path": "internal/server/autoscalingplans_composition_test.go",
-      "sha256": "416154ee00fc656bc16090c9ededcdabde32d90b4c51335f36534af4f1957e14",
-      "disposition": "test-support",
-      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "db9c3c737ec4afa6ba9a31a1ba43c1dc7b76650bd4f3f1a839283847ef809b52",
+      "sha256": "d101fb9bd8708d8cbac7e0ff176b240923920c09b05156ba861f4adb87ddda85",
       "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after Bedrock Runtime and ELB, before Route53) and server composition leave other services unchanged.",
+      "reason": "Console source editing and nonce-bound static HTML preserve existing native APIs, authorization and invocation disclosure; no provider resource or token state changes.",
       "models": [
         {
-          "id": "AutoScalingPlanTargets",
+          "id": "LandingAccessAdmission",
           "properties": [
-            "BoundedWhileOwned",
-            "OnlyAuthorizedValid",
-            "NoOwnershipSteal",
-            "DeleteKeepsCapacity",
-            "RejectionFrame",
-            "OtherTeamUnchanged",
-            "PendingInvisible"
+            "TypeOK",
+            "ExternalBoundary",
+            "PublicResponse",
+            "TokenBoundary",
+            "UnknownNeverStatic"
           ],
-          "limits": "Finite two-team, two-plan, capacity 0..2, two-step abstraction; not Go/SQL/JSON parsing, IAM matching, pagination tokens, derived status text, quotas, crash recovery, target tracking evaluation or liveness. Native Go race/fault, composed-server and boto3 tests provide separate implementation evidence."
+          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented. This console-only change does not claim browser rendering, CSP enforcement or source editor implementation correctness from the model; those require focused and real-browser tests."
         }
       ]
     },
     {
+      "path": "internal/server/web/app.css",
+      "sha256": "6ce20b27e21dc59e1f6d9761759cf3a81c70c0b65d5b355b1558109de0f33491",
+      "disposition": "presentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "ce9050467fbe763698371b9a6955a7619d727860c552bd5972fed261e62c1fd6",
+      "disposition": "modeled",
+      "reason": "Console source editing and nonce-bound static HTML preserve existing native APIs, authorization and invocation disclosure; no provider resource or token state changes.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation. This console-only change does not claim browser rendering, CSP enforcement or source editor implementation correctness from the model; those require focused and real-browser tests."
+        },
+        {
+          "id": "SakuraDisksViewEpoch",
+          "properties": [
+            "TypeOK",
+            "AcceptedReadScope",
+            "SuccessfulReadOnly",
+            "RenderedScopeBound",
+            "RenderedResourceBound",
+            "StaleReadFrame",
+            "StaleWriteFrame",
+            "NavigationACKFrame",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryOnly",
+            "SingleWriteSend",
+            "LocaleFrame",
+            "CancelDraftClear"
+          ],
+          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior. This console-only change does not claim browser rendering, CSP enforcement or source editor implementation correctness from the model; those require focused and real-browser tests."
+        },
+        {
+          "id": "DynamoDBConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "NoStalePublication",
+            "ReadGenerationVerified",
+            "DisplayedKeyBound",
+            "CancelNoOrphanLoading",
+            "AckClosesDraft",
+            "AckBelongsToCurrentView",
+            "ReadRetryNeverWrites",
+            "SingleSendBeforeACK",
+            "LocalePreservesDraft"
+          ],
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement. This console-only change does not claim browser rendering, CSP enforcement or source editor implementation correctness from the model; those require focused and real-browser tests."
+        },
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded. This console-only change does not claim browser rendering, CSP enforcement or source editor implementation correctness from the model; those require focused and real-browser tests."
+        },
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI. This console-only change does not claim browser rendering, CSP enforcement or source editor implementation correctness from the model; those require focused and real-browser tests."
+        },
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model. This console-only change does not claim browser rendering, CSP enforcement or source editor implementation correctness from the model; those require focused and real-browser tests."
+        },
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "TypeOK",
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification. This console-only change does not claim browser rendering, CSP enforcement or source editor implementation correctness from the model; those require focused and real-browser tests."
+        },
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "TypeOK",
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness. This console-only change does not claim browser rendering, CSP enforcement or source editor implementation correctness from the model; those require focused and real-browser tests."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "34fa83885d91e7e136138f7aa0efe0899ee6a6fdc1a8d93a0ab2693b2997e1fb",
+      "disposition": "test-support",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/lambda_inline_editor.py",
+      "sha256": "f181af6b7812cd710047371829525de6ecf6a1694616c66d804451b6c20ef697",
+      "disposition": "test-support",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "third_party/CONSOLE-NOTICES.txt",
+      "sha256": "f8b7a4acf9de8bfe47539b69999a0c58c964690e985893a780e61e7586337fe9",
+      "disposition": "documentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "third_party/console-packages.json",
+      "sha256": "2aaba42653a365753d87ff43f47bb605d661f651fb409378be35df8851244467",
+      "disposition": "documentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "07469814bbaf292af830f0c9d93b11106e952404283d271a541feb10f6ac941f",
+      "disposition": "presentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "0719f057b440298c2b17fecb8e6002115ca966312269d16e0daf482b4517379b",
+      "disposition": "presentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/package-lock.json",
+      "sha256": "6057bd5a85dae9e00c87e94ca612ec76de1225a5ae07c46396693eafd59b110d",
+      "disposition": "presentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/package.json",
+      "sha256": "b8ee2d49c41d1d5a301575f1426b8a3f27b19b957547ed082601cca50b8ec982",
+      "disposition": "presentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/lambda-source.mjs",
+      "sha256": "d1d232cd1ec5e4fcb9ef124965ca89373065b641f111e0dec6126c2ac6ddf758",
+      "disposition": "presentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/lambda.jsx",
+      "sha256": "4cf1bb233906caf4b951ade5ce29d60f0d908d702279980698bbb1b1bce77bbc",
+      "disposition": "modeled",
+      "reason": "Console source editing and nonce-bound static HTML preserve existing native APIs, authorization and invocation disclosure; no provider resource or token state changes.",
+      "models": [
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "TypeOK",
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness. This console-only change does not claim browser rendering, CSP enforcement or source editor implementation correctness from the model; those require focused and real-browser tests."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/python-editor.css",
+      "sha256": "8c1ee63127eee15e2f91a3b090bfef3f93856c5c8166a6e56fae40313c1f5465",
+      "disposition": "presentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/python-editor.jsx",
+      "sha256": "b12a6fb387f5ecbddfef2f6e71572208b25fae17baa65854fa65c7e91c03e344",
+      "disposition": "presentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/tests/lambda-editor-flow.test.mjs",
+      "sha256": "47fe283f1ad315ff70a728098ce07b820d2a4de532e5488e1b60c122346ee474",
+      "disposition": "presentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/tests/lambda-source.test.mjs",
+      "sha256": "4c1958723e58cad628a8cec888b17d2552583d1cf28e642ffcc0cd18e6e98416",
+      "disposition": "presentation",
+      "reason": "Local source editor UI, tests, build/license evidence and documented limits. Does not change provider state or native protocol semantics.",
+      "models": []
+    },
+    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "191eea7a89a4b601e2001d804828df92388f14cbd573bf88f9b0e29855e23263",
+      "sha256": "0c8980070e90441cc71e27b412e0358f0030de02a9a448d8afb3aa0a059486e7",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
+      "reason": "Fix the exact LandingAccessAdmission scope to include the new console HTML handler while preserving all existing source files, invariants and mutants; negative tests reject removal or unrelated additions. Does not model CSP or rendering.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "eca1a681461ded949fb622c487ca6c61eb06d26c61b915d231c9c778db7c7d81",
+      "sha256": "5bbb8d994bd00f6586560b39cf00f330322cbc27e1af274c637e38d2a5fd4c63",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/autoscaling_plans.py",
-      "sha256": "4cb799ea05edc506c177c16a471e4c9018336abd444e884b61125b7edec0c0ea",
-      "disposition": "test-support",
-      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/autoscaling_plans_openapi.py",
-      "sha256": "6b364de13d8494b62172fc23a31679b81e33772263279ce36db07c9e9257758b",
-      "disposition": "test-support",
-      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/check.py",
-      "sha256": "da7d62adb93af2f41990a41dc63460d44ecfc6776c16e7316ad5e87b7290ff89",
-      "disposition": "test-support",
-      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/route53_openapi.py",
-      "sha256": "703b3fbc613cbd3130c8b54e59120444075102489d283c8d0270507e99fa9e0b",
-      "disposition": "test-support",
-      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_autoscaling_plans_openapi.py",
-      "sha256": "9cd3e7afe9ee7e22311936135bf0e0e946d1d14dfbfc998bcb44b8ae8ac4def9",
-      "disposition": "test-support",
-      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_openapi_json10.py",
-      "sha256": "52fb96e6bca567a25f0a7b67b58dae23ede0d857fa791e76e2c133bb7235cc0f",
-      "disposition": "test-support",
-      "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
+      "reason": "Fix the exact LandingAccessAdmission scope to include the new console HTML handler while preserving all existing source files, invariants and mutants; negative tests reject removal or unrelated additions. Does not model CSP or rendering.",
       "models": []
     }
   ]

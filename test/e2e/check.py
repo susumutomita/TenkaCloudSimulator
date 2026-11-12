@@ -731,4 +731,7 @@ def handler(event,context):
   subprocess.run([sys.executable, str(Path(__file__).with_name('azure_catalog_console.py'))], check=True, timeout=300)
 
 
+ def test_lambda_inline_editor_native_deploy_and_reload_limits(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('lambda_inline_editor.py'))],check=True,timeout=240)
+
 if __name__=='__main__':unittest.main(verbosity=2)

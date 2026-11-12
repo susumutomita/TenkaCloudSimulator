@@ -76,6 +76,8 @@ jobs:
           npm audit --prefix tools/console --audit-level=high
       - name: Check secret description console and preserved disclosure contracts
         run: node --test tools/console/tests/secret-description.test.mjs tools/console/tests/secrets-manager-locale.test.mjs
+      - name: Check Lambda source draft and deploy boundaries
+        run: node --test tools/console/tests/lambda-*.test.mjs
       - name: Check App Engine console request, split and URL helpers
         run: node --test tools/console/tests/gcp-appengine.test.mjs
       - name: Check immutable release packaging and refusal regressions

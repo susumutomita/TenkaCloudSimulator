@@ -39,6 +39,8 @@ including Lambda Tail support. Check the [binary's source/version](docs/releases
 
 ## Try it: run a Python Lambda and read its output
 
+Prefer the browser? In the local console, open **Lambda → Create function**, choose an existing execution role, edit the Python sample in CodeMirror, and create it. Use **Code → Deploy code**, then **Test** to run it without making a ZIP yourself. Inline source is kept only in that Lambda screen session; download it before reloading or leaving. Existing/uploaded packages still use complete ZIP updates. See [console limits](docs/lambda.md).
+
 Use the operator session above. In the **AWS** console:
 
 1. Open **IAM → Roles → Create role**. Choose **AWS service → Lambda**, leave
