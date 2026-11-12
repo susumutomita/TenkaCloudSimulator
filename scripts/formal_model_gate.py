@@ -1227,6 +1227,13 @@ REQUIRED_MUTANTS['PersistentTransportLifecycle'] = {'ReleaseUncertainResources',
 REQUIRED_SOURCE_SCOPES['PersistentTransportLifecycle'] = {'internal/workload/guesttcp/transport_persistent_test.go', 'internal/workload/guesttcp/transport_persistent.go', 'internal/workload/guesttcp/transport.go'}
 
 
+# Bounded classification model for dropping unowned persistent-NIC guest frames.
+BASE_MODELS.add('PersistentIngressPolicy')
+BASE_INVARIANTS['PersistentIngressPolicy'] = {'AcceptOnlyOwnedValid', 'TypeOK', 'OwnedProbeAbuseRevokes', 'DroppedNotChargedOrAccepted', 'OwnedNeverDropped', 'UnownedNeverRevokes'}
+REQUIRED_MUTANTS['PersistentIngressPolicy'] = {'HandleUntrustedARP', 'ChargeDropped', 'RevokeUnhandled', 'DropOwnedProbe', 'SkipTCPParse', 'AcceptSpoofedProbe'}
+REQUIRED_SOURCE_SCOPES['PersistentIngressPolicy'] = {'internal/workload/guesttcp/transport_persistent_test.go', 'internal/workload/guesttcp/transport_persistent.go', 'internal/workload/guesttcp/transport.go'}
+
+
 # Bounded source-correspondence model; explicit limits remain in registry.
 BASE_MODELS.add('PacketAdmission')
 BASE_INVARIANTS['PacketAdmission'] = {'HeaderSound', 'BoundedCursor', 'OptionComplete', 'Progress', 'OptionSound'}

@@ -17840,6 +17840,94 @@
      "expect_invariant": "RejectionFrame"
     }
    ]
+  },
+  {
+   "id": "PersistentIngressPolicy",
+   "model": "formal/PersistentIngressPolicy.tla",
+   "config": "formal/PersistentIngressPolicy.cfg",
+   "properties": [
+    "TypeOK",
+    "UnownedNeverRevokes",
+    "DroppedNotChargedOrAccepted",
+    "OwnedNeverDropped",
+    "OwnedProbeAbuseRevokes",
+    "AcceptOnlyOwnedValid"
+   ],
+   "mutants": [
+    {
+     "id": "RevokeUnhandled",
+     "expect_invariant": "UnownedNeverRevokes",
+     "edits": [
+      {
+       "old": "THEN outcome'=\"drop\" /\\ charged'=FALSE /\\ accepted'=FALSE",
+       "new": "THEN outcome'=\"revoke\" /\\ charged'=FALSE /\\ accepted'=FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "ChargeDropped",
+     "expect_invariant": "DroppedNotChargedOrAccepted",
+     "edits": [
+      {
+       "old": "THEN outcome'=\"drop\" /\\ charged'=FALSE",
+       "new": "THEN outcome'=\"drop\" /\\ charged'=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "DropOwnedProbe",
+     "expect_invariant": "OwnedNeverDropped",
+     "edits": [
+      {
+       "old": "(~frame.dstLocal \\/ ~frame.portInRange)",
+       "new": "TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "AcceptSpoofedProbe",
+     "expect_invariant": "OwnedProbeAbuseRevokes",
+     "edits": [
+      {
+       "old": "ELSE outcome'=\"revoke\" /\\ accepted'=FALSE",
+       "new": "ELSE outcome'=\"handle\" /\\ accepted'=TRUE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "HandleUntrustedARP",
+     "expect_invariant": "UnownedNeverRevokes",
+     "edits": [
+      {
+       "old": "\\/ (frame.eth=ARP /\\ ~frame.arpTrusted)",
+       "new": "\\/ FALSE",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "id": "SkipTCPParse",
+     "expect_invariant": "UnownedNeverRevokes",
+     "edits": [
+      {
+       "old": "(~frame.tcpParse \\/ (~frame.passiveRoute",
+       "new": "((~frame.passiveRoute",
+       "count": 1
+      }
+     ]
+    }
+   ],
+   "source_scope": [
+    "internal/workload/guesttcp/transport.go",
+    "internal/workload/guesttcp/transport_persistent.go",
+    "internal/workload/guesttcp/transport_persistent_test.go"
+   ],
+   "bounds": "Exhaustive over one guest frame with every combination of EtherType class {ARP, IPv4, IPv6, other} and the six boolean classification facts (trusted ARP request, TCP parse, passive route, local destination, probe source-port range, owned-tuple peer validity). No seeds, symmetry or depth cutoff.",
+   "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
   }
  ]
 }

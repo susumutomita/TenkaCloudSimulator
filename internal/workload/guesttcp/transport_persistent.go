@@ -2,6 +2,7 @@ package guesttcp
 
 import (
 	"context"
+	"encoding/binary"
 	"errors"
 	"io"
 	"net"
@@ -390,6 +391,40 @@ func (p *ProbeExchange) writeFrame(ctx context.Context, owned []byte) error {
 		err := p.nic.base.encoder.WriteFrame(owned)
 		return errors.Join(err, observationContextError(p.engine.ctx))
 	})
+}
+
+// unhandled reports guest frames no owned route can consume: non-IPv4/ARP
+// EtherTypes (IPv6, LLDP, ...), ARP other than the trusted gateway request, IPv4 that
+// is not a well-formed TCP segment, and TCP not addressed to this NIC's local
+// endpoint, passive service route or probe source-port range. Dropping them
+// grants nothing. Frames that do target an owned tuple keep strict handling,
+// so a spoofed or malformed exchange on an owned tuple still revokes.
+func (n *persistentNIC) unhandled(frame []byte) bool {
+	if len(frame) < 14 {
+		return false
+	}
+	switch binary.BigEndian.Uint16(frame[12:14]) {
+	case 0x0806:
+		// Requests for other addresses, replies and gratuitous ARP are not ours
+		// to answer; Reply is a pure validator of the one trusted request shape.
+		_, err := n.base.arp.Reply(frame)
+		return err != nil
+	case 0x0800:
+	default:
+		return true
+	}
+	p, err := guestnet.ParseTCPFrame(frame)
+	if err != nil {
+		return true
+	}
+	if _, err = n.base.routes.Classify(guestnet.TCPFromPeer, frame); err == nil {
+		return false
+	}
+	if p.DestinationIP != n.config.LocalIP || p.DestinationMAC != n.config.LocalMAC {
+		return true
+	}
+	port := int(p.DestinationPort) - int(guestnet.ProbeSourcePort)
+	return port < 0 || port >= guestnet.MaxProbeSessions
 }
 
 func (n *persistentNIC) receive(frame []byte) error {

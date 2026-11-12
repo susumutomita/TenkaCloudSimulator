@@ -2,7 +2,9 @@ package guesttcp
 
 import (
 	"context"
+	"encoding/binary"
 	"errors"
+	"net/netip"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -647,4 +649,61 @@ func TestPersistentEngineCancellationDirectlyFencesSelectedWrite(t *testing.T) {
 	if !errors.Is(err, context.Canceled) || len(remote.in) != 0 {
 		t.Fatal("closed Engine emitted selected frame", err)
 	}
+}
+
+func TestPersistentDropsUnhandledGuestFramesButStillRevokesOwnedTupleAbuse(t *testing.T) {
+	tr, remote, s := persistentFixture(t, memoryCommitter)
+	c := config()
+	nic := persistentConfig()
+	enc := guestnet.NewEncoder(remote)
+	ipv6MLD := make([]byte, 90) // stock guest MLDv2 report to 33:33:00:00:00:16
+	copy(ipv6MLD[:6], []byte{0x33, 0x33, 0, 0, 0, 0x16})
+	copy(ipv6MLD[6:12], c.PeerMAC[:])
+	binary.BigEndian.PutUint16(ipv6MLD[12:14], 0x86dd)
+	udp := make([]byte, 60)
+	copy(udp[:6], c.LocalMAC[:])
+	copy(udp[6:12], c.PeerMAC[:])
+	binary.BigEndian.PutUint16(udp[12:14], 0x0800)
+	udp[14], udp[23] = 0x45, 17
+	foreign := Config{LocalIP: netip.MustParseAddr("192.0.2.80"), PeerIP: c.PeerIP, LocalMAC: c.LocalMAC, PeerMAC: c.PeerMAC}
+	outbound := sourcePortFrame(foreign, true, 443, 51000) // guest dialing elsewhere
+	highPort := sourcePortFrame(c, true, guestnet.ProbeSourcePort+guestnet.MaxProbeSessions, 80)
+	ac := arpBinding(c)
+	otherARP := requestARP(guestnet.ARPConfig{GuestIP: ac.GuestIP, GuestMAC: ac.GuestMAC, GatewayIP: netip.MustParseAddr("10.0.1.77"), GatewayMAC: ac.GatewayMAC})
+	for _, f := range [][]byte{ipv6MLD, udp, outbound, highPort, otherARP} {
+		if err := enc.WriteFrame(f); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// A request for the configured gateway is still answered after the drops.
+	if err := enc.WriteFrame(requestARP(ac)); err != nil {
+		t.Fatal(err)
+	}
+	until := time.Now().Add(time.Second)
+	for {
+		tr.nic.base.budgetMu.Lock()
+		count := tr.nic.base.packets
+		tr.nic.base.budgetMu.Unlock()
+		if count == 2 { // the gateway request and its trusted reply only
+			break
+		}
+		if count > 2 || time.Now().After(until) {
+			t.Fatalf("dropped frames were charged or ARP was not processed: %d", count)
+		}
+		time.Sleep(time.Millisecond)
+	}
+	select {
+	case <-tr.nic.base.done:
+		t.Fatal("unhandled guest frame revoked the persistent NIC")
+	default:
+	}
+	if len(s.injected) != 0 {
+		t.Fatal("dropped frame reached the passive service")
+	}
+	// A segment on an owned probe tuple with a spoofed peer stays fatal.
+	spoof := Config{LocalIP: nic.LocalIP, PeerIP: netip.MustParseAddr("10.0.1.99"), LocalMAC: nic.LocalMAC, PeerMAC: nic.PeerMAC}
+	if err := enc.WriteFrame(sourcePortFrame(spoof, true, guestnet.ProbeSourcePort, 80)); err != nil {
+		t.Fatal(err)
+	}
+	awaitSignal(t, tr.nic.base.done, "owned tuple abuse")
 }

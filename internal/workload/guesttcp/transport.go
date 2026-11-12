@@ -495,6 +495,13 @@ func (t *Transport) receive() error {
 		if err != nil {
 			return err
 		}
+		// A persistent VM NIC is a real guest link: stock guests emit IPv6, UDP,
+		// gratuitous ARP and outbound TCP that no owned route handles. Those are
+		// dropped like an unrouted network would, never accepted and never
+		// charged to the lifetime budget, instead of revoking the whole NIC.
+		if t.persistent != nil && t.persistent.unhandled(frame) {
+			continue
+		}
 		if err := t.account(len(frame)); err != nil {
 			return err
 		}

@@ -1463,6 +1463,44 @@
       ]
     },
     {
+      "path": "formal/PersistentIngressPolicy.cfg",
+      "sha256": "4cd5496ddb3d22a51a89e18b8d56d92171033f4c0e53463ff500ba000dd5db93",
+      "disposition": "modeled",
+      "reason": "Changed executable specification/configuration requires the listed own semantic properties and exact baseline plus required sensitivity controls; tests do not prove Go refinement.",
+      "models": [
+        {
+          "id": "PersistentIngressPolicy",
+          "properties": [
+            "UnownedNeverRevokes",
+            "DroppedNotChargedOrAccepted",
+            "OwnedNeverDropped",
+            "OwnedProbeAbuseRevokes",
+            "AcceptOnlyOwnedValid"
+          ],
+          "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
+        }
+      ]
+    },
+    {
+      "path": "formal/PersistentIngressPolicy.tla",
+      "sha256": "26c5feaa6cb312c81e1a2c691b2c2d1dd942bae78f32f9abc48de84caaf3fa14",
+      "disposition": "modeled",
+      "reason": "Changed executable specification/configuration requires the listed own semantic properties and exact baseline plus required sensitivity controls; tests do not prove Go refinement.",
+      "models": [
+        {
+          "id": "PersistentIngressPolicy",
+          "properties": [
+            "UnownedNeverRevokes",
+            "DroppedNotChargedOrAccepted",
+            "OwnedNeverDropped",
+            "OwnedProbeAbuseRevokes",
+            "AcceptOnlyOwnedValid"
+          ],
+          "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
+        }
+      ]
+    },
+    {
       "path": "formal/PersistentTransportLifecycle.cfg",
       "sha256": "8e6c32cabca1cc5b68063c3c0cdd2c86f77fe009c3d8628615b8c40cf24b6650",
       "disposition": "modeled",
@@ -1720,7 +1758,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "71036331c9fa8053f4784f3bcf6761b6e8d5a1f4a4a124e5cff3f1587651a4f0",
+      "sha256": "1077f7693134224b30212280639bfee6be4bc97e2b9e822208164b700c88614f",
       "disposition": "formal-infrastructure",
       "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
       "models": []
@@ -6264,7 +6302,7 @@
     },
     {
       "path": "internal/workload/guesttcp/transport.go",
-      "sha256": "38053b729591438d74092ab97503080a36ae8f4a03f70185c52b4506ba6d01ee",
+      "sha256": "bd17b2cf57d7a4665d41aa480a3bef143715706422d7a48a65cca987113b796f",
       "disposition": "modeled",
       "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
       "models": [
@@ -6304,6 +6342,17 @@
             "NoNeedlessSeal"
           ],
           "limits": "Only private local-injection producer/owner-consumer branch in added source paths; not all transport methods. Tokens do not prove physical authority. No Go pointer/atomic refinement, generic parser proof or clock rebasing. Foreign marker is explicit malformed-provider abstraction."
+        },
+        {
+          "id": "PersistentIngressPolicy",
+          "properties": [
+            "UnownedNeverRevokes",
+            "DroppedNotChargedOrAccepted",
+            "OwnedNeverDropped",
+            "OwnedProbeAbuseRevokes",
+            "AcceptOnlyOwnedValid"
+          ],
+          "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
         }
       ]
     },
@@ -6347,7 +6396,7 @@
     },
     {
       "path": "internal/workload/guesttcp/transport_persistent.go",
-      "sha256": "6732fc0c6c2dab55ae3b5237e00723515b921e1530fe7b501334e30ead88a672",
+      "sha256": "d4a08a2f42ad2aed831b961b2c3f37e3b1d0d8108df950fcbbf7cea43f892964",
       "disposition": "modeled",
       "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
       "models": [
@@ -6387,12 +6436,23 @@
             "NoNeedlessSeal"
           ],
           "limits": "Only private local-injection producer/owner-consumer branch in added source paths; not all transport methods. Tokens do not prove physical authority. No Go pointer/atomic refinement, generic parser proof or clock rebasing. Foreign marker is explicit malformed-provider abstraction."
+        },
+        {
+          "id": "PersistentIngressPolicy",
+          "properties": [
+            "UnownedNeverRevokes",
+            "DroppedNotChargedOrAccepted",
+            "OwnedNeverDropped",
+            "OwnedProbeAbuseRevokes",
+            "AcceptOnlyOwnedValid"
+          ],
+          "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
         }
       ]
     },
     {
       "path": "internal/workload/guesttcp/transport_persistent_test.go",
-      "sha256": "412e2651b6191ee478d978e1ecf905177ae4655df9899eb20eb170ffafb5fd46",
+      "sha256": "e22ff8f4858939d6a53182381b3bc75af83b0a612806730a204d24f8857c98e0",
       "disposition": "modeled",
       "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
       "models": [
@@ -6412,6 +6472,17 @@
             "EffectRetained"
           ],
           "limits": "Bookkeeping/atomic orchestration abstraction only, not constructor validation, parser, TCP stack, arbitrary callbacks, physical fencing, engine correctness, full source refinement or liveness. Only persistent mode of shared Transport modeled; ordinary exchange and ARP behavior remain separate obligations. Production capacities and repeated traffic unproved. Close completion is not physical settlement; uncertain Close retains its slot. No dependency behavior or provenance exemption."
+        },
+        {
+          "id": "PersistentIngressPolicy",
+          "properties": [
+            "UnownedNeverRevokes",
+            "DroppedNotChargedOrAccepted",
+            "OwnedNeverDropped",
+            "OwnedProbeAbuseRevokes",
+            "AcceptOnlyOwnedValid"
+          ],
+          "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
         }
       ]
     },
@@ -7005,7 +7076,7 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "fc9574e87ce913b7dd96a687358a3f5c323f95c6b55e15c97b2f7c166c1fbdbb",
+      "sha256": "8690d4b5f554d979d061fee48fe6be9cf7bfb5924e3089341142bb26987b7aa0",
       "disposition": "formal-infrastructure",
       "reason": "Formal execution infrastructure: DynamoDBAdmission baseline and unchanged controls use exactly two workers, other families one, families remain serial. All 60-second deadlines, model inputs, exact invariant checks and no-retry failure handling preserved; independent regression checks enforce allocation and timeout behavior.",
       "models": []
@@ -7099,7 +7170,7 @@
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "b37155f42eab9d5f7e044ae38c3d328d76644d9cc085112d6a973a43ce76ee6f",
+      "sha256": "8d9bcd2d1ca8f81cdb36296ab6d5c7e8187120d880581b42e68fa1d6c97e1afd",
       "disposition": "formal-infrastructure",
       "reason": "Formal execution infrastructure: DynamoDBAdmission baseline and unchanged controls use exactly two workers, other families one, families remain serial. All 60-second deadlines, model inputs, exact invariant checks and no-retry failure handling preserved; independent regression checks enforce allocation and timeout behavior.",
       "models": []
