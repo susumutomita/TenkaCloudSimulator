@@ -1932,7 +1932,7 @@
     },
     {
       "path": "guest/ssm-relay/main_linux.go",
-      "sha256": "973449960706ad4c3cc8ce842db75c361539ff781724ba116376c226328fae4d",
+      "sha256": "ae7781748df76fd80a2aa445de55a9034e0a3b1f6b4da576eaf1f61e12e7493e",
       "disposition": "modeled",
       "reason": "Exact participant/credential/role/target/origin binding, one-use channels, live matching Hello, post-read revocation, Resume on same driver, shutdown seal and real Exit plus local joins; image pin and separate private socket do not prove readiness.",
       "models": [
@@ -1960,6 +1960,13 @@
           "limits": "Bounded authority/lifecycle composition only; assumes trusted immutable auth/policy decisions, atomic DB CAS/one-use claims, authentic correlated protocol evidence, reliable owned runtime witnesses, bundle hash validation and exclusive packaging filesystem inputs. Does not prove Go/SQL/JSON/WebSocket/cryptography/OS/PTY/systemd refinement or real process cleanup, full ConsoleHandoff/BrowserSessions subcontracts, numeric timeout/quotas or liveness."
         }
       ]
+    },
+    {
+      "path": "guest/ssm-relay/relay_linux_test.go",
+      "sha256": "3d60d587a03f8bd74d6dba658f4f71701f10dc3a40b4a08bb25b03c8638282bc",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
     },
     {
       "path": "guest/ssm-relay/status_linux_test.go",

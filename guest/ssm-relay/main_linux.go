@@ -24,6 +24,18 @@ import (
 const device = "/dev/virtio-ports/org.tenkacloud.session.0"
 const maxSessionBytes = 4 << 20
 
+// Fixed guest locations. They are variables only so host-side tests can point
+// the unchanged relay logic at a temporary marker, PTY and shell; production
+// never assigns them.
+var (
+	geteuid         = os.Geteuid
+	imageMarkerPath = "/etc/tenkacloud/session-relay-image"
+	productUUIDPath = "/sys/class/dmi/id/product_uuid"
+	sessionDevice   = device
+	guestShell      = "/bin/bash"
+	guestHome       = "/root"
+)
+
 func main() { os.Exit(relayExitCode(run())) }
 
 // Successful session teardown returns EOF to request a fresh service process.
@@ -34,21 +46,21 @@ func relayExitCode(err error) int {
 	return 0
 }
 func run() error {
-	if os.Geteuid() != 0 {
+	if geteuid() != 0 {
 		return fmt.Errorf("guest relay requires guest root")
 	}
-	marker, err := os.ReadFile("/etc/tenkacloud/session-relay-image")
+	marker, err := os.ReadFile(imageMarkerPath)
 	if err != nil || string(marker) != "tenkacloud-guest-session-v1\n" {
 		return fmt.Errorf("guest image marker missing")
 	}
-	raw, err := os.ReadFile("/sys/class/dmi/id/product_uuid")
+	raw, err := os.ReadFile(productUUIDPath)
 	uuid := strings.ToLower(strings.TrimSpace(string(raw)))
 	if err != nil || !guestsession.ValidUUID(uuid) {
 		return guestsession.ErrProtocol
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
-	portFD, err := unix.Open(device, unix.O_RDWR|unix.O_NOCTTY|unix.O_CLOEXEC|unix.O_NONBLOCK, 0)
+	portFD, err := unix.Open(sessionDevice, unix.O_RDWR|unix.O_NOCTTY|unix.O_CLOEXEC|unix.O_NONBLOCK, 0)
 	if err != nil {
 		return err
 	}
@@ -107,9 +119,9 @@ func servePTY(ctx context.Context, stopRead context.CancelFunc, codec *guestsess
 		return err
 	}
 	// This command is executed exclusively inside the qualified guest image.
-	cmd := exec.Command("/bin/bash", guestShellArguments()...)
+	cmd := exec.Command(guestShell, guestShellArguments()...)
 	cmd.Env = []string{"PATH=/usr/sbin:/usr/bin:/sbin:/bin", "HOME=/root", "TERM=xterm-256color", "LANG=C.UTF-8"}
-	cmd.Dir = "/root"
+	cmd.Dir = guestHome
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = slave, slave, slave
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Setctty: true, Ctty: 0}
 	if err = cmd.Start(); err != nil {
