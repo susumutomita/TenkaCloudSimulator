@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"net/http"
 	"path/filepath"
 	"testing"
 
@@ -13,8 +14,15 @@ import (
 // refuses the file, releasing everything it opened, or never touched that name
 // during startup. Every refusal must leave the file reopenable once repaired.
 func TestCompositionRefusesStateWithForeignObjectsInPlaceOfTables(t *testing.T) {
+	sweepPoisonedState(t, func(path string) (http.Handler, func() error, error) {
+		return NewWithProviders(path, DefaultProviderConfig())
+	})
+}
+
+func sweepPoisonedState(t *testing.T, compose func(path string) (http.Handler, func() error, error)) {
+	t.Helper()
 	base := filepath.Join(t.TempDir(), "reference.db")
-	_, closeAll, err := NewWithProviders(base, DefaultProviderConfig())
+	_, closeAll, err := compose(base)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,7 +63,7 @@ func TestCompositionRefusesStateWithForeignObjectsInPlaceOfTables(t *testing.T) 
 		if err = state.Close(); err != nil {
 			t.Fatal(err)
 		}
-		h, closeState, err := NewWithProviders(path, DefaultProviderConfig())
+		h, closeState, err := compose(path)
 		if err == nil {
 			if err = closeState(); err != nil {
 				t.Fatal(err)
@@ -75,7 +83,7 @@ func TestCompositionRefusesStateWithForeignObjectsInPlaceOfTables(t *testing.T) 
 			t.Fatalf("refused state for %s is still held open: %v", name, err)
 		}
 		repair.Close()
-		_, closeState, err = NewWithProviders(path, DefaultProviderConfig())
+		_, closeState, err = compose(path)
 		if err != nil {
 			t.Fatalf("repaired state for %s refused: %v", name, err)
 		}
