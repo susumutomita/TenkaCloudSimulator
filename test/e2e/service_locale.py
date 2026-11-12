@@ -181,7 +181,13 @@ def run():
                 assert results.evaluate('(e) => e.scrollHeight > e.clientHeight')
                 results.hover()
                 page.mouse.wheel(0, 2000)
-                page.wait_for_function("document.querySelector('.aws-service-results').scrollTop > 0")
+                # Poll a function directly; wait_for_function string evaluation is
+                # blocked by the real console's strict CSP (keep that CSP intact).
+                for _ in range(50):
+                    if results.evaluate('(e) => e.scrollTop > 0'):
+                        break
+                    time.sleep(0.02)
+                assert results.evaluate('(e) => e.scrollTop > 0')
                 panel = page.locator('#cloud-service-catalog')
                 assert panel.evaluate('(e) => e.getBoundingClientRect().bottom <= innerHeight')
                 last = results.get_by_role('menuitem').last
