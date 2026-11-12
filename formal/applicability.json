@@ -3070,6 +3070,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/lambda_storage_faults_test.go",
+      "sha256": "f46c31868f8ba69ff9868e722f91b6d9fb3c46496e28b90d342f726d4ce6cfb6",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
+    },
+    {
       "path": "internal/aws/more_storage_faults_test.go",
       "sha256": "ddcffef82f1b3b1d7934b652dfb9a134b0811d7ee4c9bf97d20f7d4f72dad172",
       "disposition": "test-support",
@@ -3294,6 +3301,13 @@
           "limits": "Finite requested-state specification, not Go refinement. Exact serialized document/metadata are pin atoms; no SQL/parser proof, concurrent transactions, arbitrary trigger peer writes, customer-policy algorithm replacement, SSM handler/agent or Battle execution claim. See docs/formal-iam-builtin-pin-transaction.md."
         }
       ]
+    },
+    {
+      "path": "internal/aws/secret_storage_faults_test.go",
+      "sha256": "f0937025124a9c31a87d4b6f0a943da29dc6371fa53b45b9e7a46115a0010db3",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
     },
     {
       "path": "internal/aws/ssm.go",
