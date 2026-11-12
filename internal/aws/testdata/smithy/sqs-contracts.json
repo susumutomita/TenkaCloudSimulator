@@ -1,0 +1,706 @@
+{
+  "notice": "Modified derivative of AWS SDK for Go v2 SQS Smithy model: selected input/output shapes; documentation removed; Unit synthesized. Apache-2.0; see LICENSE.txt and NOTICE.txt.",
+  "operations": {
+    "CreateQueue": {
+      "input": "com.amazonaws.sqs#CreateQueueRequest",
+      "output": "com.amazonaws.sqs#CreateQueueResult"
+    },
+    "DeleteMessage": {
+      "input": "com.amazonaws.sqs#DeleteMessageRequest",
+      "output": "smithy.api#Unit"
+    },
+    "DeleteQueue": {
+      "input": "com.amazonaws.sqs#DeleteQueueRequest",
+      "output": "smithy.api#Unit"
+    },
+    "ReceiveMessage": {
+      "input": "com.amazonaws.sqs#ReceiveMessageRequest",
+      "output": "com.amazonaws.sqs#ReceiveMessageResult"
+    },
+    "SendMessage": {
+      "input": "com.amazonaws.sqs#SendMessageRequest",
+      "output": "com.amazonaws.sqs#SendMessageResult"
+    }
+  },
+  "serviceVersion": "2012-11-05",
+  "shapes": {
+    "com.amazonaws.sqs#AttributeNameList": {
+      "member": {
+        "target": "com.amazonaws.sqs#QueueAttributeName"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.sqs#Binary": {
+      "type": "blob"
+    },
+    "com.amazonaws.sqs#BinaryList": {
+      "member": {
+        "target": "com.amazonaws.sqs#Binary",
+        "traits": {
+          "smithy.api#xmlName": "BinaryListValue"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.sqs#CreateQueueRequest": {
+      "members": {
+        "Attributes": {
+          "target": "com.amazonaws.sqs#QueueAttributeMap",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Attribute"
+          }
+        },
+        "QueueName": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "tags": {
+          "target": "com.amazonaws.sqs#TagMap",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Tag"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#CreateQueueResult": {
+      "members": {
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#DeleteMessageRequest": {
+      "members": {
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ReceiptHandle": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#DeleteQueueRequest": {
+      "members": {
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#Message": {
+      "members": {
+        "Attributes": {
+          "target": "com.amazonaws.sqs#MessageSystemAttributeMap",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Attribute"
+          }
+        },
+        "Body": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        },
+        "MD5OfBody": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        },
+        "MD5OfMessageAttributes": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        },
+        "MessageAttributes": {
+          "target": "com.amazonaws.sqs#MessageBodyAttributeMap",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "MessageAttribute"
+          }
+        },
+        "MessageId": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        },
+        "ReceiptHandle": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#MessageAttributeName": {
+      "type": "string"
+    },
+    "com.amazonaws.sqs#MessageAttributeNameList": {
+      "member": {
+        "target": "com.amazonaws.sqs#MessageAttributeName"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.sqs#MessageAttributeValue": {
+      "members": {
+        "BinaryListValues": {
+          "target": "com.amazonaws.sqs#BinaryList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "BinaryListValue"
+          }
+        },
+        "BinaryValue": {
+          "target": "com.amazonaws.sqs#Binary",
+          "traits": {}
+        },
+        "DataType": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "StringListValues": {
+          "target": "com.amazonaws.sqs#StringList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "StringListValue"
+          }
+        },
+        "StringValue": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#MessageBodyAttributeMap": {
+      "key": {
+        "target": "com.amazonaws.sqs#String",
+        "traits": {
+          "smithy.api#xmlName": "Name"
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.sqs#MessageAttributeValue",
+        "traits": {
+          "smithy.api#xmlName": "Value"
+        }
+      }
+    },
+    "com.amazonaws.sqs#MessageBodySystemAttributeMap": {
+      "key": {
+        "target": "com.amazonaws.sqs#MessageSystemAttributeNameForSends",
+        "traits": {
+          "smithy.api#xmlName": "Name"
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.sqs#MessageSystemAttributeValue",
+        "traits": {
+          "smithy.api#xmlName": "Value"
+        }
+      }
+    },
+    "com.amazonaws.sqs#MessageList": {
+      "member": {
+        "target": "com.amazonaws.sqs#Message"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.sqs#MessageSystemAttributeList": {
+      "member": {
+        "target": "com.amazonaws.sqs#MessageSystemAttributeName"
+      },
+      "type": "list"
+    },
+    "com.amazonaws.sqs#MessageSystemAttributeMap": {
+      "key": {
+        "target": "com.amazonaws.sqs#MessageSystemAttributeName",
+        "traits": {
+          "smithy.api#xmlName": "Name"
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.sqs#String",
+        "traits": {
+          "smithy.api#xmlName": "Value"
+        }
+      }
+    },
+    "com.amazonaws.sqs#MessageSystemAttributeName": {
+      "members": {
+        "AWSTraceHeader": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWSTraceHeader"
+          }
+        },
+        "All": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "All"
+          }
+        },
+        "ApproximateFirstReceiveTimestamp": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ApproximateFirstReceiveTimestamp"
+          }
+        },
+        "ApproximateReceiveCount": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ApproximateReceiveCount"
+          }
+        },
+        "DeadLetterQueueSourceArn": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DeadLetterQueueSourceArn"
+          }
+        },
+        "MessageDeduplicationId": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MessageDeduplicationId"
+          }
+        },
+        "MessageGroupId": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MessageGroupId"
+          }
+        },
+        "SenderId": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SenderId"
+          }
+        },
+        "SentTimestamp": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SentTimestamp"
+          }
+        },
+        "SequenceNumber": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SequenceNumber"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.sqs#MessageSystemAttributeNameForSends": {
+      "members": {
+        "AWSTraceHeader": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "AWSTraceHeader"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.sqs#MessageSystemAttributeValue": {
+      "members": {
+        "BinaryListValues": {
+          "target": "com.amazonaws.sqs#BinaryList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "BinaryListValue"
+          }
+        },
+        "BinaryValue": {
+          "target": "com.amazonaws.sqs#Binary",
+          "traits": {}
+        },
+        "DataType": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "StringListValues": {
+          "target": "com.amazonaws.sqs#StringList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "StringListValue"
+          }
+        },
+        "StringValue": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        }
+      },
+      "traits": {},
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#NullableInteger": {
+      "type": "integer"
+    },
+    "com.amazonaws.sqs#QueueAttributeMap": {
+      "key": {
+        "target": "com.amazonaws.sqs#QueueAttributeName",
+        "traits": {
+          "smithy.api#xmlName": "Name"
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.sqs#String",
+        "traits": {
+          "smithy.api#xmlName": "Value"
+        }
+      }
+    },
+    "com.amazonaws.sqs#QueueAttributeName": {
+      "members": {
+        "All": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "All"
+          }
+        },
+        "ApproximateNumberOfMessages": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ApproximateNumberOfMessages"
+          }
+        },
+        "ApproximateNumberOfMessagesDelayed": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ApproximateNumberOfMessagesDelayed"
+          }
+        },
+        "ApproximateNumberOfMessagesNotVisible": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ApproximateNumberOfMessagesNotVisible"
+          }
+        },
+        "ContentBasedDeduplication": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ContentBasedDeduplication"
+          }
+        },
+        "CreatedTimestamp": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "CreatedTimestamp"
+          }
+        },
+        "DeduplicationScope": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DeduplicationScope"
+          }
+        },
+        "DelaySeconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "DelaySeconds"
+          }
+        },
+        "FifoQueue": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FifoQueue"
+          }
+        },
+        "FifoThroughputLimit": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "FifoThroughputLimit"
+          }
+        },
+        "KmsDataKeyReusePeriodSeconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KmsDataKeyReusePeriodSeconds"
+          }
+        },
+        "KmsMasterKeyId": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "KmsMasterKeyId"
+          }
+        },
+        "LastModifiedTimestamp": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "LastModifiedTimestamp"
+          }
+        },
+        "MaximumMessageSize": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MaximumMessageSize"
+          }
+        },
+        "MessageRetentionPeriod": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "MessageRetentionPeriod"
+          }
+        },
+        "Policy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "Policy"
+          }
+        },
+        "QueueArn": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "QueueArn"
+          }
+        },
+        "ReceiveMessageWaitTimeSeconds": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "ReceiveMessageWaitTimeSeconds"
+          }
+        },
+        "RedriveAllowPolicy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RedriveAllowPolicy"
+          }
+        },
+        "RedrivePolicy": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "RedrivePolicy"
+          }
+        },
+        "SqsManagedSseEnabled": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "SqsManagedSseEnabled"
+          }
+        },
+        "VisibilityTimeout": {
+          "target": "smithy.api#Unit",
+          "traits": {
+            "smithy.api#enumValue": "VisibilityTimeout"
+          }
+        }
+      },
+      "type": "enum"
+    },
+    "com.amazonaws.sqs#ReceiveMessageRequest": {
+      "members": {
+        "AttributeNames": {
+          "target": "com.amazonaws.sqs#AttributeNameList",
+          "traits": {
+            "smithy.api#deprecated": {
+              "message": "AttributeNames has been replaced by MessageSystemAttributeNames"
+            },
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "AttributeName"
+          }
+        },
+        "MaxNumberOfMessages": {
+          "target": "com.amazonaws.sqs#NullableInteger",
+          "traits": {}
+        },
+        "MessageAttributeNames": {
+          "target": "com.amazonaws.sqs#MessageAttributeNameList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "MessageAttributeName"
+          }
+        },
+        "MessageSystemAttributeNames": {
+          "target": "com.amazonaws.sqs#MessageSystemAttributeList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "AttributeName"
+          }
+        },
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "ReceiveRequestAttemptId": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        },
+        "VisibilityTimeout": {
+          "target": "com.amazonaws.sqs#NullableInteger",
+          "traits": {}
+        },
+        "WaitTimeSeconds": {
+          "target": "com.amazonaws.sqs#NullableInteger",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#ReceiveMessageResult": {
+      "members": {
+        "Messages": {
+          "target": "com.amazonaws.sqs#MessageList",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "Message"
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#SendMessageRequest": {
+      "members": {
+        "DelaySeconds": {
+          "target": "com.amazonaws.sqs#NullableInteger",
+          "traits": {}
+        },
+        "MessageAttributes": {
+          "target": "com.amazonaws.sqs#MessageBodyAttributeMap",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "MessageAttribute"
+          }
+        },
+        "MessageBody": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        },
+        "MessageDeduplicationId": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        },
+        "MessageGroupId": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        },
+        "MessageSystemAttributes": {
+          "target": "com.amazonaws.sqs#MessageBodySystemAttributeMap",
+          "traits": {
+            "smithy.api#xmlFlattened": {},
+            "smithy.api#xmlName": "MessageSystemAttribute"
+          }
+        },
+        "QueueUrl": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {
+            "smithy.api#required": {}
+          }
+        }
+      },
+      "traits": {
+        "smithy.api#input": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#SendMessageResult": {
+      "members": {
+        "MD5OfMessageAttributes": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        },
+        "MD5OfMessageBody": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        },
+        "MD5OfMessageSystemAttributes": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        },
+        "MessageId": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        },
+        "SequenceNumber": {
+          "target": "com.amazonaws.sqs#String",
+          "traits": {}
+        }
+      },
+      "traits": {
+        "smithy.api#output": {}
+      },
+      "type": "structure"
+    },
+    "com.amazonaws.sqs#String": {
+      "type": "string"
+    },
+    "com.amazonaws.sqs#StringList": {
+      "member": {
+        "target": "com.amazonaws.sqs#String",
+        "traits": {
+          "smithy.api#xmlName": "StringListValue"
+        }
+      },
+      "type": "list"
+    },
+    "com.amazonaws.sqs#TagKey": {
+      "type": "string"
+    },
+    "com.amazonaws.sqs#TagMap": {
+      "key": {
+        "target": "com.amazonaws.sqs#TagKey",
+        "traits": {
+          "smithy.api#xmlName": "Key"
+        }
+      },
+      "type": "map",
+      "value": {
+        "target": "com.amazonaws.sqs#TagValue",
+        "traits": {
+          "smithy.api#xmlName": "Value"
+        }
+      }
+    },
+    "com.amazonaws.sqs#TagValue": {
+      "type": "string"
+    },
+    "smithy.api#Unit": {
+      "members": {},
+      "type": "structure"
+    }
+  },
+  "sourceSHA256": "38eef06ce5642b8a052282fd19a3ab275e0046d375474e2ff022d3e33aaeab72"
+}

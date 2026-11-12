@@ -17,6 +17,19 @@ from formal_applicability import GateError, RECORD, changes, disposition, git, i
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class SmithyFixtureClassificationTests(unittest.TestCase):
+    def test_only_selected_smithy_sources_are_test_support(self):
+        for name in ('LICENSE.txt', 'NOTICE.txt', 'source.json', 'sqs.json', 'sqs-contracts.json'):
+            self.assertEqual(disposition('internal/aws/testdata/smithy/' + name), 'test-support')
+        self.assertEqual(disposition('scripts/smithy-contracts.py'), 'validation-tooling')
+        for path in ('internal/aws/testdata/smithy/runtime.go',
+                     'internal/aws/testdata/smithy/sqs.json.go',
+                     'internal/aws/testdata/smithy/unknown.json',
+                     'internal/aws/smithy.go',
+                     'scripts/smithy-runtime.py'):
+            self.assertIsNone(disposition(path), path)
+
+
 class LandingPresentationBoundaryTests(unittest.TestCase):
     def test_only_named_static_landing_documents_are_presentation(self):
         for path in ('internal/server/landing/index.html', 'internal/server/landing/landing.css'):
