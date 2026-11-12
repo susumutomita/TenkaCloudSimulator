@@ -73,9 +73,18 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_autoscaling_plans_reference_contract_detectors(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name("test_autoscaling_plans_openapi.py"))],check=True,timeout=60)
+
+ def test_autoscaling_plans_native_sdk_capacity_isolation_and_restart(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name("autoscaling_plans.py"))],check=True,timeout=180)
+
  def test_route53_reference_contract_detectors(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_openapi.py"))],check=True,timeout=60)
   subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_reference_adapters.py"))],check=True,timeout=60)
+
+ def test_elb_native_lambda_target_sdk(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name("elb.py"))],check=True,timeout=300)
 
  def test_route53_native_public_zone_sdk(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("route53.py"))],check=True,timeout=180)
@@ -104,6 +113,8 @@ class Conformance(unittest.TestCase):
   subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart_docs.py'))],check=True,timeout=120)
  def test_s3_multipart_native_persistence_and_console(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('s3_multipart.py'))],check=True)
+ def test_bedrock_runtime_local_backend_boto3(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('bedrock_runtime.py'))],check=True,timeout=180)
  def test_sts_native_sdk_original_hello_world(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('sts_sdk.py'))],check=True,timeout=180)
  def test_sns_native_admission_persistence_and_isolation(self):
@@ -710,6 +721,12 @@ def handler(event,context):
 
  def test_gcp_catalog_console_reference_and_shared_native_state(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_console.py'))], check=True, timeout=300)
+
+ def test_gcp_appengine_official_clients_deploy_serve_split_firewall_two_teams_restart(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_appengine_sdk.py'))], check=True, timeout=300)
+
+ def test_gcp_appengine_console_reference_and_shared_native_state(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_appengine_console.py'))], check=True, timeout=300)
 
  def test_azure_catalog_official_sdks_two_teams_owner_restart_and_cleanup(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('azure_catalog_fixtures.py'))], check=True, timeout=600)

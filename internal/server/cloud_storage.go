@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	azureblob "github.com/susumutomita/TenkaCloudSimulator/internal/azure/blob"
+	gcpappengine "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/appengine"
 	gcpcatalog "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/catalog"
 	gcpstorage "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/storage"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/provider"
@@ -31,7 +33,7 @@ func DefaultCloudStorageConfig() CloudStorageConfig {
 // gcpLocations are the Google Cloud locations the catalog accepts.
 var gcpLocations = []string{"global", "us-central1", "us-east1", "us-west1", "europe-west1", "asia-northeast1"}
 
-func registerCloudStorage(db *sql.DB, registry *provider.Registry, cfg CloudStorageConfig) (*gcpcatalog.Engine, error) {
+func registerCloudStorage(db *sql.DB, registry *provider.Registry, cfg CloudStorageConfig) (*gcpcatalog.Engine, *gcpappengine.Engine, error) {
 	gcp, err := gcpstorage.NewProjectHandler(db, gcpstorage.FactoryConfig{
 		Environment: cfg.Environment,
 		Projects:    []gcpstorage.ProjectBinding{{Project: gcpstorage.Project{ID: cfg.GCPProject, Number: cfg.GCPProjectNumber}, OwnerSubject: cfg.GCPOwner}},
@@ -41,7 +43,7 @@ func registerCloudStorage(db *sql.DB, registry *provider.Registry, cfg CloudStor
 		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	// The GCP catalog shares the provider route and the configured project
 	// owner; it claims only its registered API names.
@@ -51,32 +53,71 @@ func registerCloudStorage(db *sql.DB, registry *provider.Registry, cfg CloudStor
 			return actor.ExerciseIdentity, ok
 		}}, gcpcatalog.APIs())
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+	// App Engine shares the configured project and owner. Deployments copy
+	// Python sources from Cloud Storage objects of that project.
+	appEngine, err := gcpappengine.New(db, gcpappengine.Config{Project: cfg.GCPProject, Owner: cfg.GCPOwner,
+		Subject: func(ctx context.Context) (string, bool) {
+			actor, ok := provider.ActorFromContext(ctx)
+			return actor.ExerciseIdentity, ok
+		},
+		Source: func(ctx context.Context, bucket, object string, limit int64) ([]byte, error) {
+			data, err := gcpstorage.ReadProjectObject(ctx, db, cfg.Environment, cfg.GCPProject, bucket, object, limit)
+			switch {
+			case errors.Is(err, gcpstorage.ErrObjectNotFound):
+				return nil, gcpappengine.ErrSourceNotFound
+			case errors.Is(err, gcpstorage.ErrObjectTooLarge):
+				return nil, gcpappengine.ErrSourceTooLarge
+			}
+			return data, err
+		}})
+	if err != nil {
+		return nil, nil, err
 	}
 	storage := gcp
 	gcp = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if catalog.Owns(r) {
+		switch {
+		case appEngine.Owns(r):
+			appEngine.ServeHTTP(w, r)
+		case catalog.Owns(r):
 			catalog.ServeHTTP(w, r)
-			return
+		default:
+			storage.ServeHTTP(w, r)
 		}
-		storage.ServeHTTP(w, r)
 	})
 	azure, err := azureblob.NewOwnedHandler(db, azureblob.Config{Account: cfg.AzureAccount, Owner: cfg.AzureOwner, Environment: cfg.Environment}, func(ctx context.Context) (azureblob.AuthenticatedActor, bool) {
 		actor, ok := provider.ActorFromContext(ctx)
 		return azureblob.AuthenticatedActor{ExerciseIdentity: actor.ExerciseIdentity}, ok
 	})
 	if err != nil {
-		return nil, err
+		_ = appEngine.Close()
+		return nil, nil, err
 	}
 	for _, entry := range []struct {
 		name    string
 		handler http.Handler
 	}{{"gcp", gcp}, {"azure", azure}} {
 		if err = registry.Register(entry.name, entry.handler); err != nil {
-			return nil, err
+			_ = appEngine.Close()
+			return nil, nil, err
 		}
 	}
-	return catalog, nil
+	return catalog, appEngine, nil
+}
+
+// gcpAppEngineCapabilities advertises the native App Engine subset.
+func gcpAppEngineCapabilities(engine *gcpappengine.Engine, cfg CloudStorageConfig) map[string]any {
+	locations := []map[string]any{}
+	for _, l := range gcpappengine.Locations {
+		locations = append(locations, map[string]any{"locationId": l.ID, "regionId": l.RegionID, "region": l.Region, "displayName": l.Display})
+	}
+	return map[string]any{"service": "App Engine", "api": "appengine.v1", "project": cfg.GCPProject, "endpoint": "/_simulator/providers/gcp/appengine/",
+		"methods": engine.Methods(), "officialMethods": engine.OfficialMethods(), "dataPlane": gcpappengine.DataPlanePrefix + "{hostname}/",
+		"runtimes": []string{"python312"}, "environments": []string{"standard"}, "locations": locations, "requestTimeoutSeconds": int(engine.RequestTimeout().Seconds()),
+		"requestBodyBytes": 64 << 10, "deploymentSources": "deployment.zip or deployment.files of Cloud Storage objects in the configured project",
+		"reference": "/_simulator/docs/gcp-appengine.html", "bounds": gcpappengine.Bounds,
+		"authorization": "Admin API: local configured project owner only; not Google IAM. Data plane: any authenticated local session, then the App Engine firewall"}
 }
 
 // gcpCatalogDescriptorsPath serves the full descriptors of every reviewed

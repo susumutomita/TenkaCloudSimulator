@@ -76,11 +76,17 @@ Python 3.12のみ、ゲストメモリ128 MiB、タイムアウト1〜30秒で�
   [SQS](docs/sqs.md)、[SNS](docs/sns.md)、[CloudWatch Logs](docs/cloudwatch-logs.md)。
 - **認可・シークレット：** [IAM](docs/iam.md)、[native SDK / STS](docs/sts-native.md)、
   [Secrets Manager](docs/secrets-manager.md)、[KMS](docs/kms.md)。
+- **ネットワーク：** [Elastic Load Balancing](docs/elb.md)（Lambda ターゲット）、
+  [Route 53](docs/route53.md)。
+- **スケーリング：** [ローカルDynamoDBテーブル向けAuto Scaling plans](docs/autoscaling-plans.md)。
 - **構成の作成：** [CloudFormation](docs/cloudformation-rest.md)、
   [SSM値パラメータ](docs/cloudformation-ssm-parameters.md)、
   [native IAM profile](docs/cloudformation-iam-profiles.md)、
   [固定SSM policy](docs/iam-ssm-managed-policy.md)。
+- **ローカルAI推論（任意で有効化）：** [自分のOllamaで動くBedrock Runtime InvokeModel/Converse](docs/bedrock-runtime.md)。
+  既定では無効です。クラウドへの代替接続、ストリーミング、ツール利用には対応しません。
 - **他クラウド：** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md)、
+  [App Engine（Python 3.12 WSGIバージョン、トラフィック分割、ファイアウォール）](docs/gcp-appengine.md)、
   [Google Cloudの画面](docs/gcp-console.md)、[Azureの画面](docs/azure-console.md)、
   [任意で有効化するSakura Disk構成メタデータ](docs/sakura.md)。
 - **設定情報だけを扱うカタログ：** [AWS](docs/aws-catalog.md)、

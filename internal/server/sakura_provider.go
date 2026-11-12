@@ -17,6 +17,10 @@ type ProviderConfig struct {
 	commandAPI         func() *aws.SSMCommandAPI
 	CloudStorage       CloudStorageConfig
 	SakuraDisks        *sakura.Config
+	// BedrockRuntime is the trusted, operator-built local inference adapter.
+	// nil keeps Bedrock Runtime inference disabled with explicit errors. The
+	// caller owns it and closes it; closing the composition does not.
+	BedrockRuntime *aws.BedrockRuntime
 }
 
 func DefaultProviderConfig() ProviderConfig {

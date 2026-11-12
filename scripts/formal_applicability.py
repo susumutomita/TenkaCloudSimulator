@@ -27,6 +27,8 @@ FORMAL_INFRA = {'formal/models.json', 'formal/tla2tools.sha256',
                 'scripts/formal_support/ProbeOperationSeedReachability.cfg',
                 }
 KNOWN_VALIDATION = {
+    'scripts/smithy-contracts.py',
+    'scripts/software_factory.py',  # Local development evidence/claim gate, never simulator runtime.
     'scripts/check-sts-formal-candidate.py',
     'scripts/build-release.py', 'scripts/verify-release.py', 'scripts/verify-release-tag.py',
     'scripts/build-vulndb-snapshot.py', 'scripts/catalog-matrix.py',
@@ -42,7 +44,11 @@ NONFORMAL = {
     'presentation': ['tools/console/**', 'tools/scalar/**', 'internal/server/web/**',
                      'internal/server/apidocs/**',
                      'internal/server/landing/index.html', 'internal/server/landing/landing.css'],
-    'test-support': ['internal/aws/testdata/hello-world-battle-original.yaml', 'internal/aws/testdata/host-battle-bootstrap/provenance.json', 'internal/aws/testdata/host-battle-bootstrap/template.json', 'internal/server/testdata/battle-deployment-key-v1.json', 'scripts/guest-image/test_session_overlay.py', 'internal/aws/testdata/hello-world-battle-iam-fragment.yaml', 'internal/aws/testdata/sts-original/hello-world.yaml', 'test/**', '*_test.go', 'scripts/test-*.py',
+    'test-support': ['internal/aws/testdata/smithy/LICENSE.txt',
+                     'internal/aws/testdata/smithy/NOTICE.txt',
+                     'internal/aws/testdata/smithy/source.json',
+                     'internal/aws/testdata/smithy/sqs.json',
+                     'internal/aws/testdata/smithy/sqs-contracts.json', 'internal/aws/testdata/hello-world-battle-original.yaml', 'internal/aws/testdata/host-battle-bootstrap/provenance.json', 'internal/aws/testdata/host-battle-bootstrap/template.json', 'internal/server/testdata/battle-deployment-key-v1.json', 'scripts/guest-image/test_session_overlay.py', 'internal/aws/testdata/hello-world-battle-iam-fragment.yaml', 'internal/aws/testdata/sts-original/hello-world.yaml', 'test/**', '*_test.go', 'scripts/test-*.py',
                      'internal/aws/testdata/dynamodb_size_sdk.py'],
     'build-metadata': ['Makefile', '.gitignore', '.gitattributes', '.github/CODEOWNERS',
                        '.github/PULL_REQUEST_TEMPLATE.md'],

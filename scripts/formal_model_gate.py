@@ -10,7 +10,7 @@ import tempfile
 import time
 from pathlib import Path
 
-BASE_MODELS = {'Route53AtomicBatch', 'S3MultipartState', 'AzureBlobState',
+BASE_MODELS = {'BedrockRuntimeAdmission', 'ELBTargetLifecycle', 'AppEngineTraffic', 'Route53AtomicBatch', 'S3MultipartState', 'AzureBlobState',
  'CatalogConsoleEpoch',
  'CatalogResourceLifecycle',
  'AzurePropertiesEpoch',
@@ -61,7 +61,7 @@ BASE_MODELS = {'Route53AtomicBatch', 'S3MultipartState', 'AzureBlobState',
  'StackOwnership',
  'StartupTokenVisibility',
  'LandingTopologyState', 'LandingAccessAdmission', 'LoginInputIntent'}
-BASE_INVARIANTS = {'Route53AtomicBatch': {'PendingInvisible', 'TypeOK', 'PreserveSentinel', 'AtomicPair', 'OnlyAuthorizedValid', 'OtherTeamUnchanged'}, 'S3MultipartState': {'TypeOK', 'Budget', 'NoOrphans', 'Cleanup', 'RefusalAtomic'}, 'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'ReloadOnlyAfterAck', 'OnlyCurrentReplies', 'FailureVisible', 'SingleWriter'},
+BASE_INVARIANTS = {'BedrockRuntimeAdmission': {'AuthorizationFirst', 'TypeOK', 'SuccessOnlyFromBackend', 'TruthfulFailure', 'BackendOnlyAfterAdmission', 'NoFallback', 'NoCallAfterClose', 'NoPersistence', 'ConcurrencyBound'}, 'ELBTargetLifecycle': {'TypeOK', 'ListenerReferencesExist', 'TargetNeedsGroup', 'HealthCurrent', 'ReportedHealthInUse', 'OnlyAuthorizedChanges', 'OtherTeamUnchanged'}, 'AppEngineTraffic': {'SplitComplete', 'ApplicationParent', 'TypeOK', 'DefaultFirst', 'ServedThroughRouteAndFirewall', 'DenialAtomic', 'OtherTeamUnchanged', 'ApplicationPermanent', 'AllocationsReferenceVersions'}, 'Route53AtomicBatch': {'PendingInvisible', 'TypeOK', 'PreserveSentinel', 'AtomicPair', 'OnlyAuthorizedValid', 'OtherTeamUnchanged'}, 'S3MultipartState': {'TypeOK', 'Budget', 'NoOrphans', 'Cleanup', 'RefusalAtomic'}, 'CatalogConsoleEpoch': {'TypeOK', 'NoUnmountedAcceptance', 'ReloadOnlyAfterAck', 'OnlyCurrentReplies', 'FailureVisible', 'SingleWriter'},
  'CatalogResourceLifecycle': {'PeerFrame', 'QuotaBound', 'FailureFrame', 'FreshIDs', 'TokenOnce', 'GenerationAdvances', 'ChildGuard', 'StaleWriteRejected', 'AuthorizationFirst', 'TokenBinding', 'UniqueNames', 'TypeOK', 'ReplayNoDuplicate'},
  'AzureBlobState': {'BudgetBounded',
                     'ConditionEnforced',
@@ -476,7 +476,7 @@ BASE_INVARIANTS = {'Route53AtomicBatch': {'PendingInvisible', 'TypeOK', 'Preserv
                           'UnsupportedCanvasHidden'},
  'LoginInputIntent': {'LocaleIntentFrame', 'NoEmptyPOST', 'IntentInvalidatesAsync', 'TypeOK', 'SubmissionSelectionExact', 'NoPOSTWhileBlocked', 'StaleFileCompletionFrame', 'AdoptedValueExact'}}
 # Established controls require an explicit gate-policy change before retirement.
-REQUIRED_MUTANTS = {'Route53AtomicBatch': {'ChangeSentinel', 'ExposePendingState', 'HalfBatch', 'OmitAuthorization', 'ChangeOtherTeam', 'OmitValidation'}, 'S3MultipartState': {'OmitPartBudget', 'OmitUploadParent', 'RetainCompletedParts', 'PartialFailure', 'OmitUploadBinding'}, 'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureError', 'ReloadAfterFailedWrite', 'AcceptAfterUnmount', 'AllowConcurrentWrites'},
+REQUIRED_MUTANTS = {'BedrockRuntimeAdmission': {'FallbackBackend', 'OmitMapping', 'ShutdownClaimsBackendFailure', 'OmitEnablement', 'AdmitAfterClose', 'PersistPrompt', 'MisreportMissingModel', 'OmitAuthorization', 'SyntheticDisabledSuccess', 'OmitValidation', 'CallUnsupportedOperation', 'LeakSlot', 'MapBeforeAuthorization', 'IgnoreConcurrency'}, 'ELBTargetLifecycle': {'OmitInUseGuard', 'OmitListenerCascade', 'OmitTargetCascade', 'OmitEpochGuard', 'OmitUnuseReset', 'CheckUnusedGroup', 'OmitAuthorization', 'ChangeOtherTeam'}, 'AppEngineTraffic': {'PartialSplit', 'DeleteDefaultService', 'DeployWithoutApplication', 'OmitOwnerCheck', 'KeepSplitOfDeletedService', 'DeleteVersionWithTraffic', 'OmitDefaultFirst', 'DeleteApplication', 'SplitNamesMissingVersion', 'ChangeOtherTeam', 'ServeUnroutedVersion', 'ServePastFirewall', 'FirstVersionWithoutTraffic'}, 'Route53AtomicBatch': {'ChangeSentinel', 'ExposePendingState', 'HalfBatch', 'OmitAuthorization', 'ChangeOtherTeam', 'OmitValidation'}, 'S3MultipartState': {'OmitPartBudget', 'OmitUploadParent', 'RetainCompletedParts', 'PartialFailure', 'OmitUploadBinding'}, 'CatalogConsoleEpoch': {'OmitReplyEpochGuard', 'DropFailureError', 'ReloadAfterFailedWrite', 'AcceptAfterUnmount', 'AllowConcurrentWrites'},
  'CatalogResourceLifecycle': {'AllowDuplicateNames', 'ReplayCommits', 'IgnoreGeneration', 'TokenToFutureID', 'UpdateKeepsGeneration', 'ReplayCreatesRow', 'WritePeerScope', 'ReuseDeletedID', 'IgnoreQuota', 'DeleteParentWithChildren', 'FaultCommits', 'DeniedCommits'},
  'AzureBlobState': {'ContainerDeleteErasesPeer',
                     'ContainerDeleteLeavesBlobs',
@@ -873,7 +873,7 @@ REQUIRED_MUTANTS = {'Route53AtomicBatch': {'ChangeSentinel', 'ExposePendingState
                           'WrongDetailProjection',
                           'WrongProviderDefault'},
  'LoginInputIntent': {'FileCompletionIgnoresRevision', 'NonemptyDOMUsesControlledState', 'UnmountedFileCompletionPublishes', 'LocaleClearsIntent', 'LocaleInvalidatesCurrentFile', 'SubmitIgnoresBusy', 'CurrentFileErrorDiscarded', 'FlushDoesNotAdoptNativeValue', 'NativeAdoptionSkipsNewIntent', 'EmptyDOMReusesOldCredential', 'OldPasteSurvivesNewIntent', 'SubmitIgnoresFileGate', 'FocusSkipsNativeAdoption', 'KeyDownSkipsNativeAdoption'}}
-REQUIRED_SOURCE_SCOPES = {'Route53AtomicBatch': {'internal/aws/s3.go', 'internal/aws/route53_http.go', 'internal/server/server.go', 'internal/aws/ssm.go', 'internal/aws/route53_store.go', 'internal/aws/route53_dispatch.go'}, 'CFNConditionAdmission': {'internal/aws/cloudformation.go',
+REQUIRED_SOURCE_SCOPES = {'BedrockRuntimeAdmission': {'cmd/simulator/bedrock_flags.go', 'cmd/simulator/main.go', 'internal/aws/bedrock_runtime_messages.go', 'internal/inference/apple.go', 'internal/aws/ssm.go', 'internal/aws/bedrock_runtime.go', 'internal/aws/s3.go', 'internal/inference/ollama.go', 'internal/server/server.go', 'internal/server/bedrock_runtime.go', 'internal/server/sakura_provider.go', 'internal/inference/inference.go'}, 'ELBTargetLifecycle': {'internal/aws/elb_store.go', 'internal/aws/elb_dispatch.go', 'internal/aws/elb_query.go', 'internal/aws/elb_target.go', 'internal/aws/apirouting/alb_headers.go', 'internal/aws/lambda_permissions.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/server/server.go'}, 'AppEngineTraffic': {'internal/gcp/appengine/deploy.go', 'internal/gcp/appengine/wsgi.py', 'internal/server/cloud_storage.go', 'tools/gcpmodels/appengine.py', 'internal/gcp/appengine/store.go', 'internal/gcp/appengine/apps.go', 'internal/gcp/storage/source.go', 'internal/gcp/appengine/services.go', 'internal/gcp/appengine/model.go', 'internal/gcp/appengine/openapi.go', 'internal/server/server.go', 'internal/gcp/appengine/engine.go', 'internal/gcp/appengine/firewall.go', 'internal/gcp/appengine/serve.go', 'internal/gcp/appengine/model.json'}, 'Route53AtomicBatch': {'internal/aws/s3.go', 'internal/aws/route53_http.go', 'internal/server/server.go', 'internal/aws/ssm.go', 'internal/aws/route53_store.go', 'internal/aws/route53_dispatch.go'}, 'CFNConditionAdmission': {'internal/aws/cloudformation.go',
                            'internal/aws/cloudformation_conditions.go',
                            'internal/aws/cloudformation_conditions_link.go',
                            'internal/aws/cloudformation_intrinsics.go'},
@@ -1302,6 +1302,13 @@ EC2_ATTACHMENT_CONFIG = 'SPECIFICATION Spec\nCHECK_DEADLOCK FALSE\nINVARIANTS Ty
 
 COMMAND_DISPATCH_BOUNDS = 'One selected capability/key, two sequential commands, clock0..3 and original requested deadlines1..4; existing key classes none/exact/foreign, independent lower-layer admission/refusal. Forwarded deadline is not effective scope-capped deadline.'
 COMMAND_DISPATCH_CONFIG = 'INIT Init\nNEXT Next\nCHECK_DEADLOCK FALSE\nINVARIANT TypeOK\nINVARIANT Admission\nINVARIANT OriginalDeadline\nINVARIANT ReadOnly\nINVARIANT UnknownNotSettled\nINVARIANT DuplicatePreserved\nINVARIANT ExactDomain\nINVARIANT ReadAfterExpiry\nINVARIANT AtMostOnce\nINVARIANT ReadAdmission\n'
+
+
+# Independent bounded Auto Scaling plan capacity-target contract.
+BASE_MODELS.add('AutoScalingPlanTargets')
+BASE_INVARIANTS['AutoScalingPlanTargets'] = {'TypeOK', 'BoundedWhileOwned', 'OnlyAuthorizedValid', 'NoOwnershipSteal', 'DeleteKeepsCapacity', 'RejectionFrame', 'OtherTeamUnchanged', 'PendingInvisible'}
+REQUIRED_MUTANTS['AutoScalingPlanTargets'] = {'OmitAuthorization', 'OmitValidation', 'SkipCapacityBound', 'ClampLowerOnly', 'StealOwnership', 'RevertOnDelete', 'WriteOtherTeam', 'ExposePendingState', 'ReuseTableGeneration', 'RejectWritesCapacity', 'RejectClaimsOwner'}
+REQUIRED_SOURCE_SCOPES['AutoScalingPlanTargets'] = {'internal/aws/autoscalingplans_store.go', 'internal/aws/autoscalingplans_http.go', 'internal/aws/autoscalingplans_dispatch.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/server/server.go'}
 
 class GateError(ValueError):
     pass

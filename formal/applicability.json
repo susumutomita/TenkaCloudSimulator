@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "d096316726049261b1a1f9d5818c469027e04e2b",
+  "base_sha": "749d8a86014d08fc6085ecff36984fc97a56f595",
   "changes": [
     {
       "path": ".github/workflows/formal.yml",
@@ -11,7 +11,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "dcb0f38f0a5bf5e56687124deeb91844f40807950d9489dfe19bca89eac51b88",
+      "sha256": "1a24f57a7bfd843ae67f22b73e8a338cdb17ee9d625ca76331417a6d82c79359",
       "disposition": "documentation",
       "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
       "models": []
@@ -99,7 +99,7 @@
     },
     {
       "path": "cmd/simulator/main.go",
-      "sha256": "e7fd658205d2fafa08328d7f3c3f168114ced0a7f98e18c4d2805b72ec5c728f",
+      "sha256": "ab69df2d88b1fa6f09e2981523b6bd66cf356193b4841fe7d42220c224a50da1",
       "disposition": "modeled",
       "reason": "Owned launch proof bootstrap closes inherited executable descriptor before child creation; authenticated numeric-loopback and explicit Linux runtime options remain prerequisites. OwnedClockQualification extension is pending integrator metadata. Static constructor wiring delegates to canonical provider; it is not physical-ready evidence. Existing startup/token models retain their own scope.",
       "models": [
@@ -1720,7 +1720,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "9eb07f53661cf720f84f36cc9ac45dfb0a5a5905728b8979c5222cc3f6eae1a5",
+      "sha256": "71036331c9fa8053f4784f3bcf6761b6e8d5a1f4a4a124e5cff3f1587651a4f0",
       "disposition": "formal-infrastructure",
       "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
       "models": []
@@ -2892,7 +2892,7 @@
     },
     {
       "path": "internal/aws/s3.go",
-      "sha256": "a9275e8122f7560ff15cc5e89b786980776046c4676754f30c342d3399a88b1c",
+      "sha256": "c9522f3d4fb6232c195ca45ba5b94f14dfd643c4a4745218a1a361ee16b6a187",
       "disposition": "modeled",
       "reason": "Gateway gains typed Documents/Sessions/Commands store references. This is stateless composition: handlers independently enforce their existing authority/lifecycle contracts. SSMDocumentState and all retained prior exact scopes remain bounded; no factory or field establishes participant/command authorization.",
       "models": [
@@ -3111,7 +3111,7 @@
     },
     {
       "path": "internal/aws/ssm.go",
-      "sha256": "5ddaa18261b445ff7aa1e1105ad30a57cf8976bbf56d33fe8fbac36f9a11ae90",
+      "sha256": "9b7c706c2479059b69046ac52af9432c17f61b0d875d6f60b3ba0c7be6c36c9d",
       "disposition": "modeled",
       "reason": "Exact operation dispatch selects independent native command/session/document handlers before ordinary parameter handling. Their current verified policy/participant verdicts are assumptions at this stateless routing seam, supported by signed native negative tests. No operation name or header confers authority.",
       "models": [
@@ -4048,7 +4048,7 @@
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "8a87e630fb66c873db7b153b38cb37e4e2dcd08ed8d73227d7c24457384b6bfd",
+      "sha256": "c64f7d32bcb7b656b2d304b7b3447228701d273e19971dbaf47fca5380429918",
       "disposition": "presentation",
       "reason": "Static API reference schemas/descriptions for bounded implemented document/command/session surfaces; checked against native/reference tests. This file grants no runtime permission and is not evidence of guest execution. Classified presentation under current exact gate; stateful handler code remains modeled.",
       "models": []
@@ -4143,7 +4143,7 @@
     },
     {
       "path": "internal/server/sakura_provider.go",
-      "sha256": "37ad93d0a722d2decb398045b896b2edf2849c0ca3cc6e80f96f3a505482414e",
+      "sha256": "f04d5107595c9530856e2eaa6ee5664c89fe163336f013a6b5fd2e6e40526d33",
       "disposition": "modeled",
       "reason": "Typed ProviderConfig additions carry independently configured runtime/terminal/command factories and cleanup. Existing provider admission obligations are preserved. Stateless plumbing delegates authentication and lifecycle to handlers; no new implicit NativeCommandIssuer factory-auth proof.",
       "models": [
@@ -4196,7 +4196,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "c1e79f58c24a82c707cfedd0ea499c216e1096fa3f45b585a446c6b939660cfa",
+      "sha256": "f1c9c9b56d34fb66fd73b9bb800b89e1eb8eae3ae02e58b44783480460fd7f3d",
       "disposition": "modeled",
       "reason": "Configured command/session factories, exact route dispatch and protocol discovery delegate to independently authenticated handlers. Close preserves underlying runtime cleanup failure. Stateless wiring and policy verdicts are explicit assumptions backed by native composition tests; discovery never proves physical readiness or authority.",
       "models": [
@@ -4732,9 +4732,9 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "7e050b83803f9a07e632d5dfd3fd18209a5922aa3b2f9484b7c21f6f7e163efe",
+      "sha256": "f764cd96c736c869f81632ab0f49284a80e7cd00ba1c9540aef035e0aae8c6b7",
       "disposition": "modeled",
-      "reason": "Only corrected terminal client/component behavior: exact receipt epoch/disposal, current channel token-once, current component UI callbacks, and unknown remote outcome retained independently of local disposal. TerminalClientEpoch is a finite contract, not JS/React/browser/guest proof. Rebuilt derived bundle is tied to exact main→terminal→client graph and digest; parent build/assets evidence is independent. No whole-bundle or bundler-refinement claim.",
+      "reason": "Only corrected terminal client/component behavior: exact receipt epoch/disposal, current channel token-once, current component UI callbacks, and unknown remote outcome retained independently of local disposal. TerminalClientEpoch is a finite contract, not JS/React/browser/guest proof. Rebuilt derived bundle is tied to exact main\u2192terminal\u2192client graph and digest; parent build/assets evidence is independent. No whole-bundle or bundler-refinement claim.",
       "models": [
         {
           "id": "SecretsRevealEpoch",
@@ -6998,14 +6998,14 @@
     },
     {
       "path": "scripts/formal_applicability.py",
-      "sha256": "472c8cfc8f5d4f2f4cee5a0b16fb8185f3cceeea963fa02f65830d5bf67991a7",
+      "sha256": "738a89c285e9b6953785af5e823c84c78f8b7025848360a5f4f65fd0bc090363",
       "disposition": "formal-infrastructure",
       "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "54c495a5304e6e0144eff1c1c1cde6150512384671e91328e4a0c0c70163bc43",
+      "sha256": "fc9574e87ce913b7dd96a687358a3f5c323f95c6b55e15c97b2f7c166c1fbdbb",
       "disposition": "formal-infrastructure",
       "reason": "Formal execution infrastructure: DynamoDBAdmission baseline and unchanged controls use exactly two workers, other families one, families remain serial. All 60-second deadlines, model inputs, exact invariant checks and no-retry failure handling preserved; independent regression checks enforce allocation and timeout behavior.",
       "models": []
@@ -7092,14 +7092,14 @@
     },
     {
       "path": "scripts/test-formal-applicability.py",
-      "sha256": "f4cb42cc6c237013891629030ff829075fba98165856c2b7ed2404fa083b7b6d",
+      "sha256": "fb5991e0a3277d7fb10c1df307603c04fe08913541a07d20bb206a7953944aab",
       "disposition": "formal-infrastructure",
       "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "6e74c2b069ee739dc411a5d0039a02bc1c5d25e8a2f3d14119b22333189796f9",
+      "sha256": "b37155f42eab9d5f7e044ae38c3d328d76644d9cc085112d6a973a43ce76ee6f",
       "disposition": "formal-infrastructure",
       "reason": "Formal execution infrastructure: DynamoDBAdmission baseline and unchanged controls use exactly two workers, other families one, families remain serial. All 60-second deadlines, model inputs, exact invariant checks and no-retry failure handling preserved; independent regression checks enforce allocation and timeout behavior.",
       "models": []
@@ -7113,7 +7113,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "022d746942b6753fc2d5fec9a5774278938f0f12599c3c250ea8391db0886825",
+      "sha256": "82d046467b6616df4412c60f1d9d3043b352d27148bf512a77d578fa6feaba47",
       "disposition": "test-support",
       "reason": "Test-only strict authentication refusal: host participant token without verified STS receives exact HTTP403/code/message, preserved SDK policy/restart checks, permanent negative assertion detectors registered before existing bounded SDK test; no browser or guest execution.",
       "models": []
@@ -7122,12 +7122,12 @@
       "path": "test/e2e/iam_ssm_builtin.py",
       "sha256": "df2080a47d8103a443983a74faa5ab018a75fe1ba9447d672e26568e4a27fcae",
       "disposition": "test-support",
-      "models": [],
-      "reason": "Test-only strict authentication refusal: host participant token without verified STS receives exact HTTP403/code/message, preserved SDK policy/restart checks, permanent negative assertion detectors registered before existing bounded SDK test; no browser or guest execution."
+      "reason": "Test-only strict authentication refusal: host participant token without verified STS receives exact HTTP403/code/message, preserved SDK policy/restart checks, permanent negative assertion detectors registered before existing bounded SDK test; no browser or guest execution.",
+      "models": []
     },
     {
       "path": "test/e2e/route53_openapi.py",
-      "sha256": "09be29984bba45372980cd684cbcbbffc99437eec51e4c408d77ca83fce0eaf1",
+      "sha256": "b5397772b5906d12a2f6bec6b74e49ae591340930d4754b4fc77a90624c2fad5",
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
@@ -7164,12 +7164,12 @@
       "path": "test/e2e/test_iam_ssm_builtin_admission.py",
       "sha256": "72cd6abd8c83d5f36dc837af6b3ec629eb384cf3e85877ad792c763821067bc6",
       "disposition": "test-support",
-      "models": [],
-      "reason": "Test-only strict authentication refusal: host participant token without verified STS receives exact HTTP403/code/message, preserved SDK policy/restart checks, permanent negative assertion detectors registered before existing bounded SDK test; no browser or guest execution."
+      "reason": "Test-only strict authentication refusal: host participant token without verified STS receives exact HTTP403/code/message, preserved SDK policy/restart checks, permanent negative assertion detectors registered before existing bounded SDK test; no browser or guest execution.",
+      "models": []
     },
     {
       "path": "test/e2e/test_openapi_json10.py",
-      "sha256": "9011bef6aae55c06476cbaef09be3e63455da63d6342849a8b57faae82421150",
+      "sha256": "0d7a066eec22fc75d7481a0e65e18a7cb94b4064952ad6a9e506284cebc858fa",
       "disposition": "test-support",
       "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
@@ -7218,21 +7218,21 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "9cf682e72dbc3db4193c56aab64046910ea30c8ea702c021d2972b93d09fac42",
+      "sha256": "d3c19bc97181609487a5587b53793bb0d4523a8bea4e6f9b23b281cb58208db5",
       "disposition": "presentation",
       "reason": "Build-produced SHA256 metadata for embedded console artifacts, verified against actual app.js digest. Does not establish JavaScript semantics; generated stateful app.js retains TerminalClientEpoch and prior models. Current gate calls this presentation metadata.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "1014e97a347d080d23cf5596796c40c312faff31929d86b3c99b02f202625629",
+      "sha256": "29c94bb344b42a8fe0a39f4cd351ce11ace3a585abef64a06b54227a7f984086",
       "disposition": "presentation",
-      "reason": "Build-produced import/contribution graph: main→terminal→client and positive bytes checked. Not browser execution or bundler refinement proof; runtime bundle is modeled separately. Current gate calls this presentation metadata.",
+      "reason": "Build-produced import/contribution graph: main\u2192terminal\u2192client and positive bytes checked. Not browser execution or bundler refinement proof; runtime bundle is modeled separately. Current gate calls this presentation metadata.",
       "models": []
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "057eb566d04397ad0246a680f1712f3e6dc2926817334b88a0031b1692bbf3f4",
+      "sha256": "5b7a0e2bbc00857c33409478a5a4f7e2a73907b6c920e5869487a7b71d0013c8",
       "disposition": "modeled",
       "reason": "Only corrected terminal client/component behavior: exact receipt epoch/disposal, current channel token-once, current component UI callbacks, and unknown remote outcome retained independently of local disposal. TerminalClientEpoch is a finite contract, not JS/React/browser/guest proof. Exact terminal hash-route branch selects component; login/other console models remain. Hash changes are not assumed to trigger reactive remount.",
       "models": [

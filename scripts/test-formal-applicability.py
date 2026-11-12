@@ -53,6 +53,19 @@ class SeedReplayInfrastructureClassificationTests(unittest.TestCase):
             self.assertIsNone(disposition(path), path)
 
 
+class SmithyFixtureClassificationTests(unittest.TestCase):
+    def test_only_selected_smithy_sources_are_test_support(self):
+        for name in ('LICENSE.txt', 'NOTICE.txt', 'source.json', 'sqs.json', 'sqs-contracts.json'):
+            self.assertEqual(disposition('internal/aws/testdata/smithy/' + name), 'test-support')
+        self.assertEqual(disposition('scripts/smithy-contracts.py'), 'validation-tooling')
+        for path in ('internal/aws/testdata/smithy/runtime.go',
+                     'internal/aws/testdata/smithy/sqs.json.go',
+                     'internal/aws/testdata/smithy/unknown.json',
+                     'internal/aws/smithy.go',
+                     'scripts/smithy-runtime.py'):
+            self.assertIsNone(disposition(path), path)
+
+
 class LandingPresentationBoundaryTests(unittest.TestCase):
     def test_only_named_static_landing_documents_are_presentation(self):
         for path in ('internal/server/landing/index.html', 'internal/server/landing/landing.css'):
@@ -81,6 +94,14 @@ class PromptDocumentationClassificationTests(unittest.TestCase):
                      '.claude/skills/feature/SKILL.md.py',
                      '.claude/agents/hooks/policy.md', '.claude/rules/hooks/policy.md',
                      '.claude/skills/feature/hooks/SKILL.md', 'internal/server/access.go'):
+            self.assertIsNone(disposition(path), path)
+
+
+class FactoryClassificationTests(unittest.TestCase):
+    def test_only_exact_local_factory_gate_is_validation_tooling(self):
+        self.assertEqual(disposition('scripts/software_factory.py'), 'validation-tooling')
+        for path in ('scripts/software_factory_extra.py', 'scripts/software_factory.sh',
+                     'internal/core/software_factory.go', '.claude/hooks/software_factory.py'):
             self.assertIsNone(disposition(path), path)
 
 

@@ -21,6 +21,9 @@ test-start:
 	$(PYTHON) test/start/check_start.py
 
 test:
+	$(PYTHON) scripts/smithy-contracts.py --check
+	$(PYTHON) scripts/test-smithy-contracts.py
+	$(PYTHON) scripts/test-software-factory.py
 	mkdir -p reports
 	# Packages each compile fixed WASM runtimes. Avoid cross-package CPU contention;
 	# goroutine/race and deadline assertions inside each test remain unchanged.

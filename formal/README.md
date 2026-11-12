@@ -649,3 +649,14 @@ pre-fix source counterexamples are not certified by a passing model.
 `IAMBuiltinPinTransaction` adds the bounded readonly builtin pin and native/CFN
 attachment transaction boundary without replacing customer-managed policy or
 no-builtin CFN models. See [its source correspondence and verification status](../docs/formal-iam-builtin-pin-transaction.md).
+
+## Bedrock Runtime admission
+
+`BedrockRuntimeAdmission` bounds two requests, one slot, one shutdown and six
+backend outcomes for the opt-in local Bedrock Runtime. It checks that only
+admitted, IAM-allowed requests reach the one configured backend, that a closed
+runtime admits nothing, that slots are bounded and released, and that results
+are never synthesized, rerouted, misreported or persisted. Fourteen named
+controls must each violate their declared invariant. See the
+[model contract and source correspondence](../docs/formal-bedrock-runtime.md);
+it is not a Go/HTTP refinement or a real-model result.

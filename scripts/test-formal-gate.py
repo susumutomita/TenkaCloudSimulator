@@ -189,6 +189,35 @@ class FormalGateTests(unittest.TestCase):
         with self.assertRaises(GateError):
             load_registry(self.root)
 
+    def test_autoscaling_plan_targets_required_contract(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        entry = next(m for m in json.loads(original)['models'] if m['id'] == 'AutoScalingPlanTargets')
+        self.assertEqual(set(entry['properties']), {'TypeOK', 'BoundedWhileOwned', 'OnlyAuthorizedValid', 'NoOwnershipSteal', 'DeleteKeepsCapacity', 'RejectionFrame', 'OtherTeamUnchanged', 'PendingInvisible'})
+        self.assertEqual({m['id'] for m in entry['mutants']}, {'OmitAuthorization', 'OmitValidation', 'SkipCapacityBound', 'ClampLowerOnly', 'StealOwnership', 'RevertOnDelete', 'WriteOtherTeam', 'ExposePendingState', 'ReuseTableGeneration', 'RejectWritesCapacity', 'RejectClaimsOwner'})
+        self.assertEqual(set(entry['source_scope']), {'internal/aws/autoscalingplans_store.go', 'internal/aws/autoscalingplans_http.go', 'internal/aws/autoscalingplans_dispatch.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/server/server.go'})
+        config = self.root / entry['config']
+        cfg = config.read_text()
+        for field in ('properties', 'mutants', 'source_scope'):
+            for item in entry[field]:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == entry['id'])
+                target[field].remove(item)
+                if field == 'properties':
+                    config.write_text(cfg.replace('INVARIANT ' + item + '\n', ''))
+                    target['mutants'] = [m for m in target['mutants'] if m['expect_invariant'] != item]
+                path.write_text(json.dumps(changed))
+                with self.subTest(field=field, item=item), self.assertRaises(GateError):
+                    load_registry(self.root)
+                config.write_text(cfg)
+        changed = json.loads(original)
+        changed['models'] = [m for m in changed['models'] if m['id'] != entry['id']]
+        path.write_text(json.dumps(changed))
+        (self.root / entry['model']).unlink()
+        config.unlink()
+        with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+            load_registry(self.root)
+
     def test_secret_description_workflow_required_contract(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -636,6 +665,95 @@ class FormalGateTests(unittest.TestCase):
         finally:
             path.write_text(original)
 
+    def test_bedrock_runtime_model_properties_controls_and_source_scopes_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        model = next(m for m in json.loads(original)['models'] if m['id'] == 'BedrockRuntimeAdmission')
+        expected_properties = {'AuthorizationFirst', 'BackendOnlyAfterAdmission', 'ConcurrencyBound', 'NoCallAfterClose', 'NoFallback', 'NoPersistence', 'SuccessOnlyFromBackend', 'TruthfulFailure', 'TypeOK'}
+        expected_controls = {'AdmitAfterClose', 'CallUnsupportedOperation', 'FallbackBackend', 'IgnoreConcurrency', 'LeakSlot', 'MapBeforeAuthorization', 'MisreportMissingModel', 'OmitAuthorization', 'OmitEnablement', 'OmitMapping', 'OmitValidation', 'PersistPrompt', 'ShutdownClaimsBackendFailure', 'SyntheticDisabledSuccess'}
+        expected_scope = {'cmd/simulator/bedrock_flags.go', 'cmd/simulator/main.go', 'internal/aws/bedrock_runtime.go', 'internal/aws/bedrock_runtime_messages.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/inference/apple.go', 'internal/inference/inference.go', 'internal/inference/ollama.go', 'internal/server/bedrock_runtime.go', 'internal/server/sakura_provider.go', 'internal/server/server.go'}
+        self.assertEqual(set(model['properties']), expected_properties)
+        self.assertEqual({m['id'] for m in model['mutants']}, expected_controls)
+        self.assertEqual(set(model['source_scope']), expected_scope)
+        tla, cfg = self.root / model['model'], self.root / model['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        try:
+            registry = json.loads(original)
+            registry['models'] = [m for m in registry['models'] if m['id'] != model['id']]
+            path.write_text(json.dumps(registry))
+            tla.unlink(); cfg.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            tla.write_bytes(source); cfg.write_bytes(config)
+            for prop in sorted(expected_properties):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['properties'].remove(prop)
+                cfg.write_text('\n'.join(line for line in config.decode().splitlines() if line != 'INVARIANT ' + prop) + '\n')
+                path.write_text(json.dumps(registry))
+                with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+            cfg.write_bytes(config)
+            for control in sorted(expected_controls):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['mutants'] = [m for m in target['mutants'] if m['id'] != control]
+                path.write_text(json.dumps(registry))
+                with self.subTest(control=control), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                    load_registry(self.root)
+            for source_path in sorted(expected_scope):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['source_scope'].remove(source_path)
+                path.write_text(json.dumps(registry))
+                with self.subTest(source_scope=source_path), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+        finally:
+            path.write_text(original)
+            tla.write_bytes(source); cfg.write_bytes(config)
+
+
+
+    def test_appengine_model_properties_controls_and_source_scopes_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        model = next(m for m in json.loads(original)['models'] if m['id'] == 'AppEngineTraffic')
+        expected_properties = {'AllocationsReferenceVersions', 'ApplicationParent', 'ApplicationPermanent', 'DefaultFirst', 'DenialAtomic', 'OtherTeamUnchanged', 'ServedThroughRouteAndFirewall', 'SplitComplete', 'TypeOK'}
+        expected_controls = {'ChangeOtherTeam', 'DeleteApplication', 'DeleteDefaultService', 'DeleteVersionWithTraffic', 'DeployWithoutApplication', 'FirstVersionWithoutTraffic', 'KeepSplitOfDeletedService', 'OmitDefaultFirst', 'OmitOwnerCheck', 'PartialSplit', 'ServePastFirewall', 'ServeUnroutedVersion', 'SplitNamesMissingVersion'}
+        expected_scope = {'internal/gcp/appengine/apps.go', 'internal/gcp/appengine/deploy.go', 'internal/gcp/appengine/engine.go', 'internal/gcp/appengine/firewall.go', 'internal/gcp/appengine/model.go', 'internal/gcp/appengine/model.json', 'internal/gcp/appengine/openapi.go', 'internal/gcp/appengine/serve.go', 'internal/gcp/appengine/services.go', 'internal/gcp/appengine/store.go', 'internal/gcp/appengine/wsgi.py', 'internal/gcp/storage/source.go', 'internal/server/cloud_storage.go', 'internal/server/server.go', 'tools/gcpmodels/appengine.py'}
+        self.assertEqual(set(model['properties']), expected_properties)
+        self.assertEqual({m['id'] for m in model['mutants']}, expected_controls)
+        self.assertEqual(set(model['source_scope']), expected_scope)
+        cfg = self.root / model['config']
+        config = cfg.read_bytes()
+        try:
+            for prop in sorted(expected_properties):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['properties'].remove(prop)
+                cfg.write_text('\n'.join(line for line in config.decode().splitlines() if line != 'INVARIANT ' + prop) + '\n')
+                path.write_text(json.dumps(registry))
+                with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+            cfg.write_bytes(config)
+            for control in sorted(expected_controls):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['mutants'] = [m for m in target['mutants'] if m['id'] != control]
+                path.write_text(json.dumps(registry))
+                with self.subTest(control=control), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                    load_registry(self.root)
+            for source_path in sorted(expected_scope):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['source_scope'].remove(source_path)
+                path.write_text(json.dumps(registry))
+                with self.subTest(source_scope=source_path), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+        finally:
+            path.write_text(original)
+            cfg.write_bytes(config)
+
     def test_route53_model_properties_six_controls_and_source_scopes_cannot_disappear(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -683,11 +801,58 @@ class FormalGateTests(unittest.TestCase):
             path.write_text(original)
             tla.write_bytes(source); cfg.write_bytes(config)
 
+    def test_elb_model_properties_eight_controls_and_source_scopes_cannot_disappear(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        model = next(m for m in json.loads(original)['models'] if m['id'] == 'ELBTargetLifecycle')
+        expected_properties = {'TypeOK', 'ListenerReferencesExist', 'TargetNeedsGroup', 'HealthCurrent', 'ReportedHealthInUse', 'OnlyAuthorizedChanges', 'OtherTeamUnchanged'}
+        expected_controls = {'OmitInUseGuard', 'OmitListenerCascade', 'OmitTargetCascade', 'OmitEpochGuard', 'OmitUnuseReset', 'CheckUnusedGroup', 'OmitAuthorization', 'ChangeOtherTeam'}
+        expected_scope = {'internal/aws/elb_store.go', 'internal/aws/elb_dispatch.go', 'internal/aws/elb_query.go', 'internal/aws/elb_target.go', 'internal/aws/apirouting/alb_headers.go', 'internal/aws/lambda_permissions.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/server/server.go'}
+        self.assertEqual(set(model['properties']), expected_properties)
+        self.assertEqual({m['id'] for m in model['mutants']}, expected_controls)
+        self.assertEqual(set(model['source_scope']), expected_scope)
+        tla, cfg = self.root / model['model'], self.root / model['config']
+        source, config = tla.read_bytes(), cfg.read_bytes()
+        try:
+            registry = json.loads(original)
+            registry['models'] = [m for m in registry['models'] if m['id'] != model['id']]
+            path.write_text(json.dumps(registry))
+            tla.unlink(); cfg.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            tla.write_bytes(source); cfg.write_bytes(config)
+            for prop in sorted(expected_properties):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['properties'].remove(prop)
+                cfg.write_text('\n'.join(line for line in config.decode().splitlines() if line != 'INVARIANT ' + prop) + '\n')
+                path.write_text(json.dumps(registry))
+                with self.subTest(property=prop), self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                    load_registry(self.root)
+            cfg.write_bytes(config)
+            for control in sorted(expected_controls):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['mutants'] = [m for m in target['mutants'] if m['id'] != control]
+                path.write_text(json.dumps(registry))
+                with self.subTest(control=control), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                    load_registry(self.root)
+            for source_path in sorted(expected_scope):
+                registry = json.loads(original)
+                target = next(m for m in registry['models'] if m['id'] == model['id'])
+                target['source_scope'].remove(source_path)
+                path.write_text(json.dumps(registry))
+                with self.subTest(source_scope=source_path), self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                    load_registry(self.root)
+        finally:
+            path.write_text(original)
+            tla.write_bytes(source); cfg.write_bytes(config)
+
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'TerminalClientEpoch', 'CanonicalVMComposition', 'InstanceMetadataTokens', 'IAMConditionEvaluation', 'NativeCommandIssuer', 'ParticipantSessionLifecycle', 'OwnedClockQualification', 'ARPTrustedReply', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'WAFAssociationAuthorization', 'WAFRequestEvaluation'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'ARPTrustedReply', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation'})
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
             for mutant in model['mutants']:

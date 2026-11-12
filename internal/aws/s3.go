@@ -35,6 +35,8 @@ var sequence atomic.Uint64
 var Regions = []string{"us-east-1", "us-west-2", "ap-northeast-1", "eu-west-1"}
 
 type Gateway struct {
+	AutoScalingPlans  *AutoScalingPlansStore
+	ELB               *ELBStore
 	Route53           *Route53Store
 	WAF               *WAFStore
 	SNS               *SNSStore
@@ -61,6 +63,9 @@ type Gateway struct {
 	Catalog http.Handler
 	// CatalogOwns reports whether a request belongs to Catalog.
 	CatalogOwns func(*http.Request) bool
+	// BedrockRuntime is the opt-in local inference adapter; nil means
+	// disabled, which answers every inference request with an explicit error.
+	BedrockRuntime *BedrockRuntime
 }
 type failure struct {
 	XMLName   xml.Name `xml:"Error"`
