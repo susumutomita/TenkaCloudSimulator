@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "base_sha": "66287bb49d39b22b1974b59773096e9d51004627",
+  "base_sha": "e4d30099cd6bc8a70986eb3b634b34af621f24d0",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "cf52f6a52a5d022deccfeeda6f9f03ea6de7c0d340744f000d027ca0ede0950b",
+      "sha256": "2f8cfea51cd2b5dfdc62854b462ecda85bce701a46ce72ea39707fc03ae0103a",
       "disposition": "documentation",
       "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "2bb530b14dc4492780a504b34837e56488b6526be8c6bac86bd2cae156207ff8",
+      "sha256": "a71d5ad8c43f1a63261e82f6f4de7f4fe3e61de1e33558dc22a9f40a19ac17c2",
       "disposition": "documentation",
       "reason": "Service guide and README links describing the bounded operations, limits, deviations and verification; no executable behavior.",
       "models": []
@@ -27,7 +27,7 @@
       "path": "formal/AutoScalingPlanTargets.cfg",
       "sha256": "24e0cbee679c3941f5b775c9c31b6104d1be3c1a20fe43a015a7a9585bece1c9",
       "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after ELB, before Route53) and server composition leave other services unchanged.",
       "models": [
         {
           "id": "AutoScalingPlanTargets",
@@ -48,7 +48,7 @@
       "path": "formal/AutoScalingPlanTargets.tla",
       "sha256": "db1de5c41a9b52120e6aa803e48a15d64081a8d683664dc204065223ed22b3fa",
       "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after ELB, before Route53) and server composition leave other services unchanged.",
       "models": [
         {
           "id": "AutoScalingPlanTargets",
@@ -67,7 +67,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "a6409012bf34165b6a9b61d1d78085959ac96a0cf694ed7026cc2e87652ee11f",
+      "sha256": "b55884920039dc25d5d090093ba47c34804aff6d2fca0609cca08d2744629559",
       "disposition": "formal-infrastructure",
       "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
       "models": []
@@ -76,7 +76,7 @@
       "path": "internal/aws/autoscalingplans_dispatch.go",
       "sha256": "6b143c9ff39aef3d969e4c38d6122ae4a8cf9e106216cbf939cfef0afb111cbb",
       "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after ELB, before Route53) and server composition leave other services unchanged.",
       "models": [
         {
           "id": "AutoScalingPlanTargets",
@@ -97,7 +97,7 @@
       "path": "internal/aws/autoscalingplans_http.go",
       "sha256": "8ec7c9473cc4a66d858998ce866f32f9bb5ffed6e50b928263440a581984cd85",
       "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after ELB, before Route53) and server composition leave other services unchanged.",
       "models": [
         {
           "id": "AutoScalingPlanTargets",
@@ -118,7 +118,7 @@
       "path": "internal/aws/autoscalingplans_store.go",
       "sha256": "593c63829d662aa2b84f28370338371a6a51a112f54852d5cea6bd915d5d4d7a",
       "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after ELB, before Route53) and server composition leave other services unchanged.",
       "models": [
         {
           "id": "AutoScalingPlanTargets",
@@ -144,9 +144,9 @@
     },
     {
       "path": "internal/aws/s3.go",
-      "sha256": "1d94272833d34cc3b9bc1360bb43f47751ed41cc7bb38f7237b2c51fc89a14b7",
+      "sha256": "024733630dfa78106f239813524743975ab3040e43d8ff8dc060bd3b9f9a529f",
       "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after ELB, before Route53) and server composition leave other services unchanged.",
       "models": [
         {
           "id": "AutoScalingPlanTargets",
@@ -165,9 +165,9 @@
     },
     {
       "path": "internal/aws/ssm.go",
-      "sha256": "67f8b847f6be10c5771cec7c9d17c12b71f9633f1de191e4b8de3627a9e2e2c8",
+      "sha256": "81fe042385ebaee7fb2035dd44e78805c3bc2e2a61d554e2e0ddbfc2552d0528",
       "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after ELB, before Route53) and server composition leave other services unchanged.",
       "models": [
         {
           "id": "AutoScalingPlanTargets",
@@ -200,9 +200,9 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "77a4af0ef1a735aa91a466e964faa87aa876a8be49bccc721fabdb883714fa39",
+      "sha256": "2ab659fc4040898c3d8f08b2c65f5a2e1548f34c50c3f81609a2e3ef418a24e5",
       "disposition": "modeled",
-      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch and server composition leave other services unchanged.",
+      "reason": "Adds bounded Auto Scaling Plans native state: plan/resource rows and DynamoDB capacity bounds commit in one transaction after complete validation and immutable caller authorization (plan action plus caller DynamoDB table authority); denied, invalid, conflicting or failed requests write nothing; delete keeps capacity; one owner per table dimension; additive Gateway field, dispatch (after ELB, before Route53) and server composition leave other services unchanged.",
       "models": [
         {
           "id": "AutoScalingPlanTargets",
@@ -221,14 +221,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "f733a536639b0e2b6e3eea96cd02aef3bd63aeb124b96ba31f3a2a3e0616b41c",
+      "sha256": "a0b247cabc574d7498c8b1ddeb8a19fb582ea89e6a72973d5714dd183528d989",
       "disposition": "formal-infrastructure",
       "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "d55fea9a21cb0195ab5550d263ed74248ef10b96bb0f98fc8a3bcdaa29ab5a52",
+      "sha256": "992b6a043788c72dcb638b70be3b4213f057dca8e179f962b3958213dc444e85",
       "disposition": "formal-infrastructure",
       "reason": "Registers the AutoScalingPlanTargets model, invariants, eleven mutation controls and exact source scope in the mandatory formal gate policy and its detector tests.",
       "models": []
@@ -249,7 +249,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "d1089900bd58afe1ab5600cf1341257e3888e7dcb23e23b7ee3cbac9692d8e8e",
+      "sha256": "28fbc054090c07bad3ccd243159791a25910b2cc37dc4ea342a02a5be2fc33ba",
       "disposition": "test-support",
       "reason": "Test or e2e support for the bounded Auto Scaling Plans contract (native Go, composed server, boto3 SDK, served templates, reference projection/detectors); not production state.",
       "models": []

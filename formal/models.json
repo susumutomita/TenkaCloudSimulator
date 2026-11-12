@@ -10913,6 +10913,123 @@
    ]
   },
   {
+   "id": "ELBTargetLifecycle",
+   "model": "formal/ELBTargetLifecycle.tla",
+   "config": "formal/ELBTargetLifecycle.cfg",
+   "bounds": "Two team databases, one load balancer, Lambda target group, forward listener and registration each, health epochs 0..3, one in-flight check per team.",
+   "properties": [
+    "TypeOK",
+    "ListenerReferencesExist",
+    "TargetNeedsGroup",
+    "HealthCurrent",
+    "ReportedHealthInUse",
+    "OnlyAuthorizedChanges",
+    "OtherTeamUnchanged"
+   ],
+   "limits": "Reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result abstraction only; consecutive thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, resource-policy evaluation, Lambda execution, SQL/Go refinement, crashes and liveness are not modeled. Native, server and SDK tests cover them independently.",
+   "source_scope": [
+    "internal/aws/elb_store.go",
+    "internal/aws/elb_dispatch.go",
+    "internal/aws/elb_query.go",
+    "internal/aws/elb_target.go",
+    "internal/aws/apirouting/alb_headers.go",
+    "internal/aws/lambda_permissions.go",
+    "internal/aws/s3.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "OmitInUseGuard",
+     "edits": [
+      {
+       "old": "DeleteTG(t) == /\\ tg[t] /\\ ~listener[t]",
+       "new": "DeleteTG(t) == /\\ tg[t]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ListenerReferencesExist"
+    },
+    {
+     "id": "OmitListenerCascade",
+     "edits": [
+      {
+       "old": "/\\ lb' = Set(lb, t, FALSE) /\\ listener' = Set(listener, t, FALSE)",
+       "new": "/\\ lb' = Set(lb, t, FALSE) /\\ listener' = listener",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ListenerReferencesExist"
+    },
+    {
+     "id": "OmitTargetCascade",
+     "edits": [
+      {
+       "old": "/\\ tg' = Set(tg, t, FALSE) /\\ target' = Set(target, t, FALSE)",
+       "new": "/\\ tg' = Set(tg, t, FALSE) /\\ target' = target",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TargetNeedsGroup"
+    },
+    {
+     "id": "OmitEpochGuard",
+     "edits": [
+      {
+       "old": "IF inflight[t] = epoch[t] /\\ target[t] /\\ tg[t]",
+       "new": "IF target[t] /\\ tg[t]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HealthCurrent"
+    },
+    {
+     "id": "OmitUnuseReset",
+     "edits": [
+      {
+       "old": "/\\ listener' = Set(listener, t, FALSE) /\\ Bump(t)",
+       "new": "/\\ listener' = Set(listener, t, FALSE) /\\ Same(t)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReportedHealthInUse"
+    },
+    {
+     "id": "CheckUnusedGroup",
+     "edits": [
+      {
+       "old": "StartCheck(t) == /\\ tg[t] /\\ target[t] /\\ listener[t] /\\ inflight[t] = -1",
+       "new": "StartCheck(t) == /\\ tg[t] /\\ target[t] /\\ inflight[t] = -1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReportedHealthInUse"
+    },
+    {
+     "id": "OmitAuthorization",
+     "edits": [
+      {
+       "old": "/\\ IF auth THEN Effect(t) ELSE UNCHANGED state",
+       "new": "/\\ Effect(t)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyAuthorizedChanges"
+    },
+    {
+     "id": "ChangeOtherTeam",
+     "edits": [
+      {
+       "old": "CreateLB(t) == /\\ ~lb[t] /\\ lb' = Set(lb, t, TRUE)",
+       "new": "CreateLB(t) == /\\ ~lb[t] /\\ lb' = [u \\in Teams |-> TRUE]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OtherTeamUnchanged"
+    }
+   ]
+  },
+  {
    "id": "AutoScalingPlanTargets",
    "model": "formal/AutoScalingPlanTargets.tla",
    "config": "formal/AutoScalingPlanTargets.cfg",
