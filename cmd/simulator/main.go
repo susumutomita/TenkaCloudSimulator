@@ -41,6 +41,10 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	if err != nil {
 		return err
 	}
+	bedrockOptions, err := registerBedrockFlags(flags)
+	if err != nil {
+		return err
+	}
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -56,6 +60,13 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	sakuraScope, err := validateSakuraFlags(*sakuraOptions, *unsafe)
 	if err != nil {
 		return err
+	}
+	bedrockRuntime, err := validateBedrockFlags(*bedrockOptions, *unsafe)
+	if err != nil {
+		return err
+	}
+	if bedrockRuntime != nil {
+		defer bedrockRuntime.Close()
 	}
 	host, _, err := net.SplitHostPort(*listen)
 	if err != nil {
@@ -75,7 +86,7 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 	if err != nil {
 		return err
 	}
-	handler, closeState, err := server.NewWithProviders(*statePath, server.ProviderConfig{CloudStorage: cloudConfig, SakuraDisks: sakuraScope})
+	handler, closeState, err := server.NewWithProviders(*statePath, server.ProviderConfig{CloudStorage: cloudConfig, SakuraDisks: sakuraScope, BedrockRuntime: bedrockRuntime})
 	if err != nil {
 		_ = l.Close()
 		return err
@@ -100,9 +111,16 @@ func run(ctx context.Context, args []string, output io.Writer) error {
 		}
 	}
 	srv := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 32 << 10}
+	if bedrockRuntime != nil {
+		// Cancel bounded local generations as soon as shutdown begins.
+		srv.RegisterOnShutdown(bedrockRuntime.Close)
+	}
 	done := make(chan error, 1)
 	go func() { done <- srv.Serve(l) }()
 	fmt.Fprintf(output, "TenkaCloud Simulator · independent local simulation\nConsole http://%s/_simulator/console/\nAWS simulation endpoint http://%s\n", l.Addr(), l.Addr())
+	if bedrockRuntime != nil {
+		fmt.Fprintf(output, "Bedrock Runtime: local %s backend, %d mapped model(s); no cloud or synthetic fallback\n", bedrockRuntime.BackendName(), len(bedrockRuntime.ModelIDs()))
+	}
 	select {
 	case err := <-done:
 		if err != http.ErrServerClosed {

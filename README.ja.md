@@ -82,6 +82,8 @@ Python 3.12のみ、ゲストメモリ128 MiB、タイムアウト1〜30秒で�
   [SSM値パラメータ](docs/cloudformation-ssm-parameters.md)、
   [native IAM profile](docs/cloudformation-iam-profiles.md)、
   [固定SSM policy](docs/iam-ssm-managed-policy.md)。
+- **ローカルAI推論（任意で有効化）：** [自分のOllamaで動くBedrock Runtime InvokeModel/Converse](docs/bedrock-runtime.md)。
+  既定では無効です。クラウドへの代替接続、ストリーミング、ツール利用には対応しません。
 - **他クラウド：** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md)、
   [App Engine（Python 3.12 WSGIバージョン、トラフィック分割、ファイアウォール）](docs/gcp-appengine.md)、
   [Google Cloudの画面](docs/gcp-console.md)、[Azureの画面](docs/azure-console.md)、
