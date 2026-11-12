@@ -2290,6 +2290,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/cloudformation_intrinsic_refusals_test.go",
+      "sha256": "dd7f3caacfaec30498c74bd121aba895acaa19456ab49fc00eb98f377f8c0851",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
+    },
+    {
       "path": "internal/aws/cloudformation_intrinsics_test.go",
       "sha256": "601cdaa233e32e3f28ef070a4b196ef127a8ee0eef02162d2aa4ea3196154735",
       "disposition": "test-support",
@@ -3308,6 +3315,13 @@
           "limits": "Finite requested-state specification, not Go refinement. Exact serialized document/metadata are pin atoms; no SQL/parser proof, concurrent transactions, arbitrary trigger peer writes, customer-policy algorithm replacement, SSM handler/agent or Battle execution claim. See docs/formal-iam-builtin-pin-transaction.md."
         }
       ]
+    },
+    {
+      "path": "internal/aws/s3_multipart_xml_test.go",
+      "sha256": "aafbb2e7187e781e2035a008eac923ed5a0e25c90a075dcfe7fe871d3751de8e",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
     },
     {
       "path": "internal/aws/secret_storage_faults_test.go",
@@ -4515,6 +4529,13 @@
           "limits": "Companion to unchanged EC2GuestAttachmentLifecycle, not a replacement. Checks ordering of pinned planning, durable readback, captured paused QMP ownership, attachment/activation, private QGA readiness, generation publication, teardown, network ownership and child admission. Equality/validity predicates abstract byte validation and SQL/OS APIs; no proof of parser correctness, actual networking, cryptography, PID/FD identity, resource quota cardinality, packet routing, real image execution, liveness or Go refinement. Separate modes do not prove arbitrary cross-mode interference. Restart cannot recover physical authority. Successful checking is not physical Battle acceptance."
         }
       ]
+    },
+    {
+      "path": "internal/server/s3_multipart_refusals_test.go",
+      "sha256": "f3ce2456ae15f26eded133412fb8e27c71441d19709a42e23c7773836dfa7706",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
     },
     {
       "path": "internal/server/sakura_provider.go",
