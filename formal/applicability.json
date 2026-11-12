@@ -2978,6 +2978,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/iam_cloudformation_compile_test.go",
+      "sha256": "e403dd3a64410d743c7deb42cac0d52d4e7637c616a6940ded49978f092cba35",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
+    },
+    {
       "path": "internal/aws/iam_instance_profiles.go",
       "sha256": "a796ffe6fc8dfe4b155b0fe0163e979ac6c829b62c9bf7beb8378d4b7b14283f",
       "disposition": "modeled",
@@ -4113,6 +4120,13 @@
           "limits": "Finite admission/evaluation abstraction, not JSON/regex/UTF8 correctness or exhaustive IAM. Providers must construct trusted immutable context; core cannot establish trust from arbitrary caller maps. Concrete duplicate parser, escaping, limits and actual immutable provider snapshot require native tests. Scope policy.go only EvaluateWithContext preflight and explicit Deny precedence; unrelated identity storage not modeled."
         }
       ]
+    },
+    {
+      "path": "internal/core/policy_conditions_strict_test.go",
+      "sha256": "7cf2e2c553a1dce386b36f0aa787100fdda5064b686563072c73fd7b6628e9a0",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "models": []
     },
     {
       "path": "internal/core/policy_conditions_test.go",
