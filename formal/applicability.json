@@ -2250,15 +2250,30 @@
     {
       "path": "internal/aws/cloudformation_ssm_parameters.go",
       "sha256": "aedbc6970d3438eda3acc0de7a80ab5849988b01e57fef67d44a616afa7f34e2",
-      "disposition": "needs-review",
-      "reason": "",
-      "models": []
+      "disposition": "modeled",
+      "reason": "Typed SSM parameter admission keeps validation and per-key ssm:GetParameters authorization before any read and one atomic snapshot. A missing row for an /aws/service/ami-amazon-linux-latest/ alias may resolve, inside that same snapshot and only after authorization, to the configured VM runtime first pinned image ID; a stored local row always wins, nothing is fetched and other names still fail closed.",
+      "models": [
+        {
+          "id": "CFNParameterSnapshot",
+          "properties": [
+            "ValidateBeforeRead",
+            "AuthorizeEveryKeyBeforeRead",
+            "OneAtomicSnapshot",
+            "NoFailedWrites",
+            "AdmissionExact",
+            "KeysPreserved",
+            "SnapshotFrozen",
+            "ReplayNoSourceRead"
+          ],
+          "limits": "The runtime image alias is an abstract resolved source value equivalent to a row read; no proof that the pinned image matches the AWS public AMI, no AMI validity, VM execution, SQL/IAM/Go refinement or liveness claim. Focused native tests cover alias, precedence and non-AMI rejection."
+        }
+      ]
     },
     {
       "path": "internal/aws/cloudformation_ssm_parameters_test.go",
       "sha256": "7855188f2b5061b35bf5a1bfc867033e19a183ef9c63daa69811297bf39d39a7",
-      "disposition": "needs-review",
-      "reason": "",
+      "disposition": "test-support",
+      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
       "models": []
     },
     {
