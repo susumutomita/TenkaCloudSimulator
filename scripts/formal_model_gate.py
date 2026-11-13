@@ -1324,6 +1324,13 @@ BASE_INVARIANTS['EC2ReadDiscovery'] = {'TypeOK', 'AuthorizedRead', 'RegionBound'
 REQUIRED_MUTANTS['EC2ReadDiscovery'] = {'MissingAllow', 'MissingDeny', 'MissingRegion', 'MissingOwner'}
 REQUIRED_SOURCE_SCOPES['EC2ReadDiscovery'] = {'internal/aws/ec2_read.go', 'internal/aws/ssm.go', 'internal/server/server.go'}
 
+# Independent Lambda execution-role bridge decision source. These fixed sets
+# must not be derived from the mutable registry, which this gate validates.
+BASE_MODELS.add('LambdaExecutionRoleBridge')
+BASE_INVARIANTS['LambdaExecutionRoleBridge'] = {'TypeOK', 'NoCallerEscalation', 'NoCallerNarrowing', 'CanceledNotDispatched'}
+REQUIRED_MUTANTS['LambdaExecutionRoleBridge'] = {'InheritCallerSession', 'IntersectCallerSession', 'DispatchAfterCancel'}
+REQUIRED_SOURCE_SCOPES['LambdaExecutionRoleBridge'] = {'internal/aws/lambda_bridge.go', 'internal/aws/lambda_bridge_test.go', 'internal/aws/lambda_bridge_cancel_test.go'}
+
 class GateError(ValueError):
     pass
 
