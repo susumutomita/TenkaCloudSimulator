@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
 )
 
@@ -243,5 +244,55 @@ func TestImageDimensionAdmissionBounds(t *testing.T) {
 	}
 	if checkStandaloneHeader(bytes.NewReader(b), 511) == nil {
 		t.Fatal("file shorter than first cluster accepted")
+	}
+}
+
+// A candidate is untrusted as a file type even when its name is canonical and
+// its parent is private. In particular, opening a FIFO must not await a writer.
+func TestIndependentImageRejectsNonRegularAndShortCandidates(t *testing.T) {
+	dir, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Chmod(dir, 0700); err != nil {
+		t.Fatal(err)
+	}
+	b := header()
+	originalPath := filepath.Join(dir, "original")
+	if err = os.WriteFile(originalPath, b, 0600); err != nil {
+		t.Fatal(err)
+	}
+	original, err := os.Open(originalPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer original.Close()
+	fifo := filepath.Join(dir, "fifo")
+	if err = syscall.Mkfifo(fifo, 0600); err != nil {
+		t.Fatal(err)
+	}
+	directory := filepath.Join(dir, "directory")
+	if err = os.Mkdir(directory, 0700); err != nil {
+		t.Fatal(err)
+	}
+	short := filepath.Join(dir, "short")
+	if err = os.WriteFile(short, b[:511], 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, candidate := range []string{fifo, directory, short} {
+		t.Run(filepath.Base(candidate), func(t *testing.T) {
+			f, err := OpenIndependentImage(candidate, pin(b), original)
+			if f != nil {
+				f.Close()
+				t.Fatal("rejected candidate returned an owned descriptor")
+			}
+			if err == nil {
+				t.Fatal("invalid file type or size admitted")
+			}
+		})
+	}
+	got, err := os.ReadFile(originalPath)
+	if err != nil || !bytes.Equal(got, b) {
+		t.Fatal("original changed", err)
 	}
 }
