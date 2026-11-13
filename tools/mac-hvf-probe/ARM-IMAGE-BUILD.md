@@ -57,3 +57,28 @@ force a newly generated image through without review.
    all owned processes. A shell Exit is not proof of VM teardown or isolation.
 5. Only after image and lifecycle qualification can the actual Battle
    initialize/operate/grade/cleanup be attempted. This file is not that result.
+
+## Non-executing builder preparation implementation
+
+`builder_plan.py` is the first independent implementation increment. It validates
+pinned input image/overlay hashes, requires a new private output directory,
+copies the base to an independent inode, rechecks both copies, and writes a
+fixed builder-only local NoCloud script. It does not call QEMU, hdiutil, a shell
+or an image editor. The current change does not yet provide an executable VM
+builder command to the operator.
+
+The proposed guest script mounts only the read-only `TCSOVERLAY` medium, verifies
+the fixed tar digest, applies the reviewed five-file overlay to the guest root,
+verifies binary/marker/service link, syncs and powers off. Failure emits a distinct
+marker and powers off. It does not start the relay. The eventual launcher must
+retain NIC/share/SSH absence, timeout/owned-child cleanup, the fixed wait-online
+credential, read-only seed/overlay drives, and write only the new candidate disk.
+Do not replace the denied automated launch with this future launcher.
+
+Preparation failures leave an `INCOMPLETE` marker and no success receipt. Never
+reuse that directory or promote its disk; no automatic deletion/recovery occurs.
+The private-directory/no-concurrent-modification assumption remains necessary:
+path checks are not a race-proof hostile-host boundary. Exact binary toolchain,
+actual guest installation, cloud-init build-state cleanup for later runtime,
+image verification and Hello/Ready/Exit are still unqualified. An installed
+file marker alone cannot satisfy any runtime acceptance.
