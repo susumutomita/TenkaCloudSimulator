@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 )
@@ -187,4 +188,65 @@ func mustBridgeJSON(t *testing.T, v any) []byte {
 		t.Fatal(err)
 	}
 	return data
+}
+
+func TestLambdaCapabilityIgnoresCallerSessionContext(t *testing.T) {
+	db, s := s3TestState(t)
+	parameters, err := NewParameterStore(db.Database())
+	if err != nil {
+		t.Fatal(err)
+	}
+	identities := core.NewIdentities(db)
+	policy, err := core.ParsePolicy([]byte(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"ssm:GetParameter","Resource":"arn:aws:ssm:us-east-1:000000000000:parameter/own/*"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = identities.Set("executor", policy); err != nil {
+		t.Fatal(err)
+	}
+	for name, value := range map[string]string{"/own/value": "safe-value", "/private/value": "private-dummy"} {
+		if _, err = parameters.Put("us-east-1", name, "String", value, nil, false); err != nil {
+			t.Fatal(err)
+		}
+	}
+	gateway := &Gateway{Store: db, S3: s, Parameters: parameters, Identities: identities}
+	invoke := gateway.lambdaExchange(LambdaFunction{Region: "us-east-1", Role: "arn:aws:iam::000000000000:role/executor"}, "us-east-1")
+	read := func(ctx context.Context, name string) string {
+		t.Helper()
+		body, _ := json.Marshal(map[string]any{"service": "ssm", "operation": "GetParameter", "parameters": map[string]string{"Name": name}})
+		data, err := invoke(ctx, body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return string(data)
+	}
+	// A caller that may read everything must not lend that authority to the function.
+	everything := core.Policy{Version: "2012-10-17", Statement: core.Statements{{Effect: "Allow", Action: core.StringList{"*"}, Resource: core.StringList{"*"}}}}
+	broad := context.WithValue(context.Background(), sdkPolicyContextKey{}, everything)
+	broad = context.WithValue(broad, sdkIdentityContextKey{}, SDKIdentity{Principal: "caller"})
+	if got := read(broad, "/private/value"); !strings.Contains(got, "AccessDenied") || strings.Contains(got, "private-dummy") {
+		t.Fatal("caller session policy replaced the execution role", got)
+	}
+	// A caller that may read nothing, or is bound to one console parameter or one
+	// terminal target, does not narrow the function's own role either.
+	narrow := context.WithValue(context.Background(), sdkPolicyContextKey{}, core.Policy{Version: "2012-10-17"})
+	narrow = context.WithValue(narrow, consoleParameterBoundaryKey{}, consoleParameterBoundary{name: "/other", region: "us-east-1", arn: "arn:aws:ssm:us-east-1:000000000000:parameter/other"})
+	narrow = context.WithValue(narrow, terminalBoundaryKey{}, terminalBoundary{"us-east-1", "i-other"})
+	if got := read(narrow, "/own/value"); !strings.Contains(got, "safe-value") {
+		t.Fatal("caller session boundary replaced the execution role", got)
+	}
+	canceled, cancel := context.WithCancel(broad)
+	cancel()
+	if _, err = invoke(canceled, json.RawMessage(`{}`)); err != context.Canceled {
+		t.Fatal("cancellation did not reach the capability", err)
+	}
+	deadline, stop := context.WithTimeout(broad, time.Hour)
+	defer stop()
+	scoped := executionRoleContext{deadline}
+	if scoped.Value(sdkPolicyContextKey{}) != nil || scoped.Value(sdkIdentityContextKey{}) != nil || scoped.Done() != deadline.Done() {
+		t.Fatal("execution-role context kept caller values or lost cancellation")
+	}
+	if when, ok := scoped.Deadline(); !ok || when.IsZero() {
+		t.Fatal("execution-role context lost the invocation deadline")
+	}
 }

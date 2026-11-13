@@ -391,7 +391,25 @@ func TestConsoleHandoffRequiresAccessCapability(t *testing.T) {
 	bareRequest.Header.Set("X-Simulator-Authentication", "required")
 	bareResponse := httptest.NewRecorder()
 	h.ServeHTTP(bareResponse, bareRequest)
-	if bareResponse.Code != 200 || strings.Contains(bareResponse.Body.String(), `"consoleHandoff"`) {
-		t.Fatal("embedding without Access advertised console handoff", bareResponse.Code)
+	if bareResponse.Code != 200 || strings.Contains(bareResponse.Body.String(), `"consoleHandoff"`) || strings.Contains(bareResponse.Body.String(), `"nativeSdk"`) {
+		t.Fatal("embedding without Access advertised console handoff or native SDK sessions", bareResponse.Code)
+	}
+	operator := strings.Repeat("n", 64)
+	a, err := NewAccess(h, operator, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	authenticated := httptest.NewRequest("GET", "http://127.0.0.1:4566/_simulator/v1/capabilities", nil)
+	authenticated.Header.Set("X-Simulator-Token", operator)
+	response := httptest.NewRecorder()
+	a.ServeHTTP(response, authenticated)
+	var advertised struct {
+		NativeSDK struct {
+			Version  int
+			Services []string
+		} `json:"nativeSdk"`
+	}
+	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &advertised) != nil || advertised.NativeSDK.Version != 1 || strings.Join(advertised.NativeSDK.Services, ",") != "sts,iam,cloudformation,ssm,lambda" {
+		t.Fatal("Access did not advertise the native SDK services it verifies", response.Code, response.Body.String())
 	}
 }
