@@ -13,7 +13,7 @@ class ArtifactValidation(unittest.TestCase):
             path.write_bytes(b'test fixture, never executed')
             expected = {'kernel': hashlib.sha256(path.read_bytes()).hexdigest()}
             with patch.object(boot_probe, 'EXPECTED', expected):
-                self.assertEqual(boot_probe.verified_files(root), [str(path)])
+                self.assertEqual(boot_probe.verified_files(root), [str(path.resolve())])
 
     def test_tampered_artifact_rejected(self):
         with tempfile.TemporaryDirectory() as root:
