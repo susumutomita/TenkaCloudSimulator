@@ -57,10 +57,11 @@ func verify(originalPath, parent string) (_ result, err error) {
 			err = errors.Join(err, os.RemoveAll(directory))
 		}
 	}()
-	directory, e = filepath.EvalSymlinks(directory)
+	canonicalDirectory, e := filepath.EvalSymlinks(directory)
 	if e != nil {
 		return result{}, e
 	}
+	directory = canonicalDirectory
 	if e = os.Chmod(directory, 0700); e != nil {
 		return result{}, e
 	}
