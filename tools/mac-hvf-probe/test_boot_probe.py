@@ -33,7 +33,7 @@ class ArtifactValidation(unittest.TestCase):
 
 
 class BootExecutionContract(unittest.TestCase):
-    def run_case(self, chunks, ticks=None, code=0, expected_error=None):
+    def run_case(self, chunks, ticks=None, code=0, expected_error=None, inspect_identity=False):
         child = Mock()
         child.stdin = io.BytesIO()
         child.stdout = Mock()
@@ -56,11 +56,11 @@ class BootExecutionContract(unittest.TestCase):
             stack.enter_context(patch.object(boot_probe.sys, 'stderr', errors))
             if expected_error:
                 with self.assertRaises(expected_error):
-                    boot_probe.main('/fixed')
+                    boot_probe.main('/fixed', inspect_identity=inspect_identity)
                 child.kill.assert_called_once_with()
                 self.assertEqual(output.write.call_count, 0, 'failure printed success')
             else:
-                boot_probe.main('/fixed')
+                boot_probe.main('/fixed', inspect_identity=inspect_identity)
                 child.kill.assert_not_called()
             self.assertTrue(child.stdin.closed)
             child.stdout.close.assert_called()
@@ -72,8 +72,12 @@ class BootExecutionContract(unittest.TestCase):
             self.assertEqual(args[args.index('-serial') + 1], 'stdio')
             self.assertEqual(args[args.index('-kernel') + 1], '/fixed/kernel')
             self.assertEqual(args[args.index('-initrd') + 1], '/fixed/initrd')
-            for forbidden in ['-drive', '-netdev', '-fsdev', '-device']:
+            for forbidden in ['-drive', '-netdev', '-fsdev'] + ([] if inspect_identity else ['-device']):
                 self.assertNotIn(forbidden, args)
+            if inspect_identity:
+                self.assertEqual(args[args.index('-uuid') + 1], 'b42718a6-5b28-4f82-8d9c-cd91dfe925c1')
+                self.assertIn('null,id=session-probe', args)
+                self.assertIn('virtserialport,chardev=session-probe,name=org.tenkacloud.session.0', args)
             return child
 
     def test_success_uses_fixed_safe_argv_and_environment(self):
@@ -91,6 +95,9 @@ class BootExecutionContract(unittest.TestCase):
                              ([b'TCS_ARCH_aarch64 Power down', b''], 1)]:
             with self.subTest(code=code, chunks=chunks):
                 self.run_case(chunks, code=code, expected_error=ValueError)
+
+    def test_identity_probe_uses_only_fixed_null_channel(self):
+        self.run_case([b'~ # ', b'org.tenkacloud.session.0\nTCS_ARCH_aarch64\nPower down\n', b''], inspect_identity=True)
 
     def test_wrong_platform_never_launches(self):
         with patch.object(boot_probe.platform, 'system', return_value='Linux'), \

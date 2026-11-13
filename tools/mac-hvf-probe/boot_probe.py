@@ -29,7 +29,7 @@ def verified_files(directory):
     return result
 
 
-def main(directory):
+def main(directory, inspect_identity=False):
     if platform.system() != 'Darwin' or platform.machine() != 'arm64':
         raise SystemExit('Apple Silicon required; no fallback')
     kernel, initrd = verified_files(directory)
@@ -38,6 +38,10 @@ def main(directory):
             '-display', 'none', '-monitor', 'none', '-serial', 'stdio',
             '-kernel', kernel, '-initrd', initrd,
             '-append', 'console=ttyAMA0 rdinit=/bin/sh panic=-1']
+    if inspect_identity:
+        args += ['-uuid', 'b42718a6-5b28-4f82-8d9c-cd91dfe925c1',
+                 '-device', 'virtio-serial-pci', '-chardev', 'null,id=session-probe',
+                 '-device', 'virtserialport,chardev=session-probe,name=org.tenkacloud.session.0']
     start = time.monotonic()
     child = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT, env={})
@@ -58,6 +62,8 @@ def main(directory):
                 if len(output) > 1024 * 1024:
                     raise ValueError('serial output budget exceeded')
                 if b'~ # ' in output and not sent:
+                    if inspect_identity:
+                        child.stdin.write(b"/bin/busybox mount -t sysfs sysfs /sys; /bin/busybox cat /sys/class/dmi/id/product_uuid; /bin/busybox cat /sys/class/virtio-ports/*/name; /bin/busybox test -c /dev/virtio-ports/org.tenkacloud.session.0 && echo TCS_NAMED_CHAR_PRESENT\n")
                     child.stdin.write(b"printf 'TCS_ARCH_'; /bin/busybox uname -m; /bin/busybox poweroff -f\n")
                     child.stdin.flush()
                     sent = True
@@ -74,11 +80,15 @@ def main(directory):
     print(json.dumps({'result': 'trusted-arm64-initramfs-boot-pass', 'battleReady': False,
                       'guestBooted': True, 'ownedChildReaped': True,
                       'elapsedSeconds': round(time.monotonic() - start, 3),
-                      'artifacts': EXPECTED}))
+                      'artifacts': EXPECTED,
+                      'identityProbe': inspect_identity,
+                      'matchingDMIUUID': b'b42718a6-5b28-4f82-8d9c-cd91dfe925c1' in output.splitlines(),
+                      'namedVirtioPort': b'org.tenkacloud.session.0' in output.splitlines(),
+                      'namedCharacterDevice': b'TCS_NAMED_CHAR_PRESENT' in output.splitlines()}))
     sys.stdout.buffer.write(output)
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
+    if len(sys.argv) not in (2, 3) or (len(sys.argv) == 3 and sys.argv[2] != '--identity'):
         raise SystemExit('usage: boot_probe.py VERIFIED_ARTIFACT_DIRECTORY')
-    main(sys.argv[1])
+    main(sys.argv[1], inspect_identity=len(sys.argv) == 3)

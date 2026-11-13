@@ -87,3 +87,25 @@ and wrong-platform refusal through mocked process/clock/serial boundaries. All
 These injected failure tests are not real guest quota/OS-isolation tests. Artifact
 path TOCTOU and the unpinned installed QEMU binary remain development limitations;
 this change does not promote the probe to a production runtime.
+
+## Existing relay prerequisites on ARM (measurement, not a replacement relay)
+
+`boot_probe.py VERIFIED_ARTIFACT_DIRECTORY --identity` adds a fixed test UUID
+and a fixed `org.tenkacloud.session.0` virtserialport connected to a null chardev,
+not a socket/listener or arbitrary destination. The trusted guest mounts its own
+sysfs and inspects the existing relay's exact DMI/port prerequisites. It does not
+create an image marker, install a relay, substitute identities or change gates.
+
+Actual Mac/Alpine result: sysfs reported `org.tenkacloud.session.0`, but
+`/sys/class/dmi/id/product_uuid` was absent and the named character-device path
+required by the relay was absent. Output reports `matchingDMIUUID:false`,
+`namedVirtioPort:true`, `namedCharacterDevice:false` separately from guest boot.
+Thus direct kernel/initramfs boot is NOT a qualified relay image. The port exists
+in sysfs but this does not prove a usable PTY or byte exchange. No stream bytes
+were sent through the null port.
+
+The reviewed repository relay source and overlay were integrated by #465; they
+are unchanged here. Their current contract also needs bash, systemd, an image
+marker and real TCS1 Hello UUID equality. A proper ARM guest image must establish
+DMI/firmware availability and udev device naming without weakening that contract.
+The probe does not claim which firmware/image combination supplies them.
