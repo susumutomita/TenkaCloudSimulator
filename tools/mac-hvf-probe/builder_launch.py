@@ -29,14 +29,21 @@ def argv(root, firmware):
 
 def validate(root):
     root = pathlib.Path(root).resolve(strict=True)
-    if ',' in str(root) or not root.is_dir() or root.stat().st_mode & 0o077:
+    if ',' in str(root) or not root.is_dir() or root.stat().st_mode & 0o077 or root.stat().st_uid != os.getuid():
         raise ValueError('operator-private builder directory required')
     if any((root / n).exists() for n in ('INCOMPLETE', 'ATTEMPTED', 'build-result.json', 'builder-serial.log', 'seed.iso', 'overlay.iso')):
         raise ValueError('incomplete or already attempted directory')
     receipt = json.loads((root / 'preparation.json').read_text())
     if receipt.get('state') != 'prepared-not-built' or receipt.get('vmExecuted') is not False:
         raise ValueError('preparation receipt absent/invalid')
-    checked(root / 'candidate.qcow2', 'sha512', IMAGE_SHA512, 1024 ** 3)
+    candidate = root / 'candidate.qcow2'
+    st = candidate.stat()
+    original = receipt.get('sourceIdentity')
+    if (st.st_nlink != 1 or st.st_uid != os.getuid() or st.st_mode & 0o077
+            or not isinstance(original, dict) or set(original) != {'device', 'inode'}
+            or original == {'device': st.st_dev, 'inode': st.st_ino}):
+        raise ValueError('candidate must be a private independent file')
+    checked(candidate, 'sha512', IMAGE_SHA512, 1024 ** 3)
     checked(root / 'overlay/relay.tar', 'sha256', OVERLAY_SHA256, 32 * 1024 ** 2)
     expected = {'user-data': BUILD_SCRIPT,
                 'meta-data': 'instance-id: tcs-arm-builder-v1\nlocal-hostname: tcs-builder\n',
@@ -98,9 +105,6 @@ def execute(root, firmware_directory):
         result = {'state': 'built-not-qualified', 'diskSHA256': digest,
                   'ownedChildReaped': True, 'battleReady': False, 'relayExecuted': False,
                   'cloudInitCleanupVerified': False}
-        with (root / 'build-result.json').open('x') as f:
-            f.write(json.dumps(result, indent=2) + '\n')
-        return result
     except BaseException:
         if child is not None:
             stop_owned(child)
@@ -111,6 +115,10 @@ def execute(root, firmware_directory):
         # Log write can fail. Missing receipt or log is never a successful build.
         with (root / 'builder-serial.log').open('xb') as f:
             f.write(output)
+    # No receipt is published until serial log persistence has succeeded.
+    with (root / 'build-result.json').open('x') as f:
+        f.write(json.dumps(result, indent=2) + '\n')
+    return result
 
 
 if __name__ == '__main__':

@@ -1,4 +1,6 @@
 import pathlib
+import json
+import os
 import tempfile
 import unittest
 from unittest import mock
@@ -56,3 +58,47 @@ class BuilderLauncher(unittest.TestCase):
                 child.kill.assert_called_once()
                 self.assertFalse((root / 'build-result.json').exists())
                 self.assertTrue(any(c.kwargs == {'timeout': 2} for c in child.wait.call_args_list))
+
+    def test_hardlink_rejected_before_hash_or_spawn(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            original = root / 'original'
+            original.write_bytes(b'publisher image')
+            original.chmod(0o600)
+            os.link(original, root / 'candidate.qcow2')
+            (root / 'preparation.json').write_text(json.dumps({
+                'state': 'prepared-not-built', 'vmExecuted': False,
+                'sourceIdentity': {'device': original.stat().st_dev, 'inode': original.stat().st_ino}}))
+            with mock.patch.object(b, 'checked') as check:
+                with self.assertRaisesRegex(ValueError, 'private independent'):
+                    b.validate(root)
+                check.assert_not_called()
+
+    def test_quota_and_iso_failure_never_publish_receipt(self):
+        for iso_fail in (True, False):
+            with self.subTest(iso_fail=iso_fail), tempfile.TemporaryDirectory() as tmp:
+                root = pathlib.Path(tmp)
+                child, sel = self.run_fake(root)
+                with mock.patch.object(b.platform, 'system', return_value='Darwin'), mock.patch.object(b.platform, 'machine', return_value='arm64'), mock.patch.object(b, 'validate', return_value=root), mock.patch.object(b, 'verified_firmware', return_value='/firmware'), mock.patch.object(b.subprocess, 'run', side_effect=OSError('ISO failed') if iso_fail else None), mock.patch.object(b.subprocess, 'Popen', return_value=child) as popen, mock.patch.object(b.selectors, 'DefaultSelector', return_value=sel), mock.patch.object(b.os, 'read', return_value=b'x' * (4 * 1024 ** 2 + 1)):
+                    with self.assertRaises((OSError, ValueError)):
+                        b.execute(root, root)
+                self.assertFalse((root / 'build-result.json').exists())
+                if iso_fail:
+                    popen.assert_not_called()
+                else:
+                    child.kill.assert_called_once()
+
+    def test_success_persists_log_before_unqualified_receipt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / 'candidate.qcow2').write_bytes(b'built fixture')
+            child, sel = self.run_fake(root)
+            serial = b'TCS_BUILD_FILES_INSTALLED\n[1] reboot: Power down\n'
+            with mock.patch.object(b.platform, 'system', return_value='Darwin'), mock.patch.object(b.platform, 'machine', return_value='arm64'), mock.patch.object(b, 'validate', return_value=root), mock.patch.object(b, 'verified_firmware', return_value='/firmware'), mock.patch.object(b.subprocess, 'run'), mock.patch.object(b.subprocess, 'Popen', return_value=child), mock.patch.object(b.selectors, 'DefaultSelector', return_value=sel), mock.patch.object(b.os, 'read', side_effect=[serial, b'']):
+                result = b.execute(root, root)
+            self.assertEqual((root / 'builder-serial.log').read_bytes(), serial)
+            self.assertEqual(json.loads((root / 'build-result.json').read_text()), result)
+            self.assertEqual(result['state'], 'built-not-qualified')
+            self.assertFalse(result['battleReady'])
+            self.assertFalse(result['cloudInitCleanupVerified'])
+            child.kill.assert_not_called()

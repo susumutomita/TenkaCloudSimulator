@@ -1,6 +1,7 @@
 """Prepare fixed offline builder inputs; never launch a VM or modify an image."""
 import hashlib
 import json
+import os
 import pathlib
 import shutil
 import sys
@@ -40,6 +41,7 @@ def prepare(image, overlay, output):
         (output / 'overlay').mkdir(mode=0o700)
         (output / 'seed').mkdir(mode=0o700)
         with image.open('rb') as src, (output / 'candidate.qcow2').open('xb') as dst:
+            os.fchmod(dst.fileno(), 0o600)
             shutil.copyfileobj(src, dst)
         checked(output / 'candidate.qcow2', 'sha512', IMAGE_SHA512, 1024 ** 3)
         with overlay.open('rb') as src, (output / 'overlay/relay.tar').open('xb') as dst:
@@ -49,6 +51,7 @@ def prepare(image, overlay, output):
         (output / 'seed/network-config').write_text('version: 2\nethernets: {}\n')
         (output / 'seed/user-data').write_text(BUILD_SCRIPT)
         receipt = {'state': 'prepared-not-built', 'vmExecuted': False, 'battleReady': False,
+                   'sourceIdentity': {'device': image.stat().st_dev, 'inode': image.stat().st_ino},
                    'baseSHA512': IMAGE_SHA512, 'overlaySHA256': OVERLAY_SHA256,
                    'builderScriptSHA256': hashlib.sha256(BUILD_SCRIPT.encode()).hexdigest(),
                    'failureRule': 'retain candidate as unqualified; never retry or promote automatically'}

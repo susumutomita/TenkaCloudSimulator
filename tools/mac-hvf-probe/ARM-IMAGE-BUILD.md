@@ -109,3 +109,14 @@ and cleanup of builder cloud-init state remains necessary before qualification
 or a later relay boot. No runtime image hash was changed to admit the candidate.
 Parent crash/SIGKILL remains unsupported; do not force-close the operator
 Terminal. No actual ISO creation or VM launch was run for this increment.
+
+Independent-review correction: preparation now records the publisher file's
+source device/inode and makes the candidate mode 0600. Launcher requires current
+user ownership, no group/other access, one hardlink, and a different inode from
+the source receipt. Older prepared directories without sourceIdentity are
+rejected, not upgraded implicitly. This is still an operator-private-directory
+contract, not protection against concurrent malicious same-user modification.
+Serial log persistence now precedes build-result receipt creation. Mock tests
+cover successful unqualified receipt, ISO failure, output quota, timeout,
+missing marker, spawn failure and hardlinked-source rejection. These mocks do
+not prove guest installation or crash-safe storage durability.
