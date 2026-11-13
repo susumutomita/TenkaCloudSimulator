@@ -79,3 +79,11 @@ This proves trusted Linux ARM64 guest execution on this Mac, NOT original Battle
 Amazon Linux compatibility, inner TCG safety, multi-team isolation, clock bootstrap,
 network/IMDS/SSM, persistent VM ownership or participant transport. Those remain
 unimplemented/unverified; simulator and Host runtime gates are unchanged.
+
+Boot execution regression coverage now checks the actual launch argv and empty
+environment, serial-output budget, deadline, missing success markers, nonzero exit
+and wrong-platform refusal through mocked process/clock/serial boundaries. All
+17 tests pass; the real pinned guest boot/poweroff probe was rerun successfully.
+These injected failure tests are not real guest quota/OS-isolation tests. Artifact
+path TOCTOU and the unpinned installed QEMU binary remain development limitations;
+this change does not promote the probe to a production runtime.
