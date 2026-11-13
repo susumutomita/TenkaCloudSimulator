@@ -120,6 +120,39 @@
       "models": []
     },
     {
+      "path": "internal/server/landing/landing.css",
+      "sha256": "e111a030c7f6927404c3de4b830577333c2c9af3586bd30f2d8f71e9ffd3a128",
+      "disposition": "presentation",
+      "reason": "Public decorative canvas source containment and geometry regression; no API, authority or state mutation. Strict accessibility assertions remain; native browser rendering requires independent CI evidence.",
+      "models": []
+    },
+    {
+      "path": "internal/server/landing/landing.mjs",
+      "sha256": "f6bdbb9f7d20ea17c0dae11dd6768400377ca1b5504254b2947e67b66de7a1a9",
+      "disposition": "modeled",
+      "reason": "Public decorative canvas source containment and geometry regression; no API, authority or state mutation. Strict accessibility assertions remain; native browser rendering requires independent CI evidence.",
+      "models": [
+        {
+          "id": "LandingTopologyState",
+          "properties": [
+            "TypeOK",
+            "InitialFragmentSelection",
+            "ProviderSelectsDefault",
+            "NodeClickSelectsExact",
+            "InvalidInputPreservesSelection",
+            "DOMSelectionAgrees",
+            "CanonicalHTMLAvailable",
+            "MountUsesLatestSelection",
+            "UnsupportedCanvasHidden",
+            "RetiredCanvasHidden",
+            "PaintUsesLatestSelection",
+            "RetiredCallbackNoEffect"
+          ],
+          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data, closed initial-fragment resolution and native feature/paint verdicts are assumed; direct URL parsing/encoding/scroll/history is not modeled; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness."
+        }
+      ]
+    },
+    {
       "path": "internal/server/server.go",
       "sha256": "aa1807f01cc57d46f4a415ff83ab0ba976b676f2ba22fccc5dd27daa81b195d4",
       "disposition": "modeled",
@@ -310,9 +343,9 @@
     },
     {
       "path": "test/e2e/landing_topology.py",
-      "sha256": "220bcc20cf6ab716993d99fbc3c23076d7db8d84001025239be1a2680b1a90f4",
+      "sha256": "e4321f8b363db5ecb220c4778495311e07227a27e149b28360a5fc8fac191daf",
       "disposition": "test-support",
-      "reason": "Diagnostic evidence for the existing public landing-page accessibility acceptance only; retains strict violations and incomplete assertions without changing browser state, runtime code or authority.",
+      "reason": "Public decorative canvas source containment and geometry regression; no API, authority or state mutation. Strict accessibility assertions remain; native browser rendering requires independent CI evidence.",
       "models": []
     },
     {
