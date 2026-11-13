@@ -75,6 +75,13 @@
       ]
     },
     {
+      "path": "internal/aws/ec2_read_boundaries_test.go",
+      "sha256": "3d74e79d5474b7b72dbf5c5b2d8c5c2d065589058927b2376045e5b41530339a",
+      "disposition": "test-support",
+      "reason": "Exercise EC2 malformed request, unavailable state and corrupt ownership refusal through public dispatch; stable tag ordering is also checked. No production behavior or verification threshold is changed.",
+      "models": []
+    },
+    {
       "path": "internal/aws/ec2_read_routing_test.go",
       "sha256": "e89570015e8da12743c5e1bac7b1dc6f634faad6692d563ebfaae5c4a9812412",
       "disposition": "test-support",
