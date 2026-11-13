@@ -94,8 +94,22 @@ func checkStandaloneHeader(r io.ReaderAt, size int64) error {
 	}
 	u32 := func(offset int) uint32 { return binary.BigEndian.Uint32(h[offset : offset+4]) }
 	u64 := func(offset int) uint64 { return binary.BigEndian.Uint64(h[offset : offset+8]) }
-	if string(h[:4]) != "QFI\xfb" || u32(4) != 3 || u64(8) != 0 || u32(16) != 0 || u32(32) != 0 || u32(60) != 0 || u64(64) != 0 || u64(72) != 0 || u64(80) != 0 || u64(88) != 0 || u32(96) != 4 || u32(100) != 104 {
+	if string(h[:4]) != "QFI\xfb" || u32(4) != 3 || u64(8) != 0 || u32(16) != 0 || u32(32) != 0 || u32(60) != 0 || u64(64) != 0 || u64(72) != 0 || u64(80) != 0 || u64(88) != 0 || u32(96) != 4 {
 		return ErrPlan
+	}
+	headerLength := int64(u32(100))
+	if headerLength != 104 && headerLength != 112 {
+		return ErrPlan
+	}
+	if headerLength == 112 {
+		var optional [8]byte
+		if _, e := r.ReadAt(optional[:], 104); e != nil {
+			return ErrPlan
+		}
+		// No compression feature: compression type and padding must be zero.
+		if optional != [8]byte{} {
+			return ErrPlan
+		}
 	}
 	bits := u32(20)
 	if bits < 9 || bits > 21 || u64(24) == 0 || u64(24) > uint64(maxImageBytes) {
@@ -108,7 +122,7 @@ func checkStandaloneHeader(r io.ReaderAt, size int64) error {
 	// Only the display-only feature-name table is admitted. Reject backing-format,
 	// external-data, encryption, bitmap and unknown extensions even with clear flags.
 	seenFeatures := false
-	for offset := int64(104); offset+8 <= cluster; {
+	for offset := headerLength; offset+8 <= cluster; {
 		var ext [8]byte
 		if _, e := r.ReadAt(ext[:], offset); e != nil {
 			return ErrPlan

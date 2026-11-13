@@ -171,3 +171,22 @@ func TestImageHeaderRejectsTruncatedAndDuplicateExtensions(t *testing.T) {
 		t.Fatal("nonempty terminator")
 	}
 }
+
+func TestImageHeaderAllowsOnlyZeroOptionalV3Fields(t *testing.T) {
+	b := header()
+	binary.BigEndian.PutUint32(b[100:], 112)
+	if checkStandaloneHeader(bytes.NewReader(b), 512) != nil {
+		t.Fatal("zero optional header rejected")
+	}
+	for _, off := range []int{104, 105, 111} {
+		c := append([]byte(nil), b...)
+		c[off] = 1
+		if checkStandaloneHeader(bytes.NewReader(c), 512) == nil {
+			t.Fatal("nonzero optional field")
+		}
+	}
+	binary.BigEndian.PutUint32(b[100:], 120)
+	if checkStandaloneHeader(bytes.NewReader(b), 512) == nil {
+		t.Fatal("unknown header admitted")
+	}
+}

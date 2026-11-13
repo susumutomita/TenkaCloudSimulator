@@ -105,7 +105,7 @@ SHA-256. Regular-file metadata is checked again after bounded hashing. It opens
 with no-follow/nonblocking/close-on-exec flags; it never modifies image bytes.
 
 This preflight has a deliberately narrower format subset than the existing
-Linux guestvm validator: QCOW2 v3, fixed 104-byte header, refcount order 4, no
+Linux guestvm validator: QCOW2 v3, 104-byte header or 112-byte header with zero optional fields, refcount order 4, no
 backing/encryption/snapshots/feature flags, bounded dimensions, and no extensions
 except a bounded feature-name display table. Unknown or external-file extensions
 are rejected. The QEMU format reference was read for field/extension semantics:
@@ -122,3 +122,8 @@ hostile boundary. Retaining an FD pins an inode, not immutable bytes. This API d
 not pass the FD into QEMU, replace pathname execution, or qualify writable launch;
 that integration must preserve verified identity without reopening by name.
 Runtime/VM/launchd gates remain disabled; no real image or VM has been run here.
+
+A read-only header observation of the prepared official Debian ARM original found
+v3/112-byte header, 3 GiB virtual size and zero feature flags. The 112-byte case is
+therefore accepted only with zero compression type/padding, as documented by QEMU.
+This observation is not full original/candidate validation or image boot evidence.
