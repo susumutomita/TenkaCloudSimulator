@@ -27,7 +27,13 @@ type result struct {
 	BattleReady bool   `json:"battleReady"`
 }
 
-func verify(originalPath, parent string) (_ result, err error) {
+func verify(originalPath, parent string) (result, error) {
+	return verifyPinned(originalPath, parent, originalSize, originalSHA512)
+}
+
+// The CLI always uses the fixed official pin above. Parameters here permit
+// small synthetic regression fixtures, not operator-selected qualification.
+func verifyPinned(originalPath, parent string, expectedSize int64, expectedSHA512 string) (_ result, err error) {
 	if originalPath == "" || parent == "" {
 		return result{}, errors.New("original and scratch are required")
 	}
@@ -44,7 +50,7 @@ func verify(originalPath, parent string) (_ result, err error) {
 	if e != nil {
 		return result{}, e
 	}
-	if !info.Mode().IsRegular() || info.Size() != originalSize {
+	if !info.Mode().IsRegular() || info.Size() != expectedSize {
 		return result{}, errors.New("unexpected original type/size")
 	}
 	directory, e := os.MkdirTemp(parent, "hvf-asset-check-")
@@ -71,12 +77,12 @@ func verify(originalPath, parent string) (_ result, err error) {
 		return result{}, e
 	}
 	sha256Hash, sha512Hash := sha256.New(), sha512.New()
-	n, copyErr := io.Copy(io.MultiWriter(copyFile, sha256Hash, sha512Hash), io.LimitReader(original, originalSize+1))
+	n, copyErr := io.Copy(io.MultiWriter(copyFile, sha256Hash, sha512Hash), io.LimitReader(original, expectedSize+1))
 	closeErr := copyFile.Close()
 	if e = errors.Join(copyErr, closeErr); e != nil {
 		return result{}, e
 	}
-	if n != originalSize || hex.EncodeToString(sha512Hash.Sum(nil)) != originalSHA512 {
+	if n != expectedSize || hex.EncodeToString(sha512Hash.Sum(nil)) != expectedSHA512 {
 		return result{}, errors.New("official original pin mismatch")
 	}
 	digest := hex.EncodeToString(sha256Hash.Sum(nil))

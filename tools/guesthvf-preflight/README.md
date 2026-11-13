@@ -33,3 +33,9 @@ Only trusted operator-controlled inputs/storage are supported; no concurrent
 mutation/replacement of the original or scratch directory is allowed. A cleanup
 error makes the command fail; retain the failed copy for operator diagnosis rather
 than treating failure as a usable runtime image. Automated VM launch stays disabled.
+
+Small synthetic QCOW2 tests now cover successful independent copy admission,
+wrong-pin rejection after copying, and pinned external-backing rejection, checking
+scratch cleanup and unchanged original bytes in each case. The CLI still supplies
+only its fixed official size/hash; synthetic fixtures are rejected through that
+entry point. These unit tests do not qualify the official image or prove VM boot.
