@@ -20,10 +20,21 @@ This does not measure suspend/resume behavior experimentally or qualify Go 1.26.
 (the repository directive) by running that exact toolchain. The checked constructor
 fails when sampling uncertainty exceeds its bound rather than widening the bound.
 
-`BootstrapInherited` and `CloseInheritedExecutable` still reject Darwin. The Host
+`BootstrapInherited` now supports fixed private FD3 on Darwin using the same
+FD-type/CLOEXEC/checked-close implementation as Linux. Actual anonymous pipe and
+AF_UNIX socketpair child-process tests verify one private bootstrap record, no
+stdout/stderr record, and descriptor closure; a regular-file test rejects without
+writing. Existing injected negative tests now also run on Darwin.
+`CloseInheritedExecutable` still rejects Darwin. The Host
 parser still rejects this label. The Battle unsupported-platform guards, inherited
 FD3/FD4 contract and VM supervisor are unchanged. This package cannot make a Mac
 Battle deployment work by itself. Future Host integration must preserve private
 bootstrap, expiry/nonce/HMAC checks and domain identity; no clock label proves
 that another machine shares a clock. No VM, launchd registration or denied log
 operation is part of these tests.
+
+The production CLI checks the unsupported Battle platform before FD3 bootstrap,
+and then requires qualified executable FD4 handling before creating the clock.
+Neither check is relaxed. These short-lived Go test subprocesses are IPC tests,
+not a replacement for the refused launchd experiment or a VM execution attempt.
+They do not prove supervisor-death cleanup, Host integration or Battle E2E.

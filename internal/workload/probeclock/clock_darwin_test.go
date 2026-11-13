@@ -17,7 +17,7 @@ func rawMilliseconds(t *testing.T) int64 {
 	}
 	return ts.Sec*1000 + ts.Nsec/1_000_000
 }
-func TestDarwinUsesActualUptimeRawWithoutEnablingBootstrap(t *testing.T) {
+func TestDarwinUsesActualUptimeRawWithoutEnablingExecutableLaunch(t *testing.T) {
 	before := rawMilliseconds(t)
 	clock, e := New()
 	if e != nil {
@@ -34,9 +34,6 @@ func TestDarwinUsesActualUptimeRawWithoutEnablingBootstrap(t *testing.T) {
 	time.Sleep(2 * time.Millisecond)
 	if clock.NowMs() <= sample {
 		t.Fatal("clock did not advance")
-	}
-	if c, e := BootstrapInherited(); c != nil || !errors.Is(e, ErrClock) {
-		t.Fatal("unqualified bootstrap enabled")
 	}
 	if e := CloseInheritedExecutable(); !errors.Is(e, ErrClock) {
 		t.Fatal("unqualified executable handling enabled")

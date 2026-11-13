@@ -11,7 +11,7 @@ import (
 // mach_absolute_time converted by mach_timebase_info, excluding system sleep.
 // Go's Darwin monotonic time uses that same source. Never label this Linux's
 // CLOCK_MONOTONIC or substitute Darwin CLOCK_MONOTONIC (which includes sleep).
-// This constructor does NOT enable inherited bootstrap or Battle on Darwin.
+// This constructor does NOT qualify executable launch or Battle on Darwin.
 func New() (*Clock, error) {
 	anchor := time.Now()
 	var ts unix.Timespec
