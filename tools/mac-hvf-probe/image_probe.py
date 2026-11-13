@@ -15,6 +15,10 @@ from boot_probe import verified_firmware, read_private_channel
 IMAGE_SHA512 = '4a166ab9a73f27857896b799dff913199ea982e2379889340e60734ba43bea83840c1317f6257a9a8ca466b2293862181a597edc5cdb5d19d4cb704a85b4130a'
 SEED_SHA256 = '40c641be2139814ace726a735da8f6b8994586c4aec55e68e495ec4d4b404478'
 UUID = 'b42718a6-5b28-4f82-8d9c-cd91dfe925c1'
+# Diagnostic guest only: no NIC exists, so waiting for a network is invalid.
+# Empty extra-unit credential masks only this guest boot's wait-online unit.
+OFFLINE_WAIT_MASK = ('type=11,value=io.systemd.credential:'
+                     'systemd.extra-unit.systemd-networkd-wait-online.service=')
 
 
 def checked(path, algorithm, digest, limit):
@@ -55,6 +59,7 @@ def main(directory, firmware_directory):
                 '-cpu', 'host', '-m', '512', '-smp', '1', '-nic', 'none',
                 '-display', 'none', '-monitor', 'none', '-serial', 'stdio',
                 '-bios', firmware, '-uuid', UUID,
+                '-smbios', OFFLINE_WAIT_MASK,
                 '-drive', f'file={disk},format=qcow2,if=none,id=os,snapshot=on',
                 '-device', 'virtio-blk-pci,drive=os',
                 '-drive', f'file={seed},format=raw,if=none,id=seed,readonly=on',

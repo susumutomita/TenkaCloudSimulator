@@ -2,6 +2,7 @@ import hashlib
 import pathlib
 import tempfile
 import unittest
+from unittest import mock
 import image_probe
 
 
@@ -33,3 +34,28 @@ class ImageProbeContract(unittest.TestCase):
             for path in [link, pathlib.Path(root) / 'image,other']:
                 with self.assertRaises(ValueError):
                     image_probe.checked(path, 'sha512', '', 7)
+
+    def test_offline_launch_and_spawn_failure_close_channels(self):
+        host, guest = mock.Mock(), mock.Mock()
+        guest.fileno.return_value = 21
+        with tempfile.TemporaryDirectory() as root, \
+             mock.patch.object(image_probe.platform, 'system', return_value='Darwin'), \
+             mock.patch.object(image_probe.platform, 'machine', return_value='arm64'), \
+             mock.patch.object(image_probe, 'checked', side_effect=['/disk', '/seed']), \
+             mock.patch.object(image_probe, 'verified_firmware', return_value='/firmware'), \
+             mock.patch.object(image_probe.socket, 'socketpair', return_value=(host, guest)), \
+             mock.patch.object(image_probe.subprocess, 'Popen', side_effect=OSError('test spawn failure')) as spawn:
+            with self.assertRaises(OSError):
+                image_probe.main(root, root)
+        args = spawn.call_args.args[0]
+        self.assertEqual(args[args.index('-smbios') + 1],
+                         'type=11,value=io.systemd.credential:systemd.extra-unit.systemd-networkd-wait-online.service=')
+        self.assertEqual(args[args.index('-nic') + 1], 'none')
+        self.assertEqual(args[args.index('-machine') + 1], 'virt,accel=hvf')
+        self.assertNotIn('-netdev', args)
+        self.assertEqual(spawn.call_args.kwargs['env'], {})
+        self.assertEqual(spawn.call_args.kwargs['pass_fds'], (21,))
+        self.assertIn('file=/disk,format=qcow2,if=none,id=os,snapshot=on', args)
+        self.assertIn('file=/seed,format=raw,if=none,id=seed,readonly=on', args)
+        host.close.assert_called_once()
+        guest.close.assert_called_once()

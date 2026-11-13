@@ -198,3 +198,35 @@ snapshot-file operation through an authorized mechanism. Existing initramfs
 results are separate and remain valid. The private-directory TOCTOU and unpinned
 installed QEMU limitations, parent-crash uncertainty and incomplete Battle
 acceptance still apply. Do not treat this preparation as a supported runtime.
+
+### Offline boot ordering candidate (not VM verified)
+
+The operator's subsequent Terminal log reached Debian systemd, udev and
+cloud-init-local, then stopped at systemd-networkd-wait-online until our unchanged
+90-second deadline. It did not produce prerequisite markers or a success JSON.
+The original TimeoutError, rather than TeardownUncertain, is consistent with
+successful exact-child kill/wait in this version; it is not a system-wide process
+inventory. This is distinct from the earlier automated-launch permission denial.
+
+The minimal candidate supplies one fixed SMBIOS OEM string containing an empty
+`systemd.extra-unit.systemd-networkd-wait-online.service` credential. systemd's
+boot generator uses empty extra-unit credentials to mask that unit for the guest
+boot. This does not enable networking, alter macOS services, disable a security
+service, or relax the deadline. It does not modify the base image or seed. No
+other unit, arbitrary credential, account, key or debug shell is supplied.
+
+Official rationale:
+- https://docs.cloud-init.io/en/latest/explanation/boot.html : user-data processing
+  follows the local/network stages, and runcmd is later. Moving the same command
+  to bootcmd/boothook alone does not prove elimination of network dependencies.
+- https://www.freedesktop.org/software/systemd/man/257/systemd-debug-generator.html
+  : empty extra-unit credentials mask units (available since systemd 256).
+- https://systemd.io/CREDENTIALS/ : SMBIOS type 11 supports system credentials;
+  unlike fw_cfg it avoids the latter's 55-character name limitation.
+
+This is a diagnosis-backed candidate, not proof the pinned image consumes the
+credential on ARM or that the wait-online unit was the only blocker. No automated
+VM retry was performed after the permission denial. The 29 passing Python tests
+include a mocked spawn failure checking the exact mask, no NIC, HVF, empty env,
+selected FD, snapshot/read-only drives and closure of both socket endpoints.
+These are host regression tests, not a guest boot, relay or Battle result.
