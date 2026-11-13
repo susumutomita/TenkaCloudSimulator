@@ -262,3 +262,22 @@ bounded fixed command/output/Exit, closure/teardown negatives, then integration
 with the existing owning runtime. The current one-way diagnostic bytes are not
 TCS1. Image creation and automated VM execution must not evade the known sandbox
 restriction; an operator-run boot is not blanket approval for automated retries.
+
+### ARM overlay packaging only
+
+`arm-relay-preparation.json` records the exact source hashes for the existing
+relay/codec and a diagnostic ARM64 overlay. The unchanged repository
+`session-overlay.py` produced overlay SHA256
+`11b2535ad82b18dbe3272a6042e155d9ae2bd6f88f52b97512d61846693aa79e`.
+Its existing regression test passed (exact input checks, no-overwrite and digest
+drift rejection). Read-only inspection of the actual tar checked five entries,
+root ownership, exact relay binary hash, marker bytes and service enablement
+symlink. The archive was neither extracted into a host nor applied to a disk.
+
+The existing image recipe remains Linux/amd64 AL2023-specific. This diagnostic
+Debian/ARM archive is not a qualified replacement. No virt-customize/guestfish
+executable was available on this Mac when checked; neither was installed.
+An approved offline ARM image-building procedure and exact build-toolchain
+qualification are still needed before installing this artifact. A different
+executor or guest-launch wrapper must not be used to route around the known
+automated-launch restriction. Do not use Battle UserData to install the relay.
