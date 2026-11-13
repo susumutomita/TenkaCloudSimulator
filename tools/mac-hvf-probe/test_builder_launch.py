@@ -102,3 +102,32 @@ class BuilderLauncher(unittest.TestCase):
             self.assertFalse(result['battleReady'])
             self.assertFalse(result['cloudInitCleanupVerified'])
             child.kill.assert_not_called()
+
+    def test_log_failure_does_not_publish_receipt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / 'candidate.qcow2').write_bytes(b'built fixture')
+            child, sel = self.run_fake(root)
+            serial = b'TCS_BUILD_FILES_INSTALLED\nTCS_BUILD_STATE_CLEAN\n[1] reboot: Power down\n'
+            original_open = pathlib.Path.open
+            def fail_log(path, *args, **kwargs):
+                if path == root / 'builder-serial.log':
+                    raise OSError('log disk full')
+                return original_open(path, *args, **kwargs)
+            with mock.patch.object(b.platform, 'system', return_value='Darwin'), mock.patch.object(b.platform, 'machine', return_value='arm64'), mock.patch.object(b, 'validate', return_value=root), mock.patch.object(b, 'verified_firmware', return_value='/firmware'), mock.patch.object(b.subprocess, 'run'), mock.patch.object(b.subprocess, 'Popen', return_value=child), mock.patch.object(b.selectors, 'DefaultSelector', return_value=sel), mock.patch.object(b.os, 'read', side_effect=[serial, b'']), mock.patch.object(pathlib.Path, 'open', fail_log):
+                with self.assertRaisesRegex(OSError, 'log disk full'):
+                    b.execute(root, root)
+            self.assertFalse((root / 'build-result.json').exists())
+            child.wait.assert_called_with(timeout=2)
+
+    def test_missing_cleanup_or_explicit_failure_rejects(self):
+        for extra in (b'', b'TCS_BUILD_STATE_CLEAN\nTCS_BUILD_FAILED\n'):
+            with self.subTest(extra=extra), tempfile.TemporaryDirectory() as tmp:
+                root = pathlib.Path(tmp)
+                child, sel = self.run_fake(root)
+                serial = b'TCS_BUILD_FILES_INSTALLED\n' + extra + b'[1] reboot: Power down\n'
+                with mock.patch.object(b.platform, 'system', return_value='Darwin'), mock.patch.object(b.platform, 'machine', return_value='arm64'), mock.patch.object(b, 'validate', return_value=root), mock.patch.object(b, 'verified_firmware', return_value='/firmware'), mock.patch.object(b.subprocess, 'run'), mock.patch.object(b.subprocess, 'Popen', return_value=child), mock.patch.object(b.selectors, 'DefaultSelector', return_value=sel), mock.patch.object(b.os, 'read', side_effect=[serial, b'']):
+                    with self.assertRaisesRegex(ValueError, 'completion unconfirmed'):
+                        b.execute(root, root)
+                self.assertFalse((root / 'build-result.json').exists())
+                child.kill.assert_called_once()

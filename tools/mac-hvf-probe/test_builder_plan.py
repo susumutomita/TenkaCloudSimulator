@@ -61,4 +61,6 @@ class BuilderPreparation(unittest.TestCase):
         self.assertLess(script.index('systemctl stop cloud-init-main.service'), script.index('cloud-init clean --logs --seed --machine-id'))
         self.assertIn('MainPID --value cloud-init-main.service', script)
         self.assertIn('test ! -e /var/lib/cloud/instance', script)
+        self.assertIn('test ! -L /var/lib/cloud/instance', script)
+        self.assertIn('test ! -L /var/lib/cloud/seed', script)
         self.assertIn('TCS_BUILD_STATE_CLEAN', script)

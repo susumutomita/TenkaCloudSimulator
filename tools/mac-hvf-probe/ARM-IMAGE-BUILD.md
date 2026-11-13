@@ -148,3 +148,9 @@ cloudInitCleanupVerified=false: this code has not run in the pinned guest, and
 post-shutdown disk inspection/reboot is not replaced by guest marker output.
 The previous claim that no cleanup is attempted describes the earlier candidate,
 not this deferred candidate. Runtime, image qualification and Battle remain open.
+
+Review follow-up: cleanup rejects dangling instance/seed symlinks as well as
+existing targets. Mock failure injection now confirms missing cleanup marker,
+explicit failure marker, and serial-log disk-full cannot publish a build-result
+receipt. These remain host-side tests; actual systemd job ordering and final
+on-disk cleanup are not yet observed.

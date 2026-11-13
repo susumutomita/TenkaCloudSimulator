@@ -34,7 +34,9 @@ systemctl stop cloud-init-main.service
 test "$(systemctl show -p MainPID --value cloud-init-main.service)" = 0
 cloud-init clean --logs --seed --machine-id
 test ! -e /var/lib/cloud/instance
+test ! -L /var/lib/cloud/instance
 test ! -e /var/lib/cloud/seed
+test ! -L /var/lib/cloud/seed
 test "$(cat /etc/machine-id)" = uninitialized
 sync
 echo TCS_BUILD_STATE_CLEAN
