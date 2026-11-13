@@ -75,6 +75,13 @@
       ]
     },
     {
+      "path": "internal/aws/ec2_read_routing_test.go",
+      "sha256": "e89570015e8da12743c5e1bac7b1dc6f634faad6692d563ebfaae5c4a9812412",
+      "disposition": "test-support",
+      "reason": "Regression proving unknown JSON targets cannot redirect EC2-marked requests into CloudFormation. Existing DynamoDB admission tests prove native refusal and state preservation.",
+      "models": []
+    },
+    {
       "path": "internal/aws/ec2_read_test.go",
       "sha256": "d3a916fb9e4df3b9a853814bf3de43da787f9c442c7fbd5a70ccf2fc91d8bd24",
       "disposition": "test-support",
@@ -83,7 +90,7 @@
     },
     {
       "path": "internal/aws/ssm.go",
-      "sha256": "5adc77b02792b17cdf55e6bb155c6968b6b2457008b3b03b00c3c41a7dfa25ed",
+      "sha256": "e3c4867f470bb872bd6f78f3341bfd8a69eeb954e74710a2613e5430681e847f",
       "disposition": "modeled",
       "reason": "Read-only EC2 discovery admission and its routing/capability wiring; actual database queries and wire authorization require independent tests and review.",
       "models": [
