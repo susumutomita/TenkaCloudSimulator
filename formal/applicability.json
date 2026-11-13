@@ -267,6 +267,20 @@
       ]
     },
     {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "a09353dc3a1e2c573f635ff8213fcdf8ebff40d66ef10e39e4776be5c4fd4a48",
+      "disposition": "formal-infrastructure",
+      "reason": "Pin the new EC2 discovery model, invariant, mutation and source inventories independently of the mutable registry; test each single deletion fails closed. No runtime change.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "1c446d3f38e056a9eb9d082054be3b05b8cddd659e523f418010c13a968c9ebb",
+      "disposition": "formal-infrastructure",
+      "reason": "Pin the new EC2 discovery model, invariant, mutation and source inventories independently of the mutable registry; test each single deletion fails closed. No runtime change.",
+      "models": []
+    },
+    {
       "path": "test/e2e/check.py",
       "sha256": "e42425932f59abb9174f78b7912f9d4eb246c836bf6c878fe3098d3035fb113b",
       "disposition": "test-support",
