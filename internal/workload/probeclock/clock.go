@@ -16,9 +16,13 @@ import (
 const MaxValidity = 30 * time.Second
 const Protocol = 2
 
+const linuxMonotonic = "linux-clock-monotonic"
+const darwinUptimeRaw = "darwin-clock-uptime-raw"
+
 var ErrClock = errors.New("unqualified probe clock")
 
 type Clock struct {
+	kind   string
 	domain string
 	key    [32]byte
 	anchor time.Time
@@ -42,14 +46,20 @@ type Sample struct {
 // bootstrap must be the launcher-inherited private pipe, never stdout, a
 // participant connection, configuration file, or an HTTP response.
 func (c *Clock) Bootstrap() Bootstrap {
-	return Bootstrap{Protocol, c.domain, hex.EncodeToString(c.key[:]), "linux-clock-monotonic"}
+	return Bootstrap{Protocol, c.domain, hex.EncodeToString(c.key[:]), c.kind}
 }
 func (c *Clock) Domain() string { return c.domain }
 func newClock(anchor time.Time, ticks int64, entropy io.Reader) (*Clock, error) {
+	return newPlatformClock(anchor, ticks, entropy, linuxMonotonic)
+}
+func newPlatformClock(anchor time.Time, ticks int64, entropy io.Reader, kind string) (*Clock, error) {
+	if kind != linuxMonotonic && kind != darwinUptimeRaw {
+		return nil, ErrClock
+	}
 	if anchor == anchor.Round(0) || ticks < 1 || ticks > 1<<53-1 {
 		return nil, ErrClock
 	}
-	c := &Clock{anchor: anchor, ticks: ticks}
+	c := &Clock{kind: kind, anchor: anchor, ticks: ticks}
 	var id [16]byte
 	if _, e := io.ReadFull(entropy, id[:]); e != nil {
 		return nil, e
