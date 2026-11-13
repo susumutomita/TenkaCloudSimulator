@@ -127,3 +127,32 @@ A read-only header observation of the prepared official Debian ARM original foun
 v3/112-byte header, 3 GiB virtual size and zero feature flags. The 112-byte case is
 therefore accepted only with zero compression type/padding, as documented by QEMU.
 This observation is not full original/candidate validation or image boot evidence.
+
+## QEMU native parent-exit option: examined, not admitted
+
+The [QEMU invocation manual](https://www.qemu.org/docs/master/system/invocation.html)
+documents `-run-with exit-with-parent=on` for macOS. The previously obtained
+QEMU 11.1.3 source archive was read without executing it. Its
+`system/exit-with-parent.c` has SHA-256
+`a8ac47aad5191b0fd2788c629593f7449acdea65ec22b5b680348eb487b6ef70`.
+The macOS implementation creates a detached thread; that thread obtains getppid,
+registers kqueue NOTE_EXIT, and requests QEMU shutdown when an event arrives.
+It returns after logging a kqueue/registration error without failing startup.
+There is no readiness acknowledgement to the spawning parent. Parent exit before
+that thread captures/registers its identity therefore has no demonstrated safe
+handshake. `system/vl.c` calls set_exit_with_parent without checking its return.
+`qemu_system_killed` requests poweroff and wakes the event loop; it does not perform
+an unconditional kernel SIGKILL of the VM process.
+
+This is not equivalent to the repository's Linux creator-thread-death SIGKILL
+contract for a single trusted child. That Linux contract itself does NOT promise
+arbitrary descendant containment or progress while the owner is merely hung.
+The distinction avoids demanding stronger guarantees from Mac while still
+rejecting the unchecked monitor-start and asynchronous-stop gaps.
+
+No flag was added to the admitted plan, and no QEMU/launchd experiment was run.
+Any future use requires a fail-closed parent-identity/monitor-ready handshake,
+startup-failure fencing, bounded stop with independently verified owned exit,
+and the still-missing executable/descriptor admission. Observing this option in
+help or documentation is not runtime qualification. An alternative mechanism
+must not be used to retry a previously denied operation.
