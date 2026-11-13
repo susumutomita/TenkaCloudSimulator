@@ -21,3 +21,12 @@ Do not silently simulate success for unsupported operations. Unsupported policy 
 Before completing a change run `make before-commit`; for protocol, persistence, console, or documentation-UI changes also run `make e2e`. For model changes run `TLA_JAR=... make formal`. Cross-platform execution is not implied by successful cross-compilation. Summarize the outcome, verification, compatibility impact, and remaining risks in the final response or existing review discussion. Distinguish passed, failed, and unrun checks. Do not overstate bounded TLA+ checking as a proof of implementation.
 
 Skills under `.claude/skills/` and agents under `.claude/agents/` are optional task-specific aids, not mandatory gates. Use the current Go Makefile gates; do not reintroduce removed TypeScript harness commands. Do not weaken regression tests to get green checks; adjust stale tooling only with evidence and matching detector coverage.
+
+For Finder/Fixer work, acceptance is executable, not a prose assertion. Before
+claiming a task, register its test suite and expected behavior independently of
+the fix. `make test` runs the offline factory acceptance gate on committed, clean
+HEAD; skips, missing expected tests, failed cleanup/tests, stale HEAD and altered
+logs cannot satisfy that gate. Independent review must include its exact-HEAD
+report. Read docs/contributing/software-factory.md for the current pilot scope.
+This contract applies equally to Codex, Claude Code and other authorized tools;
+optional role prompts do not replace the gate or authorize external agent access.

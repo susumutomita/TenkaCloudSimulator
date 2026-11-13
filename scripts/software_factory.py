@@ -6,6 +6,7 @@ import json
 import re
 import sqlite3
 from pathlib import PurePosixPath
+from factory_acceptance import SUITES, verify as verify_acceptance, validate_scope, candidate_paths
 
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 
@@ -71,6 +72,9 @@ class Factory:
         require(finding.get('oracle') in ('official-specification', 'recorded-cloud', 'local-regression'),
                 'explicit oracle required; another emulator alone is not authoritative')
         finding['paths'] = scope(finding.get('paths'))
+        acceptance = finding.get('acceptance')
+        require(isinstance(acceptance, list) and acceptance and all(isinstance(s, str) and s in SUITES for s in acceptance) and len(acceptance) == len(set(acceptance)), 'registered acceptance suites required')
+        validate_scope(acceptance, finding['provider'], finding['operation'], finding['paths'])
         required = finding.get('required_checks')
         require(isinstance(required, list) and required and all(isinstance(c, str) and c.strip() for c in required), 'required_checks required')
         require('make before-commit' in required, 'repository gate must be required')
@@ -166,6 +170,10 @@ class Factory:
                         v.get('evidence') for v in checks.values()), 'invalid check evidence')
             require(isinstance(report.get('findings'), list), 'review findings required')
             passed = not report['findings'] and all(v['status'] == 'passed' for v in checks.values())
+            if passed:
+                require(isinstance(report.get('acceptance_report'), str) and report['acceptance_report'], 'executed acceptance report required; legacy records must be reconciled')
+                verify_acceptance(report['acceptance_report'], job['head'], body.get('acceptance', []))
+                require(changed == candidate_paths(body['base'], job['head']), 'declared changed paths differ from actual candidate diff')
             state = 'ready' if passed else ('claimed' if job['attempts'] < 2 else 'blocked')
             self.db.execute('UPDATE jobs SET state=?,evidence=? WHERE id=?', (state, json.dumps(report), key))
             return self.get(key)

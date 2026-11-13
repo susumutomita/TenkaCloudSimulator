@@ -5,9 +5,9 @@ It separates evidence gathering, implementation and independent review. The
 integration owner invokes the optional `issue-finder` and `issue-fixer` agent
 instructions with the existing authorized agent tool. A standard-library Python
 3 ledger enforces local claims, path conflicts, duplicate scenario IDs, a two-attempt
-budget and exact-HEAD review evidence. It does **not** launch an LLM, run commands,
-verify log authenticity, poll GitHub, create Issues/PRs or merge anything. A `ready`
-entry means evidence was recorded, not that CI or remote integration occurred.
+budget and exact-HEAD review evidence. The ledger does **not** launch an LLM, poll GitHub, create Issues/PRs or merge
+anything. Its acceptance executor below runs a fixed reviewed command and checks
+exact-HEAD test evidence. A `ready` entry is not remote CI or integration proof.
 
 ## Reference and adaptation
 
@@ -19,8 +19,8 @@ describes tests checked against AWS, agent implementation and independent gates.
 These are references for the separation of duties, not imported agent code.
 The concrete `IssueFinderAgent`/`IssueFixerAgent` implementation and launch API were
 not established by this inspection; do not claim this is that upstream harness.
-Upstream's root is CC0; vendored components have separate notices. No upstream
-source is copied here.
+Upstream's root is CC0; vendored components have separate notices. The initial ledger copied no upstream source. The new acceptance pilot below
+preserves a pinned CC0 test and its license as test-only provenance.
 
 Tenka's Go single-binary contract remains authoritative. Preserve provider-neutral
 core, native protocol semantics, console/API shared state, bounded runtime and
@@ -37,19 +37,22 @@ there is no expiring lease that silently lets a second worker take over.
 The integration owner also checks live external/local ownership as required by
 [parallel-development.md](parallel-development.md).
 
-A finding JSON has this shape (example only, not a verified defect):
+A finding JSON has this shape (schema example only, not a verified defect;
+replace the example operation and paths with the actual SQS pilot finding, or
+register a corresponding acceptance suite first):
 
 ```json
 {
-  "provider": "aws", "operation": "ExampleOperation", "scenario": "missing resource",
+  "provider": "aws", "operation": "DeleteMessage", "scenario": "deletion with zero visibility",
   "base": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "paths": ["internal/example"],
-  "expected": "Documented missing-resource error", "actual": "Observed response",
+  "paths": ["internal/aws/sqs_store.go"],
+  "expected": "Message absent after deletion", "actual": "Example only: message observed again",
   "reference": "Official API URL and relevant section",
   "oracle": "official-specification",
   "reproduction": "Reviewed local test name, input and evidence path, not a shell command",
   "inventory_checked_at": "2026-11-12T00:00:00Z", "related_work": [],
-  "required_checks": ["make before-commit", "focused regression"]
+  "required_checks": ["make before-commit", "focused regression"],
+  "acceptance": ["sqs-lifecycle"]
 }
 ```
 
@@ -117,3 +120,68 @@ Only the integration owner reconciles terminal entries and remote status. Before
 any authorized publication/merge, check current remote HEAD, duplicate PRs,
 required CI and unresolved reviews separately. Never turn an old ledger record
 into a claim that a new HEAD passed.
+
+## Executed acceptance gate (agent-neutral pilot)
+
+The original ledger above checks cooperative declarations. New findings must also
+name `"acceptance": ["sqs-lifecycle"]`, and an otherwise successful review must
+supply `"acceptance_report": "/absolute/local/report.json"`. A missing, old-HEAD,
+altered or skipped receipt cannot transition a job to ready. Failed reviews still
+return the existing bounded retry state. Old persisted findings without an
+acceptance suite cannot become ready: reconcile through the existing owner, never
+replace a lost ledger with an empty one or automatically reset a denial.
+
+The current registered pilot is **SQS lifecycle only**. Do not assign this suite
+to an unrelated finding as its acceptance. Register a reviewed suite with named
+required tests before starting another service. Additional full `make before-commit`,
+E2E, formal, independent security/code review and remote CI remain required as
+applicable. Passing this pilot alone is not a merge approval.
+
+1. Test Writer fixes an oracle and observable assertions before Fixer changes.
+2. Finder reproduces and checks inventory; integration owner claims existing ledger.
+3. Fixer commits on the assigned branch; oracle edits need independent review.
+4. In the clean candidate checkout run:
+
+   ```sh
+   python3 scripts/factory_acceptance.py --output /tmp/acceptance.json
+   python3 scripts/factory_acceptance.py --verify --output /tmp/acceptance.json
+   ```
+
+5. Independent reviewer reruns the gate on that HEAD, examines the oracle/diff and
+   records that report alongside all other required checks in the ledger review.
+
+Commands are a reviewed in-code allowlist, not shell strings from issue text.
+The executor disables Go module downloads and strips cloud credential/proxy
+variables, enforces a timeout, captures JSON test events, and requires the exact
+expected test and package completion. Empty output, skip, exit failure and timeout
+fail closed. Missing Go/modules are blocked, not skipped. Logs bind to HEAD,
+source checksums and test identities. `make test` runs the gate; existing CI calls
+`make before-commit`, so a failure makes that CI job fail. **No branch protection
+or GitHub required-check configuration has been changed**: this does not prevent
+a privileged user bypassing CI. Likewise local receipts and reviewer names are
+not authenticated attestations; they are reproducible evidence checked by CI,
+not a hostile-agent security boundary. Use an isolated executor for untrusted code.
+
+The Go SQS gateway/SQLite test adapts the pinned public CC0 AWS evaluation-suite
+scenario in `test/factory/upstream/`. Original bytes, license, upstream commit,
+Git blob IDs and SHA256 are preserved. The upstream README says its scenarios
+were verified against real AWS; **Tenka did not execute AWS**. This is not the
+upstream boto3 runner or an AWS-provided agent orchestrator. Zero visibility makes
+deletion observable immediately rather than relying on a sleeping hidden message.
+Our adaptation does not establish boto3/HTTP-listener/UI/VM equivalence. Repeated
+DeleteMessage receipts intentionally differ from AWS in current Tenka and are
+not covered or claimed fixed. Non-pilot services, Console, docs send buttons,
+Client Libraries and real Battle phases remain separate acceptance requirements.
+
+Claude Code already imports AGENTS.md through CLAUDE.md. Optional test-writer,
+issue-finder and issue-fixer prompts offer the same division of work; neither
+Claude-specific hooks nor new permissions are installed. Existing approved agent
+dispatch remains external to this offline executor.
+
+Pilot findings are mechanically limited to the five SQS lifecycle operations and
+SQS handler/store/test files. An EC2/UI/shared-core finding cannot borrow a passing
+SQS receipt. Ready also compares declared paths with the actual base-to-candidate
+Git diff. Git environment overrides and ambient Go overlays/workspaces/config are
+removed from evidence execution; `GO` selects one explicit executable, not shell
+arguments. Already-active legacy ledger jobs need owner reconciliation; this
+change does not silently migrate, reset or replace their ledger.

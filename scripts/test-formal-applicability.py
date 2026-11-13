@@ -100,6 +100,9 @@ class PromptDocumentationClassificationTests(unittest.TestCase):
 class FactoryClassificationTests(unittest.TestCase):
     def test_only_exact_local_factory_gate_is_validation_tooling(self):
         self.assertEqual(disposition('scripts/software_factory.py'), 'validation-tooling')
+        self.assertEqual(disposition('scripts/factory_acceptance.py'), 'validation-tooling')
+        self.assertIsNone(disposition('scripts/factory_acceptance_extra.py'))
+        self.assertIsNone(disposition('internal/core/factory_acceptance.go'))
         for path in ('scripts/software_factory_extra.py', 'scripts/software_factory.sh',
                      'internal/core/software_factory.go', '.claude/hooks/software_factory.py'):
             self.assertIsNone(disposition(path), path)
