@@ -55,3 +55,43 @@ Actual process supervision, descriptor pinning, private QMP ownership, quotas,
 parent-death containment, image validation and Battle E2E remain unimplemented.
 The existing production unsupported-platform gates and Host clock/FD contracts
 are unchanged. No runtime capability is advertised.
+
+## Supervisor death: Darwin candidate and acceptance boundary
+
+The Mac's installed Apple manual pages (`man launchd.plist`, `man launchctl`,
+`man kqueue`, read 2026-11-13) document:
+
+- `AbandonProcessGroup`: on job death launchd kills remaining processes with the
+  same process-group ID; setting true disables that behavior.
+- `ExitTimeOut`: seconds between TERM and KILL when stopping a job. Zero means
+  infinity, so the candidate uses 2, never zero.
+- `KeepAlive` may relaunch a crashed job; the candidate explicitly disables it.
+- `bootstrap`/`bootout` install/remove service definitions in a launchd domain.
+- kqueue `NOTE_EXIT` observes exit; it does not promise termination of descendants.
+
+`ProposeSupervisor` generates only an inactive job definition, with RunAtLoad,
+KeepAlive and AbandonProcessGroup false. It neither writes a plist nor invokes
+launchctl. There is no supervisor entrypoint yet. Do not bootstrap it. The label
+is a proposed generation identifier, not a durable uniqueness registry.
+
+The next real acceptance test, after an actual supervisor exists and the transient
+service registration is authorized, must use only a benign owned child (not QEMU)
+and an independent observer: controller disconnect, supervisor normal exit,
+supervisor SIGKILL, child ignoring TERM, no automatic restart, exact-generation
+stop, and service removal. Verify child disappearance and distinguish launchd
+cleanup from a successful reap by the original parent. No such test has run.
+A child deliberately leaving the group is a required negative control: the manual
+provides no group-exit containment guarantee. The candidate must remain disabled
+if that stronger boundary is required and no other qualified mechanism supplies it.
+
+For real use, a trusted supervisor would own the controller liveness endpoint,
+validate assets, spawn QEMU without setpgid/setsid/daemonization, and fence/stop
+on controller loss. launchd supplies the *candidate* supervisor-death group cleanup.
+This depends on trusted QEMU remaining in-group; it does not contain an exploited
+QEMU that escapes the group. HVF is not host-side seccomp. Filesystem/descriptor
+confinement, quotas, executable identity, authenticated IPC and image integrity
+remain independent blocking work. No claim of Linux safety equivalence follows.
+
+Plist tests check XML escaping, no auto-launch/restart/demand triggers, finite stop
+interval, no group abandonment, and rejected malformed inputs. They are not
+launchd execution, registration permission, crash-containment or Battle evidence.
