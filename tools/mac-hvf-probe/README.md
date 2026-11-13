@@ -160,3 +160,41 @@ subsystem. The verified Alpine initramfs instead includes mdev configuration and
 has not run that udev rule. No manual symlink, fake identity or substitute relay
 was added. A qualified ARM image still needs its normal device manager, bash,
 systemd, pinned relay/service/marker and actual TCS1 handshake/PTY verification.
+
+## Debian ARM64 system-image attempt (blocked before boot)
+
+`image_probe.py` prepares a separate trusted Debian 13 ARM64 cloud-image check for
+systemd PID1, bash, exact DMI UUID and the existing named character device. It is
+not an AL2023 Battle replacement and does not contain or run the session relay.
+The seed's fixed diagnostic command is included under `debian-seed/`; it adds no
+password/account/SSH key and uses no network. This is test provisioning, not a
+change to the original Battle UserData. The image is a temporary QEMU snapshot;
+the seed disk is read-only. No NIC/share or external listener is configured.
+
+Official inputs:
+- https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-arm64.qcow2
+- https://cloud.debian.org/images/cloud/trixie/latest/SHA512SUMS
+- SHA512: `4a166ab9a73f27857896b799dff913199ea982e2379889340e60734ba43bea83840c1317f6257a9a8ca466b2293862181a597edc5cdb5d19d4cb704a85b4130a`.
+
+The official download redirects to a Debian mirror over HTTPS. The first request
+saved the redirect's HTML and failed its checksum; it was never executed. Following
+that HTTPS redirect produced a matching official checksum. Detached signatures
+were not verified. `qemu-img info` reported qcow2 with no backing file. The seed ISO
+was created from the included files using macOS hdiutil, volume name cidata;
+its exact local artifact SHA256 is pinned by the probe. Rebuilding can change
+ISO metadata and requires a newly reviewed hash, not silently bypassing the check.
+No OS/firmware/image bytes are redistributed here.
+
+2026-11-13 attempt: QEMU exited 1 before boot because its `snapshot=on` temporary
+file under `/var/tmp/vl.*` could not be created (`Operation not permitted`). The
+owned child was reaped. No alternate temp path/environment/permission route was
+tried after the denial. Process-list inspection was also unavailable because
+sysmond was absent. Therefore this attempt provides **no system-image execution
+or named-device/relay success evidence**. 28 focused tests pass; three new tests
+cover input hashes/size/path and exact observation markers, not an actual guest.
+
+Running this image probe remains blocked pending resolution of the denied
+snapshot-file operation through an authorized mechanism. Existing initramfs
+results are separate and remain valid. The private-directory TOCTOU and unpinned
+installed QEMU limitations, parent-crash uncertainty and incomplete Battle
+acceptance still apply. Do not treat this preparation as a supported runtime.
