@@ -702,3 +702,40 @@ func TestProbeRegistryGlobalCapacityRetainsUnfinishedCallback(t *testing.T) {
 	}
 	registries[0] = next
 }
+
+func TestRegistryCancellationFencesAdmissionBeforeWatcher(t *testing.T) {
+	r := probeRegistry(t)
+	s := openProbe(t, r, 80)
+	frame := probeFrame(s, TCPFromPeer)
+	if accepted, err := r.RouteIncoming(frame); !accepted || err != nil {
+		t.Fatal("fixture frame not queued", accepted, err)
+	}
+	// Hold the same mutex as the lifetime watcher: cancellation is observable,
+	// but the watcher cannot perform closure first. No scheduler sleep or race
+	// winner is required to exercise the synchronous admission fence.
+	r.mu.Lock()
+	r.cancel()
+	err := r.admissionLocked()
+	closed, childClosed, queued, watched := r.closed, s.closed, len(s.incoming), r.watched
+	r.mu.Unlock()
+	if !errors.Is(err, ErrProbeClosed) || !errors.Is(err, context.Canceled) {
+		t.Fatal("canceled lifetime did not synchronously reject admission", err)
+	}
+	if !closed || !childClosed || queued != 0 || watched {
+		t.Fatalf("closure before watcher: registry=%t child=%t queue=%d watched=%t", closed, childClosed, queued, watched)
+	}
+	if accepted, err := r.RouteIncoming(frame); accepted || !errors.Is(err, ErrProbeClosed) {
+		t.Fatal("late frame admitted after cancellation", accepted, err)
+	}
+	if next, err := r.Open(context.Background(), 80); next != nil || !errors.Is(err, ErrProbeClosed) {
+		t.Fatal("new session admitted after cancellation", next, err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	if err := s.Wait(ctx); err != nil {
+		t.Fatal("child did not drain", err)
+	}
+	if err := r.Wait(ctx); err != nil {
+		t.Fatal("registry did not drain", err)
+	}
+}
