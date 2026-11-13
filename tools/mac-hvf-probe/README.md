@@ -109,3 +109,27 @@ are unchanged here. Their current contract also needs bash, systemd, an image
 marker and real TCS1 Hello UUID equality. A proper ARM guest image must establish
 DMI/firmware availability and udev device naming without weakening that contract.
 The probe does not claim which firmware/image combination supplies them.
+
+## Pinned EDK2 firmware measurement
+
+`boot_probe.py VERIFIED_ARTIFACT_DIRECTORY --firmware` additionally loads only
+`edk2-aarch64-code.fd` with SHA256
+`47765fe344818cbc464b1c14ae658fb4b854f5c2ceffa982411731eb4865594d`.
+The expected source archive was checked against Homebrew's official formula API:
+https://formulae.brew.sh/api/formula/qemu.json
+
+- Official source: https://download.qemu.org/qemu-11.1.3.tar.xz
+- Archive SHA256: `5a8289c7940dc77d3873c81a6c29ba3afe1446fc9d36e77fa1658cdbecb84b22`.
+- Decompressed member: `qemu-11.1.3/pc-bios/edk2-aarch64-code.fd.bz2`.
+- Bytes match the installed Homebrew firmware exactly. No installation or system
+  configuration was changed. Publisher source checksum verified; detached
+  signatures were not verified. No firmware is redistributed by this change.
+
+Actual ARM64 HVF firmware boot now exposes the exact supplied test UUID through
+`/sys/class/dmi/id/product_uuid` and the expected virtio port name. Both observations
+are true; named character-device observation remains false in this initramfs.
+Guest uname and orderly poweroff/reap still pass (one run: 1.662 seconds).
+This narrows the next image prerequisite to real device naming plus the existing
+bash/systemd/relay/marker requirements. It does not prove relay handshake, byte
+transport or Battle execution. Null chardev, no NIC/disk/share and empty environment
+remain unchanged. Filename/hash checks retain the private-directory TOCTOU limit.

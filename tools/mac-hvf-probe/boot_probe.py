@@ -29,7 +29,16 @@ def verified_files(directory):
     return result
 
 
-def main(directory, inspect_identity=False):
+def verified_firmware(directory):
+    path = pathlib.Path(directory).resolve(strict=True) / 'edk2-aarch64-code.fd'
+    if path.is_symlink() or not path.is_file() or path.stat().st_size != 64 * 1024 * 1024:
+        raise ValueError('invalid firmware')
+    if hashlib.sha256(path.read_bytes()).hexdigest() != '47765fe344818cbc464b1c14ae658fb4b854f5c2ceffa982411731eb4865594d':
+        raise ValueError('firmware digest mismatch')
+    return str(path)
+
+
+def main(directory, inspect_identity=False, firmware=False):
     if platform.system() != 'Darwin' or platform.machine() != 'arm64':
         raise SystemExit('Apple Silicon required; no fallback')
     kernel, initrd = verified_files(directory)
@@ -42,6 +51,8 @@ def main(directory, inspect_identity=False):
         args += ['-uuid', 'b42718a6-5b28-4f82-8d9c-cd91dfe925c1',
                  '-device', 'virtio-serial-pci', '-chardev', 'null,id=session-probe',
                  '-device', 'virtserialport,chardev=session-probe,name=org.tenkacloud.session.0']
+    if firmware:
+        args += ['-bios', verified_firmware(directory)]
     start = time.monotonic()
     child = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT, env={})
@@ -82,6 +93,7 @@ def main(directory, inspect_identity=False):
                       'elapsedSeconds': round(time.monotonic() - start, 3),
                       'artifacts': EXPECTED,
                       'identityProbe': inspect_identity,
+                      'firmwareProbe': firmware,
                       'matchingDMIUUID': b'b42718a6-5b28-4f82-8d9c-cd91dfe925c1' in output.splitlines(),
                       'namedVirtioPort': b'org.tenkacloud.session.0' in output.splitlines(),
                       'namedCharacterDevice': b'TCS_NAMED_CHAR_PRESENT' in output.splitlines()}))
@@ -89,6 +101,6 @@ def main(directory, inspect_identity=False):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) not in (2, 3) or (len(sys.argv) == 3 and sys.argv[2] != '--identity'):
+    if len(sys.argv) not in (2, 3) or (len(sys.argv) == 3 and sys.argv[2] not in ('--identity', '--firmware')):
         raise SystemExit('usage: boot_probe.py VERIFIED_ARTIFACT_DIRECTORY')
-    main(sys.argv[1], inspect_identity=len(sys.argv) == 3)
+    main(sys.argv[1], inspect_identity=len(sys.argv) == 3, firmware=len(sys.argv) == 3 and sys.argv[2] == '--firmware')
