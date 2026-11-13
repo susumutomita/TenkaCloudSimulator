@@ -68,7 +68,7 @@ def main():
     if platform.system() != "Darwin" or platform.machine() != "arm64":
         raise SystemExit("This probe requires an Apple Silicon Mac; no fallback.")
     child = subprocess.Popen(ARGS, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, text=True)
+                             stderr=subprocess.PIPE, text=True, env={})
     stdout, stderr = exchange_owned(
         child, "".join(json.dumps(command) + "\n" for command in COMMANDS))
     verify(stdout, stderr, child.returncode)
