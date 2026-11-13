@@ -1,0 +1,173 @@
+//go:build darwin || linux
+
+package guesthvf
+
+import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/binary"
+	"fmt"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+func header() []byte {
+	b := make([]byte, 512)
+	copy(b, "QFI\xfb")
+	binary.BigEndian.PutUint32(b[4:], 3)
+	binary.BigEndian.PutUint32(b[20:], 9)
+	binary.BigEndian.PutUint64(b[24:], 4096)
+	binary.BigEndian.PutUint32(b[96:], 4)
+	binary.BigEndian.PutUint32(b[100:], 104)
+	return b
+}
+func pin(b []byte) string { return fmt.Sprintf("%x", sha256.Sum256(b)) }
+func TestStandaloneHeaderRejectsExternalAuthority(t *testing.T) {
+	if checkStandaloneHeader(bytes.NewReader(header()), 512) != nil {
+		t.Fatal("minimal subset rejected")
+	}
+	for _, off := range []int{4, 8, 16, 32, 60, 64, 72, 80, 88, 96, 100} {
+		b := header()
+		b[off+3] ^= 1
+		if checkStandaloneHeader(bytes.NewReader(b), 512) == nil {
+			t.Fatalf("header field %d", off)
+		}
+	}
+	for _, kind := range []uint32{0xe2792aca, 0x44415441, 0x0537be77, 0x23852875, 0x12345678} {
+		b := header()
+		binary.BigEndian.PutUint32(b[104:], kind)
+		if checkStandaloneHeader(bytes.NewReader(b), 512) == nil {
+			t.Fatalf("extension %x", kind)
+		}
+	}
+	b := header()
+	binary.BigEndian.PutUint32(b[104:], 0x6803f857)
+	binary.BigEndian.PutUint32(b[108:], 48)
+	if checkStandaloneHeader(bytes.NewReader(b), 512) != nil {
+		t.Fatal("display table rejected")
+	}
+	binary.BigEndian.PutUint32(b[108:], 4096)
+	if checkStandaloneHeader(bytes.NewReader(b), 512) == nil {
+		t.Fatal("overflow")
+	}
+}
+func TestIndependentImageKeepsOriginalUnchanged(t *testing.T) {
+	dir, e := filepath.EvalSymlinks(t.TempDir())
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = os.Chmod(dir, 0700); e != nil {
+		t.Fatal(e)
+	}
+	b := header()
+	origPath := filepath.Join(dir, "original")
+	copyPath := filepath.Join(dir, "candidate")
+	for _, p := range []string{origPath, copyPath} {
+		if e = os.WriteFile(p, b, 0600); e != nil {
+			t.Fatal(e)
+		}
+	}
+	original, e := os.Open(origPath)
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer original.Close()
+	f, e := OpenIndependentImage(copyPath, pin(b), original)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e := f.Write([]byte("x")); e == nil {
+		t.Fatal("validation FD is writable")
+	}
+	f.Close()
+	unchanged, _ := os.ReadFile(origPath)
+	if !bytes.Equal(unchanged, b) {
+		t.Fatal("original changed")
+	}
+	if _, e = OpenIndependentImage(origPath, pin(b), original); e == nil {
+		t.Fatal("original admitted")
+	}
+	if _, e = OpenIndependentImage(copyPath, pin([]byte("bad")), original); e == nil {
+		t.Fatal("bad pin")
+	}
+	alias := filepath.Join(dir, "alias")
+	if e = os.Symlink(copyPath, alias); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = OpenIndependentImage(alias, pin(b), original); e == nil {
+		t.Fatal("symlink")
+	}
+	link := filepath.Join(dir, "hardlink")
+	if e = os.Link(copyPath, link); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = OpenIndependentImage(copyPath, pin(b), original); e == nil {
+		t.Fatal("shared inode")
+	}
+	if e = os.Remove(link); e != nil {
+		t.Fatal(e)
+	}
+	if e = os.Chmod(copyPath, 0644); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = OpenIndependentImage(copyPath, pin(b), original); e == nil {
+		t.Fatal("public image")
+	}
+	os.Chmod(copyPath, 0600)
+	if e = os.Chmod(dir, 0755); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = OpenIndependentImage(copyPath, pin(b), original); e == nil {
+		t.Fatal("public directory")
+	}
+}
+
+func TestImagePreflightRejectsMissingReferenceAndMalformedPin(t *testing.T) {
+	dir, e := filepath.EvalSymlinks(t.TempDir())
+	if e != nil {
+		t.Fatal(e)
+	}
+	os.Chmod(dir, 0700)
+	p := filepath.Join(dir, "image")
+	b := header()
+	if e = os.WriteFile(p, b, 0600); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = OpenIndependentImage(p, pin(b), nil); e == nil {
+		t.Fatal("nil original")
+	}
+	original, e := os.Open(p)
+	if e != nil {
+		t.Fatal(e)
+	}
+	for _, digest := range []string{"", "bad", pin(b) + "00"} {
+		if _, e = OpenIndependentImage(p, digest, original); e == nil {
+			t.Fatal("malformed digest")
+		}
+	}
+	original.Close()
+	if _, e = OpenIndependentImage(p, pin(b), original); e == nil {
+		t.Fatal("closed original")
+	}
+}
+func TestImageHeaderRejectsTruncatedAndDuplicateExtensions(t *testing.T) {
+	b := header()
+	for _, n := range []int{0, 72, 103, 104, 107} {
+		if checkStandaloneHeader(bytes.NewReader(b[:n]), 512) == nil {
+			t.Fatalf("truncated %d", n)
+		}
+	}
+	for _, offset := range []int{104, 160} {
+		binary.BigEndian.PutUint32(b[offset:], 0x6803f857)
+		binary.BigEndian.PutUint32(b[offset+4:], 48)
+	}
+	if checkStandaloneHeader(bytes.NewReader(b), 512) == nil {
+		t.Fatal("duplicate table")
+	}
+	b = header()
+	binary.BigEndian.PutUint32(b[108:], 8)
+	if checkStandaloneHeader(bytes.NewReader(b), 512) == nil {
+		t.Fatal("nonempty terminator")
+	}
+}

@@ -95,3 +95,30 @@ remain independent blocking work. No claim of Linux safety equivalence follows.
 Plist tests check XML escaping, no auto-launch/restart/demand triggers, finite stop
 interval, no group abandonment, and rejected malformed inputs. They are not
 launchd execution, registration permission, crash-containment or Battle evidence.
+
+## Independent writable image preflight (still no runtime activation)
+
+`OpenIndependentImage` retains a read-only FD for a private candidate copy after
+checking owner, mode 0600, link count 1, distinct inode from an already-open trusted
+original, canonical non-symlink pathname, private parent directory and exact
+SHA-256. Regular-file metadata is checked again after bounded hashing. It opens
+with no-follow/nonblocking/close-on-exec flags; it never modifies image bytes.
+
+This preflight has a deliberately narrower format subset than the existing
+Linux guestvm validator: QCOW2 v3, fixed 104-byte header, refcount order 4, no
+backing/encryption/snapshots/feature flags, bounded dimensions, and no extensions
+except a bounded feature-name display table. Unknown or external-file extensions
+are rejected. The QEMU format reference was read for field/extension semantics:
+https://www.qemu.org/docs/master/interop/qcow2.html
+The existing Linux validator and invocation are unchanged.
+
+The format check is NOT validation of allocation tables or bootability. Unit
+fixtures contain synthetic headers, not runnable guest images. A digest alone is
+not publisher provenance; callers must obtain the expected pin from a verified
+asset record. The original FD is assumed to be an already-qualified reference.
+Mode-bit checks do not audit macOS ACLs or establish a cross-user sandbox.
+Same-user concurrent mutations and parent-path replacement are not defended as a
+hostile boundary. Retaining an FD pins an inode, not immutable bytes. This API does
+not pass the FD into QEMU, replace pathname execution, or qualify writable launch;
+that integration must preserve verified identity without reopening by name.
+Runtime/VM/launchd gates remain disabled; no real image or VM has been run here.
