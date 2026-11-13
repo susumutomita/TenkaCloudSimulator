@@ -50,7 +50,7 @@ class BootExecutionContract(unittest.TestCase):
         selector.select.return_value = [object()]
         host_channel, guest_channel = Mock(), Mock()
         guest_channel.fileno.return_value = 77
-        host_channel.recv.return_value = channel_bytes
+        host_channel.recv.side_effect = [channel_bytes, b'']
         output, errors = Mock(), Mock()
         output.buffer, errors.buffer = io.BytesIO(), io.BytesIO()
         with ExitStack() as stack:
@@ -124,6 +124,26 @@ class BootExecutionContract(unittest.TestCase):
 
     def test_wrong_private_channel_bytes_fail_closed(self):
         self.run_case([b'~ # ', b'TCS_ARCH_aarch64\nPower down\n', b''], inspect_identity=True, firmware=True, device_probe=True, channel_bytes=b'wrong', expected_error=ValueError)
+
+    def test_private_channel_accepts_fragmented_reads(self):
+        channel = Mock()
+        channel.recv.side_effect = [b'TCS_', b'PORT_', b'BYTE\n', b'']
+        self.assertTrue(boot_probe.read_private_channel(channel))
+
+    def test_private_channel_limits_bytes_and_time(self):
+        channel = Mock()
+        channel.recv.return_value = b'x' * 65
+        with self.assertRaisesRegex(ValueError, 'byte budget'):
+            boot_probe.read_private_channel(channel)
+        with patch.object(boot_probe.time, 'monotonic', side_effect=[0, 2]):
+            with self.assertRaises(TimeoutError):
+                boot_probe.read_private_channel(channel)
+
+    def test_invalid_device_mode_allocates_no_socket(self):
+        with patch.object(boot_probe.socket, 'socketpair') as pair:
+            with self.assertRaises(ValueError):
+                boot_probe.main('/unused', device_probe=True)
+            pair.assert_not_called()
 
     def test_wrong_platform_never_launches(self):
         with patch.object(boot_probe.platform, 'system', return_value='Linux'), \

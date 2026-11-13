@@ -39,7 +39,25 @@ def verified_firmware(directory):
     return str(path)
 
 
+def read_private_channel(channel):
+    deadline = time.monotonic() + 1
+    data = bytearray()
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError('private channel deadline exceeded')
+        channel.settimeout(remaining)
+        chunk = channel.recv(65 - len(data))
+        if not chunk:
+            return bytes(data) == b'TCS_PORT_BYTE\n'
+        data.extend(chunk)
+        if len(data) > 64:
+            raise ValueError('private channel byte budget exceeded')
+
+
 def main(directory, inspect_identity=False, firmware=False, device_probe=False):
+    if device_probe and not (inspect_identity and firmware):
+        raise ValueError('device probe requires firmware and identity checks')
     if platform.system() != 'Darwin' or platform.machine() != 'arm64':
         raise SystemExit('Apple Silicon required; no fallback')
     kernel, initrd = verified_files(directory)
@@ -97,8 +115,7 @@ def main(directory, inspect_identity=False, firmware=False, device_probe=False):
                     sent = True
         child.wait(timeout=2)
         if host_channel is not None:
-            host_channel.settimeout(1)
-            channel_bytes_observed = host_channel.recv(64) == b'TCS_PORT_BYTE\n'
+            channel_bytes_observed = read_private_channel(host_channel)
             if not channel_bytes_observed:
                 raise ValueError('fixed private channel bytes unconfirmed')
         if child.returncode != 0 or b'TCS_ARCH_aarch64' not in output or b'Power down' not in output:
