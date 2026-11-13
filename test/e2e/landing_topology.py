@@ -324,8 +324,12 @@ def audit(page, axe_source, report, name):
     before = page.evaluate('({x:scrollX,y:scrollY})')
     result = page.evaluate("""async () => {
         const result = await axe.run(document, {runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});
-        return {violations:result.violations.map(v=>({id:v.id,nodes:v.nodes.length})),
-                incomplete:result.incomplete.map(v=>({id:v.id,nodes:v.nodes.length})),passes:result.passes.length};
+        const finding = v => ({id:v.id,nodes:v.nodes.length,details:v.nodes.map(n=>({
+            target:n.target,summary:n.failureSummary,
+            checks:[...n.any,...n.all,...n.none].map(c=>({id:c.id,message:c.message,data:c.data}))
+        }))});
+        return {violations:result.violations.map(finding),
+                incomplete:result.incomplete.map(finding),passes:result.passes.length};
     }""")
     after = page.evaluate('({x:scrollX,y:scrollY})')
     # Save strict findings and unmodified scroll before raising a regression.
