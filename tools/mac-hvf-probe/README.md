@@ -30,3 +30,11 @@ https://www.qemu.org/docs/master/system/security.html
 
 The prior cloud contract is a separate local branch/commit, not assumed present
 here. Full repository gates and real Battle acceptance remain pending.
+
+Follow-up lifecycle check: cleanup now uses a two-second wait on the exact owned
+child, not unbounded `communicate` waiting for pipe EOF. Missing termination proof
+raises `TeardownUncertain`; it cannot produce the successful result. Nine tests
+pass, including a real sleeping child timed out/killed/reaped while an unrelated
+child remains running. Keyboard interruption and failed-wait outcomes are mocked,
+not real OS signal/permission experiments. The empty HVF probe also passes again.
+This still does not supervise parent crash or prove cleanup of a booted guest.

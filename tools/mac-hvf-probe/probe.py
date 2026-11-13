@@ -2,7 +2,6 @@
 import json
 import platform
 import subprocess
-import sys
 
 QEMU = "/opt/homebrew/bin/qemu-system-aarch64"
 ARGS = [QEMU, "-no-user-config", "-nodefaults", "-machine", "virt,accel=hvf",
@@ -39,19 +38,39 @@ def verify(stdout, stderr, returncode):
         raise ValueError("missing orderly owned shutdown")
 
 
+class TeardownUncertain(RuntimeError):
+    """Never report success when termination of the exact child is unobserved."""
+
+
+def stop_owned(child, timeout=2):
+    # Popen owns the unreaped child: no discovery, adoption or process-name kills.
+    # Wait only for that child, never for EOF on a potentially inherited pipe.
+    try:
+        child.kill()
+        child.wait(timeout=timeout)
+    except BaseException as error:
+        raise TeardownUncertain("owned child termination unconfirmed") from error
+    finally:
+        for stream in (child.stdin, child.stdout, child.stderr):
+            if stream is not None:
+                stream.close()
+
+
+def exchange_owned(child, payload, timeout=8):
+    try:
+        return child.communicate(payload, timeout=timeout)
+    except BaseException:
+        stop_owned(child)
+        raise
+
+
 def main():
     if platform.system() != "Darwin" or platform.machine() != "arm64":
         raise SystemExit("This probe requires an Apple Silicon Mac; no fallback.")
     child = subprocess.Popen(ARGS, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, text=True)
-    try:
-        stdout, stderr = child.communicate(
-            "".join(json.dumps(command) + "\n" for command in COMMANDS), timeout=8)
-    except BaseException:
-        # Only the exact child created above is targeted. No process-name kills.
-        child.kill()
-        child.communicate()
-        raise
+    stdout, stderr = exchange_owned(
+        child, "".join(json.dumps(command) + "\n" for command in COMMANDS))
     verify(stdout, stderr, child.returncode)
     print(json.dumps({"result": "empty-paused-hvf-probe-pass", "battleReady": False,
                       "guestBooted": False, "ownedChildReaped": True,

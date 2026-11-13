@@ -1,5 +1,8 @@
 import json
 import unittest
+import subprocess
+import sys
+from unittest.mock import Mock
 import probe
 
 
@@ -41,6 +44,45 @@ class Contract(unittest.TestCase):
         self.assertNotIn("tcg", " ".join(probe.ARGS))
         for option in ["-drive", "-kernel", "-netdev", "-fsdev", "-device"]:
             self.assertNotIn(option, probe.ARGS)
+
+
+class OwnedLifecycle(unittest.TestCase):
+    def test_real_timeout_reaps_only_owned_child(self):
+        child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"],
+                                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, text=True)
+        unrelated = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+        try:
+            with self.assertRaises(subprocess.TimeoutExpired):
+                probe.exchange_owned(child, "", timeout=0.1)
+            self.assertIsNotNone(child.returncode)
+            self.assertTrue(child.stdout.closed)
+            self.assertIsNone(unrelated.poll())
+        finally:
+            if child.poll() is None:
+                child.kill()
+            child.wait(timeout=2)
+            unrelated.kill()
+            unrelated.wait(timeout=2)
+
+    def test_interrupt_preserved_after_confirmed_stop(self):
+        child = Mock()
+        child.communicate.side_effect = KeyboardInterrupt()
+        with self.assertRaises(KeyboardInterrupt):
+            probe.exchange_owned(child, "")
+        child.kill.assert_called_once_with()
+        child.wait.assert_called_once_with(timeout=2)
+        child.stdout.close.assert_called_once_with()
+
+    def test_failed_stop_is_uncertain_not_success(self):
+        for error in [subprocess.TimeoutExpired("owned", 2), PermissionError("denied")]:
+            with self.subTest(error=error):
+                child = Mock()
+                child.wait.side_effect = error
+                with self.assertRaises(probe.TeardownUncertain):
+                    probe.stop_owned(child)
+                child.wait.assert_called_once_with(timeout=2)
+
 
 
 if __name__ == "__main__":
