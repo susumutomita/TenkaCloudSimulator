@@ -34,13 +34,18 @@ else:
 ''')
     plist = directory / "job.plist"
     plist.write_bytes(plistlib.dumps({"Label":label,"ProgramArguments":[str(pathlib.Path(sys.executable).resolve()),str(script),str(directory)],"RunAtLoad":False,"KeepAlive":False,"AbandonProcessGroup":False,"ExitTimeOut":2}))
-    bootstrapped = False
+    attempted = False
+    failure = None
     result = {"label": label, "directory": str(directory), "battleReady": False}
     def ctl(*args, check=True):
         return subprocess.run(["/bin/launchctl",*args],capture_output=True,text=True,timeout=10,check=check)
+    def detail(exc):
+        return {"type": type(exc).__name__, "message": str(exc)[:2048], "returncode": getattr(exc, "returncode", None), "stderr": str(getattr(exc, "stderr", "") or "")[:4096]}
+    def absent(check):
+        return check.returncode != 0 and f'Could not find service "{label}"' in check.stderr
     try:
+        attempted = True
         ctl("bootstrap",f"gui/{os.getuid()}",str(plist))
-        bootstrapped = True
         ctl("kickstart",target)
         deadline=time.monotonic()+5
         while not (directory/"child.json").exists():
@@ -64,20 +69,34 @@ else:
         status=ctl("print",target).stdout
         if "state = running" in status: raise RuntimeError("job unexpectedly restarted")
         result["noRestartObserved"]=True
-    except subprocess.CalledProcessError as exc:
-        result["commandFailure"] = {"returncode":exc.returncode,"stderr":exc.stderr,"stdout":exc.stdout}
-        raise
+    except BaseException as exc:
+        failure = exc
+        result["operationFailure"] = detail(exc)
     finally:
-        if bootstrapped:
-            ctl("bootout",target)
-            check=ctl("print",target,check=False)
-            if check.returncode==0: raise RuntimeError("service still registered after bootout")
-            # Preserve diagnostic evidence, never claim a permissions failure means absent.
-            if "Could not find service" not in check.stderr:
-                raise RuntimeError("service absence not confirmed: "+check.stderr)
-            result["serviceRemoved"]=True
+        # A failed/timeout bootstrap may have installed the dedicated job.
+        # Inspect only its exact fresh label, never retry registration.
+        if attempted:
+            try:
+                state = ctl("print", target, check=False)
+                if state.returncode == 0:
+                    result["registrationObserved"] = True
+                    ctl("bootout", target)
+                    state = ctl("print", target, check=False)
+                if not absent(state):
+                    raise RuntimeError("exact-label absence unconfirmed: " + state.stderr)
+                result["serviceAbsentConfirmed"] = True
+            except BaseException as exc:
+                result["cleanupFailure"] = detail(exc)
+                if failure is None:
+                    failure = exc
+        result["experimentPassed"] = failure is None and result.get("serviceAbsentConfirmed", False)
+        # This outer evidence write is reached even when bootout/print fail.
+        # Disk failure itself remains an explicit error, never a success receipt.
         (directory/"result.json").write_text(json.dumps(result,indent=2)+"\n")
         print(json.dumps(result))
+    if failure is not None:
+        raise RuntimeError("experiment incomplete; evidence: " + str(directory/"result.json")) from failure
+    return result
 
 if __name__=="__main__":
     raise SystemExit("Blocked experiment: bootstrap failed; do not retry without resolving the original failure through an authorized path.")

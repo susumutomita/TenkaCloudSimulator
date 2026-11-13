@@ -26,3 +26,18 @@ has RunAtLoad/KeepAlive/AbandonProcessGroup false. Controller crash, stopped chi
 group escape and adversarial workloads are NOT tested or contained by this script.
 A non-running launchd state or absence check is not proof of a successful kernel
 reap by the original parent. Do not use this experiment as Battle qualification.
+
+## Subsequent offline error-handling correction
+
+The CLI remains blocked and no registration was retried. Four mocked tests now
+cover failed bootstrap with confirmed exact-label absence, bootstrap timeout with
+partial registration, cleanup failure preserving both errors, and unreadable
+registration state. `subprocess.run` is replaced for every test: no launchctl,
+child process or VM is run. Unknown state remains unknown; no success is inferred.
+All attempted registrations would be inspected by exact generated label. If a
+partial registration is observed, only that label is cleaned up; registration is
+never retried. This is currently tested with mocks only. Operation and cleanup
+exceptions are separately preserved with bounded error text, even when bootout
+fails. A failed result-file write still raises and cannot become a success receipt.
+These tests do not recover the lost stderr from the original real failure or
+qualify macOS process ownership. Real testing remains blocked.
