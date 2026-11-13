@@ -190,3 +190,58 @@ func TestImageHeaderAllowsOnlyZeroOptionalV3Fields(t *testing.T) {
 		t.Fatal("unknown header admitted")
 	}
 }
+
+func TestOptionalHeaderExtensionBoundaries(t *testing.T) {
+	b := header()
+	binary.BigEndian.PutUint32(b[100:], 112)
+	binary.BigEndian.PutUint32(b[112:], 0x6803f857)
+	binary.BigEndian.PutUint32(b[116:], 48)
+	if err := checkStandaloneHeader(bytes.NewReader(b), 512); err != nil {
+		t.Fatal("optional header plus display table rejected", err)
+	}
+	for _, size := range []int{104, 111, 112, 119, 168, 175} {
+		if err := checkStandaloneHeader(bytes.NewReader(b[:size]), 512); err == nil {
+			t.Fatalf("truncated optional/extension read admitted at %d", size)
+		}
+	}
+	binary.BigEndian.PutUint32(b[168:], 0x44415441)
+	if checkStandaloneHeader(bytes.NewReader(b), 512) == nil {
+		t.Fatal("external data after display table accepted")
+	}
+	binary.BigEndian.PutUint32(b[168:], 0x6803f857)
+	binary.BigEndian.PutUint32(b[172:], 48)
+	if checkStandaloneHeader(bytes.NewReader(b), 512) == nil {
+		t.Fatal("duplicate feature table after optional header accepted")
+	}
+	// A complete display table must not excuse a truncated end marker.
+	b = header()
+	binary.BigEndian.PutUint32(b[104:], 0x6803f857)
+	binary.BigEndian.PutUint32(b[108:], 384)
+	if checkStandaloneHeader(bytes.NewReader(b[:496]), 512) == nil {
+		t.Fatal("missing terminator read accepted")
+	}
+}
+func TestImageDimensionAdmissionBounds(t *testing.T) {
+	for _, bits := range []uint32{0, 8, 22, 32} {
+		b := header()
+		binary.BigEndian.PutUint32(b[20:], bits)
+		if checkStandaloneHeader(bytes.NewReader(b), 512) == nil {
+			t.Fatalf("cluster exponent %d", bits)
+		}
+	}
+	for _, virtualSize := range []uint64{0, uint64(maxImageBytes) + 1} {
+		b := header()
+		binary.BigEndian.PutUint64(b[24:], virtualSize)
+		if checkStandaloneHeader(bytes.NewReader(b), 512) == nil {
+			t.Fatalf("virtual size %d", virtualSize)
+		}
+	}
+	b := header()
+	binary.BigEndian.PutUint64(b[24:], uint64(maxImageBytes))
+	if checkStandaloneHeader(bytes.NewReader(b), 512) != nil {
+		t.Fatal("virtual upper bound rejected")
+	}
+	if checkStandaloneHeader(bytes.NewReader(b), 511) == nil {
+		t.Fatal("file shorter than first cluster accepted")
+	}
+}
