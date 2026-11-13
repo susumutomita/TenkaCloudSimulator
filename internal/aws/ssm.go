@@ -33,6 +33,16 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveBedrockRuntime(w, r)
 		return
 	}
+	// DynamoDB's explicit protocol target owns its admission errors even when
+	// the service hint or signing scope incorrectly names EC2.
+	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "DynamoDB_20120810.") {
+		g.serveDynamoDB(w, r)
+		return
+	}
+	if isEC2Read(r) {
+		g.serveEC2Read(w, r)
+		return
+	}
 	if isELB(r) {
 		g.serveELB(w, r)
 		return
@@ -106,10 +116,6 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		g.serveSSM(w, r)
-		return
-	}
-	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "DynamoDB_20120810.") {
-		g.serveDynamoDB(w, r)
 		return
 	}
 	g.serveS3(w, r)

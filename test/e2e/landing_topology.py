@@ -321,11 +321,33 @@ def audit(page, axe_source, report, name):
     stability = page.evaluate(STABLE_LAYOUT)
     (report/(name+'-layout.json')).write_text(json.dumps(stability, indent=2)+'\n')
     assert stability['status'] == 'STABLE' and stability['stableFrames'] >= 3 and stability['fontsReady']
+    # Native drawable sources must not escape into the readable HTML above.
+    projection = page.evaluate("""() => {
+        const canvas=document.querySelector('[data-topology-canvas]');
+        const visible=!!canvas && !canvas.hidden;
+        const box=canvas?.getBoundingClientRect();
+        return {visible, overflow:canvas ? getComputedStyle(canvas).overflow : null,
+            sources: visible ? [...canvas.querySelectorAll('[drawable]')].map(e=>{
+                const r=e.getBoundingClientRect(), style=getComputedStyle(e);
+                return {transform:style.transform,x:r.x-box.x,y:r.y-box.y,
+                    inside:r.left>=box.left && r.top>=box.top && r.right<=box.right && r.bottom<=box.bottom};
+            }) : []};
+    }""")
+    (report/(name+'-projection.json')).write_text(json.dumps(projection, indent=2)+'\n')
+    if projection['visible']:
+        assert projection['overflow'] == 'clip'
+        assert len(projection['sources']) == 9
+        assert all(s['inside'] and s['transform'] == 'none' and s['x'] == 0 and s['y'] == 0
+                   for s in projection['sources']), projection
     before = page.evaluate('({x:scrollX,y:scrollY})')
     result = page.evaluate("""async () => {
         const result = await axe.run(document, {runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});
-        return {violations:result.violations.map(v=>({id:v.id,nodes:v.nodes.length})),
-                incomplete:result.incomplete.map(v=>({id:v.id,nodes:v.nodes.length})),passes:result.passes.length};
+        const finding = v => ({id:v.id,nodes:v.nodes.length,details:v.nodes.map(n=>({
+            target:n.target,summary:n.failureSummary,
+            checks:[...n.any,...n.all,...n.none].map(c=>({id:c.id,message:c.message,data:c.data}))
+        }))});
+        return {violations:result.violations.map(finding),
+                incomplete:result.incomplete.map(finding),passes:result.passes.length};
     }""")
     after = page.evaluate('({x:scrollX,y:scrollY})')
     # Save strict findings and unmodified scroll before raising a regression.

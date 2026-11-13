@@ -1317,6 +1317,13 @@ BASE_INVARIANTS['AutoScalingPlanTargets'] = {'TypeOK', 'BoundedWhileOwned', 'Onl
 REQUIRED_MUTANTS['AutoScalingPlanTargets'] = {'OmitAuthorization', 'OmitValidation', 'SkipCapacityBound', 'ClampLowerOnly', 'StealOwnership', 'RevertOnDelete', 'WriteOtherTeam', 'ExposePendingState', 'ReuseTableGeneration', 'RejectWritesCapacity', 'RejectClaimsOwner'}
 REQUIRED_SOURCE_SCOPES['AutoScalingPlanTargets'] = {'internal/aws/autoscalingplans_store.go', 'internal/aws/autoscalingplans_http.go', 'internal/aws/autoscalingplans_dispatch.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/server/server.go'}
 
+# Independent EC2 read-only discovery admission contract. These fixed sets must
+# not be derived from the mutable registry, which this gate validates.
+BASE_MODELS.add('EC2ReadDiscovery')
+BASE_INVARIANTS['EC2ReadDiscovery'] = {'TypeOK', 'AuthorizedRead', 'RegionBound', 'OwnedRead'}
+REQUIRED_MUTANTS['EC2ReadDiscovery'] = {'MissingAllow', 'MissingDeny', 'MissingRegion', 'MissingOwner'}
+REQUIRED_SOURCE_SCOPES['EC2ReadDiscovery'] = {'internal/aws/ec2_read.go', 'internal/aws/ssm.go', 'internal/server/server.go'}
+
 class GateError(ValueError):
     pass
 

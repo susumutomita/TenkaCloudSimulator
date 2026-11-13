@@ -187,3 +187,20 @@ still applies to Services, search and Favorites. A scoped Parameter Store handof
 continues to show only Console Home and Systems Manager, even if this browser
 previously pinned S3. This is a session-scope restriction, not dynamic IAM-policy
 discovery; stars never grant API permission or change the session.
+
+### Read-only EC2 and VPC inspection
+
+The EC2 and VPC views list the local CloudFormation-managed resources returned
+by `DescribeInstances` and `DescribeVpcs` in the selected region. Discovery must
+advertise both read operations and `console: true` before these views appear.
+They do not implement instance launch/start/stop, VPC creation, or network edits.
+The recorded simulator runtime state is not an AWS instance-state claim or a
+probe of guest health; absent/unknown state is shown as unconfirmed. UserData,
+runtime plans, credentials and internal connection details are never displayed.
+
+Lists are bounded by the API and must fail rather than silently truncate. A read
+failure clears previous data and is shown as an error, not an empty-success
+result. Switching identity, region or service discards old in-flight responses.
+The initial read API is for the local operator/exercise-identity context, not a
+new STS participant authorization surface. Each team's isolated process/database
+remains the tenancy boundary.
