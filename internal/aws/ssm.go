@@ -33,6 +33,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveBedrockRuntime(w, r)
 		return
 	}
+	if isEC2Read(r) {
+		g.serveEC2Read(w, r)
+		return
+	}
 	if isELB(r) {
 		g.serveELB(w, r)
 		return

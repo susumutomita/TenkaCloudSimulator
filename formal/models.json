@@ -17928,6 +17928,70 @@
    ],
    "bounds": "Exhaustive over one guest frame with every combination of EtherType class {ARP, IPv4, IPv6, other} and the six boolean classification facts (trusted ARP request, TCP parse, passive route, local destination, probe source-port range, owned-tuple peer validity). No seeds, symmetry or depth cutoff.",
    "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
+  },
+  {
+   "id": "EC2ReadDiscovery",
+   "model": "formal/EC2ReadDiscovery.tla",
+   "config": "formal/EC2ReadDiscovery.cfg",
+   "bounds": "Two regions, two stack owners, Boolean allow/deny and one atomic read observation.",
+   "properties": [
+    "TypeOK",
+    "AuthorizedRead",
+    "RegionBound",
+    "OwnedRead"
+   ],
+   "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties.",
+   "source_scope": [
+    "internal/aws/ec2_read.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "MissingAllow",
+     "edits": [
+      {
+       "old": "/\\ allow /\\ ~deny",
+       "new": "/\\ TRUE /\\ ~deny",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizedRead"
+    },
+    {
+     "id": "MissingDeny",
+     "edits": [
+      {
+       "old": "/\\ allow /\\ ~deny",
+       "new": "/\\ allow /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizedRead"
+    },
+    {
+     "id": "MissingRegion",
+     "edits": [
+      {
+       "old": "/\\ requestRegion = recordRegion",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RegionBound"
+    },
+    {
+     "id": "MissingOwner",
+     "edits": [
+      {
+       "old": "/\\ claimedOwner = storedOwner",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OwnedRead"
+    }
+   ]
   }
  ]
 }

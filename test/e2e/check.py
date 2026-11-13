@@ -370,6 +370,7 @@ def handler(event,context):
   subprocess.run([sys.executable,str(Path(__file__).with_name('kms_locale.py'))],check=True,timeout=120)
  def test_service_japanese_uses_canonical_native_operations(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('service_locale.py'))],check=True,timeout=180)
+  subprocess.run([sys.executable,str(Path(__file__).with_name('ec2_readonly_console.py'))],check=True,timeout=180)
  def test_official_storage_sdk_harness_boundaries(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('test_crossprovider_official_storage.py'))],check=True,timeout=30)
  def test_official_storage_sdks_two_teams_restart_and_conditions(self):
