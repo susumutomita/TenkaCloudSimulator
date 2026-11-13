@@ -102,17 +102,36 @@ func verifyPinned(originalPath, parent string, expectedSize int64, expectedSHA51
 	}
 	return result{Result: "pinned-arm-image-preflight-pass", CopySHA256: digest, CopyRemoved: true, BattleReady: false}, nil
 }
-func main() {
-	original := flag.String("original", "", "canonical pinned original image")
-	scratch := flag.String("scratch", "", "operator-owned scratch parent")
-	flag.Parse()
-	r, e := verify(*original, *scratch)
-	if e != nil {
-		fmt.Fprintln(os.Stderr, e)
-		os.Exit(1)
+
+// run keeps parsing, validation, and output errors observable without launching
+// a VM or terminating the test process. The verifier's official pin is fixed.
+func run(args []string, stdout, stderr io.Writer) int {
+	flags := flag.NewFlagSet("guesthvf-preflight", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	original := flags.String("original", "", "canonical pinned original image")
+	scratch := flags.String("scratch", "", "operator-owned scratch parent")
+	if err := flags.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return 0
+		}
+		return 2
 	}
-	if e = json.NewEncoder(os.Stdout).Encode(r); e != nil {
-		fmt.Fprintln(os.Stderr, e)
-		os.Exit(1)
+	if flags.NArg() != 0 {
+		fmt.Fprintln(stderr, "unexpected positional arguments")
+		return 2
 	}
+	r, err := verify(*original, *scratch)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	return writeResult(stdout, stderr, r)
 }
+func writeResult(stdout, stderr io.Writer, r result) int {
+	if err := json.NewEncoder(stdout).Encode(r); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	return 0
+}
+func main() { os.Exit(run(os.Args[1:], os.Stdout, os.Stderr)) }

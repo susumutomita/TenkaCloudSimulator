@@ -5,6 +5,8 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/binary"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -99,5 +101,38 @@ func TestPinnedCopyAdmissionAndFailureCleanup(t *testing.T) {
 	// The public entry point must not admit the synthetic fixture's self-pin.
 	if r, err := verify(original, scratch); err == nil || r != (result{}) {
 		t.Fatal("official pin was bypassed")
+	}
+}
+
+type failingOutput struct{}
+
+func (failingOutput) Write([]byte) (int, error) { return 0, errors.New("test output unavailable") }
+func TestCLIRejectsInvalidInputWithoutSuccessOutput(t *testing.T) {
+	for _, args := range [][]string{nil, {"--unknown"}, {"--original"}, {"extra"}, {"--original", "missing", "--scratch", "missing"}} {
+		var out, diagnostics bytes.Buffer
+		if code := run(args, &out, &diagnostics); code == 0 || out.Len() != 0 || diagnostics.Len() == 0 {
+			t.Fatalf("args=%v code=%d out=%q err=%q", args, code, out.String(), diagnostics.String())
+		}
+	}
+}
+func TestResultOutputFailureIsNotSuccess(t *testing.T) {
+	r := result{Result: "pinned-arm-image-preflight-pass", CopySHA256: strings.Repeat("a", 64), CopyRemoved: true}
+	var out, diagnostics bytes.Buffer
+	if code := writeResult(&out, &diagnostics, r); code != 0 || diagnostics.Len() != 0 {
+		t.Fatalf("code=%d err=%q", code, diagnostics.String())
+	}
+	var got result
+	if err := json.Unmarshal(out.Bytes(), &got); err != nil || got != r || got.BattleReady {
+		t.Fatalf("result=%+v err=%v", got, err)
+	}
+	if code := writeResult(failingOutput{}, &diagnostics, r); code == 0 || !strings.Contains(diagnostics.String(), "test output unavailable") {
+		t.Fatalf("write failure code=%d err=%q", code, diagnostics.String())
+	}
+}
+
+func TestCLIHelpDoesNotValidateOrEmitReceipt(t *testing.T) {
+	var out, diagnostics bytes.Buffer
+	if code := run([]string{"--help"}, &out, &diagnostics); code != 0 || out.Len() != 0 || !strings.Contains(diagnostics.String(), "canonical pinned original image") {
+		t.Fatalf("help code=%d out=%q err=%q", code, out.String(), diagnostics.String())
 	}
 }
