@@ -316,6 +316,28 @@ def public_cta_case(page, context, origin, oracle, responses):
 STABLE_LAYOUT = '() => new Promise(resolve => {\n    const started=performance.now(),maxMs=5000,requiredFrames=3;\n    const ids=[\'aws-gateway\',\'aws-lambda\',\'aws-s3\',\'aws-ssm\',\'aws-iam\',\'gcp-storage\',\'gcp-object\',\'azure-container\',\'azure-blob\'];\n    let previous=null,stableFrames=0,frames=0,last=null,first=null,done=false,raf=null,fontsReady=false;\n    const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};\n    const finish=status=>{\n        if(done)return;done=true;clearTimeout(timer);if(raf!==null)cancelAnimationFrame(raf);\n        resolve({status,maxMs,requiredFrames,stableFrames,frames,fontsReady,elapsedMs:Math.round((performance.now()-started)*1000)/1000,\n            first,last,qualification:\'Actual unmodified scroll/layout measured across requestAnimationFrame after document.fonts.ready; no CSS, motion, scroll or focus override.\'});\n    };\n    const timer=setTimeout(()=>finish(\'UNSTABLE_OR_FONTS_TIMEOUT\'),maxMs);\n    const tick=()=>{\n        if(done)return;\n        const nodes=[];\n        for(const id of ids){\n            const matches=document.querySelectorAll(\'a[data-node-id="\'+id+\'"]\');\n            if(matches.length!==1){finish(\'SOURCE_NODE_INVENTORY_UNAVAILABLE\');return;}\n            nodes.push({id,rect:rect(matches[0])});\n        }\n        const paths=Array.from(document.querySelectorAll(\'svg.topology-lines path\'));\n        if(paths.length!==6){finish(\'SOURCE_PATH_INVENTORY_UNAVAILABLE\');return;}\n        const current=document.querySelector(\'a[data-node-id][aria-current="true"]\')?.getAttribute(\'data-node-id\');\n        if(!ids.includes(current)){finish(\'SOURCE_SELECTION_UNAVAILABLE\');return;}\n        const detail=document.getElementById(\'detail-\'+current);\n        if(!detail){finish(\'SOURCE_DETAIL_UNAVAILABLE\');return;}\n        last={scrollX,scrollY,viewportWidth:innerWidth,viewportHeight:innerHeight,\n            scrollWidth:document.documentElement.scrollWidth,scrollHeight:document.documentElement.scrollHeight,\n            nodes,paths:paths.map((p,index)=>({index,rect:rect(p)})),current,detailRect:rect(detail)};\n        if(first===null)first=last;\n        const signature=JSON.stringify(last);frames++;\n        stableFrames=signature===previous?stableFrames+1:1;previous=signature;\n        if(stableFrames>=requiredFrames){finish(\'STABLE\');return;}\n        if(performance.now()-started>=maxMs){finish(\'UNSTABLE_OR_FONTS_TIMEOUT\');return;}\n        raf=requestAnimationFrame(tick);\n    };\n    if(!document.fonts||!document.fonts.ready){finish(\'FONT_API_UNAVAILABLE\');return;}\n    document.fonts.ready.then(()=>{fontsReady=true;if(!done)raf=requestAnimationFrame(tick);},()=>finish(\'FONT_READINESS_REJECTED\'));\n})\n'
 
 
+DRAWABLE_GEOMETRY = """() => {
+    const canvas = document.querySelector('canvas[data-topology-canvas]');
+    if (!canvas || canvas.hidden) return {canvasShown: false, escaped: []};
+    const box = canvas.getBoundingClientRect();
+    const escaped = Array.from(canvas.querySelectorAll('[drawable]')).map(element => {
+        const r = element.getBoundingClientRect();
+        return {text: element.textContent.split('\\n')[0], left: r.left - box.left, top: r.top - box.top,
+                right: box.right - r.right, bottom: box.bottom - r.bottom};
+    }).filter(r => Math.min(r.left, r.top, r.right, r.bottom) < -0.5);
+    return {canvasShown: true, drawables: canvas.querySelectorAll('[drawable]').length, escaped};
+}"""
+
+
+def drawable_geometry(page):
+    # Native drawElementImage places each drawable's layout box where it is
+    # painted. A box escaping the canvas overlaps ordinary HTML (hit testing
+    # and axe colour contrast then see an invisible element over real text).
+    geometry = page.evaluate(DRAWABLE_GEOMETRY)
+    assert geometry['escaped'] == [], geometry
+    return geometry
+
+
 def audit(page, axe_source, report, name):
     page.evaluate(axe_source)
     stability = page.evaluate(STABLE_LAYOUT)
@@ -381,6 +403,7 @@ def case(browser, origin, oracle, report, axe_source, width, mode):
             if not all(record['currentAPI'].values()) or mode == 'blocked-enhancement':
                 assert canvas.get_attribute('hidden') is not None
             record['nativeDrawAcceptance'] = 'NOT_PROVED_BY_THIS_REGRESSION'
+            record['drawableGeometry'] = drawable_geometry(page)
             record['audit'] = audit(page, axe_source, report, name)
         assert not errors and not forbidden
         if mode == 'blocked-enhancement':
