@@ -38,3 +38,10 @@ and then requires qualified executable FD4 handling before creating the clock.
 Neither check is relaxed. These short-lived Go test subprocesses are IPC tests,
 not a replacement for the refused launchd experiment or a VM execution attempt.
 They do not prove supervisor-death cleanup, Host integration or Battle E2E.
+
+FD-type checks alone do not prove anonymity, AF_UNIX transport or launcher
+ownership: a socket/FIFO of another origin has the same mode type. The caller
+must be the qualified trusted launcher furnishing a private inherited endpoint;
+there is no participant-selectable descriptor or automatic network bootstrap.
+The successful test fixtures establish their own private pipe/socketpair, not a
+general authentication theorem for arbitrary descriptors.

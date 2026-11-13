@@ -18,8 +18,9 @@ type bootstrapOps struct {
 	clock    func() (*Clock, error)
 }
 
-// BootstrapInherited uses only fixed launcher-owned anonymous FD3. Every close
-// and close-on-exec operation is checked before startup may create guest children.
+// BootstrapInherited requires the trusted launcher to supply private anonymous
+// FD3. Type checks alone do not prove launcher ownership, anonymity or AF_UNIX.
+// Every close and CLOEXEC operation is checked before creating guest children.
 func BootstrapInherited() (*Clock, error) {
 	return bootstrapFD(3, bootstrapOps{
 		open:     func(fd int) io.WriteCloser { return os.NewFile(uintptr(fd), "private-clock-bootstrap") },
