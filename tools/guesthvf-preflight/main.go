@@ -1,3 +1,5 @@
+//go:build darwin || linux
+
 // guesthvf-preflight is a read/copy-only development check of one pinned official
 // Debian ARM asset. It never launches QEMU, launchctl or the Battle runtime.
 package main
@@ -13,6 +15,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"syscall"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/guesthvf"
 )
@@ -41,10 +44,14 @@ func verifyPinned(originalPath, parent string, expectedSize int64, expectedSHA51
 	if e != nil || canonical != originalPath {
 		return result{}, errors.New("original must be canonical and not symlinked")
 	}
-	original, e := os.Open(originalPath)
+	// Reject nonregular inputs using the opened descriptor, without waiting for
+	// a FIFO writer. NOFOLLOW also rejects a final symlink swapped in after
+	// canonicalization; concurrent parent-directory mutation is not supported.
+	originalFD, e := syscall.Open(originalPath, syscall.O_RDONLY|syscall.O_NONBLOCK|syscall.O_NOFOLLOW|syscall.O_CLOEXEC, 0)
 	if e != nil {
 		return result{}, e
 	}
+	original := os.NewFile(uintptr(originalFD), originalPath)
 	defer func() { err = errors.Join(err, original.Close()) }()
 	info, e := original.Stat()
 	if e != nil {

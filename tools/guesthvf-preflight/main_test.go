@@ -1,7 +1,10 @@
+//go:build darwin || linux
+
 package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/binary"
@@ -9,9 +12,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
+	"time"
 )
 
 func TestInvalidOriginalDoesNotCreateCopy(t *testing.T) {
@@ -134,5 +140,48 @@ func TestCLIHelpDoesNotValidateOrEmitReceipt(t *testing.T) {
 	var out, diagnostics bytes.Buffer
 	if code := run([]string{"--help"}, &out, &diagnostics); code != 0 || out.Len() != 0 || !strings.Contains(diagnostics.String(), "canonical pinned original image") {
 		t.Fatalf("help code=%d out=%q err=%q", code, out.String(), diagnostics.String())
+	}
+}
+
+// Run the FIFO check in an owned, deadline-bounded subprocess so a regression
+// to blocking open cannot hang the suite or leave a blocked goroutine behind.
+func TestFIFOOriginalRejectedWithoutBlocking(t *testing.T) {
+	if os.Getenv("GUESTHVF_FIFO_HELPER") == "1" {
+		_, err := verify(os.Getenv("GUESTHVF_FIFO_PATH"), os.Getenv("GUESTHVF_FIFO_SCRATCH"))
+		if err == nil || !strings.Contains(err.Error(), "unexpected original type/size") {
+			t.Fatalf("FIFO rejection: %v", err)
+		}
+		return
+	}
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	fifo := filepath.Join(root, "original.fifo")
+	if err := syscall.Mkfifo(fifo, 0600); err != nil {
+		t.Fatal(err)
+	}
+	scratch := filepath.Join(root, "scratch")
+	if err := os.Mkdir(scratch, 0700); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestFIFOOriginalRejectedWithoutBlocking$")
+	cmd.Env = append(os.Environ(), "GUESTHVF_FIFO_HELPER=1", "GUESTHVF_FIFO_PATH="+fifo, "GUESTHVF_FIFO_SCRATCH="+scratch)
+	output, err := cmd.CombinedOutput()
+	if ctx.Err() != nil {
+		t.Fatalf("FIFO open exceeded deadline: %v", ctx.Err())
+	}
+	if err != nil {
+		t.Fatalf("FIFO helper: %v\n%s", err, output)
+	}
+	entries, err := os.ReadDir(scratch)
+	if err != nil || len(entries) != 0 {
+		t.Fatalf("copy created on FIFO input: %v %v", entries, err)
+	}
+	info, err := os.Lstat(fifo)
+	if err != nil || info.Mode()&os.ModeNamedPipe == 0 {
+		t.Fatalf("original FIFO changed: %v", err)
 	}
 }
