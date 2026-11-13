@@ -95,7 +95,7 @@ def execute(root, firmware_directory):
                     raise ValueError('builder serial budget exceeded')
         child.wait(timeout=2)
         lines = output.splitlines()
-        if child.returncode != 0 or b'TCS_BUILD_FILES_INSTALLED' not in lines or b'TCS_BUILD_FAILED' in lines or not any(b'reboot: Power down' in l for l in lines):
+        if child.returncode != 0 or b'TCS_BUILD_FILES_INSTALLED' not in lines or b'TCS_BUILD_STATE_CLEAN' not in lines or b'TCS_BUILD_FAILED' in lines or not any(b'reboot: Power down' in l for l in lines):
             raise ValueError('builder completion unconfirmed')
         hasher = hashlib.sha256()
         with (root / 'candidate.qcow2').open('rb') as disk:
@@ -104,7 +104,7 @@ def execute(root, firmware_directory):
         digest = hasher.hexdigest()
         result = {'state': 'built-not-qualified', 'diskSHA256': digest,
                   'ownedChildReaped': True, 'battleReady': False, 'relayExecuted': False,
-                  'cloudInitCleanupVerified': False}
+                  'cloudInitCleanupObserved': True, 'cloudInitCleanupVerified': False}
     except BaseException:
         if child is not None:
             stop_owned(child)

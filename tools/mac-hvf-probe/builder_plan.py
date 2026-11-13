@@ -24,8 +24,35 @@ test "$(cat /etc/tenkacloud/session-relay-image)" = tenkacloud-guest-session-v1
 test "$(readlink /etc/systemd/system/multi-user.target.wants/tenkacloud-session-relay.service)" = /usr/lib/systemd/system/tenkacloud-session-relay.service
 sync
 echo TCS_BUILD_FILES_INSTALLED
+cat > /run/tcs-builder-finalize.sh <<'FINALIZE'
+#!/bin/sh
+set -eu
+exec > /dev/ttyAMA0 2>&1
+trap 'echo TCS_BUILD_FAILED; poweroff -f' EXIT
+test "$(systemctl show -p Result --value cloud-final.service)" = success
+systemctl stop cloud-init-main.service
+test "$(systemctl show -p MainPID --value cloud-init-main.service)" = 0
+cloud-init clean --logs --seed --machine-id
+test ! -e /var/lib/cloud/instance
+test ! -e /var/lib/cloud/seed
+test "$(cat /etc/machine-id)" = uninitialized
+sync
+echo TCS_BUILD_STATE_CLEAN
 trap - EXIT
 poweroff
+FINALIZE
+cat > /run/systemd/system/tcs-builder-finalize.service <<'UNIT'
+[Unit]
+Description=Finalize trusted offline image build
+After=cloud-final.service
+[Service]
+Type=oneshot
+ExecStart=/bin/sh /run/tcs-builder-finalize.sh
+TimeoutStartSec=30
+UNIT
+systemctl daemon-reload
+systemctl start --no-block tcs-builder-finalize.service
+trap - EXIT
 '''.replace('OVERLAY_HASH', OVERLAY_SHA256).replace('BINARY_HASH', BINARY_SHA256)
 
 

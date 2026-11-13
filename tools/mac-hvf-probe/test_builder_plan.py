@@ -52,4 +52,13 @@ class BuilderPreparation(unittest.TestCase):
         self.assertIn('mount -o ro', script)
         self.assertIn('TCS_BUILD_FAILED', script)
         self.assertNotIn('curl', script)
-        self.assertNotIn('systemctl start', script)
+        self.assertNotIn('systemctl start tenkacloud-session-relay', script)
+
+    def test_cleanup_runs_after_final_with_cloud_init_stopped(self):
+        script = builder_plan.BUILD_SCRIPT
+        self.assertIn('After=cloud-final.service', script)
+        self.assertIn('systemctl start --no-block tcs-builder-finalize.service', script)
+        self.assertLess(script.index('systemctl stop cloud-init-main.service'), script.index('cloud-init clean --logs --seed --machine-id'))
+        self.assertIn('MainPID --value cloud-init-main.service', script)
+        self.assertIn('test ! -e /var/lib/cloud/instance', script)
+        self.assertIn('TCS_BUILD_STATE_CLEAN', script)

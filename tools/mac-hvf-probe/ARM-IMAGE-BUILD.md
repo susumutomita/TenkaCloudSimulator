@@ -120,3 +120,31 @@ Serial log persistence now precedes build-result receipt creation. Mock tests
 cover successful unqualified receipt, ISO failure, output quota, timeout,
 missing marker, spawn failure and hardlinked-source rejection. These mocks do
 not prove guest installation or crash-safe storage durability.
+
+## Deferred cleanup candidate (supersedes live-final cleanup limitation)
+
+The proposed builder now queues a fixed, /run-only oneshot after
+cloud-final.service. The builder's user-data script returns instead of cleaning
+its own active cloud-init state. The separate oneshot checks the final-stage
+Result, stops the guest cloud-init-main.service, requires MainPID=0, then invokes
+`cloud-init clean --logs --seed --machine-id`, checks absence of instance/seed
+state and the uninitialized machine-id, syncs and powers off. No host service is
+stopped; the relay is not explicitly started. The oneshot timeout is 30 seconds,
+and the outer builder remains limited to 90 seconds. Errors emit the failure
+marker or cause absence of the required cleanup marker, so acceptance fails.
+
+Version-matched official source rationale (cloud-init 25.1.4, as seen in the
+operator guest log):
+- https://github.com/canonical/cloud-init/blob/25.1.4/systemd/cloud-final.service
+  describes the final-stage completion shim.
+- https://github.com/canonical/cloud-init/blob/25.1.4/systemd/cloud-init-main.service.tmpl
+  identifies the separate all-stages process.
+- https://github.com/canonical/cloud-init/blob/25.1.4/cloudinit/cmd/clean.py
+  implements the selected cleanup flags and uninitialized machine-id.
+
+Launcher additionally requires TCS_BUILD_STATE_CLEAN before a build receipt.
+A receipt records cloudInitCleanupObserved=true but still
+cloudInitCleanupVerified=false: this code has not run in the pinned guest, and
+post-shutdown disk inspection/reboot is not replaced by guest marker output.
+The previous claim that no cleanup is attempted describes the earlier candidate,
+not this deferred candidate. Runtime, image qualification and Battle remain open.
