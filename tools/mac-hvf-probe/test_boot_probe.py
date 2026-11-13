@@ -39,7 +39,7 @@ class ArtifactValidation(unittest.TestCase):
 
 
 class BootExecutionContract(unittest.TestCase):
-    def run_case(self, chunks, ticks=None, code=0, expected_error=None, inspect_identity=False, firmware=False):
+    def run_case(self, chunks, ticks=None, code=0, expected_error=None, inspect_identity=False, firmware=False, device_probe=False, channel_bytes=b'TCS_PORT_BYTE\n'):
         child = Mock()
         child.stdin = io.BytesIO()
         child.stdout = Mock()
@@ -48,9 +48,13 @@ class BootExecutionContract(unittest.TestCase):
         selector = MagicMock()
         selector.__enter__.return_value = selector
         selector.select.return_value = [object()]
+        host_channel, guest_channel = Mock(), Mock()
+        guest_channel.fileno.return_value = 77
+        host_channel.recv.return_value = channel_bytes
         output, errors = Mock(), Mock()
         output.buffer, errors.buffer = io.BytesIO(), io.BytesIO()
         with ExitStack() as stack:
+            stack.enter_context(patch.object(boot_probe.socket, 'socketpair', return_value=(host_channel, guest_channel)))
             stack.enter_context(patch.object(boot_probe.platform, 'system', return_value='Darwin'))
             stack.enter_context(patch.object(boot_probe.platform, 'machine', return_value='arm64'))
             stack.enter_context(patch.object(boot_probe, 'verified_files', return_value=['/fixed/kernel', '/fixed/initrd']))
@@ -63,11 +67,11 @@ class BootExecutionContract(unittest.TestCase):
             stack.enter_context(patch.object(boot_probe.sys, 'stderr', errors))
             if expected_error:
                 with self.assertRaises(expected_error):
-                    boot_probe.main('/fixed', inspect_identity=inspect_identity, firmware=firmware)
+                    boot_probe.main('/fixed', inspect_identity=inspect_identity, firmware=firmware, device_probe=device_probe)
                 child.kill.assert_called_once_with()
                 self.assertEqual(output.write.call_count, 0, 'failure printed success')
             else:
-                boot_probe.main('/fixed', inspect_identity=inspect_identity, firmware=firmware)
+                boot_probe.main('/fixed', inspect_identity=inspect_identity, firmware=firmware, device_probe=device_probe)
                 child.kill.assert_not_called()
             self.assertTrue(child.stdin.closed)
             child.stdout.close.assert_called()
@@ -83,10 +87,14 @@ class BootExecutionContract(unittest.TestCase):
                 self.assertNotIn(forbidden, args)
             if inspect_identity:
                 self.assertEqual(args[args.index('-uuid') + 1], 'b42718a6-5b28-4f82-8d9c-cd91dfe925c1')
-                self.assertIn('null,id=session-probe', args)
+                self.assertIn('socket,id=session-probe,fd=77' if device_probe else 'null,id=session-probe', args)
                 self.assertIn('virtserialport,chardev=session-probe,name=org.tenkacloud.session.0', args)
             if firmware:
                 self.assertEqual(args[args.index('-bios') + 1], '/fixed/firmware')
+            if device_probe:
+                self.assertEqual(popen.call_args.kwargs['pass_fds'], (77,))
+                host_channel.close.assert_called_once_with()
+                guest_channel.close.assert_called_once_with()
             return child
 
     def test_success_uses_fixed_safe_argv_and_environment(self):
@@ -110,6 +118,12 @@ class BootExecutionContract(unittest.TestCase):
 
     def test_firmware_probe_uses_only_verified_firmware(self):
         self.run_case([b'~ # ', b'TCS_ARCH_aarch64\nPower down\n', b''], inspect_identity=True, firmware=True)
+
+    def test_device_channel_owns_and_closes_both_endpoints(self):
+        self.run_case([b'~ # ', b'TCS_ARCH_aarch64\nPower down\n', b''], inspect_identity=True, firmware=True, device_probe=True)
+
+    def test_wrong_private_channel_bytes_fail_closed(self):
+        self.run_case([b'~ # ', b'TCS_ARCH_aarch64\nPower down\n', b''], inspect_identity=True, firmware=True, device_probe=True, channel_bytes=b'wrong', expected_error=ValueError)
 
     def test_wrong_platform_never_launches(self):
         with patch.object(boot_probe.platform, 'system', return_value='Linux'), \

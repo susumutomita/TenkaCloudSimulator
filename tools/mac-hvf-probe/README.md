@@ -133,3 +133,30 @@ This narrows the next image prerequisite to real device naming plus the existing
 bash/systemd/relay/marker requirements. It does not prove relay handshake, byte
 transport or Battle execution. Null chardev, no NIC/disk/share and empty environment
 remain unchanged. Filename/hash checks retain the private-directory TOCTOU limit.
+
+## Kernel device and private byte-path probe
+
+`--device` includes firmware/identity checks and replaces the null backend with
+an anonymous socketpair. Only the selected socket FD is inherited by QEMU; no
+filesystem socket or TCP/UDP listener is created. Both host-owned endpoints are
+closed after the probe, including launch-failure handling. The trusted guest
+mounts its own devtmpfs and tests the observed kernel device `/dev/vport0p1`, then
+writes a fixed short diagnostic string. The host checks those bytes from the
+private channel independently of the serial log. This is one-way byte-path
+measurement, not TCS1, an authenticated relay or participant transport.
+
+Actual Mac result: `kernelCharacterDevice:true`,
+`privateChannelBytesObserved:true`, matching DMI UUID and port name true, but
+`namedCharacterDevice:false`. Guest poweroff and exact-child reap succeeded.
+22 tests pass, including mocked socket ownership/closure and wrong-byte refusal.
+The fixed vport number is specific to this one-device probe, never a replacement
+for the production relay's fixed named-device check.
+
+The canonical systemd rule explains the missing image setup:
+https://github.com/systemd/systemd/blob/v258/rules.d/50-udev-default.rules.in#L11
+
+It creates `virtio-ports/$attr{name}` symlinks for the matching virtio-ports
+subsystem. The verified Alpine initramfs instead includes mdev configuration and
+has not run that udev rule. No manual symlink, fake identity or substitute relay
+was added. A qualified ARM image still needs its normal device manager, bash,
+systemd, pinned relay/service/marker and actual TCS1 handshake/PTY verification.
