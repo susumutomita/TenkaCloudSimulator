@@ -230,3 +230,35 @@ VM retry was performed after the permission denial. The 29 passing Python tests
 include a mocked spawn failure checking the exact mask, no NIC, HVF, empty env,
 selected FD, snapshot/read-only drives and closure of both socket endpoints.
 These are host regression tests, not a guest boot, relay or Battle result.
+
+### Operator execution of edd67f7 and relay preparation
+
+The operator's saved Terminal log for exact candidate
+`edd67f738451559efd15670def516c0224e6da4d` was read back. Log SHA256:
+`d253e235568b3e38192a9fac32d40a5fa215606d6943ebc904d9eba6fc016fd1`.
+It contains PID1 systemd, the expected UUID, bash, the named character-device
+marker, prerequisite completion, guest Power down and the success JSON:
+`systemdBashNamedDevice=true`, `privateBytesObserved=true`,
+`ownedChildReaped=true`, `elapsedSeconds=15.429`.
+The operator reported exit 0. This is a single manual trusted-image diagnostic,
+not a performance benchmark, arbitrary workload containment, or Battle execution.
+`relayExecuted=false` and `battleReady=false` remain true statements.
+No automated image-launch retry was made after the sandbox denial.
+
+Existing guest relay and codec source were not changed. Their last source change
+is integrated commit `bf5585f5230f7cc284a89024e6d4a8462b0306e8` (#465).
+An offline diagnostic cross-build at edd67f7 succeeded with Linux/ARM64,
+CGO_ENABLED=0, -trimpath, -buildvcs=false, GOPROXY=off and GOSUMDB=off.
+The output was inspected as a statically linked AArch64 ELF, never executed:
+SHA256 `7eea651aad51fe984baecd1b402e08e98b95da0f2a51379ffe3cf58b6c82e5f6`.
+The installed compiler was Go 1.26.2 darwin/arm64 (binary SHA256
+`005640c7ff93028cb704283b0f737f2db3faf8b51b2561170c769b83905da646`),
+not an exact Go 1.26.0 toolchain qualification. No image overlay was applied,
+no marker installed and no runtime source/gate relaxed.
+
+Next acceptance remains: reviewed/pinned ARM image containing the unchanged
+relay and service, private TCS1 Hello matching the owner UUID, actual PTY Ready,
+bounded fixed command/output/Exit, closure/teardown negatives, then integration
+with the existing owning runtime. The current one-way diagnostic bytes are not
+TCS1. Image creation and automated VM execution must not evade the known sandbox
+restriction; an operator-run boot is not blanket approval for automated retries.
