@@ -82,3 +82,30 @@ path checks are not a race-proof hostile-host boundary. Exact binary toolchain,
 actual guest installation, cloud-init build-state cleanup for later runtime,
 image verification and Hello/Ready/Exit are still unqualified. An installed
 file marker alone cannot satisfy any runtime acceptance.
+
+## Operator launcher candidate (not executed)
+
+`builder_launch.py --operator-build PREPARED_DIRECTORY FIRMWARE_DIRECTORY` now
+implements the separate, explicit operator action. This is not permission to run
+it automatically. It rechecks private-directory/input hashes, refuses prior
+attempts/results/ISOs, creates ATTEMPTED before subprocesses, makes two local
+read-only ISOs with system hdiutil, and boots only candidate.qcow2 with fixed
+HVF/512MiB/one CPU/no NIC/no share/no private relay channel. The original image
+is not in its QEMU argument list. It retains the 90-second/4MiB bounds and exact
+child kill/wait. Both ISO creation and QEMU receive an empty environment.
+
+A build receipt requires exit zero, the exact installed-files marker, no failure
+marker, guest poweroff indication, child wait and final disk digest. It still
+says built-not-qualified, battleReady=false, relayExecuted=false and
+cloudInitCleanupVerified=false. A receipt alone without complete serial log and
+normal operator exit is not acceptance. Any failure retains the candidate and
+ATTEMPTED; never resume or reuse it. INCOMPLETE/log writes may themselves fail
+on a full disk, so absence of a failure marker never establishes success.
+
+Guest cloud-init may write final-stage state after a script runs. Therefore this
+candidate deliberately does not call clean from inside its still-running final
+stage and claim a clean reusable image. A separately reviewed offline inspection
+and cleanup of builder cloud-init state remains necessary before qualification
+or a later relay boot. No runtime image hash was changed to admit the candidate.
+Parent crash/SIGKILL remains unsupported; do not force-close the operator
+Terminal. No actual ISO creation or VM launch was run for this increment.
