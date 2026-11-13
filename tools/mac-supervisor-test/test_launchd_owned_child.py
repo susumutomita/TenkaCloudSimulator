@@ -20,6 +20,8 @@ class FailureEvidence(unittest.TestCase):
                 target=argv[-1]
                 label=target.rsplit("/",1)[-1]
                 if argv[1]=="print":
+                    if initial=="timeout":
+                        raise subprocess.TimeoutExpired(argv,10,stderr="state unavailable")
                     if initial=="unknown":
                         return subprocess.CompletedProcess(argv,1,"","Operation not permitted")
                     if initial=="present" and "bootout" not in calls:
@@ -64,5 +66,40 @@ class FailureEvidence(unittest.TestCase):
         self.assertIn("cleanupFailure",data)
         self.assertNotIn("serviceAbsentConfirmed",data)
         self.assertNotIn("bootout",calls)
+
+    def test_print_timeout_preserves_unknown_state_without_cleanup_retry(self):
+        data,calls=self.exercise(subprocess.TimeoutExpired(["launchctl"],10),"timeout")
+        self.assertEqual(data["cleanupFailure"]["type"],"TimeoutExpired")
+        self.assertNotIn("serviceAbsentConfirmed",data)
+        self.assertEqual(calls,["bootstrap","print"])
+
+    def test_error_text_is_bounded(self):
+        data,_=self.exercise(subprocess.CalledProcessError(5,["x"*10000],stderr="e"*10000))
+        self.assertLessEqual(len(data["operationFailure"]["message"]),2048)
+        self.assertEqual(len(data["operationFailure"]["stderr"]),4096)
+
+    def test_diskfull_never_emits_a_success_receipt(self):
+        with tempfile.TemporaryDirectory() as root:
+            calls=[]
+            real_write=pathlib.Path.write_text
+            def write(path,*args,**kwargs):
+                if path.name=="result.json":
+                    raise OSError(28,"No space left on device")
+                return real_write(path,*args,**kwargs)
+            def fake(argv,**kwargs):
+                calls.append(argv[1])
+                if argv[1]=="bootstrap":
+                    raise subprocess.CalledProcessError(5,argv,stderr="initial failure")
+                if argv[1]=="print":
+                    label=argv[-1].rsplit("/",1)[-1]
+                    return subprocess.CompletedProcess(argv,113,"",f'Could not find service "{label}"')
+                raise AssertionError("unexpected operation")
+            output=io.StringIO()
+            with patch.object(subject.sys,"platform","darwin"), patch.object(subject.pathlib.Path,"home",return_value=pathlib.Path(root)), patch.object(subject.subprocess,"run",side_effect=fake), patch.object(pathlib.Path,"write_text",new=write), contextlib.redirect_stdout(output):
+                with self.assertRaises(OSError) as error: subject.run()
+            self.assertEqual(error.exception.errno,28)
+            self.assertEqual(output.getvalue(),"")
+            self.assertEqual(calls,["bootstrap","print"])
+            self.assertEqual(list(pathlib.Path(root).glob("*/result.json")),[])
 
 if __name__=="__main__": unittest.main()

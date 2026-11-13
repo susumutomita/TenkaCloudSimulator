@@ -29,10 +29,11 @@ reap by the original parent. Do not use this experiment as Battle qualification.
 
 ## Subsequent offline error-handling correction
 
-The CLI remains blocked and no registration was retried. Four mocked tests now
+The CLI remains blocked and no registration was retried. Seven mocked tests now
 cover failed bootstrap with confirmed exact-label absence, bootstrap timeout with
 partial registration, cleanup failure preserving both errors, and unreadable
-registration state. `subprocess.run` is replaced for every test: no launchctl,
+registration state, state-inspection timeout, bounded error text and evidence-write
+disk failure without a success receipt. `subprocess.run` is replaced for every test: no launchctl,
 child process or VM is run. Unknown state remains unknown; no success is inferred.
 All attempted registrations would be inspected by exact generated label. If a
 partial registration is observed, only that label is cleaned up; registration is
