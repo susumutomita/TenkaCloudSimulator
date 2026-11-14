@@ -18319,6 +18319,59 @@
      "expect_invariant": "LaunchdSuccessEvidence"
     }
    ]
+  },
+  {
+   "id": "LambdaExecutionRoleBridge",
+   "model": "formal/LambdaExecutionRoleBridge.tla",
+   "config": "formal/LambdaExecutionRoleBridge.cfg",
+   "bounds": "Exhaustive over two resources, every subset as the saved execution-role grant and every subset as the caller's request-context grant, and both cancellation states, for one bridge call.",
+   "properties": [
+    "TypeOK",
+    "NoCallerEscalation",
+    "NoCallerNarrowing",
+    "CanceledNotDispatched"
+   ],
+   "limits": "Decision-source abstraction of the execution-role SDK bridge only: the decision depends on the saved role and never on the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. Does not model IAM policy parsing or evaluation, SSM/S3 handlers, Go context implementation, WASI containment, timing, payload limits or a Go refinement. Native tests (lambda_bridge_test.go, lambda_bridge_cancel_test.go and the signed-session server test) establish the implementation properties.",
+   "source_scope": [
+    "internal/aws/lambda_bridge.go",
+    "internal/aws/lambda_bridge_test.go",
+    "internal/aws/lambda_bridge_cancel_test.go"
+   ],
+   "mutants": [
+    {
+     "id": "InheritCallerSession",
+     "edits": [
+      {
+       "old": "allowed |-> res \\in roleGrant]",
+       "new": "allowed |-> res \\in roleGrant \\cup callerGrant]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoCallerEscalation"
+    },
+    {
+     "id": "IntersectCallerSession",
+     "edits": [
+      {
+       "old": "allowed |-> res \\in roleGrant]",
+       "new": "allowed |-> res \\in roleGrant \\cap callerGrant]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoCallerNarrowing"
+    },
+    {
+     "id": "DispatchAfterCancel",
+     "edits": [
+      {
+       "old": " /\\ ~canceled",
+       "new": " /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CanceledNotDispatched"
+    }
+   ]
   }
  ]
 }

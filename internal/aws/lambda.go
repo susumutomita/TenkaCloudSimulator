@@ -353,18 +353,24 @@ func (g *Gateway) serveLambda(w http.ResponseWriter, r *http.Request) {
 	if principal == "" {
 		principal = core.Administrator
 	}
-	// One immutable policy snapshot covers both CreateFunction and PassRole.
-	var policy core.Policy
-	if principal != core.Administrator {
+	// One immutable policy snapshot covers both CreateFunction and PassRole. A signed
+	// SDK session carries the snapshot it was validated with (as SSM uses it); other
+	// local principals read their current policy.
+	policy, sessionPolicy := SDKPolicyFromContext(r.Context())
+	if !sessionPolicy && principal != core.Administrator {
 		policy, _, err = g.Identities.Policy(principal)
 		if err != nil {
 			lambdaError(w, err)
 			return
 		}
 	}
+	// A browser session bound to one SSM parameter may not reach Lambda at all.
+	_, parameterBound := r.Context().Value(consoleParameterBoundaryKey{}).(consoleParameterBoundary)
 	authorize := func(action, resource string) bool {
 		decision := "allowed"
-		if principal != core.Administrator {
+		if parameterBound {
+			decision = "implicitDeny"
+		} else if sessionPolicy || principal != core.Administrator {
 			decision = core.Evaluate(policy, action, resource)
 		}
 		w.Header().Set("X-Simulator-IAM-Decision", decision)

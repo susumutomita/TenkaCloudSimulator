@@ -17,7 +17,7 @@ LambdaのPython 3.12関数を、埋込CPython 3.12.16/WASIで実際に実行す�
 
 関数ARNはAWS形式の `arn:aws:lambda:<region>:000000000000:function:<name>`。native nameまたは同一region/accountの非修飾ARNを使用する。各関数の実ARNを評価し、Create/PassRoleは同一policy snapshotを使う。IAM trust/AssumeRoleの再現ではない。execution roleは既存local identityのみで、権限のないサービス接続を自動追加しない。
 
-SDKは同一endpointのdummy TCSIM署名scopeでlambdaへ振り分ける。unsigned requestは `X-Simulator-Service: lambda`、`X-Simulator-Region`を明示する。S3 object keyとLambda URLの衝突を避け、通常のS3リクエストは従来のデータにアクセスする。認証は通常の`X-Simulator-Token`またはブラウザcookie。実AWSキー/session tokenは拒否する。
+SDKは同一endpointのdummy TCSIM署名scopeでlambdaへ振り分ける。unsigned requestは `X-Simulator-Service: lambda`、`X-Simulator-Region`を明示する。S3 object keyとLambda URLの衝突を避け、通常のS3リクエストは従来のデータにアクセスする。認証は通常の`X-Simulator-Token`またはブラウザcookie。`TCSIMOPERATOR`や引き受けたロールのsession資格情報によるSigV4署名も使える（[native SDK / STS](sts-native.md)）。その場合は関数名だけのpath、query stringなし、本文384KiBまで。sessionの認可はロールのpolicy snapshotで行う。関数内のSDK呼び出しは常に保存済みexecution roleで評価し、呼び出し元sessionの権限・境界を引き継がない。SSM parameterに限定したconsole sessionからはLambdaを使えない。実AWSキーと、検証できないsession tokenは拒否する。
 
 InvokeはRequestResponseとDryRunのみ。Python例外はHTTP200 + `X-Amz-Function-Error: Unhandled`でJSONのerrorType/errorMessageを返す。サービスの認可・入力・保存エラーは適切なHTTPエラー。ZIP更新はRevisionIdの楽観lockを実装し、削除後に同名関数が再作成されても古いrole/environmentを復活させない。
 

@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+// NativeSDKServices are the signing services a TCSIMOPERATOR or assumed-role
+// session may use. Hosts read the same list from the capability document.
+var NativeSDKServices = []string{"sts", "iam", "cloudformation", "ssm", "lambda"}
+
 type sdkSignature struct {
 	key, date, region, service, scope, headers, signature string
 }
@@ -49,11 +53,14 @@ func parseSDKSignature(r *http.Request) (sdkSignature, error) {
 	if !regionSupported {
 		return fail()
 	}
-	// This initial native credential surface is the exact control-plane subset
-	// needed by unchanged CloudFormation/SSM problems. Other services fail closed.
-	switch parts[3] {
-	case "sts", "iam", "cloudformation", "ssm":
-	default:
+	// This native credential surface is the exact subset needed by unchanged
+	// CloudFormation/SSM problems and by participants using a problem's own Lambda
+	// function (REST paths below /2015-03-31/functions only). Other services fail closed.
+	serviceSupported := false
+	for _, service := range NativeSDKServices {
+		serviceSupported = serviceSupported || service == parts[3]
+	}
+	if !serviceSupported {
 		return fail()
 	}
 	decoded, err := hex.DecodeString(fields["Signature"])
@@ -72,21 +79,32 @@ func sdkHMAC(key []byte, value string) []byte {
 func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time.Time) error {
 	fail := func() error { return fmt.Errorf("local SigV4 signature verification failed") }
 	handoff := (r.URL.Path == "/_simulator/v1/console-handoffs" || r.URL.Path == "/_simulator/v1/terminal-handoffs") && s.service == "sts"
-	if secret == "" || (r.URL.Path != "/" && !handoff) || r.URL.RawPath != "" || r.URL.User != nil {
+	lambdaREST := s.service == "lambda"
+	if secret == "" || r.URL.RawPath != "" || r.URL.User != nil {
 		return fail()
 	}
-	if r.Method != "POST" {
+	switch {
+	case lambdaREST:
+		// The REST method and path decide the operation; there is no target header.
+		if !lambdaSDKPath(r.Method, r.URL.Path) || r.Header.Get("X-Amz-Target") != "" {
+			return fail()
+		}
+		switch r.Header.Get("Content-Type") {
+		case "", "application/json", "application/octet-stream", "binary/octet-stream":
+		default:
+			return fail()
+		}
+	case (r.URL.Path != "/" && !handoff) || r.Method != "POST":
 		return fail()
-	}
-	if handoff {
+	case handoff:
 		if r.Header.Get("Content-Type") != "application/json" || r.Header.Get("X-Amz-Target") != "" {
 			return fail()
 		}
-	} else if s.service == "ssm" {
+	case s.service == "ssm":
 		if !strings.HasPrefix(r.Header.Get("X-Amz-Target"), "AmazonSSM.") || r.Header.Get("Content-Type") != "application/x-amz-json-1.1" {
 			return fail()
 		}
-	} else if r.Header.Get("X-Amz-Target") != "" || !strings.HasPrefix(r.Header.Get("Content-Type"), "application/x-www-form-urlencoded") {
+	case r.Header.Get("X-Amz-Target") != "" || !strings.HasPrefix(r.Header.Get("Content-Type"), "application/x-www-form-urlencoded"):
 		return fail()
 	}
 	for _, name := range []string{"Content-Type", "X-Amz-Target", "X-Amz-Date", "X-Amz-Security-Token", "X-Amz-Content-Sha256", "X-Simulator-Principal", "X-Simulator-Service", "X-Simulator-Region"} {
@@ -143,11 +161,16 @@ func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time
 			return fail()
 		}
 	}
+	// UpdateFunctionCode carries a base64 ZIP; Lambda itself caps that body at 384 KiB.
+	limit := int64(256 << 10)
+	if lambdaREST {
+		limit = 384 << 10
+	}
 	var body []byte
 	if r.Body != nil {
-		body, err = io.ReadAll(io.LimitReader(r.Body, (256<<10)+1))
+		body, err = io.ReadAll(io.LimitReader(r.Body, limit+1))
 		_ = r.Body.Close()
-		if err != nil || len(body) > 256<<10 {
+		if err != nil || int64(len(body)) > limit {
 			return fail()
 		}
 	}
@@ -157,8 +180,9 @@ func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time
 	if supplied := r.Header.Get("X-Amz-Content-Sha256"); supplied != "" && supplied != payloadHash {
 		return fail()
 	}
-	// Only root control-plane POSTs and the exact STS console-handoff POST
-	// are in scope. Canonical escaping stays explicit; raw paths are refused.
+	// Only root control-plane POSTs, the exact STS console-handoff POST and the
+	// Lambda function REST paths are in scope. Canonical escaping stays explicit;
+	// raw paths are refused, and Lambda paths admit only unescaped function names.
 	path := (&url.URL{Path: r.URL.Path}).EscapedPath()
 	request := r.Method + "\n" + path + "\n\n" + canonical.String() + "\n" + s.headers + "\n" + payloadHash
 	digest := sha256.Sum256([]byte(request))
@@ -172,4 +196,34 @@ func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time
 		return fail()
 	}
 	return nil
+}
+
+// lambdaSDKPath admits the Lambda REST operations a signed SDK session may call:
+// ListFunctions, GetFunctionConfiguration, Invoke, UpdateFunctionCode, CreateFunction
+// and DeleteFunction. Function names must be plain names (no ARN, no escaping), so
+// the canonical path equals the request path.
+func lambdaSDKPath(method, path string) bool {
+	const prefix = "/2015-03-31/functions"
+	if path == prefix || path == prefix+"/" {
+		return method == "GET" || method == "POST"
+	}
+	rest, ok := strings.CutPrefix(path, prefix+"/")
+	if !ok {
+		return false
+	}
+	name, operation, _ := strings.Cut(rest, "/")
+	if name == "" || len(name) > 64 || strings.Trim(name, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-") != "" {
+		return false
+	}
+	switch operation {
+	case "":
+		return method == "DELETE"
+	case "configuration", "configuration/":
+		return method == "GET"
+	case "invocations", "invocations/":
+		return method == "POST"
+	case "code", "code/":
+		return method == "PUT"
+	}
+	return false
 }
