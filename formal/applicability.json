@@ -45,7 +45,8 @@
       "FreshWrite",
       "ValidWrite",
       "PreservedPackage"
-     ]
+     ],
+     "limits": "Admission and frame-condition abstraction only. Revision identities abstract nonreused generation tokens. ZIP parsing, UTF8, compression, source text, cryptographic token generation, SQL concurrency and browser/CSP behavior require implementation regression tests; not a Go refinement proof."
     }
    ]
   },
@@ -64,7 +65,8 @@
       "FreshWrite",
       "ValidWrite",
       "PreservedPackage"
-     ]
+     ],
+     "limits": "Admission and frame-condition abstraction only. Revision identities abstract nonreused generation tokens. ZIP parsing, UTF8, compression, source text, cryptographic token generation, SQL concurrency and browser/CSP behavior require implementation regression tests; not a Go refinement proof."
     }
    ]
   },
@@ -90,7 +92,8 @@
       "FreshWrite",
       "ValidWrite",
       "PreservedPackage"
-     ]
+     ],
+     "limits": "Admission and frame-condition abstraction only. Revision identities abstract nonreused generation tokens. ZIP parsing, UTF8, compression, source text, cryptographic token generation, SQL concurrency and browser/CSP behavior require implementation regression tests; not a Go refinement proof."
     }
    ]
   },
@@ -122,7 +125,8 @@
       "PublicResponse",
       "TokenBoundary",
       "UnknownNeverStatic"
-     ]
+     ],
+     "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
     }
    ]
   },
@@ -159,7 +163,8 @@
       "FreshReceipt",
       "ReceiptMutationCurrent",
       "ChangeOnlyInflight"
-     ]
+     ],
+     "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence."
     },
     {
      "id": "ProjectAuthority",
@@ -174,7 +179,8 @@
       "FinitePermissions",
       "ActorUsesPersistedProject",
       "OnlyActualOwnerAuthorized"
-     ]
+     ],
+     "limits": "GCP owner-only factory and actual-bucket-project authorization abstraction after a trusted subject extractor; not Google IAM/OAuth, credential validation/extraction, operator/control roles, Azure authorization, HTTP/path/generation semantics, SQLite/Go refinement, concurrency/crash proof, byte budgets, project-number parsing, growing configured project roster or actual SDK execution. One bucket stands for an existing resource; policy Allowed is not an HTTP success for every permission. Root source binding is limited to NewWithCloudStorage calling registerCloudStorage and the fixed GCP Environment/Project/Number/Owner argument construction for NewProjectHandler. This is an abstract constructor/admission contract, not a proof of core DB opening, registration rollback across providers, server dispatch order, capabilities metadata, HTTP or constructor SQL atomicity. CLI binding covers only trusted fixed GCP owner configuration and constructor refusal correspondence; argument grammar, startup I/O, Azure initialization, tokens and absence of AWS policy grants are checked natively, not proved by this model."
     },
     {
      "id": "KMSProtocolAdmission",
@@ -185,7 +191,8 @@
       "MissingIdentityDenied",
       "NoSuccessWithoutKMSTarget",
       "NoAuthorityFromWireMetadata"
-     ]
+     ],
+     "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
     },
     {
      "id": "CloudWatchLogsLifecycle",
@@ -194,7 +201,8 @@
       "NoOrphans",
       "OnlyAcceptedWrites",
       "TokenAuthority"
-     ]
+     ],
+     "limits": "Finite safety only; no liveness or implementation refinement. Models transaction atomicity and database identity as abstract steps, not SQLite faults, HMAC cryptography or OS process isolation. Byte/time limits, sorting, page convergence, expiry and real IAM documents require native/SDK tests. Captured read receipts preserve the authorization context when later resource generations change. Shared source scope covers only the added Logs field/dispatch/construction seam; not all other service dispatch or server lifecycle/authentication. Stream deletion and later recreation are included: the abstract incarnation advances at deletion, while native code assigns a fresh random generation at recreation. Reads are disallowed while absent; native regressions verify cursor rejection and SQL failure rollback."
     },
     {
      "id": "SecretsVersionLifecycle",
@@ -207,7 +215,8 @@
       "ActiveHasCurrent",
       "AuthorizedVersions",
       "AuthorizedDisclosure"
-     ]
+     ],
+     "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
     },
     {
      "id": "DynamoDBAdmission",
@@ -234,7 +243,8 @@
       "RemovalAdmissionExact",
       "StartupAdmission",
       "StartupRefusedFrame"
-     ]
+     ],
+     "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Targeted finite-model receipts are separate from exact-HEAD whole-registry merge checking and actual Go/native/integration execution."
     },
     {
      "id": "IAMManagedPolicies",
@@ -252,7 +262,8 @@
       "RoleViewsExact",
       "PeerFrame",
       "ImmutableVersions"
-     ]
+     ],
+     "limits": "New boundedscenario scope, not bisimilar/equivalent to original4requestcandidate which remainsUNPASSED. No Go/SQL/parser/trust/crypto/HTTP/refinement/liveness or unboundedhistory proof. Fixedaction/resource; concretequotas/hostisolation testedseparately; failedrequestidentitydiagnosticnormalized. Existing29models/gates unchanged. Native Query routing/validation, caller snapshot and RoleID admission, concrete SQL rollback/quotas and server capability metadata require real-code tests. This model abstracts authorized/storage outcomes and persisted role/policy generations, not the HTTP authorization race or UI. Two-request/four-seed scope is narrower than the unsuccessful four-request exploratory candidate."
     },
     {
      "id": "SakuraStartupAdmission",
@@ -268,7 +279,8 @@
       "RegistrationRequiresSchema",
       "TokenOnlyAuthenticated",
       "StartupComplete"
-     ]
+     ],
+     "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded."
     },
     {
      "id": "LandingAccessAdmission",
@@ -278,7 +290,8 @@
       "PublicResponse",
       "TokenBoundary",
       "UnknownNeverStatic"
-     ]
+     ],
+     "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
     },
     {
      "id": "CatalogResourceLifecycle",
@@ -296,7 +309,8 @@
       "ChildGuard",
       "TokenBinding",
       "TokenOnce"
-     ]
+     ],
+     "limits": "Atomic catalog store projection only, shared by the AWS catalog and the Google API catalog (configured project owner as authorization, etag as generation, requestId as client token, force as cascade): authorization-before-commit, typed refusal frames, quota, optional name uniqueness, fresh identifiers, generation-guarded update/delete, child reference integrity with refuse or cascade deletion, and client-token replay. Official shape validation, wire projection, pagination tokens, tag maps, ARN formatting, SQL/locking/crash behavior, JSON encoding and Go refinement are verified by native tests, not this model. A three-step bound is not an API cap."
     },
     {
      "id": "SNSLifecycle",
@@ -312,7 +326,8 @@
       "NoDanglingDeliveredMessage",
       "DeleteAckEmpty",
       "DeleteRetryAcknowledged"
-     ]
+     ],
+     "limits": "Atomic state transitions assume transaction rollback and model validated existing state. Captured post-operation ACK and frozen-delete ownership, globally bounded count/abstract byte/delivery budgets and target/peer frames only. Not SQL/driver/crash/Go refinement, UUID allocation, schema migration, UTF-8 byte calculation, quotas at real cardinality, IAM or outbound delivery. Delivery audit may outlive Unsubscribe, but not its stored message or topic. Ignored/vanishing/late-reinsert native SQLite faults and two-host SDK checks are separate executable obligations."
     },
     {
      "id": "SNSAdmission",
@@ -323,7 +338,8 @@
       "NoRegionMismatch",
       "NoSuccessOnRefusal",
       "NoRejectedMutation"
-     ]
+     ],
+     "limits": "Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence."
     },
     {
      "id": "S3MultipartState",
@@ -333,7 +349,8 @@
       "NoOrphans",
       "Cleanup",
       "RefusalAtomic"
-     ]
+     ],
+     "limits": "Finite atomic transaction abstraction only; does not execute Go/SQLite/HTTP/React, prove refinement, MD5 integrity, IAM parsing, version selection, ordering/minimum sizes, timestamps, random IDs, OS isolation, or real AWS parity. Scope labels abstract bucket/key/upload binding. Actual Go fault, SDK, persistence and browser tests cover those boundaries."
     },
     {
      "id": "ConsoleHandoff",
@@ -349,7 +366,8 @@
       "LogoutRejectsReplay",
       "UnrelatedSessionsPreserved",
       "SDKAuthorityPreserved"
-     ]
+     ],
+     "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
     },
     {
      "id": "WAFRequestEvaluation",
@@ -359,7 +377,8 @@
       "CountContinues",
       "FirstTerminatingRuleWins",
       "UnassociatedAllows"
-     ]
+     ],
+     "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
     },
     {
      "id": "IAMInstanceProfiles",
@@ -375,7 +394,8 @@
       "FreshProfileIdentity",
       "PeerFrame",
       "RemovalExact"
-     ]
+     ],
+     "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history."
     },
     {
      "id": "LambdaLogTailDisclosure",
@@ -387,7 +407,8 @@
       "TailBound",
       "DisplayCurrent",
       "DisplayHasResponse"
-     ]
+     ],
+     "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness."
     },
     {
      "id": "SNSQueueFanout",
@@ -402,7 +423,8 @@
       "AuditExact",
       "RecipientsExact",
       "RefusalUnchanged"
-     ]
+     ],
+     "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
     },
     {
      "id": "Route53AtomicBatch",
@@ -413,7 +435,8 @@
       "OnlyAuthorizedValid",
       "OtherTeamUnchanged",
       "PendingInvisible"
-     ]
+     ],
+     "limits": "Atomic batch/authority/team frame abstraction only; no Go/SQL/XML/DNS, receipt retention, quota, pagination, crash or liveness proof. Native and SDK tests independently cover implementation boundaries."
     },
     {
      "id": "SSMDocumentState",
@@ -427,7 +450,8 @@
       "DeleteCleanup",
       "LatestPrecondition",
       "CreateOnlyAbsent"
-     ]
+     ],
+     "limits": "Definition management only. Atomic abstract transitions assume transaction commit/rollback; no SQL refinement, parser, IAM evaluation, byte quota, wire, persistence, concurrency or execution proof."
     },
     {
      "id": "CanonicalVMComposition",
@@ -456,7 +480,8 @@
       "SavedAssociation",
       "NoRebinding",
       "SavedOperationAuthority"
-     ]
+     ],
+     "limits": "Companion to unchanged EC2GuestAttachmentLifecycle, not a replacement. Checks ordering of pinned planning, durable readback, captured paused QMP ownership, attachment/activation, private QGA readiness, generation publication, teardown, network ownership and child admission. Equality/validity predicates abstract byte validation and SQL/OS APIs; no proof of parser correctness, actual networking, cryptography, PID/FD identity, resource quota cardinality, packet routing, real image execution, liveness or Go refinement. Separate modes do not prove arbitrary cross-mode interference. Restart cannot recover physical authority. Successful checking is not physical Battle acceptance."
     },
     {
      "id": "ParticipantSessionLifecycle",
@@ -479,7 +504,8 @@
       "TerminalEvidence",
       "FreshEvidence",
       "RevokeIsNotExit"
-     ]
+     ],
+     "limits": "Bounded authority/lifecycle composition only; assumes trusted immutable auth/policy decisions, atomic DB CAS/one-use claims, authentic correlated protocol evidence, reliable owned runtime witnesses, bundle hash validation and exclusive packaging filesystem inputs. Does not prove Go/SQL/JSON/WebSocket/cryptography/OS/PTY/systemd refinement or real process cleanup, full ConsoleHandoff/BrowserSessions subcontracts, numeric timeout/quotas or liveness."
     },
     {
      "id": "AppEngineTraffic",
@@ -493,7 +519,8 @@
       "OtherTeamUnchanged",
       "ApplicationPermanent",
       "ServedThroughRouteAndFirewall"
-     ]
+     ],
+     "limits": "Admin-plane ownership, traffic-split, deletion-order and request-routing abstraction only; no Go, SQL, HTTP, Python sandbox, Cloud Storage copy, pagination, operations, quotas, IP or cookie sharding, crash or liveness proof. Native Go and official-client tests independently cover implementation boundaries."
     },
     {
      "id": "ELBTargetLifecycle",
@@ -505,7 +532,8 @@
       "ReportedHealthInUse",
       "OnlyAuthorizedChanges",
       "OtherTeamUnchanged"
-     ]
+     ],
+     "limits": "Reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result abstraction only; consecutive thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, resource-policy evaluation, Lambda execution, SQL/Go refinement, crashes and liveness are not modeled. Native, server and SDK tests cover them independently."
     },
     {
      "id": "BedrockRuntimeAdmission",
@@ -519,7 +547,8 @@
       "NoFallback",
       "TruthfulFailure",
       "NoPersistence"
-     ]
+     ],
+     "limits": "Finite admission/result abstraction of the opt-in local Bedrock Runtime only. Assumes the authenticated exercise identity, IAM decision, strict body validation and Ollama transport pins are computed correctly; the shutdown and canceled responses are distinct kinds here but share ServiceUnavailableException on the wire. No Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, token counts, streaming, tool use, Apple backend, Claude Code or liveness proof. Native, CLI and SDK tests independently cover implementation boundaries."
     },
     {
      "id": "AutoScalingPlanTargets",
@@ -532,7 +561,8 @@
       "RejectionFrame",
       "OtherTeamUnchanged",
       "PendingInvisible"
-     ]
+     ],
+     "limits": "Capacity-bound/ownership/authority/rollback/team-frame abstraction only; no Go/SQL/JSON parsing, IAM matching, pagination, status derivation text, quotas, crash recovery, target tracking evaluation or liveness proof. Native Go, composed-server and SDK tests provide separate implementation evidence."
     },
     {
      "id": "EC2ReadDiscovery",
@@ -541,7 +571,8 @@
       "AuthorizedRead",
       "RegionBound",
       "OwnedRead"
-     ]
+     ],
+     "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties."
     }
    ]
   },
@@ -566,7 +597,8 @@
       "FreshEmissionHistory",
       "ReturnedARNMatches",
       "VisibleContextMatches"
-     ]
+     ],
+     "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
     },
     {
      "id": "SakuraDisksViewEpoch",
@@ -585,7 +617,8 @@
       "SingleWriteSend",
       "LocaleFrame",
       "CancelDraftClear"
-     ]
+     ],
+     "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
     },
     {
      "id": "DynamoDBConsoleEpoch",
@@ -600,7 +633,8 @@
       "ReadRetryNeverWrites",
       "SingleSendBeforeACK",
       "LocalePreservesDraft"
-     ]
+     ],
+     "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
     },
     {
      "id": "SecretMetadataViewEpoch",
@@ -618,7 +652,8 @@
       "CurrentPageOnly",
       "LocalePreservesQuery",
       "ParentRevealClearedForMetadata"
-     ]
+     ],
+     "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
     },
     {
      "id": "KMSAliasesViewEpoch",
@@ -634,7 +669,8 @@
       "OnlyVerifiedTargetSubmitted",
       "DeleteRequiresExactConfirmation",
       "LocalePreservesIntent"
-     ]
+     ],
+     "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
     },
     {
      "id": "CatalogConsoleEpoch",
@@ -645,7 +681,8 @@
       "SingleWriter",
       "ReloadOnlyAfterAck",
       "FailureVisible"
-     ]
+     ],
+     "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model."
     },
     {
      "id": "LoginInputIntent",
@@ -658,7 +695,8 @@
       "AdoptedValueExact",
       "IntentInvalidatesAsync",
       "LocaleIntentFrame"
-     ]
+     ],
+     "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
     },
     {
      "id": "LambdaLogTailDisclosure",
@@ -670,7 +708,8 @@
       "TailBound",
       "DisplayCurrent",
       "DisplayHasResponse"
-     ]
+     ],
+     "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness."
     },
     {
      "id": "TerminalClientEpoch",
@@ -683,7 +722,8 @@
       "DisposeNotRemoteTermination",
       "NoAutomaticStartRetry",
       "DiscardPreservesIdentity"
-     ]
+     ],
+     "limits": "Finite client lifecycle contract, not JS/React/browser/fetch/WebSocket refinement. Single abstract remote lifecycle does not represent arbitrary concurrent sessions. Assumes authentic native response and component/channel identity checks; parsing, transport, DOM, token cryptography and guest termination are independent. Operation epoch is defense in depth under busy/permanent-disposal guards; no impossible overlapping operation is invented to produce an epoch-only counterexample."
     }
    ]
   },
@@ -787,7 +827,8 @@
       "TailBound",
       "DisplayCurrent",
       "DisplayHasResponse"
-     ]
+     ],
+     "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness."
     }
    ]
   },
