@@ -48,6 +48,26 @@ class FormalGateTests(unittest.TestCase):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, target)
 
+    def test_mac_models_cannot_drop_controls_or_expand_scope(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        for name in ('MacPreparationAdmission', 'MacProbeLifecycle'):
+            entry = next(m for m in json.loads(original)['models'] if m['id'] == name)
+            for mutation in entry['mutants']:
+                changed = json.loads(original)
+                target = next(m for m in changed['models'] if m['id'] == name)
+                target['mutants'].remove(mutation)
+                path.write_text(json.dumps(changed))
+                with self.subTest(model=name, mutant=mutation['id']), self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                    load_registry(self.root)
+            changed = json.loads(original)
+            target = next(m for m in changed['models'] if m['id'] == name)
+            target['source_scope'].append('internal/core/store.go')
+            path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        path.write_text(original)
+
     def test_ssm_batch_inventory_and_boundaries_are_required(self):
         path = self.root / 'formal/models.json'
         original = path.read_text()
@@ -3713,6 +3733,7 @@ class FormalGateTests(unittest.TestCase):
                                                      'internal/aws/ec2_network_actor.go',
                                                      'internal/aws/ec2_network_cloudformation.go',
                                                      'cmd/simulator/battle_runtime_linux.go',
+                                             'cmd/simulator/battle_runtime_config.go',
                                                      'cmd/simulator/battle_runtime_other.go',
                                                      'internal/server/battle_runtime_linux.go',
                                                      'internal/server/ssm_runtime_capabilities.go',
@@ -3850,6 +3871,9 @@ class FormalGateTests(unittest.TestCase):
                                                     'RetainedReadAfterExpiry',
                                                     'ReadRequiresCurrentOwner'],
                                      'source_scope': ['internal/workload/probeclock/bootstrap_linux.go',
+                             'internal/workload/probeclock/bootstrap_unix.go',
+                             'internal/workload/probeclock/bootstrap_darwin.go',
+                             'internal/workload/probeclock/clock_darwin.go',
                                                       'internal/workload/probeclock/bootstrap_other.go',
                                                       'internal/workload/probeclock/clock.go',
                                                       'internal/workload/probeclock/clock_linux.go',

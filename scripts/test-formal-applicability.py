@@ -657,5 +657,16 @@ class ApplicabilityTests(unittest.TestCase):
         validate_record(self.root, self.base)
 
 
+
+class MacPreparationClassificationTests(unittest.TestCase):
+    def test_exact_documents_and_tests(self):
+        for path in ['internal/workload/guesthvf/README.md', 'internal/workload/probeclock/DARWIN.md', 'tools/guesthvf-preflight/README.md', 'tools/mac-hvf-probe/ARM-IMAGE-BUILD.md', 'tools/mac-hvf-probe/README.md', 'tools/mac-supervisor-test/README.md', 'tools/mac-hvf-probe/arm-relay-preparation.json']:
+            self.assertEqual(disposition(path), 'documentation')
+        for path in ['tools/mac-hvf-probe/test_boot_probe.py', 'tools/mac-hvf-probe/test_builder_launch.py', 'tools/mac-hvf-probe/test_builder_plan.py', 'tools/mac-hvf-probe/test_image_probe.py', 'tools/mac-hvf-probe/test_probe.py', 'tools/mac-supervisor-test/test_launchd_owned_child.py']:
+            self.assertEqual(disposition(path), 'test-support')
+    def test_runtime_is_not_exempt(self):
+        for path in ['internal/workload/guesthvf/plan.go', 'internal/workload/guesthvf/image_unix.go', 'internal/workload/guesthvf/supervision.go', 'tools/guesthvf-preflight/main.go', 'tools/mac-hvf-probe/builder_plan.py', 'tools/mac-hvf-probe/probe.py', 'tools/mac-hvf-probe/boot_probe.py', 'tools/mac-hvf-probe/image_probe.py', 'tools/mac-hvf-probe/builder_launch.py', 'tools/mac-supervisor-test/launchd_owned_child.py', 'tools/mac-hvf-probe/debian-seed/meta-data', 'tools/mac-hvf-probe/debian-seed/network-config', 'tools/mac-hvf-probe/debian-seed/user-data', 'tools/mac-hvf-probe/test_unknown.py', 'tools/mac-hvf-probe/unknown.json', 'internal/workload/probeclock/clock_darwin.go']:
+            self.assertIsNone(disposition(path), path)
+
 if __name__ == '__main__':
     unittest.main()
