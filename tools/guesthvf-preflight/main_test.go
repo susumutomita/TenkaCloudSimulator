@@ -185,3 +185,73 @@ func TestFIFOOriginalRejectedWithoutBlocking(t *testing.T) {
 		t.Fatalf("original FIFO changed: %v", err)
 	}
 }
+
+func TestPinnedOriginalWithInvalidScratchFailsWithoutMutation(t *testing.T) {
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	original := filepath.Join(root, "original")
+	data := []byte("pinned synthetic input")
+	if err := os.WriteFile(original, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	digest := fmt.Sprintf("%x", sha512.Sum512(data))
+	for _, tc := range []struct {
+		path string
+		want error
+	}{
+		{filepath.Join(root, "missing"), syscall.ENOENT}, {original, syscall.ENOTDIR},
+	} {
+		r, err := verifyPinned(original, tc.path, int64(len(data)), digest)
+		if !errors.Is(err, tc.want) || r != (result{}) {
+			t.Fatalf("scratch=%q result=%+v error=%v; want %v without receipt", tc.path, r, err, tc.want)
+		}
+	}
+	got, err := os.ReadFile(original)
+	if err != nil || !bytes.Equal(got, data) {
+		t.Fatalf("original modified: %q %v", got, err)
+	}
+	entries, err := os.ReadDir(root)
+	if err != nil || len(entries) != 1 || entries[0].Name() != "original" {
+		t.Fatalf("unexpected files after scratch failure: %v %v", entries, err)
+	}
+}
+
+func TestUnreadableOriginalFailsBeforeCreatingCopy(t *testing.T) {
+	if os.Geteuid() == 0 {
+		t.Skip("root can read mode-000 files; permission failure requires an unprivileged user")
+	}
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	original := filepath.Join(root, "original")
+	data := []byte("private synthetic input")
+	if err := os.WriteFile(original, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(original, 0000); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chmod(original, 0600); err != nil {
+			t.Error(err)
+		}
+	})
+	r, err := verifyPinned(original, root, int64(len(data)), fmt.Sprintf("%x", sha512.Sum512(data)))
+	if !errors.Is(err, syscall.EACCES) || r != (result{}) {
+		t.Fatalf("unreadable original result=%+v error=%v; want access denial without receipt", r, err)
+	}
+	entries, err := os.ReadDir(root)
+	if err != nil || len(entries) != 1 || entries[0].Name() != "original" {
+		t.Fatalf("copy created on access denial: %v %v", entries, err)
+	}
+	if err := os.Chmod(original, 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile(original)
+	if err != nil || !bytes.Equal(got, data) {
+		t.Fatalf("original modified: %q %v", got, err)
+	}
+}
