@@ -386,3 +386,101 @@ func TestLambdaSourcePythonEncodingDeclarations(t *testing.T) {
 		})
 	}
 }
+
+func TestLambdaSourceUnavailableDependenciesFailClosed(t *testing.T) {
+	t.Run("unconfigured Lambda store", func(t *testing.T) {
+		w := sourceRequest(&Gateway{}, "GET", "")
+		if w.Code != 501 || w.Header().Get("Cache-Control") != "no-store" {
+			t.Fatal(w.Code, w.Body.String())
+		}
+	})
+	t.Run("wrong service scope", func(t *testing.T) {
+		g, _ := sourceFixture(t)
+		r := httptest.NewRequest("GET", "/_simulator/v1/lambda/editor/source", nil)
+		r.Header.Set("X-Simulator-Service", "s3")
+		w := httptest.NewRecorder()
+		g.ServeLambdaSource(w, r)
+		if w.Code != 400 || strings.Contains(w.Body.String(), "from helper") {
+			t.Fatal(w.Code, w.Body.String())
+		}
+	})
+	t.Run("identity store unavailable", func(t *testing.T) {
+		g, _ := sourceFixture(t)
+		g.Identities = nil
+		r := httptest.NewRequest("GET", "/_simulator/v1/lambda/editor/source", nil)
+		r.Header.Set("X-Simulator-Principal", "participant")
+		w := httptest.NewRecorder()
+		g.ServeLambdaSource(w, r)
+		if w.Code != 403 {
+			t.Fatal(w.Code, w.Body.String())
+		}
+	})
+	t.Run("identity lookup failure", func(t *testing.T) {
+		g, _ := sourceFixture(t)
+		if err := g.Lambdas.db.Close(); err != nil {
+			t.Fatal(err)
+		}
+		r := httptest.NewRequest("GET", "/_simulator/v1/lambda/editor/source", nil)
+		r.Header.Set("X-Simulator-Principal", "participant")
+		w := httptest.NewRecorder()
+		g.ServeLambdaSource(w, r)
+		if w.Code != 500 || strings.Contains(w.Body.String(), "Source") {
+			t.Fatal(w.Code, w.Body.String())
+		}
+	})
+	t.Run("missing function and separate region", func(t *testing.T) {
+		g, _ := sourceFixture(t)
+		for _, target := range []string{"/_simulator/v1/lambda/missing/source", "/_simulator/v1/lambda/editor/source"} {
+			r := httptest.NewRequest("GET", target, nil)
+			r.Header.Set("X-Simulator-Region", "ap-northeast-1")
+			w := httptest.NewRecorder()
+			g.ServeLambdaSource(w, r)
+			if w.Code != 404 || strings.Contains(w.Body.String(), "from helper") {
+				t.Fatal(w.Code, w.Body.String())
+			}
+		}
+	})
+}
+
+func TestLambdaSourceTruncatedJSONAndRequestLimitPreserveState(t *testing.T) {
+	g, f := sourceFixture(t)
+	for _, body := range []string{`{1}`, `{"Source":`, `{"Source":"x","RevisionId":"original"`, strings.Repeat(" ", 6*pythonruntime.MaxExpandedBytes+1025)} {
+		w := sourceRequest(g, "PUT", body)
+		if w.Code != 400 {
+			t.Fatal("invalid or oversized request accepted", w.Code)
+		}
+		now, err := g.Lambdas.get(f.Region, f.Name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if now.Revision != f.Revision || !bytes.Equal(now.Code, f.Code) {
+			t.Fatal("rejected request changed persisted package")
+		}
+	}
+}
+
+func TestLambdaSourceRecompressedZIPLimitPreservesState(t *testing.T) {
+	g, f := sourceFixture(t)
+	// Valid UTF-8 and below the expanded quota, but deliberately incompressible
+	// enough that rebuilding the package must reject the 256 KiB ZIP quota.
+	source := make([]byte, 400<<10)
+	source[0] = '#'
+	state := uint32(0x12345678)
+	for i := 1; i < len(source); i++ {
+		state ^= state << 13
+		state ^= state >> 17
+		state ^= state << 5
+		source[i] = byte(33 + state%90)
+	}
+	w := sourceRequest(g, "PUT", sourceBody(string(source), f.Revision))
+	if w.Code != 400 || !strings.Contains(w.Body.String(), "256 KiB") {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	now, err := g.Lambdas.get(f.Region, f.Name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if now.Revision != f.Revision || !bytes.Equal(now.Code, f.Code) {
+		t.Fatal("oversized rebuilt ZIP replaced original")
+	}
+}
