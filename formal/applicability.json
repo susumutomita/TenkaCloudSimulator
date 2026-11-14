@@ -1,205 +1,1373 @@
 {
- "version": 1,
- "base_sha": "90a3d208fdcf3e8b37263160ea7230c34fced0b0",
- "changes": [
-  {
-   "path": "docs/lambda.md",
-   "sha256": "ee508203a3b8e22fab69f0bf3e0681de93418efc5295633dde4276b99fb1dd1b",
-   "disposition": "documentation",
-   "reason": "Documents the signed Lambda session surface, its request limits and execution-role isolation; no runtime behavior.",
-   "models": []
-  },
-  {
-   "path": "docs/sts-native.md",
-   "sha256": "4f25f4d397cc9cd526b072ab4c22ca6deca47c0b2fe1a72c1ddd55fde5f7a039",
-   "disposition": "documentation",
-   "reason": "Documents the native SDK service list, the Lambda REST subset and the nativeSdk capability advertisement; no runtime behavior.",
-   "models": []
-  },
-  {
-   "path": "formal/LambdaExecutionRoleBridge.cfg",
-   "sha256": "c2bf5ce8b4c5b8a94d00a87168d219c75795c932d66b0fb79739e8e0ae4b2aa2",
-   "disposition": "modeled",
-   "reason": "New finite configuration for the execution-role bridge model introduced by this change.",
-   "models": [
+  "version": 1,
+  "base_sha": "bf5585f5230f7cc284a89024e6d4a8462b0306e8",
+  "changes": [
     {
-     "id": "LambdaExecutionRoleBridge",
-     "properties": [
-      "NoCallerEscalation",
-      "NoCallerNarrowing",
-      "CanceledNotDispatched"
-     ],
-     "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
-    }
-   ]
-  },
-  {
-   "path": "formal/LambdaExecutionRoleBridge.tla",
-   "sha256": "8e54d6ea3b270900a9418dbf8e9e6c6eea13f5bea4c4f29ed55b288f558734d2",
-   "disposition": "modeled",
-   "reason": "New finite model of the execution-role bridge decision source introduced by this change; its mutants check that inheriting or intersecting the caller's grants, or dispatching after cancellation, is caught.",
-   "models": [
+      "path": ".github/workflows/ci.yml",
+      "sha256": "cce1042f1c0fc67fed38e358a202037ca410d668c441cfda53bec6b9c92b4aac",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers and enforces finite source-edit contract while retaining all existing models and mutation controls.",
+      "models": []
+    },
     {
-     "id": "LambdaExecutionRoleBridge",
-     "properties": [
-      "NoCallerEscalation",
-      "NoCallerNarrowing",
-      "CanceledNotDispatched"
-     ],
-     "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
-    }
-   ]
-  },
-  {
-   "path": "formal/models.json",
-   "sha256": "b743d6b9716114cd8836e0e7b187fd3674f53968c6731a51326fc14a7e144df8",
-   "disposition": "formal-infrastructure",
-   "reason": "Registers the LambdaExecutionRoleBridge model, its exact source scope and three mutation controls; no existing model, invariant, mutant or scope is removed.",
-   "models": []
-  },
-  {
-   "path": "internal/aws/lambda.go",
-   "sha256": "7f9158d9c937118ae5f0d9512c0ed7f08f7fa27973d59acea3b361c1ebce8f74",
-   "disposition": "modeled",
-   "reason": "Lambda HTTP authorization now reads a signed SDK session's policy snapshot instead of the stored identity policy, and refuses a browser session bound to one SSM parameter. The Tail disclosure model treats authorization as an abstract admission input; this change only alters how that input is computed, and the Tail path is otherwise unchanged.",
-   "models": [
+      "path": "README.md",
+      "sha256": "2a20249014115e117c0e320d16fe77a33e4e0e327a2629a969c139354cb8515a",
+      "disposition": "documentation",
+      "reason": "Describes saved handler editing, exact limitations and permissions.",
+      "models": []
+    },
     {
-     "id": "LambdaLogTailDisclosure",
-     "properties": [
-      "ResponseAuthorized"
-     ],
-     "limits": "The model abstracts authorization as one Boolean; the session-snapshot source, console-bound refusal and stored-policy fallback are not modeled and are established by lambda_permissions_test.go and internal/server/lambda_sdk_session_test.go. No IAM parser, HTTP or Go refinement proof."
-    }
-   ]
-  },
-  {
-   "path": "internal/aws/lambda_bridge.go",
-   "sha256": "ceb39a19c44a7c91c18a0d5db432b061aca4fad84a65e65a2474e9c06c8c265d",
-   "disposition": "modeled",
-   "reason": "Bridge requests now carry only the invocation's cancellation and deadline, never the caller's request values, so SDK calls inside a function are decided by the saved execution role alone.",
-   "models": [
+      "path": "docs/console.md",
+      "sha256": "855ce88a875cba276c88e1c5084ad99812f2964ede226efabaaed58ba989621c",
+      "disposition": "documentation",
+      "reason": "Describes saved handler editing, exact limitations and permissions.",
+      "models": []
+    },
     {
-     "id": "LambdaExecutionRoleBridge",
-     "properties": [
-      "NoCallerEscalation",
-      "NoCallerNarrowing",
-      "CanceledNotDispatched"
-     ],
-     "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
-    }
-   ]
-  },
-  {
-   "path": "internal/aws/lambda_bridge_test.go",
-   "sha256": "17ed19c830ef697b930426b25a6dbcfd25dd546d0d8ef0c116e53d549334ea11",
-   "disposition": "modeled",
-   "reason": "Native regression test for the bridge decision source: a wide caller session cannot widen and a narrow or bound caller cannot narrow the execution role; fails on the unfixed bridge.",
-   "models": [
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "f0d4b18f9504cb2a2956f5f97ae6d0ce3e060df9acd90893d82b6cf536d2d368",
+      "disposition": "documentation",
+      "reason": "Read-only discovery UI, tests, documentation or exact build/formal metadata; no independent authority or state mutation is introduced by this file.",
+      "models": []
+    },
     {
-     "id": "LambdaExecutionRoleBridge",
-     "properties": [
-      "NoCallerEscalation",
-      "NoCallerNarrowing",
-      "CanceledNotDispatched"
-     ],
-     "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
-    }
-   ]
-  },
-  {
-   "path": "internal/aws/lambda_permissions_test.go",
-   "sha256": "4303be167c8ad87a02a654dc09b299be646f9f9c547405982fd436aa7aa13e73",
-   "disposition": "test-support",
-   "reason": "Native test of Lambda authorization from a session snapshot and console-bound refusal; test code only.",
-   "models": []
-  },
-  {
-   "path": "internal/aws/sts_lambda_signature_test.go",
-   "sha256": "2a3d38b5efcd702bd926dfeb002ab745623ff34583c6a93291dc543fd760d654",
-   "disposition": "test-support",
-   "reason": "Native SigV4 test of the Lambda REST path allowlist, limits and session snapshot; test code only.",
-   "models": []
-  },
-  {
-   "path": "internal/aws/sts_signature.go",
-   "sha256": "4c716263366d52b1823d49eb9bf996c2e81d68deb9760b9ecf4e5f6ba41f5bc7",
-   "disposition": "modeled",
-   "reason": "Adds lambda to the native signing services and admits only the listed Lambda REST paths with plain function names, no query and a 384 KiB body limit. Credential use still requires every existing guard (signature, token, expiry, generation); the STS, IAM, CloudFormation, SSM and handoff branches are unchanged.",
-   "models": [
+      "path": "docs/lambda.md",
+      "sha256": "36643c73f37ff742ce33fead073dfe95484a2925da9f69bb25f9886170a7c8bb",
+      "disposition": "documentation",
+      "reason": "Describes saved handler editing, exact limitations and permissions.",
+      "models": []
+    },
     {
-     "id": "STSSessionLifecycle",
-     "properties": [
-      "UseRequiresAllGuards"
-     ],
-     "limits": "SigV4 canonicalization, the Lambda path allowlist, content types and body limits are not modeled; sts_lambda_signature_test.go and internal/server/lambda_sdk_session_test.go establish them. Terminal handoff behavior covered by ParticipantSessionLifecycle is unchanged."
-    }
-   ]
-  },
-  {
-   "path": "internal/server/access_sdk.go",
-   "sha256": "fb029ca05eada814abc9d41ffb83cc39108acb4b11c78958cdbf9cf69babeb88",
-   "disposition": "modeled",
-   "reason": "A rejected Lambda signature now gets the Lambda REST-JSON error envelope; authentication and refusal decisions are unchanged.",
-   "models": [
+      "path": "docs/sts-native.md",
+      "sha256": "4f25f4d397cc9cd526b072ab4c22ca6deca47c0b2fe1a72c1ddd55fde5f7a039",
+      "disposition": "documentation",
+      "reason": "Documents the native SDK service list, the Lambda REST subset and the nativeSdk capability advertisement; no runtime behavior.",
+      "models": []
+    },
     {
-     "id": "STSSessionLifecycle",
-     "properties": [
-      "UseRequiresAllGuards"
-     ],
-     "limits": "Only the error wire format changes; envelope bytes are not modeled and are checked by internal/server/lambda_sdk_session_test.go."
-    }
-   ]
-  },
-  {
-   "path": "internal/server/console_handoff.go",
-   "sha256": "2a036a139534f32940243279b6da259c3ff1f1ce613acda62ffb44c3a94e8b2f",
-   "disposition": "modeled",
-   "reason": "Adds the additive nativeSdk capability advertisement under the same Access-only response marker as consoleHandoff; console handoff issuance and redemption are unchanged.",
-   "models": [
+      "path": "formal/EC2ReadDiscovery.cfg",
+      "sha256": "b7d579350a4a650dfb0ca0489e874a996078da604bec0b1dd2a4da7f7b8cfa9c",
+      "disposition": "modeled",
+      "reason": "Read-only EC2 discovery admission and its routing/capability wiring; actual database queries and wire authorization require independent tests and review.",
+      "models": [
+        {
+          "id": "EC2ReadDiscovery",
+          "properties": [
+            "AuthorizedRead",
+            "RegionBound",
+            "OwnedRead"
+          ],
+          "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties."
+        }
+      ]
+    },
     {
-     "id": "ConsoleHandoff",
-     "properties": [
-      "SDKAuthorityPreserved"
-     ],
-     "limits": "Capability JSON is metadata, not authority, and is not modeled; console_handoff_test.go checks it with and without the Access wrapper."
-    }
-   ]
-  },
-  {
-   "path": "internal/server/console_handoff_test.go",
-   "sha256": "740cd1f047b60374f6c8673fcfcb36cf4a72c2481c973863c7ca122cb84e0cde",
-   "disposition": "modeled",
-   "reason": "Extends the existing Access-capability test to require the nativeSdk advertisement only behind Access.",
-   "models": [
+      "path": "formal/EC2ReadDiscovery.tla",
+      "sha256": "12ae3abb67b6445feeac5303dadc9a1ac4ffde88a75bd7d9e0f2a2d8c0d3acb9",
+      "disposition": "modeled",
+      "reason": "Read-only EC2 discovery admission and its routing/capability wiring; actual database queries and wire authorization require independent tests and review.",
+      "models": [
+        {
+          "id": "EC2ReadDiscovery",
+          "properties": [
+            "AuthorizedRead",
+            "RegionBound",
+            "OwnedRead"
+          ],
+          "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties."
+        }
+      ]
+    },
     {
-     "id": "ConsoleHandoff",
-     "properties": [
-      "SDKAuthorityPreserved"
-     ],
-     "limits": "Test of advertised metadata only; handoff lifecycle tests are unchanged."
+      "path": "formal/LambdaExecutionRoleBridge.cfg",
+      "sha256": "c2bf5ce8b4c5b8a94d00a87168d219c75795c932d66b0fb79739e8e0ae4b2aa2",
+      "disposition": "modeled",
+      "reason": "New finite configuration for the execution-role bridge model introduced by this change.",
+      "models": [
+        {
+          "id": "LambdaExecutionRoleBridge",
+          "properties": [
+            "NoCallerEscalation",
+            "NoCallerNarrowing",
+            "CanceledNotDispatched"
+          ],
+          "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
+        }
+      ]
+    },
+    {
+      "path": "formal/LambdaExecutionRoleBridge.tla",
+      "sha256": "8e54d6ea3b270900a9418dbf8e9e6c6eea13f5bea4c4f29ed55b288f558734d2",
+      "disposition": "modeled",
+      "reason": "New finite model of the execution-role bridge decision source introduced by this change; its mutants check that inheriting or intersecting the caller's grants, or dispatching after cancellation, is caught.",
+      "models": [
+        {
+          "id": "LambdaExecutionRoleBridge",
+          "properties": [
+            "NoCallerEscalation",
+            "NoCallerNarrowing",
+            "CanceledNotDispatched"
+          ],
+          "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
+        }
+      ]
+    },
+    {
+      "path": "formal/LambdaSourceEdit.cfg",
+      "sha256": "e3999887cad22adcf78663d8db9c542336fca1ac512e66d3f48f901f45ea1723",
+      "disposition": "modeled",
+      "reason": "Bounded admission, state or preservation contract; native regressions separately verify concrete implementation. Finite models do not prove ZIP/CSP/runtime behavior.",
+      "models": [
+        {
+          "id": "LambdaSourceEdit",
+          "properties": [
+            "TypeOK",
+            "AuthorizedRead",
+            "AuthorizedWrite",
+            "FreshWrite",
+            "ValidWrite",
+            "PreservedPackage"
+          ],
+          "limits": "Admission and frame-condition abstraction only. Revision identities abstract nonreused generation tokens. ZIP parsing, UTF8, compression, source text, cryptographic token generation, SQL concurrency and browser/CSP behavior require implementation regression tests; not a Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/LambdaSourceEdit.tla",
+      "sha256": "00025af34136f20ad80359f369d45884ae71837ae9691359f53b26ef33128f3d",
+      "disposition": "modeled",
+      "reason": "Bounded admission, state or preservation contract; native regressions separately verify concrete implementation. Finite models do not prove ZIP/CSP/runtime behavior.",
+      "models": [
+        {
+          "id": "LambdaSourceEdit",
+          "properties": [
+            "TypeOK",
+            "AuthorizedRead",
+            "AuthorizedWrite",
+            "FreshWrite",
+            "ValidWrite",
+            "PreservedPackage"
+          ],
+          "limits": "Admission and frame-condition abstraction only. Revision identities abstract nonreused generation tokens. ZIP parsing, UTF8, compression, source text, cryptographic token generation, SQL concurrency and browser/CSP behavior require implementation regression tests; not a Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "493aebfda7ff995319ed2d76153babe5ca4545a76de4d8d0e95f82bf13d06f26",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers and enforces finite source-edit contract while retaining all existing models and mutation controls.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "962a5bf19a4c1500f540bd696a470f2c8e769c43a36abda519f7a3428089d549",
+      "disposition": "modeled",
+      "reason": "Read-only EC2 discovery admission and its routing/capability wiring; actual database queries and wire authorization require independent tests and review.",
+      "models": [
+        {
+          "id": "EC2ReadDiscovery",
+          "properties": [
+            "AuthorizedRead",
+            "RegionBound",
+            "OwnedRead"
+          ],
+          "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_read_boundaries_test.go",
+      "sha256": "3d74e79d5474b7b72dbf5c5b2d8c5c2d065589058927b2376045e5b41530339a",
+      "disposition": "test-support",
+      "reason": "Exercise EC2 malformed request, unavailable state and corrupt ownership refusal through public dispatch; stable tag ordering is also checked. No production behavior or verification threshold is changed.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_read_routing_test.go",
+      "sha256": "e89570015e8da12743c5e1bac7b1dc6f634faad6692d563ebfaae5c4a9812412",
+      "disposition": "test-support",
+      "reason": "Regression proving unknown JSON targets cannot redirect EC2-marked requests into CloudFormation. Existing DynamoDB admission tests prove native refusal and state preservation.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_read_test.go",
+      "sha256": "d3a916fb9e4df3b9a853814bf3de43da787f9c442c7fbd5a70ccf2fc91d8bd24",
+      "disposition": "test-support",
+      "reason": "Read-only discovery UI, tests, documentation or exact build/formal metadata; no independent authority or state mutation is introduced by this file.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/lambda.go",
+      "sha256": "7f9158d9c937118ae5f0d9512c0ed7f08f7fa27973d59acea3b361c1ebce8f74",
+      "disposition": "modeled",
+      "reason": "Lambda HTTP authorization now reads a signed SDK session's policy snapshot instead of the stored identity policy, and refuses a browser session bound to one SSM parameter. The Tail disclosure model treats authorization as an abstract admission input; this change only alters how that input is computed, and the Tail path is otherwise unchanged.",
+      "models": [
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "ResponseAuthorized"
+          ],
+          "limits": "The model abstracts authorization as one Boolean; the session-snapshot source, console-bound refusal and stored-policy fallback are not modeled and are established by lambda_permissions_test.go and internal/server/lambda_sdk_session_test.go. No IAM parser, HTTP or Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/lambda_bridge.go",
+      "sha256": "ceb39a19c44a7c91c18a0d5db432b061aca4fad84a65e65a2474e9c06c8c265d",
+      "disposition": "modeled",
+      "reason": "Bridge requests now carry only the invocation's cancellation and deadline, never the caller's request values, so SDK calls inside a function are decided by the saved execution role alone.",
+      "models": [
+        {
+          "id": "LambdaExecutionRoleBridge",
+          "properties": [
+            "NoCallerEscalation",
+            "NoCallerNarrowing",
+            "CanceledNotDispatched"
+          ],
+          "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/lambda_bridge_test.go",
+      "sha256": "17ed19c830ef697b930426b25a6dbcfd25dd546d0d8ef0c116e53d549334ea11",
+      "disposition": "modeled",
+      "reason": "Native regression test for the bridge decision source: a wide caller session cannot widen and a narrow or bound caller cannot narrow the execution role; fails on the unfixed bridge.",
+      "models": [
+        {
+          "id": "LambdaExecutionRoleBridge",
+          "properties": [
+            "NoCallerEscalation",
+            "NoCallerNarrowing",
+            "CanceledNotDispatched"
+          ],
+          "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/lambda_permissions_test.go",
+      "sha256": "4303be167c8ad87a02a654dc09b299be646f9f9c547405982fd436aa7aa13e73",
+      "disposition": "test-support",
+      "reason": "Native test of Lambda authorization from a session snapshot and console-bound refusal; test code only.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/lambda_source.go",
+      "sha256": "3fcc84dc3c4ca0358f4d0f01b7c9534ac24a9e29a62fe2c21eb64bc137a4f494",
+      "disposition": "modeled",
+      "reason": "Bounded admission, state or preservation contract; native regressions separately verify concrete implementation. Finite models do not prove ZIP/CSP/runtime behavior.",
+      "models": [
+        {
+          "id": "LambdaSourceEdit",
+          "properties": [
+            "TypeOK",
+            "AuthorizedRead",
+            "AuthorizedWrite",
+            "FreshWrite",
+            "ValidWrite",
+            "PreservedPackage"
+          ],
+          "limits": "Admission and frame-condition abstraction only. Revision identities abstract nonreused generation tokens. ZIP parsing, UTF8, compression, source text, cryptographic token generation, SQL concurrency and browser/CSP behavior require implementation regression tests; not a Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/lambda_source_test.go",
+      "sha256": "8b4fad84cb4db62e90d8c98011e7703152ed6f61d9f0126337f799ad30416bd8",
+      "disposition": "test-support",
+      "reason": "Regression evidence for handler preservation, auth/revision failures, restart and editor UI; does not change runtime admission.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "e3c4867f470bb872bd6f78f3341bfd8a69eeb954e74710a2613e5430681e847f",
+      "disposition": "modeled",
+      "reason": "Read-only EC2 discovery admission and its routing/capability wiring; actual database queries and wire authorization require independent tests and review.",
+      "models": [
+        {
+          "id": "EC2ReadDiscovery",
+          "properties": [
+            "AuthorizedRead",
+            "RegionBound",
+            "OwnedRead"
+          ],
+          "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sts_lambda_signature_test.go",
+      "sha256": "2a3d38b5efcd702bd926dfeb002ab745623ff34583c6a93291dc543fd760d654",
+      "disposition": "test-support",
+      "reason": "Native SigV4 test of the Lambda REST path allowlist, limits and session snapshot; test code only.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/sts_signature.go",
+      "sha256": "4c716263366d52b1823d49eb9bf996c2e81d68deb9760b9ecf4e5f6ba41f5bc7",
+      "disposition": "modeled",
+      "reason": "Adds lambda to the native signing services and admits only the listed Lambda REST paths with plain function names, no query and a 384 KiB body limit. Credential use still requires every existing guard (signature, token, expiry, generation); the STS, IAM, CloudFormation, SSM and handoff branches are unchanged.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "UseRequiresAllGuards"
+          ],
+          "limits": "SigV4 canonicalization, the Lambda path allowlist, content types and body limits are not modeled; sts_lambda_signature_test.go and internal/server/lambda_sdk_session_test.go establish them. Terminal handoff behavior covered by ParticipantSessionLifecycle is unchanged."
+        }
+      ]
+    },
+    {
+      "path": "internal/legal/assets/CONSOLE-NOTICES.txt",
+      "sha256": "f8b7a4acf9de8bfe47539b69999a0c58c964690e985893a780e61e7586337fe9",
+      "disposition": "documentation",
+      "reason": "Describes saved handler editing, exact limitations and permissions.",
+      "models": []
+    },
+    {
+      "path": "internal/server/access_sdk.go",
+      "sha256": "fb029ca05eada814abc9d41ffb83cc39108acb4b11c78958cdbf9cf69babeb88",
+      "disposition": "modeled",
+      "reason": "A rejected Lambda signature now gets the Lambda REST-JSON error envelope; authentication and refusal decisions are unchanged.",
+      "models": [
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Only the error wire format changes; envelope bytes are not modeled and are checked by internal/server/lambda_sdk_session_test.go."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/console_assets.go",
+      "sha256": "8bb6df2b152b1a92b32ecb4ab161c34065d61d19eab97add5ff00ff87eb538f0",
+      "disposition": "modeled",
+      "reason": "Bounded admission, state or preservation contract; native regressions separately verify concrete implementation. Finite models do not prove ZIP/CSP/runtime behavior.",
+      "models": [
+        {
+          "id": "LandingAccessAdmission",
+          "properties": [
+            "TypeOK",
+            "ExternalBoundary",
+            "PublicResponse",
+            "TokenBoundary",
+            "UnknownNeverStatic"
+          ],
+          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/console_assets_test.go",
+      "sha256": "fb56f1704b02877bb6c4a041eef6d03b488cf899a00025817ffecd508e271598",
+      "disposition": "test-support",
+      "reason": "Regression evidence for handler preservation, auth/revision failures, restart and editor UI; does not change runtime admission.",
+      "models": []
+    },
+    {
+      "path": "internal/server/console_handoff.go",
+      "sha256": "2a036a139534f32940243279b6da259c3ff1f1ce613acda62ffb44c3a94e8b2f",
+      "disposition": "modeled",
+      "reason": "Adds the additive nativeSdk capability advertisement under the same Access-only response marker as consoleHandoff; console handoff issuance and redemption are unchanged.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Capability JSON is metadata, not authority, and is not modeled; console_handoff_test.go checks it with and without the Access wrapper."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/console_handoff_test.go",
+      "sha256": "740cd1f047b60374f6c8673fcfcb36cf4a72c2481c973863c7ca122cb84e0cde",
+      "disposition": "modeled",
+      "reason": "Extends the existing Access-capability test to require the nativeSdk advertisement only behind Access.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Test of advertised metadata only; handoff lifecycle tests are unchanged."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/ec2_read_access_test.go",
+      "sha256": "63e99f8179e972519a62ec23a4ee2457deeed685680175e1219b53d3379bf2a3",
+      "disposition": "test-support",
+      "reason": "Independent Test Writer regression against real server plus access middleware: local operator, missing/cross-authority tokens, identity spoofing and native-session refusal. No production code.",
+      "models": []
+    },
+    {
+      "path": "internal/server/lambda_sdk_session_test.go",
+      "sha256": "496f50d190f095a1d16e9ceb2b528d462e8ed17a48183400f05326f2c39ba577",
+      "disposition": "test-support",
+      "reason": "Native Access-boundary test for signed Lambda sessions and execution-role isolation; test code only.",
+      "models": []
+    },
+    {
+      "path": "internal/server/lambda_source_test.go",
+      "sha256": "eecfc3867273e3551161eb0fa3265d5a48849b7e73ad44b06c6ceca6b01fb9d7",
+      "disposition": "test-support",
+      "reason": "Regression evidence for handler preservation, auth/revision failures, restart and editor UI; does not change runtime admission.",
+      "models": []
+    },
+    {
+      "path": "internal/server/landing/landing.css",
+      "sha256": "e111a030c7f6927404c3de4b830577333c2c9af3586bd30f2d8f71e9ffd3a128",
+      "disposition": "presentation",
+      "reason": "Public decorative canvas source containment and geometry regression; no API, authority or state mutation. Strict accessibility assertions remain; native browser rendering requires independent CI evidence.",
+      "models": []
+    },
+    {
+      "path": "internal/server/landing/landing.mjs",
+      "sha256": "f6bdbb9f7d20ea17c0dae11dd6768400377ca1b5504254b2947e67b66de7a1a9",
+      "disposition": "modeled",
+      "reason": "Public decorative canvas source containment and geometry regression; no API, authority or state mutation. Strict accessibility assertions remain; native browser rendering requires independent CI evidence.",
+      "models": [
+        {
+          "id": "LandingTopologyState",
+          "properties": [
+            "TypeOK",
+            "InitialFragmentSelection",
+            "ProviderSelectsDefault",
+            "NodeClickSelectsExact",
+            "InvalidInputPreservesSelection",
+            "DOMSelectionAgrees",
+            "CanonicalHTMLAvailable",
+            "MountUsesLatestSelection",
+            "UnsupportedCanvasHidden",
+            "RetiredCanvasHidden",
+            "PaintUsesLatestSelection",
+            "RetiredCallbackNoEffect"
+          ],
+          "limits": "Post-start semantic selection and optional decorative lifecycle safety only. Trusted source data, closed initial-fragment resolution and native feature/paint verdicts are assumed; direct URL parsing/encoding/scroll/history is not modeled; no DOM/accessibility/layout/rendering/Chrome support/backend/route/network or JavaScript refinement proof. Reduced-motion has identical static transitions because implementation has no animation loop; no preference-detection proof. Timeout is an environment event, not wall-clock/liveness."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "3f542699f55f1880420f256990aa87ace14cb211319f5bfec7db7105966c5cb3",
+      "disposition": "modeled",
+      "reason": "Bounded admission, state or preservation contract; native regressions separately verify concrete implementation. Finite models do not prove ZIP/CSP/runtime behavior.",
+      "models": [
+        {
+          "id": "EC2ReadDiscovery",
+          "properties": [
+            "TypeOK",
+            "AuthorizedRead",
+            "RegionBound",
+            "OwnedRead"
+          ],
+          "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties."
+        },
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "AuthorizedMutations",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight"
+          ],
+          "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence."
+        },
+        {
+          "id": "ProjectAuthority",
+          "properties": [
+            "TypeOK",
+            "FixedHostConfiguration",
+            "OwnerBindingFrozen",
+            "ConstructorRefusalFrame",
+            "NoUnboundAdoption",
+            "InitializationBindsConfigured",
+            "DeniedFrame",
+            "FinitePermissions",
+            "ActorUsesPersistedProject",
+            "OnlyActualOwnerAuthorized"
+          ],
+          "limits": "GCP owner-only factory and actual-bucket-project authorization abstraction after a trusted subject extractor; not Google IAM/OAuth, credential validation/extraction, operator/control roles, Azure authorization, HTTP/path/generation semantics, SQLite/Go refinement, concurrency/crash proof, byte budgets, project-number parsing, growing configured project roster or actual SDK execution. One bucket stands for an existing resource; policy Allowed is not an HTTP success for every permission. Root source binding is limited to NewWithCloudStorage calling registerCloudStorage and the fixed GCP Environment/Project/Number/Owner argument construction for NewProjectHandler. This is an abstract constructor/admission contract, not a proof of core DB opening, registration rollback across providers, server dispatch order, capabilities metadata, HTTP or constructor SQL atomicity. CLI binding covers only trusted fixed GCP owner configuration and constructor refusal correspondence; argument grammar, startup I/O, Azure initialization, tokens and absence of AWS policy grants are checked natively, not proved by this model."
+        },
+        {
+          "id": "KMSProtocolAdmission",
+          "properties": [
+            "TypeOK",
+            "NoCrossServiceFallback",
+            "InfraNotDeny",
+            "MissingIdentityDenied",
+            "NoSuccessWithoutKMSTarget",
+            "NoAuthorityFromWireMetadata"
+          ],
+          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun."
+        },
+        {
+          "id": "CloudWatchLogsLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "OnlyAcceptedWrites",
+            "TokenAuthority"
+          ],
+          "limits": "Finite safety only; no liveness or implementation refinement. Models transaction atomicity and database identity as abstract steps, not SQLite faults, HMAC cryptography or OS process isolation. Byte/time limits, sorting, page convergence, expiry and real IAM documents require native/SDK tests. Captured read receipts preserve the authorization context when later resource generations change. Shared source scope covers only the added Logs field/dispatch/construction seam; not all other service dispatch or server lifecycle/authentication. Stream deletion and later recreation are included: the abstract incarnation advances at deletion, while native code assigns a fresh random generation at recreation. Reads are disallowed while absent; native regressions verify cursor rejection and SQL failure rollback."
+        },
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "TypeOK",
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests."
+        },
+        {
+          "id": "DynamoDBAdmission",
+          "properties": [
+            "TypeOK",
+            "InitializedBeforeMutation",
+            "DeniedFrame",
+            "ValidKeysOnly",
+            "CanonicalKeys",
+            "SemanticBytes",
+            "CommittedBytes",
+            "CreateCommitted",
+            "AcknowledgedRemoval",
+            "ActiveTableRequired",
+            "TableBudget",
+            "ItemBudget",
+            "ItemCountBudget",
+            "StatisticsExact",
+            "PeerFrame",
+            "NoOrphans",
+            "RefusalFrame",
+            "AdmissionExact",
+            "TableAdmissionExact",
+            "RemovalAdmissionExact",
+            "StartupAdmission",
+            "StartupRefusedFrame"
+          ],
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Targeted finite-model receipts are separate from exact-HEAD whole-registry merge checking and actual Go/native/integration execution."
+        },
+        {
+          "id": "IAMManagedPolicies",
+          "properties": [
+            "TypeOK",
+            "FailureFrame",
+            "DeleteDependencies",
+            "VersionIDsMonotonic",
+            "FreshIncarnations",
+            "VersionCap",
+            "DefaultExists",
+            "AttachmentAuthority",
+            "ExplicitDenyWins",
+            "AggregateBudget",
+            "RoleViewsExact",
+            "PeerFrame",
+            "ImmutableVersions"
+          ],
+          "limits": "New boundedscenario scope, not bisimilar/equivalent to original4requestcandidate which remainsUNPASSED. No Go/SQL/parser/trust/crypto/HTTP/refinement/liveness or unboundedhistory proof. Fixedaction/resource; concretequotas/hostisolation testedseparately; failedrequestidentitydiagnosticnormalized. Existing29models/gates unchanged. Native Query routing/validation, caller snapshot and RoleID admission, concrete SQL rollback/quotas and server capability metadata require real-code tests. This model abstracts authorized/storage outcomes and persisted role/policy generations, not the HTTP authorization race or UI. Two-request/four-seed scope is narrower than the unsuccessful four-request exploratory candidate."
+        },
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "TypeOK",
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects",
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "DisabledNoSakura",
+            "EnabledOnlyAuthenticated",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema",
+            "TokenOnlyAuthenticated",
+            "StartupComplete"
+          ],
+          "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded."
+        },
+        {
+          "id": "LandingAccessAdmission",
+          "properties": [
+            "TypeOK",
+            "ExternalBoundary",
+            "PublicResponse",
+            "TokenBoundary",
+            "UnknownNeverStatic"
+          ],
+          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented."
+        },
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "TypeOK",
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
+          ],
+          "limits": "Atomic catalog store projection only, shared by the AWS catalog and the Google API catalog (configured project owner as authorization, etag as generation, requestId as client token, force as cascade): authorization-before-commit, typed refusal frames, quota, optional name uniqueness, fresh identifiers, generation-guarded update/delete, child reference integrity with refuse or cascade deletion, and client-token replay. Official shape validation, wire projection, pagination tokens, tag maps, ARN formatting, SQL/locking/crash behavior, JSON encoding and Go refinement are verified by native tests, not this model. A three-step bound is not an API cap."
+        },
+        {
+          "id": "SNSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "MessageCountBounded",
+            "ByteBudgetBounded",
+            "DeliveryBudgetBounded",
+            "DurableAck",
+            "PublishRecipientsExact",
+            "PeerFrame",
+            "NoDanglingDeliveredMessage",
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
+          ],
+          "limits": "Atomic state transitions assume transaction rollback and model validated existing state. Captured post-operation ACK and frozen-delete ownership, globally bounded count/abstract byte/delivery budgets and target/peer frames only. Not SQL/driver/crash/Go refinement, UUID allocation, schema migration, UTF-8 byte calculation, quotas at real cardinality, IAM or outbound delivery. Delivery audit may outlive Unsubscribe, but not its stored message or topic. Ignored/vanishing/late-reinsert native SQLite faults and two-host SDK checks are separate executable obligations."
+        },
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence."
+        },
+        {
+          "id": "S3MultipartState",
+          "properties": [
+            "TypeOK",
+            "Budget",
+            "NoOrphans",
+            "Cleanup",
+            "RefusalAtomic"
+          ],
+          "limits": "Finite atomic transaction abstraction only; does not execute Go/SQLite/HTTP/React, prove refinement, MD5 integrity, IAM parsing, version selection, ordering/minimum sizes, timestamps, random IDs, OS isolation, or real AWS parity. Scope labels abstract bucket/key/upload binding. Actual Go fault, SDK, persistence and browser tests cover those boundaries."
+        },
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+        },
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "TypeOK",
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement."
+        },
+        {
+          "id": "IAMInstanceProfiles",
+          "properties": [
+            "TypeOK",
+            "AuthorizationRequired",
+            "PassRoleRequired",
+            "ProfileGenerationGuard",
+            "RoleGenerationGuard",
+            "FailureFrame",
+            "SingleRole",
+            "AttachmentAuthority",
+            "FreshProfileIdentity",
+            "PeerFrame",
+            "RemovalExact"
+          ],
+          "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history."
+        },
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "TypeOK",
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness."
+        },
+        {
+          "id": "SNSQueueFanout",
+          "properties": [
+            "TypeOK",
+            "Authorized",
+            "ParentPresent",
+            "DestinationsExist",
+            "CountBounded",
+            "BytesBounded",
+            "DurableAck",
+            "AuditExact",
+            "RecipientsExact",
+            "RefusalUnchanged"
+          ],
+          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations."
+        },
+        {
+          "id": "Route53AtomicBatch",
+          "properties": [
+            "TypeOK",
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Atomic batch/authority/team frame abstraction only; no Go/SQL/XML/DNS, receipt retention, quota, pagination, crash or liveness proof. Native and SDK tests independently cover implementation boundaries."
+        },
+        {
+          "id": "SSMDocumentState",
+          "properties": [
+            "TypeOK",
+            "DeniedPreserves",
+            "RefusalPreserves",
+            "AddressIsolation",
+            "HistoryImmutable",
+            "DefaultPreserved",
+            "DeleteCleanup",
+            "LatestPrecondition",
+            "CreateOnlyAbsent"
+          ],
+          "limits": "Definition management only. Atomic abstract transitions assume transaction commit/rollback; no SQL refinement, parser, IAM evaluation, byte quota, wire, persistence, concurrency or execution proof."
+        },
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "TypeOK",
+            "PinnedPlan",
+            "JournalBeforeLaunch",
+            "PreparedIdentity",
+            "PausedExactControl",
+            "ExactAttachment",
+            "AttachBeforeActivation",
+            "PrivateAgentReadiness",
+            "PublicationAdmission",
+            "IndependentCleanup",
+            "ObservedContainment",
+            "ReleaseAfterContainment",
+            "NetworkOwnership",
+            "FrozenNetwork",
+            "AuthorizedDelete",
+            "CreatorAdmission",
+            "NoReconstruction",
+            "UncertainDebtRetained",
+            "ConfigurationAdmission",
+            "ConfiguredIsNotReady",
+            "TypedProvider",
+            "SavedAssociation",
+            "NoRebinding",
+            "SavedOperationAuthority"
+          ],
+          "limits": "Companion to unchanged EC2GuestAttachmentLifecycle, not a replacement. Checks ordering of pinned planning, durable readback, captured paused QMP ownership, attachment/activation, private QGA readiness, generation publication, teardown, network ownership and child admission. Equality/validity predicates abstract byte validation and SQL/OS APIs; no proof of parser correctness, actual networking, cryptography, PID/FD identity, resource quota cardinality, packet routing, real image execution, liveness or Go refinement. Separate modes do not prove arbitrary cross-mode interference. Restart cannot recover physical authority. Successful checking is not physical Battle acceptance."
+        },
+        {
+          "id": "ParticipantSessionLifecycle",
+          "properties": [
+            "TypeOK",
+            "PreparedEvidence",
+            "PreparationOptIn",
+            "PackageEvidence",
+            "BoundAdmission",
+            "CurrentAdmission",
+            "ChannelTokenBinding",
+            "HandoffExpiry",
+            "SingleUse",
+            "HelloEvidence",
+            "ReadyEvidence",
+            "NoPostRevokeOutput",
+            "ResumeKeepsDriver",
+            "NoResurrection",
+            "GuestDrainEvidence",
+            "TerminalEvidence",
+            "FreshEvidence",
+            "RevokeIsNotExit"
+          ],
+          "limits": "Bounded authority/lifecycle composition only; assumes trusted immutable auth/policy decisions, atomic DB CAS/one-use claims, authentic correlated protocol evidence, reliable owned runtime witnesses, bundle hash validation and exclusive packaging filesystem inputs. Does not prove Go/SQL/JSON/WebSocket/cryptography/OS/PTY/systemd refinement or real process cleanup, full ConsoleHandoff/BrowserSessions subcontracts, numeric timeout/quotas or liveness."
+        },
+        {
+          "id": "AppEngineTraffic",
+          "properties": [
+            "TypeOK",
+            "AllocationsReferenceVersions",
+            "SplitComplete",
+            "DefaultFirst",
+            "ApplicationParent",
+            "DenialAtomic",
+            "OtherTeamUnchanged",
+            "ApplicationPermanent",
+            "ServedThroughRouteAndFirewall"
+          ],
+          "limits": "Admin-plane ownership, traffic-split, deletion-order and request-routing abstraction only; no Go, SQL, HTTP, Python sandbox, Cloud Storage copy, pagination, operations, quotas, IP or cookie sharding, crash or liveness proof. Native Go and official-client tests independently cover implementation boundaries."
+        },
+        {
+          "id": "ELBTargetLifecycle",
+          "properties": [
+            "TypeOK",
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "Reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result abstraction only; consecutive thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, resource-policy evaluation, Lambda execution, SQL/Go refinement, crashes and liveness are not modeled. Native, server and SDK tests cover them independently."
+        },
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "TypeOK",
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst",
+            "NoCallAfterClose",
+            "ConcurrencyBound",
+            "SuccessOnlyFromBackend",
+            "NoFallback",
+            "TruthfulFailure",
+            "NoPersistence"
+          ],
+          "limits": "Finite admission/result abstraction of the opt-in local Bedrock Runtime only. Assumes the authenticated exercise identity, IAM decision, strict body validation and Ollama transport pins are computed correctly; the shutdown and canceled responses are distinct kinds here but share ServiceUnavailableException on the wire. No Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, token counts, streaming, tool use, Apple backend, Claude Code or liveness proof. Native, CLI and SDK tests independently cover implementation boundaries."
+        },
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "TypeOK",
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Capacity-bound/ownership/authority/rollback/team-frame abstraction only; no Go/SQL/JSON parsing, IAM matching, pagination, status derivation text, quotas, crash recovery, target tracking evaluation or liveness proof. Native Go, composed-server and SDK tests provide separate implementation evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.css",
+      "sha256": "6ce20b27e21dc59e1f6d9761759cf3a81c70c0b65d5b355b1558109de0f33491",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "1c410ddb2c4fba7202ffb49ab7e267753c289bf66bf729d7ae7a82f6fa9149bd",
+      "disposition": "modeled",
+      "reason": "Bounded admission, state or preservation contract; native regressions separately verify concrete implementation. Finite models do not prove ZIP/CSP/runtime behavior.",
+      "models": [
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SakuraDisksViewEpoch",
+          "properties": [
+            "TypeOK",
+            "AcceptedReadScope",
+            "SuccessfulReadOnly",
+            "RenderedScopeBound",
+            "RenderedResourceBound",
+            "StaleReadFrame",
+            "StaleWriteFrame",
+            "NavigationACKFrame",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryOnly",
+            "SingleWriteSend",
+            "LocaleFrame",
+            "CancelDraftClear"
+          ],
+          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
+        },
+        {
+          "id": "DynamoDBConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "NoStalePublication",
+            "ReadGenerationVerified",
+            "DisplayedKeyBound",
+            "CancelNoOrphanLoading",
+            "AckClosesDraft",
+            "AckBelongsToCurrentView",
+            "ReadRetryNeverWrites",
+            "SingleSendBeforeACK",
+            "LocalePreservesDraft"
+          ],
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+        },
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+        },
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        },
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model."
+        },
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "TypeOK",
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
+        },
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "TypeOK",
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness."
+        },
+        {
+          "id": "TerminalClientEpoch",
+          "properties": [
+            "TypeOK",
+            "ReceiptEvidence",
+            "SocketEvidence",
+            "SingleOpen",
+            "UIEvidence",
+            "DisposeNotRemoteTermination",
+            "NoAutomaticStartRetry",
+            "DiscardPreservesIdentity"
+          ],
+          "limits": "Finite client lifecycle contract, not JS/React/browser/fetch/WebSocket refinement. Single abstract remote lifecycle does not represent arbitrary concurrent sessions. Assumes authentic native response and component/channel identity checks; parsing, transport, DOM, token cryptography and guest termination are independent. Operation epoch is defense in depth under busy/permanent-disposal guards; no impossible overlapping operation is invented to produce an epoch-only counterexample."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "070965f825a6b5070362670ea992287c2ec90e12c3c3301568f172dfeb42306d",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers and enforces finite source-edit contract while retaining all existing models and mutation controls.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "a5742d2657baf68f4f8a4cb834b897c3f8ad37d755fe8795290011a65f0da9ab",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers and enforces finite source-edit contract while retaining all existing models and mutation controls.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/audit.py",
+      "sha256": "ca4324ca414d49083ff09cb9e1bb687d40590e7777092cd06a2521c1ad414d8c",
+      "disposition": "test-support",
+      "reason": "Regression evidence for handler preservation, auth/revision failures, restart and editor UI; does not change runtime admission.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "1864a9e2d6eebf32f55961eec5af57979e07632f2489072a0e4b4d4cd9c8bae9",
+      "disposition": "test-support",
+      "reason": "Regression evidence for handler preservation, auth/revision failures, restart and editor UI; does not change runtime admission.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ec2_readonly_console.py",
+      "sha256": "66c3bee20c4795342268c7f6856349ef98baf261e750a3bbb975a2b1d5587fa0",
+      "disposition": "test-support",
+      "reason": "Read-only discovery UI, tests, documentation or exact build/formal metadata; no independent authority or state mutation is introduced by this file.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/lambda_inline_editor.py",
+      "sha256": "92cbb20be44a436d363fd036250b7aeecd204a94c6c954c7eb3ef5c8ece7f997",
+      "disposition": "test-support",
+      "reason": "Regression evidence for handler preservation, auth/revision failures, restart and editor UI; does not change runtime admission.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/landing_topology.py",
+      "sha256": "e4321f8b363db5ecb220c4778495311e07227a27e149b28360a5fc8fac191daf",
+      "disposition": "test-support",
+      "reason": "Public decorative canvas source containment and geometry regression; no API, authority or state mutation. Strict accessibility assertions remain; native browser rendering requires independent CI evidence.",
+      "models": []
+    },
+    {
+      "path": "third_party/CONSOLE-NOTICES.txt",
+      "sha256": "f8b7a4acf9de8bfe47539b69999a0c58c964690e985893a780e61e7586337fe9",
+      "disposition": "documentation",
+      "reason": "Describes saved handler editing, exact limitations and permissions.",
+      "models": []
+    },
+    {
+      "path": "third_party/console-packages.json",
+      "sha256": "2aaba42653a365753d87ff43f47bb605d661f651fb409378be35df8851244467",
+      "disposition": "documentation",
+      "reason": "Describes saved handler editing, exact limitations and permissions.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "0df30d3a91542129f11a525b9b6596cad40ea61d5144edaf96a309b67fb69b3e",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "b1de756cbd7639837c0d0f9094af169e8beff08dd5ae463ae7d804fc78cc6086",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/package-lock.json",
+      "sha256": "6057bd5a85dae9e00c87e94ca612ec76de1225a5ae07c46396693eafd59b110d",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/package.json",
+      "sha256": "b8ee2d49c41d1d5a301575f1426b8a3f27b19b957547ed082601cca50b8ec982",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-home.jsx",
+      "sha256": "d9d3c9ffa1ed1f3e735a207f2281d6f0f26cc9917d7be46bd407efc7c8853a1d",
+      "disposition": "presentation",
+      "reason": "Read-only discovery UI, tests, documentation or exact build/formal metadata; no independent authority or state mutation is introduced by this file.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "fb530291cd603ce72d73b0c152722add260745501b039e03241d82c90867bcc1",
+      "disposition": "presentation",
+      "reason": "Read-only discovery UI, tests, documentation or exact build/formal metadata; no independent authority or state mutation is introduced by this file.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "f65f9d8eb990cac2d9da9319ce7740301bbc7584c74cd4de5cbbf8fb706f3422",
+      "disposition": "presentation",
+      "reason": "Read-only discovery UI, tests, documentation or exact build/formal metadata; no independent authority or state mutation is introduced by this file.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-response.mjs",
+      "sha256": "e6d6f511dbfd99a737e79e8aa17c3de0095df3000deb136b409d29936c9939ad",
+      "disposition": "presentation",
+      "reason": "Pure readonly response shape validation or independent acceptance tests. No cloud, persistence or authority mutations.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/lambda-source.mjs",
+      "sha256": "79b793f67b828de1962a0009a7096cbce9f5eec8d002c6dbc6186071581f1c9c",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/lambda.jsx",
+      "sha256": "4512ee7549433a8d7bc583a7138c783ec5ad1d7732ec9fc4e0988d44ff01aed7",
+      "disposition": "modeled",
+      "reason": "Bounded admission, state or preservation contract; native regressions separately verify concrete implementation. Finite models do not prove ZIP/CSP/runtime behavior.",
+      "models": [
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "TypeOK",
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "aad9861a5b283a63c1b6496b01e264b3132881d383c96e88460d7be0c824f3d0",
+      "disposition": "modeled",
+      "reason": "Existing scoped console behavior retained alongside read-only discovery; bounded model properties are not a proof of generated JavaScript, browser rendering, SQL or full authorization implementation.",
+      "models": [
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "TypeOK",
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        },
+        {
+          "id": "SQSConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "OnlyCurrentReplies",
+            "NoUnmountedAcceptance",
+            "ReceiptCustodyBound",
+            "RawReceiptsPrivate"
+          ],
+          "limits": "Finite view acceptance/custody abstraction only, not React/AbortController/DOM/thread execution, token authentication, IAM, native receipt validity/freshness, Go/SQL, cryptography or AWS visual parity. Native requests may finish after cancellation; only current replies enter the view. Accepted history captures its original mounted/context/epoch, so later changes cannot relabel an old acceptance. Unmount epoch advance is redundant with the alive guard and the combined mutant deliberately removes both. Receipt values abstract one response identity per context/epoch; native freshness and release require actual browser/SDK tests. main.jsx source scope is only added SQS keyed-remount/navigation seam, not all other services or authentication."
+        },
+        {
+          "id": "CloudWatchLogsViewEpoch",
+          "properties": [
+            "TypeOK",
+            "FreshResults",
+            "NoUnmountedResults"
+          ],
+          "limits": "Finite async-display acceptance model, not React/AbortController/DOM execution or implementation refinement. Context abstracts a group/stream/page query; parent region/principal changes unmount the component. IAM, team authentication, page tokens, SQL state and mutation atomicity are separate backend obligations. Form input, busy indicators and navigation layout are not modeled; actual stale-reply and browser tests remain required. Shared main.jsx scope covers the added Logs identity/region/navigation remount only, not all other service views or browser authentication."
+        },
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SakuraDisksViewEpoch",
+          "properties": [
+            "TypeOK",
+            "AcceptedReadScope",
+            "SuccessfulReadOnly",
+            "RenderedScopeBound",
+            "RenderedResourceBound",
+            "StaleReadFrame",
+            "StaleWriteFrame",
+            "NavigationACKFrame",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryOnly",
+            "SingleWriteSend",
+            "LocaleFrame",
+            "CancelDraftClear"
+          ],
+          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
+        },
+        {
+          "id": "DynamoDBConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "NoStalePublication",
+            "ReadGenerationVerified",
+            "DisplayedKeyBound",
+            "CancelNoOrphanLoading",
+            "AckClosesDraft",
+            "AckBelongsToCurrentView",
+            "ReadRetryNeverWrites",
+            "SingleSendBeforeACK",
+            "LocalePreservesDraft"
+          ],
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+        },
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        },
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model."
+        },
+        {
+          "id": "TerminalClientEpoch",
+          "properties": [
+            "TypeOK",
+            "ReceiptEvidence",
+            "SocketEvidence",
+            "SingleOpen",
+            "UIEvidence",
+            "DisposeNotRemoteTermination",
+            "NoAutomaticStartRetry",
+            "DiscardPreservesIdentity"
+          ],
+          "limits": "Finite client lifecycle contract, not JS/React/browser/fetch/WebSocket refinement. Single abstract remote lifecycle does not represent arbitrary concurrent sessions. Assumes authentic native response and component/channel identity checks; parsing, transport, DOM, token cryptography and guest termination are independent. Operation epoch is defense in depth under busy/permanent-disposal guards; no impossible overlapping operation is invented to produce an epoch-only counterexample."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/plain-code-input.mjs",
+      "sha256": "5ec631b7d54ddf986493b551e47083f9ceb9691b9158cb2430827049b6457f58",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/python-editor.css",
+      "sha256": "8c1ee63127eee15e2f91a3b090bfef3f93856c5c8166a6e56fae40313c1f5465",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/python-editor.jsx",
+      "sha256": "cdfbc42feaf068fa7a21f6ce950e964fd224a0d6d9372f48af6ba30e81b5a11b",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ec2-readonly.test.mjs",
+      "sha256": "2cdc5564efa0636e044adf9f3815fbf45991bc5422b88bd666a037c1b1596d1c",
+      "disposition": "presentation",
+      "reason": "Read-only discovery UI, tests, documentation or exact build/formal metadata; no independent authority or state mutation is introduced by this file.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ec2-response.test.mjs",
+      "sha256": "5ea1b62c82dcd4c19bcb89f22f73e51f6787480b1ae4d5e56634155209c0149a",
+      "disposition": "presentation",
+      "reason": "Pure readonly response shape validation or independent acceptance tests. No cloud, persistence or authority mutations.",
+      "models": []
+    },
+    {
+      "path": "tools/console/tests/lambda-editor-flow.test.mjs",
+      "sha256": "e6b3c9ae8a5a3d003acc2d0fe94e45c3fb0cd23ed0734da655d06451df8ba10d",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/tests/lambda-native-input.test.mjs",
+      "sha256": "9bbb9f389935e0975af824552379935c3aa6ea5e1e79acdd40c0013b0695ac89",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/tests/lambda-source.test.mjs",
+      "sha256": "c595f6dd67c92373abd3d7f3cb554d3028cd70e84fbc6cf7b914e9cad078024c",
+      "disposition": "presentation",
+      "reason": "Bundled editor UI, source draft handling, generated assets or pinned dependencies; browser and focused UI regressions verify concrete behavior.",
+      "models": []
     }
-   ]
-  },
-  {
-   "path": "internal/server/lambda_sdk_session_test.go",
-   "sha256": "496f50d190f095a1d16e9ceb2b528d462e8ed17a48183400f05326f2c39ba577",
-   "disposition": "test-support",
-   "reason": "Native Access-boundary test for signed Lambda sessions and execution-role isolation; test code only.",
-   "models": []
-  },
-  {
-   "path": "scripts/formal_model_gate.py",
-   "sha256": "d69f7c36f14be157607671d3f9f5af5ae75b5ea0a1d200784fefe161b04290c6",
-   "disposition": "formal-infrastructure",
-   "reason": "Pins the new model's invariants, mutation controls and exact source scope independently of the registry.",
-   "models": []
-  },
-  {
-   "path": "scripts/test-formal-gate.py",
-   "sha256": "3743c5b286e030168208cd17344912385200b1e49a8f71bc84707e0735bff490",
-   "disposition": "formal-infrastructure",
-   "reason": "Adds the new model to the reviewed registry inventory and a fixed-inventory removal test.",
-   "models": []
-  }
- ]
+  ]
 }

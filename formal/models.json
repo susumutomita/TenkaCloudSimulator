@@ -5485,7 +5485,8 @@
    "source_scope": [
     "internal/server/landing.go",
     "internal/server/access.go",
-    "internal/server/server.go"
+    "internal/server/server.go",
+    "internal/server/console_assets.go"
    ],
    "mutants": [
     {
@@ -18043,6 +18044,81 @@
       }
      ],
      "expect_invariant": "CanceledNotDispatched"
+    }
+   ]
+  },
+  {
+   "id": "LambdaSourceEdit",
+   "model": "formal/LambdaSourceEdit.tla",
+   "config": "formal/LambdaSourceEdit.cfg",
+   "bounds": "Two immutable revision identities, Boolean read/update grants, parameter-boundary and package-validity flags, one read or update outcome.",
+   "properties": [
+    "TypeOK",
+    "AuthorizedRead",
+    "AuthorizedWrite",
+    "FreshWrite",
+    "ValidWrite",
+    "PreservedPackage"
+   ],
+   "limits": "Admission and frame-condition abstraction only. Revision identities abstract nonreused generation tokens. ZIP parsing, UTF8, compression, source text, cryptographic token generation, SQL concurrency and browser/CSP behavior require implementation regression tests; not a Go refinement proof.",
+   "source_scope": [
+    "internal/aws/lambda_source.go"
+   ],
+   "mutants": [
+    {
+     "id": "ReadWithoutGrant",
+     "edits": [
+      {
+       "old": "/\\ allowGet /\\ ~bounded",
+       "new": "/\\ TRUE /\\ ~bounded",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizedRead"
+    },
+    {
+     "id": "WriteWithoutGrant",
+     "edits": [
+      {
+       "old": "/\\ allowGet /\\ allowUpdate /\\ ~bounded",
+       "new": "/\\ allowGet /\\ TRUE /\\ ~bounded",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizedWrite"
+    },
+    {
+     "id": "StaleWrite",
+     "edits": [
+      {
+       "old": "/\\ revision = expected /\\ valid",
+       "new": "/\\ TRUE /\\ valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FreshWrite"
+    },
+    {
+     "id": "InvalidWrite",
+     "edits": [
+      {
+       "old": "/\\ revision = expected /\\ valid",
+       "new": "/\\ revision = expected /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValidWrite"
+    },
+    {
+     "id": "LoseOtherEntries",
+     "edits": [
+      {
+       "old": "valid |-> valid, helper |-> 1, config |-> 1",
+       "new": "valid |-> valid, helper |-> 0, config |-> 1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreservedPackage"
     }
    ]
   }

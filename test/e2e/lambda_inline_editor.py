@@ -1,0 +1,101 @@
+"""Native create/edit/deploy/invoke with bundled CodeMirror; no external editor service."""
+import os
+import shutil
+import json
+import urllib.request
+from check import REPORTS, expect, running, sync_playwright, assert_reflow
+def control(endpoint, token, path, body):
+    req=urllib.request.Request(endpoint+path,data=json.dumps(body).encode(),method='PUT',headers={'Content-Type':'application/json','X-Simulator-Token':token})
+    with urllib.request.urlopen(req,timeout=10) as response:return json.load(response)
+
+# This entry point deliberately needs the real browser/server environment. Unit
+# harness results cannot stand in for this contract.
+with running(authenticated=True) as (endpoint, operator), sync_playwright() as pw:
+    control(endpoint, operator, '/_simulator/v1/iam/principals/editor-executor/policy',
+            {'Version':'2012-10-17','Statement':[{'Effect':'Deny','Action':'*','Resource':'*'}]})
+    browser=pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),args=['--no-sandbox'])
+    context=browser.new_context(viewport={'width':1440,'height':1000})
+    assert context.request.post(endpoint+'/_simulator/login',form={'token':operator},max_redirects=0).status==303
+    # Isolated diagnostic document: never clears violations in the real editor page.
+    probe=context.new_page()
+    probe.goto(endpoint+'/_simulator/console/#/lambda')
+    probe.evaluate("document.addEventListener('securitypolicyviolation',e=>window.probeViolations.push({directive:e.violatedDirective,target:e.target?.localName}))")
+    probe_results=[]
+    for styled in (False,True):
+        probe.evaluate("""styled=>{window.probeViolations=[];let d=document.createElement('div');d.id='plain-input-probe';d.contentEditable='plaintext-only';d.textContent='old';if(styled)d.style.tabSize='4';document.body.appendChild(d)}""",styled)
+        field=probe.locator('#plain-input-probe');field.click();field.press('ControlOrMeta+A')
+        probe.keyboard.insert_text('first line\nsecond line\n')
+        probe_results.append({'inlineTabSize':styled,'violations':probe.evaluate('window.probeViolations')})
+        probe.locator('#plain-input-probe').evaluate('(e)=>e.remove()')
+    print('Native plain-input probe:',json.dumps(probe_results),flush=True)
+    probe.close()
+    page=context.new_page();errors=[];outside=[]
+    page.on('pageerror',lambda error:errors.append(str(error)))
+    page.add_init_script("window.cspViolations=[];document.addEventListener('securitypolicyviolation',e=>window.cspViolations.push({directive:e.violatedDirective,blocked:e.blockedURI,source:e.sourceFile,line:e.lineNumber,column:e.columnNumber,target:e.target?.localName,style:e.target?.getAttribute?.('style')}));")
+    def guard(route):
+        if route.request.url.startswith(endpoint+'/'):route.continue_()
+        else:outside.append(route.request.url);route.abort()
+    context.route('**/*',guard)
+    def assert_csp(stage):
+        violations=page.evaluate('window.cspViolations')
+        assert not violations,{'stage':stage,'violations':violations,'styles':page.evaluate("Array.from(document.querySelectorAll('style')).map(s=>({nonceMatches:!!s.nonce&&s.nonce===document.querySelector('meta[name=editor-style-nonce]')?.content,textStart:s.textContent.slice(0,100)}))")}
+    page.goto(endpoint+'/_simulator/console/#/lambda')
+    assert_csp('console loaded')
+    page.get_by_role('button',name='Create function',exact=True).first.click()
+    page.get_by_role('textbox',name='Function name',exact=True).fill('inline-demo')
+    page.get_by_role('textbox',name='Execution role ARN',exact=True).fill('arn:aws:iam::000000000000:role/editor-executor')
+    def edit(source):
+        editor=page.locator('.lambda-python-editor .cm-content').first
+        expect(editor).to_have_attribute('contenteditable','plaintext-only')
+        editor.click();assert_csp('editor clicked')
+        editor.press('ControlOrMeta+A');assert_csp('editor select all')
+        print('Editor before native input:',editor.evaluate("e=>({tag:e.localName,style:e.getAttribute('style'),lines:Array.from(e.children).map(n=>({tag:n.localName,style:n.getAttribute('style')}))})"),flush=True)
+        page.keyboard.insert_text(source);assert_csp('editor native insertText')
+    assert_csp('create editor mounted')
+    edit('def lambda_handler(event, context):\n    return {"answer": 41}\n')
+    editor=page.locator('.lambda-python-editor .cm-content').first
+    editor.press('ControlOrMeta+End');editor.press('Enter')
+    page.keyboard.type('# typed with ordinary keys')
+    expect(editor).to_contain_text('# typed with ordinary keys')
+    assert_csp('ordinary typing and Enter')
+    editor.press('ControlOrMeta+z')
+    expect(editor).not_to_contain_text('# typed with ordinary keys')
+    # CodeMirror's primary redo binding is Mod-y (Mac: Mod-Shift-z).
+    editor.press('Meta+Shift+Z' if page.evaluate("/Mac/.test(navigator.platform)") else 'Control+y')
+    expect(editor).to_contain_text('# typed with ordinary keys')
+    assert_csp('undo redo')
+    page.get_by_role('button',name='Create function',exact=True).click()
+    expect(page.get_by_text('Deployed code',exact=True)).to_be_visible()
+    edit('def lambda_handler(event, context):\n    print("editor-output")\n    return {"answer": 42}\n')
+    page.get_by_role('tab',name='Test',exact=True).click()
+    expect(page.get_by_role('button',name='Test',exact=True)).to_be_disabled()
+    page.get_by_role('tab',name='Code',exact=True).click()
+    page.get_by_role('button',name='Deploy code',exact=True).click()
+    expect(page.get_by_text('Deployed code',exact=True)).to_be_visible()
+    assert not page.evaluate('window.cspViolations'),page.evaluate('window.cspViolations')
+    assert_csp('deployed before screenshots')
+    for width in (1440,390):
+        page.set_viewport_size({'width':width,'height':1000});assert_reflow(page)
+        page.screenshot(path=str(REPORTS/f'lambda-inline-{width}.png'),full_page=True,caret='initial',animations='allow')
+    assert_csp('screenshots complete')
+    page.get_by_role('tab',name='Test',exact=True).click()
+    page.get_by_role('checkbox',name='Include log tail for this test',exact=True).check()
+    page.get_by_role('button',name='Test',exact=True).click()
+    expect(page.get_by_label('Response',exact=True)).to_have_value('{\n  \"answer\": 42\n}')
+    expect(page.get_by_label('Log output (last 4 KiB)',exact=True)).to_have_value('editor-output\n\n')
+    assert not page.evaluate('window.cspViolations'),page.evaluate('window.cspViolations')
+    page.reload()
+    page.get_by_role('link',name='inline-demo',exact=True).click()
+    page.get_by_role('tab',name='Code',exact=True).click()
+    expect(page.locator('.lambda-python-editor .cm-content').first).to_contain_text('editor-output')
+    expect(page.get_by_role('button',name='Deploy code',exact=True)).to_be_disabled()
+    edit('def lambda_handler(event, context):\n    return {"answer": 43}\n')
+    page.get_by_role('button',name='Deploy code',exact=True).click()
+    expect(page.get_by_text('Deployed code',exact=True)).to_be_visible()
+    page.get_by_role('tab',name='Test',exact=True).click()
+    page.get_by_role('button',name='Test',exact=True).click()
+    expect(page.get_by_label('Response',exact=True)).to_have_value('{\n  \"answer\": 43\n}')
+    assert not errors,errors
+    assert not outside,outside
+    assert not page.evaluate('window.cspViolations'),page.evaluate('window.cspViolations')
+    browser.close()
