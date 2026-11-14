@@ -15402,6 +15402,7 @@
     "internal/aws/ec2_network_actor.go",
     "internal/aws/ec2_network_cloudformation.go",
     "cmd/simulator/battle_runtime_linux.go",
+    "cmd/simulator/battle_runtime_config.go",
     "cmd/simulator/battle_runtime_other.go",
     "internal/server/battle_runtime_linux.go",
     "internal/server/ssm_runtime_capabilities.go",
@@ -16806,9 +16807,12 @@
     "RetainedReadAfterExpiry",
     "ReadRequiresCurrentOwner"
    ],
-   "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged.",
+   "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved.",
    "source_scope": [
     "internal/workload/probeclock/bootstrap_linux.go",
+    "internal/workload/probeclock/bootstrap_unix.go",
+    "internal/workload/probeclock/bootstrap_darwin.go",
+    "internal/workload/probeclock/clock_darwin.go",
     "internal/workload/probeclock/bootstrap_other.go",
     "internal/workload/probeclock/clock.go",
     "internal/workload/probeclock/clock_linux.go",
@@ -17990,6 +17994,329 @@
       }
      ],
      "expect_invariant": "OwnedRead"
+    }
+   ]
+  },
+  {
+   "id": "MacPreparationAdmission",
+   "model": "formal/MacPreparationAdmission.tla",
+   "config": "formal/MacPreparationAdmission.cfg",
+   "bounds": "Five independent modes; one attempt each; exhaustive Boolean input predicates, acyclic preparation/copy/install/finalize transitions.",
+   "properties": [
+    "TypeOK",
+    "PlanEvidence",
+    "ImageEvidence",
+    "ImageHandle",
+    "PlistEvidence",
+    "OriginalBeforeCopy",
+    "CopyEvidence",
+    "CopySuccess",
+    "PreparedEvidence",
+    "InstalledEvidence",
+    "FinalizedEvidence",
+    "NoExecutionClaim"
+   ],
+   "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order.",
+   "source_scope": [
+    "internal/workload/guesthvf/plan.go",
+    "internal/workload/guesthvf/image_unix.go",
+    "internal/workload/guesthvf/supervision.go",
+    "tools/guesthvf-preflight/main.go",
+    "tools/mac-hvf-probe/builder_plan.py"
+   ],
+   "mutants": [
+    {
+     "id": "UnsupportedPlan",
+     "edits": [
+      {
+       "old": "/\\ platform /\\ generation /\\ paths",
+       "new": "/\\ TRUE /\\ generation /\\ paths",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PlanEvidence"
+    },
+    {
+     "id": "ForeignGeneration",
+     "edits": [
+      {
+       "old": "/\\ platform /\\ generation /\\ paths",
+       "new": "/\\ platform /\\ TRUE /\\ paths",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PlanEvidence"
+    },
+    {
+     "id": "UnsafePlanPaths",
+     "edits": [
+      {
+       "old": "/\\ platform /\\ generation /\\ paths",
+       "new": "/\\ platform /\\ generation /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PlanEvidence"
+    },
+    {
+     "id": "AliasImage",
+     "edits": [
+      {
+       "old": "/\\ pin /\\ canonical /\\ private /\\ independent /\\ regular",
+       "new": "/\\ pin /\\ canonical /\\ private /\\ TRUE /\\ regular",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ImageEvidence"
+    },
+    {
+     "id": "UnpinnedImage",
+     "edits": [
+      {
+       "old": "/\\ standalone /\\ digest /\\ stable",
+       "new": "/\\ standalone /\\ TRUE /\\ stable",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ImageEvidence"
+    },
+    {
+     "id": "ExternalImage",
+     "edits": [
+      {
+       "old": "/\\ standalone /\\ digest /\\ stable",
+       "new": "/\\ TRUE /\\ digest /\\ stable",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ImageEvidence"
+    },
+    {
+     "id": "ChangedImage",
+     "edits": [
+      {
+       "old": "/\\ standalone /\\ digest /\\ stable",
+       "new": "/\\ standalone /\\ digest /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ImageEvidence"
+    },
+    {
+     "id": "LostImageHandle",
+     "edits": [
+      {
+       "old": "!.retained=TRUE",
+       "new": "!.retained=FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ImageHandle"
+    },
+    {
+     "id": "UncheckedPlist",
+     "edits": [
+      {
+       "old": "/\\ s.mode=\"plist\" /\\ s.phase=\"new\" /\\ valid",
+       "new": "/\\ s.mode=\"plist\" /\\ s.phase=\"new\" /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PlistEvidence"
+    },
+    {
+     "id": "UnpinnedOriginal",
+     "edits": [
+      {
+       "old": "/\\ pin /\\ copy /\\ image",
+       "new": "/\\ TRUE /\\ copy /\\ image",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CopyEvidence"
+    },
+    {
+     "id": "UnobservedRemoval",
+     "edits": [
+      {
+       "old": "/\\ ok /\\ absent",
+       "new": "/\\ ok /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CopySuccess"
+    },
+    {
+     "id": "ReuseBuildDirectory",
+     "edits": [
+      {
+       "old": "/\\ pins /\\ fresh /\\ copies",
+       "new": "/\\ pins /\\ TRUE /\\ copies",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreparedEvidence"
+    },
+    {
+     "id": "UncheckedInstalledBinary",
+     "edits": [
+      {
+       "old": "/\\ overlay /\\ binary /\\ links",
+       "new": "/\\ overlay /\\ TRUE /\\ links",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "InstalledEvidence"
+    },
+    {
+     "id": "UncleanBuild",
+     "edits": [
+      {
+       "old": "/\\ final /\\ stopped /\\ clean",
+       "new": "/\\ final /\\ stopped /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FinalizedEvidence"
+    },
+    {
+     "id": "PlanStartsProcess",
+     "edits": [
+      {
+       "old": "!.phase=\"done\", !.accepted=TRUE,\n   !.evidence=",
+       "new": "!.phase=\"done\", !.accepted=TRUE, !.launched=TRUE,\n   !.evidence=",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoExecutionClaim"
+    },
+    {
+     "id": "CopyBeforeOriginalAdmission",
+     "edits": [
+      {
+       "old": "/\\ s.mode=\"preflight\" /\\ s.phase=\"admitted\" /\\ s.originalChecked",
+       "new": "/\\ s.mode=\"preflight\" /\\ s.phase=\"new\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OriginalBeforeCopy"
+    }
+   ]
+  },
+  {
+   "id": "MacProbeLifecycle",
+   "model": "formal/MacProbeLifecycle.tla",
+   "config": "formal/MacProbeLifecycle.cfg",
+   "bounds": "Three disjoint single-attempt modes: owned probe, owned builder, launchd observation. Boolean OS/validation outcomes; finite acyclic control flow with no retries or seeded states.",
+   "properties": [
+    "TypeOK",
+    "BuilderAttemptBeforeLaunch",
+    "OwnedSuccessEvidence",
+    "FailureCannotPass",
+    "BuildReceiptAfterLog",
+    "LaunchdSuccessEvidence",
+    "AbsenceIsNotReap",
+    "ReapClaimEvidence",
+    "NoBattleQualification"
+   ],
+   "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false.",
+   "source_scope": [
+    "tools/mac-hvf-probe/probe.py",
+    "tools/mac-hvf-probe/boot_probe.py",
+    "tools/mac-hvf-probe/image_probe.py",
+    "tools/mac-hvf-probe/builder_launch.py",
+    "tools/mac-supervisor-test/launchd_owned_child.py",
+    "tools/mac-hvf-probe/debian-seed/meta-data",
+    "tools/mac-hvf-probe/debian-seed/network-config",
+    "tools/mac-hvf-probe/debian-seed/user-data"
+   ],
+   "mutants": [
+    {
+     "id": "LoseBuilderAttemptMarker",
+     "edits": [
+      {
+       "old": "!.marker=ok,",
+       "new": "!.marker=FALSE,",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BuilderAttemptBeforeLaunch"
+    },
+    {
+     "id": "PublishWithoutOwnedEvidence",
+     "edits": [
+      {
+       "old": "~s.failed /\\ ~s.uncertain /\\ s.waited /\\ s.observed\n                 /\\ (s.mode#\"builder\" \\/ s.logSaved) /\\ ok",
+       "new": "ok",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OwnedSuccessEvidence"
+    },
+    {
+     "id": "LaunchdFailureAsSuccess",
+     "edits": [
+      {
+       "old": "accepted == ~s.failed /\\ s.serviceAbsent",
+       "new": "accepted == s.serviceAbsent",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureCannotPass"
+    },
+    {
+     "id": "AbsenceAsReap",
+     "edits": [
+      {
+       "old": "!.absent=ok, !.failed=~ok,",
+       "new": "!.absent=ok, !.waited=ok, !.failed=~ok,",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AbsenceIsNotReap"
+    },
+    {
+     "id": "PromoteDiagnosticToBattle",
+     "edits": [
+      {
+       "old": "!.reapedClaim=accepted, !.phase=\"done\"",
+       "new": "!.reapedClaim=accepted, !.battleReady=accepted, !.phase=\"done\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoBattleQualification"
+    },
+    {
+     "id": "IgnoreLogFailure",
+     "edits": [
+      {
+       "old": "!.logSaved=ok, !.failed=@ \\/ ~ok, !.phase=\"publish\"",
+       "new": "!.logSaved=ok, !.failed=@, !.phase=\"publish\"",
+       "count": 1
+      },
+      {
+       "old": "/\\ (s.mode#\"builder\" \\/ s.logSaved) /\\ ok",
+       "new": "/\\ ok",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "BuildReceiptAfterLog"
+    },
+    {
+     "id": "ReportUnobservedServiceAbsence",
+     "edits": [
+      {
+       "old": "!.serviceAbsent=ok, !.failed=@ \\/ ~ok, !.phase=\"record\"",
+       "new": "!.serviceAbsent=ok, !.failed=@, !.phase=\"record\"",
+       "count": 1
+      },
+      {
+       "old": "accepted == ~s.failed /\\ s.serviceAbsent",
+       "new": "accepted == ~s.failed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LaunchdSuccessEvidence"
     }
    ]
   },

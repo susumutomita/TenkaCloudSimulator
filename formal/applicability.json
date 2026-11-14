@@ -1,205 +1,872 @@
 {
- "version": 1,
- "base_sha": "90a3d208fdcf3e8b37263160ea7230c34fced0b0",
- "changes": [
-  {
-   "path": "docs/lambda.md",
-   "sha256": "ee508203a3b8e22fab69f0bf3e0681de93418efc5295633dde4276b99fb1dd1b",
-   "disposition": "documentation",
-   "reason": "Documents the signed Lambda session surface, its request limits and execution-role isolation; no runtime behavior.",
-   "models": []
-  },
-  {
-   "path": "docs/sts-native.md",
-   "sha256": "4f25f4d397cc9cd526b072ab4c22ca6deca47c0b2fe1a72c1ddd55fde5f7a039",
-   "disposition": "documentation",
-   "reason": "Documents the native SDK service list, the Lambda REST subset and the nativeSdk capability advertisement; no runtime behavior.",
-   "models": []
-  },
-  {
-   "path": "formal/LambdaExecutionRoleBridge.cfg",
-   "sha256": "c2bf5ce8b4c5b8a94d00a87168d219c75795c932d66b0fb79739e8e0ae4b2aa2",
-   "disposition": "modeled",
-   "reason": "New finite configuration for the execution-role bridge model introduced by this change.",
-   "models": [
+  "version": 1,
+  "base_sha": "721eed7906e643657f5c8e398e33323d14adb7e7",
+  "changes": [
     {
-     "id": "LambdaExecutionRoleBridge",
-     "properties": [
-      "NoCallerEscalation",
-      "NoCallerNarrowing",
-      "CanceledNotDispatched"
-     ],
-     "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
-    }
-   ]
-  },
-  {
-   "path": "formal/LambdaExecutionRoleBridge.tla",
-   "sha256": "8e54d6ea3b270900a9418dbf8e9e6c6eea13f5bea4c4f29ed55b288f558734d2",
-   "disposition": "modeled",
-   "reason": "New finite model of the execution-role bridge decision source introduced by this change; its mutants check that inheriting or intersecting the caller's grants, or dispatching after cancellation, is caught.",
-   "models": [
+      "path": "cmd/simulator/battle_runtime_config.go",
+      "sha256": "3c2a9d8bcef75a3014cfded707a32fe08b5c694d17c5f0ce4f3b3300cd6846d5",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "TypeOK",
+            "PinnedPlan",
+            "JournalBeforeLaunch",
+            "PreparedIdentity",
+            "PausedExactControl",
+            "ExactAttachment",
+            "AttachBeforeActivation",
+            "PrivateAgentReadiness",
+            "PublicationAdmission",
+            "IndependentCleanup",
+            "ObservedContainment",
+            "ReleaseAfterContainment",
+            "NetworkOwnership",
+            "FrozenNetwork",
+            "AuthorizedDelete",
+            "CreatorAdmission",
+            "NoReconstruction",
+            "UncertainDebtRetained",
+            "ConfigurationAdmission",
+            "ConfiguredIsNotReady",
+            "TypedProvider",
+            "SavedAssociation",
+            "NoRebinding",
+            "SavedOperationAuthority"
+          ],
+          "limits": "Companion to unchanged EC2GuestAttachmentLifecycle, not a replacement. Checks ordering of pinned planning, durable readback, captured paused QMP ownership, attachment/activation, private QGA readiness, generation publication, teardown, network ownership and child admission. Equality/validity predicates abstract byte validation and SQL/OS APIs; no proof of parser correctness, actual networking, cryptography, PID/FD identity, resource quota cardinality, packet routing, real image execution, liveness or Go refinement. Separate modes do not prove arbitrary cross-mode interference. Restart cannot recover physical authority. Successful checking is not physical Battle acceptance."
+        }
+      ]
+    },
     {
-     "id": "LambdaExecutionRoleBridge",
-     "properties": [
-      "NoCallerEscalation",
-      "NoCallerNarrowing",
-      "CanceledNotDispatched"
-     ],
-     "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
-    }
-   ]
-  },
-  {
-   "path": "formal/models.json",
-   "sha256": "b743d6b9716114cd8836e0e7b187fd3674f53968c6731a51326fc14a7e144df8",
-   "disposition": "formal-infrastructure",
-   "reason": "Registers the LambdaExecutionRoleBridge model, its exact source scope and three mutation controls; no existing model, invariant, mutant or scope is removed.",
-   "models": []
-  },
-  {
-   "path": "internal/aws/lambda.go",
-   "sha256": "7f9158d9c937118ae5f0d9512c0ed7f08f7fa27973d59acea3b361c1ebce8f74",
-   "disposition": "modeled",
-   "reason": "Lambda HTTP authorization now reads a signed SDK session's policy snapshot instead of the stored identity policy, and refuses a browser session bound to one SSM parameter. The Tail disclosure model treats authorization as an abstract admission input; this change only alters how that input is computed, and the Tail path is otherwise unchanged.",
-   "models": [
+      "path": "cmd/simulator/battle_runtime_config_test.go",
+      "sha256": "ebeed5e0c544cbeba287452ee70ff7be8a93d6ffab4d1c55e7ffe1f004e1e739",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
     {
-     "id": "LambdaLogTailDisclosure",
-     "properties": [
-      "ResponseAuthorized"
-     ],
-     "limits": "The model abstracts authorization as one Boolean; the session-snapshot source, console-bound refusal and stored-policy fallback are not modeled and are established by lambda_permissions_test.go and internal/server/lambda_sdk_session_test.go. No IAM parser, HTTP or Go refinement proof."
-    }
-   ]
-  },
-  {
-   "path": "internal/aws/lambda_bridge.go",
-   "sha256": "ceb39a19c44a7c91c18a0d5db432b061aca4fad84a65e65a2474e9c06c8c265d",
-   "disposition": "modeled",
-   "reason": "Bridge requests now carry only the invocation's cancellation and deadline, never the caller's request values, so SDK calls inside a function are decided by the saved execution role alone.",
-   "models": [
+      "path": "cmd/simulator/battle_runtime_linux.go",
+      "sha256": "33d7c13fbaef6d567fcaaf3e47fc54b6ceeab96def333fb3d4d5d008eb023443",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "TypeOK",
+            "PinnedPlan",
+            "JournalBeforeLaunch",
+            "PreparedIdentity",
+            "PausedExactControl",
+            "ExactAttachment",
+            "AttachBeforeActivation",
+            "PrivateAgentReadiness",
+            "PublicationAdmission",
+            "IndependentCleanup",
+            "ObservedContainment",
+            "ReleaseAfterContainment",
+            "NetworkOwnership",
+            "FrozenNetwork",
+            "AuthorizedDelete",
+            "CreatorAdmission",
+            "NoReconstruction",
+            "UncertainDebtRetained",
+            "ConfigurationAdmission",
+            "ConfiguredIsNotReady",
+            "TypedProvider",
+            "SavedAssociation",
+            "NoRebinding",
+            "SavedOperationAuthority"
+          ],
+          "limits": "Companion to unchanged EC2GuestAttachmentLifecycle, not a replacement. Checks ordering of pinned planning, durable readback, captured paused QMP ownership, attachment/activation, private QGA readiness, generation publication, teardown, network ownership and child admission. Equality/validity predicates abstract byte validation and SQL/OS APIs; no proof of parser correctness, actual networking, cryptography, PID/FD identity, resource quota cardinality, packet routing, real image execution, liveness or Go refinement. Separate modes do not prove arbitrary cross-mode interference. Restart cannot recover physical authority. Successful checking is not physical Battle acceptance."
+        }
+      ]
+    },
     {
-     "id": "LambdaExecutionRoleBridge",
-     "properties": [
-      "NoCallerEscalation",
-      "NoCallerNarrowing",
-      "CanceledNotDispatched"
-     ],
-     "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
-    }
-   ]
-  },
-  {
-   "path": "internal/aws/lambda_bridge_test.go",
-   "sha256": "17ed19c830ef697b930426b25a6dbcfd25dd546d0d8ef0c116e53d549334ea11",
-   "disposition": "modeled",
-   "reason": "Native regression test for the bridge decision source: a wide caller session cannot widen and a narrow or bound caller cannot narrow the execution role; fails on the unfixed bridge.",
-   "models": [
+      "path": "cmd/simulator/battle_runtime_linux_test.go",
+      "sha256": "db2139a4e59c469e36ad951c30d82a6463c49bd9e263f2ce656092f90b8abb51",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
     {
-     "id": "LambdaExecutionRoleBridge",
-     "properties": [
-      "NoCallerEscalation",
-      "NoCallerNarrowing",
-      "CanceledNotDispatched"
-     ],
-     "limits": "Decision source only: the bridge decision uses the saved execution role and never the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. IAM evaluation, SSM/S3 handlers, Go context mechanics and WASI containment are not modeled; lambda_bridge_test.go and lambda_bridge_cancel_test.go establish them natively."
-    }
-   ]
-  },
-  {
-   "path": "internal/aws/lambda_permissions_test.go",
-   "sha256": "4303be167c8ad87a02a654dc09b299be646f9f9c547405982fd436aa7aa13e73",
-   "disposition": "test-support",
-   "reason": "Native test of Lambda authorization from a session snapshot and console-bound refusal; test code only.",
-   "models": []
-  },
-  {
-   "path": "internal/aws/sts_lambda_signature_test.go",
-   "sha256": "2a3d38b5efcd702bd926dfeb002ab745623ff34583c6a93291dc543fd760d654",
-   "disposition": "test-support",
-   "reason": "Native SigV4 test of the Lambda REST path allowlist, limits and session snapshot; test code only.",
-   "models": []
-  },
-  {
-   "path": "internal/aws/sts_signature.go",
-   "sha256": "4c716263366d52b1823d49eb9bf996c2e81d68deb9760b9ecf4e5f6ba41f5bc7",
-   "disposition": "modeled",
-   "reason": "Adds lambda to the native signing services and admits only the listed Lambda REST paths with plain function names, no query and a 384 KiB body limit. Credential use still requires every existing guard (signature, token, expiry, generation); the STS, IAM, CloudFormation, SSM and handoff branches are unchanged.",
-   "models": [
+      "path": "formal/MacPreparationAdmission.cfg",
+      "sha256": "25bb3a28cb168dbf265f89a4a4d9c3fe88159ed0e7e3c0e6ed16dc44e9180c76",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacPreparationAdmission",
+          "properties": [
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
+          ],
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
     {
-     "id": "STSSessionLifecycle",
-     "properties": [
-      "UseRequiresAllGuards"
-     ],
-     "limits": "SigV4 canonicalization, the Lambda path allowlist, content types and body limits are not modeled; sts_lambda_signature_test.go and internal/server/lambda_sdk_session_test.go establish them. Terminal handoff behavior covered by ParticipantSessionLifecycle is unchanged."
-    }
-   ]
-  },
-  {
-   "path": "internal/server/access_sdk.go",
-   "sha256": "fb029ca05eada814abc9d41ffb83cc39108acb4b11c78958cdbf9cf69babeb88",
-   "disposition": "modeled",
-   "reason": "A rejected Lambda signature now gets the Lambda REST-JSON error envelope; authentication and refusal decisions are unchanged.",
-   "models": [
+      "path": "formal/MacPreparationAdmission.tla",
+      "sha256": "ae2022fce49b109d23a3731a70e2f09d6eaf5281f4c0a15669dd41c622f0abd5",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacPreparationAdmission",
+          "properties": [
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
+          ],
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
     {
-     "id": "STSSessionLifecycle",
-     "properties": [
-      "UseRequiresAllGuards"
-     ],
-     "limits": "Only the error wire format changes; envelope bytes are not modeled and are checked by internal/server/lambda_sdk_session_test.go."
-    }
-   ]
-  },
-  {
-   "path": "internal/server/console_handoff.go",
-   "sha256": "2a036a139534f32940243279b6da259c3ff1f1ce613acda62ffb44c3a94e8b2f",
-   "disposition": "modeled",
-   "reason": "Adds the additive nativeSdk capability advertisement under the same Access-only response marker as consoleHandoff; console handoff issuance and redemption are unchanged.",
-   "models": [
+      "path": "formal/MacProbeLifecycle.cfg",
+      "sha256": "d911ac8560a6e3d7b27497aadd70df5508a30bfe6b5aefadb67e4f730374c974",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
     {
-     "id": "ConsoleHandoff",
-     "properties": [
-      "SDKAuthorityPreserved"
-     ],
-     "limits": "Capability JSON is metadata, not authority, and is not modeled; console_handoff_test.go checks it with and without the Access wrapper."
-    }
-   ]
-  },
-  {
-   "path": "internal/server/console_handoff_test.go",
-   "sha256": "740cd1f047b60374f6c8673fcfcb36cf4a72c2481c973863c7ca122cb84e0cde",
-   "disposition": "modeled",
-   "reason": "Extends the existing Access-capability test to require the nativeSdk advertisement only behind Access.",
-   "models": [
+      "path": "formal/MacProbeLifecycle.tla",
+      "sha256": "85e8f303079fc61359227c3c7105d659f18f19c1010dde6a4f020f60a9cc611b",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
     {
-     "id": "ConsoleHandoff",
-     "properties": [
-      "SDKAuthorityPreserved"
-     ],
-     "limits": "Test of advertised metadata only; handoff lifecycle tests are unchanged."
+      "path": "formal/models.json",
+      "sha256": "d37e78ecc8a926f3cdd3b54de6b6487497f926fc943c10bef8a0a0d1aaefe34f",
+      "disposition": "formal-infrastructure",
+      "reason": "Exact model registry, classification policy or negative-control detector; required invariants and scopes preserved.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guesthvf/README.md",
+      "sha256": "79a4186d24c7392f3982ebaf5aaad43bdb44056c640b8b09bdbe2cb6993eb94a",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guesthvf/image_unix.go",
+      "sha256": "8068dbfbde557c3834dffd9ae46b76b28bafcc59f59f07a93482c1041bef5fac",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacPreparationAdmission",
+          "properties": [
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
+          ],
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guesthvf/image_unix_test.go",
+      "sha256": "b370336f3835e76901b8987b9395c38e1c7531a5b3a7605f176dae41b952a3d3",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guesthvf/plan.go",
+      "sha256": "1ae7314d7bdc340694f3aa3e26e743db55c4cd8e53903431f7708a018e4c0a3e",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacPreparationAdmission",
+          "properties": [
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
+          ],
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guesthvf/plan_test.go",
+      "sha256": "fe4fa74b6e920e29217483f3e0c1dac96916a6be28520cb76ffff85f8d4f5d97",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guesthvf/supervision.go",
+      "sha256": "1560283dca743e39283be5a2d99c662646d700fbc172c90951768264c2d8c8bf",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacPreparationAdmission",
+          "properties": [
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
+          ],
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guesthvf/supervision_test.go",
+      "sha256": "07dccf3866ea6b31fbd2e0041fdd9070f8edc297a9568f11e01bd2a273de9f9e",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guestnet/tcp_sessions_test.go",
+      "sha256": "300fcd7736cf0a4a8ac37cdfe82c77b35433869885debec31a56cf41a734c462",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guestvm/session_test.go",
+      "sha256": "d6b054a354518d341c526a4dcb741024d622dc2fc2d0bb4caf55498d76e813c9",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/probeclock/DARWIN.md",
+      "sha256": "b7d020093082acf22d88e77eb034a4bad4f7ea5ca181e499c25e8a9e1b34fab0",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/probeclock/bootstrap_darwin.go",
+      "sha256": "b4c6b720881069ee4bd3432152fbcc9d7ae1b58924444c92817cbc4d68d20405",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "OwnedClockQualification",
+          "properties": [
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
+          ],
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/probeclock/bootstrap_darwin_test.go",
+      "sha256": "40d05901901e1c4f38b9469d3f04914b29a2791ff66354aa948e519349a8811c",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/probeclock/bootstrap_linux.go",
+      "sha256": "1aff78addb42cdb9f4ab58275e6c7fc75ec0829463f7903c7b019cd0896d9d4b",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "OwnedClockQualification",
+          "properties": [
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
+          ],
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/probeclock/bootstrap_linux_test.go",
+      "sha256": null,
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/probeclock/bootstrap_other.go",
+      "sha256": "689fc07df62640f5ec11cf2939d7779648481b64e7f4fec988b5e9537a6bf57b",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "OwnedClockQualification",
+          "properties": [
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
+          ],
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/probeclock/bootstrap_unix.go",
+      "sha256": "b6f4d0815e84cd91427c8c5c3f9310a0bdd5ec50d63134677483285c6d9138e4",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "OwnedClockQualification",
+          "properties": [
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
+          ],
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/probeclock/bootstrap_unix_test.go",
+      "sha256": "e07f608120e306f12c246e47182c2e8a0ce8974c511b101635d0ae3394c6a734",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/probeclock/clock.go",
+      "sha256": "1d70d9753cd09313d26cd8cddb967460d07deb6fd06eeb5c5af23fe580d2f637",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "OwnedClockQualification",
+          "properties": [
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
+          ],
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/probeclock/clock_darwin.go",
+      "sha256": "ec3c72916a99e1feffafe462ddac4464aa48498947098e27cf5e3e292426a835",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "OwnedClockQualification",
+          "properties": [
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
+          ],
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/probeclock/clock_darwin_test.go",
+      "sha256": "d9307880cd044e8c97a9d8eaeb0cced30165cb368e49ac9dd23a3af9f53890ba",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/probeclock/clock_other.go",
+      "sha256": "5d4ec78d44213e81379894491237600e26e97715fd63538faf5ccb0072c811d2",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "OwnedClockQualification",
+          "properties": [
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
+          ],
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/probeclock/clock_test.go",
+      "sha256": "4d97be6fa257b95c353c05bb6bd516378e2aeb19084631748290cf14124c5186",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_applicability.py",
+      "sha256": "f86e99240d3b5f92ce728abade11eaee0db13d25f86cc94cf07bd87e2d30d528",
+      "disposition": "formal-infrastructure",
+      "reason": "Exact model registry, classification policy or negative-control detector; required invariants and scopes preserved.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "544b895474d0490243b30b93b3749f336934377d5cd028a66bfe555512a7c71b",
+      "disposition": "formal-infrastructure",
+      "reason": "Exact model registry, classification policy or negative-control detector; required invariants and scopes preserved.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "951e3f27ce71c35593c6cd7be9bb10e45bb929aa01d6ea94f4f334655df072c9",
+      "disposition": "formal-infrastructure",
+      "reason": "Exact model registry, classification policy or negative-control detector; required invariants and scopes preserved.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "8c40b5e93cc493aae67e65d21385c5be19a9f7059bab209a6fa835b27970c692",
+      "disposition": "formal-infrastructure",
+      "reason": "Exact model registry, classification policy or negative-control detector; required invariants and scopes preserved.",
+      "models": []
+    },
+    {
+      "path": "tools/guesthvf-preflight/README.md",
+      "sha256": "b89fd99107af851917adf88d702813f4fa3034e98d3b95ad753c2aa4f3b0afd0",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "tools/guesthvf-preflight/main.go",
+      "sha256": "4097615e9c245824d415a79b0de0dbb96ca5ed45b1b4dbea97d3a1a9bd2fbd86",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacPreparationAdmission",
+          "properties": [
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
+          ],
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
+    {
+      "path": "tools/guesthvf-preflight/main_test.go",
+      "sha256": "f298e72142f1815f90cb9169eb6d325ad8341fd0ab6ed405e55f49f47a0358ec",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/ARM-IMAGE-BUILD.md",
+      "sha256": "98b86b9c91fd23dd4799a3edac2ee6a12d5d47e928504aff3eab02259e572237",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/README.md",
+      "sha256": "cc4eca76bf765891d63599a18a98f81f7f80f36e9a3e6008d48d61c5f788f47a",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/arm-relay-preparation.json",
+      "sha256": "0b9cf6b9e26fe762370b3c8c2d19d464fa422f12d82b306875c3e0e9302ee929",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/boot_probe.py",
+      "sha256": "138363bdd9942a30acb44c2b27b50c29ebdd3eee1235addd5be30232cb98ea2f",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/builder_launch.py",
+      "sha256": "94e30386b0b699167a0f19b0d88c7f3ab74c76f01469b0ad6c6297dcc1569bbf",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/builder_plan.py",
+      "sha256": "03b6df3aa5e551360a3a43d7df5c62c8c88560dc5505f62fcff21f725133a1d5",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacPreparationAdmission",
+          "properties": [
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
+          ],
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/debian-seed/meta-data",
+      "sha256": "af0be699b31fdcc5783ab049dd92688cd3d885028ff5cfb67a879f567e8637d4",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/debian-seed/network-config",
+      "sha256": "639b6f419a9ac49312b218e12395dc7e7d623d96202c3315a92dcd19d6fa02ba",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/debian-seed/user-data",
+      "sha256": "33ce8bf547ed9120717e7517093db507b93e39a36410b7eb3ad9e6c638cb1cac",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/image_probe.py",
+      "sha256": "32ef2e6396a4683950d9d094a8d321822d8bd2605b8481f03bfbb1a53d4db45f",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/probe.py",
+      "sha256": "1d67280ed2c47acfdc76496f9b46b9d062fe0aeb7b6d6c290a0077a0a9ab2068",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/test_boot_probe.py",
+      "sha256": "4e751f44bb32ad805edc6771a90e3ba22fdb3d4fbd7fc0ebf0139eefa0d9fc30",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/test_builder_launch.py",
+      "sha256": "cb69b7adafccc380a3675c3203f068513254b48b5c68c7eab322ec54752d5344",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/test_builder_plan.py",
+      "sha256": "fb35ddb996ff284ecc653a0a258caca071b95189defff226ff0287d2ef2547a6",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/test_image_probe.py",
+      "sha256": "02493535063231636163a3c85ec68434636ed947fc4807778119603f1f38791c",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/test_probe.py",
+      "sha256": "d42b04e424439ce9e68ec0c96629a6d9243ea64905a63c66e9b084c06a3548ac",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-supervisor-test/README.md",
+      "sha256": "8991eadb20985ed5c38ba1446ce96719c5982b9d7b1cdf5a901893398416a57b",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-supervisor-test/launchd_owned_child.py",
+      "sha256": "bed5a3b952bfab09b37de2fdb22ed4cc4bc711f9b9703659002e98ffb31e68f7",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-supervisor-test/test_launchd_owned_child.py",
+      "sha256": "8473cbfe18653e0e8e5c6ced8d4ebcb4ea25ece075044660a6506260e0db2847",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
     }
-   ]
-  },
-  {
-   "path": "internal/server/lambda_sdk_session_test.go",
-   "sha256": "496f50d190f095a1d16e9ceb2b528d462e8ed17a48183400f05326f2c39ba577",
-   "disposition": "test-support",
-   "reason": "Native Access-boundary test for signed Lambda sessions and execution-role isolation; test code only.",
-   "models": []
-  },
-  {
-   "path": "scripts/formal_model_gate.py",
-   "sha256": "d69f7c36f14be157607671d3f9f5af5ae75b5ea0a1d200784fefe161b04290c6",
-   "disposition": "formal-infrastructure",
-   "reason": "Pins the new model's invariants, mutation controls and exact source scope independently of the registry.",
-   "models": []
-  },
-  {
-   "path": "scripts/test-formal-gate.py",
-   "sha256": "3743c5b286e030168208cd17344912385200b1e49a8f71bc84707e0735bff490",
-   "disposition": "formal-infrastructure",
-   "reason": "Adds the new model to the reviewed registry inventory and a fixed-inventory removal test.",
-   "models": []
-  }
- ]
+  ]
 }

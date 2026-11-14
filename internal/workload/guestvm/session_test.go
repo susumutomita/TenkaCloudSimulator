@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -67,6 +68,10 @@ func TestCanonicalSessionEndpointBoundsMemoryOnly(t *testing.T) {
 			t.Fatalf("control boundary %d: %v", n, got)
 		}
 	}
+}
+
+func TestCanonicalSessionEndpointInspectionRejectsOverlongMemoryOnly(t *testing.T) {
+	requireLinux(t)
 	// Real inspection path in the four-byte gap: controls fit, session does not.
 	bundle, layout := testBundle(t, imageHeader())
 	info, _ := bundle.Info(layout.BaseDisk)
@@ -84,5 +89,27 @@ func TestCanonicalSessionEndpointBoundsMemoryOnly(t *testing.T) {
 	}
 	if _, err := InspectPrepared(context.Background(), target, p.Record()); err == nil {
 		t.Fatal("overlong session inspection accepted")
+	}
+}
+
+// Unsupported hosts must reject preparation rather than silently constructing
+// a deployment that their process backend cannot safely own.
+func TestCanonicalSessionPreparationRejectsUnsupportedPlatform(t *testing.T) {
+	if runtime.GOOS == "linux" && runtime.GOARCH == "amd64" {
+		t.Skip("unsupported-platform rejection is checked on other hosts")
+	}
+	bundle, layout := testBundle(t, imageHeader())
+	info, err := bundle.Info(layout.BaseDisk)
+	if err != nil {
+		t.Fatal(err)
+	}
+	parent := shortDir(t)
+	p, err := PrepareWithNetworkAndSession(context.Background(), parent, bundle, layout, acquire(), []byte("unchanged"), networkConfig(), info.SHA256)
+	if p != nil || err == nil || err.Error() != "guest launch plan supports Linux/amd64 only" {
+		t.Fatalf("unsupported platform preparation=%v err=%v", p, err)
+	}
+	entries, err := os.ReadDir(parent)
+	if err != nil || len(entries) != 0 {
+		t.Fatalf("unsupported platform wrote deployment: entries=%v err=%v", entries, err)
 	}
 }

@@ -1578,6 +1578,7 @@ BATTLE_INTEGRATION_EXPECTED = {'CanonicalVMComposition': {'bounds': 'Five disjoi
                                              'internal/aws/ec2_network_actor.go',
                                              'internal/aws/ec2_network_cloudformation.go',
                                              'cmd/simulator/battle_runtime_linux.go',
+                                             'cmd/simulator/battle_runtime_config.go',
                                              'cmd/simulator/battle_runtime_other.go',
                                              'internal/server/battle_runtime_linux.go',
                                              'internal/server/ssm_runtime_capabilities.go',
@@ -1715,6 +1716,9 @@ BATTLE_INTEGRATION_EXPECTED = {'CanonicalVMComposition': {'bounds': 'Five disjoi
                                             'RetainedReadAfterExpiry',
                                             'ReadRequiresCurrentOwner'],
                              'source_scope': ['internal/workload/probeclock/bootstrap_linux.go',
+                             'internal/workload/probeclock/bootstrap_unix.go',
+                             'internal/workload/probeclock/bootstrap_darwin.go',
+                             'internal/workload/probeclock/clock_darwin.go',
                                               'internal/workload/probeclock/bootstrap_other.go',
                                               'internal/workload/probeclock/clock.go',
                                               'internal/workload/probeclock/clock_linux.go',
@@ -2721,6 +2725,80 @@ BATTLE_INTEGRATION_MUTATIONS = {'CanonicalVMComposition': [{'edits': [{'count': 
                                             '   !.phase=IF ReceiptCurrent'}],
                           'expect_invariant': 'DiscardPreservesIdentity',
                           'id': 'DiscardClearsKnownSession'}]}
+
+# Original Mac preparation/diagnostic projections; exact required scopes and controls.
+BASE_MODELS.add('MacPreparationAdmission')
+BASE_INVARIANTS['MacPreparationAdmission'] = {
+    'TypeOK',
+    'PlanEvidence',
+    'ImageEvidence',
+    'ImageHandle',
+    'PlistEvidence',
+    'OriginalBeforeCopy',
+    'CopyEvidence',
+    'CopySuccess',
+    'PreparedEvidence',
+    'InstalledEvidence',
+    'FinalizedEvidence',
+    'NoExecutionClaim',
+}
+REQUIRED_MUTANTS['MacPreparationAdmission'] = {
+    'UnsupportedPlan',
+    'ForeignGeneration',
+    'UnsafePlanPaths',
+    'AliasImage',
+    'UnpinnedImage',
+    'ExternalImage',
+    'ChangedImage',
+    'LostImageHandle',
+    'UncheckedPlist',
+    'UnpinnedOriginal',
+    'UnobservedRemoval',
+    'ReuseBuildDirectory',
+    'UncheckedInstalledBinary',
+    'UncleanBuild',
+    'PlanStartsProcess',
+    'CopyBeforeOriginalAdmission',
+}
+REQUIRED_SOURCE_SCOPES['MacPreparationAdmission'] = {
+    'internal/workload/guesthvf/plan.go',
+    'internal/workload/guesthvf/image_unix.go',
+    'internal/workload/guesthvf/supervision.go',
+    'tools/guesthvf-preflight/main.go',
+    'tools/mac-hvf-probe/builder_plan.py',
+}
+BASE_MODELS.add('MacProbeLifecycle')
+BASE_INVARIANTS['MacProbeLifecycle'] = {
+    'TypeOK',
+    'BuilderAttemptBeforeLaunch',
+    'OwnedSuccessEvidence',
+    'FailureCannotPass',
+    'BuildReceiptAfterLog',
+    'LaunchdSuccessEvidence',
+    'AbsenceIsNotReap',
+    'ReapClaimEvidence',
+    'NoBattleQualification',
+}
+REQUIRED_MUTANTS['MacProbeLifecycle'] = {
+    'LoseBuilderAttemptMarker',
+    'PublishWithoutOwnedEvidence',
+    'LaunchdFailureAsSuccess',
+    'AbsenceAsReap',
+    'PromoteDiagnosticToBattle',
+    'IgnoreLogFailure',
+    'ReportUnobservedServiceAbsence',
+}
+REQUIRED_SOURCE_SCOPES['MacProbeLifecycle'] = {
+    'tools/mac-hvf-probe/probe.py',
+    'tools/mac-hvf-probe/boot_probe.py',
+    'tools/mac-hvf-probe/image_probe.py',
+    'tools/mac-hvf-probe/builder_launch.py',
+    'tools/mac-supervisor-test/launchd_owned_child.py',
+    'tools/mac-hvf-probe/debian-seed/meta-data',
+    'tools/mac-hvf-probe/debian-seed/network-config',
+    'tools/mac-hvf-probe/debian-seed/user-data',
+}
+
 
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
