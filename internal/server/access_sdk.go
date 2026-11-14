@@ -44,6 +44,14 @@ func sdkAuthenticationError(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]string{"__type": "UnrecognizedClientException", "message": message})
 		return
 	}
+	if r.URL.Path == "/2015-03-31/functions" || strings.HasPrefix(r.URL.Path, "/2015-03-31/functions/") {
+		// Lambda REST-JSON clients read the error type from this header.
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Amzn-ErrorType", "UnrecognizedClientException")
+		w.WriteHeader(http.StatusForbidden)
+		_ = json.NewEncoder(w).Encode(map[string]string{"Type": "User", "message": message})
+		return
+	}
 	w.Header().Set("Content-Type", "text/xml")
 	w.WriteHeader(http.StatusForbidden)
 	_ = xml.NewEncoder(w).Encode(struct {

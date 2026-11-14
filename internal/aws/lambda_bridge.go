@@ -54,6 +54,13 @@ func (w *capabilityResponse) Write(p []byte) (int, error) {
 	return w.body.Write(p)
 }
 
+// executionRoleContext keeps the invocation's deadline and cancellation but
+// drops every caller request value. A caller's session policy, identity or
+// console/terminal boundary must never stand in for the saved execution role.
+type executionRoleContext struct{ context.Context }
+
+func (executionRoleContext) Value(any) any { return nil }
+
 // No socket or HTTP client is used here. Each call traverses the native gateway
 // using only the saved function role and invocation region. Guest transport,
 // credentials, identity headers and arbitrary destinations are never accepted.
@@ -131,7 +138,7 @@ func (g *Gateway) lambdaExchange(f LambdaFunction, region string) pythonruntime.
 		} else {
 			return bridgeFailure("NotImplementedException", "Only declared SSM/S3 execution-role operations are supported.", 501), nil
 		}
-		r, err := http.NewRequestWithContext(ctx, method, "http://simulator.invalid"+path, bytes.NewReader(data))
+		r, err := http.NewRequestWithContext(executionRoleContext{ctx}, method, "http://simulator.invalid"+path, bytes.NewReader(data))
 		if err != nil {
 			return bridgeFailure("InvalidRequest", "Invalid local request path.", 400), nil
 		}
