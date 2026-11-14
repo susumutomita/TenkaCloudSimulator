@@ -40,12 +40,15 @@ jobs:
         run: |
           /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-console-audit
           AXE_SCRIPT=/tmp/simulator-console-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/secrets_manager_console.py
+      - name: Check inline Lambda editor and strict CSP in the real browser
+        run: /tmp/simulator-tests/bin/python test/e2e/lambda_inline_editor.py
       - name: Retain focused service console evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: service-console-focused-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
+            reports/lambda-inline-*.png
             reports/service-locale-*.png
             reports/scalar-aws-json.json
             reports/secrets-metadata-*.png
@@ -76,6 +79,8 @@ jobs:
           npm audit --prefix tools/console --audit-level=high
       - name: Check secret description console and preserved disclosure contracts
         run: node --test tools/console/tests/secret-description.test.mjs tools/console/tests/secrets-manager-locale.test.mjs
+      - name: Check Lambda source draft and deploy boundaries
+        run: node --test tools/console/tests/lambda-*.test.mjs
       - name: Check App Engine console request, split and URL helpers
         run: node --test tools/console/tests/gcp-appengine.test.mjs
       - name: Check immutable release packaging and refusal regressions
@@ -126,6 +131,7 @@ jobs:
         with:
           name: service-console-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
+            reports/lambda-inline-*.png
             reports/service-locale-*.png
             reports/scalar-aws-json.json
             reports/secrets-metadata-*.png

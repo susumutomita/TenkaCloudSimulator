@@ -907,6 +907,7 @@ REQUIRED_SOURCE_SCOPES = {'BedrockRuntimeAdmission': {'cmd/simulator/bedrock_fla
                           'internal/aws/secrets_manager_versions_http_test.go',
                           'internal/aws/secrets_manager_versions_test.go'},
  'LandingAccessAdmission': {'internal/server/access.go',
+                            'internal/server/console_assets.go',
                             'internal/server/landing.go',
                             'internal/server/server.go'},
  'LandingTopologyState': {'internal/server/landing/landing.mjs',
@@ -1326,6 +1327,11 @@ REQUIRED_SOURCE_SCOPES['EC2ReadDiscovery'] = {'internal/aws/ec2_read.go', 'inter
 
 # Independent Lambda execution-role bridge decision source. These fixed sets
 # must not be derived from the mutable registry, which this gate validates.
+BASE_MODELS.add('LambdaSourceEdit')
+BASE_INVARIANTS['LambdaSourceEdit'] = {'PreservedPackage', 'AuthorizedWrite', 'TypeOK', 'FreshWrite', 'ValidWrite', 'AuthorizedRead'}
+REQUIRED_MUTANTS['LambdaSourceEdit'] = {'ReadWithoutGrant', 'InvalidWrite', 'StaleWrite', 'LoseOtherEntries', 'WriteWithoutGrant'}
+REQUIRED_SOURCE_SCOPES['LambdaSourceEdit'] = {'internal/aws/lambda_source.go'}
+
 BASE_MODELS.add('LambdaExecutionRoleBridge')
 BASE_INVARIANTS['LambdaExecutionRoleBridge'] = {'TypeOK', 'NoCallerEscalation', 'NoCallerNarrowing', 'CanceledNotDispatched'}
 REQUIRED_MUTANTS['LambdaExecutionRoleBridge'] = {'InheritCallerSession', 'IntersectCallerSession', 'DispatchAfterCancel'}
