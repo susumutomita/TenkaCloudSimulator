@@ -3,7 +3,8 @@
 
 GET /cdn/<path>   -> streams https://cdn.amazonlinux.com/<path> fetched through
                      the host's configured HTTPS proxy with TLS verification on.
-GET /local/<name> -> serves a regular file from the local directory.
+GET /local/<name> -> serves one of the regular files that were in the local
+                     directory when the relay started.
 
 Every upstream fetch is appended to a provenance log with its SHA-256. RPM
 signatures are still verified inside the guest (gpgcheck=1) with the key that
@@ -21,6 +22,11 @@ import urllib.request
 UPSTREAM = 'https://cdn.amazonlinux.com/'
 local_dir, log_path, port = sys.argv[1], sys.argv[2], int(sys.argv[3])
 context = ssl.create_default_context(cafile=os.environ.get('SSL_CERT_FILE') or '/root/.ccr/ca-bundle.crt')
+LOCAL_FILES = {}
+for entry in os.scandir(local_dir):
+    if entry.is_file(follow_symlinks=False):
+        with open(entry.path, 'rb') as source:
+            LOCAL_FILES[entry.name] = source.read()
 opener = urllib.request.build_opener(urllib.request.ProxyHandler(), urllib.request.HTTPSHandler(context=context))
 
 
@@ -41,12 +47,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_error(400)
             return
         if path.startswith('/local/'):
+            # The request only selects one of the files listed at startup; it never forms a path.
             name = path[len('/local/'):]
-            target = os.path.join(local_dir, name)
-            if '/' in name or not os.path.isfile(target) or os.path.islink(target):
+            data = LOCAL_FILES.get(name)
+            if data is None:
                 self.send_error(404)
                 return
-            data = open(target, 'rb').read()
             self.send_response(200)
             self.send_header('Content-Length', str(len(data)))
             self.end_headers()
