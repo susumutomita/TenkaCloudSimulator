@@ -68,6 +68,13 @@ These injected SQLite faults test local persistence contracts, not behavior
 observed on real AWS. Focused coverage differences are diagnostic evidence;
 never merge them into a profile presented as a whole-suite result.
 
+## Reproducing the Go gate locally
+
+Run `make before-commit` with a real Go 1.26 toolchain on `PATH` and
+`GOTOOLCHAIN=local`, as CI does. An older `go` that switches itself to 1.26 runs
+every test but fails the coverage run for a package without tests with
+`go: no such tool "covdata"`, so the gate exits 2 with all packages `ok`.
+
 ## Why Code Quality upload was replaced
 
 At head 7dfc3c8000be9abe047ce07156e0f8d929795fb6, both the PR and push runs
