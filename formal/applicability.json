@@ -1078,9 +1078,9 @@
     },
     {
       "path": "test/e2e/landing_topology.py",
-      "sha256": "e4321f8b363db5ecb220c4778495311e07227a27e149b28360a5fc8fac191daf",
+      "sha256": "749cdeaa369c3951ec8f0a3003b354f16b40d27f7b109a2a2717fccf80b0f8b7",
       "disposition": "test-support",
-      "reason": "Public decorative canvas source containment and geometry regression; no API, authority or state mutation. Strict accessibility assertions remain; native browser rendering requires independent CI evidence.",
+      "reason": "Retains native landing accessibility/containment checks and accepts only the canvas origin or exact painted snapshot position (one-pixel rounding tolerance), matching pinned-browser measurements. Reuses PR 478 commit 7c97dd7; no simulator runtime change.",
       "models": []
     },
     {

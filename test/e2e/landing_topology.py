@@ -316,7 +316,16 @@ def public_cta_case(page, context, origin, oracle, responses):
 STABLE_LAYOUT = '() => new Promise(resolve => {\n    const started=performance.now(),maxMs=5000,requiredFrames=3;\n    const ids=[\'aws-gateway\',\'aws-lambda\',\'aws-s3\',\'aws-ssm\',\'aws-iam\',\'gcp-storage\',\'gcp-object\',\'azure-container\',\'azure-blob\'];\n    let previous=null,stableFrames=0,frames=0,last=null,first=null,done=false,raf=null,fontsReady=false;\n    const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};\n    const finish=status=>{\n        if(done)return;done=true;clearTimeout(timer);if(raf!==null)cancelAnimationFrame(raf);\n        resolve({status,maxMs,requiredFrames,stableFrames,frames,fontsReady,elapsedMs:Math.round((performance.now()-started)*1000)/1000,\n            first,last,qualification:\'Actual unmodified scroll/layout measured across requestAnimationFrame after document.fonts.ready; no CSS, motion, scroll or focus override.\'});\n    };\n    const timer=setTimeout(()=>finish(\'UNSTABLE_OR_FONTS_TIMEOUT\'),maxMs);\n    const tick=()=>{\n        if(done)return;\n        const nodes=[];\n        for(const id of ids){\n            const matches=document.querySelectorAll(\'a[data-node-id="\'+id+\'"]\');\n            if(matches.length!==1){finish(\'SOURCE_NODE_INVENTORY_UNAVAILABLE\');return;}\n            nodes.push({id,rect:rect(matches[0])});\n        }\n        const paths=Array.from(document.querySelectorAll(\'svg.topology-lines path\'));\n        if(paths.length!==6){finish(\'SOURCE_PATH_INVENTORY_UNAVAILABLE\');return;}\n        const current=document.querySelector(\'a[data-node-id][aria-current="true"]\')?.getAttribute(\'data-node-id\');\n        if(!ids.includes(current)){finish(\'SOURCE_SELECTION_UNAVAILABLE\');return;}\n        const detail=document.getElementById(\'detail-\'+current);\n        if(!detail){finish(\'SOURCE_DETAIL_UNAVAILABLE\');return;}\n        last={scrollX,scrollY,viewportWidth:innerWidth,viewportHeight:innerHeight,\n            scrollWidth:document.documentElement.scrollWidth,scrollHeight:document.documentElement.scrollHeight,\n            nodes,paths:paths.map((p,index)=>({index,rect:rect(p)})),current,detailRect:rect(detail)};\n        if(first===null)first=last;\n        const signature=JSON.stringify(last);frames++;\n        stableFrames=signature===previous?stableFrames+1:1;previous=signature;\n        if(stableFrames>=requiredFrames){finish(\'STABLE\');return;}\n        if(performance.now()-started>=maxMs){finish(\'UNSTABLE_OR_FONTS_TIMEOUT\');return;}\n        raf=requestAnimationFrame(tick);\n    };\n    if(!document.fonts||!document.fonts.ready){finish(\'FONT_API_UNAVAILABLE\');return;}\n    document.fonts.ready.then(()=>{fontsReady=true;if(!done)raf=requestAnimationFrame(tick);},()=>finish(\'FONT_READINESS_REJECTED\'));\n})\n'
 
 
-def audit(page, axe_source, report, name):
+def painted_origin(node, width, height):
+    """Top-left corner topology-canvas.mjs paint() gives a node's snapshot."""
+    card_width = min(176, max(64, width * 0.23))
+    card_height = min(72, card_width * 0.44)
+    x = max(card_width / 2, min(width - card_width / 2, node['x'] * width))
+    y = max(card_height / 2, min(height - card_height / 2, node['y'] * height))
+    return x - card_width / 2, y - card_height / 2
+
+
+def audit(page, axe_source, report, name, nodes):
     page.evaluate(axe_source)
     stability = page.evaluate(STABLE_LAYOUT)
     (report/(name+'-layout.json')).write_text(json.dumps(stability, indent=2)+'\n')
@@ -327,6 +336,7 @@ def audit(page, axe_source, report, name):
         const visible=!!canvas && !canvas.hidden;
         const box=canvas?.getBoundingClientRect();
         return {visible, overflow:canvas ? getComputedStyle(canvas).overflow : null,
+            width:box ? box.width : 0, height:box ? box.height : 0,
             sources: visible ? [...canvas.querySelectorAll('[drawable]')].map(e=>{
                 const r=e.getBoundingClientRect(), style=getComputedStyle(e);
                 return {transform:style.transform,x:r.x-box.x,y:r.y-box.y,
@@ -337,8 +347,15 @@ def audit(page, axe_source, report, name):
     if projection['visible']:
         assert projection['overflow'] == 'clip'
         assert len(projection['sources']) == 9
-        assert all(s['inside'] and s['transform'] == 'none' and s['x'] == 0 and s['y'] == 0
-                   for s in projection['sources']), projection
+        # The pinned browser's native API reports a painted snapshot where the
+        # canvas drew it; a source that was never painted stays at the canvas
+        # origin. Both stay inside the clipped canvas without a CSS transform,
+        # so neither can cover the readable HTML above. Any other position fails.
+        for node, source in zip(nodes, projection['sources'], strict=True):
+            assert source['inside'] and source['transform'] == 'none', (node['id'], projection)
+            expected = ((0, 0), painted_origin(node, projection['width'], projection['height']))
+            assert any(abs(source['x'] - x) <= 1 and abs(source['y'] - y) <= 1 for x, y in expected), \
+                (node['id'], source, expected, projection)
     before = page.evaluate('({x:scrollX,y:scrollY})')
     result = page.evaluate("""async () => {
         const result = await axe.run(document, {runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});
@@ -403,7 +420,7 @@ def case(browser, origin, oracle, report, axe_source, width, mode):
             if not all(record['currentAPI'].values()) or mode == 'blocked-enhancement':
                 assert canvas.get_attribute('hidden') is not None
             record['nativeDrawAcceptance'] = 'NOT_PROVED_BY_THIS_REGRESSION'
-            record['audit'] = audit(page, axe_source, report, name)
+            record['audit'] = audit(page, axe_source, report, name, oracle['nodes'])
         assert not errors and not forbidden
         if mode == 'blocked-enhancement':
             assert blocked == [ASSET_PREFIX+'topology-canvas.mjs']
