@@ -20,7 +20,21 @@ import (
 
 // terminalHandler accepts only the private Access-created terminal context.
 // Its store enforces the original participant credential and target again.
-type terminalHandler struct{ store *aws.SSMSessionStore }
+// Zero liveness durations select the defaults below.
+type terminalHandler struct {
+	store        *aws.SSMSessionStore
+	idleLimit    time.Duration
+	pingInterval time.Duration
+}
+
+// A participant who only watches output sends no text frame, and browsers
+// answer WebSocket pings on their own. The server therefore probes the peer
+// instead of treating a pause in typing as a dead connection. A peer that
+// stops answering is still dropped within the idle limit.
+const (
+	terminalIdleLimit    = 60 * time.Second
+	terminalPingInterval = 20 * time.Second
+)
 
 func (h terminalHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	scope, ok := r.Context().Value(terminalScopeKey{}).(terminalScope)
@@ -100,6 +114,16 @@ type terminalWire struct {
 	conn net.Conn
 	read *bufio.Reader
 	mu   sync.Mutex
+	// idle is zero during the bounded open handshake. Afterwards every control
+	// frame from the peer proves liveness and renews the read deadline.
+	idle time.Duration
+}
+
+func (t *terminalWire) alive() error {
+	if t.idle <= 0 {
+		return nil
+	}
+	return t.conn.SetReadDeadline(time.Now().Add(t.idle))
 }
 
 func (t *terminalWire) receive() ([]byte, error) {
@@ -150,7 +174,13 @@ func (t *terminalWire) receive() ([]byte, error) {
 			if e := t.sendFrame(10, data); e != nil {
 				return nil, e
 			}
+			if e := t.alive(); e != nil {
+				return nil, e
+			}
 		case 10:
+			if e := t.alive(); e != nil {
+				return nil, e
+			}
 		default:
 			return nil, errors.New("unsupported frame")
 		}
@@ -253,6 +283,32 @@ func (h terminalHandler) channel(w http.ResponseWriter, r *http.Request, id stri
 	if wire.send(map[string]string{"type": "ready"}) != nil {
 		return
 	}
+	idle, interval := h.idleLimit, h.pingInterval
+	if idle <= 0 {
+		idle = terminalIdleLimit
+	}
+	if interval <= 0 {
+		interval = terminalPingInterval
+	}
+	wire.idle = idle
+	pings := make(chan struct{})
+	go func() {
+		defer close(pings)
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if wire.sendFrame(9, nil) != nil {
+					cancel()
+					_ = conn.Close()
+					return
+				}
+			}
+		}
+	}()
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -276,13 +332,16 @@ func (h terminalHandler) channel(w http.ResponseWriter, r *http.Request, id stri
 		_ = conn.Close()
 		timer := time.NewTimer(5 * time.Second)
 		defer timer.Stop()
-		select {
-		case <-done:
-		case <-timer.C: /* Retained store ownership is not reported as joined. */
+		for _, joined := range []chan struct{}{done, pings} {
+			select {
+			case <-joined:
+			case <-timer.C: /* Retained store ownership is not reported as joined. */
+				return
+			}
 		}
 	}()
 	for {
-		if err := conn.SetReadDeadline(time.Now().Add(60 * time.Second)); err != nil {
+		if err := conn.SetReadDeadline(time.Now().Add(idle)); err != nil {
 			return
 		}
 		raw, err = wire.receive()
