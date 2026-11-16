@@ -7,6 +7,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/guestnet"
 )
 
 func scopeBinding() HTTPProbeScopeBinding {
@@ -176,5 +178,79 @@ func TestHTTPProbeScopeTuplePrecedesFirstFrame(t *testing.T) {
 	case <-seen:
 	default:
 		t.Fatal("no actual frame checked")
+	}
+}
+
+// syntheticOperation is a retained handle in a chosen state, used to fill a NIC
+// handle map without spending real probe tuples.
+func syntheticOperation(scope *sealedHTTPProbeScope, settled bool, forgetAfter time.Time) *HTTPProbeOperation {
+	h := &HTTPProbeOperation{ready: make(chan struct{}), settled: make(chan struct{}), scope: scope, service: "web", forgetAfter: forgetAfter}
+	h.state.Port, h.state.Path = 80, "/"
+	if settled {
+		h.state.ResultReady, h.state.Settled = true, true
+		close(h.ready)
+		close(h.settled)
+	}
+	return h
+}
+
+func setOperationClock(f *probeHTTPFixture, now time.Time) {
+	n := f.transport.nic
+	n.base.budgetMu.Lock()
+	n.operationsMu.Lock()
+	n.now = func() time.Time { return now }
+	n.operationsMu.Unlock()
+	n.base.budgetMu.Unlock()
+}
+
+func TestHTTPProbeScopeForgetsSettledHandlesOnlyAfterRetention(t *testing.T) {
+	f := newProbeHTTPFixture(t, new(probeHTTPMemoryOwner), context.Background(), persistentConfig(), probeHTTPReply)
+	s := bindTestScope(t, f)
+	expiry := time.Now().Add(-time.Second)
+	n := f.transport.nic
+	n.operationsMu.Lock()
+	n.operations = make(map[HTTPProbeOperationKey]*HTTPProbeOperation)
+	n.operations[operationKey(1)] = syntheticOperation(nil, true, time.Time{})               // raw: never forgotten
+	n.operations[operationKey(2)] = syntheticOperation(s.state, false, expiry)               // scoped but still running
+	n.operations[operationKey(3)] = syntheticOperation(s.state, true, expiry.Add(time.Hour)) // retention not yet over
+	for i := 4; i <= guestnet.MaxProbeSessions; i++ {
+		n.operations[operationKey(uint64(i))] = syntheticOperation(s.state, true, expiry) // settled, retention over at expiry
+	}
+	n.operationsMu.Unlock()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	setOperationClock(f, expiry.Add(-time.Nanosecond))
+	if h, err := s.Start(ctx, operationKey(5000), "web"); h != nil || !errors.Is(err, ErrCapacity) {
+		t.Fatal("handle forgotten before its retention ended", err)
+	}
+	setOperationClock(f, expiry)
+	h, err := s.Start(ctx, operationKey(5000), "web")
+	if err != nil {
+		t.Fatal("full map of retired handles blocked a new probe", err)
+	}
+	if got := operationSettled(t, h); got.ResultError != nil || got.Observation.StatusCode != 200 {
+		t.Fatal("probe after eviction failed", got)
+	}
+	n.operationsMu.Lock()
+	kept := len(n.operations)
+	_, raw := n.operations[operationKey(1)]
+	_, running := n.operations[operationKey(2)]
+	_, young := n.operations[operationKey(3)]
+	n.operationsMu.Unlock()
+	if kept != 4 || !raw || !running || !young {
+		t.Fatalf("eviction removed the wrong handles: kept %d raw=%v running=%v young=%v", kept, raw, running, young)
+	}
+	if _, found, err := s.Snapshot(operationKey(4)); err != nil || found {
+		t.Fatal("forgotten handle still discoverable", err)
+	}
+	// A replay of a forgotten command carries its original, already past
+	// deadline and is rejected before retention, so it never dispatches twice.
+	replay := passiveDeadlineParent{Context: context.Background(), deadline: expiry.Add(-HTTPProbeOperationRetention)}
+	if h, err := s.Start(replay, operationKey(4), "web"); h != nil || !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatal("forgotten command replayed", err)
+	}
+	if _, found, _ := s.Snapshot(operationKey(4)); found {
+		t.Fatal("rejected replay was retained")
 	}
 }

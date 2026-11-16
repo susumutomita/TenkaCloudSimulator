@@ -203,7 +203,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 	docs, _ := fs.Sub(assets, "apidocs")
 	mux.Handle("/_simulator/docs/", http.StripPrefix("/_simulator/docs/", http.FileServer(http.FS(docs))))
 	web, _ := fs.Sub(assets, "web")
-	mux.Handle("/_simulator/console/", http.StripPrefix("/_simulator/console/", http.FileServer(http.FS(web))))
+	mux.Handle("/_simulator/console/", http.StripPrefix("/_simulator/console/", consoleAssetsHandler(web)))
 	mux.HandleFunc("/_simulator/health", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
 			w.WriteHeader(405)
@@ -235,6 +235,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 	mux.HandleFunc(gcpCatalogDescriptorsPath, gcpCatalogDescriptors(gcpCatalog))
 	mux.HandleFunc(azureCatalogDescriptorsPath, azureCatalogDescriptors(azureCatalog))
 	mux.Handle("/_simulator/v1/iam/", identityAPI(identities, roles))
+	mux.HandleFunc("/_simulator/v1/lambda/", gateway.ServeLambdaSource)
 	mux.Handle("/", registry)
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-TenkaCloud-Simulator", "true")
@@ -256,7 +257,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 			http.Error(w, "Cross-site requests are not allowed", 403)
 			return
 		}
-		if strings.HasPrefix(r.URL.Path, "/_simulator/v1/") && r.URL.Path != "/_simulator/v1/capabilities" && r.URL.Path != catalogDescriptorsPath && r.URL.Path != gcpCatalogDescriptorsPath && r.URL.Path != azureCatalogDescriptorsPath && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/iam/") && !(options.battleCapabilities != nil && strings.HasPrefix(r.URL.Path, "/_simulator/v1/battle-capabilities/")) && !(options.terminalSessions != nil && (r.URL.Path == "/_simulator/v1/terminal-control" || strings.HasPrefix(r.URL.Path, "/_simulator/v1/terminal-channel/"))) {
+		if strings.HasPrefix(r.URL.Path, "/_simulator/v1/") && r.URL.Path != "/_simulator/v1/capabilities" && r.URL.Path != catalogDescriptorsPath && r.URL.Path != gcpCatalogDescriptorsPath && r.URL.Path != azureCatalogDescriptorsPath && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/iam/") && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/lambda/") && !(options.battleCapabilities != nil && strings.HasPrefix(r.URL.Path, "/_simulator/v1/battle-capabilities/")) && !(options.terminalSessions != nil && (r.URL.Path == "/_simulator/v1/terminal-control" || strings.HasPrefix(r.URL.Path, "/_simulator/v1/terminal-channel/"))) {
 			http.NotFound(w, r)
 			return
 		}

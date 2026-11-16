@@ -51,14 +51,14 @@
 .cloud-global-nav--aws .cloud-provider-choices button[aria-pressed="true"] { background: #354354; color: #fff; }
 .cloud-global-nav--aws .cloud-language { font-size: 0; }
 .cloud-global-nav--aws .cloud-language select { padding: 4px; font-size: 12px; background: #161e2d; border-color: #5f6b7a; }
-.cloud-service-panel--aws { display: grid; grid-template-columns: 205px minmax(0, 1fr); padding: 0; width: min(720px, calc(100vw - 24px)); overflow: hidden; background: #1b2530; color: #e7e9ec; border: 1px solid #53606e; border-radius: 0 0 8px 8px; }
+.cloud-service-panel--aws { display: grid; grid-template-columns: 205px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); padding: 0; width: min(720px, calc(100vw - 24px)); overflow: hidden; background: #1b2530; color: #e7e9ec; border: 1px solid #53606e; border-radius: 0 0 8px 8px; }
 .cloud-service-panel--aws button { background: transparent; color: #e7e9ec; }
 .cloud-service-panel--aws button:hover { color: #42b4ff; background: #253443; }
-.aws-service-categories { padding: 16px; border-right: 1px solid #414d5c; overflow-y: auto; }
+.aws-service-categories { min-height: 0; overscroll-behavior-y: contain; padding: 16px; border-right: 1px solid #414d5c; overflow-y: auto; }
 .aws-service-categories button { padding: 10px 12px; font-size: 14px; }
 .aws-service-categories button[aria-current="true"] { color: #42b4ff; font-weight: 700; }
 .aws-service-category-divider { border-top: 1px solid #414d5c; margin: 14px 8px; }
-.aws-service-results { min-width: 0; overflow-y: auto; }
+.aws-service-results { min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; }
 .aws-service-results > p { padding: 0 28px; }
 .aws-service-panel-heading { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #414d5c; background: #1b2530; }
 .aws-service-panel-heading h2 { font-size: 18px; margin: 0; font-weight: 700; }

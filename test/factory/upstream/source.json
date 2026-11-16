@@ -1,0 +1,21 @@
+{
+  "repository": "https://github.com/aws/aws-emulator-evaluation-suite",
+  "commit": "4df2823bafface2ada35f482c07ff6668cc078e1",
+  "license": "CC0-1.0",
+  "files": [
+    {
+      "path": "test/factory/upstream/check_send_receive_delete_lifecycle.py",
+      "upstream_path": "behavioral/sqs/check_send_receive_delete_lifecycle.py",
+      "git_blob": "ff2cc41b441084ecbfbc0b348f7f8d507f35fec3",
+      "sha256": "aa2445c3e5b97d984bc303144b87731b7163ad0f342aef2551f0376d80df7ece"
+    },
+    {
+      "path": "test/factory/upstream/LICENSE",
+      "upstream_path": "LICENSE",
+      "git_blob": "0e259d42c996742e9e3cba14c677129b2c1b6311",
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+    }
+  ],
+  "oracle": "upstream-reported-real-aws; not independently executed against AWS by Tenka",
+  "adaptation": "Go gateway/SQLite test; not boto3/SDK certification. VisibilityTimeout=0 strengthens deletion observability; no real AWS calls."
+}
