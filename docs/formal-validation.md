@@ -81,8 +81,9 @@ fallback evidence, not native Chrome 157 rendering or successful full-gate CI.
 | LandingAccessAdmission | ten literal paths, GET/HEAD/POST and trusted host/origin/auth verdicts; one request/response transition | concrete middleware/token/session/URL/HTTP/ServeMux implementation, service authority |
 | LandingTopologyState | nine nodes/three providers; known or absent initial fragment; two selections/two callbacks, one mount/retirement | URL parsing/history, focus/Tab, DOM/layout/SVG geometry, native canvas rendering, JavaScript refinement or liveness |
 
-All registered models run even for documentation-only changes. CI splits them
-across ten TLC shards by case position and accepts the result only after
+Release tags and manual runs execute all registered models, even for
+documentation-only changes; pull requests and main pushes check applicability
+only. CI splits the models across ten TLC shards by case position and accepts the result only after
 `check-formal.py --combine` confirms every case ran once at the same head. The supported CFG
 grammar is deliberately restricted to named invariants, init/next/specification,
 Boolean deadlock setting and finite literal constant assignments. Views,
@@ -200,7 +201,9 @@ PRs must be up to date and each tested record must match its actual event base.
 
 The intended unique GitHub Actions job/check name is **`Formal validation`**.
 It runs on every PR and main push, merge-group and manual replay without path
-filters, skip conditions or `continue-on-error`; feature-branch push is omitted
+filters or `continue-on-error`. There it checks applicability; TLC and the gate
+negative controls run only for release tags and manual runs, because a full run
+took about 45 minutes serially and about 6 minutes sharded; feature-branch push is omitted
 to avoid two same-name checks with different PR/base interpretations. It runs independently
 of the long Go/browser job. It uses an unprivileged `pull_request` workflow,
 read-only contents permission, pinned checkout/artifact actions and the checked

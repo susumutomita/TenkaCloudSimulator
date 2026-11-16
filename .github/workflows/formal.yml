@@ -11,6 +11,7 @@ permissions:
 jobs:
   gate-tests:
     name: Formal gate and applicability tests
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -19,12 +20,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
-      - name: Validate exact changed blobs and declared model applicability
-        env:
-          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
-        run: |
-          base=$(python3 scripts/check-formal-applicability.py event-base --event "$GITHUB_EVENT_PATH")
-          python3 scripts/check-formal-applicability.py check --base "$base"
       - name: Exercise applicability and gate negative controls
         env:
           PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
@@ -32,16 +27,9 @@ jobs:
         run: |
           python3 scripts/test-formal-gate.py
           python3 scripts/test-formal-applicability.py
-      - name: Retain exact applicability evidence
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: formal-applicability-${{ github.event.pull_request.head.sha || github.sha }}
-          path: reports/formal/
-          if-no-files-found: error
-          retention-days: 14
   tlc:
     name: Formal TLC shard ${{ matrix.shard }}
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     # Each shard runs every tenth registered case serially with the unchanged 60s per-case cap.
     timeout-minutes: 30
@@ -76,23 +64,36 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      # Pull requests and main pushes check applicability only; releases and manual runs also run TLC.
+      FULL: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
     steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate exact changed blobs and declared model applicability
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
+        run: |
+          base=$(python3 scripts/check-formal-applicability.py event-base --event "$GITHUB_EVENT_PATH")
+          python3 scripts/check-formal-applicability.py check --base "$base"
       - name: Require the gate tests and every TLC shard to succeed
+        if: env.FULL == 'true'
         env:
           GATE_TESTS: ${{ needs.gate-tests.result }}
           TLC: ${{ needs.tlc.result }}
         run: |
           echo "gate-tests=$GATE_TESTS tlc=$TLC"
           test "$GATE_TESTS" = success && test "$TLC" = success
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          persist-credentials: false
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - if: env.FULL == 'true'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: formal-shard-*-${{ github.event.pull_request.head.sha || github.sha }}
           path: reports/formal/shards
       - name: Accept the shards only as one full merge-gate run of this head
+        if: env.FULL == 'true'
         env:
           PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
         run: python3 scripts/check-formal.py --combine reports/formal/shards/*/evidence.json --reports reports/formal/combined

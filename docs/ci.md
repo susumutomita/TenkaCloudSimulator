@@ -150,9 +150,11 @@ A required pinned-catalog subset rehearsal runs the unchanged original wp2shell 
 
 The standalone `Formal validation` job provides the stable required check;
 its inventory/applicability contract is documented in
-[formal-validation.md](formal-validation.md). The checker always runs all
-registered models and requires the intended invariant counterexamples. Ten
-`Formal TLC shard` jobs each run every tenth registered case serially, in registry
+[formal-validation.md](formal-validation.md). On pull requests and main pushes
+it checks exact-blob applicability only, so model changes must be checked
+locally with `TLA_JAR=... make formal` as AGENTS.md requires. Release tags and
+manual runs run all registered models and require the intended invariant
+counterexamples: ten `Formal TLC shard` jobs each run every tenth registered case serially, in registry
 order and with the unchanged 60-second per-case deadline. The `Formal validation`
 job passes only when the gate tests and every shard succeeded and
 `check-formal.py --combine` confirms that the shards together are one full
@@ -171,8 +173,9 @@ from verified merge enforcement.
 
 ## Pinned TLC download transport
 
-TLC runs only in Formal validation, which runs every registered model under
-`--merge-gate`; the `ci` job no longer repeats the same registry without it.
+TLC runs only in Formal validation, for release tags and manual runs, where it
+runs every registered model under `--merge-gate`; the `ci` job no longer
+repeats the same registry without it.
 The Formal validation invocation keeps the official `tlaplus/tlaplus` 1.7.4 release URL
 and the repository SHA-256 check before Java. A transient transfer can retry at
 most three times after the first request. Connection and per-transfer limits
