@@ -99,6 +99,9 @@ ORDER BY seq DESC LIMIT 1`, q.region, key, prefix, prefix))
 func (q *request) listECSRevisions(rows []row, parent *row, inputToken, outputToken, limitKey string, limit int) (map[string]any, error) {
 	family, _ := q.input["familyPrefix"].(string)
 	status, _ := q.input["status"].(string)
+	if status == "INACTIVE" {
+		return nil, Failure("InvalidParameterException", "Listing INACTIVE task definitions is not supported: the simulator does not track live ECS task or service references.")
+	}
 	order, _ := q.input["sort"].(string)
 	cursorScope := fingerprint(q.input, inputToken, limitKey)
 	cursor := int64(0)

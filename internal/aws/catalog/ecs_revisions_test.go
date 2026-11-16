@@ -148,5 +148,13 @@ func TestECSListsRevisionsInFamilyAndRevisionOrder(t *testing.T) {
 	check(map[string]any{"nextToken": token, "maxResults": 3}, "z:1", "z:2")
 	check(map[string]any{"sort": "DESC"}, "z:2", "z:1", "a:1")
 	check(map[string]any{"familyPrefix": "z"}, "z:1", "z:2")
-	check(map[string]any{"status": "INACTIVE"})
+	expect(t, h.json1("ecs", "RegisterTaskDefinition", revisionInput("z-preview", "example/app:v1")), 200, "")
+	check(map[string]any{"familyPrefix": "z", "status": "ACTIVE"}, "z:1", "z:2")
+	check(map[string]any{"familyPrefix": "z-pre"})
+	check(map[string]any{"status": "DELETE_IN_PROGRESS"})
+	r := h.json1("ecs", "ListTaskDefinitions", map[string]any{"status": "INACTIVE"})
+	expect(t, r, 400, "InvalidParameterException")
+	if !strings.Contains(r.raw, "does not track live ECS task or service references") {
+		t.Fatalf("missing unsupported-filter reason: %s", r.raw)
+	}
 }
