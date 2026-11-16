@@ -157,6 +157,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/catalog/ecs_revision_boundaries_test.go",
+      "sha256": "01ec8b65610c38a92031283538e67f081138123d77e55ce824a36d1f4aca2aaf",
+      "disposition": "test-support",
+      "reason": "Checks scope, authorization, revision allocation, and retry behavior through the ECS catalog and store.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/ecs_revisions.go",
       "sha256": "ef9f12c1d37e01461eb1c5780c4705b7821c41de7aebaf947a6209e070ccd23b",
       "disposition": "modeled",
@@ -290,6 +297,13 @@
           "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
         }
       ]
+    },
+    {
+      "path": "internal/aws/cloudformation_application_contract_test.go",
+      "sha256": "14b86eefc3a4e750c427a27956ae1d16f64a3ed00cda71045d2f973131f56f38",
+      "disposition": "test-support",
+      "reason": "Checks declaration rejection, schema startup recovery, and per-resource delete authorization for the SDK sample application.",
+      "models": []
     },
     {
       "path": "internal/aws/cloudformation_conditions.go",
@@ -440,6 +454,13 @@
       ]
     },
     {
+      "path": "internal/aws/cloudfront_vpc_origin_contract_test.go",
+      "sha256": "9cf271ef6d9668bb65f1b2a980a00707fb4e184735a7859ab130fe6ceb343c7f",
+      "disposition": "test-support",
+      "reason": "Checks VPC origin configuration, HTTP responses, ALB reassociation, bounded creation and recovery on storage failure.",
+      "models": []
+    },
+    {
       "path": "internal/aws/cloudfront_vpc_origin_http.go",
       "sha256": "a52b37f072e6a8790c22f7944c872dddeeec0969830491787c86f1b9b8f717bd",
       "disposition": "modeled",
@@ -463,6 +484,13 @@
       "sha256": "7455322aa80d3609ee992b1fbee3c6a77ea27b9b90416b023d718a901b40639a",
       "disposition": "test-support",
       "reason": "Regression fixtures and assertions exercise the native HTTP or storage behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ecs_stack_lifecycle_test.go",
+      "sha256": "e275880555e0a2952bdb54e41aa56cbc50a8e3fc666405f52788f084ff2c9b78",
+      "disposition": "test-support",
+      "reason": "Checks ECS stack declarations, revision planning, and atomic registration of native task definitions and stack events.",
       "models": []
     },
     {
