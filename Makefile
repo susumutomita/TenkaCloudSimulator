@@ -26,6 +26,7 @@ test: test-scripts test-go
 	$(PYTHON) scripts/check-coverage.py $(COVERAGE_PROFILE)
 
 test-scripts:
+	$(PYTHON) -m unittest discover -s test/battle/image -p 'test_*.py'
 	$(PYTHON) scripts/smithy-contracts.py --check
 	$(PYTHON) scripts/test-smithy-contracts.py
 	$(PYTHON) scripts/test-software-factory.py
