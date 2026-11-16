@@ -17,16 +17,12 @@ func (q *request) isECSTaskDefinition() bool {
 // registration won that revision, its successor must be authorized separately.
 func (q *request) registerECSRevision() (map[string]any, error) {
 	family := q.input["family"].(string) // ecsTaskDefinition already validated this member.
-	prefix := q.formatARN(q.resource(), family+":", family, nil)
 	previous := 0
 	for {
 		if err := q.ctx.Err(); err != nil {
 			return nil, err
 		}
-		var revision int
-		err := q.e.store.db.QueryRow(`SELECT COALESCE(MAX(json_extract(document,'$.revision')),0)+1
-FROM aws_catalog_resources WHERE service='ecs' AND region=? AND kind='taskDefinition'
-AND name=? AND substr(arn,1,length(?))=?`, q.region, family, prefix, prefix).Scan(&revision)
+		revision, err := NextECSTaskRevision(q.e.store.db, q.region, q.e.cfg.Account, family)
 		if err != nil {
 			return nil, err
 		}
@@ -44,8 +40,8 @@ AND name=? AND substr(arn,1,length(?))=?`, q.region, family, prefix, prefix).Sca
 
 var ecsRoleName = regexp.MustCompile(`^[A-Za-z0-9+=,.@_-]{1,64}$`)
 
-func (q *request) authorizeECSRegistration(r row) error {
-	prefix := "arn:aws:iam::" + q.e.cfg.Account + ":role/"
+func ecsRegistrationPermissions(account string, r row, authorize func(string, string) error) error {
+	prefix := "arn:aws:iam::" + account + ":role/"
 	for _, member := range []string{"executionRoleArn", "taskRoleArn"} {
 		if role, ok := r.Document[member].(string); ok && role != "" {
 			if ecsRoleName.MatchString(role) {
@@ -55,13 +51,13 @@ func (q *request) authorizeECSRegistration(r row) error {
 			if !local || path == "" || strings.ContainsAny(path, "*?") || strings.HasSuffix(path, "/") {
 				return Failure("ClientException", "The task role must name a role in the simulator account.")
 			}
-			if err := q.authorizeAction("iam:PassRole", role); err != nil {
+			if err := authorize("iam:PassRole", role); err != nil {
 				return err
 			}
 		}
 	}
 	if len(r.Tags) != 0 {
-		return q.authorizeAction("ecs:TagResource", r.ARN)
+		return authorize("ecs:TagResource", r.ARN)
 	}
 	return nil
 }

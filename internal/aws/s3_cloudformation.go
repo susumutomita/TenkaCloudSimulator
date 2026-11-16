@@ -260,6 +260,23 @@ func stackResourcePermissions(record StackRecord, deleting bool, authorize func(
 			if tags, ok := r.Properties["Tags"].([]any); !deleting && ok && len(tags) > 0 {
 				actions = append(actions, "iam:TagRole")
 			}
+		case stackTaskDefinition:
+			if deleting {
+				if r.Retain {
+					continue
+				}
+				resource = r.PhysicalID
+				actions = []string{"ecs:DeregisterTaskDefinition"}
+			} else {
+				task, err := plannedStackECSTask(record.Region, r)
+				if err != nil {
+					return err
+				}
+				if err = task.Authorize(authorize); err != nil {
+					return err
+				}
+				continue
+			}
 		case "AWS::Lambda::Function":
 			resource = lambdaARN(record.Region, r.PhysicalID)
 			if deleting {

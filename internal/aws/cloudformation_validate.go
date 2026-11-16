@@ -59,6 +59,12 @@ func parseStackTemplate(body string) (map[string]any, error) {
 			return nil, fmt.Errorf("Unsupported resource type: %s", kind)
 		}
 		for key := range r {
+			if kind == stackTaskDefinition && (key == "DeletionPolicy" || key == "UpdateReplacePolicy") {
+				if r[key] != "Retain" && r[key] != "Delete" {
+					return nil, fmt.Errorf("Task definitions support only Retain or Delete for %s", key)
+				}
+				continue
+			}
 			if key != "Type" && key != "Properties" && key != "DependsOn" && key != "Condition" {
 				return nil, fmt.Errorf("Unsupported resource attribute: %s", key)
 			}
@@ -72,7 +78,7 @@ func parseStackTemplate(body string) (map[string]any, error) {
 
 func supportedStackResourceType(kind string) bool {
 	switch kind {
-	case stackVpcOrigin, "AWS::SSM::Parameter", "AWS::IAM::Role", "AWS::IAM::InstanceProfile", "AWS::S3::Bucket", "AWS::Lambda::Function", "AWS::EC2::Instance":
+	case stackTaskDefinition, stackVpcOrigin, "AWS::SSM::Parameter", "AWS::IAM::Role", "AWS::IAM::InstanceProfile", "AWS::S3::Bucket", "AWS::Lambda::Function", "AWS::EC2::Instance":
 		return true
 	default:
 		return stackAPIKind(kind) || stackNetworkKind(kind)

@@ -526,13 +526,13 @@ func (q *request) generated(value any, r row, parent *row) any {
 	return nil
 }
 
-func (q *request) create(ecsRevision int) (map[string]any, error) {
+func (q *request) prepareCreate(ecsRevision int) (row, *row, error) {
 	res := q.resource()
 	inputShape := q.b.model.shape(q.official.Input)
 	resourceShape := q.b.model.shape(res.Shape)
 	parent, err := q.parentRow(res)
 	if err != nil {
-		return nil, err
+		return row{}, nil, err
 	}
 	tagsMember := q.tagMember(q.official.Input)
 	tokenMember := idempotencyMember(inputShape)
@@ -550,7 +550,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 			target = alias
 		}
 		if _, ok := resourceShape.Members[target]; !ok {
-			return nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}
+			return row{}, nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}
 		}
 		document[target] = stored(value)
 		supplied[target] = true
@@ -560,7 +560,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	}
 	id, err := newID(res.ID, name)
 	if err != nil {
-		return nil, err
+		return row{}, nil, err
 	}
 	if res.Singleton {
 		id, name = "default", "default"
@@ -569,7 +569,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 		name = id
 	}
 	if id == "" {
-		return nil, invalid("A name is required to identify this resource.")
+		return row{}, nil, invalid("A name is required to identify this resource.")
 	}
 	tags := map[string]string{}
 	if tagsMember != "" {
@@ -578,7 +578,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 		}
 	}
 	if len(tags) > maxTagsPerResource {
-		return nil, &fault{kind: "tags", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
+		return row{}, nil, &fault{kind: "tags", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
 	}
 	r := row{Service: q.b.spec.Model, Region: q.region, Kind: res.Kind, Parent: parentID(parent), ID: id, Name: name, Tags: tags}
 	r.ARN = q.formatARN(res, id, name, parent)
@@ -616,15 +616,25 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 		document[key] = q.generated(value, r, parent)
 	}
 	r.Document = document
+	return r, parent, nil
+}
+
+func (q *request) create(ecsRevision int) (map[string]any, error) {
+	r, parent, err := q.prepareCreate(ecsRevision)
+	if err != nil {
+		return nil, err
+	}
+	res := q.resource()
+	tokenMember := idempotencyMember(q.b.model.shape(q.official.Input))
 	if err := q.authorize(r.ARN); err != nil {
 		return nil, err
 	}
 	if ecsRevision > 0 {
-		if err := q.authorizeECSRegistration(r); err != nil {
+		if err := ecsRegistrationPermissions(q.e.cfg.Account, r, q.authorizeAction); err != nil {
 			return nil, err
 		}
 	}
-	if err := q.checkRefs(res, document); err != nil {
+	if err := q.checkRefs(res, r.Document); err != nil {
 		return nil, err
 	}
 	token, _ := q.input[tokenMember].(string)
@@ -651,33 +661,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 			return nil, err
 		}
 	}
-	limit := res.Limit
-	if limit == 0 {
-		limit = defaultKindLimit
-	}
-	count, err := countKind(tx, r.Service, r.Region, r.Kind, r.Parent)
-	if err != nil {
-		return nil, err
-	}
-	if count >= limit {
-		return nil, &fault{kind: "limit", message: fmt.Sprintf("The simulator allows at most %d %s resources per scope.", limit, res.Kind)}
-	}
-	if res.Unique {
-		taken, err := nameTaken(tx, r.Service, r.Region, r.Kind, r.Parent, r.Name)
-		if err != nil {
-			return nil, err
-		}
-		if taken {
-			return nil, &fault{kind: "conflict", message: fmt.Sprintf("The %s %s already exists.", res.Kind, r.Name)}
-		}
-	}
-	if err := parentAlive(tx, parent); err != nil {
-		return nil, err
-	}
-	if r.Seq, err = nextSeq(tx); err != nil {
-		return nil, err
-	}
-	if err := insertRow(tx, r); err != nil {
+	if err := insertNewResource(tx, res, &r, parent); err != nil {
 		return nil, err
 	}
 	if token != "" {
@@ -699,6 +683,39 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 		return nil, err
 	}
 	return q.output(r, parent), nil
+}
+
+func insertNewResource(tx *sql.Tx, res *Resource, r *row, parent *row) error {
+	limit := res.Limit
+	if limit == 0 {
+		limit = defaultKindLimit
+	}
+	count, err := countKind(tx, r.Service, r.Region, r.Kind, r.Parent)
+	if err != nil {
+		return err
+	}
+	if count >= limit {
+		return &fault{kind: "limit", message: fmt.Sprintf("The simulator allows at most %d %s resources per scope.", limit, res.Kind)}
+	}
+	if res.Unique {
+		taken, err := nameTaken(tx, r.Service, r.Region, r.Kind, r.Parent, r.Name)
+		if err != nil {
+			return err
+		}
+		if taken {
+			return &fault{kind: "conflict", message: fmt.Sprintf("The %s %s already exists.", res.Kind, r.Name)}
+		}
+	}
+	if err := parentAlive(tx, parent); err != nil {
+		return err
+	}
+	if r.Seq, err = nextSeq(tx); err != nil {
+		return err
+	}
+	if err := insertRow(tx, *r); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (q *request) read() (map[string]any, error) {

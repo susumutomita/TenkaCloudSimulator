@@ -37,6 +37,9 @@ func stackConditionalLinks(value any, resources map[string]any, refs map[string]
 			if kind == stackVpcOrigin && (field == "Arn" || field == "Id") {
 				valid = true
 			}
+			if kind == stackTaskDefinition && field == "TaskDefinitionArn" {
+				valid = true
+			}
 			if stackNetworkAttribute(kind, field) || kind == "AWS::EC2::Instance" && field == "PublicDnsName" {
 				valid = true
 			}

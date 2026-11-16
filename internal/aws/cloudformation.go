@@ -22,6 +22,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/catalog"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 	"go.yaml.in/yaml/v3"
 )
@@ -36,6 +37,7 @@ type StackStore struct {
 type StackResource struct {
 	LogicalID, Type, PhysicalID string
 	Properties                  map[string]any
+	Retain                      bool              `json:",omitempty"`
 	NativeIAM                   *stackNativeIAM   `json:",omitempty"`
 	StateHash                   string            `json:",omitempty"`
 	StateParts                  map[string]string `json:",omitempty"`
@@ -66,6 +68,9 @@ func NewStackStore(db *sql.DB) (*StackStore, error) {
 		return nil, err
 	}
 	if _, err := NewLambdaPermissionStore(db); err != nil {
+		return nil, err
+	}
+	if err := catalog.InitECSTaskStorage(db); err != nil {
 		return nil, err
 	}
 	if _, err := NewIAMRoleStore(db); err != nil {
@@ -441,6 +446,10 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 }
 
 func compileStackWithParameters(region, name, body string, parameters map[string]string, capabilities string, resolveParameters stackParameterResolver) (StackRecord, error) {
+	return compileStackWithResolvers(region, name, body, parameters, capabilities, resolveParameters, nil)
+}
+
+func compileStackWithResolvers(region, name, body string, parameters map[string]string, capabilities string, resolveParameters stackParameterResolver, nextTaskRevision func(stackID, family string) (int, error)) (StackRecord, error) {
 	fail := func(message string) (StackRecord, error) {
 		return StackRecord{}, ssmFailure{"ValidationError", message}
 	}
@@ -544,6 +553,7 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 		return fail(err.Error())
 	}
 	var declaredRoles []StackResource
+	nextRevision := map[string]int{}
 	for _, key := range keys {
 		raw := object(resources[key])
 		kind := stringValue(raw["Type"])
@@ -609,6 +619,27 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 				return fail("Parameter description exceeds 1024 bytes.")
 			}
 			attrs[key+".Value"] = value
+		} else if kind == stackTaskDefinition {
+			family := stringValue(properties["Family"])
+			revision := nextRevision[family]
+			if revision == 0 {
+				revision = 1
+				if nextTaskRevision != nil && enabled[key] {
+					revision, e = nextTaskRevision(id, family)
+					if e != nil {
+						return StackRecord{}, e
+					}
+				}
+			}
+			definition, err := prepareStackECSTask(region, properties, revision)
+			if err != nil {
+				return fail(err.Error())
+			}
+			if enabled[key] {
+				nextRevision[family] = revision + 1
+			}
+			physical = definition.ARN()
+			attrs[key+".TaskDefinitionArn"] = physical
 		} else if kind == "AWS::Lambda::Function" {
 			f, e := compileStackFunction(region, name, id, key, properties)
 			if e != nil {
@@ -637,7 +668,7 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 		if kind == "AWS::ApiGateway::Stage" {
 			refs[key] = stringValue(properties["StageName"])
 		}
-		compiled := StackResource{LogicalID: key, Type: kind, PhysicalID: physical, Properties: properties, NativeIAM: nativeIAM}
+		compiled := StackResource{LogicalID: key, Type: kind, PhysicalID: physical, Properties: properties, NativeIAM: nativeIAM, Retain: raw["DeletionPolicy"] == "Retain"}
 		if kind == "AWS::IAM::Role" {
 			declaredRoles = append(declaredRoles, compiled)
 		}
@@ -768,6 +799,15 @@ func (s *StackStore) createCheckedContext(ctx context.Context, record StackRecor
 				return err
 			}
 			continue // Remains IN_PROGRESS until actual readiness outside SQL.
+		}
+		if r.Type == stackTaskDefinition {
+			if err = createStackECSTask(tx, record, r); err != nil {
+				return err
+			}
+			if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
+				return err
+			}
+			continue
 		}
 		if r.NativeIAM != nil {
 			if err = createStackIAM(tx, record, &r); err != nil {
@@ -1006,7 +1046,15 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		if owned != 1 {
 			return ssmFailure{"ValidationError", "Stack resource ownership changed; deletion refused."}
 		}
-		if r.NativeIAM != nil {
+		if r.Type == stackTaskDefinition {
+			if r.Retain {
+				if err = appendStackEvent(tx, records[0], &r, "DELETE_SKIPPED"); err != nil {
+					return err
+				}
+				continue
+			}
+			err = catalog.DeregisterStackTaskDefinition(tx, region, r.PhysicalID)
+		} else if r.NativeIAM != nil {
 			err = deleteStackIAM(tx, r)
 		} else if r.Type == "AWS::EC2::Instance" {
 			// Actual retained owner cleanup completed outside this transaction.
@@ -1346,13 +1394,18 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		record, err := compileStackWithParameters(region, name, form.Get("TemplateBody"), parameters, form.Get("Capabilities.member.1"),
+		record, err := compileStackWithResolvers(region, name, form.Get("TemplateBody"), parameters, form.Get("Capabilities.member.1"),
 			func(stackID string, keys map[string]string) (map[string]string, error) {
 				// Authorize the actual generated ARN before reading source values.
 				if e := authorize(stackID); e != nil {
 					return nil, e
 				}
 				return g.Stacks.resolveSSMParameters(r.Context(), region, keys, authorizeAction)
+			}, func(id, family string) (int, error) {
+				if err := authorize(id); err != nil {
+					return 0, err
+				}
+				return catalog.NextECSTaskRevision(g.Stacks.db, region, stackECSAccount, family)
 			})
 		if err == nil {
 			record.Tags, record.ClientToken, record.RequestHash = tags, clientToken, requestHash
