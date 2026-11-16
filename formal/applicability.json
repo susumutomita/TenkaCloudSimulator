@@ -4,16 +4,49 @@
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "cce1042f1c0fc67fed38e358a202037ca410d668c441cfda53bec6b9c92b4aac",
+      "sha256": "8189aa97e06e6152cc5488f5463ed3278aacd0b263fdfd0e0cbc66a5958971c1",
       "disposition": "formal-infrastructure",
-      "reason": "Registers and enforces finite source-edit contract while retaining all existing models and mutation controls.",
+      "reason": "Integrates main CI sharding and release/manual-only full E2E while retaining focused Lambda inline-editor browser/CSP acceptance and unit regressions.",
       "models": []
+    },
+    {
+      "path": ".github/workflows/formal.yml",
+      "sha256": "646fa229fa64b44580d32aa56a1daaf540e21e8e3cf4e227811eeb91fd14761f",
+      "disposition": "formal-infrastructure",
+      "reason": "Checks exact-blob applicability in the required Formal validation job on every change. For release tags and manual runs it also runs the gate tests and the TLC registry as ten serial shard jobs, and accepts the shards only through check-formal.py --combine.",
+      "models": []
+    },
+    {
+      "path": "Makefile",
+      "sha256": "c1993e243122e7eee954c77e0898f5e6d043a845326359e9e582d2c7a6055e46",
+      "disposition": "modeled",
+      "reason": "Preserves the registered start/test-start startup and token targets unchanged while splitting make test into test-scripts and test-go; make before-commit still runs the same commands for the whole module.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Existing finite startup/token abstraction is unchanged. This test-recipe split is not modeled and is validated by the coverage gate regression suite and CI; no claim of implementation refinement."
+        }
+      ]
     },
     {
       "path": "README.md",
       "sha256": "2a20249014115e117c0e320d16fe77a33e4e0e327a2629a969c139354cb8515a",
       "disposition": "documentation",
       "reason": "Describes saved handler editing, exact limitations and permissions.",
+      "models": []
+    },
+    {
+      "path": "docs/ci.md",
+      "sha256": "2c096f9b5558e4a2ea5e4419c91cebd6fb3dd5a0b52de3f714c4d631d91d6902",
+      "disposition": "documentation",
+      "reason": "Documents that pull requests check applicability only and that release tags run the ten TLC shards and the combine check.",
       "models": []
     },
     {
@@ -28,6 +61,13 @@
       "sha256": "f0d4b18f9504cb2a2956f5f97ae6d0ce3e060df9acd90893d82b6cf536d2d368",
       "disposition": "documentation",
       "reason": "Read-only discovery UI, tests, documentation or exact build/formal metadata; no independent authority or state mutation is introduced by this file.",
+      "models": []
+    },
+    {
+      "path": "docs/formal-validation.md",
+      "sha256": "c7b0863f8da6f6504d97150fb4e97a3aba013581bd6e525ed90b67e53d8884cd",
+      "disposition": "documentation",
+      "reason": "Documents the release-only TLC run, the case-position shards and the combined evidence.",
       "models": []
     },
     {
@@ -153,6 +193,13 @@
       ]
     },
     {
+      "path": "formal/README.md",
+      "sha256": "c776067343380e68bf375f1df0c7811c580c268fb40a72e712e8fe522b14b68c",
+      "disposition": "documentation",
+      "reason": "Updates the execution budget for the applicability-only pull request job and the release shard jobs.",
+      "models": []
+    },
+    {
       "path": "formal/models.json",
       "sha256": "493aebfda7ff995319ed2d76153babe5ca4545a76de4d8d0e95f82bf13d06f26",
       "disposition": "formal-infrastructure",
@@ -196,6 +243,13 @@
       "disposition": "test-support",
       "reason": "Read-only discovery UI, tests, documentation or exact build/formal metadata; no independent authority or state mutation is introduced by this file.",
       "models": []
+    },
+    {
+      "path": "internal/aws/ec2_runtime_publication_fault_linux_test.go",
+      "disposition": "test-support",
+      "models": [],
+      "sha256": "39a4822aded78ad85e610b8753987b24fa0a9ce09d48ecaced32c3eaf2d5f4d8",
+      "reason": "Retains the merged main Linux EC2 ready-publication fault regression; test-only coverage, no runtime implementation change."
     },
     {
       "path": "internal/aws/lambda.go",
@@ -1035,17 +1089,45 @@
       ]
     },
     {
+      "path": "scripts/check-coverage.py",
+      "sha256": "227065bc6871862d79343aafc0dd7d195b0007961a78c34c71cdfff12b4dff53",
+      "disposition": "validation-tooling",
+      "reason": "Adds a merge subcommand that refuses shard profiles unless every package ran exactly once at one head, and every listed test of a split package ran exactly once. The 90% floors are unchanged.",
+      "models": []
+    },
+    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "070965f825a6b5070362670ea992287c2ec90e12c3c3301568f172dfeb42306d",
+      "sha256": "00536b2cf6b22dcb660c89bb4007975d326ec87166973bb40b1e3c735d9be0fd",
       "disposition": "formal-infrastructure",
-      "reason": "Registers and enforces finite source-edit contract while retaining all existing models and mutation controls.",
+      "reason": "Integrates main case-position sharding and combined immutable evidence with LambdaSourceEdit model registration, preserving model bounds and mutation requirements.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-coverage-gate.py",
+      "sha256": "27402e63c188f86088eda6aaa99f695cd7fbcfac44642c51d97d6540bdaaf726",
+      "disposition": "validation-tooling",
+      "reason": "Regression tests for the shard merge: missing, repeated or unexpected packages or tests, another head, mismatched modes and a missing profile fail.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "a5742d2657baf68f4f8a4cb834b897c3f8ad37d755fe8795290011a65f0da9ab",
+      "sha256": "2d344a704d3d19379f45bc8efe6bc7fc66dc0c85601a061060e614ebf9bbe70d",
       "disposition": "formal-infrastructure",
-      "reason": "Registers and enforces finite source-edit contract while retaining all existing models and mutation controls.",
+      "reason": "Retains both LambdaSourceEdit fixture coverage and main shard/combine negative controls.",
+      "models": []
+    },
+    {
+      "path": "test/ci/release_pipeline.py",
+      "sha256": "9444ecce09d4c03032cc081f800344a808875e3432a868084f54e2ce579b5e96",
+      "disposition": "test-support",
+      "reason": "Fails if TLC or the gate tests run on pull requests, if the applicability check becomes conditional, or if the combine step runs outside release mode.",
+      "models": []
+    },
+    {
+      "path": "test/ci/tla_download.py",
+      "sha256": "6833720a0cb61e7e21d5df297911394cc499e6ab5988ac50c56bd75998f96d25",
+      "disposition": "test-support",
+      "reason": "Pins the sharded Formal validation command that follows the TLC download.",
       "models": []
     },
     {

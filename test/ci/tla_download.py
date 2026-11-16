@@ -16,31 +16,24 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 URL = 'https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar'
-WORKFLOWS = ('.github/workflows/ci.yml', '.github/workflows/formal.yml')
+WORKFLOW = '.github/workflows/formal.yml'
 
 
 def configured_command():
-    commands = []
-    for path in WORKFLOWS:
-        lines = (ROOT / path).read_text().splitlines()
-        matching = [i for i, line in enumerate(lines) if URL in line]
-        if len(matching) != 1:
-            raise AssertionError(f'{path}: one literal pinned download required')
-        index = matching[0]
-        if shlex.split(lines[index - 1].strip()) != ['python3', 'test/ci/tla_download.py']:
-            raise AssertionError(f'{path}: local transport suite must precede download')
-        commands.append(shlex.split(lines[index].strip()))
-        following = shlex.split(lines[index + 1].strip())
-        if following[0] != 'TLA_JAR=/tmp/tla2tools.jar':
-            raise AssertionError(f'{path}: canonical formal invocation must follow download')
-        if path.endswith('formal.yml'):
-            if following[1:] != ['python3', 'scripts/check-formal.py', '--merge-gate']:
-                raise AssertionError('immutable formal checker changed')
-        elif following[1:] != ['make', 'formal']:
-            raise AssertionError('CI formal checker changed')
-    if commands[0] != commands[1]:
-        raise AssertionError('workflow download commands drifted')
-    return commands[0]
+    if URL in (ROOT / '.github/workflows/ci.yml').read_text():
+        raise AssertionError('ci.yml: TLC runs only in Formal validation')
+    lines = (ROOT / WORKFLOW).read_text().splitlines()
+    matching = [i for i, line in enumerate(lines) if URL in line]
+    if len(matching) != 1:
+        raise AssertionError(f'{WORKFLOW}: one literal pinned download required')
+    index = matching[0]
+    if shlex.split(lines[index - 1].strip()) != ['python3', 'test/ci/tla_download.py']:
+        raise AssertionError(f'{WORKFLOW}: local transport suite must precede download')
+    following = shlex.split(lines[index + 1].strip())
+    if following != ['TLA_JAR=/tmp/tla2tools.jar', 'python3', 'scripts/check-formal.py', '--merge-gate',
+                     '--shard', '$SHARD/10', '--reports', 'reports/formal/shard-$SHARD']:
+        raise AssertionError('immutable formal checker changed')
+    return shlex.split(lines[index].strip())
 
 
 class DownloadTests(unittest.TestCase):
