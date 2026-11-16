@@ -3,6 +3,13 @@
   "base_sha": "9eb7532df476be5197f66611fc39e2e48cd7d836",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "c3a13f3009dccbe9086d2599a543939cdf19c0b4de7f8f7b9aa73ab129c845ef",
+      "disposition": "formal-infrastructure",
+      "reason": "Runs the standalone simulator SDK lifecycle and byte-boundary checks in the existing integration job.",
+      "models": []
+    },
+    {
       "path": "README.md",
       "sha256": "5988256c9e2ce05c4e54af6f5d488d277ce32cda78b32a7869458703631dcf6d",
       "disposition": "documentation",
@@ -607,6 +614,20 @@
       "sha256": "7483a805f0cdd9eac14902850d9fc06a2593e38c02b6141ffeb28020ef7be98f",
       "disposition": "formal-infrastructure",
       "reason": "Registers bounded models and enforces required invariant, mutant and source-scope declarations.",
+      "models": []
+    },
+    {
+      "path": "test/platform/README.md",
+      "sha256": "f297d50eb549ce79a75a30a5a61d80819941c056f1f1cc9b6e10ec31d499c39b",
+      "disposition": "test-support",
+      "reason": "Documents the CloudFormation SDK lifecycle fixture and the byte limits it checks in platform CI.",
+      "models": []
+    },
+    {
+      "path": "test/platform/sdk-lifecycle.py",
+      "sha256": "db875b6a6f4a0d8ae6d475eba98fb9318f08d41b4507657ce234c05b1ea88cbb",
+      "disposition": "test-support",
+      "reason": "Tests rejection of oversized descriptions and the normal SDK lifecycle with a local fixture and verifies the resulting SSM and stack state.",
       "models": []
     }
   ]
