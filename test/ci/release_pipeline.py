@@ -151,7 +151,7 @@ class TagTests(unittest.TestCase):
 
 class WorkflowTests(unittest.TestCase):
     def test_go_security_patch_pin_is_consistent(self):
-        for name, count in [('ci.yml', 2), ('release.yml', 1)]:
+        for name, count in [('ci.yml', 6), ('release.yml', 1)]:
             workflow = (ROOT / '.github/workflows' / name).read_text()
             pins = [line.strip() for line in workflow.splitlines()
                     if line.strip().startswith('go-version:')]
@@ -169,6 +169,13 @@ class WorkflowTests(unittest.TestCase):
         self.assertLess(workflow.index('--draft '), workflow.index('--draft=false'))
         for target in verify.TARGETS:
             self.assertIn('target: ' + target, workflow)
+
+    def test_release_validation_still_runs_e2e(self):
+        workflow = (ROOT / '.github/workflows/ci.yml').read_text()
+        job = workflow[workflow.index('\n  e2e:\n'):]
+        self.assertIn("    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'\n", job)
+        self.assertIn('make e2e PYTHON=/tmp/simulator-tests/bin/python', job)
+        self.assertIn('  workflow_call:', workflow)
 
 
 class BuildTests(unittest.TestCase):

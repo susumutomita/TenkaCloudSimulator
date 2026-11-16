@@ -4,26 +4,39 @@ The required `ci` job verifies the actual Go module, embedded console/API refere
 and SQLite runtime. Node/npm, Python/Chromium/SDK and Java are development tools;
 the resulting statically linked executable does not require them at runtime.
 
-Every push, pull request and manual run checks out the exact tested head and runs:
+Every push to main, pull request and manual run checks out the exact tested head.
+The jobs below run in parallel, and the required `ci` job passes only when the
+`checks`, every `go-test` shard and `platform-audit` jobs succeeded:
 
-1. Integrity-locked Scalar rebuild, actual bundle-input exclusion and original notices.
-2. Go format/vet, module and embedded-asset integrity, full-module race tests and
-   statement coverage, static binary build, and five OS/architecture compile checks.
-3. Unfiltered Cobertura conversion and Go HTML coverage view. Both full-module
-   statement coverage and source-line coverage must be at least 90%.
-4. Locked npm dependency audit (high/critical fail) and canonical Go govulncheck.
-5. Required real-binary/SDK/console/Scalar regression, including the new two-provider
-   PC/mobile acceptance, plus the existing accessibility audit. The current source
-   registers 80 Conformance cases and 64 finite TLC baselines/547 named sensitivity
-   counterexamples; only completed exact-head runs count as verified.
-   Official Google/Azure storage SDK acceptance runs against local CLIs with pinned development dependencies and documented transport limits;
-   native HTTP and browser proof must not be labelled official SDK compatibility.
+1. `checks`: integrity-locked Scalar and Cloudscape rebuilds with original notices,
+   console/release/token script tests, Go format/vet, module and embedded-asset
+   integrity, static binary build, five OS/architecture compile checks, locked npm
+   dependency audit (high/critical fail) and canonical Go govulncheck.
+2. `go-test`: five shards run the full-module race tests with `-coverpkg=./...`.
+   Each shard runs its packages with `-p 1` and records its head and package list.
+3. `platform-audit`: the actual platform hello-world lifecycle, participant browser
+   and the existing console accessibility audit.
+4. `ci`: merges the shard profiles, then runs unfiltered Cobertura conversion and the
+   Go HTML coverage view. Both full-module statement coverage and source-line
+   coverage must be at least 90%.
+
+The real-binary/SDK/console/Scalar regression (`make e2e`) runs in the `e2e` job only
+for release tags and manual runs, so pull requests do not wait for it. The release
+workflow calls this workflow, so a release still requires it. Run `make e2e` locally
+for the changes AGENTS.md names. The current source registers 80 Conformance cases
+and 64 finite TLC baselines/547 named sensitivity counterexamples; only completed
+exact-head runs count as verified. Official Google/Azure storage SDK acceptance runs
+against local CLIs with pinned development dependencies and documented transport
+limits; native HTTP and browser proof must not be labelled official SDK compatibility.
 
 Coverage generation and threshold checks are ordinary required steps. An absent,
 empty, malformed or below-floor report exits nonzero. Regression tests exercise
 both floors independently, repeated statement blocks and missing/invalid reports.
 No source files or packages are removed from the coverage reports: `cmd/simulator`
-and all internal packages are included. Foreign builds are compile checks, not
+and all internal packages are included. `check-coverage.py merge` refuses the shard
+profiles unless every shard ran at the same head and the shards together list each
+package of `go list ./...` exactly once. Its regression tests cover a missing,
+repeated or unexpected package, another head, mismatched modes and a missing profile. Foreign builds are compile checks, not
 foreign-platform runtime tests. TLC is bounded checking, not an implementation proof.
 
 The embedded CPython/WASI/stdlib and original rights inventory are verified offline
@@ -40,7 +53,7 @@ source view and Markdown summary for 14 days. Evidence is retained even after a
 failed threshold check; uploading an artifact does not change the failed result.
 Missing evidence cannot make generation or validation succeed.
 
-The existing safe-audit artifact also retains `reports/landing-topology/**` for
+The `e2e` job's safe-audit artifact also retains `reports/landing-topology/**` for
 14 days, including after a failed E2E step. These are public landing-page
 screenshots, layout/keyboard observations, pinned asset hashes and strict axe
 findings from eight fresh anonymous desktop/mobile contexts. The helper receives
@@ -66,7 +79,9 @@ recovery tests exercise sanitized failures, unchanged owner/peer-region state,
 authorization before corrupted-state access, and repaired native operations.
 These injected SQLite faults test local persistence contracts, not behavior
 observed on real AWS. Focused coverage differences are diagnostic evidence;
-never merge them into a profile presented as a whole-suite result.
+never merge them into a profile presented as a whole-suite result. The `ci` job's
+shard merge is the one exception, because `check-coverage.py merge` proves that
+the shards ran every package once at the same head.
 
 ## Why Code Quality upload was replaced
 
@@ -111,7 +126,7 @@ reports below predate this increment and do not certify the changed working tree
 
 S3 versioning increment adds the enabled-history S3Versions model and a mandatory mutant that incorrectly guards bucket deletion using only current objects. TLC must reject that mutant with NoHistoryOrphans. This finite abstraction does not prove the implementation or model suspended versions/quota; native race/SQLite/SDK/browser tests cover those contracts. The browser audit now captures 23 states, including version settings, public-access confirmation, version table, bucket tag editor and mobile reflow. Existing 90% statement and unfiltered source-line floors remain unchanged.
 
-The full-module Go race command runs packages with `-p 1`: several test binaries independently JIT-compile the fixed embedded CPython/SQLite WASM. Cross-package CPU competition caused non-performance containment tests to hit their existing execution deadlines on the cloud worker. Packages run sequentially; goroutine concurrency, race instrumentation, cancellation/deadline negative assertions and both 90% floors remain enforced. The positive four-invocation state-isolation test uses a supported15-second budget for two queued waves of fresh interpreter startup under race instrumentation; every payload must still be1. It is not a startup performance benchmark. No failed test is skipped or retried by CI.
+Each `go-test` shard runs its packages with `-p 1`, on its own runner: several test binaries independently JIT-compile the fixed embedded CPython/SQLite WASM. Cross-package CPU competition caused non-performance containment tests to hit their existing execution deadlines on the cloud worker. Packages run sequentially; goroutine concurrency, race instrumentation, cancellation/deadline negative assertions and both 90% floors remain enforced. The positive four-invocation state-isolation test uses a supported15-second budget for two queued waves of fresh interpreter startup under race instrumentation; every payload must still be1. It is not a startup performance benchmark. No failed test is skipped or retried by CI.
 
 ## Responsive layout synchronization
 
@@ -144,15 +159,17 @@ from verified merge enforcement.
 
 ## Pinned TLC download transport
 
-Both formal invocations keep the official `tlaplus/tlaplus` 1.7.4 release URL
+TLC runs only in Formal validation, which runs every registered model under
+`--merge-gate`; the `ci` job no longer repeats the same registry without it.
+The Formal validation invocation keeps the official `tlaplus/tlaplus` 1.7.4 release URL
 and the repository SHA-256 check before Java. A transient transfer can retry at
 most three times after the first request. Connection and per-transfer limits
 are 10s/30s with a 60s retry window; the outer Ubuntu `timeout` sends TERM at
 95s and KILL after a further 5s if required. These limits apply to download
 transport, separately from unchanged model bounds and TLC deadlines.
 
-The six required loopback tests run before either workflow downloads the tool.
-They read the actual configured commands and verify 504 recovery, 403 refusal
+The six required loopback tests run before Formal validation downloads the tool.
+They read the actual configured command, refuse a TLC download in `ci.yml`, and verify 504 recovery, 403 refusal
 without retry, exhausted retries, a shortened fixture-only outer deadline, and
 rejection of dummy bytes by the real checksum checker before any Java/model run.
 Checksum failure is outside the transport retry. Exhaustion or refusal remains
@@ -162,7 +179,7 @@ are not established by that fixture. Hosted checks validate the actual runner.
 
 ## Browser acquisition budgets
 
-Both browser jobs install the pinned Python test requirements, the complete
+Every browser job (`console-acceptance`, `platform-audit` and `e2e`) installs the pinned Python test requirements, the complete
 Playwright Chromium system dependencies (including fonts), and the matching
 browser in separate required steps, with budgets of 3, 12 and 5 minutes. The
 focused Japanese job has a 30-minute overall budget for build, acquisition,
