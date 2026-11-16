@@ -1,85 +1,40 @@
 {
   "version": 1,
-  "base_sha": "eff384a888a0432399faaeccdf634b06655b2369",
+  "base_sha": "123247431b869937ca60bc8077105452f6caff2a",
   "changes": [
     {
-      "path": "docs/ci.md",
-      "sha256": "f8f6d0ab3f6fd8407a9ccd1f74b1641f3aa9849a5ad443d4d981621d84a19b88",
-      "disposition": "documentation",
-      "reason": "Explains how to reproduce the Go gate locally and why an auto-switched toolchain makes it exit 2; no runtime behavior.",
+      "path": "internal/server/web/app.css",
+      "sha256": "b56182239b077e637722031bd7532c33a748e6fdce3fc7a07acc49f5d89cf38a",
+      "disposition": "presentation",
+      "reason": "Service flyout CSS layout and its exact generated asset metadata only; no API, authority, persistence or runtime state transitions change. Browser regression remains required.",
       "models": []
     },
     {
-      "path": "docs/start.md",
-      "sha256": "e4e04ae7d6d250af8eafea51be11cd8deb607d7293aac51a43af0e9d128c02fc",
-      "disposition": "documentation",
-      "reason": "Documents the accepted bundle archive ending, the emulator tree and CreateStack response timing observed in a real run; no runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "internal/server/terminal_channel.go",
-      "sha256": "ed0673949262fe3b0fcaa26a1a231a4d6c0beaeee7e429eb1a7527f75cc99005",
-      "disposition": "modeled",
-      "reason": "Transport liveness for the participant data channel: the server pings the peer and renews the read deadline on its answer instead of closing after 60 seconds without typed input. Admission, token use, generation and driver ownership are unchanged.",
-      "models": [
-        {
-          "id": "ParticipantSessionLifecycle",
-          "properties": [
-            "ResumeKeepsDriver",
-            "NoPostRevokeOutput",
-            "RevokeIsNotExit"
-          ],
-          "limits": "The model has no numeric timeouts, WebSocket framing or liveness, so the ping cadence and idle limit are not modeled. It still covers what a channel drop may do: detaching a consumer keeps the same driver for Resume, emits nothing after revocation and is not a guest exit. terminal_keepalive_test.go establishes the liveness behavior natively."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/terminal_keepalive_test.go",
-      "sha256": "20517ed498c18e10f27564fd4e02e56a72bfa5ac0fc415f8ff5b09ebe503f2ef",
+      "path": "test/e2e/service_locale.py",
+      "sha256": "ae222831d40c4ee3b483a77f14432bc3019250754c884ea9de8ea234cd21d3e5",
       "disposition": "test-support",
-      "reason": "Regression test: a participant answering pings stays attached past the idle limit, a silent peer is dropped within it, and the session then resumes.",
+      "reason": "Browser regression coverage for constrained flyout wheel scrolling, viewport bounds and dismissal focus; no production behavior.",
       "models": []
     },
     {
-      "path": "internal/server/terminal_session_flow_test.go",
-      "sha256": "91af15001b522bbc0e2b8a8a21af1bce75121389ca5f41b47358b66553680495",
-      "disposition": "test-support",
-      "reason": "Test fixture only: lets a flow test choose short liveness durations; existing flow assertions are unchanged.",
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "4dabee02e975e440a230fc5d7b110a238db0d5f3d4aa4e111d0aaea8d6f9b75a",
+      "disposition": "presentation",
+      "reason": "Service flyout CSS layout and its exact generated asset metadata only; no API, authority, persistence or runtime state transitions change. Browser regression remains required.",
       "models": []
     },
     {
-      "path": "test/battle/README.md",
-      "sha256": "511ea5ff6f74e0a5b756d0779bcd51af1075c97f2f0c580aa78274bda722bfb3",
-      "disposition": "test-support",
-      "reason": "Describes the opt-in local Battle rehearsal, its bundle inputs and the limits of what a pass shows; not executed by the simulator or CI.",
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "3b0a32e50aca6da7d6170cb50b95f94d94dd05c59006be65837971757ae7bb7a",
+      "disposition": "presentation",
+      "reason": "Service flyout CSS layout and its exact generated asset metadata only; no API, authority, persistence or runtime state transitions change. Browser regression remains required.",
       "models": []
     },
     {
-      "path": "test/battle/image/builder-user-data.sh",
-      "sha256": "e333d5c3a2490d6387326035bf475d9215e849b5fdb56290c95125c8eafb7f36",
-      "disposition": "test-support",
-      "reason": "Guest-image builder input for the local rehearsal; runs only inside a throwaway builder guest, never in the simulator or a Battle VM.",
-      "models": []
-    },
-    {
-      "path": "test/battle/image/repo_relay.py",
-      "sha256": "3af0e8b81c6987bf50478f3761cd2d4c7c656173b4d72081336a0c9c44c3183a",
-      "disposition": "test-support",
-      "reason": "Loopback build helper that relays the official package repository for the rehearsal image build; not simulator runtime.",
-      "models": []
-    },
-    {
-      "path": "test/battle/pack_bundle.py",
-      "sha256": "7284042d69e9a0992c47495300512db7ff52c31015d7e2f80253d0d3037a768c",
-      "disposition": "test-support",
-      "reason": "Packs a rehearsal asset tree into the archive and manifest the existing loader verifies; executes nothing and is not simulator runtime.",
-      "models": []
-    },
-    {
-      "path": "test/battle/rehearsal.py",
-      "sha256": "7dbfaa9deb9bba6c9c43dd3a34d4674c63c44cace27162b7f9df65a9c6776cc6",
-      "disposition": "test-support",
-      "reason": "Opt-in local driver that exercises the existing authenticated HTTP surfaces against a real guest; adds no simulator behavior and is not run by CI.",
+      "path": "tools/console/src/console.css",
+      "sha256": "f18c1754a163e47f5da89b62fe6013ffbac835293d4dbad774a9a9fc60dcd6d8",
+      "disposition": "presentation",
+      "reason": "Service flyout CSS layout and its exact generated asset metadata only; no API, authority, persistence or runtime state transitions change. Browser regression remains required.",
       "models": []
     }
   ]
