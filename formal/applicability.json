@@ -1,19 +1,66 @@
 {
   "version": 1,
-  "base_sha": "721eed7906e643657f5c8e398e33323d14adb7e7",
+  "base_sha": "a262c99922141bcf6bfcebdf218c87464ec43593",
   "changes": [
     {
-      "path": "internal/aws/ec2_runtime_publication_fault_linux_test.go",
-      "sha256": "39a4822aded78ad85e610b8753987b24fa0a9ce09d48ecaced32c3eaf2d5f4d8",
-      "disposition": "test-support",
-      "reason": "Linux-only regression test: an injected SQLite refusal of the ready state update must leave the EC2 launch sealed and its cleanup retained. It changes no runtime, state machine or authority.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "f23a75511cf60dff3f4240cae96442bf3d40abed2a2d4cff0605f63fe1469a14",
+      "disposition": "formal-infrastructure",
+      "reason": "Runs the same Go, static, console, platform and audit checks as parallel jobs, splits the two largest Go packages by test name, and moves make e2e to release and manual runs. TLC stays in Formal validation. No runtime, state or authority changes.",
       "models": []
     },
     {
-      "path": "test/e2e/landing_topology.py",
-      "sha256": "749cdeaa369c3951ec8f0a3003b354f16b40d27f7b109a2a2717fccf80b0f8b7",
+      "path": "Makefile",
+      "sha256": "c1993e243122e7eee954c77e0898f5e6d043a845326359e9e582d2c7a6055e46",
+      "disposition": "modeled",
+      "reason": "Preserves the registered start/test-start startup and token targets unchanged while splitting make test into test-scripts and test-go; make before-commit still runs the same commands for the whole module.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Existing finite startup/token abstraction is unchanged. This test-recipe split is not modeled and is validated by the coverage gate regression suite and CI; no claim of implementation refinement."
+        }
+      ]
+    },
+    {
+      "path": "docs/ci.md",
+      "sha256": "ba8d4099c8058f9568cbc8e5fdca95cfe5f6e4fe38be3f280bfbc28b910c35dd",
+      "disposition": "documentation",
+      "reason": "Documents the sharded CI layout, the exact-once coverage merge and where E2E and TLC now run.",
+      "models": []
+    },
+    {
+      "path": "scripts/check-coverage.py",
+      "sha256": "227065bc6871862d79343aafc0dd7d195b0007961a78c34c71cdfff12b4dff53",
+      "disposition": "validation-tooling",
+      "reason": "Adds a merge subcommand that refuses shard profiles unless every package ran exactly once at one head, and every listed test of a split package ran exactly once. The 90% floors are unchanged.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-coverage-gate.py",
+      "sha256": "27402e63c188f86088eda6aaa99f695cd7fbcfac44642c51d97d6540bdaaf726",
+      "disposition": "validation-tooling",
+      "reason": "Regression tests for the shard merge: missing, repeated or unexpected packages or tests, another head, mismatched modes and a missing profile fail.",
+      "models": []
+    },
+    {
+      "path": "test/ci/release_pipeline.py",
+      "sha256": "99b37f573bc2526560067b3bb6aedb0d52e8cb7788b19ad6ee61d57668fe09fe",
       "disposition": "test-support",
-      "reason": "Browser acceptance test for the landing topology canvas, reused unchanged from PR 478. It accepts an unpainted origin or the painted position within one pixel and changes no runtime, state or authority.",
+      "reason": "Updates the Go pin count for the new jobs and asserts that release validation still runs make e2e.",
+      "models": []
+    },
+    {
+      "path": "test/ci/tla_download.py",
+      "sha256": "db684634daeac677ffa2c6e91820d0a6f9020fd5941fc9944aa206eef4d1a867",
+      "disposition": "test-support",
+      "reason": "Checks the single TLC download in Formal validation and refuses one in ci.yml.",
       "models": []
     }
   ]
