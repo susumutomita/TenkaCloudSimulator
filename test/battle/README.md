@@ -66,7 +66,11 @@ of the copy prepares it:
 
 1. `image/repo_relay.py LOCAL_DIR PROVENANCE.jsonl 8099` on the build machine.
    It relays `cdn.amazonlinux.com` over verified TLS and records the SHA-256 of
-   every file it serves. RPM signatures are still checked inside the guest.
+   every file it serves. It uses the build machine's system CA trust by default;
+   set `SSL_CERT_FILE` to a valid PEM CA bundle when an explicit trust source is
+   needed. A missing or invalid explicit CA file stops the relay; certificate and
+   hostname verification remain enabled. RPM signatures are still checked inside
+   the guest.
 2. Build `guest/ssm-relay` and package it with
    `scripts/guest-image/session-overlay.py`; put the tar in `LOCAL_DIR` and its
    digest in `image/builder-user-data.sh`.
