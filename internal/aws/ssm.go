@@ -43,6 +43,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveEC2Read(w, r)
 		return
 	}
+	if isCloudFrontVpcOrigin(r) {
+		g.CloudFront.ServeHTTP(g, w, r)
+		return
+	}
 	if isELB(r) {
 		g.serveELB(w, r)
 		return

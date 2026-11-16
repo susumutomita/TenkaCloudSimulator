@@ -151,13 +151,19 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		_ = store.Close()
 		return nil, nil, err
 	}
+	cloudFront, err := aws.NewCloudFrontStore(store.Database())
+	if err != nil {
+		_ = lambdas.Close()
+		_ = store.Close()
+		return nil, nil, err
+	}
 	catalogEngine, err := catalog.New(store.Database(), catalog.Config{Regions: aws.Regions, Account: "000000000000", DefaultPrincipal: core.Administrator, Authorize: identities.DecisionContext}, catalog.Services())
 	if err != nil {
 		_ = lambdas.Close()
 		_ = store.Close()
 		return nil, nil, err
 	}
-	gateway := &aws.Gateway{AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, Route53: route53, WAF: waf, SNS: snsTopics, Catalog: catalogEngine, CatalogOwns: catalogEngine.Owns, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
+	gateway := &aws.Gateway{AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, Catalog: catalogEngine, CatalogOwns: catalogEngine.Owns, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
 	if options.commandAPI != nil {
 		gateway.Commands = options.commandAPI()
 	}
