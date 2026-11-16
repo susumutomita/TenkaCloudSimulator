@@ -2787,7 +2787,20 @@ def load_registry(root, relative='formal/models.json'):
     return registry
 
 
+_MUTANTS = {}
+
+
 def apply_mutant(source, name, mutant):
+    # load_registry re-applies every mutant on each call; the result depends only on these inputs.
+    key = (source, name, repr(mutant))
+    if key not in _MUTANTS:
+        if len(_MUTANTS) > 20000:
+            _MUTANTS.clear()
+        _MUTANTS[key] = _apply_mutant(source, name, mutant)
+    return _MUTANTS[key]
+
+
+def _apply_mutant(source, name, mutant):
     require(isinstance(mutant['edits'], list) and mutant['edits'], 'empty mutation')
     changed = source
     for edit in mutant['edits']:
