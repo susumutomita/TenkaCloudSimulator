@@ -359,27 +359,39 @@ func (s *OwnedProbeSession) CommitProbeHTTPObservation(ctx context.Context, v Pr
 		return err
 	}
 	defer func() { s.gate <- struct{}{} }()
-	if len(s.evidence) >= s.config.EvidenceLimit {
-		return ErrCapacity
-	}
-	before := len(s.evidence)
+	// Evidence is a rolling record of the newest EvidenceLimit observations, so a
+	// long-lived session keeps probing instead of refusing once the record fills.
+	before := s.evidence
 	copyV := v
 	completed := false
 	defer func() {
 		if !completed {
-			s.evidence = s.evidence[:before]
+			s.evidence = before
 			s.Revoke()
 		}
 	}()
-	err := s.transaction(ctx, OwnedProbeAcceptance{NIC: s.nic(), Observation: &copyV}, func() error { s.evidence = append(s.evidence, v); return nil })
+	err := s.transaction(ctx, OwnedProbeAcceptance{NIC: s.nic(), Observation: &copyV}, func() error {
+		s.evidence = appendEvidence(before, v, s.config.EvidenceLimit)
+		return nil
+	})
 	if err != nil {
-		s.evidence = s.evidence[:before]
+		s.evidence = before
 	}
 	completed = true
 	return err
 }
 
-// Evidence is a copied local record, not scoring or whole-NIC cleanup proof.
+// appendEvidence never writes into the visible elements of evidence, so a failed
+// transaction can restore the previous slice unchanged.
+func appendEvidence(evidence []ProbeHTTPObservation, v ProbeHTTPObservation, limit int) []ProbeHTTPObservation {
+	if len(evidence) < limit {
+		return append(evidence, v)
+	}
+	return append(append(make([]ProbeHTTPObservation, 0, limit), evidence[len(evidence)-limit+1:]...), v)
+}
+
+// Evidence is a copied local record of at most EvidenceLimit newest observations,
+// not scoring or whole-NIC cleanup proof.
 func (s *OwnedProbeSession) Evidence(ctx context.Context) ([]ProbeHTTPObservation, error) {
 	if s == nil || nilInterface(ctx) {
 		return nil, ErrOwnedProbeSession

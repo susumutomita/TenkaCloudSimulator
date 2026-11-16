@@ -100,6 +100,7 @@ type Transport struct {
 	budgetMu        sync.Mutex
 	packets         int
 	bytes           int
+	budgetWindow    time.Time
 	err             error
 	closeErr        error
 }
@@ -480,6 +481,9 @@ func (t *Transport) account(n int) error {
 	frames, bytes := maxFrames, maxBytes
 	if t.persistent != nil {
 		frames, bytes = maxPersistentFrames, maxPersistentBytes
+		if now := t.persistent.clock(); !now.Before(t.budgetWindow.Add(persistentBudgetWindow)) {
+			t.budgetWindow, t.packets, t.bytes = now, 0, 0
+		}
 	}
 	if n < guestnet.MinFrameBytes || n > guestnet.MaxFrameBytes || t.packets >= frames || t.bytes > bytes-n {
 		return ErrCapacity

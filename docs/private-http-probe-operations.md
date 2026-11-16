@@ -10,9 +10,13 @@ No endpoint, production capability, Host job metadata, or scoring is provided.
 
 The NIC owns a map of at most `guestnet.MaxProbeSessions` (1024) handles. A second
 transport wrapper around that same NIC cannot create another retention budget.
-Handles and failure tombstones are never removed, evicted, renewed, or reused.
-The existing TCP session-attempt budget remains independently enforced; legacy
-probes and failed operation admissions do not replenish either budget.
+Handles and failure tombstones are never renewed or reused. Raw handles are never
+removed. When the map is full, a scoped handle is forgotten only if it has settled
+and `HTTPProbeOperationRetention` (one minute) has passed since its original
+caller deadline. A replay of the same command carries that same past deadline,
+so scoped `Start` rejects it before retention: forgetting never causes a second
+dispatch. A forgotten key reads as unknown, and the Host must not reuse a key for
+a new command. The TCP session registry enforces its own tuple limits separately.
 
 A repeated key with the exact original port/path returns the same handle before
 examining a replacement context or revalidating NIC admission. A different target

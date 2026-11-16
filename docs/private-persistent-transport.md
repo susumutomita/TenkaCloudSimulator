@@ -64,8 +64,10 @@ serialize physical/policy revocation with the entire effect; context checks do
 not eliminate a check-to-write race or recall an entered write.
 
 All incoming and outgoing traffic, including ARP, invalid and retired frames,
-shares a fixed attachment budget of 65536 frames and 64 MiB. The registry, Engine
-and passive service retain their independent smaller budgets. No counter resets
+shares an attachment budget of 65536 frames and 64 MiB per fixed one-minute
+window. Exceeding a window's budget ends the attachment; the next window starts
+fresh, so a long attachment is not limited by its total traffic. The registry,
+Engine and passive service retain their independent budgets. No counter resets
 when a probe closes. An IMDS service retains its existing eight lifetime TCP
 attempts and token namespace; this multiplexer does not replenish either.
 
