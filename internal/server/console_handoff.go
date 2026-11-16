@@ -29,6 +29,8 @@ func consoleScopeFromRequest(r *http.Request) any { return r.Context().Value(con
 func addConsoleHandoffCapabilities(w http.ResponseWriter, r *http.Request, capabilities map[string]any) map[string]any {
 	if w.Header().Get("X-Simulator-Authentication") == "required" {
 		capabilities["consoleHandoff"] = map[string]any{"version": 1, "services": []string{"ssm-parameter"}}
+		// Native SigV4 is verified by the same Access wrapper; an embedding without it has none.
+		capabilities["nativeSdk"] = map[string]any{"version": 1, "services": aws.NativeSDKServices}
 		if scope := consoleScopeFromRequest(r); scope != nil {
 			capabilities["consoleScope"] = scope
 		}

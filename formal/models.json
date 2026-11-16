@@ -5485,7 +5485,8 @@
    "source_scope": [
     "internal/server/landing.go",
     "internal/server/access.go",
-    "internal/server/server.go"
+    "internal/server/server.go",
+    "internal/server/console_assets.go"
    ],
    "mutants": [
     {
@@ -18000,6 +18001,198 @@
    ],
    "bounds": "Exhaustive over one guest frame with every combination of EtherType class {ARP, IPv4, IPv6, other} and the six boolean classification facts (trusted ARP request, TCP parse, passive route, local destination, probe source-port range, owned-tuple peer validity). No seeds, symmetry or depth cutoff.",
    "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
+  },
+  {
+   "id": "EC2ReadDiscovery",
+   "model": "formal/EC2ReadDiscovery.tla",
+   "config": "formal/EC2ReadDiscovery.cfg",
+   "bounds": "Two regions, two stack owners, Boolean allow/deny and one atomic read observation.",
+   "properties": [
+    "TypeOK",
+    "AuthorizedRead",
+    "RegionBound",
+    "OwnedRead"
+   ],
+   "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties.",
+   "source_scope": [
+    "internal/aws/ec2_read.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "MissingAllow",
+     "edits": [
+      {
+       "old": "/\\ allow /\\ ~deny",
+       "new": "/\\ TRUE /\\ ~deny",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizedRead"
+    },
+    {
+     "id": "MissingDeny",
+     "edits": [
+      {
+       "old": "/\\ allow /\\ ~deny",
+       "new": "/\\ allow /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizedRead"
+    },
+    {
+     "id": "MissingRegion",
+     "edits": [
+      {
+       "old": "/\\ requestRegion = recordRegion",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RegionBound"
+    },
+    {
+     "id": "MissingOwner",
+     "edits": [
+      {
+       "old": "/\\ claimedOwner = storedOwner",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OwnedRead"
+    }
+   ]
+  },
+  {
+   "id": "LambdaExecutionRoleBridge",
+   "model": "formal/LambdaExecutionRoleBridge.tla",
+   "config": "formal/LambdaExecutionRoleBridge.cfg",
+   "bounds": "Exhaustive over two resources, every subset as the saved execution-role grant and every subset as the caller's request-context grant, and both cancellation states, for one bridge call.",
+   "properties": [
+    "TypeOK",
+    "NoCallerEscalation",
+    "NoCallerNarrowing",
+    "CanceledNotDispatched"
+   ],
+   "limits": "Decision-source abstraction of the execution-role SDK bridge only: the decision depends on the saved role and never on the caller's session policy, identity or console/terminal boundary, and a canceled invocation dispatches nothing. Does not model IAM policy parsing or evaluation, SSM/S3 handlers, Go context implementation, WASI containment, timing, payload limits or a Go refinement. Native tests (lambda_bridge_test.go, lambda_bridge_cancel_test.go and the signed-session server test) establish the implementation properties.",
+   "source_scope": [
+    "internal/aws/lambda_bridge.go",
+    "internal/aws/lambda_bridge_test.go",
+    "internal/aws/lambda_bridge_cancel_test.go"
+   ],
+   "mutants": [
+    {
+     "id": "InheritCallerSession",
+     "edits": [
+      {
+       "old": "allowed |-> res \\in roleGrant]",
+       "new": "allowed |-> res \\in roleGrant \\cup callerGrant]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoCallerEscalation"
+    },
+    {
+     "id": "IntersectCallerSession",
+     "edits": [
+      {
+       "old": "allowed |-> res \\in roleGrant]",
+       "new": "allowed |-> res \\in roleGrant \\cap callerGrant]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoCallerNarrowing"
+    },
+    {
+     "id": "DispatchAfterCancel",
+     "edits": [
+      {
+       "old": " /\\ ~canceled",
+       "new": " /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CanceledNotDispatched"
+    }
+   ]
+  },
+  {
+   "id": "LambdaSourceEdit",
+   "model": "formal/LambdaSourceEdit.tla",
+   "config": "formal/LambdaSourceEdit.cfg",
+   "bounds": "Two immutable revision identities, Boolean read/update grants, parameter-boundary and package-validity flags, one read or update outcome.",
+   "properties": [
+    "TypeOK",
+    "AuthorizedRead",
+    "AuthorizedWrite",
+    "FreshWrite",
+    "ValidWrite",
+    "PreservedPackage"
+   ],
+   "limits": "Admission and frame-condition abstraction only. Revision identities abstract nonreused generation tokens. ZIP parsing, UTF8, compression, source text, cryptographic token generation, SQL concurrency and browser/CSP behavior require implementation regression tests; not a Go refinement proof.",
+   "source_scope": [
+    "internal/aws/lambda_source.go"
+   ],
+   "mutants": [
+    {
+     "id": "ReadWithoutGrant",
+     "edits": [
+      {
+       "old": "/\\ allowGet /\\ ~bounded",
+       "new": "/\\ TRUE /\\ ~bounded",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizedRead"
+    },
+    {
+     "id": "WriteWithoutGrant",
+     "edits": [
+      {
+       "old": "/\\ allowGet /\\ allowUpdate /\\ ~bounded",
+       "new": "/\\ allowGet /\\ TRUE /\\ ~bounded",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AuthorizedWrite"
+    },
+    {
+     "id": "StaleWrite",
+     "edits": [
+      {
+       "old": "/\\ revision = expected /\\ valid",
+       "new": "/\\ TRUE /\\ valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FreshWrite"
+    },
+    {
+     "id": "InvalidWrite",
+     "edits": [
+      {
+       "old": "/\\ revision = expected /\\ valid",
+       "new": "/\\ revision = expected /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValidWrite"
+    },
+    {
+     "id": "LoseOtherEntries",
+     "edits": [
+      {
+       "old": "valid |-> valid, helper |-> 1, config |-> 1",
+       "new": "valid |-> valid, helper |-> 0, config |-> 1",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PreservedPackage"
+    }
+   ]
   }
  ]
 }
