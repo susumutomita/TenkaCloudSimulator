@@ -149,9 +149,14 @@ jobs:
             go test -race -coverpkg=./... -list '.*' $packages | { grep -E '^(Test|Example|Fuzz)' || true; } | sort > reports/shard/listed.txt
             awk -v index_="${PART%/*}" -v count="${PART#*/}" '(NR - 1) % count == index_' reports/shard/listed.txt > reports/shard/tests.txt
             test -s reports/shard/tests.txt
-            export GO_TEST_RUN="^($(paste -sd'|' reports/shard/tests.txt))\$"
+            names="$(paste -sd'|' reports/shard/tests.txt)"
+            printf '^(%s)$' "$names" > reports/shard/run.txt
+            make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out" GO_TEST_RUN_FILE=reports/shard/run.txt | tee reports/shard/test.log
+            { grep -E '^=== RUN   [^/ ]+$' reports/shard/test.log || true; } | sed 's/^=== RUN   //' | sort -u > reports/shard/ran.txt
+            diff reports/shard/tests.txt reports/shard/ran.txt
+          else
+            make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out"
           fi
-          make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out"
           if [ -n "$PART" ]; then
             jq -n --arg index "${PART%/*}" --arg count "${PART#*/}" --rawfile listed reports/shard/listed.txt --rawfile tests reports/shard/tests.txt \
               '{index: ($index | tonumber), count: ($count | tonumber), listed: ($listed | split("\n") | map(select(length > 0))), tests: ($tests | split("\n") | map(select(length > 0)))}' > reports/shard/part.json

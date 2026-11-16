@@ -52,7 +52,7 @@ def check_parts(packages, parts):
     count, listed = parts[0]['count'], parts[0]['listed']
     if type(count) is not int or not isinstance(listed, list) or not listed or len(set(listed)) != len(listed):
         raise ValueError('invalid listed tests: ' + name)
-    if any(p['count'] != count or p['listed'] != listed for p in parts) or sorted(p['index'] for p in parts) != list(range(count)):
+    if any(type(p['index']) is not int or p['count'] != count or p['listed'] != listed for p in parts) or sorted(p['index'] for p in parts) != list(range(count)):
         raise ValueError('shard parts are missing, repeated or from another split: ' + name)
     ran = [test for p in parts for test in p['tests']]
     if len(ran) != len(set(ran)) or set(ran) != set(listed):

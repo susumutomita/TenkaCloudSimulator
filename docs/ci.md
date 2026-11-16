@@ -15,7 +15,8 @@ The jobs below run in parallel, and the required `ci` job passes only when
 2. `go-test`: seven shards run the full-module race tests with `-coverpkg=./...`.
    Each shard runs its packages with `-p 1` and records its head and package list.
    `internal/server` and `internal/aws` are each split into two shards: both list
-   the package's tests with `go test -list` and run alternate names with `-run`.
+   the package's tests with `go test -list`, run alternate names with `-run`, and
+   fail unless the verbose log shows that exactly those top-level tests ran.
 3. `platform-audit`: the actual platform hello-world lifecycle, participant browser,
    responsive reflow, the `make start` token check and the existing console
    accessibility audit. `console-acceptance` runs the focused service console checks.

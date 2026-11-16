@@ -131,10 +131,26 @@ class ShardMerge(unittest.TestCase):
             'other listing': [first, {'index': 1, 'count': 2, 'listed': ['TestB'], 'tests': ['TestB']}],
             'other count': [first, {'index': 1, 'count': 3, 'listed': listed, 'tests': ['TestB']}],
             'empty listing': [{'index': 0, 'count': 1, 'listed': [], 'tests': []}],
+            'boolean index': [{'index': False, 'count': 2, 'listed': listed, 'tests': ['TestA', 'TestC']},
+                              {'index': True, 'count': 2, 'listed': listed, 'tests': ['TestB']}],
         }
         for name, parts in cases.items():
             with self.subTest(name):
                 code, merged = self.run_merge(self.split(*parts))
+                self.assertNotEqual(code, 0)
+                self.assertIsNone(merged)
+
+    def test_split_package_also_claimed_elsewhere_fails(self):
+        listed = ['TestA', 'TestB']
+        whole = {'index': 0, 'count': 1, 'listed': listed, 'tests': listed}
+        profile = 'mode: atomic\nb.go:1.1,2.1 2 1\n'
+        cases = {
+            'split and unsplit': self.split(whole) + [('unsplit', HEAD, ['example/b'], profile)],
+            'overlapping split groups': self.split(whole) + [('other', HEAD, ['example/c'], profile, whole)],
+        }
+        for name, shards in cases.items():
+            with self.subTest(name):
+                code, merged = self.run_merge(shards)
                 self.assertNotEqual(code, 0)
                 self.assertIsNone(merged)
 

@@ -35,8 +35,8 @@ test-go:
 	mkdir -p reports
 	# Packages each compile fixed WASM runtimes. Avoid cross-package CPU contention;
 	# goroutine/race and deadline assertions inside each test remain unchanged.
-	# CI may set GO_TEST_RUN in the environment to run one share of a package's tests.
-	$(GO) test -p 1 -race -coverpkg=./... -coverprofile=$(COVERAGE_PROFILE) $${GO_TEST_RUN:+-run "$$GO_TEST_RUN"} $(GO_TEST_PACKAGES)
+	# CI names a file holding a -run pattern to run one share of a package's tests.
+	$(GO) test -p 1 -race -coverpkg=./... -coverprofile=$(COVERAGE_PROFILE) $(if $(GO_TEST_RUN_FILE),-v -run "$$(cat '$(GO_TEST_RUN_FILE)')") $(GO_TEST_PACKAGES)
 
 vet:
 	$(GO) vet ./...
