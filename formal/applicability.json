@@ -1,66 +1,61 @@
 {
   "version": 1,
-  "base_sha": "a262c99922141bcf6bfcebdf218c87464ec43593",
+  "base_sha": "372884bddab9752e8ef361c9e08168ff36f9efc7",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "f23a75511cf60dff3f4240cae96442bf3d40abed2a2d4cff0605f63fe1469a14",
+      "path": ".github/workflows/formal.yml",
+      "sha256": "646fa229fa64b44580d32aa56a1daaf540e21e8e3cf4e227811eeb91fd14761f",
       "disposition": "formal-infrastructure",
-      "reason": "Runs the same Go, static, console, platform and audit checks as parallel jobs, splits the two largest Go packages by test name, and moves make e2e to release and manual runs. TLC stays in Formal validation. No runtime, state or authority changes.",
+      "reason": "Checks exact-blob applicability in the required Formal validation job on every change. For release tags and manual runs it also runs the gate tests and the TLC registry as ten serial shard jobs, and accepts the shards only through check-formal.py --combine.",
       "models": []
-    },
-    {
-      "path": "Makefile",
-      "sha256": "c1993e243122e7eee954c77e0898f5e6d043a845326359e9e582d2c7a6055e46",
-      "disposition": "modeled",
-      "reason": "Preserves the registered start/test-start startup and token targets unchanged while splitting make test into test-scripts and test-go; make before-commit still runs the same commands for the whole module.",
-      "models": [
-        {
-          "id": "StartupTokenVisibility",
-          "properties": [
-            "TypeOK",
-            "FileIdentityFrozen",
-            "CreatedFilePrivate",
-            "HistoryVisibility",
-            "InvalidFileNeverEmits"
-          ],
-          "limits": "Existing finite startup/token abstraction is unchanged. This test-recipe split is not modeled and is validated by the coverage gate regression suite and CI; no claim of implementation refinement."
-        }
-      ]
     },
     {
       "path": "docs/ci.md",
-      "sha256": "ba8d4099c8058f9568cbc8e5fdca95cfe5f6e4fe38be3f280bfbc28b910c35dd",
+      "sha256": "2c096f9b5558e4a2ea5e4419c91cebd6fb3dd5a0b52de3f714c4d631d91d6902",
       "disposition": "documentation",
-      "reason": "Documents the sharded CI layout, the exact-once coverage merge and where E2E and TLC now run.",
+      "reason": "Documents that pull requests check applicability only and that release tags run the ten TLC shards and the combine check.",
       "models": []
     },
     {
-      "path": "scripts/check-coverage.py",
-      "sha256": "227065bc6871862d79343aafc0dd7d195b0007961a78c34c71cdfff12b4dff53",
-      "disposition": "validation-tooling",
-      "reason": "Adds a merge subcommand that refuses shard profiles unless every package ran exactly once at one head, and every listed test of a split package ran exactly once. The 90% floors are unchanged.",
+      "path": "docs/formal-validation.md",
+      "sha256": "c7b0863f8da6f6504d97150fb4e97a3aba013581bd6e525ed90b67e53d8884cd",
+      "disposition": "documentation",
+      "reason": "Documents the release-only TLC run, the case-position shards and the combined evidence.",
       "models": []
     },
     {
-      "path": "scripts/test-coverage-gate.py",
-      "sha256": "27402e63c188f86088eda6aaa99f695cd7fbcfac44642c51d97d6540bdaaf726",
-      "disposition": "validation-tooling",
-      "reason": "Regression tests for the shard merge: missing, repeated or unexpected packages or tests, another head, mismatched modes and a missing profile fail.",
+      "path": "formal/README.md",
+      "sha256": "c776067343380e68bf375f1df0c7811c580c268fb40a72e712e8fe522b14b68c",
+      "disposition": "documentation",
+      "reason": "Updates the execution budget for the applicability-only pull request job and the release shard jobs.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "a1c4de949a183478cc9133987e106ee6284c9312075bc03fded0c7dce5db8190",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds case-position shards to run_suite and combine_shards, which accepts shard evidence only as one full merge-gate run of the same head, and reuses applied mutants within one process. Model bounds, mutants, deadlines and TLC options are unchanged.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "0d7de798948f531336c479543f5af722386e5c023504f6f8148c6e705c2cb479",
+      "disposition": "formal-infrastructure",
+      "reason": "Covers invalid shards and every combine refusal, and adds an optional worker-process runner that requires every test to run and pass.",
       "models": []
     },
     {
       "path": "test/ci/release_pipeline.py",
-      "sha256": "99b37f573bc2526560067b3bb6aedb0d52e8cb7788b19ad6ee61d57668fe09fe",
+      "sha256": "9444ecce09d4c03032cc081f800344a808875e3432a868084f54e2ce579b5e96",
       "disposition": "test-support",
-      "reason": "Updates the Go pin count for the new jobs and asserts that release validation still runs make e2e.",
+      "reason": "Fails if TLC or the gate tests run on pull requests, if the applicability check becomes conditional, or if the combine step runs outside release mode.",
       "models": []
     },
     {
       "path": "test/ci/tla_download.py",
-      "sha256": "db684634daeac677ffa2c6e91820d0a6f9020fd5941fc9944aa206eef4d1a867",
+      "sha256": "6833720a0cb61e7e21d5df297911394cc499e6ab5988ac50c56bd75998f96d25",
       "disposition": "test-support",
-      "reason": "Checks the single TLC download in Formal validation and refuses one in ci.yml.",
+      "reason": "Pins the sharded Formal validation command that follows the TLC download.",
       "models": []
     }
   ]
