@@ -1,0 +1,257 @@
+//go:build darwin || linux
+
+package main
+
+import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"crypto/sha512"
+	"encoding/binary"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"syscall"
+	"testing"
+	"time"
+)
+
+func TestInvalidOriginalDoesNotCreateCopy(t *testing.T) {
+	root, e := filepath.EvalSymlinks(t.TempDir())
+	if e != nil {
+		t.Fatal(e)
+	}
+	original := filepath.Join(root, "original")
+	if e = os.WriteFile(original, []byte("not the official image"), 0600); e != nil {
+		t.Fatal(e)
+	}
+	alias := filepath.Join(root, "alias")
+	if e = os.Symlink(original, alias); e != nil {
+		t.Fatal(e)
+	}
+	for _, path := range []string{"", filepath.Join(root, "missing"), alias, original, root} {
+		if _, e = verify(path, root); e == nil {
+			t.Fatal("invalid original accepted", path)
+		}
+	}
+	files, e := os.ReadDir(root)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if len(files) != 2 {
+		t.Fatal("created copy on invalid input", files)
+	}
+	data, _ := os.ReadFile(original)
+	if string(data) != "not the official image" {
+		t.Fatal("original changed")
+	}
+}
+
+func TestPinnedCopyAdmissionAndFailureCleanup(t *testing.T) {
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	original := filepath.Join(root, "original")
+	scratch := filepath.Join(root, "scratch")
+	if err = os.Mkdir(scratch, 0700); err != nil {
+		t.Fatal(err)
+	}
+	header := make([]byte, 512)
+	copy(header, "QFI\xfb")
+	binary.BigEndian.PutUint32(header[4:], 3)
+	binary.BigEndian.PutUint32(header[20:], 9)
+	binary.BigEndian.PutUint64(header[24:], 4096)
+	binary.BigEndian.PutUint32(header[96:], 4)
+	binary.BigEndian.PutUint32(header[100:], 104)
+	for _, tc := range []struct {
+		name              string
+		badPin, badHeader bool
+	}{
+		{name: "verified copy"}, {name: "pin mismatch", badPin: true}, {name: "external backing rejected", badHeader: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			data := bytes.Clone(header)
+			if tc.badHeader {
+				binary.BigEndian.PutUint64(data[8:], 256)
+			}
+			if err := os.WriteFile(original, data, 0600); err != nil {
+				t.Fatal(err)
+			}
+			digest := fmt.Sprintf("%x", sha512.Sum512(data))
+			if tc.badPin {
+				digest = strings.Repeat("0", 128)
+			}
+			r, err := verifyPinned(original, scratch, int64(len(data)), digest)
+			if tc.badPin || tc.badHeader {
+				if err == nil || r != (result{}) {
+					t.Fatalf("failure accepted: %+v %v", r, err)
+				}
+			} else if err != nil || r.Result != "pinned-arm-image-preflight-pass" || !r.CopyRemoved || r.BattleReady || r.CopySHA256 != fmt.Sprintf("%x", sha256.Sum256(data)) {
+				t.Fatalf("copy evidence: %+v %v", r, err)
+			}
+			entries, err := os.ReadDir(scratch)
+			if err != nil || len(entries) != 0 {
+				t.Fatalf("copy leaked: %v %v", entries, err)
+			}
+			got, err := os.ReadFile(original)
+			if err != nil || !bytes.Equal(got, data) {
+				t.Fatalf("original modified: %v", err)
+			}
+		})
+	}
+	// The public entry point must not admit the synthetic fixture's self-pin.
+	if r, err := verify(original, scratch); err == nil || r != (result{}) {
+		t.Fatal("official pin was bypassed")
+	}
+}
+
+type failingOutput struct{}
+
+func (failingOutput) Write([]byte) (int, error) { return 0, errors.New("test output unavailable") }
+func TestCLIRejectsInvalidInputWithoutSuccessOutput(t *testing.T) {
+	for _, args := range [][]string{nil, {"--unknown"}, {"--original"}, {"extra"}, {"--original", "missing", "--scratch", "missing"}} {
+		var out, diagnostics bytes.Buffer
+		if code := run(args, &out, &diagnostics); code == 0 || out.Len() != 0 || diagnostics.Len() == 0 {
+			t.Fatalf("args=%v code=%d out=%q err=%q", args, code, out.String(), diagnostics.String())
+		}
+	}
+}
+func TestResultOutputFailureIsNotSuccess(t *testing.T) {
+	r := result{Result: "pinned-arm-image-preflight-pass", CopySHA256: strings.Repeat("a", 64), CopyRemoved: true}
+	var out, diagnostics bytes.Buffer
+	if code := writeResult(&out, &diagnostics, r); code != 0 || diagnostics.Len() != 0 {
+		t.Fatalf("code=%d err=%q", code, diagnostics.String())
+	}
+	var got result
+	if err := json.Unmarshal(out.Bytes(), &got); err != nil || got != r || got.BattleReady {
+		t.Fatalf("result=%+v err=%v", got, err)
+	}
+	if code := writeResult(failingOutput{}, &diagnostics, r); code == 0 || !strings.Contains(diagnostics.String(), "test output unavailable") {
+		t.Fatalf("write failure code=%d err=%q", code, diagnostics.String())
+	}
+}
+
+func TestCLIHelpDoesNotValidateOrEmitReceipt(t *testing.T) {
+	var out, diagnostics bytes.Buffer
+	if code := run([]string{"--help"}, &out, &diagnostics); code != 0 || out.Len() != 0 || !strings.Contains(diagnostics.String(), "canonical pinned original image") {
+		t.Fatalf("help code=%d out=%q err=%q", code, out.String(), diagnostics.String())
+	}
+}
+
+// Run the FIFO check in an owned, deadline-bounded subprocess so a regression
+// to blocking open cannot hang the suite or leave a blocked goroutine behind.
+func TestFIFOOriginalRejectedWithoutBlocking(t *testing.T) {
+	if os.Getenv("GUESTHVF_FIFO_HELPER") == "1" {
+		_, err := verify(os.Getenv("GUESTHVF_FIFO_PATH"), os.Getenv("GUESTHVF_FIFO_SCRATCH"))
+		if err == nil || !strings.Contains(err.Error(), "unexpected original type/size") {
+			t.Fatalf("FIFO rejection: %v", err)
+		}
+		return
+	}
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	fifo := filepath.Join(root, "original.fifo")
+	if err := syscall.Mkfifo(fifo, 0600); err != nil {
+		t.Fatal(err)
+	}
+	scratch := filepath.Join(root, "scratch")
+	if err := os.Mkdir(scratch, 0700); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestFIFOOriginalRejectedWithoutBlocking$")
+	cmd.Env = append(os.Environ(), "GUESTHVF_FIFO_HELPER=1", "GUESTHVF_FIFO_PATH="+fifo, "GUESTHVF_FIFO_SCRATCH="+scratch)
+	output, err := cmd.CombinedOutput()
+	if ctx.Err() != nil {
+		t.Fatalf("FIFO open exceeded deadline: %v", ctx.Err())
+	}
+	if err != nil {
+		t.Fatalf("FIFO helper: %v\n%s", err, output)
+	}
+	entries, err := os.ReadDir(scratch)
+	if err != nil || len(entries) != 0 {
+		t.Fatalf("copy created on FIFO input: %v %v", entries, err)
+	}
+	info, err := os.Lstat(fifo)
+	if err != nil || info.Mode()&os.ModeNamedPipe == 0 {
+		t.Fatalf("original FIFO changed: %v", err)
+	}
+}
+
+func TestPinnedOriginalWithInvalidScratchFailsWithoutMutation(t *testing.T) {
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	original := filepath.Join(root, "original")
+	data := []byte("pinned synthetic input")
+	if err := os.WriteFile(original, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	digest := fmt.Sprintf("%x", sha512.Sum512(data))
+	for _, tc := range []struct {
+		path string
+		want error
+	}{
+		{filepath.Join(root, "missing"), syscall.ENOENT}, {original, syscall.ENOTDIR},
+	} {
+		r, err := verifyPinned(original, tc.path, int64(len(data)), digest)
+		if !errors.Is(err, tc.want) || r != (result{}) {
+			t.Fatalf("scratch=%q result=%+v error=%v; want %v without receipt", tc.path, r, err, tc.want)
+		}
+	}
+	got, err := os.ReadFile(original)
+	if err != nil || !bytes.Equal(got, data) {
+		t.Fatalf("original modified: %q %v", got, err)
+	}
+	entries, err := os.ReadDir(root)
+	if err != nil || len(entries) != 1 || entries[0].Name() != "original" {
+		t.Fatalf("unexpected files after scratch failure: %v %v", entries, err)
+	}
+}
+
+func TestUnreadableOriginalFailsBeforeCreatingCopy(t *testing.T) {
+	if os.Geteuid() == 0 {
+		t.Skip("root can read mode-000 files; permission failure requires an unprivileged user")
+	}
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	original := filepath.Join(root, "original")
+	data := []byte("private synthetic input")
+	if err := os.WriteFile(original, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(original, 0000); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chmod(original, 0600); err != nil {
+			t.Error(err)
+		}
+	})
+	r, err := verifyPinned(original, root, int64(len(data)), fmt.Sprintf("%x", sha512.Sum512(data)))
+	if !errors.Is(err, syscall.EACCES) || r != (result{}) {
+		t.Fatalf("unreadable original result=%+v error=%v; want access denial without receipt", r, err)
+	}
+	entries, err := os.ReadDir(root)
+	if err != nil || len(entries) != 1 || entries[0].Name() != "original" {
+		t.Fatalf("copy created on access denial: %v %v", entries, err)
+	}
+	if err := os.Chmod(original, 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile(original)
+	if err != nil || !bytes.Equal(got, data) {
+		t.Fatalf("original modified: %q %v", got, err)
+	}
+}

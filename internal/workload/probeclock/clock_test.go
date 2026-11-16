@@ -116,3 +116,26 @@ func TestMonotonicMillisBeyondNanosecondSafeInteger(t *testing.T) {
 		t.Fatal(n, e)
 	}
 }
+
+func TestPlatformClockIdentityIsExplicitAndLinuxWireUnchanged(t *testing.T) {
+	entropy := func() *bytes.Reader { return bytes.NewReader(bytes.Repeat([]byte{9}, 48)) }
+	linux, e := newClock(time.Now(), 1000, entropy())
+	if e != nil {
+		t.Fatal(e)
+	}
+	if linux.Bootstrap().Clock != "linux-clock-monotonic" || linux.Bootstrap().Version != 2 {
+		t.Fatal("Linux wire changed")
+	}
+	darwin, e := newPlatformClock(time.Now(), 1000, entropy(), darwinUptimeRaw)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if darwin.Bootstrap().Clock != "darwin-clock-uptime-raw" {
+		t.Fatal("Darwin mislabelled")
+	}
+	for _, kind := range []string{"", "wall", "CLOCK_MONOTONIC", "linux-clock-monotonic-extra"} {
+		if c, e := newPlatformClock(time.Now(), 1000, entropy(), kind); c != nil || e == nil {
+			t.Fatal("unknown clock accepted")
+		}
+	}
+}

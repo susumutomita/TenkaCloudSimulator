@@ -1,581 +1,871 @@
 {
   "version": 1,
-  "base_sha": "625c6255ec436be2eaa1187405d1c18146e74bc1",
+  "base_sha": "c35d9591be83526a3f1120828282ef8afc10e362",
   "changes": [
     {
-      "path": "docs/formal-nic-session-bookkeeping.md",
-      "sha256": "16f6ead87dd9e83fc96a811cf8f062bb7846e9f01936d0505b0dd8c553a898d2",
-      "disposition": "documentation",
-      "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-probe-operation-lifecycle.md",
-      "sha256": "3299fb4ba0c6630450b45dcec539c5ab8847310c5deef7c57e097ea0fc3c7e0a",
-      "disposition": "documentation",
-      "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
-      "models": []
-    },
-    {
-      "path": "docs/owned-probe-session.md",
-      "sha256": "e7cc3c7187fd6bae9cb72a78c933ec3777ffa1490e4c4b11204018fe472742e6",
-      "disposition": "documentation",
-      "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
-      "models": []
-    },
-    {
-      "path": "docs/private-http-probe-operations.md",
-      "sha256": "5d6a8962cc270d71bdf6db3a82da5a1123c7fd7d7c014e503a7e41e9c218e721",
+      "path": "cmd/simulator/battle_runtime_config.go",
+      "sha256": "3c2a9d8bcef75a3014cfded707a32fe08b5c694d17c5f0ce4f3b3300cd6846d5",
       "disposition": "modeled",
-      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
       "models": [
         {
-          "id": "ProbeOperationLifecycle",
+          "id": "CanonicalVMComposition",
           "properties": [
-            "ScopeImmutable",
-            "RetainedExact",
-            "RetainedBound",
-            "ValidatedAdmission",
-            "ScopedIdentity",
-            "ImmutableBinding",
-            "WorkerBound",
-            "WorkerDebt",
-            "AtMostOnce",
-            "RouteBeforeDispatch",
-            "RouteRetained",
-            "ResultSticky",
-            "SettlementEvidence",
-            "TimelySuccess",
-            "WireUnknown",
-            "DuplicateIsolation",
-            "LookupIsolation",
-            "WireIdentity",
-            "WireRoute",
-            "WireResult",
-            "WireSettlement",
-            "PoisonSticky",
-            "PoisonExclusion",
-            "NoLateHostAcceptance",
-            "EvictedForgotten"
+            "TypeOK",
+            "PinnedPlan",
+            "JournalBeforeLaunch",
+            "PreparedIdentity",
+            "PausedExactControl",
+            "ExactAttachment",
+            "AttachBeforeActivation",
+            "PrivateAgentReadiness",
+            "PublicationAdmission",
+            "IndependentCleanup",
+            "ObservedContainment",
+            "ReleaseAfterContainment",
+            "NetworkOwnership",
+            "FrozenNetwork",
+            "AuthorizedDelete",
+            "CreatorAdmission",
+            "NoReconstruction",
+            "UncertainDebtRetained",
+            "ConfigurationAdmission",
+            "ConfiguredIsNotReady",
+            "TypedProvider",
+            "SavedAssociation",
+            "NoRebinding",
+            "SavedOperationAuthority"
           ],
-          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
+          "limits": "Companion to unchanged EC2GuestAttachmentLifecycle, not a replacement. Checks ordering of pinned planning, durable readback, captured paused QMP ownership, attachment/activation, private QGA readiness, generation publication, teardown, network ownership and child admission. Equality/validity predicates abstract byte validation and SQL/OS APIs; no proof of parser correctness, actual networking, cryptography, PID/FD identity, resource quota cardinality, packet routing, real image execution, liveness or Go refinement. Separate modes do not prove arbitrary cross-mode interference. Restart cannot recover physical authority. Successful checking is not physical Battle acceptance."
         }
       ]
     },
     {
-      "path": "docs/private-persistent-transport.md",
-      "sha256": "c2b177788c443115c6eb8017dd866a511186de23ee0daa0ad127cd289a80fdc6",
-      "disposition": "documentation",
-      "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
+      "path": "cmd/simulator/battle_runtime_config_test.go",
+      "sha256": "ebeed5e0c544cbeba287452ee70ff7be8a93d6ffab4d1c55e7ffe1f004e1e739",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
       "models": []
     },
     {
-      "path": "docs/private-tcp-probe-sessions.md",
-      "sha256": "989545b2547f9cd2a9da68453d607a1c4ffa7cb2ee7c65e6bd981d5b7ea08ed9",
-      "disposition": "documentation",
-      "reason": "Human-readable documentation only, no execution; claims must remain qualified by actual tests and physical gaps.",
-      "models": []
-    },
-    {
-      "path": "formal/NICSessionBookkeeping.tla",
-      "sha256": "9df2b999f750854d2a963fc2b5042314eab3f1fcdaf68fa402d5cab6e939e88a",
+      "path": "cmd/simulator/battle_runtime_linux.go",
+      "sha256": "33d7c13fbaef6d567fcaaf3e47fc54b6ceeab96def333fb3d4d5d008eb023443",
       "disposition": "modeled",
-      "reason": "Changed executable specification/configuration requires the listed own semantic properties and exact baseline plus required sensitivity controls; tests do not prove Go refinement.",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
       "models": [
         {
-          "id": "NICSessionBookkeeping",
+          "id": "CanonicalVMComposition",
           "properties": [
-            "TupleTombstones",
-            "ImmutableTuples",
-            "LiveAccounting",
-            "DrainRequiresJoins",
-            "SingleDelivery",
-            "RevocationRetainsDebt",
-            "NoClosedAdmission",
-            "BudgetMonotone",
-            "ChargedAttempts",
-            "TupleDirectionGuard",
-            "IncomingIsolation",
-            "ClosedQueuesEmpty",
-            "LateSuccessRejected",
-            "RewrapPreservesState",
-            "EffectNotCleanupProof"
+            "TypeOK",
+            "PinnedPlan",
+            "JournalBeforeLaunch",
+            "PreparedIdentity",
+            "PausedExactControl",
+            "ExactAttachment",
+            "AttachBeforeActivation",
+            "PrivateAgentReadiness",
+            "PublicationAdmission",
+            "IndependentCleanup",
+            "ObservedContainment",
+            "ReleaseAfterContainment",
+            "NetworkOwnership",
+            "FrozenNetwork",
+            "AuthorizedDelete",
+            "CreatorAdmission",
+            "NoReconstruction",
+            "UncertainDebtRetained",
+            "ConfigurationAdmission",
+            "ConfiguredIsNotReady",
+            "TypedProvider",
+            "SavedAssociation",
+            "NoRebinding",
+            "SavedOperationAuthority"
           ],
-          "limits": "Logical TCPProbeSessions bookkeeping only. Seed prefixes are documented; no unbounded safety/liveness, Go concurrency refinement, full limits arithmetic, timer/suspension (the 2*MSL tuple quarantine is an abstract quiesce step after drain), packet parsing/checksums/ARP/encoding, gVisor TCP sequence semantics, exact context hook scheduling, physical ownership/atomic revocation/delivery fencing, OS NIC cleanup or process restart proof. Parsed tuple/direction validity is an abstract input predicate. An admitted callback may already have effects after revocation; effectPossible remains sticky and does not certify cleanup. Persistent transport queues/pumps are separate obligations and not bound here."
+          "limits": "Companion to unchanged EC2GuestAttachmentLifecycle, not a replacement. Checks ordering of pinned planning, durable readback, captured paused QMP ownership, attachment/activation, private QGA readiness, generation publication, teardown, network ownership and child admission. Equality/validity predicates abstract byte validation and SQL/OS APIs; no proof of parser correctness, actual networking, cryptography, PID/FD identity, resource quota cardinality, packet routing, real image execution, liveness or Go refinement. Separate modes do not prove arbitrary cross-mode interference. Restart cannot recover physical authority. Successful checking is not physical Battle acceptance."
         }
       ]
     },
     {
-      "path": "formal/ProbeOperationLifecycle.cfg",
-      "sha256": "9936857f609180b2d162c06c71768609d35722844fb00dfb3dced69c6f3695cd",
+      "path": "cmd/simulator/battle_runtime_linux_test.go",
+      "sha256": "db2139a4e59c469e36ad951c30d82a6463c49bd9e263f2ce656092f90b8abb51",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "formal/MacPreparationAdmission.cfg",
+      "sha256": "25bb3a28cb168dbf265f89a4a4d9c3fe88159ed0e7e3c0e6ed16dc44e9180c76",
       "disposition": "modeled",
-      "reason": "Changed executable specification/configuration requires the listed own semantic properties and exact baseline plus required sensitivity controls; tests do not prove Go refinement.",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
       "models": [
         {
-          "id": "ProbeOperationLifecycle",
+          "id": "MacPreparationAdmission",
           "properties": [
-            "ScopeImmutable",
-            "RetainedExact",
-            "RetainedBound",
-            "ValidatedAdmission",
-            "ScopedIdentity",
-            "ImmutableBinding",
-            "WorkerBound",
-            "WorkerDebt",
-            "AtMostOnce",
-            "RouteBeforeDispatch",
-            "RouteRetained",
-            "ResultSticky",
-            "SettlementEvidence",
-            "TimelySuccess",
-            "WireUnknown",
-            "DuplicateIsolation",
-            "LookupIsolation",
-            "WireIdentity",
-            "WireRoute",
-            "WireResult",
-            "WireSettlement",
-            "PoisonSticky",
-            "PoisonExclusion",
-            "NoLateHostAcceptance",
-            "EvictedForgotten"
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
           ],
-          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
         }
       ]
     },
     {
-      "path": "formal/ProbeOperationLifecycle.tla",
-      "sha256": "2cd62b6c21c8227e2ba4e381e7b1b2472c724439bc354d474c8786dbb681e03d",
+      "path": "formal/MacPreparationAdmission.tla",
+      "sha256": "ae2022fce49b109d23a3731a70e2f09d6eaf5281f4c0a15669dd41c622f0abd5",
       "disposition": "modeled",
-      "reason": "Changed executable specification/configuration requires the listed own semantic properties and exact baseline plus required sensitivity controls; tests do not prove Go refinement.",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
       "models": [
         {
-          "id": "ProbeOperationLifecycle",
+          "id": "MacPreparationAdmission",
           "properties": [
-            "ScopeImmutable",
-            "RetainedExact",
-            "RetainedBound",
-            "ValidatedAdmission",
-            "ScopedIdentity",
-            "ImmutableBinding",
-            "WorkerBound",
-            "WorkerDebt",
-            "AtMostOnce",
-            "RouteBeforeDispatch",
-            "RouteRetained",
-            "ResultSticky",
-            "SettlementEvidence",
-            "TimelySuccess",
-            "WireUnknown",
-            "DuplicateIsolation",
-            "LookupIsolation",
-            "WireIdentity",
-            "WireRoute",
-            "WireResult",
-            "WireSettlement",
-            "PoisonSticky",
-            "PoisonExclusion",
-            "NoLateHostAcceptance",
-            "EvictedForgotten"
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
           ],
-          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
+    {
+      "path": "formal/MacProbeLifecycle.cfg",
+      "sha256": "d911ac8560a6e3d7b27497aadd70df5508a30bfe6b5aefadb67e4f730374c974",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "formal/MacProbeLifecycle.tla",
+      "sha256": "85e8f303079fc61359227c3c7105d659f18f19c1010dde6a4f020f60a9cc611b",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "2393ff9ab1a1597602488d2eb4ef37affe4d4b92f58d845882206763b5d969b9",
+      "sha256": "9d1ef71a5886141abef7b158abd2fe7e8e74cc2c856a6c95079128f9a22b8612",
       "disposition": "formal-infrastructure",
-      "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
+      "reason": "Exact model registry, classification policy or negative-control detector; required invariants and scopes preserved.",
       "models": []
     },
     {
-      "path": "internal/workload/guestnet/tcp_sessions.go",
-      "sha256": "ecf1bde8d76b8dab417f4ee410cfc0f5fd22c17b709ec6624777fdeae41f1c7d",
+      "path": "internal/workload/guesthvf/README.md",
+      "sha256": "79a4186d24c7392f3982ebaf5aaad43bdb44056c640b8b09bdbe2cb6993eb94a",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guesthvf/image_unix.go",
+      "sha256": "8068dbfbde557c3834dffd9ae46b76b28bafcc59f59f07a93482c1041bef5fac",
       "disposition": "modeled",
-      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
       "models": [
         {
-          "id": "NICSessionBookkeeping",
+          "id": "MacPreparationAdmission",
           "properties": [
-            "TupleTombstones",
-            "ImmutableTuples",
-            "LiveAccounting",
-            "DrainRequiresJoins",
-            "SingleDelivery",
-            "RevocationRetainsDebt",
-            "NoClosedAdmission",
-            "BudgetMonotone",
-            "ChargedAttempts",
-            "TupleDirectionGuard",
-            "IncomingIsolation",
-            "ClosedQueuesEmpty",
-            "LateSuccessRejected",
-            "RewrapPreservesState",
-            "EffectNotCleanupProof"
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
           ],
-          "limits": "Logical TCPProbeSessions bookkeeping only. Seed prefixes are documented; no unbounded safety/liveness, Go concurrency refinement, full limits arithmetic, timer/suspension (the 2*MSL tuple quarantine is an abstract quiesce step after drain), packet parsing/checksums/ARP/encoding, gVisor TCP sequence semantics, exact context hook scheduling, physical ownership/atomic revocation/delivery fencing, OS NIC cleanup or process restart proof. Parsed tuple/direction validity is an abstract input predicate. An admitted callback may already have effects after revocation; effectPossible remains sticky and does not certify cleanup. Persistent transport queues/pumps are separate obligations and not bound here."
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
         }
       ]
+    },
+    {
+      "path": "internal/workload/guesthvf/image_unix_test.go",
+      "sha256": "b370336f3835e76901b8987b9395c38e1c7531a5b3a7605f176dae41b952a3d3",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guesthvf/plan.go",
+      "sha256": "1ae7314d7bdc340694f3aa3e26e743db55c4cd8e53903431f7708a018e4c0a3e",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacPreparationAdmission",
+          "properties": [
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
+          ],
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guesthvf/plan_test.go",
+      "sha256": "fe4fa74b6e920e29217483f3e0c1dac96916a6be28520cb76ffff85f8d4f5d97",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guesthvf/supervision.go",
+      "sha256": "1560283dca743e39283be5a2d99c662646d700fbc172c90951768264c2d8c8bf",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacPreparationAdmission",
+          "properties": [
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
+          ],
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guesthvf/supervision_test.go",
+      "sha256": "07dccf3866ea6b31fbd2e0041fdd9070f8edc297a9568f11e01bd2a273de9f9e",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
     },
     {
       "path": "internal/workload/guestnet/tcp_sessions_test.go",
-      "sha256": "2e09f7ed72e7032b42e9019de66ad602e6c22881bbdc4fff40eb9bba55b31d30",
+      "sha256": "3355543f26e538f2ee3dd971be92f581deade400f65a040b8a96b9350f8bcd59",
       "disposition": "test-support",
-      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
       "models": []
     },
     {
-      "path": "internal/workload/guesttcp/http_probe_observation_test.go",
-      "sha256": "8557bf9d29463ac24684415ce5a83d2929efb44e8bb35da5e7b18f3da7103a24",
-      "disposition": "modeled",
-      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
-      "models": [
-        {
-          "id": "ProbeOperationLifecycle",
-          "properties": [
-            "ScopeImmutable",
-            "RetainedExact",
-            "RetainedBound",
-            "ValidatedAdmission",
-            "ScopedIdentity",
-            "ImmutableBinding",
-            "WorkerBound",
-            "WorkerDebt",
-            "AtMostOnce",
-            "RouteBeforeDispatch",
-            "RouteRetained",
-            "ResultSticky",
-            "SettlementEvidence",
-            "TimelySuccess",
-            "WireUnknown",
-            "DuplicateIsolation",
-            "LookupIsolation",
-            "WireIdentity",
-            "WireRoute",
-            "WireResult",
-            "WireSettlement",
-            "PoisonSticky",
-            "PoisonExclusion",
-            "NoLateHostAcceptance",
-            "EvictedForgotten"
-          ],
-          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
-        }
-      ]
-    },
-    {
-      "path": "internal/workload/guesttcp/http_probe_operation.go",
-      "sha256": "3d6e6be8530c48a36ccb651c433f790bf0deaf41d60fc1d5db3e185714a462a3",
-      "disposition": "modeled",
-      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
-      "models": [
-        {
-          "id": "ProbeOperationLifecycle",
-          "properties": [
-            "ScopeImmutable",
-            "RetainedExact",
-            "RetainedBound",
-            "ValidatedAdmission",
-            "ScopedIdentity",
-            "ImmutableBinding",
-            "WorkerBound",
-            "WorkerDebt",
-            "AtMostOnce",
-            "RouteBeforeDispatch",
-            "RouteRetained",
-            "ResultSticky",
-            "SettlementEvidence",
-            "TimelySuccess",
-            "WireUnknown",
-            "DuplicateIsolation",
-            "LookupIsolation",
-            "WireIdentity",
-            "WireRoute",
-            "WireResult",
-            "WireSettlement",
-            "PoisonSticky",
-            "PoisonExclusion",
-            "NoLateHostAcceptance",
-            "EvictedForgotten"
-          ],
-          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
-        }
-      ]
-    },
-    {
-      "path": "internal/workload/guesttcp/http_probe_scope_test.go",
-      "sha256": "58d819f3590399506e1af9f66c816e2418eb98c54b298e9dbb6b1fdd49328955",
-      "disposition": "modeled",
-      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
-      "models": [
-        {
-          "id": "ProbeOperationLifecycle",
-          "properties": [
-            "ScopeImmutable",
-            "RetainedExact",
-            "RetainedBound",
-            "ValidatedAdmission",
-            "ScopedIdentity",
-            "ImmutableBinding",
-            "WorkerBound",
-            "WorkerDebt",
-            "AtMostOnce",
-            "RouteBeforeDispatch",
-            "RouteRetained",
-            "ResultSticky",
-            "SettlementEvidence",
-            "TimelySuccess",
-            "WireUnknown",
-            "DuplicateIsolation",
-            "LookupIsolation",
-            "WireIdentity",
-            "WireRoute",
-            "WireResult",
-            "WireSettlement",
-            "PoisonSticky",
-            "PoisonExclusion",
-            "NoLateHostAcceptance",
-            "EvictedForgotten"
-          ],
-          "limits": "Bounded lock/action and protocol-consumer abstraction, not Go/JS/TCP/packet/parser/HTTP/gVisor refinement, wall-clock scheduling/Unix-ms encoding proof, cryptographic/authenticated ownership, actual provider registry, physical revocation/transport, VM execution, durability/crash recovery or liveness. valid abstracts pre-retention validation; effective NIC deadline may already be expired. Worker completion is an abstract real-work signal, never inferred from caller timeout. Routes are allocated opaque atoms; a deadline symbol stands for the scoped caller deadline plus retention when a full NIC forgets a settled handle, and a forgotten key returns only as a replay of its original command; NIC session allocation/reuse proof remains independent. Host consumer poison and original-budget checks have separate TypeScript native tests, not a Simulator runtime implementation claim. Three-step suffix exploration is not all unbounded histories. Prefix replay is independently checked from EmptyState using actual model actions; separate prefix replay is mandatory formal support validation, not a production operation."
-        }
-      ]
-    },
-    {
-      "path": "internal/workload/guesttcp/owned_probe_session.go",
-      "sha256": "c43151185f00d1a899bd14a490eb7a18d0e8f0ebef26944cf4bc8f439d99578d",
-      "disposition": "modeled",
-      "reason": "Bounded owned-session lifecycle, single-use attachment handoff, or normalized fixed TCP/ARP policy obligations apply only to their exact declared source and artifact scopes. Prior ARP trusted-reply obligations remain retained. Authoritative provider fencing/issuance, byte-parser refinement, real VM ownership, clock qualification, and full Host integration are not established by these models. Native tests independently exercise actual in-memory TCP/ARP/passive composition.",
-      "models": [
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoInvalidAdmission",
-            "NoInvalidPublication",
-            "TentativeHidden",
-            "CloseOnce",
-            "CloseBeforeJoin",
-            "DebtUntilDrain",
-            "ImmutableBinding",
-            "OneApply",
-            "TerminalSeal",
-            "EvidenceHasSuccess",
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Only private local-injection producer/owner-consumer branch in added source paths; not all transport methods. Tokens do not prove physical authority. No Go pointer/atomic refinement, generic parser proof or clock rebasing. Foreign marker is explicit malformed-provider abstraction."
-        },
-        {
-          "id": "OwnedProbeDispatchPolicy",
-          "properties": [
-            "ImmutableCanonical",
-            "ExactReplyMatch",
-            "DispatchSound",
-            "DispatchComplete"
-          ],
-          "limits": "Only MatchesReply canonical field equality and owner frame branch/normalized tuple selection. Existing ARP request parser/TCP parser assumed separate validated operations; no complete byte grammar/refinement, raw-to-normalized tuple orientation proof, physical authority, descriptor issuance or runtime lifecycle claim."
-        }
-      ]
-    },
-    {
-      "path": "internal/workload/guesttcp/owned_probe_session_test.go",
-      "sha256": "c53188b75acd27c7bec17b3ae2b6e595b1b1b6288d38e957024d85b4eede43cf",
+      "path": "internal/workload/guestvm/session_test.go",
+      "sha256": "d6b054a354518d341c526a4dcb741024d622dc2fc2d0bb4caf55498d76e813c9",
       "disposition": "test-support",
-      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
       "models": []
     },
     {
-      "path": "internal/workload/guesttcp/probe_soak_test.go",
-      "sha256": "24b5e2fe99f077086af7a663416e231b07c6a65fe9f91e825e28dcbf5632dea2",
-      "disposition": "test-support",
-      "reason": "Deterministic regression/fixture support; expected results independent of implementation, not shipping runtime authority.",
+      "path": "internal/workload/probeclock/DARWIN.md",
+      "sha256": "b7d020093082acf22d88e77eb034a4bad4f7ea5ca181e499c25e8a9e1b34fab0",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
       "models": []
     },
     {
-      "path": "internal/workload/guesttcp/transport.go",
-      "sha256": "92d204da275817f5f4a60dc642007d946d0bea1be39930eda059ce171ef449a8",
+      "path": "internal/workload/probeclock/bootstrap_darwin.go",
+      "sha256": "b4c6b720881069ee4bd3432152fbcc9d7ae1b58924444c92817cbc4d68d20405",
       "disposition": "modeled",
-      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
       "models": [
         {
-          "id": "PersistentTransportLifecycle",
+          "id": "OwnedClockQualification",
           "properties": [
-            "NoInvalidAdmission",
-            "QueueSealed",
-            "QueueOwnership",
-            "SelectedDebt",
-            "ProbePumpDebt",
-            "ReadJoin",
-            "ChildJoin",
-            "CompletionJoin",
-            "CapacityRelease",
-            "NoLateSuccess",
-            "EffectRetained"
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
           ],
-          "limits": "Bookkeeping/atomic orchestration abstraction only, not constructor validation, parser, TCP stack, arbitrary callbacks, physical fencing, engine correctness, full source refinement or liveness. Only persistent mode of shared Transport modeled; ordinary exchange and ARP behavior remain separate obligations. Production capacities and repeated traffic unproved. Close completion is not physical settlement; uncertain Close retains its slot. No dependency behavior or provenance exemption."
-        },
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoInvalidAdmission",
-            "NoInvalidPublication",
-            "TentativeHidden",
-            "CloseOnce",
-            "CloseBeforeJoin",
-            "DebtUntilDrain",
-            "ImmutableBinding",
-            "OneApply",
-            "TerminalSeal",
-            "EvidenceHasSuccess",
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Only private local-injection producer/owner-consumer branch in added source paths; not all transport methods. Tokens do not prove physical authority. No Go pointer/atomic refinement, generic parser proof or clock rebasing. Foreign marker is explicit malformed-provider abstraction."
-        },
-        {
-          "id": "PersistentIngressPolicy",
-          "properties": [
-            "UnownedNeverRevokes",
-            "DroppedNotChargedOrAccepted",
-            "OwnedNeverDropped",
-            "OwnedProbeAbuseRevokes",
-            "AcceptOnlyOwnedValid"
-          ],
-          "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
         }
       ]
     },
     {
-      "path": "internal/workload/guesttcp/transport_persistent.go",
-      "sha256": "4f3e2225df9733164e0e881de2f53065896a2a04fd81512143ebca475657ab06",
+      "path": "internal/workload/probeclock/bootstrap_darwin_test.go",
+      "sha256": "40d05901901e1c4f38b9469d3f04914b29a2791ff66354aa948e519349a8811c",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/probeclock/bootstrap_linux.go",
+      "sha256": "1aff78addb42cdb9f4ab58275e6c7fc75ec0829463f7903c7b019cd0896d9d4b",
       "disposition": "modeled",
-      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
       "models": [
         {
-          "id": "PersistentTransportLifecycle",
+          "id": "OwnedClockQualification",
           "properties": [
-            "NoInvalidAdmission",
-            "QueueSealed",
-            "QueueOwnership",
-            "SelectedDebt",
-            "ProbePumpDebt",
-            "ReadJoin",
-            "ChildJoin",
-            "CompletionJoin",
-            "CapacityRelease",
-            "NoLateSuccess",
-            "EffectRetained"
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
           ],
-          "limits": "Bookkeeping/atomic orchestration abstraction only, not constructor validation, parser, TCP stack, arbitrary callbacks, physical fencing, engine correctness, full source refinement or liveness. Only persistent mode of shared Transport modeled; ordinary exchange and ARP behavior remain separate obligations. Production capacities and repeated traffic unproved. Close completion is not physical settlement; uncertain Close retains its slot. No dependency behavior or provenance exemption."
-        },
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoInvalidAdmission",
-            "NoInvalidPublication",
-            "TentativeHidden",
-            "CloseOnce",
-            "CloseBeforeJoin",
-            "DebtUntilDrain",
-            "ImmutableBinding",
-            "OneApply",
-            "TerminalSeal",
-            "EvidenceHasSuccess",
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Only private local-injection producer/owner-consumer branch in added source paths; not all transport methods. Tokens do not prove physical authority. No Go pointer/atomic refinement, generic parser proof or clock rebasing. Foreign marker is explicit malformed-provider abstraction."
-        },
-        {
-          "id": "PersistentIngressPolicy",
-          "properties": [
-            "UnownedNeverRevokes",
-            "DroppedNotChargedOrAccepted",
-            "OwnedNeverDropped",
-            "OwnedProbeAbuseRevokes",
-            "AcceptOnlyOwnedValid"
-          ],
-          "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
         }
       ]
     },
     {
-      "path": "internal/workload/guesttcp/transport_persistent_test.go",
-      "sha256": "a9f0d7b51271b81dfb8c3e2f8f12e332a2bfe7e095683948fdc810ca925fbc57",
+      "path": "internal/workload/probeclock/bootstrap_linux_test.go",
+      "sha256": null,
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/probeclock/bootstrap_other.go",
+      "sha256": "689fc07df62640f5ec11cf2939d7779648481b64e7f4fec988b5e9537a6bf57b",
       "disposition": "modeled",
-      "reason": "Finite source-correspondence properties apply only to the declared adapter transitions and model artifact, with explicit bounded domains and exclusions. Concrete native verification and physical/provider acceptance remain independent.",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
       "models": [
         {
-          "id": "PersistentTransportLifecycle",
+          "id": "OwnedClockQualification",
           "properties": [
-            "NoInvalidAdmission",
-            "QueueSealed",
-            "QueueOwnership",
-            "SelectedDebt",
-            "ProbePumpDebt",
-            "ReadJoin",
-            "ChildJoin",
-            "CompletionJoin",
-            "CapacityRelease",
-            "NoLateSuccess",
-            "EffectRetained"
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
           ],
-          "limits": "Bookkeeping/atomic orchestration abstraction only, not constructor validation, parser, TCP stack, arbitrary callbacks, physical fencing, engine correctness, full source refinement or liveness. Only persistent mode of shared Transport modeled; ordinary exchange and ARP behavior remain separate obligations. Production capacities and repeated traffic unproved. Close completion is not physical settlement; uncertain Close retains its slot. No dependency behavior or provenance exemption."
-        },
-        {
-          "id": "PersistentIngressPolicy",
-          "properties": [
-            "UnownedNeverRevokes",
-            "DroppedNotChargedOrAccepted",
-            "OwnedNeverDropped",
-            "OwnedProbeAbuseRevokes",
-            "AcceptOnlyOwnedValid"
-          ],
-          "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
         }
       ]
+    },
+    {
+      "path": "internal/workload/probeclock/bootstrap_unix.go",
+      "sha256": "b6f4d0815e84cd91427c8c5c3f9310a0bdd5ec50d63134677483285c6d9138e4",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "OwnedClockQualification",
+          "properties": [
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
+          ],
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/probeclock/bootstrap_unix_test.go",
+      "sha256": "e07f608120e306f12c246e47182c2e8a0ce8974c511b101635d0ae3394c6a734",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/probeclock/clock.go",
+      "sha256": "1d70d9753cd09313d26cd8cddb967460d07deb6fd06eeb5c5af23fe580d2f637",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "OwnedClockQualification",
+          "properties": [
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
+          ],
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/probeclock/clock_darwin.go",
+      "sha256": "ec3c72916a99e1feffafe462ddac4464aa48498947098e27cf5e3e292426a835",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "OwnedClockQualification",
+          "properties": [
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
+          ],
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/probeclock/clock_darwin_test.go",
+      "sha256": "d9307880cd044e8c97a9d8eaeb0cced30165cb368e49ac9dd23a3af9f53890ba",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/probeclock/clock_other.go",
+      "sha256": "5d4ec78d44213e81379894491237600e26e97715fd63538faf5ccb0072c811d2",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "OwnedClockQualification",
+          "properties": [
+            "TypeOK",
+            "OwnedProof",
+            "QualifiedOnlyCurrent",
+            "AuthenticatedResponses",
+            "StopInvalidates",
+            "V2Admission",
+            "ConservativeOriginalDeadline",
+            "RetainedReadAfterExpiry",
+            "ReadRequiresCurrentOwner"
+          ],
+          "limits": "Finite lifecycle admission abstraction, not Linux kernel/FFI/crypto/parser refinement proof. Host namespace/bootstrap counterpart requires its separate source/tests; physical ownership and actual running VM remain separate obligations. Integer boundary rounding witnesses supplement, not replace pure arithmetic tests. Existing v1 CommandDispatchLifecycle remains unchanged. Darwin bindings cover abstract FD3 checks, FD4 refusal and sampled domain/bounds only. No CLOCK_UPTIME_RAW equivalence to Go time, suspend behavior, syscall/FD refinement, executable launch qualification or Mac Battle readiness is proved."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/probeclock/clock_test.go",
+      "sha256": "4d97be6fa257b95c353c05bb6bd516378e2aeb19084631748290cf14124c5186",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_applicability.py",
+      "sha256": "26a3b66a63cb736f6f3b2210deb66592fe1b11b81d0ba47f81fc74aeea090426",
+      "disposition": "formal-infrastructure",
+      "reason": "Exact model registry, classification policy or negative-control detector; required invariants and scopes preserved.",
+      "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "af65afcca1b3402b398583a85c75a86ed3d8169f1804a8a43019f4a34eb42df4",
+      "sha256": "d7d5777932ca756b4ff7beb0ae569a57d82f02623130c25c25ce71ce94567a39",
       "disposition": "formal-infrastructure",
-      "reason": "Formal execution infrastructure: DynamoDBAdmission baseline and unchanged controls use exactly two workers, other families one, families remain serial. All 60-second deadlines, model inputs, exact invariant checks and no-retry failure handling preserved; independent regression checks enforce allocation and timeout behavior.",
+      "reason": "Exact model registry, classification policy or negative-control detector; required invariants and scopes preserved.",
       "models": []
     },
     {
-      "path": "scripts/formal_seed_replay.py",
-      "sha256": "3ff7962259777cc15f4e82c718d8a1ed9b54761427df8a274af98bc27a9b5a88",
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "fe1330afd7ea2348e3e09a33dc7e1617e91e42e30762f38080193d3d58d8268b",
       "disposition": "formal-infrastructure",
-      "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_support/NICSessionSeedReachability.tla",
-      "sha256": "4a8122deb47a3a9d27ee2fe8d1efa9485ff4e5cabdf7f9ce2b84d39321dd2d84",
-      "disposition": "formal-infrastructure",
-      "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_support/ProbeOperationSeedReachability.tla",
-      "sha256": "a78e3d2e8a41a6405a071186c5e645e07737e8959040cab5e73ed71721da8b6a",
-      "disposition": "formal-infrastructure",
-      "reason": "Formal gate/CI/registry/detectors preserve timeout, mutation and immutable-input requirements; independent unit validation required.",
+      "reason": "Exact model registry, classification policy or negative-control detector; required invariants and scopes preserved.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "6648bcf0e8e84b47f21366f54482074c08b2096f9761388ecdf05dc95012a543",
+      "sha256": "07148af75979fe5da57ad31987056b230f42700c74cb4f3dd100a55f43559ec9",
       "disposition": "formal-infrastructure",
-      "reason": "Formal execution infrastructure: DynamoDBAdmission baseline and unchanged controls use exactly two workers, other families one, families remain serial. All 60-second deadlines, model inputs, exact invariant checks and no-retry failure handling preserved; independent regression checks enforce allocation and timeout behavior.",
+      "reason": "Exact model registry, classification policy or negative-control detector; required invariants and scopes preserved.",
+      "models": []
+    },
+    {
+      "path": "tools/guesthvf-preflight/README.md",
+      "sha256": "b89fd99107af851917adf88d702813f4fa3034e98d3b95ad753c2aa4f3b0afd0",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "tools/guesthvf-preflight/main.go",
+      "sha256": "4097615e9c245824d415a79b0de0dbb96ca5ed45b1b4dbea97d3a1a9bd2fbd86",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacPreparationAdmission",
+          "properties": [
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
+          ],
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
+    {
+      "path": "tools/guesthvf-preflight/main_test.go",
+      "sha256": "f298e72142f1815f90cb9169eb6d325ad8341fd0ab6ed405e55f49f47a0358ec",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/ARM-IMAGE-BUILD.md",
+      "sha256": "98b86b9c91fd23dd4799a3edac2ee6a12d5d47e928504aff3eab02259e572237",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/README.md",
+      "sha256": "cc4eca76bf765891d63599a18a98f81f7f80f36e9a3e6008d48d61c5f788f47a",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/arm-relay-preparation.json",
+      "sha256": "0b9cf6b9e26fe762370b3c8c2d19d464fa422f12d82b306875c3e0e9302ee929",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/boot_probe.py",
+      "sha256": "138363bdd9942a30acb44c2b27b50c29ebdd3eee1235addd5be30232cb98ea2f",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/builder_launch.py",
+      "sha256": "94e30386b0b699167a0f19b0d88c7f3ab74c76f01469b0ad6c6297dcc1569bbf",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/builder_plan.py",
+      "sha256": "03b6df3aa5e551360a3a43d7df5c62c8c88560dc5505f62fcff21f725133a1d5",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacPreparationAdmission",
+          "properties": [
+            "TypeOK",
+            "PlanEvidence",
+            "ImageEvidence",
+            "ImageHandle",
+            "PlistEvidence",
+            "OriginalBeforeCopy",
+            "CopyEvidence",
+            "CopySuccess",
+            "PreparedEvidence",
+            "InstalledEvidence",
+            "FinalizedEvidence",
+            "NoExecutionClaim"
+          ],
+          "limits": "Original bounded admission/sequencing projection. Boolean predicates abstract path/XML/QCOW parsing, hash algorithms, ownership/stat identity and guest command results, not Go/Python/shell/OS refinement. Image success retains a read-only FD but does not prevent same-user mutation or prove allocation integrity. Failure retains uncertainty, not guaranteed close/reap. Builder install/finalize describes emitted script ordering only, not execution, guest service success or poweroff. Preparation never launches and does not qualify Battle. launchd process ownership, physical execution, liveness and arbitrary concurrent interference are outside. Preflight original type/size admission precedes any scratch copy; actual O_NONBLOCK/O_NOFOLLOW semantics, FIFO scheduling and descriptor operations require native tests, not this Boolean abstraction. The original digest is checked after copying and before image acceptance, matching source order."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/debian-seed/meta-data",
+      "sha256": "af0be699b31fdcc5783ab049dd92688cd3d885028ff5cfb67a879f567e8637d4",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/debian-seed/network-config",
+      "sha256": "639b6f419a9ac49312b218e12395dc7e7d623d96202c3315a92dcd19d6fa02ba",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/debian-seed/user-data",
+      "sha256": "33ce8bf547ed9120717e7517093db507b93e39a36410b7eb3ad9e6c638cb1cac",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/image_probe.py",
+      "sha256": "32ef2e6396a4683950d9d094a8d321822d8bd2605b8481f03bfbb1a53d4db45f",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/probe.py",
+      "sha256": "1d67280ed2c47acfdc76496f9b46b9d062fe0aeb7b6d6c290a0077a0a9ab2068",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-hvf-probe/test_boot_probe.py",
+      "sha256": "4e751f44bb32ad805edc6771a90e3ba22fdb3d4fbd7fc0ebf0139eefa0d9fc30",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/test_builder_launch.py",
+      "sha256": "cb69b7adafccc380a3675c3203f068513254b48b5c68c7eab322ec54752d5344",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/test_builder_plan.py",
+      "sha256": "fb35ddb996ff284ecc653a0a258caca071b95189defff226ff0287d2ef2547a6",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/test_image_probe.py",
+      "sha256": "02493535063231636163a3c85ec68434636ed947fc4807778119603f1f38791c",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-hvf-probe/test_probe.py",
+      "sha256": "d42b04e424439ce9e68ec0c96629a6d9243ea64905a63c66e9b084c06a3548ac",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-supervisor-test/README.md",
+      "sha256": "8991eadb20985ed5c38ba1446ce96719c5982b9d7b1cdf5a901893398416a57b",
+      "disposition": "documentation",
+      "reason": "Passive documentation or historical receipt only; no runtime consumer or authority.",
+      "models": []
+    },
+    {
+      "path": "tools/mac-supervisor-test/launchd_owned_child.py",
+      "sha256": "bed5a3b952bfab09b37de2fdb22ed4cc4bc711f9b9703659002e98ffb31e68f7",
+      "disposition": "modeled",
+      "reason": "Exact source or model/config binding to the bounded predicates and ordering listed below; not implementation refinement or physical Battle acceptance.",
+      "models": [
+        {
+          "id": "MacProbeLifecycle",
+          "properties": [
+            "TypeOK",
+            "BuilderAttemptBeforeLaunch",
+            "OwnedSuccessEvidence",
+            "FailureCannotPass",
+            "BuildReceiptAfterLog",
+            "LaunchdSuccessEvidence",
+            "AbsenceIsNotReap",
+            "ReapClaimEvidence",
+            "NoBattleQualification"
+          ],
+          "limits": "Control-flow and receipt safety projection only. Probe mode combines successful communicate/wait and protocol/serial/private-channel predicates; validators, bytes, QMP/JSON/cloud-init/bash/kernel behavior, numeric deadlines/output sizes, signal/PID identity and filesystem/OS semantics are external assumptions, not proved. Launchd numeric PID absence is observation only, never reaping or hostile containment; no assumption that parent death kills children. CLI remains blocked and model does not authorize invocation. Bootstrap may have installed a service despite failure; cleanup success abstracts exact-label print/optional bootout/recognized absence. Builder ISO creation and prevalidation abstract bounded checked subprocesses; source installation content is separate preparation model. No liveness, crash containment, path race, arbitrary descendant cleanup, or Python refinement proof. Static Debian seed source binding is only the image-probe fixed prerequisite marker contract, not execution or truthfulness of those markers. All successful diagnostics remain battleReady=false."
+        }
+      ]
+    },
+    {
+      "path": "tools/mac-supervisor-test/test_launchd_owned_child.py",
+      "sha256": "8473cbfe18653e0e8e5c6ced8d4ebcb4ea25ece075044660a6506260e0db2847",
+      "disposition": "test-support",
+      "reason": "Regression/mocked test input, not a runtime implementation or relaxed acceptance threshold.",
       "models": []
     }
   ]

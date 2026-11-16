@@ -1,0 +1,3 @@
+#cloud-config
+runcmd:
+  - [sh, -c, "{ printf 'TCS_PID1_'; cat /proc/1/comm; printf 'TCS_UUID_'; cat /sys/class/dmi/id/product_uuid; test -x /bin/bash && echo TCS_BASH_PRESENT; test -c /dev/virtio-ports/org.tenkacloud.session.0 && echo TCS_NAMED_CHAR_PRESENT; printf 'TCS_PORT_BYTE\n' > /dev/virtio-ports/org.tenkacloud.session.0; echo TCS_PREREQ_DONE; } > /dev/ttyAMA0 2>&1; poweroff"]
