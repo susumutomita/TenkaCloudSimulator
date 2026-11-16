@@ -5179,7 +5179,8 @@
     "internal/aws/cloudformation_conditions.go",
     "internal/aws/cloudformation.go",
     "internal/aws/cloudformation_conditions_link.go",
-    "internal/aws/cloudformation_intrinsics.go"
+    "internal/aws/cloudformation_intrinsics.go",
+    "internal/aws/cloudformation_validate.go"
    ],
    "limits": "Finite validation witnesses, not real Go constraint evaluation, rational arithmetic, regex, UTF8/byte limits, YAML/JSON parser or graph recursion refinement. Condition equality is an immutable Boolean input; alias/cycle/unknown graphs are abstract witnesses, not evaluated graph nodes. Chosen symbol-link validity is abstract; frozen4177 compiler preparation now has a separately reviewed limited source correspondence, not a full linker/dependency refinement. Unused branch syntax is validated; resource linking is distinct. No SQL, transaction, runtime provisioning, policy grant, output privacy/NoEcho, grader execution, VM or host authority proof. selectedLink witness is an unconditional BaseRole link, independent of the optional map/list arm; NoValue can prune that optional arm while BaseRole linking still fails. Exact compiler4177 correspondence is a bounded plan-admission projection only: outer declaration validation actually precedes parameters, unlike the model phase order. Both-arm raw Ref/GetAtt/Sub validation, active-disabled dependency graph, resource schema allowlists/copies/ordering are separate native obligations, not modeled individually. Resource/output sets represent a pure StackRecord plan, not SQL/resource allocation, rollback, grant, NoEcho/private-output filtering or host grading. File scope covers only these named compile preparation contracts, not every behavior in cloudformation.go."
   },
@@ -18518,6 +18519,258 @@
       }
      ],
      "expect_invariant": "PreservedPackage"
+    }
+   ]
+  },
+  {
+   "id": "ECSTaskRevisionLifecycle",
+   "model": "formal/ECSTaskRevisionLifecycle.tla",
+   "config": "formal/ECSTaskRevisionLifecycle.cfg",
+   "bounds": "One account/region/family, two committed revision numbers, two image identities, one interleaved prepared stack, two independent grant/transaction outcomes, retain or retire.",
+   "properties": [
+    "CommitRequiresAdmission",
+    "HistoryImmutable",
+    "RevisionIdentity",
+    "CleanupExact",
+    "TypeOK"
+   ],
+   "limits": "Checks serializable family transitions with an intervening native registration. IAM/SQL evaluation, JSON projection, HTTP serialization and container execution are outside this model.",
+   "source_scope": [
+    "internal/aws/catalog/ecs_revisions.go",
+    "internal/aws/catalog/ecs_stack.go",
+    "internal/aws/catalog/services_compute.go",
+    "internal/aws/catalog/semantics.go",
+    "internal/aws/ecs_task_definition_cloudformation.go",
+    "internal/aws/cloudformation.go",
+    "internal/aws/s3_cloudformation.go"
+   ],
+   "mutants": [
+    {
+     "id": "UseStaleStackPlan",
+     "edits": [
+      {
+       "old": "fresh == target = Len(images) + 1",
+       "new": "fresh == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CommitRequiresAdmission"
+    },
+    {
+     "id": "PublishFailedStack",
+     "edits": [
+      {
+       "old": "eligible /\\ grant /\\ laterOK",
+       "new": "eligible /\\ grant",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CommitRequiresAdmission"
+    },
+    {
+     "id": "OverwriteEarlierImage",
+     "edits": [
+      {
+       "old": "Append(images, image)",
+       "new": "Append(IF Len(images) > 0 THEN [images EXCEPT ![1] = image] ELSE images, image)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "HistoryImmutable"
+    },
+    {
+     "id": "RetireRetainedRevision",
+     "edits": [
+      {
+       "old": "IF retain THEN active ELSE active \\ {claim}",
+       "new": "active \\ {claim}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CleanupExact"
+    }
+   ]
+  },
+  {
+   "id": "VpcOriginReferenceLifecycle",
+   "model": "formal/VpcOriginReferenceLifecycle.tla",
+   "config": "formal/VpcOriginReferenceLifecycle.cfg",
+   "bounds": "One named load balancer (private/public/absent), one origin identity, three fresh ETag epochs, one stored stack ownership token, Boolean grant and transaction outcomes.",
+   "properties": [
+    "PrivateALBRequired",
+    "RejectStaleMutation",
+    "FailureRollsBack",
+    "GenerationAdvances",
+    "DeleteExact",
+    "TypeOK"
+   ],
+   "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation.",
+   "source_scope": [
+    "internal/aws/cloudfront_vpc_origin.go",
+    "internal/aws/cloudfront_vpc_origin_http.go",
+    "internal/aws/cloudformation_vpc_origin.go",
+    "internal/aws/elb_store.go",
+    "internal/aws/cloudformation.go",
+    "internal/aws/s3.go",
+    "internal/aws/s3_cloudformation.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "AcceptPublicALB",
+     "edits": [
+      {
+       "old": "lb = \"private\" /\\ epoch < MaxEpoch",
+       "new": "lb # \"none\" /\\ epoch < MaxEpoch",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PrivateALBRequired"
+    },
+    {
+     "id": "DeleteReferencedALB",
+     "edits": [
+      {
+       "old": "lb # \"none\" /\\ origin = 0",
+       "new": "lb # \"none\" /\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PrivateALBRequired"
+    },
+    {
+     "id": "AcceptStaleUpdate",
+     "edits": [
+      {
+       "old": "exact == expected = origin",
+       "new": "exact == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RejectStaleMutation"
+    },
+    {
+     "id": "DeleteDriftedStackOrigin",
+     "edits": [
+      {
+       "old": "grant /\\ tag = origin /\\ origin > 0",
+       "new": "grant /\\ (stack \\/ tag = origin) /\\ origin > 0",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RejectStaleMutation"
+    },
+    {
+     "id": "CommitPartialOrigin",
+     "edits": [
+      {
+       "old": "free /\\ grant /\\ laterOK",
+       "new": "free /\\ grant",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureRollsBack"
+    }
+   ]
+  },
+  {
+   "id": "CFNParameterRuleAdmission",
+   "model": "formal/CFNParameterRuleAdmission.tla",
+   "config": "formal/CFNParameterRuleAdmission.cfg",
+   "bounds": "Two operations, one or two copies, two primary locations, three secondary inputs, a second Boolean assertion, and three declaration shapes.",
+   "properties": [
+    "EveryOperandChecked",
+    "ValidationIgnoresValues",
+    "AllActiveAssertionsRequired",
+    "PublicationFollowsAdmission",
+    "ValidatedCreatesNothing",
+    "TypeOK"
+   ],
+   "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model.",
+   "source_scope": [
+    "internal/aws/cloudformation.go",
+    "internal/aws/cloudformation_conditions.go",
+    "internal/aws/cloudformation_rules.go",
+    "internal/aws/cloudformation_validate.go"
+   ],
+   "mutants": [
+    {
+     "id": "SkipInactiveShape",
+     "edits": [
+      {
+       "old": "IF input.defect = \"none\" THEN",
+       "new": "IF input.copies = 1 \\/ input.defect = \"none\" THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EveryOperandChecked"
+    },
+    {
+     "id": "IgnoreLateOperand",
+     "edits": [
+      {
+       "old": "IF input.defect = \"none\" THEN",
+       "new": "IF (input.secondary = \"\" /\\ input.defect = \"unknownRef\") \\/ input.defect = \"none\" THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EveryOperandChecked"
+    },
+    {
+     "id": "ValidateWithValues",
+     "edits": [
+      {
+       "old": "IF input.mode = \"validate\" THEN",
+       "new": "IF input.mode = \"validate\" /\\ (~active \\/ passes) THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValidationIgnoresValues"
+    },
+    {
+     "id": "AcceptEitherComparison",
+     "edits": [
+      {
+       "old": "firstAssertion == complete /\\ distinct",
+       "new": "firstAssertion == complete \\/ distinct",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllActiveAssertionsRequired"
+    },
+    {
+     "id": "IgnoreAdditionalAssertion",
+     "edits": [
+      {
+       "old": "passes == firstAssertion /\\ input.secondAssertion",
+       "new": "passes == firstAssertion",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllActiveAssertionsRequired"
+    },
+    {
+     "id": "EnforceInactiveRule",
+     "edits": [
+      {
+       "old": "ELSE IF ~active \\/ passes THEN",
+       "new": "ELSE IF passes THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllActiveAssertionsRequired"
+    },
+    {
+     "id": "PublishBeforeAdmission",
+     "edits": [
+      {
+       "old": "/\\ published = FALSE",
+       "new": "/\\ published = TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PublicationFollowsAdmission"
     }
    ]
   }

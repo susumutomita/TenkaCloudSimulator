@@ -68,6 +68,11 @@ func stackConstraintLength(v any) (int, error) {
 // ConstraintDescription are never interpolated into failure text. Existing
 // byte-length String behavior is preserved; this is not Unicode-length parity.
 func stackParameterValues(definitions map[string]any, supplied map[string]string) (map[string]string, error) {
+	return checkStackParameters(definitions, supplied, true)
+}
+
+// Template validation checks the declarations and defaults before concrete inputs exist.
+func checkStackParameters(definitions map[string]any, supplied map[string]string, requireValues bool) (map[string]string, error) {
 	fail := func(name, why string) (map[string]string, error) {
 		return nil, fmt.Errorf("parameter %s: %s", name, why)
 	}
@@ -234,6 +239,9 @@ func stackParameterValues(definitions map[string]any, supplied map[string]string
 		value, suppliedValue := supplied[name]
 		if !suppliedValue {
 			if !hasDefault {
+				if !requireValues {
+					continue
+				}
 				return fail(name, "missing required value")
 			}
 			value = fallback
@@ -257,86 +265,37 @@ func stackConditionValues(definitions map[string]any, references map[string]stri
 	// Cache structural height with each completed value. A later root may
 	// reach that value below other aliases; cached work must not erase depth.
 	heights := map[string]int{}
-	var evaluate func(string, int) (bool, error)
-	operand := func(value any) (string, error) {
-		if text, ok := stackScalarText(value); ok {
-			if len(text) > 51200 {
-				return "", fmt.Errorf("condition operand exceeds local byte bound")
-			}
-			return text, nil
-		}
-		ref, ok := value.(map[string]any)
-		if !ok || len(ref) != 1 {
-			return "", fmt.Errorf("condition operand must be scalar or parameter Ref")
-		}
-		name, ok := ref["Ref"].(string)
-		if !ok || name == "AWS::NoValue" {
-			return "", fmt.Errorf("invalid condition Ref")
-		}
-		text, exists := references[name]
-		if !exists {
-			return "", fmt.Errorf("unknown condition Ref")
-		}
-		return text, nil
-	}
-	evaluate = func(name string, depth int) (bool, error) {
+	var evaluate func(string, int) (stackTruth, error)
+	evaluator := stackPredicateEvaluator{references: references}
+	evaluate = func(name string, depth int) (stackTruth, error) {
 		if depth > stackConditionalDepth {
-			return false, fmt.Errorf("condition depth exceeds 32")
+			return stackTruth{}, fmt.Errorf("condition depth exceeds 32")
 		}
 		if !stackConditionalName.MatchString(name) {
-			return false, fmt.Errorf("invalid condition name")
+			return stackTruth{}, fmt.Errorf("invalid condition name")
 		}
 		if state[name] == 2 {
 			if depth+heights[name]-1 > stackConditionalDepth {
-				return false, fmt.Errorf("condition depth exceeds 32")
+				return stackTruth{}, fmt.Errorf("condition depth exceeds 32")
 			}
-			return result[name], nil
+			return stackTruth{value: result[name], height: heights[name]}, nil
 		}
 		if state[name] == 1 {
-			return false, fmt.Errorf("condition cycle")
+			return stackTruth{}, fmt.Errorf("condition cycle")
 		}
-		raw, exists := definitions[name]
-		if !exists {
-			return false, fmt.Errorf("unknown condition")
-		}
-		expression, ok := raw.(map[string]any)
-		if !ok || len(expression) != 1 {
-			return false, fmt.Errorf("condition requires one supported expression")
+		raw, ok := definitions[name]
+		if !ok {
+			return stackTruth{}, fmt.Errorf("unknown condition")
 		}
 		state[name] = 1
-		var value bool
-		height := 1
-		if alias, exists := expression["Condition"]; exists {
-			target, ok := alias.(string)
-			if !ok {
-				return false, fmt.Errorf("invalid condition alias")
-			}
-			var err error
-			value, err = evaluate(target, depth+1)
-			if err != nil {
-				return false, err
-			}
-			height += heights[target]
-		} else if raw, exists := expression["Fn::Equals"]; exists {
-			args, ok := raw.([]any)
-			if !ok || len(args) != 2 {
-				return false, fmt.Errorf("Equals requires exactly two operands")
-			}
-			left, err := operand(args[0])
-			if err != nil {
-				return false, err
-			}
-			right, err := operand(args[1])
-			if err != nil {
-				return false, err
-			}
-			value = left == right
-		} else {
-			return false, fmt.Errorf("unsupported condition expression")
+		v, err := evaluator.eval(raw, depth)
+		if err != nil {
+			return stackTruth{}, err
 		}
-		result[name], heights[name], state[name] = value, height, 2
-		return value, nil
+		result[name], heights[name], state[name] = v.value, v.height, 2
+		return v, nil
 	}
+	evaluator.alias = evaluate
 	names := make([]string, 0, len(definitions))
 	for name := range definitions {
 		names = append(names, name)

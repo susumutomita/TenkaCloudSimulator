@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ncruces/go-sqlite3"
 )
 
 // ELBStore owns bounded Application Load Balancer control-plane state in the
@@ -354,6 +356,9 @@ func (s *ELBStore) DeleteLoadBalancer(ctx context.Context, region, arn string, a
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, "DELETE FROM aws_elb_load_balancers WHERE arn=?", arn); err != nil {
+		if errors.Is(err, sqlite3.CONSTRAINT_FOREIGNKEY) || (errors.Is(err, sqlite3.CONSTRAINT_TRIGGER) && strings.Contains(err.Error(), "FOREIGN KEY constraint failed")) {
+			return elbErr("ResourceInUse", "Remove origins associated with this load balancer before deleting it.")
+		}
 		return err
 	}
 	for _, group := range groups {

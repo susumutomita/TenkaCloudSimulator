@@ -38,6 +38,21 @@ through `?name=` returns the function's403 because its policy only permits the
 example's `/cfn-rest/public`. Two teams need separate process/SQLite/token
 instances. IAM identity selection alone does not isolate participants.
 
+## Validate an inline template
+
+Call `cloudformation.validate_template(TemplateBody=...)` before supplying
+stack parameters. The simulator accepts one YAML or JSON document of up to
+51,200 bytes and uses the same resource-type allowlist as `CreateStack`. It
+checks declarations and parameter defaults and returns the template description,
+parameter keys, descriptions, public defaults, and required IAM capabilities.
+A required parameter may omit its default. The response omits defaults marked
+`NoEcho`. The caller needs `cloudformation:ValidateTemplate` on `*`.
+
+Validation does not read SSM parameters, create a stack, or run workloads.
+`CreateStack` also checks concrete parameter values, resolves references,
+validates resource properties, and authorizes provisioning. The local API
+rejects `TemplateURL` and external transforms. See the [AWS Query API reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_ValidateTemplate.html).
+
 ## Supported resources and boundaries
 
 The existing S3 Bucket, SSM Parameter, IAM Role and inline Python Lambda Function
@@ -110,12 +125,24 @@ unit is bytes, not a claim of AWS Unicode-length parity. Number comparison uses
 bounded exact decimal rational values (at most 128 text bytes, exponent −308…308);
 it is not general AWS parameter-type or numeric compatibility.
 
-Conditions support `Fn::Equals` over literals or parameter/pseudo-parameter Ref,
-and `{Condition: name}` aliases. All condition definitions must be valid, including
-unused aliases; unknown names and cycles fail. And, Or, Not, mappings, dynamic
-references and general intrinsic languages remain unsupported. Local bounds are
-100 parameter/condition definitions, depth 32 and 10,000 conditional-value nodes.
-String scalars are capped at 51,200 bytes; the TemplateBody limit remains 51,200.
+Conditions support `Fn::Equals` over literals or parameter/pseudo-parameter references,
+`Fn::Not` with one predicate, `Fn::And` with 2–10 predicates and named condition
+aliases. Every operand and alias must be valid, including unused conditions.
+Unknown names, cycles, and unsupported operators such as `Fn::Or` fail validation
+during stack compilation. The compiler limits conditions to 100 definitions,
+32 levels of nesting and 10,000 predicate nodes. Strings and the template body
+are each bounded to 51,200 bytes.
+
+A template may also declare up to 100 parameter rules. Each rule accepts an
+optional `RuleCondition` and 1–100 assertions. Rule conditions and assertions
+support `Fn::Equals`, `Fn::Not` and `Fn::And` over literals and references to
+declared String or Number inputs. `ValidateTemplate` checks their structure and
+references. `CreateStack` evaluates assertions against submitted values and
+defaults whenever the rule condition is true or absent. A rejected assertion
+identifies the rule and assertion number. No stack or native resources are
+created. The [local admission model](../formal/CFNParameterRuleAdmission.tla)
+checks the validation and creation outcomes for a two-location example with
+two assertions. [AWS template rules](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/rules-section-structure.html)
 
 A resource or output may have a named Condition. `Fn::If` selects only the chosen
 value; direct `AWS::NoValue` arms remove a map property or list member. Both arms

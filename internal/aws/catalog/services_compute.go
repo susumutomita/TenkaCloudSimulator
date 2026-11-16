@@ -136,9 +136,9 @@ var ecs = &Service{
 				"pendingTasksCount": 0, "activeServicesCount": 0, "statistics": []any{}, "capacityProviders": []any{},
 				"defaultCapacityProviderStrategy": []any{}, "attachments": []any{},
 				"settings": []any{map[string]any{"name": "containerInsights", "value": "disabled"}}}},
-		{Kind: "taskDefinition", Shape: "TaskDefinition", ID: "name", ARN: "arn:{partition}:ecs:{region}:{account}:task-definition/{name}:1",
-			ARNMember: "taskDefinitionArn", NameMember: "family", Unique: true, Limit: 200,
-			Generate: map[string]any{"revision": 1, "status": "ACTIVE", "registeredAt": "$now"}},
+		{Kind: "taskDefinition", Shape: "TaskDefinition", ID: "name", ARN: "arn:{partition}:ecs:{region}:{account}:task-definition/{id}",
+			ARNMember: "taskDefinitionArn", NameMember: "family", Limit: 200,
+			Generate: map[string]any{"status": "ACTIVE", "registeredAt": "$now"}},
 	},
 	Ops: []Op{
 		{Name: "CreateCluster", Kind: Create, Resource: "cluster", Check: ecsCreateCluster},
@@ -151,9 +151,9 @@ var ecs = &Service{
 			Fields: []string{"capacityProviders", "defaultCapacityProviderStrategy"}, Check: ecsCapacityProviders},
 		{Name: "DeleteCluster", Kind: Delete, Resource: "cluster", Lookup: "cluster", Set: map[string]any{"status": "INACTIVE"}},
 		{Name: "RegisterTaskDefinition", Kind: Create, Resource: "taskDefinition", Check: ecsTaskDefinition},
-		{Name: "DescribeTaskDefinition", Kind: Read, Resource: "taskDefinition", Lookup: "taskDefinition", Accept: []string{"include"}, Check: ecsTaskDefinitionRevision},
-		{Name: "ListTaskDefinitions", Kind: List, Resource: "taskDefinition", ListValue: "taskDefinitionArn", Filters: map[string]string{"status": "status"}},
-		{Name: "DeregisterTaskDefinition", Kind: Delete, Resource: "taskDefinition", Lookup: "taskDefinition", Check: ecsTaskDefinitionRevision,
+		{Name: "DescribeTaskDefinition", Kind: Read, Resource: "taskDefinition", Lookup: "taskDefinition", Accept: []string{"include"}},
+		{Name: "ListTaskDefinitions", Kind: List, Resource: "taskDefinition", ListValue: "taskDefinitionArn", Accept: []string{"sort"}, Filters: map[string]string{"status": "status", "familyPrefix": "family"}},
+		{Name: "DeregisterTaskDefinition", Kind: Update, Resource: "taskDefinition", Lookup: "taskDefinition",
 			Set: map[string]any{"status": "INACTIVE", "deregisteredAt": "$now"}},
 		{Name: "TagResource", Kind: Tag, Lookup: "resourceArn"},
 		{Name: "UntagResource", Kind: Untag, Lookup: "resourceArn"},
@@ -162,7 +162,7 @@ var ecs = &Service{
 	Bounds: []string{
 		"Clusters and task definitions are configuration metadata: no container instance, task, service, task set or Fargate capacity is started, so cluster counts stay 0. RunTask, StartTask, CreateService and other workload APIs return UnknownOperationException with HTTP 501.",
 		"Clusters accept only the AWS-managed FARGATE and FARGATE_SPOT capacity providers; Service Connect namespaces do not exist. A missing clusterName creates the default cluster and DescribeClusters without clusters describes it. Creating a live cluster name again is refused. DescribeClusters and DescribeTaskDefinition always return settings, configuration and tags, and failures name the identifier as supplied.",
-		"Each task definition family holds one revision (1): registering a live family again is refused and other revisions do not exist. Deregistration deletes the revision after returning it INACTIVE. Fargate task definitions must use awsvpc networking and a documented Linux task CPU and memory combination. familyPrefix and sort are refused.",
+		"RegisterTaskDefinition stores each family revision under its own ARN. DescribeTaskDefinition accepts a family (latest ACTIVE revision), family:revision or ARN. Deregistration requires a revision and retains it for numbering. Describe omits inactive revisions without a referencing workload. ListTaskDefinitions defaults to ACTIVE and filters by the full family name. Explicit INACTIVE listing is unsupported because the simulator does not track live task or service references. A region retains up to 200 task definition revisions including inactive ones. CloudFormation CreateStack registers task definitions in the same store. Ref and GetAtt TaskDefinitionArn return the revision ARN. DeleteStack retires the owned revision unless DeletionPolicy is Retain. Fargate task definitions must use awsvpc networking and a documented Linux task CPU and memory combination.",
 	},
 }
 
@@ -274,24 +274,6 @@ func fargateSize(cpu, memory int64) bool {
 		return within(32768, 122880, 8192)
 	}
 	return false
-}
-
-// ecsTaskDefinitionRevision resolves family:1 to the single stored
-// revision and refuses other revisions, which the simulator never registers.
-func ecsTaskDefinitionRevision(input map[string]any) error {
-	identifier, _ := input["taskDefinition"].(string)
-	slash := strings.LastIndex(identifier, "/")
-	family, revision, ok := strings.Cut(identifier[slash+1:], ":")
-	if !ok {
-		return nil
-	}
-	if revision != "1" {
-		return Failure("ClientException", "The task definition revision does not exist.")
-	}
-	if slash < 0 {
-		input["taskDefinition"] = family
-	}
-	return nil
 }
 
 var eks = &Service{

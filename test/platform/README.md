@@ -57,3 +57,20 @@ an existing node_modules or platform source. Browser coverage drives both teams'
 real Cloudscape login, Services/region navigation, SSM Overview value read and
 practice portal submission, checks 100/95, no external requests, mobile width and
 stack cleanup. Flags/tokens are never printed.
+
+## CloudFormation and SDK coverage in pull requests
+
+After `make build`, run `python test/platform/sdk-lifecycle.py -v` with
+`scripts/requirements-test.txt` installed. Each case uses a fresh authenticated
+local simulator.
+
+- Descriptions of 1,025 and 1,105 UTF-8 bytes must fail with a validation error
+  and leave no stack, parameter, REST API or Lambda function.
+- A 1,024-byte description must succeed. The SDK deploys the checked-in
+  `examples/cloudformation-rest-lambda.json` application, reads its SSM
+  parameter and calls its HTTP route. Changing a WAF rule from Count to Block
+  makes that same request return 403. Removing the association restores access,
+  and deleting the stack removes the application's resources.
+
+These cases exercise an ordinary application. Replaying and grading external
+security challenges are outside this pull-request check.

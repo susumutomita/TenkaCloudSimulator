@@ -2806,6 +2806,86 @@ REQUIRED_SOURCE_SCOPES['MacProbeLifecycle'] = {
 }
 
 
+REQUIRED_SOURCE_SCOPES['CFNConditionAdmission'].add('internal/aws/cloudformation_validate.go')
+
+BASE_MODELS.add('ECSTaskRevisionLifecycle')
+BASE_INVARIANTS['ECSTaskRevisionLifecycle'] = {
+    'CommitRequiresAdmission',
+    'HistoryImmutable',
+    'RevisionIdentity',
+    'CleanupExact',
+    'TypeOK',
+}
+REQUIRED_MUTANTS['ECSTaskRevisionLifecycle'] = {
+    'UseStaleStackPlan',
+    'PublishFailedStack',
+    'OverwriteEarlierImage',
+    'RetireRetainedRevision',
+}
+REQUIRED_SOURCE_SCOPES['ECSTaskRevisionLifecycle'] = {
+    'internal/aws/catalog/ecs_revisions.go',
+    'internal/aws/catalog/ecs_stack.go',
+    'internal/aws/catalog/services_compute.go',
+    'internal/aws/catalog/semantics.go',
+    'internal/aws/ecs_task_definition_cloudformation.go',
+    'internal/aws/cloudformation.go',
+    'internal/aws/s3_cloudformation.go',
+}
+
+BASE_MODELS.add('VpcOriginReferenceLifecycle')
+BASE_INVARIANTS['VpcOriginReferenceLifecycle'] = {
+    'PrivateALBRequired',
+    'RejectStaleMutation',
+    'FailureRollsBack',
+    'GenerationAdvances',
+    'DeleteExact',
+    'TypeOK',
+}
+REQUIRED_MUTANTS['VpcOriginReferenceLifecycle'] = {
+    'AcceptPublicALB',
+    'DeleteReferencedALB',
+    'AcceptStaleUpdate',
+    'DeleteDriftedStackOrigin',
+    'CommitPartialOrigin',
+}
+REQUIRED_SOURCE_SCOPES['VpcOriginReferenceLifecycle'] = {
+    'internal/aws/cloudfront_vpc_origin.go',
+    'internal/aws/cloudfront_vpc_origin_http.go',
+    'internal/aws/cloudformation_vpc_origin.go',
+    'internal/aws/elb_store.go',
+    'internal/aws/cloudformation.go',
+    'internal/aws/s3.go',
+    'internal/aws/s3_cloudformation.go',
+    'internal/aws/ssm.go',
+    'internal/server/server.go',
+}
+
+BASE_MODELS.add('CFNParameterRuleAdmission')
+BASE_INVARIANTS['CFNParameterRuleAdmission'] = {
+    'EveryOperandChecked',
+    'ValidationIgnoresValues',
+    'AllActiveAssertionsRequired',
+    'PublicationFollowsAdmission',
+    'ValidatedCreatesNothing',
+    'TypeOK',
+}
+REQUIRED_MUTANTS['CFNParameterRuleAdmission'] = {
+    'SkipInactiveShape',
+    'IgnoreLateOperand',
+    'ValidateWithValues',
+    'AcceptEitherComparison',
+    'IgnoreAdditionalAssertion',
+    'EnforceInactiveRule',
+    'PublishBeforeAdmission',
+}
+REQUIRED_SOURCE_SCOPES['CFNParameterRuleAdmission'] = {
+    'internal/aws/cloudformation.go',
+    'internal/aws/cloudformation_conditions.go',
+    'internal/aws/cloudformation_rules.go',
+    'internal/aws/cloudformation_validate.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

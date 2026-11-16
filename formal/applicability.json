@@ -1,45 +1,661 @@
 {
   "version": 1,
-  "base_sha": "24a30df3e854dc72b9bd5f1973e8289c5158f8f3",
+  "base_sha": "9eb7532df476be5197f66611fc39e2e48cd7d836",
   "changes": [
     {
-      "path": "Makefile",
-      "sha256": "642fc99996765ad6e89e38da62bcb77dd3fb339db31b3fc2929d52e4675b40bf",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "c3a13f3009dccbe9086d2599a543939cdf19c0b4de7f8f7b9aa73ab129c845ef",
+      "disposition": "formal-infrastructure",
+      "reason": "Runs the standalone simulator SDK lifecycle and byte-boundary checks in the existing integration job.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "5988256c9e2ce05c4e54af6f5d488d277ce32cda78b32a7869458703631dcf6d",
+      "disposition": "documentation",
+      "reason": "Reference documentation describing the bounded simulator contract.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "29214c86e8b54c7019ac669ec7f1233f1d4a221f63eec9593646116860d7a483",
+      "disposition": "documentation",
+      "reason": "Reference documentation describing the bounded simulator contract.",
+      "models": []
+    },
+    {
+      "path": "docs/cloudformation-rest.md",
+      "sha256": "1468c5b00c054baa323aeea60f612d4444dcd685194d9a4609076304f593d65c",
+      "disposition": "documentation",
+      "reason": "Reference documentation describing the bounded simulator contract.",
+      "models": []
+    },
+    {
+      "path": "docs/cloudfront-vpc-origin.md",
+      "sha256": "8086183a6419242ceba19661be44ff65eb63f5ec76ceb252e7abd9794edeec35",
+      "disposition": "documentation",
+      "reason": "Reference documentation describing the bounded simulator contract.",
+      "models": []
+    },
+    {
+      "path": "formal/CFNParameterRuleAdmission.cfg",
+      "sha256": "d1d9a22c70b3a00933bf87a60dae68d8b6c5cea8f231562f68963ff49b80df0c",
       "disposition": "modeled",
-      "reason": "Makefile is already scoped to StartupTokenVisibility. This change only registers an offline test and leaves startup token forwarding, defaults and all existing gates unchanged.",
+      "reason": "Checks every parameter rule before stack admission and native provisioning.",
       "models": [
         {
-          "id": "StartupTokenVisibility",
+          "id": "CFNParameterRuleAdmission",
           "properties": [
-            "TypeOK",
-            "FileIdentityFrozen",
-            "CreatedFilePrivate",
-            "HistoryVisibility",
-            "InvalidFileNeverEmits"
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
           ],
-          "limits": "Existing bounded startup token visibility model is unchanged; this binding preserves its Makefile scope. It does not model the image builder TLS, Python tests, CI execution, host trust stores or real VM behavior."
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
         }
       ]
     },
     {
-      "path": "test/battle/README.md",
-      "sha256": "f9b20ba8e43f1b87790bc1a20722dcd23fc803b7e86b481301ea9ccb19d602ab",
-      "disposition": "test-support",
-      "reason": "Documents TLS trust selection for the opt-in rehearsal image builder; not evidence of guest execution.",
+      "path": "formal/CFNParameterRuleAdmission.tla",
+      "sha256": "58309f976f823da3d87e530523e0d73815aa43d21d8eccca8101122ee633d129",
+      "disposition": "modeled",
+      "reason": "Checks every parameter rule before stack admission and native provisioning.",
+      "models": [
+        {
+          "id": "CFNParameterRuleAdmission",
+          "properties": [
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
+          ],
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
+        }
+      ]
+    },
+    {
+      "path": "formal/ECSTaskRevisionLifecycle.cfg",
+      "sha256": "b6a68e194ac96f27342f4e19516fd5cc71cdf42dd8a1e09363ae95e0fd1b3e34",
+      "disposition": "modeled",
+      "reason": "The bounded specification and its configuration declare the reachable lifecycle and the invariants checked by TLC.",
+      "models": [
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "CommitRequiresAdmission",
+            "HistoryImmutable",
+            "RevisionIdentity",
+            "CleanupExact"
+          ],
+          "limits": "Checks serializable family transitions with an intervening native registration. IAM/SQL evaluation, JSON projection, HTTP serialization and container execution are outside this model."
+        }
+      ]
+    },
+    {
+      "path": "formal/ECSTaskRevisionLifecycle.tla",
+      "sha256": "781713da22a95c3f93a31d72e92b038605e48fbf5ca0e1fa1f0754d59616b67b",
+      "disposition": "modeled",
+      "reason": "The bounded specification and its configuration declare the reachable lifecycle and the invariants checked by TLC.",
+      "models": [
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "CommitRequiresAdmission",
+            "HistoryImmutable",
+            "RevisionIdentity",
+            "CleanupExact"
+          ],
+          "limits": "Checks serializable family transitions with an intervening native registration. IAM/SQL evaluation, JSON projection, HTTP serialization and container execution are outside this model."
+        }
+      ]
+    },
+    {
+      "path": "formal/VpcOriginReferenceLifecycle.cfg",
+      "sha256": "816604839a16a1c287bb8aabfa74e1c483c9b5f88c53fb2256b3a05a4de149f6",
+      "disposition": "modeled",
+      "reason": "The bounded specification and its configuration declare the reachable lifecycle and the invariants checked by TLC.",
+      "models": [
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation."
+        }
+      ]
+    },
+    {
+      "path": "formal/VpcOriginReferenceLifecycle.tla",
+      "sha256": "cc5a25be7936041de4d77fbc5f37344bff4da4c79f5a6ab91541cc1f9d17933f",
+      "disposition": "modeled",
+      "reason": "The bounded specification and its configuration declare the reachable lifecycle and the invariants checked by TLC.",
+      "models": [
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "f5a1cf6d0ce60cbc44c7654fc0c63e4cee705f20978e918be72711f9b8997fcc",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers bounded models and enforces required invariant, mutant and source-scope declarations.",
       "models": []
     },
     {
-      "path": "test/battle/image/repo_relay.py",
-      "sha256": "233d287f3e7d1605c1e0d5274641f2946995d206edd3da32e5e580cb5389dcde",
+      "path": "internal/aws/catalog/ecs_revision_boundaries_test.go",
+      "sha256": "01ec8b65610c38a92031283538e67f081138123d77e55ce824a36d1f4aca2aaf",
       "disposition": "test-support",
-      "reason": "Opt-in rehearsal image build helper only; removes machine-specific CA path while preserving certificate and hostname verification. No product runtime code or model predicate changes.",
+      "reason": "Checks scope, authorization, revision allocation, and retry behavior through the ECS catalog and store.",
       "models": []
     },
     {
-      "path": "test/battle/image/test_repo_relay.py",
-      "sha256": "f8d3cd61070cc61973fa19dd502a73051164bf521d4ce3ef5de7a304304c7a92",
+      "path": "internal/aws/catalog/ecs_revisions.go",
+      "sha256": "ef9f12c1d37e01461eb1c5780c4705b7821c41de7aebaf947a6209e070ccd23b",
+      "disposition": "modeled",
+      "reason": "Native registrations reserve a new family revision only after admission, preserve previous images and retire the selected revision.",
+      "models": [
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "CommitRequiresAdmission",
+            "HistoryImmutable",
+            "RevisionIdentity",
+            "CleanupExact"
+          ],
+          "limits": "Checks serializable family transitions with an intervening native registration. IAM/SQL evaluation, JSON projection, HTTP serialization and container execution are outside this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/ecs_revisions_test.go",
+      "sha256": "5a25769721d101e1f5f58fa6fca370f52e4ef8540d2645c0baacdf876b606bb4",
       "disposition": "test-support",
-      "reason": "Offline regression checks default and explicit trust selection, fail-closed invalid overrides, and loopback listener. No real VM or TLS execution is claimed.",
+      "reason": "Regression fixtures and assertions exercise the native HTTP or storage behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/ecs_stack.go",
+      "sha256": "62e749f73a7e2e9debfc28f484e4b770af21547d279854b015515147dd21fcc6",
+      "disposition": "modeled",
+      "reason": "Stack registration checks the predicted revision inside the transaction and stores the ARN for later cleanup.",
+      "models": [
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "CommitRequiresAdmission",
+            "HistoryImmutable",
+            "RevisionIdentity",
+            "CleanupExact"
+          ],
+          "limits": "Checks serializable family transitions with an intervening native registration. IAM/SQL evaluation, JSON projection, HTTP serialization and container execution are outside this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "7e36c180b070a5f889d1d1333cc9ec581cbf56fa3a67c5a28f6df5b155115797",
+      "disposition": "modeled",
+      "reason": "Catalog admission delegates task-definition requests to the native revision writer and reader.",
+      "models": [
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "CommitRequiresAdmission",
+            "HistoryImmutable",
+            "RevisionIdentity",
+            "CleanupExact"
+          ],
+          "limits": "Checks serializable family transitions with an intervening native registration. IAM/SQL evaluation, JSON projection, HTTP serialization and container execution are outside this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_compute.go",
+      "sha256": "5514cd930f9e408538f4273d897b5ca18196032133897f526094d6047c837cb9",
+      "disposition": "modeled",
+      "reason": "The ECS action table selects the native revision operations and bounds the supported statuses.",
+      "models": [
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "CommitRequiresAdmission",
+            "HistoryImmutable",
+            "RevisionIdentity",
+            "CleanupExact"
+          ],
+          "limits": "Checks serializable family transitions with an intervening native registration. IAM/SQL evaluation, JSON projection, HTTP serialization and container execution are outside this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_compute_test.go",
+      "sha256": "d4a400e51907bcb5d56a667225da010ee32147ced0e64829450f2ca7d309e325",
+      "disposition": "test-support",
+      "reason": "Regression fixtures and assertions exercise the native HTTP or storage behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "a0e774f6d055d19aa25c040639a1173bb2a22fe1e59a21465c5d2a54875c4896",
+      "disposition": "modeled",
+      "reason": "The stack planner validates parameters and selected links, then commits task definitions, origin metadata and ownership together.",
+      "models": [
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "CommitRequiresAdmission",
+            "HistoryImmutable",
+            "RevisionIdentity",
+            "CleanupExact"
+          ],
+          "limits": "Checks serializable family transitions with an intervening native registration. IAM/SQL evaluation, JSON projection, HTTP serialization and container execution are outside this model."
+        },
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation."
+        },
+        {
+          "id": "CFNConditionAdmission",
+          "properties": [
+            "PlanExact",
+            "SelectedLinkValidated",
+            "NoEarlyPublication"
+          ],
+          "limits": "Binary parser limits, supported CloudFormation resource names, metadata keys, response serialization and service reachability are covered separately by Go tests."
+        },
+        {
+          "id": "CFNParameterRuleAdmission",
+          "properties": [
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
+          ],
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_application_contract_test.go",
+      "sha256": "14b86eefc3a4e750c427a27956ae1d16f64a3ed00cda71045d2f973131f56f38",
+      "disposition": "test-support",
+      "reason": "Checks declaration rejection, schema startup recovery, and per-resource delete authorization for the SDK sample application.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudformation_conditions.go",
+      "sha256": "5654ba7b8c9f79ac9325c3f6ad9915a1590ef93cf79654db33c941401b84b97d",
+      "disposition": "modeled",
+      "reason": "Template-only validation and actual creation check parameter declarations with different requirements for supplied values.",
+      "models": [
+        {
+          "id": "CFNConditionAdmission",
+          "properties": [
+            "ParameterAdmission",
+            "NoResultOnInvalid"
+          ],
+          "limits": "Binary parser limits, supported CloudFormation resource names, metadata keys, response serialization and service reachability are covered separately by Go tests."
+        },
+        {
+          "id": "CFNParameterRuleAdmission",
+          "properties": [
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
+          ],
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_conditions_link.go",
+      "sha256": "d844989e6d401b9e99d281fb59716d9bd78bc393fa5eb2d0f173b56341c8d69c",
+      "disposition": "modeled",
+      "reason": "Selected links admit the named ECS task and VPC-origin attributes. Unknown attributes fail admission.",
+      "models": [
+        {
+          "id": "CFNConditionAdmission",
+          "properties": [
+            "SelectedLinkValidated",
+            "NoResultOnInvalid"
+          ],
+          "limits": "Binary parser limits, supported CloudFormation resource names, metadata keys, response serialization and service reachability are covered separately by Go tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_rules.go",
+      "sha256": "d746dbb5044f12ad0e50cc26da5c08762e735e0859c0fc5dd21074a0960fded0",
+      "disposition": "modeled",
+      "reason": "Checks every parameter rule before stack admission and native provisioning.",
+      "models": [
+        {
+          "id": "CFNParameterRuleAdmission",
+          "properties": [
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
+          ],
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_rules_test.go",
+      "sha256": "a55c031e75bd31fbab8502bb74c6969dae7bfa08f87ac2c197a53ef2004d8d20",
+      "disposition": "test-support",
+      "reason": "Native validation and creation tests cover bounds, active and inactive assertions, and absence of native writes after rejection.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudformation_validate.go",
+      "sha256": "e1a7aa78099a1a87c401a75e2d4d7b255a9595117e32999de667849bbf53caa1",
+      "disposition": "modeled",
+      "reason": "ValidateTemplate parses and bounds declarations without executing a creation plan. The no-publication and parameter admission properties cover the affected boundary.",
+      "models": [
+        {
+          "id": "CFNConditionAdmission",
+          "properties": [
+            "ParameterAdmission",
+            "NoEarlyPublication"
+          ],
+          "limits": "Binary parser limits, supported CloudFormation resource names, metadata keys, response serialization and service reachability are covered separately by Go tests."
+        },
+        {
+          "id": "CFNParameterRuleAdmission",
+          "properties": [
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
+          ],
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_validate_test.go",
+      "sha256": "d15746302d12e6f15e13114b7333356a9d133420a1f380deeae21e3c82dee861",
+      "disposition": "test-support",
+      "reason": "Regression fixtures and assertions exercise the native HTTP or storage behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudformation_vpc_origin.go",
+      "sha256": "8e6dccdd05d2de389ac1333227491da0843a00d71c015fd239431c433417dcd4",
+      "disposition": "modeled",
+      "reason": "Stack creation uses the same origin store as REST; deletion compares the stack's saved token to the live resource.",
+      "models": [
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_vpc_origin_test.go",
+      "sha256": "7dc31cd007c710b0ddf4351ca77031a2e8f01408ebabc1ce247fa7de282f792d",
+      "disposition": "test-support",
+      "reason": "Regression fixtures and assertions exercise the native HTTP or storage behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudfront_vpc_origin.go",
+      "sha256": "e6809bf82a8f239d36b14d4af2e59328ee9cfd4e5c73867e036a61609fdbe956",
+      "disposition": "modeled",
+      "reason": "The origin writer validates the native load balancer and conditionally changes an exact resource generation.",
+      "models": [
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudfront_vpc_origin_contract_test.go",
+      "sha256": "9cf271ef6d9668bb65f1b2a980a00707fb4e184735a7859ab130fe6ceb343c7f",
+      "disposition": "test-support",
+      "reason": "Checks VPC origin configuration, HTTP responses, ALB reassociation, bounded creation and recovery on storage failure.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudfront_vpc_origin_http.go",
+      "sha256": "a52b37f072e6a8790c22f7944c872dddeeec0969830491787c86f1b9b8f717bd",
+      "disposition": "modeled",
+      "reason": "The REST handler maps caller grants and ETag preconditions to the transactional native operation.",
+      "models": [
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudfront_vpc_origin_test.go",
+      "sha256": "7455322aa80d3609ee992b1fbee3c6a77ea27b9b90416b023d718a901b40639a",
+      "disposition": "test-support",
+      "reason": "Regression fixtures and assertions exercise the native HTTP or storage behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ecs_stack_lifecycle_test.go",
+      "sha256": "e275880555e0a2952bdb54e41aa56cbc50a8e3fc666405f52788f084ff2c9b78",
+      "disposition": "test-support",
+      "reason": "Checks ECS stack declarations, revision planning, and atomic registration of native task definitions and stack events.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ecs_task_definition_cloudformation.go",
+      "sha256": "0e1e27b1c8b40da7647a89cafe7798202dccf1a615dd8c6d666d49085e57614f",
+      "disposition": "modeled",
+      "reason": "CloudFormation projects the declared containers into the native ECS registration and uses the exact owned revision during cleanup.",
+      "models": [
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "CommitRequiresAdmission",
+            "HistoryImmutable",
+            "RevisionIdentity",
+            "CleanupExact"
+          ],
+          "limits": "Checks serializable family transitions with an intervening native registration. IAM/SQL evaluation, JSON projection, HTTP serialization and container execution are outside this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ecs_task_definition_cloudformation_test.go",
+      "sha256": "2849cd8f6c3811cea93217a942cc1c68c9b85b45c1386646006cdd027a2aa107",
+      "disposition": "test-support",
+      "reason": "Regression fixtures and assertions exercise the native HTTP or storage behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/elb_store.go",
+      "sha256": "324a0bd27440b04c3c08c830a5350f94d60ece92c870152cf605dcfda6b5f7d3",
+      "disposition": "modeled",
+      "reason": "Deleting a load balancer is refused while native origin metadata references it.",
+      "models": [
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "af2a5aa0fc140e80141dc4e09cce2846dc36497961f7b4a5dfe2f7e8c652811a",
+      "disposition": "modeled",
+      "reason": "The gateway owns the shared origin store handle used by the AWS REST endpoint.",
+      "models": [
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/s3_cloudformation.go",
+      "sha256": "37e89d752fb2f21a4c37c3814baa4c4d40146561a1c6005a3fe559a32acb5e29",
+      "disposition": "modeled",
+      "reason": "Query dispatch shares durable stores between CloudFormation, the ECS catalog and the CloudFront origin handlers.",
+      "models": [
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation."
+        },
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "CommitRequiresAdmission",
+            "HistoryImmutable",
+            "RevisionIdentity",
+            "CleanupExact"
+          ],
+          "limits": "Checks serializable family transitions with an intervening native registration. IAM/SQL evaluation, JSON projection, HTTP serialization and container execution are outside this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "c9c2662c1f1871fa051cb5427869a12a57d82d95da4ac37f4c3864de3110323e",
+      "disposition": "modeled",
+      "reason": "REST dispatch routes VPC-origin operations to the shared native state.",
+      "models": [
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/ecs.json",
+      "sha256": "f03d400b48875971683dc948a5fb9e729b82e57d9f42f5a8cf5f57983a87bd24",
+      "disposition": "presentation",
+      "reason": "Lists the native ECS operations in the generated console API catalog.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "da303cacac7c597c9f462d60997ba7b58cc950a7a43a0c2ac82e5d6c4009cfc9",
+      "disposition": "modeled",
+      "reason": "Startup wires the resource handlers to the same SQLite database, including the ALB reference needed for origin admission.",
+      "models": [
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "f2cff621441db9eb0c7c8dd0ad80ec89c555c6a3dd3864db2ad5e36a2859cb0e",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers bounded models and enforces required invariant, mutant and source-scope declarations.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "7483a805f0cdd9eac14902850d9fc06a2593e38c02b6141ffeb28020ef7be98f",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers bounded models and enforces required invariant, mutant and source-scope declarations.",
+      "models": []
+    },
+    {
+      "path": "test/platform/README.md",
+      "sha256": "f297d50eb549ce79a75a30a5a61d80819941c056f1f1cc9b6e10ec31d499c39b",
+      "disposition": "test-support",
+      "reason": "Documents the CloudFormation SDK lifecycle fixture and the byte limits it checks in platform CI.",
+      "models": []
+    },
+    {
+      "path": "test/platform/sdk-lifecycle.py",
+      "sha256": "db875b6a6f4a0d8ae6d475eba98fb9318f08d41b4507657ce234c05b1ea88cbb",
+      "disposition": "test-support",
+      "reason": "Tests rejection of oversized descriptions and the normal SDK lifecycle with a local fixture and verifies the resulting SSM and stack state.",
       "models": []
     }
   ]
