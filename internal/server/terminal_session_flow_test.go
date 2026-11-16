@@ -81,6 +81,11 @@ type terminalFlow struct {
 
 func newTerminalFlow(t *testing.T) *terminalFlow {
 	t.Helper()
+	return newTerminalFlowWithLiveness(t, 0, 0)
+}
+
+func newTerminalFlowWithLiveness(t *testing.T, idle, ping time.Duration) *terminalFlow {
+	t.Helper()
 	a, c, _ := terminalFixture(t)
 	db, err := core.New(":memory:")
 	if err != nil {
@@ -97,7 +102,7 @@ func newTerminalFlow(t *testing.T) *terminalFlow {
 		defer cancel()
 		_ = sessions.Shutdown(ctx)
 	})
-	a.next = terminalHandler{store: sessions}
+	a.next = terminalHandler{store: sessions, idleLimit: idle, pingInterval: ping}
 	w := terminalRedeem(a, terminalCode(t, a, c))
 	cookies := w.Result().Cookies()
 	if w.Code != 303 || len(cookies) != 1 {
