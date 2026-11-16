@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -41,7 +42,10 @@ func (q *request) execute() (map[string]any, error) {
 	}
 	switch q.op.Kind {
 	case Create:
-		return q.create()
+		if q.isECSTaskDefinition() {
+			return q.registerECSRevision()
+		}
+		return q.create(0)
 	case Read:
 		return q.read()
 	case List:
@@ -94,7 +98,7 @@ func (q *request) put() (map[string]any, error) {
 	}
 	found, err := find(q.e.store.db, q.b.spec.Model, q.region, res.Kind, parentID(parent), q.identifier())
 	if errors.Is(err, sql.ErrNoRows) {
-		return q.create()
+		return q.create(0)
 	}
 	if err != nil {
 		return nil, err
@@ -213,7 +217,11 @@ func (q *request) checkRefs(res *Resource, document map[string]any) error {
 }
 
 func (q *request) authorize(resource string) error {
-	decision, err := q.e.cfg.Authorize(q.ctx, q.principal, q.b.spec.IAMPrefix+":"+q.op.action(), resource)
+	return q.authorizeAction(q.b.spec.IAMPrefix+":"+q.op.action(), resource)
+}
+
+func (q *request) authorizeAction(action, resource string) error {
+	decision, err := q.e.cfg.Authorize(q.ctx, q.principal, action, resource)
 	if err != nil {
 		return err
 	}
@@ -286,6 +294,10 @@ func (q *request) lookup() (row, *row, error) {
 		return row{}, nil, err
 	}
 	identifier := q.identifier()
+	if q.isECSTaskDefinition() {
+		r, err := q.lookupECSRevision(identifier)
+		return r, parent, err
+	}
 	found, err := find(q.e.store.db, q.b.spec.Model, q.region, res.Kind, parentID(parent), identifier)
 	if errors.Is(err, sql.ErrNoRows) && res.Singleton {
 		r := row{Service: q.b.spec.Model, Region: q.region, Kind: res.Kind, ID: "default", Name: "default", Tags: map[string]string{}, Document: map[string]any{}}
@@ -442,10 +454,10 @@ func idempotencyMember(shape *Shape) string {
 	return ""
 }
 
-func fingerprint(input map[string]any, skip string) string {
+func fingerprint(input map[string]any, skip ...string) string {
 	clone := map[string]any{}
 	for k, v := range input {
-		if k != skip {
+		if !slices.Contains(skip, k) {
 			clone[k] = stored(v)
 		}
 	}
@@ -514,7 +526,7 @@ func (q *request) generated(value any, r row, parent *row) any {
 	return nil
 }
 
-func (q *request) create() (map[string]any, error) {
+func (q *request) create(ecsRevision int) (map[string]any, error) {
 	res := q.resource()
 	inputShape := q.b.model.shape(q.official.Input)
 	resourceShape := q.b.model.shape(res.Shape)
@@ -570,6 +582,11 @@ func (q *request) create() (map[string]any, error) {
 	}
 	r := row{Service: q.b.spec.Model, Region: q.region, Kind: res.Kind, Parent: parentID(parent), ID: id, Name: name, Tags: tags}
 	r.ARN = q.formatARN(res, id, name, parent)
+	if ecsRevision > 0 {
+		r.ARN = q.formatARN(res, fmt.Sprintf("%s:%d", name, ecsRevision), name, parent)
+		r.ID = r.ARN
+		document["revision"] = ecsRevision
+	}
 	if res.ARNMember != "" {
 		document[res.ARNMember] = r.ARN
 	}
@@ -601,6 +618,11 @@ func (q *request) create() (map[string]any, error) {
 	r.Document = document
 	if err := q.authorize(r.ARN); err != nil {
 		return nil, err
+	}
+	if ecsRevision > 0 {
+		if err := q.authorizeECSRegistration(r); err != nil {
+			return nil, err
+		}
 	}
 	if err := q.checkRefs(res, document); err != nil {
 		return nil, err
@@ -910,6 +932,9 @@ func (q *request) list() (map[string]any, error) {
 	rows, err := list(q.e.store.db, q.b.spec.Model, q.region, res.Kind, parentID(parent))
 	if err != nil {
 		return nil, err
+	}
+	if q.isECSTaskDefinition() {
+		return q.listECSRevisions(rows, parent, inputToken, outputToken, limitKey, limit)
 	}
 	filtered := rows[:0]
 	for _, r := range rows {

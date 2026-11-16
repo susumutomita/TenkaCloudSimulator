@@ -48,8 +48,6 @@ func TestComputeCheckHooksApplyDocumentedRules(t *testing.T) {
 		{"fargate size", ecsTaskDefinition, fargate("256", "1536", "awsvpc"), "ClientException"},
 		{"fargate units", ecsTaskDefinition, fargate("1 vCPU", "2 GB", "awsvpc"), ""},
 		{"fargate bad units", ecsTaskDefinition, fargate("many vCPU", "2 GB", "awsvpc"), "ClientException"},
-		{"other revision", ecsTaskDefinitionRevision, map[string]any{"taskDefinition": "web:2"}, "ClientException"},
-		{"family only", ecsTaskDefinitionRevision, map[string]any{"taskDefinition": "web"}, ""},
 		{"outposts", eksCluster, map[string]any{"outpostConfig": map[string]any{}}, "InvalidParameterException"},
 		{"deletion protection", eksCluster, map[string]any{"deletionProtection": true}, "InvalidParameterException"},
 		{"kubernetes version", eksCluster, map[string]any{"version": "latest"}, "InvalidParameterException"},
@@ -98,7 +96,7 @@ func TestComputeCheckHooksApplyDocumentedRules(t *testing.T) {
 }
 
 // The default cluster and family:1 identifiers follow the official API.
-func TestECSDefaultClusterAndSingleRevision(t *testing.T) {
+func TestECSDefaultClusterAndFirstRevision(t *testing.T) {
 	h := newHarness(t, ecs)
 	created := h.json1("ecs", "CreateCluster", map[string]any{})
 	expect(t, created, 200, "")
@@ -121,7 +119,7 @@ func TestECSDefaultClusterAndSingleRevision(t *testing.T) {
 		expect(t, h.json1("ecs", "DescribeTaskDefinition", map[string]any{"taskDefinition": identifier}), 200, "")
 	}
 	expect(t, h.json1("ecs", "DescribeTaskDefinition", map[string]any{"taskDefinition": "web:3"}), 400, "ClientException")
-	expect(t, h.json1("ecs", "RegisterTaskDefinition", task), 400, "InvalidParameterException")
+	expect(t, h.json1("ecs", "RegisterTaskDefinition", task), 200, "")
 	deregistered := h.json1("ecs", "DeregisterTaskDefinition", map[string]any{"taskDefinition": "web:1"})
 	if deregistered.body["taskDefinition"].(map[string]any)["status"] != "INACTIVE" {
 		t.Fatalf("deregistered %v", deregistered.body)
