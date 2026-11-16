@@ -72,7 +72,7 @@ func parseStackTemplate(body string) (map[string]any, error) {
 
 func supportedStackResourceType(kind string) bool {
 	switch kind {
-	case "AWS::SSM::Parameter", "AWS::IAM::Role", "AWS::IAM::InstanceProfile", "AWS::S3::Bucket", "AWS::Lambda::Function", "AWS::EC2::Instance":
+	case stackVpcOrigin, "AWS::SSM::Parameter", "AWS::IAM::Role", "AWS::IAM::InstanceProfile", "AWS::S3::Bucket", "AWS::Lambda::Function", "AWS::EC2::Instance":
 		return true
 	default:
 		return stackAPIKind(kind) || stackNetworkKind(kind)

@@ -116,8 +116,8 @@ func TestCloudFrontVpcOriginRejectsInvalidOrUnownedTargets(t *testing.T) {
 		cfExpectError(t, h.request("POST", cloudFrontPath, body), 400, "InvalidArgument")
 	}
 	h.origin(h.request("POST", cloudFrontPath, cfCreateXML(h.config)), 202)
-	if r := h.call("DeleteLoadBalancer", "LoadBalancerArn", h.alb); r.Code == 200 {
-		t.Fatal("deleted a referenced private ALB")
+	if r := h.call("DeleteLoadBalancer", "LoadBalancerArn", h.alb); r.Code != 400 || elbCode(r.Body.String()) != "ResourceInUse" {
+		t.Fatalf("deleting a referenced ALB: %d %s", r.Code, r.Body.String())
 	}
 }
 
@@ -157,7 +157,7 @@ func TestCloudFrontVpcOriginTransactionsRollBack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	o, err := saveCFOriginTx(t.Context(), tx, "", "", c, tags)
+	o, err := saveCFOriginTx(t.Context(), tx, "vo_0000000000000001", "", true, c, tags)
 	if err != nil {
 		t.Fatal(err)
 	}

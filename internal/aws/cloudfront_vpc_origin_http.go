@@ -105,14 +105,20 @@ func (s *CloudFrontStore) ServeHTTP(g *Gateway, w http.ResponseWriter, r *http.R
 	if id != "" {
 		resource = cloudFrontARNPrefix + id
 	}
-	decision, err := g.Identities.DecisionContext(r.Context(), principal, "cloudfront:"+action, resource)
-	if err != nil {
-		cfError(w, err)
-		return
+	authorize := func(action, resource string) bool {
+		decision, err := g.Identities.DecisionContext(r.Context(), principal, "cloudfront:"+action, resource)
+		if err != nil {
+			cfError(w, err)
+			return false
+		}
+		w.Header().Set("X-Simulator-IAM-Decision", decision)
+		if decision != "allowed" {
+			cfError(w, cfFailure{403, "AccessDenied", "The selected identity cannot perform this CloudFront operation."})
+			return false
+		}
+		return true
 	}
-	w.Header().Set("X-Simulator-IAM-Decision", decision)
-	if decision != "allowed" {
-		cfError(w, cfFailure{403, "AccessDenied", "The selected identity cannot perform this CloudFront operation."})
+	if !authorize(action, resource) {
 		return
 	}
 	data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 32<<10))
@@ -134,7 +140,15 @@ func (s *CloudFrontStore) ServeHTTP(g *Gateway, w http.ResponseWriter, r *http.R
 			return
 		}
 		if action == "CreateVpcOrigin" {
-			o, err = s.Create(r.Context(), c, tags)
+			id, err = newCFOriginID()
+			if err != nil {
+				cfError(w, err)
+				return
+			}
+			if len(tags) > 0 && !authorize("TagResource", cloudFrontARNPrefix+id) {
+				return
+			}
+			o, err = s.save(r.Context(), id, "", true, c, tags)
 			if err == nil {
 				w.Header().Set("Location", cloudFrontPath+"/"+o.ID)
 			}

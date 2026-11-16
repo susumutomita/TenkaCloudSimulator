@@ -128,6 +128,9 @@ func createStackBucket(tx *sql.Tx, region string, r StackResource) error {
 	return s3WriteTags(tx, r.PhysicalID, tags)
 }
 func stackResourceNamespace(region, kind string) string {
+	if kind == stackVpcOrigin {
+		return "cloudfront-vpc-origin"
+	}
 	if kind == "AWS::EC2::Instance" {
 		return "ec2-instance:" + region
 	}
@@ -185,6 +188,19 @@ func stackResourcePermissions(record StackRecord, deleting bool, authorize func(
 				actions = []string{"lambda:RemovePermission"}
 			} else {
 				actions = []string{"lambda:AddPermission"}
+			}
+		case stackVpcOrigin:
+			resource = cloudFrontARNPrefix + r.PhysicalID
+			if deleting {
+				actions = []string{"cloudfront:GetVpcOrigin", "cloudfront:DeleteVpcOrigin"}
+			} else {
+				if err := authorize("cloudfront:CreateVpcOrigin", "*"); err != nil {
+					return err
+				}
+				actions = []string{"cloudfront:GetVpcOrigin"}
+				if tags, ok := r.Properties["Tags"].([]any); ok && len(tags) > 0 {
+					actions = append(actions, "cloudfront:TagResource")
+				}
 			}
 		case "AWS::SSM::Parameter":
 			resource = "arn:aws:ssm:" + record.Region + ":000000000000:parameter/" + trimParameterSlash(r.PhysicalID)

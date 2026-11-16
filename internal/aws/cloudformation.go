@@ -53,6 +53,12 @@ type StackRecord struct {
 }
 
 func NewStackStore(db *sql.DB) (*StackStore, error) {
+	if _, err := NewELBStore(db); err != nil {
+		return nil, err
+	}
+	if _, err := NewCloudFrontStore(db); err != nil {
+		return nil, err
+	}
 	if _, err := NewEC2NetworkStore(db); err != nil {
 		return nil, err
 	}
@@ -567,6 +573,14 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 			if e != nil {
 				return fail(e.Error())
 			}
+		} else if kind == stackVpcOrigin {
+			if _, _, e := stackVpcOriginConfig(properties); e != nil {
+				return fail(e.Error())
+			}
+			sum := sha256.Sum256([]byte(id + "\x00" + key))
+			physical = "vo_" + hex.EncodeToString(sum[:8])
+			attrs[key+".Id"] = physical
+			attrs[key+".Arn"] = cloudFrontARNPrefix + physical
 		} else if kind == "AWS::SSM::Parameter" {
 			for k := range properties {
 				switch k {
@@ -786,6 +800,16 @@ func (s *StackStore) createCheckedContext(ctx context.Context, record StackRecor
 			}
 			continue
 		}
+		if r.Type == stackVpcOrigin {
+			if err = createStackVpcOrigin(ctx, tx, record, &r); err != nil {
+				return err
+			}
+			record.Resources[index] = r
+			if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
+				return err
+			}
+			continue
+		}
 		table, limit := "aws_ssm_parameters", 1000
 		if r.Type == "AWS::S3::Bucket" {
 			table, limit = "buckets", core.MaxBuckets
@@ -991,6 +1015,8 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 			err = deleteStackNetwork(context.Background(), tx, records[0], r)
 		} else if stackAPIKind(r.Type) {
 			err = deleteStackAPI(context.Background(), tx, region, r)
+		} else if r.Type == stackVpcOrigin {
+			err = deleteStackVpcOrigin(context.Background(), tx, r)
 		} else if r.Type == "AWS::SSM::Parameter" {
 			_, err = tx.Exec("DELETE FROM aws_ssm_parameters WHERE region=? AND name=?", region, r.PhysicalID)
 		} else if r.Type == "AWS::Lambda::Function" {
@@ -1064,6 +1090,8 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 			continue
 		}
 		switch resource.Type {
+		case stackVpcOrigin:
+			err = tx.QueryRow("SELECT count(*) FROM aws_cloudfront_vpc_origins WHERE id=?", resource.PhysicalID).Scan(&remaining)
 		case "AWS::SSM::Parameter":
 			err = tx.QueryRow("SELECT count(*) FROM aws_ssm_parameters WHERE region=? AND name=?", region, resource.PhysicalID).Scan(&remaining)
 		case "AWS::S3::Bucket":

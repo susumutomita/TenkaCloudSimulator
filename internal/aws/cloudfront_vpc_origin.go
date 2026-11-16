@@ -147,41 +147,50 @@ func cfMatch(o CFVpcOrigin, match string) error {
 	return nil
 }
 
-func (s *CloudFrontStore) Create(ctx context.Context, c CFOriginConfig, tags []CFOriginTag) (CFVpcOrigin, error) {
-	return s.save(ctx, "", "", c, tags)
-}
 func (s *CloudFrontStore) Update(ctx context.Context, id, match string, c CFOriginConfig) (CFVpcOrigin, error) {
 	if id == "" {
 		return CFVpcOrigin{}, cfMissing()
 	}
-	return s.save(ctx, id, match, c, nil)
+	return s.save(ctx, id, match, false, c, nil)
 }
 
-func (s *CloudFrontStore) save(ctx context.Context, id, match string, c CFOriginConfig, tags []CFOriginTag) (CFVpcOrigin, error) {
+func (s *CloudFrontStore) save(ctx context.Context, id, match string, creating bool, c CFOriginConfig, tags []CFOriginTag) (CFVpcOrigin, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return CFVpcOrigin{}, err
 	}
 	defer tx.Rollback()
-	o, err := saveCFOriginTx(ctx, tx, id, match, c, tags)
+	o, err := saveCFOriginTx(ctx, tx, id, match, creating, c, tags)
 	if err != nil {
 		return CFVpcOrigin{}, err
 	}
 	return o, tx.Commit()
 }
 
-// saveCFOriginTx creates when id is empty and otherwise updates exactly the matched revision.
-func saveCFOriginTx(ctx context.Context, tx *sql.Tx, id, match string, c CFOriginConfig, tags []CFOriginTag) (CFVpcOrigin, error) {
+func newCFOriginID() (string, error) {
+	id, err := elbID()
+	if err != nil {
+		return "", err
+	}
+	return "vo_" + id, nil
+}
+
+// CloudFormation preallocates the ID so Ref/GetAtt and the native row agree.
+// Creation always uses INSERT; an existing ID can only change through a matched update.
+func saveCFOriginTx(ctx context.Context, tx *sql.Tx, id, match string, creating bool, c CFOriginConfig, tags []CFOriginTag) (CFVpcOrigin, error) {
 	if err := validateCFOriginConfig(c); err != nil {
 		return CFVpcOrigin{}, err
 	}
 	if err := validateCFOriginTags(tags); err != nil {
 		return CFVpcOrigin{}, err
 	}
+	if !cloudFrontOriginID.MatchString(id) {
+		return CFVpcOrigin{}, cfInvalid("Invalid VPC origin ID.")
+	}
 	var err error
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	o := CFVpcOrigin{Status: "Deployed", Tags: tags, CreatedTime: now}
-	if id != "" {
+	if !creating {
 		o, err = getCFOrigin(ctx, tx, id)
 		if err != nil {
 			return CFVpcOrigin{}, err
@@ -190,11 +199,7 @@ func saveCFOriginTx(ctx context.Context, tx *sql.Tx, id, match string, c CFOrigi
 			return CFVpcOrigin{}, err
 		}
 	} else {
-		key, err := elbID()
-		if err != nil {
-			return CFVpcOrigin{}, err
-		}
-		o.ID = "vo_" + key
+		o.ID = id
 		o.ARN = cloudFrontARNPrefix + o.ID
 	}
 	lb, err := elbReadLoadBalancer(ctx, tx, "arn=?", c.ARN)
@@ -215,7 +220,7 @@ func saveCFOriginTx(ctx context.Context, tx *sql.Tx, id, match string, c CFOrigi
 	if duplicate {
 		return CFVpcOrigin{}, cfFailure{409, "EntityAlreadyExists", "The VPC origin name is already in use."}
 	}
-	if id == "" {
+	if creating {
 		var count int
 		if err = tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM aws_cloudfront_vpc_origins").Scan(&count); err != nil {
 			return CFVpcOrigin{}, err
@@ -233,7 +238,7 @@ func saveCFOriginTx(ctx context.Context, tx *sql.Tx, id, match string, c CFOrigi
 	if err != nil {
 		return CFVpcOrigin{}, err
 	}
-	if id == "" {
+	if creating {
 		_, err = tx.ExecContext(ctx, "INSERT INTO aws_cloudfront_vpc_origins(id,name,alb,document) VALUES(?,?,?,?)", o.ID, c.Name, c.ARN, string(data))
 	} else {
 		_, err = tx.ExecContext(ctx, "UPDATE aws_cloudfront_vpc_origins SET name=?,alb=?,document=? WHERE id=?", c.Name, c.ARN, string(data), id)
