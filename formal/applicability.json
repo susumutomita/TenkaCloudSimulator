@@ -5,9 +5,21 @@
     {
       "path": "Makefile",
       "sha256": "642fc99996765ad6e89e38da62bcb77dd3fb339db31b3fc2929d52e4675b40bf",
-      "disposition": "build-metadata",
-      "reason": "Registers the offline image-builder regression in the existing test-scripts target; no runtime or model behavior changed.",
-      "models": []
+      "disposition": "modeled",
+      "reason": "Makefile is already scoped to StartupTokenVisibility. This change only registers an offline test and leaves startup token forwarding, defaults and all existing gates unchanged.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Existing bounded startup token visibility model is unchanged; this binding preserves its Makefile scope. It does not model the image builder TLS, Python tests, CI execution, host trust stores or real VM behavior."
+        }
+      ]
     },
     {
       "path": "test/battle/README.md",
