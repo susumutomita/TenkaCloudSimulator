@@ -166,7 +166,7 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 		return a, nil
 	case yaml.ScalarNode:
 		if n.Tag == "!!bool" {
-			return n.Value == "true", nil
+			return strings.EqualFold(n.Value, "true"), nil
 		}
 		if n.Tag == "!!null" {
 			return nil, nil
@@ -438,41 +438,14 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 	fail := func(message string) (StackRecord, error) {
 		return StackRecord{}, ssmFailure{"ValidationError", message}
 	}
-	if !stackCreateName.MatchString(name) || len(body) == 0 || len(body) > 51200 {
-		return fail("Use a valid stack name and TemplateBody of 1–51200 bytes.")
+	if !stackCreateName.MatchString(name) {
+		return fail("Use a valid stack name.")
 	}
-	var node yaml.Node
-	if yaml.Unmarshal([]byte(body), &node) != nil || len(node.Content) == 0 {
-		return fail("Invalid YAML/JSON template.")
-	}
-	value, err := taggedYAML(&node)
+	template, err := parseStackTemplate(body)
 	if err != nil {
 		return fail(err.Error())
 	}
-	template := object(value)
-	for k := range template {
-		switch k {
-		case "AWSTemplateFormatVersion", "Description", "Parameters", "Conditions", "Resources", "Outputs":
-		default:
-			return fail("Unsupported template section: " + k)
-		}
-	}
 	resources := object(template["Resources"])
-	if len(resources) == 0 || len(resources) > 100 {
-		return fail("Require 1–100 supported resources.")
-	}
-	for _, value := range resources {
-		r := object(value)
-		kind := stringValue(r["Type"])
-		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::IAM::InstanceProfile" && kind != "AWS::S3::Bucket" && kind != "AWS::Lambda::Function" && !stackAPIKind(kind) && !stackNetworkKind(kind) && kind != "AWS::EC2::Instance" {
-			return fail("Unsupported resource type: " + kind)
-		}
-		for k := range r {
-			if k != "Type" && k != "Properties" && k != "DependsOn" && k != "Condition" {
-				return fail("Unsupported resource attribute: " + k)
-			}
-		}
-	}
 	bytes := make([]byte, 16)
 	if _, err = rand.Read(bytes); err != nil {
 		return StackRecord{}, err
@@ -1182,8 +1155,8 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	action := form.Get("Action")
-	if action != "CreateStack" && action != "DescribeStacks" && action != "DeleteStack" && action != "DescribeStackEvents" {
-		cfnError(w, ssmFailure{"NotImplemented", "Only CreateStack, DescribeStacks, DescribeStackEvents and DeleteStack are supported."})
+	if action != "CreateStack" && action != "DescribeStacks" && action != "DeleteStack" && action != "DescribeStackEvents" && action != "ValidateTemplate" {
+		cfnError(w, ssmFailure{"NotImplemented", "Only CreateStack, DescribeStacks, DescribeStackEvents, DeleteStack and ValidateTemplate are supported."})
 		return
 	}
 	if form.Get("Version") != "2010-05-15" {
@@ -1195,6 +1168,13 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		if len(values) != 1 {
 			fail("Repeated Query fields are unsupported.")
 			return
+		}
+		if action == "ValidateTemplate" {
+			if key != "Action" && key != "Version" && key != "TemplateBody" {
+				fail("ValidateTemplate supports inline TemplateBody only.")
+				return
+			}
+			continue
 		}
 		if strings.Contains(key, ".member.") {
 			parts := strings.Split(key, ".")
@@ -1279,6 +1259,17 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 
 	name := form.Get("StackName")
 	switch action {
+	case "ValidateTemplate":
+		if err = authorize("*"); err != nil {
+			cfnError(w, err)
+			return
+		}
+		result, err := validateStackTemplate(form.Get("TemplateBody"))
+		if err != nil {
+			fail(err.Error())
+			return
+		}
+		cfnResponse(w, action, result)
 	case "CreateStack":
 		if !stackCreateName.MatchString(name) {
 			fail("Use a valid stack name.")

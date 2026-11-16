@@ -68,6 +68,11 @@ func stackConstraintLength(v any) (int, error) {
 // ConstraintDescription are never interpolated into failure text. Existing
 // byte-length String behavior is preserved; this is not Unicode-length parity.
 func stackParameterValues(definitions map[string]any, supplied map[string]string) (map[string]string, error) {
+	return checkStackParameters(definitions, supplied, true)
+}
+
+// Template validation checks the declarations and defaults before concrete inputs exist.
+func checkStackParameters(definitions map[string]any, supplied map[string]string, requireValues bool) (map[string]string, error) {
 	fail := func(name, why string) (map[string]string, error) {
 		return nil, fmt.Errorf("parameter %s: %s", name, why)
 	}
@@ -234,6 +239,9 @@ func stackParameterValues(definitions map[string]any, supplied map[string]string
 		value, suppliedValue := supplied[name]
 		if !suppliedValue {
 			if !hasDefault {
+				if !requireValues {
+					continue
+				}
 				return fail(name, "missing required value")
 			}
 			value = fallback

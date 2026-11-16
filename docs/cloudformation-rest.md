@@ -38,6 +38,21 @@ through `?name=` returns the function's403 because its policy only permits the
 example's `/cfn-rest/public`. Two teams need separate process/SQLite/token
 instances. IAM identity selection alone does not isolate participants.
 
+## Validate an inline template
+
+Call `cloudformation.validate_template(TemplateBody=...)` before supplying
+stack parameters. The simulator accepts one YAML or JSON document of up to
+51,200 bytes and uses the same resource-type allowlist as `CreateStack`. It
+checks declarations and parameter defaults and returns the template description,
+parameter keys, descriptions, public defaults, and required IAM capabilities.
+A required parameter may omit its default. The response omits defaults marked
+`NoEcho`. The caller needs `cloudformation:ValidateTemplate` on `*`.
+
+Validation does not read SSM parameters, create a stack, or run workloads.
+`CreateStack` also checks concrete parameter values, resolves references,
+validates resource properties, and authorizes provisioning. The local API
+rejects `TemplateURL` and external transforms. See the [AWS Query API reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_ValidateTemplate.html).
+
 ## Supported resources and boundaries
 
 The existing S3 Bucket, SSM Parameter, IAM Role and inline Python Lambda Function
