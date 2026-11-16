@@ -36,8 +36,8 @@ func parseStackTemplate(body string) (map[string]any, error) {
 		}
 	}
 	if description, has := template["Description"]; has {
-		if text, ok := description.(string); !ok || len(text) == 0 || len(text) > 1024 {
-			return nil, fmt.Errorf("Description must be a string of 1–1024 bytes.")
+		if text, ok := description.(string); !ok || len(text) > 1024 {
+			return nil, fmt.Errorf("Description must be a string of at most 1024 bytes.")
 		}
 	}
 	for _, section := range []string{"Parameters", "Conditions", "Outputs"} {

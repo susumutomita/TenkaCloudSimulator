@@ -142,3 +142,27 @@ func TestValidateTemplateRejectsUnsupportedDeclarationsAndInputs(t *testing.T) {
 		t.Fatal("rejected templates mutated state")
 	}
 }
+
+func TestTemplateDescriptionByteLimit(t *testing.T) {
+	const resources = "\nResources: {Bucket: {Type: 'AWS::S3::Bucket'}}"
+	const utf8Prefix = "界"
+	limit := strings.Repeat(utf8Prefix, 341) + "a"
+	for _, tc := range []struct {
+		name, literal string
+		ok            bool
+	}{
+		{"empty", "''", true},
+		{"1024 bytes", limit, true},
+		{"1025 bytes", limit + "b", false},
+		{"null", "null", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			body := "Description: " + tc.literal + resources
+			_, validationErr := validateStackTemplate(body)
+			_, creationErr := compileStack("us-east-1", "description-limit", body, nil, "")
+			if (validationErr == nil) != tc.ok || (creationErr == nil) != tc.ok {
+				t.Fatalf("validate = %v, compile = %v", validationErr, creationErr)
+			}
+		})
+	}
+}
