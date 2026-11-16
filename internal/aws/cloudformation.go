@@ -97,7 +97,7 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 		}
 		return stackTaggedYAMLNode(n.Content[0], depth+1, nodes)
 	}
-	if n.Tag == "!Equals" || n.Tag == "!If" || n.Tag == "!Select" {
+	if n.Tag == "!Equals" || n.Tag == "!Not" || n.Tag == "!And" || n.Tag == "!If" || n.Tag == "!Select" {
 		if n.Kind != yaml.SequenceNode {
 			return nil, fmt.Errorf("intrinsic shorthand requires a sequence")
 		}
@@ -109,13 +109,7 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 			}
 			values = append(values, value)
 		}
-		key := "Fn::Equals"
-		if n.Tag == "!If" {
-			key = "Fn::If"
-		} else if n.Tag == "!Select" {
-			key = "Fn::Select"
-		}
-		return map[string]any{key: values}, nil
+		return map[string]any{"Fn::" + strings.TrimPrefix(n.Tag, "!"): values}, nil
 	}
 	if n.Tag == "!Base64" || n.Tag == "!GetAZs" {
 		if n.Kind == yaml.ScalarNode && n.Value == "" && n.Style&(yaml.DoubleQuotedStyle|yaml.SingleQuotedStyle|yaml.LiteralStyle|yaml.FoldedStyle) == 0 {
@@ -136,7 +130,10 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 		return map[string]any{"Fn::" + n.Tag[1:]: value}, nil
 	}
 	if strings.HasPrefix(n.Tag, "!") && !strings.HasPrefix(n.Tag, "!!") && n.Kind != yaml.ScalarNode {
-		return nil, fmt.Errorf("intrinsic shorthand must be scalar")
+		return nil, fmt.Errorf("intrinsic shorthand must be scalar at line %d, column %d", n.Line, n.Column)
+	}
+	if n.Tag == "!Condition" {
+		return map[string]any{"Condition": n.Value}, nil
 	}
 	if n.Tag == "!Ref" {
 		return map[string]any{"Ref": n.Value}, nil
@@ -476,6 +473,9 @@ func compileStackWithResolvers(region, name, body string, parameters map[string]
 	values, e := stackParameterValues(definitions, parameters)
 	if e != nil {
 		return fail(e.Error())
+	}
+	if err := checkStackRules(object(template["Rules"]), definitions, values, true); err != nil {
+		return fail(err.Error())
 	}
 	for key, value := range values {
 		refs[key] = value

@@ -18673,6 +18673,106 @@
      "expect_invariant": "FailureRollsBack"
     }
    ]
+  },
+  {
+   "id": "CFNParameterRuleAdmission",
+   "model": "formal/CFNParameterRuleAdmission.tla",
+   "config": "formal/CFNParameterRuleAdmission.cfg",
+   "bounds": "Two operations, one or two copies, two primary locations, three secondary inputs, a second Boolean assertion, and three declaration shapes.",
+   "properties": [
+    "EveryOperandChecked",
+    "ValidationIgnoresValues",
+    "AllActiveAssertionsRequired",
+    "PublicationFollowsAdmission",
+    "ValidatedCreatesNothing",
+    "TypeOK"
+   ],
+   "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model.",
+   "source_scope": [
+    "internal/aws/cloudformation.go",
+    "internal/aws/cloudformation_conditions.go",
+    "internal/aws/cloudformation_rules.go",
+    "internal/aws/cloudformation_validate.go"
+   ],
+   "mutants": [
+    {
+     "id": "SkipInactiveShape",
+     "edits": [
+      {
+       "old": "IF input.defect = \"none\" THEN",
+       "new": "IF input.copies = 1 \\/ input.defect = \"none\" THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EveryOperandChecked"
+    },
+    {
+     "id": "IgnoreLateOperand",
+     "edits": [
+      {
+       "old": "IF input.defect = \"none\" THEN",
+       "new": "IF (input.secondary = \"\" /\\ input.defect = \"unknownRef\") \\/ input.defect = \"none\" THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "EveryOperandChecked"
+    },
+    {
+     "id": "ValidateWithValues",
+     "edits": [
+      {
+       "old": "IF input.mode = \"validate\" THEN",
+       "new": "IF input.mode = \"validate\" /\\ (~active \\/ passes) THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValidationIgnoresValues"
+    },
+    {
+     "id": "AcceptEitherComparison",
+     "edits": [
+      {
+       "old": "firstAssertion == complete /\\ distinct",
+       "new": "firstAssertion == complete \\/ distinct",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllActiveAssertionsRequired"
+    },
+    {
+     "id": "IgnoreAdditionalAssertion",
+     "edits": [
+      {
+       "old": "passes == firstAssertion /\\ input.secondAssertion",
+       "new": "passes == firstAssertion",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllActiveAssertionsRequired"
+    },
+    {
+     "id": "EnforceInactiveRule",
+     "edits": [
+      {
+       "old": "ELSE IF ~active \\/ passes THEN",
+       "new": "ELSE IF passes THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AllActiveAssertionsRequired"
+    },
+    {
+     "id": "PublishBeforeAdmission",
+     "edits": [
+      {
+       "old": "/\\ published = FALSE",
+       "new": "/\\ published = TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PublicationFollowsAdmission"
+    }
+   ]
   }
  ]
 }

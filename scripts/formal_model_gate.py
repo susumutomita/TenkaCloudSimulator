@@ -2860,6 +2860,31 @@ REQUIRED_SOURCE_SCOPES['VpcOriginReferenceLifecycle'] = {
     'internal/server/server.go',
 }
 
+BASE_MODELS.add('CFNParameterRuleAdmission')
+BASE_INVARIANTS['CFNParameterRuleAdmission'] = {
+    'EveryOperandChecked',
+    'ValidationIgnoresValues',
+    'AllActiveAssertionsRequired',
+    'PublicationFollowsAdmission',
+    'ValidatedCreatesNothing',
+    'TypeOK',
+}
+REQUIRED_MUTANTS['CFNParameterRuleAdmission'] = {
+    'SkipInactiveShape',
+    'IgnoreLateOperand',
+    'ValidateWithValues',
+    'AcceptEitherComparison',
+    'IgnoreAdditionalAssertion',
+    'EnforceInactiveRule',
+    'PublishBeforeAdmission',
+}
+REQUIRED_SOURCE_SCOPES['CFNParameterRuleAdmission'] = {
+    'internal/aws/cloudformation.go',
+    'internal/aws/cloudformation_conditions.go',
+    'internal/aws/cloudformation_rules.go',
+    'internal/aws/cloudformation_validate.go',
+}
+
 
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)

@@ -18,7 +18,7 @@
     },
     {
       "path": "docs/cloudformation-rest.md",
-      "sha256": "9dd7d5a2defcbe09648c8650b86e3e6d015da3eb9ae83703843fecf78b2b7a13",
+      "sha256": "1468c5b00c054baa323aeea60f612d4444dcd685194d9a4609076304f593d65c",
       "disposition": "documentation",
       "reason": "Reference documentation describing the bounded simulator contract.",
       "models": []
@@ -29,6 +29,44 @@
       "disposition": "documentation",
       "reason": "Reference documentation describing the bounded simulator contract.",
       "models": []
+    },
+    {
+      "path": "formal/CFNParameterRuleAdmission.cfg",
+      "sha256": "d1d9a22c70b3a00933bf87a60dae68d8b6c5cea8f231562f68963ff49b80df0c",
+      "disposition": "modeled",
+      "reason": "Checks every parameter rule before stack admission and native provisioning.",
+      "models": [
+        {
+          "id": "CFNParameterRuleAdmission",
+          "properties": [
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
+          ],
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
+        }
+      ]
+    },
+    {
+      "path": "formal/CFNParameterRuleAdmission.tla",
+      "sha256": "58309f976f823da3d87e530523e0d73815aa43d21d8eccca8101122ee633d129",
+      "disposition": "modeled",
+      "reason": "Checks every parameter rule before stack admission and native provisioning.",
+      "models": [
+        {
+          "id": "CFNParameterRuleAdmission",
+          "properties": [
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
+          ],
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
+        }
+      ]
     },
     {
       "path": "formal/ECSTaskRevisionLifecycle.cfg",
@@ -106,7 +144,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "bc7eb003d3c472b52b960de515bdbd588b52d0f3eb008bed343ad6e6525d1104",
+      "sha256": "f5a1cf6d0ce60cbc44c7654fc0c63e4cee705f20978e918be72711f9b8997fcc",
       "disposition": "formal-infrastructure",
       "reason": "Registers bounded models and enforces required invariant, mutant and source-scope declarations.",
       "models": []
@@ -199,7 +237,7 @@
     },
     {
       "path": "internal/aws/cloudformation.go",
-      "sha256": "728fc911470262a88ab4ecae69bee12a29a0d639ea3a0474c677939fdf093acc",
+      "sha256": "a0e774f6d055d19aa25c040639a1173bb2a22fe1e59a21465c5d2a54875c4896",
       "disposition": "modeled",
       "reason": "The stack planner validates parameters and selected links, then commits task definitions, origin metadata and ownership together.",
       "models": [
@@ -232,12 +270,23 @@
             "NoEarlyPublication"
           ],
           "limits": "Binary parser limits, supported CloudFormation resource names, metadata keys, response serialization and service reachability are covered separately by Go tests."
+        },
+        {
+          "id": "CFNParameterRuleAdmission",
+          "properties": [
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
+          ],
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
         }
       ]
     },
     {
       "path": "internal/aws/cloudformation_conditions.go",
-      "sha256": "65d0725c825cfcfb9e0d1dd8e2066238ecf1ad66026d0f0e2c5caf8d390e05f8",
+      "sha256": "5654ba7b8c9f79ac9325c3f6ad9915a1590ef93cf79654db33c941401b84b97d",
       "disposition": "modeled",
       "reason": "Template-only validation and actual creation check parameter declarations with different requirements for supplied values.",
       "models": [
@@ -248,6 +297,17 @@
             "NoResultOnInvalid"
           ],
           "limits": "Binary parser limits, supported CloudFormation resource names, metadata keys, response serialization and service reachability are covered separately by Go tests."
+        },
+        {
+          "id": "CFNParameterRuleAdmission",
+          "properties": [
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
+          ],
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
         }
       ]
     },
@@ -268,8 +328,34 @@
       ]
     },
     {
+      "path": "internal/aws/cloudformation_rules.go",
+      "sha256": "d746dbb5044f12ad0e50cc26da5c08762e735e0859c0fc5dd21074a0960fded0",
+      "disposition": "modeled",
+      "reason": "Checks every parameter rule before stack admission and native provisioning.",
+      "models": [
+        {
+          "id": "CFNParameterRuleAdmission",
+          "properties": [
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
+          ],
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_rules_test.go",
+      "sha256": "a55c031e75bd31fbab8502bb74c6969dae7bfa08f87ac2c197a53ef2004d8d20",
+      "disposition": "test-support",
+      "reason": "Native validation and creation tests cover bounds, active and inactive assertions, and absence of native writes after rejection.",
+      "models": []
+    },
+    {
       "path": "internal/aws/cloudformation_validate.go",
-      "sha256": "135550189cfa3758d3a91c45b9728330d31cef437e346652dc00d5afb1c0fe40",
+      "sha256": "e1a7aa78099a1a87c401a75e2d4d7b255a9595117e32999de667849bbf53caa1",
       "disposition": "modeled",
       "reason": "ValidateTemplate parses and bounds declarations without executing a creation plan. The no-publication and parameter admission properties cover the affected boundary.",
       "models": [
@@ -280,6 +366,17 @@
             "NoEarlyPublication"
           ],
           "limits": "Binary parser limits, supported CloudFormation resource names, metadata keys, response serialization and service reachability are covered separately by Go tests."
+        },
+        {
+          "id": "CFNParameterRuleAdmission",
+          "properties": [
+            "EveryOperandChecked",
+            "ValidationIgnoresValues",
+            "AllActiveAssertionsRequired",
+            "PublicationFollowsAdmission",
+            "ValidatedCreatesNothing"
+          ],
+          "limits": "Checks rule admission with one optional rule and two scalar assertions. YAML parsing, cardinality limits, arbitrary expression trees, resource adapters and native transactions are verified separately or outside this model."
         }
       ]
     },
@@ -500,14 +597,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "e3060dc35848e889d950b1f52832fd2fd7d27b92e6e7e2828842a14be2bb0f78",
+      "sha256": "f2cff621441db9eb0c7c8dd0ad80ec89c555c6a3dd3864db2ad5e36a2859cb0e",
       "disposition": "formal-infrastructure",
       "reason": "Registers bounded models and enforces required invariant, mutant and source-scope declarations.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "4c3e4597778ea809cbae4117d99ac98b7438e13c50cacdae5e684ba079ce8738",
+      "sha256": "7483a805f0cdd9eac14902850d9fc06a2593e38c02b6141ffeb28020ef7be98f",
       "disposition": "formal-infrastructure",
       "reason": "Registers bounded models and enforces required invariant, mutant and source-scope declarations.",
       "models": []

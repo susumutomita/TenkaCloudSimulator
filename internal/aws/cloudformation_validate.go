@@ -30,7 +30,7 @@ func parseStackTemplate(body string) (map[string]any, error) {
 	template := object(value)
 	for _, key := range slices.Sorted(maps.Keys(template)) {
 		switch key {
-		case "AWSTemplateFormatVersion", "Description", "Parameters", "Conditions", "Resources", "Outputs":
+		case "AWSTemplateFormatVersion", "Description", "Parameters", "Rules", "Conditions", "Resources", "Outputs":
 		default:
 			return nil, fmt.Errorf("Unsupported template section: %s", key)
 		}
@@ -40,7 +40,7 @@ func parseStackTemplate(body string) (map[string]any, error) {
 			return nil, fmt.Errorf("Description must be a string of at most 1024 bytes.")
 		}
 	}
-	for _, section := range []string{"Parameters", "Conditions", "Outputs"} {
+	for _, section := range []string{"Parameters", "Rules", "Conditions", "Outputs"} {
 		if value, has := template[section]; has && object(value) == nil {
 			return nil, fmt.Errorf("%s must be an object.", section)
 		}
@@ -92,6 +92,9 @@ func validateStackTemplate(body string) (string, error) {
 	}
 	definitions := object(template["Parameters"])
 	if _, err := checkStackParameters(definitions, nil, false); err != nil {
+		return "", err
+	}
+	if err := checkStackRules(object(template["Rules"]), definitions, nil, false); err != nil {
 		return "", err
 	}
 	var out strings.Builder
