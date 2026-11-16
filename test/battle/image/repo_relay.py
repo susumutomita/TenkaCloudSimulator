@@ -21,7 +21,9 @@ import urllib.request
 
 UPSTREAM = 'https://cdn.amazonlinux.com/'
 local_dir, log_path, port = sys.argv[1], sys.argv[2], int(sys.argv[3])
-context = ssl.create_default_context(cafile=os.environ.get('SSL_CERT_FILE') or '/root/.ccr/ca-bundle.crt')
+# Use platform trust by default. An explicit CA file must load successfully;
+# never replace a missing/invalid override with a different trust source.
+context = ssl.create_default_context(cafile=os.environ.get('SSL_CERT_FILE') or None)
 LOCAL_FILES = {}
 for entry in os.scandir(local_dir):
     if entry.is_file(follow_symlinks=False):
