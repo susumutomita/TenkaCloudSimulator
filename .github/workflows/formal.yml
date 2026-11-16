@@ -9,37 +9,85 @@ on:
 permissions:
   contents: read
 jobs:
-  formal:
-    name: Formal validation
+  gate-tests:
+    name: Formal gate and applicability tests
     runs-on: ubuntu-latest
-    # Allow headroom for the whole serial model registry and gate/applicability tests.
-    # Per-TLC-case deadlines, invariants and counterexample requirements are unchanged.
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
-      - name: Exercise applicability and gate negative controls
-        env:
-          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
-        run: |
-          python3 scripts/test-formal-gate.py
-          python3 scripts/test-formal-applicability.py
       - name: Validate exact changed blobs and declared model applicability
         env:
           PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
         run: |
           base=$(python3 scripts/check-formal-applicability.py event-base --event "$GITHUB_EVENT_PATH")
           python3 scripts/check-formal-applicability.py check --base "$base"
-      - name: Run all finite models and required invariant counterexamples
+      - name: Exercise applicability and gate negative controls
         env:
           PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
+          FORMAL_GATE_TEST_WORKERS: '4'
+        run: |
+          python3 scripts/test-formal-gate.py
+          python3 scripts/test-formal-applicability.py
+  tlc:
+    name: Formal TLC shard ${{ matrix.shard }}
+    runs-on: ubuntu-latest
+    # Each shard runs every tenth registered case serially with the unchanged 60s per-case cap.
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Run this shard of the finite models and required invariant counterexamples
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
+          SHARD: ${{ matrix.shard }}
         run: |
           python3 test/ci/tla_download.py
           timeout --kill-after=5s 95s curl --fail --location --retry 3 --retry-delay 2 --retry-max-time 60 --connect-timeout 10 --max-time 30 https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar --output /tmp/tla2tools.jar
-          TLA_JAR=/tmp/tla2tools.jar python3 scripts/check-formal.py --merge-gate
+          TLA_JAR=/tmp/tla2tools.jar python3 scripts/check-formal.py --merge-gate --shard "$SHARD/10" --reports "reports/formal/shard-$SHARD"
+      - name: Retain this shard's formal evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formal-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: reports/formal/shard-${{ matrix.shard }}/
+          if-no-files-found: error
+          retention-days: 14
+  formal:
+    name: Formal validation
+    needs: [gate-tests, tlc]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Require the gate tests and every TLC shard to succeed
+        env:
+          GATE_TESTS: ${{ needs.gate-tests.result }}
+          TLC: ${{ needs.tlc.result }}
+        run: |
+          echo "gate-tests=$GATE_TESTS tlc=$TLC"
+          test "$GATE_TESTS" = success && test "$TLC" = success
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: formal-shard-*-${{ github.event.pull_request.head.sha || github.sha }}
+          path: reports/formal/shards
+      - name: Accept the shards only as one full merge-gate run of this head
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
+        run: python3 scripts/check-formal.py --combine reports/formal/shards/*/evidence.json --reports reports/formal/combined
       - name: Retain exact formal evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

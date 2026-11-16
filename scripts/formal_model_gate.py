@@ -2844,11 +2844,15 @@ def exact_head_inputs(root):
     return {'head': head, 'content': content, 'hashes': hashes}
 
 
-def run_suite(root, jar, reports, registry_path='formal/models.json', timeout=60, merge_gate=False):
+def run_suite(root, jar, reports, registry_path='formal/models.json', timeout=60, merge_gate=False, shard=None):
     root, reports = Path(root), Path(reports)
     reports.mkdir(parents=True, exist_ok=True)
     evidence = {'kind': 'bounded-tlc-not-go-refinement', 'success': False, 'runs': []}
     try:
+        if shard is not None:
+            # A shard runs every count-th case in registry order, so heavy models spread out.
+            require(type(shard[0]) is int and type(shard[1]) is int and 0 <= shard[0] < shard[1], 'invalid formal shard')
+            evidence['shard'] = {'index': shard[0], 'count': shard[1]}
         snapshot = exact_head_inputs(root) if merge_gate else None
         registry = load_registry(root, registry_path)
         validate_guesttcp_module_pins(root, snapshot['content'] if snapshot else None)
@@ -2870,11 +2874,15 @@ def run_suite(root, jar, reports, registry_path='formal/models.json', timeout=60
             temp = Path(directory)
             pinned_jar = temp / 'tla2tools.jar'
             pinned_jar.write_bytes(jar_bytes)
+            position = -1
             for model in registry['models']:
                 source = snapshot['content'][model['model']].decode() if snapshot else asset(root, model['model']).read_text()
                 config = snapshot['content'][model['config']].decode() if snapshot else asset(root, model['config']).read_text()
                 cases = [(model['id'], source, None)] + [(*apply_mutant(source, model['id'], m), m['expect_invariant']) for m in model['mutants']]
                 for name, candidate, expected in cases:
+                    position += 1
+                    if shard is not None and position % shard[1] != shard[0]:
+                        continue
                     tla, cfg = temp / (name + '.tla'), temp / (name + '.cfg')
                     tla.write_text(candidate)
                     cfg.write_text(config)
@@ -2928,9 +2936,10 @@ def run_suite(root, jar, reports, registry_path='formal/models.json', timeout=60
                     validate_result(result.returncode, text, expected)
                     run['success'] = True
                     print(name + ': ' + ('bounded invariants hold' if expected is None else 'required counterexample observed'))
-            from formal_seed_replay import run_seed_replays
-            run_seed_replays(root, registry, snapshot, temp, pinned_jar, java,
-                             reports, timeout, evidence, require, validate_result)
+            if shard is None or shard[0] == 0:
+                from formal_seed_replay import run_seed_replays
+                run_seed_replays(root, registry, snapshot, temp, pinned_jar, java,
+                                 reports, timeout, evidence, require, validate_result)
         if snapshot:
             after = exact_head_inputs(root)
             require(after['head'] == snapshot['head'] and after['hashes'] == snapshot['hashes'], 'HEAD/policy/model inputs changed while TLC was running')
@@ -2943,15 +2952,78 @@ def run_suite(root, jar, reports, registry_path='formal/models.json', timeout=60
         (reports / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
 
 
+def combine_shards(root, evidence_paths, reports, registry_path='formal/models.json'):
+    """Accept shard evidence only if together it is one full merge-gate run of this HEAD."""
+    from formal_seed_replay import SPECS
+    root, reports = Path(root), Path(reports)
+    reports.mkdir(parents=True, exist_ok=True)
+    combined = {'kind': 'bounded-tlc-not-go-refinement', 'success': False, 'runs': []}
+    try:
+        snapshot = exact_head_inputs(root)
+        registry = load_registry(root, registry_path)
+        require(registry['_digest'] == digest(snapshot['content'][registry_path]), 'registry changed during input verification')
+        try:
+            shards = [json.loads(Path(path).read_text()) for path in evidence_paths]
+        except (OSError, ValueError) as error:
+            raise GateError('unreadable formal shard evidence') from error
+        count = len(shards)
+        require(count > 0 and all(isinstance(s, dict) and isinstance(s.get('shard'), dict) for s in shards), 'missing formal shard evidence')
+        require(sorted(s['shard'].get('index') for s in shards) == list(range(count)) and all(s['shard'].get('count') == count for s in shards),
+                'formal shards are missing, repeated or from another layout')
+        order = []
+        for model in registry['models']:
+            source = snapshot['content'][model['model']].decode()
+            order += [model['id']] + [apply_mutant(source, model['id'], m)[0] for m in model['mutants']]
+        for evidence in sorted(shards, key=lambda s: s['shard']['index']):
+            index = evidence['shard']['index']
+            require(evidence.get('success') is True and evidence.get('input_mode') == 'immutable-head', 'formal shard did not pass in merge mode')
+            require(evidence.get('head_sha') == snapshot['head'] and evidence.get('input_sha256') == snapshot['hashes']
+                    and evidence.get('registry_sha256') == registry['_digest'] and evidence.get('tool_sha256') == registry['_checksum'],
+                    'formal shard checked other inputs')
+            runs = evidence.get('runs')
+            require(isinstance(runs, list) and all(isinstance(r, dict) and r.get('success') is True for r in runs), 'formal shard recorded a failed run')
+            require([r.get('case') for r in runs if r.get('kind') != 'seed-prefix-replay'] == order[index::count],
+                    'formal shard runs do not match its share of cases')
+            seeds = [r for r in runs if r.get('kind') == 'seed-prefix-replay']
+            require(len(seeds) == (2 * len(SPECS) if index == 0 else 0), 'seed replays must run exactly once, in shard 0')
+            combined['runs'] += runs
+        after = exact_head_inputs(root)
+        require(after['head'] == snapshot['head'] and after['hashes'] == snapshot['hashes'], 'HEAD/policy/model inputs changed while combining')
+        combined.update(input_mode='immutable-head', head_sha=snapshot['head'], input_sha256=snapshot['hashes'], shards=count,
+                        tool_version=registry['tool']['version'], tool_sha256=registry['_checksum'], registry_sha256=registry['_digest'])
+        combined['success'] = True
+        return combined
+    except (GateError, OSError, KeyError, TypeError) as error:
+        combined['error'] = str(error)
+        raise GateError(str(error)) from error
+    finally:
+        (reports / 'evidence.json').write_text(json.dumps(combined, indent=2) + '\n')
+
+
+def parse_shard(value):
+    match = re.fullmatch(r'(\d+)/(\d+)', value)
+    require(match is not None, 'shard must be INDEX/COUNT')
+    index, count = int(match.group(1)), int(match.group(2))
+    require(0 <= index < count, 'invalid formal shard')
+    return index, count
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--registry', default='formal/models.json')
     parser.add_argument('--reports', default='reports/formal')
     parser.add_argument('--merge-gate', action='store_true', help='require immutable HEAD inputs before/after TLC; required in CI')
+    parser.add_argument('--shard', help='INDEX/COUNT: run only this deterministic share of the registered models')
+    parser.add_argument('--combine', nargs='+', metavar='EVIDENCE', help='accept shard evidence files only as one full merge-gate run of HEAD')
     options = parser.parse_args()
     try:
+        if options.combine:
+            require(options.shard is None and not options.merge_gate, '--combine takes no other run options')
+            combine_shards(Path.cwd(), options.combine, options.reports, options.registry)
+            return
         require(bool(os.environ.get('TLA_JAR')), 'TLA_JAR must identify the pinned TLC jar')
-        run_suite(Path.cwd(), os.environ['TLA_JAR'], options.reports, options.registry, merge_gate=options.merge_gate)
+        shard = parse_shard(options.shard) if options.shard is not None else None
+        run_suite(Path.cwd(), os.environ['TLA_JAR'], options.reports, options.registry, merge_gate=options.merge_gate, shard=shard)
     except GateError as error:
         parser.exit(1, 'Formal validation failed: ' + str(error) + '\n')

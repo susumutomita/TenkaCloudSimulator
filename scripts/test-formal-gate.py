@@ -4,14 +4,16 @@ import contextlib
 import io
 import hashlib
 import json
+import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from formal_model_gate import validate_guesttcp_module_pins, require, BASE_MODELS, REQUIRED_MUTANTS, GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs
+from formal_model_gate import validate_guesttcp_module_pins, require, BASE_MODELS, REQUIRED_MUTANTS, GateError, apply_mutant, load_registry, run_suite, validate_result, invariants, exact_head_inputs, combine_shards, parse_shard
 
 from formal_seed_replay import SPECS, prepare_seed_replays, run_seed_replays
 
@@ -1291,6 +1293,83 @@ class FormalGateTests(unittest.TestCase):
             with self.assertRaises(GateError):
                 run_suite(self.root, jar, self.root / 'reports/formal', merge_gate=True)
         self.assertFalse(json.loads((self.root / 'reports/formal/evidence.json').read_text())['success'])
+
+    def controlled_merge_runs(self):
+        # Controlled Java results exercise shard bookkeeping only, not TLC.
+        jar = self.root / 'fixture.jar'
+        jar.write_bytes(b'unit shard fixture')
+        (self.root / 'formal/tla2tools.sha256').write_text(hashlib.sha256(jar.read_bytes()).hexdigest() + '  tla2tools.jar\n')
+        (self.root / '.gitignore').write_text('reports/\n')
+        for command in (['git','init','-q'], ['git','config','user.name','Fixture'], ['git','config','user.email','fixture@example.invalid'], ['git','add','.'], ['git','commit','-q','-m','controlled immutable tree']):
+            subprocess.run(command, cwd=self.root, check=True, capture_output=True)
+        registry = load_registry(self.root)
+        expected = {m['id'] + '_' + mutation['id']: mutation['expect_invariant'] for m in registry['models'] for mutation in m['mutants']}
+        real_run = subprocess.run
+        def controlled(command, **kwargs):
+            if command[0] != '/fixture/java':
+                return real_run(command, **kwargs)
+            name = Path(command[-1]).stem
+            if name.endswith('_InvalidTarget'):
+                return subprocess.CompletedProcess(command, 12, 'Invariant SeedTargetReached is violated.\nState 1:\nState 2:', '')
+            if name in expected:
+                return subprocess.CompletedProcess(command, 12, 'Invariant ' + expected[name] + ' is violated.', '')
+            return subprocess.CompletedProcess(command, 0, 'No error has been found.', '')
+        return jar, registry, controlled
+
+    def test_invalid_formal_shards_are_rejected_before_tlc(self):
+        for value in ('3/3', '0/0', '-1/3', 'a/b', '1'):
+            with self.subTest(value=value), self.assertRaises(GateError):
+                parse_shard(value)
+        with patch('formal_model_gate.subprocess.run') as process:
+            for shard in ((3, 3), (0, 0), (-1, 2)):
+                with self.subTest(shard=shard), self.assertRaisesRegex(GateError, 'invalid formal shard'):
+                    run_suite(self.root, self.root / 'absent.jar', self.root / 'reports/invalid', shard=shard)
+            process.assert_not_called()
+
+    def test_combined_shards_cover_every_case_once_and_reject_gaps(self):
+        jar, registry, controlled = self.controlled_merge_runs()
+        reports = self.root / 'reports'
+        shards = [reports / f'shard-{index}/evidence.json' for index in range(2)]
+        # Reading HEAD inputs takes seconds; merge-mode snapshots are covered by
+        # test_merge_mode_uses_head_snapshots_and_rejects_changes_during_run.
+        snapshot, cached = exact_head_inputs(self.root), load_registry(self.root)
+        with patch('formal_model_gate.shutil.which', return_value='/fixture/java'), patch('formal_model_gate.subprocess.run', side_effect=controlled), \
+                patch('formal_model_gate.exact_head_inputs', return_value=snapshot):
+            for index in range(2):
+                run_suite(self.root, jar, shards[index].parent, merge_gate=True, shard=(index, 2))
+        combined = combine_shards(self.root, shards, reports / 'combined')
+        order = [name for m in registry['models'] for name in [m['id']] + [m['id'] + '_' + mutation['id'] for mutation in m['mutants']]]
+        self.assertTrue(combined['success'])
+        self.assertEqual(combined['shards'], 2)
+        self.assertEqual(sorted(r['case'] for r in combined['runs'] if r.get('kind') != 'seed-prefix-replay'), sorted(order))
+        self.assertEqual(len([r for r in combined['runs'] if r.get('kind') == 'seed-prefix-replay']), 2 * len(SPECS))
+
+        def rejected(paths, message):
+            with patch('formal_model_gate.exact_head_inputs', return_value=snapshot), patch('formal_model_gate.load_registry', return_value=cached), \
+                    self.assertRaisesRegex(GateError, message):
+                combine_shards(self.root, paths, reports / 'rejected')
+            self.assertFalse(json.loads((reports / 'rejected/evidence.json').read_text())['success'])
+
+        rejected(shards[:1], 'missing, repeated or from another layout')
+        rejected([shards[0], shards[0]], 'missing, repeated or from another layout')
+        tampered = reports / 'tampered/evidence.json'
+        tampered.parent.mkdir()
+        for name, edit, message in (
+                ('dropped case', lambda e: e['runs'].pop(1), 'do not match its share of cases'),
+                ('reordered cases', lambda e: e['runs'].reverse(), 'do not match its share of cases'),
+                ('failed run', lambda e: e['runs'][0].update(success=False), 'recorded a failed run'),
+                ('other head', lambda e: e.update(head_sha='0' * 40), 'checked other inputs'),
+                ('other layout', lambda e: e['shard'].update(count=3), 'missing, repeated or from another layout'),
+                ('seed replays moved', lambda e: e['runs'].append({'kind': 'seed-prefix-replay', 'success': True}), 'seed replays must run exactly once')):
+            with self.subTest(name):
+                evidence = json.loads(shards[1].read_text())
+                edit(evidence)
+                tampered.write_text(json.dumps(evidence))
+                rejected([shards[0], tampered], message)
+        (self.root / 'formal/README.md').write_text('changed after the shards ran\n')
+        subprocess.run(['git', 'commit', '-qam', 'new head'], cwd=self.root, check=True, capture_output=True)
+        with self.assertRaisesRegex(GateError, 'checked other inputs'):
+            combine_shards(self.root, shards, reports / 'rejected')
 
 
     def test_required_ssm_inventory_and_property_cannot_disappear(self):
@@ -4104,6 +4183,29 @@ class FormalGateTests(unittest.TestCase):
             self.assertEqual(evidence['failure']['deadline_seconds'], 60)
 
 
+def run_one(name):
+    stream = io.StringIO()
+    result = unittest.TextTestRunner(stream=stream, verbosity=0).run(unittest.defaultTestLoader.loadTestsFromName(name, sys.modules[__name__]))
+    return name, result.testsRun, result.wasSuccessful(), stream.getvalue()
+
+
+def run_parallel(workers):
+    import multiprocessing
+    import time
+    names = [case.id().split('.', 1)[1] for case in unittest.defaultTestLoader.loadTestsFromTestCase(FormalGateTests)]
+    started, ran, failed = time.monotonic(), 0, []
+    with multiprocessing.get_context('fork').Pool(workers) as pool:
+        for name, count, passed, output in pool.imap_unordered(run_one, names):
+            ran += count
+            if not passed:
+                failed.append(name)
+                print(output, file=sys.stderr)
+    print(f'Ran {ran} of {len(names)} tests in {time.monotonic() - started:.1f}s with {workers} workers; {len(failed)} failed: {failed}')
+    return 0 if ran == len(names) and not failed else 1
+
 
 if __name__ == '__main__':
+    workers = int(os.environ.get('FORMAL_GATE_TEST_WORKERS', '1'))
+    if workers > 1:
+        sys.exit(run_parallel(workers))
     unittest.main()

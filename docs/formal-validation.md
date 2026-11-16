@@ -81,7 +81,9 @@ fallback evidence, not native Chrome 157 rendering or successful full-gate CI.
 | LandingAccessAdmission | ten literal paths, GET/HEAD/POST and trusted host/origin/auth verdicts; one request/response transition | concrete middleware/token/session/URL/HTTP/ServeMux implementation, service authority |
 | LandingTopologyState | nine nodes/three providers; known or absent initial fragment; two selections/two callbacks, one mount/retirement | URL parsing/history, focus/Tab, DOM/layout/SVG geometry, native canvas rendering, JavaScript refinement or liveness |
 
-All registered models run even for documentation-only changes. The supported CFG
+All registered models run even for documentation-only changes. CI splits them
+across ten TLC shards by case position and accepts the result only after
+`check-formal.py --combine` confirms every case ran once at the same head. The supported CFG
 grammar is deliberately restricted to named invariants, init/next/specification,
 Boolean deadlock setting and finite literal constant assignments. Views,
 constraints, substitutions and unknown directives fail instead of masquerading

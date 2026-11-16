@@ -151,7 +151,13 @@ A required pinned-catalog subset rehearsal runs the unchanged original wp2shell 
 The standalone `Formal validation` job provides the stable required check;
 its inventory/applicability contract is documented in
 [formal-validation.md](formal-validation.md). The checker always runs all
-registered models and requires the intended invariant counterexamples. Exact
+registered models and requires the intended invariant counterexamples. Ten
+`Formal TLC shard` jobs each run every tenth registered case serially, in registry
+order and with the unchanged 60-second per-case deadline. The `Formal validation`
+job passes only when the gate tests and every shard succeeded and
+`check-formal.py --combine` confirms that the shards together are one full
+merge-gate run of the same head: every case exactly once, seed replays once and
+identical inputs. Exact
 base/blob-bound dispositions prevent absent/stale applicability metadata from
 silently passing; unknown implementation paths fail. This validates declared
 bounded correspondence, not Go refinement or authenticated human review.

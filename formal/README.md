@@ -139,8 +139,10 @@ CFNPhysicalResourceACK adds five properties and seven controls for selected SSM/
 
 ## Aggregate CI execution capacity
 
-The required `Formal validation` job reserves 30 minutes for checkout, the gate
-negative controls, exact-blob applicability and the complete serial registry.
+The required `Formal validation` check reserves 30 minutes for each of its jobs.
+The gate job runs the negative controls in four processes and checks exact-blob
+applicability. Ten TLC shard jobs each run every tenth case of the registry
+serially, and the `Formal validation` job accepts them only as one full run.
 Each TLC case retains its 60-second default deadline and existing per-model
 settings; all 531 combined baseline/counterexample runs and failure requirements
 remain mandatory: the preserved 505 public-base checks, nine STS checks and
