@@ -2,7 +2,10 @@ package aws
 
 import (
 	"context"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 )
 
 func TestPrivateLambdaServicePermissionIsSourceBoundAndRevisionChecked(t *testing.T) {
@@ -142,5 +145,46 @@ func TestLambdaServicePermissionNeverAcceptsOtherPrincipalsOrDamagedConditions(t
 	}
 	if localAPISource("us-east-1", source+"\n") {
 		t.Fatal("control byte in service SourceArn accepted")
+	}
+}
+
+func TestLambdaAuthorizationUsesSessionSnapshotAndRefusesConsoleBoundSessions(t *testing.T) {
+	db, store, identities := lambdaState(t)
+	g := &Gateway{Store: db, Identities: identities, Lambdas: store}
+	f := LambdaFunction{Name: "viewer", Region: "us-east-1", Role: "arn:aws:iam::000000000000:role/executor", Code: []byte("not invoked")}
+	if err := store.save(&f, true, ""); err != nil {
+		t.Fatal(err)
+	}
+	everything, err := core.ParsePolicy([]byte(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"lambda:*","Resource":"*"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = identities.Set("stored-wide", everything); err != nil {
+		t.Fatal(err)
+	}
+	configuration := func(principal string, ctx context.Context) int {
+		r := httptest.NewRequest("GET", "/2015-03-31/functions/viewer/configuration", nil).WithContext(ctx)
+		r.Header.Set("X-Simulator-Service", "lambda")
+		r.Header.Set("X-Simulator-Principal", principal)
+		w := httptest.NewRecorder()
+		g.ServeHTTP(w, r)
+		return w.Code
+	}
+	readOne := core.Policy{Version: "2012-10-17", Statement: core.Statements{{Effect: "Allow", Action: core.StringList{"lambda:GetFunctionConfiguration"}, Resource: core.StringList{lambdaARN("us-east-1", "viewer")}}}}
+	// The stored policy of "executor" allows only SSM; its signed session snapshot decides.
+	if code := configuration("executor", context.WithValue(context.Background(), sdkPolicyContextKey{}, readOne)); code != 200 {
+		t.Fatal("session snapshot ignored", code)
+	}
+	// A wide stored policy cannot widen a narrower session snapshot.
+	if code := configuration("stored-wide", context.WithValue(context.Background(), sdkPolicyContextKey{}, core.Policy{Version: "2012-10-17"})); code != 403 {
+		t.Fatal("stored policy replaced the session snapshot", code)
+	}
+	if code := configuration("stored-wide", context.Background()); code != 200 {
+		t.Fatal("stored policy for a token principal ignored", code)
+	}
+	// A browser handoff bound to one SSM parameter never reaches Lambda.
+	bound := context.WithValue(context.WithValue(context.Background(), sdkPolicyContextKey{}, everything), consoleParameterBoundaryKey{}, consoleParameterBoundary{name: "/team/value", region: "us-east-1", arn: "arn:aws:ssm:us-east-1:000000000000:parameter/team/value"})
+	if code := configuration("stored-wide", bound); code != 403 {
+		t.Fatal("console-bound session reached Lambda", code)
 	}
 }

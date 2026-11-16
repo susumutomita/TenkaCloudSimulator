@@ -4,9 +4,11 @@ BINARY := dist/tenkacloud-simulator
 START_LISTEN ?= 127.0.0.1:4566
 START_STATE ?= ./practice.db
 START_TOKEN_FILE ?= ./simulator-token
+GO_TEST_PACKAGES ?= ./...
+COVERAGE_PROFILE ?= reports/coverage.out
 export GO START_LISTEN START_STATE START_TOKEN_FILE
 
-.PHONY: build dev start test-start test vet format-check before-commit e2e formal verify-assets cross-check
+.PHONY: build dev start test-start test test-scripts test-go vet format-check before-commit e2e formal verify-assets cross-check
 build:
 	mkdir -p dist
 	CGO_ENABLED=0 $(GO) build -trimpath -ldflags='-s -w' -o $(BINARY) ./cmd/simulator
@@ -20,18 +22,23 @@ start:
 test-start:
 	$(PYTHON) test/start/check_start.py
 
-test:
+test: test-scripts test-go
+	$(PYTHON) scripts/check-coverage.py $(COVERAGE_PROFILE)
+
+test-scripts:
 	$(PYTHON) scripts/smithy-contracts.py --check
 	$(PYTHON) scripts/test-smithy-contracts.py
 	$(PYTHON) scripts/test-software-factory.py
 	$(PYTHON) scripts/test-factory-acceptance.py
 	$(PYTHON) scripts/factory_acceptance.py
+	$(PYTHON) scripts/test-coverage-gate.py
+
+test-go:
 	mkdir -p reports
 	# Packages each compile fixed WASM runtimes. Avoid cross-package CPU contention;
 	# goroutine/race and deadline assertions inside each test remain unchanged.
-	$(GO) test -p 1 -race -coverpkg=./... -coverprofile=reports/coverage.out ./...
-	$(PYTHON) scripts/test-coverage-gate.py
-	$(PYTHON) scripts/check-coverage.py reports/coverage.out
+	# CI names a file holding a -run pattern to run one share of a package's tests.
+	$(GO) test -p 1 -race -coverpkg=./... -coverprofile=$(COVERAGE_PROFILE) $(if $(GO_TEST_RUN_FILE),-v -run "$$(cat '$(GO_TEST_RUN_FILE)')") $(GO_TEST_PACKAGES)
 
 vet:
 	$(GO) vet ./...

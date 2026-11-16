@@ -55,7 +55,7 @@ SSM詳細はregion・Parameter名をhashに保持する。その他サービス�
 
 リージョン変更は選択bucket/detail/modalを破棄して、そのリージョンのbucket一覧へ戻す。保存中のcontext変更をUIでガードし、古いregionのbucketへ誤って書き込まないことをSDK readback付きの実ブラウザ回帰で検証する。
 
-LambdaはFunctions一覧→Author from scratchで作成→CodeのZIP Deploy→Testの実Python実行→Configuration→確認入力付き削除を同じnative APIで行う。Invoke限定identityには一覧/configurationを開放せず、host提供の名前からTestする。inline editor/monitoring等の未再現点と実行制限は[Lambda](lambda.md)。公開AWS guideとの操作対応であり、ログイン済みAWS画面とのpixel一致は未検証。
+LambdaはFunctions一覧→Author from scratchで作成→CodeのZIP Deploy→Testの実Python実行→Configuration→確認入力付き削除を同じnative APIで行う。Invoke限定identityには一覧/configurationを開放せず、host提供の名前からTestする。CodeMirrorでの保存済みhandler編集・他ZIPファイル保持と未保存下書きの制限、monitoring等の未再現点と実行制限は[Lambda](lambda.md)。公開AWS guideとの操作対応であり、ログイン済みAWS画面とのpixel一致は未検証。
 
 サービス変更はメニュー・breadcrumb・サービス単位hashのいずれも作成/編集/uploadフォームと入力・選択file・フォームerrorを破棄する。遷移先の一覧と操作を表示し、移動前の未送信フォームから別サービスのリソースを作らない。4種類のフォーム×menu/hashの8通りを実ブラウザとSDK readbackで検証する。
 
@@ -187,3 +187,20 @@ still applies to Services, search and Favorites. A scoped Parameter Store handof
 continues to show only Console Home and Systems Manager, even if this browser
 previously pinned S3. This is a session-scope restriction, not dynamic IAM-policy
 discovery; stars never grant API permission or change the session.
+
+### Read-only EC2 and VPC inspection
+
+The EC2 and VPC views list the local CloudFormation-managed resources returned
+by `DescribeInstances` and `DescribeVpcs` in the selected region. Discovery must
+advertise both read operations and `console: true` before these views appear.
+They do not implement instance launch/start/stop, VPC creation, or network edits.
+The recorded simulator runtime state is not an AWS instance-state claim or a
+probe of guest health; absent/unknown state is shown as unconfirmed. UserData,
+runtime plans, credentials and internal connection details are never displayed.
+
+Lists are bounded by the API and must fail rather than silently truncate. A read
+failure clears previous data and is shown as an error, not an empty-success
+result. Switching identity, region or service discards old in-flight responses.
+The initial read API is for the local operator/exercise-identity context, not a
+new STS participant authorization surface. Each team's isolated process/database
+remains the tenancy boundary.

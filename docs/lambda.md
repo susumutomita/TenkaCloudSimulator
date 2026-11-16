@@ -17,7 +17,7 @@ LambdaのPython 3.12関数を、埋込CPython 3.12.16/WASIで実際に実行す�
 
 関数ARNはAWS形式の `arn:aws:lambda:<region>:000000000000:function:<name>`。native nameまたは同一region/accountの非修飾ARNを使用する。各関数の実ARNを評価し、Create/PassRoleは同一policy snapshotを使う。IAM trust/AssumeRoleの再現ではない。execution roleは既存local identityのみで、権限のないサービス接続を自動追加しない。
 
-SDKは同一endpointのdummy TCSIM署名scopeでlambdaへ振り分ける。unsigned requestは `X-Simulator-Service: lambda`、`X-Simulator-Region`を明示する。S3 object keyとLambda URLの衝突を避け、通常のS3リクエストは従来のデータにアクセスする。認証は通常の`X-Simulator-Token`またはブラウザcookie。実AWSキー/session tokenは拒否する。
+SDKは同一endpointのdummy TCSIM署名scopeでlambdaへ振り分ける。unsigned requestは `X-Simulator-Service: lambda`、`X-Simulator-Region`を明示する。S3 object keyとLambda URLの衝突を避け、通常のS3リクエストは従来のデータにアクセスする。認証は通常の`X-Simulator-Token`またはブラウザcookie。`TCSIMOPERATOR`や引き受けたロールのsession資格情報によるSigV4署名も使える（[native SDK / STS](sts-native.md)）。その場合は関数名だけのpath、query stringなし、本文384KiBまで。sessionの認可はロールのpolicy snapshotで行う。関数内のSDK呼び出しは常に保存済みexecution roleで評価し、呼び出し元sessionの権限・境界を引き継がない。SSM parameterに限定したconsole sessionからはLambdaを使えない。実AWSキーと、検証できないsession tokenは拒否する。
 
 InvokeはRequestResponseとDryRunのみ。Python例外はHTTP200 + `X-Amz-Function-Error: Unhandled`でJSONのerrorType/errorMessageを返す。サービスの認可・入力・保存エラーは適切なHTTPエラー。ZIP更新はRevisionIdの楽観lockを実装し、削除後に同名関数が再作成されても古いrole/environmentを復活させない。
 
@@ -39,7 +39,11 @@ CPythonは変更していない。WASIの絶対時刻poll非対応に合わせ�
 
 ## Cloudscape画面と検証
 
-Lambda→Functions→Create function（Author from scratch、Python 3.12、既存local role）→Test。Services→IAM→Roles→Create roleでローカルroleを作り、LambdaのPermissions→Existing roleから選べる。初期policyは明示Denyでservice権限なし。Code tabからZIPをDeployし、同じnative API/SDKで読戻す。Configurationは実設定を表示する。Invokeのみ許可された参加者には、一覧/configurationを許可せず、hostから渡された名前のTestを用意する。inline code editor、monitoring、role自動作成等は未再現。実AWSログイン済み画面とのpixel一致は未検証。
+Lambda→Functions→Create function（Author from scratch、Python 3.12、既存local role）→CodeMirrorのPython編集→作成/Deploy→Test。Services→IAM→Roles→Create roleでローカルroleを作り、LambdaのPermissions→Existing roleから選べる。初期policyは明示Denyでservice権限なし。Code tabからZIPをDeployし、同じnative API/SDKで読戻す。Configurationは実設定を表示する。Invokeのみ許可された参加者には、一覧/configurationを許可せず、hostから渡された名前のTestを用意する。CodeMirror（同梱エディタ。VS Code/Code-OSSそのものではない）で保存済みPython関数のハンドラーファイルを編集できる。作成時は入力したソースをZIP化してnative APIへ送信し、編集後はRevisionId付きDeployが成功するまでTestを無効化する。既存関数やCFNの`index.py`も、再読込後に保存済みZIPから読み出す。デプロイはハンドラーファイルのみ更新し、他のZIP entryと関数設定を保持する。未保存の下書きはメモリのみで、再読込/他サービスへの移動前にはダウンロードが必要。破損ZIPや非UTF-8ソースなどは明示エラーとし、完全なZIP更新も利用できる。
+
+ローカル独自API `GET/PUT /_simulator/v1/lambda/{name}/source` を利用する（AWS native GetFunctionではない）。通常のlocal token/cookie認証を必須とし、GETは`lambda:GetFunction`、PUTはそれに加えて`lambda:UpdateFunctionCode`を実関数ARNに要求する。PUTは`Source`と必須`RevisionId`だけを受理し、編集パスは保存済みHandlerから決める。古いrevision・削除後同名再作成への書込は拒否する。署名SDK向けの新操作としては公開しない。
+
+これはCode-OSS全体や拡張機能/ターミナルではない。monitoring、role自動作成等は未再現。実AWSログイン済み画面とのpixel一致は未検証。
 
 Test の「このテストのログ末尾を取得」を明示的に選ぶと、その同期呼び出しの実出力を表示する。既定では要求しない。選択解除、入力変更、新しい呼び出し、関数やサービスの移動で以前の表示を消し、遅れて返った別の呼び出し結果を破棄する。中断は表示と待機を取り消すもので、既に実行した関数の副作用を巻き戻す保証はない。CloudWatch の永続履歴や Monitor tab の対応を意味しない。
 

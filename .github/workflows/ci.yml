@@ -1,6 +1,7 @@
 name: ci
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
   workflow_call:
@@ -40,20 +41,25 @@ jobs:
         run: |
           /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-console-audit
           AXE_SCRIPT=/tmp/simulator-console-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/secrets_manager_console.py
+      - name: Check inline Lambda editor and strict CSP in the real browser
+        run: /tmp/simulator-tests/bin/python test/e2e/lambda_inline_editor.py
       - name: Retain focused service console evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: service-console-focused-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
+            reports/lambda-inline-*.png
             reports/service-locale-*.png
             reports/scalar-aws-json.json
             reports/secrets-metadata-*.png
             reports/secrets-a11y-summary.json
           if-no-files-found: warn
           retention-days: 14
-  ci:
+  checks:
+    name: Static checks, builds and audits
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
@@ -76,14 +82,191 @@ jobs:
           npm audit --prefix tools/console --audit-level=high
       - name: Check secret description console and preserved disclosure contracts
         run: node --test tools/console/tests/secret-description.test.mjs tools/console/tests/secrets-manager-locale.test.mjs
+      - name: Check Lambda source draft and deploy boundaries
+        run: node --test tools/console/tests/lambda-*.test.mjs
       - name: Check App Engine console request, split and URL helpers
         run: node --test tools/console/tests/gcp-appengine.test.mjs
       - name: Check immutable release packaging and refusal regressions
         run: python3 test/ci/release_pipeline.py
       - name: Check native token input regression cases
         run: node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
-      - name: Run Go quality gates and compile all supported targets
-        run: make before-commit cross-check
+      - name: Check Go format, vet, modules, embedded assets and script gates
+        run: |
+          make format-check vet verify-assets test-scripts
+          go mod verify
+      - name: Build the static binary and compile all supported targets
+        run: make build cross-check
+      - name: Audit the locked API-reference build dependencies
+        run: npm audit --prefix tools/scalar --audit-level=high
+      - name: Check Go vulnerabilities against the canonical service
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+  go-test:
+    name: Go race tests (${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: server-a
+            packages: ./internal/server
+            part: 0/2
+          - shard: server-b
+            packages: ./internal/server
+            part: 1/2
+          - shard: aws-a
+            packages: ./internal/aws
+            part: 0/2
+          - shard: aws-b
+            packages: ./internal/aws
+            part: 1/2
+          - shard: workloads
+            packages: ./internal/workload/python ./internal/workload/guesttcp
+          - shard: catalogs
+            packages: ./internal/gcp/appengine ./internal/gcp/catalog ./internal/aws/catalog
+          - shard: rest
+            exclude: ./internal/server ./internal/aws ./internal/workload/python ./internal/workload/guesttcp ./internal/gcp/appengine ./internal/gcp/catalog ./internal/aws/catalog
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Run this shard under the race detector with full-module coverage
+        shell: bash
+        env:
+          SHARD: ${{ matrix.shard }}
+          PACKAGES: ${{ matrix.packages }}
+          EXCLUDE: ${{ matrix.exclude }}
+          PART: ${{ matrix.part }}
+        run: |
+          mkdir -p reports/shard
+          if [ -n "$PACKAGES" ]; then
+            go list $PACKAGES > reports/shard/packages.txt
+          else
+            go list $EXCLUDE > reports/shard/excluded.txt
+            go list ./... | grep -vxF -f reports/shard/excluded.txt > reports/shard/packages.txt
+          fi
+          packages="$(tr '\n' ' ' < reports/shard/packages.txt)"
+          if [ -n "$PART" ]; then
+            go test -race -coverpkg=./... -list '.*' $packages | { grep -E '^(Test|Example|Fuzz)' || true; } | sort > reports/shard/listed.txt
+            awk -v index_="${PART%/*}" -v count="${PART#*/}" '(NR - 1) % count == index_' reports/shard/listed.txt > reports/shard/tests.txt
+            test -s reports/shard/tests.txt
+            names="$(paste -sd'|' reports/shard/tests.txt)"
+            printf '^(%s)$' "$names" > reports/shard/run.txt
+            make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out" GO_TEST_RUN_FILE=reports/shard/run.txt | tee reports/shard/test.log
+            { grep -E '^=== RUN   [^/ ]+$' reports/shard/test.log || true; } | sed 's/^=== RUN   //' | sort -u > reports/shard/ran.txt
+            diff reports/shard/tests.txt reports/shard/ran.txt
+          else
+            make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out"
+          fi
+          if [ -n "$PART" ]; then
+            jq -n --arg index "${PART%/*}" --arg count "${PART#*/}" --rawfile listed reports/shard/listed.txt --rawfile tests reports/shard/tests.txt \
+              '{index: ($index | tonumber), count: ($count | tonumber), listed: ($listed | split("\n") | map(select(length > 0))), tests: ($tests | split("\n") | map(select(length > 0)))}' > reports/shard/part.json
+          else
+            echo null > reports/shard/part.json
+          fi
+          jq -n --arg head "$(git rev-parse HEAD)" --arg profile "coverage-$SHARD.out" --rawfile packages reports/shard/packages.txt --slurpfile part reports/shard/part.json \
+            '{head: $head, profile: $profile, packages: ($packages | split("\n") | map(select(length > 0)))} + (if $part[0] == null then {} else {part: $part[0]} end)' > "reports/shard/$SHARD.json"
+      - name: Retain this shard's coverage and package manifest
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: go-coverage-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            reports/shard/${{ matrix.shard }}.json
+            reports/shard/coverage-${{ matrix.shard }}.out
+          if-no-files-found: error
+          retention-days: 14
+  platform-audit:
+    name: Platform lifecycle and console audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Build the actual embedded simulator
+        run: make build
+      - name: Install Python SDK and browser tools
+        timeout-minutes: 3
+        run: |
+          python3 -m venv /tmp/simulator-tests
+          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
+      - name: Install full Chromium system dependencies
+        timeout-minutes: 12
+        run: /tmp/simulator-tests/bin/playwright install-deps chromium
+      - name: Install pinned Chromium browser
+        timeout-minutes: 5
+        run: /tmp/simulator-tests/bin/playwright install chromium
+      - name: Prepare pinned axe-core for mandatory browser accessibility checks
+        run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
+      - name: Run the actual platform hello-world lifecycle and participant browser
+        run: |
+          git init /tmp/simulator-platform
+          git -C /tmp/simulator-platform remote add origin https://github.com/susumutomita/TenkaCloud.git
+          git -C /tmp/simulator-platform fetch --depth=1 origin f99b3d9a00076a2a5e97f1d4d9b0b20a7e02245c
+          git -C /tmp/simulator-platform checkout --detach FETCH_HEAD
+          git init /tmp/simulator-challenges
+          git -C /tmp/simulator-challenges remote add origin https://github.com/susumutomita/TenkaCloudChallenge.git
+          git -C /tmp/simulator-challenges fetch --depth=1 origin a749b142416770abee3f173673702c55df3856aa
+          git -C /tmp/simulator-challenges checkout --detach FETCH_HEAD
+          npm ci --prefix tools/platform --ignore-scripts --no-audit --no-fund
+          npm audit --prefix tools/platform --audit-level=high
+          node tools/platform/setup.mjs /tmp/simulator-platform
+          python3 scripts/catalog-matrix.py /tmp/simulator-challenges
+          git diff --exit-code -- docs/catalog.md
+          export TENKACLOUD_ROOT=/tmp/simulator-platform CHALLENGE_ROOT=/tmp/simulator-challenges
+          export BUN="$PWD/tools/platform/node_modules/@oven/bun-linux-x64/bin/bun"
+          "$BUN" test/platform/hello-world.ts
+          /tmp/simulator-tests/bin/python test/platform/browser.py
+          /tmp/simulator-tests/bin/python test/platform/wp-sdk-subset.py
+      - name: Check responsive reflow and the start command's token handling
+        run: |
+          /tmp/simulator-tests/bin/python test/e2e/reflow_test.py
+          make test-start PYTHON=/tmp/simulator-tests/bin/python
+      - name: Inspect console flow, keyboard behavior, and accessible contrast
+        run: |
+          AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make audit PYTHON=/tmp/simulator-tests/bin/python
+          AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_console.py
+          CHALLENGE_ROOT=/tmp/simulator-challenges AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_original_http.py
+  ci:
+    name: ci
+    needs: [console-acceptance, checks, go-test, platform-audit]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Require every gate job to succeed
+        env:
+          CONSOLE_ACCEPTANCE: ${{ needs.console-acceptance.result }}
+          CHECKS: ${{ needs.checks.result }}
+          GO_TEST: ${{ needs.go-test.result }}
+          PLATFORM_AUDIT: ${{ needs.platform-audit.result }}
+        run: |
+          echo "console-acceptance=$CONSOLE_ACCEPTANCE checks=$CHECKS go-test=$GO_TEST platform-audit=$PLATFORM_AUDIT"
+          test "$CONSOLE_ACCEPTANCE" = success && test "$CHECKS" = success && test "$GO_TEST" = success && test "$PLATFORM_AUDIT" = success
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: go-coverage-shard-*-${{ github.event.pull_request.head.sha || github.sha }}
+          path: reports/shard
+          merge-multiple: true
+      - name: Merge shard coverage only when every package ran exactly once at this head
+        run: |
+          go list ./... > reports/expected-packages.txt
+          python3 scripts/check-coverage.py merge reports/coverage.out reports/expected-packages.txt "$(git rev-parse HEAD)" reports/shard/*.json
       - name: Generate coverage views and enforce both 90% floors
         run: |
           go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > reports/coverage.xml
@@ -101,10 +284,19 @@ jobs:
             reports/coverage-summary.md
           if-no-files-found: error
           retention-days: 14
-      - name: Audit the locked API-reference build dependencies
-        run: npm audit --prefix tools/scalar --audit-level=high
-      - name: Check Go vulnerabilities against the canonical service
-        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+  e2e:
+    name: Real binary, SDK, console and API reference E2E
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: '1.26.11'
+          cache: true
       - name: Install Python SDK and browser tools
         timeout-minutes: 3
         run: |
@@ -126,6 +318,7 @@ jobs:
         with:
           name: service-console-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
+            reports/lambda-inline-*.png
             reports/service-locale-*.png
             reports/scalar-aws-json.json
             reports/secrets-metadata-*.png
@@ -142,33 +335,3 @@ jobs:
             reports/language-login-ja-*.png
           if-no-files-found: warn
           retention-days: 14
-      - name: Run the actual platform hello-world lifecycle and participant browser
-        run: |
-          git init /tmp/simulator-platform
-          git -C /tmp/simulator-platform remote add origin https://github.com/susumutomita/TenkaCloud.git
-          git -C /tmp/simulator-platform fetch --depth=1 origin f99b3d9a00076a2a5e97f1d4d9b0b20a7e02245c
-          git -C /tmp/simulator-platform checkout --detach FETCH_HEAD
-          git init /tmp/simulator-challenges
-          git -C /tmp/simulator-challenges remote add origin https://github.com/susumutomita/TenkaCloudChallenge.git
-          git -C /tmp/simulator-challenges fetch --depth=1 origin a749b142416770abee3f173673702c55df3856aa
-          git -C /tmp/simulator-challenges checkout --detach FETCH_HEAD
-          npm ci --prefix tools/platform --ignore-scripts --no-audit --no-fund
-          npm audit --prefix tools/platform --audit-level=high
-          node tools/platform/setup.mjs /tmp/simulator-platform
-          python3 scripts/catalog-matrix.py /tmp/simulator-challenges
-          git diff --exit-code -- docs/catalog.md
-          export TENKACLOUD_ROOT=/tmp/simulator-platform CHALLENGE_ROOT=/tmp/simulator-challenges
-          export BUN="$PWD/tools/platform/node_modules/@oven/bun-linux-x64/bin/bun"
-          "$BUN" test/platform/hello-world.ts
-          /tmp/simulator-tests/bin/python test/platform/browser.py
-          /tmp/simulator-tests/bin/python test/platform/wp-sdk-subset.py
-      - name: Inspect console flow, keyboard behavior, and accessible contrast
-        run: |
-          AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make audit PYTHON=/tmp/simulator-tests/bin/python
-          AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_console.py
-          CHALLENGE_ROOT=/tmp/simulator-challenges AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_original_http.py
-      - name: Finite state model check and deletion-guard mutation
-        run: |
-          python3 test/ci/tla_download.py
-          timeout --kill-after=5s 95s curl --fail --location --retry 3 --retry-delay 2 --retry-max-time 60 --connect-timeout 10 --max-time 30 https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar --output /tmp/tla2tools.jar
-          TLA_JAR=/tmp/tla2tools.jar make formal
