@@ -151,7 +151,7 @@ class TagTests(unittest.TestCase):
 
 class WorkflowTests(unittest.TestCase):
     def test_go_security_patch_pin_is_consistent(self):
-        for name, count in [('ci.yml', 2), ('release.yml', 1)]:
+        for name, count in [('ci.yml', 6), ('release.yml', 1)]:
             workflow = (ROOT / '.github/workflows' / name).read_text()
             pins = [line.strip() for line in workflow.splitlines()
                     if line.strip().startswith('go-version:')]
@@ -169,6 +169,27 @@ class WorkflowTests(unittest.TestCase):
         self.assertLess(workflow.index('--draft '), workflow.index('--draft=false'))
         for target in verify.TARGETS:
             self.assertIn('target: ' + target, workflow)
+
+    def test_release_validation_still_runs_e2e(self):
+        workflow = (ROOT / '.github/workflows/ci.yml').read_text()
+        job = workflow[workflow.index('\n  e2e:\n'):]
+        self.assertIn("    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'\n", job)
+        self.assertIn('make e2e PYTHON=/tmp/simulator-tests/bin/python', job)
+        self.assertIn('  workflow_call:', workflow)
+
+    def test_release_runs_tlc_and_every_change_checks_applicability(self):
+        workflow = (ROOT / '.github/workflows/formal.yml').read_text()
+        release_only = "    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'\n"
+        tlc = workflow[workflow.index('\n  tlc:\n'):workflow.index('\n  formal:\n')]
+        gate = workflow[workflow.index('\n  gate-tests:\n'):workflow.index('\n  tlc:\n')]
+        final = workflow[workflow.index('\n  formal:\n'):]
+        self.assertIn(release_only, tlc)
+        self.assertIn(release_only, gate)
+        self.assertIn('    name: Formal validation\n    needs: [gate-tests, tlc]\n    if: always()\n', final)
+        check = final[final.index('Validate exact changed blobs'):final.index('Require the gate tests')]
+        self.assertNotIn('if:', check)
+        self.assertIn('check-formal-applicability.py check --base "$base"', check)
+        self.assertEqual(final.count("if: env.FULL == 'true'"), 3)
 
 
 class BuildTests(unittest.TestCase):

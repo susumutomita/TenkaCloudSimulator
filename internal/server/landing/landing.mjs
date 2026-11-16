@@ -97,8 +97,9 @@ function start() {
     element.setAttribute('aria-hidden', 'true');
     element.setAttribute('inert', '');
     element.textContent = `${node.title}\n${node.subtitle}`;
-    element.style.left = `${node.x * 100}%`;
-    element.style.top = `${node.y * 100}%`;
+    // Snapshot sources stay at the canvas origin without transforms.
+    // Scene positions belong only to drawElementImage, not DOM layout; moving
+    // sources can clip native snapshots and overlap adjacent readable content.
     canvas.append(element);
     return Object.freeze({id: node.id, provider: node.provider, element, x: node.x, y: node.y});
   });

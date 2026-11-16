@@ -157,6 +157,17 @@ startup and defaults to 8 hours when `lifetimeUntilMs` is omitted; every VM in
 the runtime shares that window. Unknown or duplicate configuration fields are
 rejected.
 
+The archive is a gzip-compressed tar of exactly the manifest's regular files and
+must end with the two end-of-archive blocks and nothing else. GNU tar and Python
+`tarfile` pad archives to 10240-byte records; startup refuses that padding with
+`trailing or corrupt guest bundle data`. The emulator runs from the extracted
+tree with an empty environment, so every module and ROM it loads must be listed
+in the manifest at the relative path the emulator expects.
+`CreateStack` for a stack with an instance answers only after the guest agent
+responds, about a minute without hardware acceleration: give the client a longer
+read timeout and no automatic retry. [The local rehearsal](../test/battle/README.md)
+shows a working tree, image preparation and what stays on disk afterwards.
+
 Use only an independently trusted bundle. The manifest SHA-256 and archive/file
 hash checks establish integrity, not vendor authenticity or containment. Loading
 configuration extracts verified assets but does not start a VM. A CloudFormation

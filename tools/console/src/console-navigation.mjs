@@ -6,6 +6,8 @@ export const PROVIDERS = Object.freeze([
   {id: 'sakura', label: 'Sakura Cloud', defaultService: 'sakura-disks'},
 ]);
 export const SERVICES = Object.freeze([
+  {id: 'ec2', provider: 'aws', label: 'EC2', capability: 'ec2', route: '/ec2', keywords: 'instance compute インスタンス コンピューティング'},
+  {id: 'vpc', provider: 'aws', label: 'VPC', capability: 'ec2', route: '/vpc', keywords: 'network virtual private cloud ネットワーク 仮想プライベートクラウド'},
   {id: 's3', provider: 'aws', label: 'S3', capability: 's3', route: '/s3', keywords: 'bucket object バケット オブジェクト ストレージ'},
   {id: 'ssm', provider: 'aws', label: 'Systems Manager', capability: 'ssm', route: '/parameters', keywords: 'parameter store パラメータ 設定 システムマネージャー パラメータストア'},
   {id: 'lambda', provider: 'aws', label: 'Lambda', capability: 'lambda', route: '/lambda', keywords: 'function 関数 ラムダ'},
@@ -50,6 +52,10 @@ export function serviceAvailable(id, capabilities) {
   // A participant handoff only exposes its bound SSM scope. This presentation
   // restriction never replaces the server's exact-resource authorization.
   if (capabilities.consoleScope && id !== 'ssm') return false;
+  if (id === 'ec2' || id === 'vpc') {
+    const ec2=capabilities.services?.ec2;
+    return ec2?.console === true && Array.isArray(ec2.operations) && ['DescribeInstances','DescribeVpcs'].every(op=>ec2.operations.includes(op));
+  }
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
   if (service.provider === 'sakura') return sakuraConfiguration(capabilities) !== null;
   if (service.id === 'gcp-appengine') return typeof capabilities.gcpAppEngine?.endpoint === 'string' && typeof capabilities.gcpAppEngine.project === 'string'
