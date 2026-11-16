@@ -103,10 +103,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - shard: server
+          - shard: server-a
             packages: ./internal/server
-          - shard: aws
+            part: 0/2
+          - shard: server-b
+            packages: ./internal/server
+            part: 1/2
+          - shard: aws-a
             packages: ./internal/aws
+            part: 0/2
+          - shard: aws-b
+            packages: ./internal/aws
+            part: 1/2
           - shard: workloads
             packages: ./internal/workload/python ./internal/workload/guesttcp
           - shard: catalogs
@@ -127,16 +135,31 @@ jobs:
           SHARD: ${{ matrix.shard }}
           PACKAGES: ${{ matrix.packages }}
           EXCLUDE: ${{ matrix.exclude }}
+          PART: ${{ matrix.part }}
         run: |
           mkdir -p reports/shard
           if [ -n "$PACKAGES" ]; then
             go list $PACKAGES > reports/shard/packages.txt
           else
-            go list ./... | grep -vxF -f <(go list $EXCLUDE) > reports/shard/packages.txt
+            go list $EXCLUDE > reports/shard/excluded.txt
+            go list ./... | grep -vxF -f reports/shard/excluded.txt > reports/shard/packages.txt
           fi
-          make test-go GO_TEST_PACKAGES="$(tr '\n' ' ' < reports/shard/packages.txt)" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out"
-          jq -n --arg head "$(git rev-parse HEAD)" --arg profile "coverage-$SHARD.out" --rawfile packages reports/shard/packages.txt \
-            '{head: $head, profile: $profile, packages: ($packages | split("\n") | map(select(length > 0)))}' > "reports/shard/$SHARD.json"
+          packages="$(tr '\n' ' ' < reports/shard/packages.txt)"
+          if [ -n "$PART" ]; then
+            go test -race -coverpkg=./... -list '.*' $packages | { grep -E '^(Test|Example|Fuzz)' || true; } | sort > reports/shard/listed.txt
+            awk -v index_="${PART%/*}" -v count="${PART#*/}" '(NR - 1) % count == index_' reports/shard/listed.txt > reports/shard/tests.txt
+            test -s reports/shard/tests.txt
+            export GO_TEST_RUN="^($(paste -sd'|' reports/shard/tests.txt))\$"
+          fi
+          make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out"
+          if [ -n "$PART" ]; then
+            jq -n --arg index "${PART%/*}" --arg count "${PART#*/}" --rawfile listed reports/shard/listed.txt --rawfile tests reports/shard/tests.txt \
+              '{index: ($index | tonumber), count: ($count | tonumber), listed: ($listed | split("\n") | map(select(length > 0))), tests: ($tests | split("\n") | map(select(length > 0)))}' > reports/shard/part.json
+          else
+            echo null > reports/shard/part.json
+          fi
+          jq -n --arg head "$(git rev-parse HEAD)" --arg profile "coverage-$SHARD.out" --rawfile packages reports/shard/packages.txt --slurpfile part reports/shard/part.json \
+            '{head: $head, profile: $profile, packages: ($packages | split("\n") | map(select(length > 0)))} + (if $part[0] == null then {} else {part: $part[0]} end)' > "reports/shard/$SHARD.json"
       - name: Retain this shard's coverage and package manifest
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -193,6 +216,10 @@ jobs:
           "$BUN" test/platform/hello-world.ts
           /tmp/simulator-tests/bin/python test/platform/browser.py
           /tmp/simulator-tests/bin/python test/platform/wp-sdk-subset.py
+      - name: Check responsive reflow and the start command's token handling
+        run: |
+          /tmp/simulator-tests/bin/python test/e2e/reflow_test.py
+          make test-start PYTHON=/tmp/simulator-tests/bin/python
       - name: Inspect console flow, keyboard behavior, and accessible contrast
         run: |
           AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make audit PYTHON=/tmp/simulator-tests/bin/python
@@ -200,19 +227,20 @@ jobs:
           CHALLENGE_ROOT=/tmp/simulator-challenges AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_original_http.py
   ci:
     name: ci
-    needs: [checks, go-test, platform-audit]
+    needs: [console-acceptance, checks, go-test, platform-audit]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Require every gate job to succeed
         env:
+          CONSOLE_ACCEPTANCE: ${{ needs.console-acceptance.result }}
           CHECKS: ${{ needs.checks.result }}
           GO_TEST: ${{ needs.go-test.result }}
           PLATFORM_AUDIT: ${{ needs.platform-audit.result }}
         run: |
-          echo "checks=$CHECKS go-test=$GO_TEST platform-audit=$PLATFORM_AUDIT"
-          test "$CHECKS" = success && test "$GO_TEST" = success && test "$PLATFORM_AUDIT" = success
+          echo "console-acceptance=$CONSOLE_ACCEPTANCE checks=$CHECKS go-test=$GO_TEST platform-audit=$PLATFORM_AUDIT"
+          test "$CONSOLE_ACCEPTANCE" = success && test "$CHECKS" = success && test "$GO_TEST" = success && test "$PLATFORM_AUDIT" = success
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}

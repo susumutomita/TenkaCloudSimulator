@@ -62,10 +62,13 @@ class ShardMerge(unittest.TestCase):
             root = Path(directory)
             (root/'expected.txt').write_text('\n'.join(expected) + '\n')
             manifests = []
-            for name, head, packages, profile in shards:
+            for name, head, packages, profile, *part in shards:
                 if profile is not None:
                     (root/f'coverage-{name}.out').write_text(profile)
-                (root/f'{name}.json').write_text(json.dumps({'head': head, 'packages': packages, 'profile': f'coverage-{name}.out'}))
+                manifest = {'head': head, 'packages': packages, 'profile': f'coverage-{name}.out'}
+                if part:
+                    manifest['part'] = part[0]
+                (root/f'{name}.json').write_text(json.dumps(manifest))
                 manifests.append(str(root/f'{name}.json'))
             result = subprocess.run([sys.executable, str(SCRIPT), 'merge', str(root/'merged.out'), str(root/'expected.txt'), HEAD, *manifests], capture_output=True, text=True)
             merged = (root/'merged.out').read_text() if (root/'merged.out').exists() else None
@@ -101,6 +104,37 @@ class ShardMerge(unittest.TestCase):
         for name, shards in cases.items():
             with self.subTest(name):
                 code, merged = self.run_merge(shards)
+                self.assertNotEqual(code, 0)
+                self.assertIsNone(merged)
+
+    def split(self, *parts):
+        profile = 'mode: atomic\nb.go:1.1,2.1 2 1\n'
+        return [VALID_SHARDS[0]] + [(f'part-{i}', HEAD, ['example/b', 'example/c'], profile, part) for i, part in enumerate(parts)]
+
+    def test_split_package_parts_that_run_every_listed_test_once_merge(self):
+        listed = ['TestA', 'TestB', 'TestC']
+        code, merged = self.run_merge(self.split({'index': 0, 'count': 2, 'listed': listed, 'tests': ['TestA', 'TestC']},
+                                                 {'index': 1, 'count': 2, 'listed': listed, 'tests': ['TestB']}))
+        self.assertEqual(code, 0)
+        self.assertEqual(merged.count('mode: atomic'), 1)
+
+    def test_split_package_parts_with_gaps_or_overlaps_fail(self):
+        listed = ['TestA', 'TestB', 'TestC']
+        first = {'index': 0, 'count': 2, 'listed': listed, 'tests': ['TestA', 'TestC']}
+        cases = {
+            'missing part': [first],
+            'repeated part': [first, dict(first)],
+            'repeated index covering every test': [first, {'index': 0, 'count': 2, 'listed': listed, 'tests': ['TestB']}],
+            'test not run': [first, {'index': 1, 'count': 2, 'listed': listed, 'tests': []}],
+            'test run twice': [first, {'index': 1, 'count': 2, 'listed': listed, 'tests': ['TestB', 'TestC']}],
+            'unlisted test': [first, {'index': 1, 'count': 2, 'listed': listed, 'tests': ['TestB', 'TestD']}],
+            'other listing': [first, {'index': 1, 'count': 2, 'listed': ['TestB'], 'tests': ['TestB']}],
+            'other count': [first, {'index': 1, 'count': 3, 'listed': listed, 'tests': ['TestB']}],
+            'empty listing': [{'index': 0, 'count': 1, 'listed': [], 'tests': []}],
+        }
+        for name, parts in cases.items():
+            with self.subTest(name):
+                code, merged = self.run_merge(self.split(*parts))
                 self.assertNotEqual(code, 0)
                 self.assertIsNone(merged)
 

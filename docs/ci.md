@@ -5,17 +5,20 @@ and SQLite runtime. Node/npm, Python/Chromium/SDK and Java are development tools
 the resulting statically linked executable does not require them at runtime.
 
 Every push to main, pull request and manual run checks out the exact tested head.
-The jobs below run in parallel, and the required `ci` job passes only when the
-`checks`, every `go-test` shard and `platform-audit` jobs succeeded:
+The jobs below run in parallel, and the required `ci` job passes only when
+`console-acceptance`, `checks`, every `go-test` shard and `platform-audit` succeeded:
 
 1. `checks`: integrity-locked Scalar and Cloudscape rebuilds with original notices,
    console/release/token script tests, Go format/vet, module and embedded-asset
    integrity, static binary build, five OS/architecture compile checks, locked npm
    dependency audit (high/critical fail) and canonical Go govulncheck.
-2. `go-test`: five shards run the full-module race tests with `-coverpkg=./...`.
+2. `go-test`: seven shards run the full-module race tests with `-coverpkg=./...`.
    Each shard runs its packages with `-p 1` and records its head and package list.
-3. `platform-audit`: the actual platform hello-world lifecycle, participant browser
-   and the existing console accessibility audit.
+   `internal/server` and `internal/aws` are each split into two shards: both list
+   the package's tests with `go test -list` and run alternate names with `-run`.
+3. `platform-audit`: the actual platform hello-world lifecycle, participant browser,
+   responsive reflow, the `make start` token check and the existing console
+   accessibility audit. `console-acceptance` runs the focused service console checks.
 4. `ci`: merges the shard profiles, then runs unfiltered Cobertura conversion and the
    Go HTML coverage view. Both full-module statement coverage and source-line
    coverage must be at least 90%.
@@ -35,8 +38,10 @@ both floors independently, repeated statement blocks and missing/invalid reports
 No source files or packages are removed from the coverage reports: `cmd/simulator`
 and all internal packages are included. `check-coverage.py merge` refuses the shard
 profiles unless every shard ran at the same head and the shards together list each
-package of `go list ./...` exactly once. Its regression tests cover a missing,
-repeated or unexpected package, another head, mismatched modes and a missing profile. Foreign builds are compile checks, not
+package of `go list ./...` exactly once. A split package passes only when its
+shards share one test listing and together run each listed test exactly once.
+Its regression tests cover a missing, repeated or unexpected package or test,
+another head, mismatched modes and a missing profile. Foreign builds are compile checks, not
 foreign-platform runtime tests. TLC is bounded checking, not an implementation proof.
 
 The embedded CPython/WASI/stdlib and original rights inventory are verified offline

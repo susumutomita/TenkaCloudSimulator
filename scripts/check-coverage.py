@@ -37,16 +37,38 @@ def line_counts(path):
     return covered, total
 
 
+def claim(tested, packages):
+    for package in packages:
+        if package in tested:
+            raise ValueError('package tested by more than one shard: ' + package)
+        tested.add(package)
+
+
+def check_parts(packages, parts):
+    """Shards that split one package list must run every listed test exactly once."""
+    name = ' '.join(packages)
+    if not all(isinstance(p, dict) and set(p) == {'index', 'count', 'listed', 'tests'} and isinstance(p['tests'], list) for p in parts):
+        raise ValueError('invalid shard part: ' + name)
+    count, listed = parts[0]['count'], parts[0]['listed']
+    if type(count) is not int or not isinstance(listed, list) or not listed or len(set(listed)) != len(listed):
+        raise ValueError('invalid listed tests: ' + name)
+    if any(p['count'] != count or p['listed'] != listed for p in parts) or sorted(p['index'] for p in parts) != list(range(count)):
+        raise ValueError('shard parts are missing, repeated or from another split: ' + name)
+    ran = [test for p in parts for test in p['tests']]
+    if len(ran) != len(set(ran)) or set(ran) != set(listed):
+        raise ValueError('shard parts do not run each listed test exactly once: ' + name)
+
+
 def merge_shards(output, expected_packages, head, manifests):
     expected = Path(expected_packages).read_text().split()
     if not expected or len(set(expected)) != len(expected):
         raise ValueError('expected package list is empty or repeats a package')
     if not manifests:
         raise ValueError('no shard manifests')
-    tested, mode, blocks = set(), None, []
+    tested, mode, blocks, split = set(), None, [], {}
     for manifest_path in map(Path, manifests):
         manifest = json.loads(manifest_path.read_text())
-        if not isinstance(manifest, dict) or set(manifest) != {'head', 'packages', 'profile'}:
+        if not isinstance(manifest, dict) or set(manifest) - {'part'} != {'head', 'packages', 'profile'}:
             raise ValueError('invalid shard manifest: ' + manifest_path.name)
         if manifest['head'] != head:
             raise ValueError('shard was tested at another head: ' + manifest_path.name)
@@ -55,15 +77,18 @@ def merge_shards(output, expected_packages, head, manifests):
             raise ValueError('shard lists no packages: ' + manifest_path.name)
         if not isinstance(profile, str) or Path(profile).name != profile:
             raise ValueError('shard profile must sit beside its manifest: ' + manifest_path.name)
-        for package in packages:
-            if package in tested:
-                raise ValueError('package tested by more than one shard: ' + package)
-            tested.add(package)
+        if 'part' in manifest:
+            split.setdefault(tuple(packages), []).append(manifest['part'])
+        else:
+            claim(tested, packages)
         lines = (manifest_path.parent / profile).read_text().splitlines()
         if not lines or lines[0] not in MODES or mode not in (None, lines[0]):
             raise ValueError('missing or mismatched shard coverage mode: ' + profile)
         mode = lines[0]
         blocks += lines[1:]
+    for packages, parts in split.items():
+        check_parts(packages, parts)
+        claim(tested, packages)
     if tested != set(expected):
         missing, extra = sorted(set(expected) - tested), sorted(tested - set(expected))
         raise ValueError(f'shards do not cover the module exactly: missing={missing} extra={extra}')
