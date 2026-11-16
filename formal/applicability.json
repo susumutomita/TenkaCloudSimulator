@@ -1,40 +1,122 @@
 {
   "version": 1,
-  "base_sha": "123247431b869937ca60bc8077105452f6caff2a",
+  "base_sha": "a358e32cfed31c88de56a88d187143c349cbda7d",
   "changes": [
     {
-      "path": "internal/server/web/app.css",
-      "sha256": "b56182239b077e637722031bd7532c33a748e6fdce3fc7a07acc49f5d89cf38a",
-      "disposition": "presentation",
-      "reason": "Service flyout CSS layout and its exact generated asset metadata only; no API, authority, persistence or runtime state transitions change. Browser regression remains required.",
+      "path": ".claude/agents/test-writer.md",
+      "sha256": "d91fc5d5e7419c1a004c5067e866673f429bd4b70db86d23306657c57a43bd1c",
+      "disposition": "documentation",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
       "models": []
     },
     {
-      "path": "test/e2e/service_locale.py",
-      "sha256": "ae222831d40c4ee3b483a77f14432bc3019250754c884ea9de8ea234cd21d3e5",
+      "path": ".gitignore",
+      "sha256": "5ef57b3d16908420be64fecfce5b98c8b00d8ac4692010c79fc5c9e2c624dba0",
+      "disposition": "build-metadata",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
+      "models": []
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "67b7f156f42c9212d5ebe6b5a4108a524acb63f233e342a83447b05193077077",
+      "disposition": "documentation",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
+      "models": []
+    },
+    {
+      "path": "Makefile",
+      "sha256": "9c966d48008ed1609ec9fde52ca628a95d9c69cac073cd5c7c634807431a51b6",
+      "disposition": "modeled",
+      "reason": "Only development acceptance invocation changed; preserve existing startup token invariants.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "TypeOK",
+            "FileIdentityFrozen",
+            "CreatedFilePrivate",
+            "HistoryVisibility",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "Finite startup abstraction only, not Python evidence runner, OS subprocess isolation or authenticated review."
+        }
+      ]
+    },
+    {
+      "path": "docs/contributing/software-factory.md",
+      "sha256": "ee7b37e3a629fefafba494552803f6e9f668f5a59f7e5b3fb62b77614cb9a052",
+      "disposition": "documentation",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/sqs_factory_fidelity_test.go",
+      "sha256": "097c42cfd7670cf5d9612d09c55474238db53cbfe126040aa81b38341fe20595",
       "disposition": "test-support",
-      "reason": "Browser regression coverage for constrained flyout wheel scrolling, viewport bounds and dismissal focus; no production behavior.",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "4dabee02e975e440a230fc5d7b110a238db0d5f3d4aa4e111d0aaea8d6f9b75a",
-      "disposition": "presentation",
-      "reason": "Service flyout CSS layout and its exact generated asset metadata only; no API, authority, persistence or runtime state transitions change. Browser regression remains required.",
+      "path": "scripts/factory_acceptance.py",
+      "sha256": "0e0a61c6b7a08f6cf6c40cdd308e83a1b2024420dbf69a7d13fd752c9abc9d29",
+      "disposition": "validation-tooling",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "3b0a32e50aca6da7d6170cb50b95f94d94dd05c59006be65837971757ae7bb7a",
-      "disposition": "presentation",
-      "reason": "Service flyout CSS layout and its exact generated asset metadata only; no API, authority, persistence or runtime state transitions change. Browser regression remains required.",
+      "path": "scripts/formal_applicability.py",
+      "sha256": "7a0426a3e7e86377856e888593a4067a342ef28f6045cc8d698a800ee50b002b",
+      "disposition": "formal-infrastructure",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
       "models": []
     },
     {
-      "path": "tools/console/src/console.css",
-      "sha256": "f18c1754a163e47f5da89b62fe6013ffbac835293d4dbad774a9a9fc60dcd6d8",
-      "disposition": "presentation",
-      "reason": "Service flyout CSS layout and its exact generated asset metadata only; no API, authority, persistence or runtime state transitions change. Browser regression remains required.",
+      "path": "scripts/software_factory.py",
+      "sha256": "99b98da5247449ac3258e839bce8a908976236153c66b63fda89d080304f832d",
+      "disposition": "validation-tooling",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-factory-acceptance.py",
+      "sha256": "c4e7a2a473ae852835950d0068a402cc2f834525bed95ccd652d629cf582853f",
+      "disposition": "test-support",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "26f09ef52fbeaf3353e3ee79318eb8db574e6346243f0c7a86102acea47590c3",
+      "disposition": "formal-infrastructure",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-software-factory.py",
+      "sha256": "cb2705816fc5b9711ede6d4aadd5a5422a9b48a00041d9b731853f02c5e7f853",
+      "disposition": "test-support",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
+      "models": []
+    },
+    {
+      "path": "test/factory/upstream/LICENSE",
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "disposition": "test-support",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
+      "models": []
+    },
+    {
+      "path": "test/factory/upstream/check_send_receive_delete_lifecycle.py",
+      "sha256": "aa2445c3e5b97d984bc303144b87731b7163ad0f342aef2551f0376d80df7ece",
+      "disposition": "test-support",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
+      "models": []
+    },
+    {
+      "path": "test/factory/upstream/source.json",
+      "sha256": "d8682313e51d5b3d36b8f9738078ac3cd6b40ce05d0c7ab90d2379cf5e2d99da",
+      "disposition": "test-support",
+      "reason": "Development-only factory acceptance, provenance, documentation or regression support; no simulator runtime semantics changed.",
       "models": []
     }
   ]

@@ -29,6 +29,8 @@ test-scripts:
 	$(PYTHON) scripts/smithy-contracts.py --check
 	$(PYTHON) scripts/test-smithy-contracts.py
 	$(PYTHON) scripts/test-software-factory.py
+	$(PYTHON) scripts/test-factory-acceptance.py
+	$(PYTHON) scripts/factory_acceptance.py
 	$(PYTHON) scripts/test-coverage-gate.py
 
 test-go:

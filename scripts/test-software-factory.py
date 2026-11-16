@@ -2,6 +2,7 @@
 import copy
 import tempfile
 import unittest
+from unittest.mock import patch
 from software_factory import Factory
 
 BASE = 'a' * 40
@@ -9,13 +10,19 @@ HEAD = 'b' * 40
 
 class FactoryTests(unittest.TestCase):
     def setUp(self):
+        self.acceptance = patch('software_factory.verify_acceptance', return_value={})
+        self.acceptance.start()
+        self.diff = patch('software_factory.candidate_paths', return_value=['internal/aws/sqs_store.go'])
+        self.diff.start()
+        self.addCleanup(self.diff.stop)
+        self.addCleanup(self.acceptance.stop)
         self.tmp = tempfile.TemporaryDirectory()
         self.f = Factory(self.tmp.name + '/ledger.db')
-        self.finding = dict(provider='aws', operation='GetThing', scenario='missing resource',
+        self.finding = dict(provider='aws', operation='DeleteMessage', scenario='missing resource',
             expected='not found', actual='success', reference='official specification URL',
             reproduction='local regression test', base=BASE, inventory_checked_at='2026-11-12T00:00:00Z',
-            related_work=[], oracle='official-specification', paths=['internal/example'],
-            required_checks=['make before-commit', 'focused regression'])
+            related_work=[], oracle='official-specification', paths=['internal/aws/sqs_store.go'],
+            required_checks=['make before-commit', 'focused regression'], acceptance=['sqs-lifecycle'])
         self.key = self.f.add(copy.deepcopy(self.finding))['id']
 
     def tearDown(self):
@@ -28,13 +35,30 @@ class FactoryTests(unittest.TestCase):
         self.f.candidate(self.key, 'fixer', HEAD)
 
     def report(self):
-        return dict(head=HEAD, reviewer='reviewer', findings=[], changed_paths=['internal/example/test.go'],
+        return dict(head=HEAD, acceptance_report='separately-tested-receipt.json', reviewer='reviewer', findings=[], changed_paths=['internal/aws/sqs_store.go'],
                     checks={name: dict(status='passed', evidence='log at exact head')
                             for name in self.finding['required_checks']})
 
     def test_success_is_ready_not_merged(self):
         self.candidate()
         self.assertEqual(self.f.review(self.key, self.report())['state'], 'ready')
+
+    def test_execution_receipt_required_and_failure_cannot_ready(self):
+        self.candidate()
+        report = self.report()
+        del report['acceptance_report']
+        with self.assertRaises(ValueError): self.f.review(self.key, report)
+        with patch('software_factory.verify_acceptance', side_effect=ValueError('skip')):
+            with self.assertRaises(ValueError): self.f.review(self.key, self.report())
+        self.assertEqual(self.f.get(self.key)['state'], 'review')
+
+    def test_unrelated_suite_and_invented_diff_are_rejected(self):
+        for fields in ({'operation':'RunInstances'}, {'provider':'azure'}, {'paths':['internal/server/server.go']}):
+            finding=copy.deepcopy(self.finding);finding.update(fields)
+            with self.assertRaises(ValueError):self.f.add(finding)
+        self.candidate()
+        with patch('software_factory.candidate_paths', return_value=['internal/aws/sqs.go']):
+            with self.assertRaises(ValueError):self.f.review(self.key,self.report())
 
     def test_dedup_independent_of_base_and_prose(self):
         f = copy.deepcopy(self.finding)
@@ -47,7 +71,7 @@ class FactoryTests(unittest.TestCase):
         try:
             with self.assertRaises(ValueError): other.claim(self.key, 'other', BASE)
             f = copy.deepcopy(self.finding)
-            f.update(scenario='different', paths=['internal/example/child'])
+            f.update(scenario='different', paths=['internal/aws/sqs_store.go'])
             key = other.add(f)['id']
             with self.assertRaises(ValueError): other.claim(key, 'other', BASE)
         finally:
