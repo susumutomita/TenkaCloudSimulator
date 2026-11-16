@@ -1359,6 +1359,11 @@ class FormalGateTests(unittest.TestCase):
                 ('reordered cases', lambda e: e['runs'].reverse(), 'do not match its share of cases'),
                 ('failed run', lambda e: e['runs'][0].update(success=False), 'recorded a failed run'),
                 ('other head', lambda e: e.update(head_sha='0' * 40), 'checked other inputs'),
+                ('other input hashes', lambda e: e['input_sha256'].update({'formal/models.json': '0' * 64}), 'checked other inputs'),
+                ('other registry', lambda e: e.update(registry_sha256='0' * 64), 'checked other inputs'),
+                ('other tool', lambda e: e.update(tool_sha256='0' * 64), 'checked other inputs'),
+                ('failed shard', lambda e: e.update(success=False), 'did not pass in merge mode'),
+                ('working-tree shard', lambda e: e.update(input_mode='working-tree-specification-only-not-merge-evidence'), 'did not pass in merge mode'),
                 ('other layout', lambda e: e['shard'].update(count=3), 'missing, repeated or from another layout'),
                 ('seed replays moved', lambda e: e['runs'].append({'kind': 'seed-prefix-replay', 'success': True}), 'seed replays must run exactly once')):
             with self.subTest(name):
@@ -4192,7 +4197,10 @@ def run_one(name):
 def run_parallel(workers):
     import multiprocessing
     import time
-    names = [case.id().split('.', 1)[1] for case in unittest.defaultTestLoader.loadTestsFromTestCase(FormalGateTests)]
+    def flatten(suite):
+        for item in suite:
+            yield from flatten(item) if isinstance(item, unittest.TestSuite) else [item]
+    names = [case.id().split('.', 1)[1] for case in flatten(unittest.defaultTestLoader.loadTestsFromModule(sys.modules[__name__]))]
     started, ran, failed = time.monotonic(), 0, []
     with multiprocessing.get_context('fork').Pool(workers) as pool:
         for name, count, passed, output in pool.imap_unordered(run_one, names):

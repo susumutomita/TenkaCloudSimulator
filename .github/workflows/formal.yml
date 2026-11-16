@@ -32,6 +32,14 @@ jobs:
         run: |
           python3 scripts/test-formal-gate.py
           python3 scripts/test-formal-applicability.py
+      - name: Retain exact applicability evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formal-applicability-${{ github.event.pull_request.head.sha || github.sha }}
+          path: reports/formal/
+          if-no-files-found: error
+          retention-days: 14
   tlc:
     name: Formal TLC shard ${{ matrix.shard }}
     runs-on: ubuntu-latest
