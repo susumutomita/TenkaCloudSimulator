@@ -41,9 +41,9 @@ func (p *Prepared) SessionSocket() string {
 
 func validPrivateEndpoints(directory string, session bool) bool {
 	for _, name := range []string{"qmp.sock", "qga.sock"} {
-		if len(filepath.Join(directory, name)) > 107 {
+		if len(filepath.Join(directory, name)) > maxUnixSocketPath {
 			return false
 		}
 	}
-	return !session || len(filepath.Join(directory, "session.sock")) <= 107
+	return !session || len(filepath.Join(directory, "session.sock")) <= maxUnixSocketPath
 }

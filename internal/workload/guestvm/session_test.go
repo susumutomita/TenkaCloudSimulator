@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 )
@@ -61,10 +60,10 @@ func TestCanonicalSessionImageHookMemoryOnly(t *testing.T) {
 func TestCanonicalSessionEndpointBoundsMemoryOnly(t *testing.T) {
 	for _, n := range []int{94, 95, 96, 98, 99} {
 		directory := "/" + strings.Repeat("x", n-1)
-		if got := validPrivateEndpoints(directory, true); got != (n+len("/session.sock") <= 107) {
+		if got := validPrivateEndpoints(directory, true); got != (n+len("/session.sock") <= maxUnixSocketPath) {
 			t.Fatalf("session boundary %d: %v", n, got)
 		}
-		if got := validPrivateEndpoints(directory, false); got != (n+len("/qmp.sock") <= 107) {
+		if got := validPrivateEndpoints(directory, false); got != (n+len("/qmp.sock") <= maxUnixSocketPath) {
 			t.Fatalf("control boundary %d: %v", n, got)
 		}
 	}
@@ -95,7 +94,7 @@ func TestCanonicalSessionEndpointInspectionRejectsOverlongMemoryOnly(t *testing.
 // Unsupported hosts must reject preparation rather than silently constructing
 // a deployment that their process backend cannot safely own.
 func TestCanonicalSessionPreparationRejectsUnsupportedPlatform(t *testing.T) {
-	if runtime.GOOS == "linux" && runtime.GOARCH == "amd64" {
+	if launchPlatformSupported() {
 		t.Skip("unsupported-platform rejection is checked on other hosts")
 	}
 	bundle, layout := testBundle(t, imageHeader())
@@ -105,7 +104,7 @@ func TestCanonicalSessionPreparationRejectsUnsupportedPlatform(t *testing.T) {
 	}
 	parent := shortDir(t)
 	p, err := PrepareWithNetworkAndSession(context.Background(), parent, bundle, layout, acquire(), []byte("unchanged"), networkConfig(), info.SHA256)
-	if p != nil || err == nil || err.Error() != "guest launch plan supports Linux/amd64 only" {
+	if p != nil || err == nil || err.Error() != "guest launch plan supports Linux/amd64 and macOS/arm64 only" {
 		t.Fatalf("unsupported platform preparation=%v err=%v", p, err)
 	}
 	entries, err := os.ReadDir(parent)

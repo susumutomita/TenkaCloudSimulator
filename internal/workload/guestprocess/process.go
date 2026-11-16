@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -33,6 +34,9 @@ type Spec struct {
 	Args       []string
 	Env        []string
 }
+
+// startFunc is os.StartProcess, replaceable only by package tests.
+type startFunc = func(string, []string, *os.ProcAttr) (*os.Process, error)
 
 // Exit is evidence only for the single owned process, never its descendants or
 // a VM lease. Reaped is true only following a successful kernel wait operation.

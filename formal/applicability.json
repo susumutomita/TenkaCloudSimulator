@@ -1,45 +1,881 @@
 {
   "version": 1,
-  "base_sha": "24a30df3e854dc72b9bd5f1973e8289c5158f8f3",
+  "base_sha": "9eb7532df476be5197f66611fc39e2e48cd7d836",
   "changes": [
     {
-      "path": "Makefile",
-      "sha256": "642fc99996765ad6e89e38da62bcb77dd3fb339db31b3fc2929d52e4675b40bf",
+      "path": ".github/workflows/battle-macos.yml",
+      "sha256": "e73ce8865714b35426a3885a91eefd3c6ea13888ee9dcf5395cbceb2cb5a4225",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-macos workflow runs Darwin tests and the Apple silicon rehearsal.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "bce6c3a19fd48368d8ad78e230d99831685453b4c34253dbf8b92a1d64afd2cf",
+      "disposition": "documentation",
+      "reason": "Documents the macOS/arm64 Battle runtime option, its Darwin supervisor and limits.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/battle_platform.go",
+      "sha256": "f589881bbf0995ba2632683ce561c8322cb68793ba42ed0910e58475f5c5b9cc",
       "disposition": "modeled",
-      "reason": "Makefile is already scoped to StartupTokenVisibility. This change only registers an offline test and leaves startup token forwarding, defaults and all existing gates unchanged.",
+      "reason": "Single platform admission: Linux/amd64 or macOS/arm64.",
       "models": [
         {
-          "id": "StartupTokenVisibility",
+          "id": "CanonicalVMComposition",
           "properties": [
-            "TypeOK",
-            "FileIdentityFrozen",
-            "CreatedFilePrivate",
-            "HistoryVisibility",
-            "InvalidFileNeverEmits"
+            "ConfigurationAdmission",
+            "ConfiguredIsNotReady"
           ],
-          "limits": "Existing bounded startup token visibility model is unchanged; this binding preserves its Makefile scope. It does not model the image builder TLS, Python tests, CI execution, host trust stores or real VM behavior."
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
         }
       ]
     },
     {
+      "path": "cmd/simulator/battle_runtime_config_test.go",
+      "sha256": "fe20673a5ec3bb98406f33cb1a20069ad5729557b73d55a064cb2696250a5bc3",
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/battle_runtime_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to battle_runtime_unix.go; GOARCH checks replaced by battlePlatformSupported.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "ConfigurationAdmission",
+            "ConfiguredIsNotReady"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/battle_runtime_other.go",
+      "sha256": "5b667078bb92a29faa10198762e11982546f1e6af6611808accc07ac5c980a61",
+      "disposition": "modeled",
+      "reason": "Narrowed to platforms with neither Linux nor Darwin; uses the shared platform error.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "ConfigurationAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/battle_runtime_unix.go",
+      "sha256": "f62f7c5c1973e17ae075df048cc479e1f297bb0def55d5137a892e0ad047d93d",
+      "disposition": "modeled",
+      "reason": "Renamed from battle_runtime_linux.go; configuration loading and pin checks unchanged; GOARCH checks replaced by battlePlatformSupported.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "ConfigurationAdmission",
+            "ConfiguredIsNotReady"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/main.go",
+      "sha256": "3349fd9d65e97bf7d0a4ef4cc905bc0c25de3ee58614917be7fe2e7b31c1b1c7",
+      "disposition": "modeled",
+      "reason": "Calls guestprocess.RunSupervisorIfRequested first (a no-op except for a Darwin supervisor invocation, which exits before flags, tokens or listeners exist) and updates the flag help text.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission",
+            "ConfigurationAdmission"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        },
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "InvalidFileNeverEmits",
+            "HistoryVisibility"
+          ],
+          "limits": "The supervisor mode exits before any token file is read, created or printed; token handling is unchanged."
+        }
+      ]
+    },
+    {
+      "path": "docs/ec2-guest-attachment-lifecycle.md",
+      "sha256": "7db9e93c2194b68e80188f516bddda07b2a0dc80819bcf773ffd1c811382992f",
+      "disposition": "documentation",
+      "reason": "Documents the macOS/arm64 Battle runtime option, its Darwin supervisor and limits.",
+      "models": []
+    },
+    {
+      "path": "docs/start.md",
+      "sha256": "03a2d6570be1d662b1359c4f5ba344dcdb56591f201a16fe20ba5d6af3b1d315",
+      "disposition": "documentation",
+      "reason": "Documents the macOS/arm64 Battle runtime option, its Darwin supervisor and limits.",
+      "models": []
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "3141ab0769038c7aa46a2a4f5ad7f262e43dae06ade3e1c01bcf973232d1a6aa",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-macos workflow runs Darwin tests and the Apple silicon rehearsal.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_cloudformation_adapter_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to ec2_cloudformation_adapter_unix.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "SavedAssociation",
+            "TypedProvider"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_cloudformation_adapter_unix.go",
+      "sha256": "001c8f751e44f0fd683ca05bf780098d445a630da87c51c1c6ab4b201e77497c",
+      "disposition": "modeled",
+      "reason": "Renamed from ec2_cloudformation_adapter_linux.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "SavedAssociation",
+            "TypedProvider"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_cloudformation_runtime_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to ec2_cloudformation_runtime_unix.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PublicationAdmission",
+            "IndependentCleanup"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_cloudformation_runtime_unix.go",
+      "sha256": "89a9b505bfa1aca59cf5eb6007b283893f5d9debfd7f66511d3aca0402d807c0",
+      "disposition": "modeled",
+      "reason": "Renamed from ec2_cloudformation_runtime_linux.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PublicationAdmission",
+            "IndependentCleanup"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_command_backend_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to ec2_command_backend_unix.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "NativeCommandIssuer",
+          "properties": [
+            "ReservationBeforeEffect",
+            "AtMostOneEffect"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_command_backend_unix.go",
+      "sha256": "82cb071874748835e1250b52af0f399486b5892e7477994c9dc594804958e23e",
+      "disposition": "modeled",
+      "reason": "Renamed from ec2_command_backend_linux.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "NativeCommandIssuer",
+          "properties": [
+            "ReservationBeforeEffect",
+            "AtMostOneEffect"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_metadata_service_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to ec2_metadata_service_unix.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "InstanceMetadataTokens",
+          "properties": [
+            "TokenAdmission",
+            "InstanceBoundRead"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_metadata_service_unix.go",
+      "sha256": "fc19429274292435412fe2419c7b883c38e17ecb3444c04725dc78ed115c5e57",
+      "disposition": "modeled",
+      "reason": "Renamed from ec2_metadata_service_linux.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "InstanceMetadataTokens",
+          "properties": [
+            "TokenAdmission",
+            "InstanceBoundRead"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_session_backend_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to ec2_session_backend_unix.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "ParticipantSessionLifecycle",
+          "properties": [
+            "BoundAdmission",
+            "CurrentAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_session_backend_unix.go",
+      "sha256": "bab9dacea7d22f20ca5b8ecbd985546b722691e666b0a62f007bd04de9ce023a",
+      "disposition": "modeled",
+      "reason": "Renamed from ec2_session_backend_linux.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "ParticipantSessionLifecycle",
+          "properties": [
+            "BoundAdmission",
+            "CurrentAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vm_backend_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to ec2_vm_backend_unix.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PausedExactControl",
+            "ExactAttachment"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vm_backend_unix.go",
+      "sha256": "8fe6c104d7e49dcbe823bf42d40605535cc888bda5e21fce99801b75d9ac19e5",
+      "disposition": "modeled",
+      "reason": "Renamed from ec2_vm_backend_linux.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PausedExactControl",
+            "ExactAttachment"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vm_nic_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to ec2_vm_nic_unix.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership",
+            "FrozenNetwork"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vm_nic_unix.go",
+      "sha256": "7407dcd8dbfc4692d791bb36086b252867ed0a3684ea4f0c0bfa2651f63b85c2",
+      "disposition": "modeled",
+      "reason": "Renamed from ec2_vm_nic_linux.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership",
+            "FrozenNetwork"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vm_qga_readiness_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to ec2_vm_qga_readiness_unix.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PrivateAgentReadiness"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vm_qga_readiness_unix.go",
+      "sha256": "914407109090a61f55837f112183f2b540cb25a0358e958404fcf9850cd8a4e0",
+      "disposition": "modeled",
+      "reason": "Renamed from ec2_vm_qga_readiness_linux.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PrivateAgentReadiness"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/battle_capabilities_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to battle_capabilities_unix.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PublicationAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/battle_capabilities_unix.go",
+      "sha256": "5bda01e03b4807b0e7838dfefb45cb18c13510b896468b8f68fec1707e9043b5",
+      "disposition": "modeled",
+      "reason": "Renamed from battle_capabilities_linux.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PublicationAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/battle_runtime_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to battle_runtime_unix.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "ConfigurationAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/battle_runtime_unix.go",
+      "sha256": "09073552153ef94de7a7fe01dbd9238b26f00bbdbf5dae5330bd99b62ff86e92",
+      "disposition": "modeled",
+      "reason": "Renamed from battle_runtime_linux.go with linux || darwin; contents unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "ConfigurationAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/attempt_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Moved unchanged into attempt_unix.go except two per-platform hooks (creator thread pin and bound launch) and the anonymous-pipe check.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission",
+            "UncertainDebtRetained",
+            "IndependentCleanup"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/attempt_other.go",
+      "sha256": "6dec430bfd817b658ee1ca66e665c599f0ebbaa98709431701400de92fe31236",
+      "disposition": "modeled",
+      "reason": "Build constraint narrowed to platforms with neither Linux nor Darwin support; behavior unchanged (unsupported).",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/attempt_unix.go",
+      "sha256": "55bc18723e7de9902bdc1795df3512ac8f60fc5674abc11b689766ef90c6fbd3",
+      "disposition": "modeled",
+      "reason": "Shared attempt lifecycle for Linux and Darwin. Linux still pins the creator thread and launches with PDEATHSIG through platform_linux.go; Darwin binds the child to its private supervisor. Admission, debt retention, cancellation and cleanup ordering are unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission",
+            "UncertainDebtRetained",
+            "IndependentCleanup"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/budget_unix.go",
+      "sha256": "a54955413799a9dd022c57762c7b13dfb3600ed926a5f0dcc4df38013179e09d",
+      "disposition": "modeled",
+      "reason": "The existing 16-slot supervisor budget moved out of supervisor_linux.go so both platforms share one admission bound.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission",
+            "UncertainDebtRetained"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/nic_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Moved into nic_unix.go; only socket-pair creation became a platform hook.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership",
+            "UncertainDebtRetained"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/nic_linux_test.go",
+      "sha256": null,
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guestprocess/nic_unix.go",
+      "sha256": "82cf4230f9dddbbdf081c716fccb28ade4dabf947e3c91a7013067f2a3d47e01",
+      "disposition": "modeled",
+      "reason": "Shared NIC launch ownership for Linux and Darwin; socket-pair creation is per platform (Darwin sets close-on-exec under ForkLock and nonblocking mode, matching Linux SOCK_CLOEXEC|SOCK_NONBLOCK). Ownership and debt rules unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership",
+            "UncertainDebtRetained"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/nic_unix_test.go",
+      "sha256": "9aa8edc0f0a71f309a58adaff369b98436e23d30e9ca7314b6f307e080ccf39e",
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guestprocess/platform_darwin.go",
+      "sha256": "83296ec12f298affb4ddd367df04ffb88ba9b4a7f1d98218e3d0584f2c0b1819",
+      "disposition": "modeled",
+      "reason": "Darwin hooks: no creator pin (supervisor process binds the child), F_GETPATH named-FIFO rejection, close-on-exec socketpair under ForkLock.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission",
+            "IndependentCleanup"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/platform_linux.go",
+      "sha256": "d067917f960553301bd57e53a01b8c2d6d8edb430693f8afc89957d5e224e249",
+      "disposition": "modeled",
+      "reason": "Linux hooks keep the previous behavior exactly: LockOSThread, launchWithFile with SIGKILL PDEATHSIG, /proc anonymous-pipe check and SOCK_CLOEXEC|SOCK_NONBLOCK socketpair.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission",
+            "IndependentCleanup"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/process.go",
+      "sha256": "3abe365bea8c370309047ec260f914a041c7036751d9a26ca65cce2f251caca6",
+      "disposition": "modeled",
+      "reason": "Adds a shared startFunc alias for os.StartProcess; no behavior change.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/process_darwin.go",
+      "sha256": "46b41ed475e35409203c9fbebeb057f2c03d25aafbad1fe09c2e855353ab6616",
+      "disposition": "modeled",
+      "reason": "Darwin owner of one supervisor-bound child: synchronous start receipt, Kill by control-socket shutdown (never a PID signal), Reaped only with the supervisor reap receipt; anything else is ErrOwnershipUncertain and keeps debt.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission",
+            "UncertainDebtRetained",
+            "IndependentCleanup",
+            "ObservedContainment"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/process_darwin_test.go",
+      "sha256": "1a355bbb4006fe58a46674b78b29173060d97a7428519949b77b107e65d0e6e8",
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guestprocess/process_other.go",
+      "sha256": "375ccd01fb595008dfeead528a7e00d6466dc2200b2aede0f929357a598d3ee6",
+      "disposition": "modeled",
+      "reason": "Build constraint narrowed to platforms with neither Linux nor Darwin support; behavior unchanged (unsupported).",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/supervisor_darwin.go",
+      "sha256": "85bd28d6adb082cdf221e72508ab9231c83fc68c4b0d07a2d5bae2e845bf13ac",
+      "disposition": "modeled",
+      "reason": "Darwin bounded launch and the private supervisor: starts exactly one child, SIGKILLs it while unreaped on control EOF, input or termination signal, reaps it, then sends the receipt.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission",
+            "UncertainDebtRetained",
+            "IndependentCleanup",
+            "ObservedContainment"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/supervisor_entry_other.go",
+      "sha256": "b1ff24fc7111f3bc99de8cd35cd9923c7a1039f916415cfc3bfa2b98fa275634",
+      "disposition": "modeled",
+      "reason": "No-op supervisor entry outside Darwin, so main can call it unconditionally.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestprocess/supervisor_linux.go",
+      "sha256": "828200c8af3255ab084ce791cd93b0f7734511ae254a063339bbb70c5a14fdf9",
+      "disposition": "modeled",
+      "reason": "Supervisor budget declarations moved to budget_unix.go; LaunchSupervisorBound unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "CreatorAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestvm/nic_linux.go",
+      "sha256": null,
+      "disposition": "modeled",
+      "reason": "Renamed to nic_unix.go with linux || darwin; QEMU socket netdev arguments unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership",
+            "PinnedPlan"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestvm/nic_unix.go",
+      "sha256": "538fd13357e4511c2fbf9ceb494c6e1b0b6006acad5dcd1e6be1ad027e1857fa",
+      "disposition": "modeled",
+      "reason": "Renamed from nic_linux.go with linux || darwin; QEMU socket netdev arguments unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership",
+            "PinnedPlan"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestvm/platform_darwin.go",
+      "sha256": "1b162a3b89c38a65a69de904786581f8c38edf9de0eea0f430a10bce6910e2cb",
+      "disposition": "modeled",
+      "reason": "Darwin admits arm64 hosts for the same x86_64 TCG plan, uses the 103-byte sun_path limit and omits the Linux-only -sandbox.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PinnedPlan"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        },
+        {
+          "id": "ParticipantSessionLifecycle",
+          "properties": [
+            "PreparedEvidence"
+          ],
+          "limits": "Socket path bound only; session lifecycle unchanged."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestvm/platform_linux.go",
+      "sha256": "5dd85e053245f52e37ade31441bfc4b0d9956188987605452dd5dc6b38290858",
+      "disposition": "modeled",
+      "reason": "Linux keeps Linux/amd64 admission, the 107-byte socket path limit and the seccomp -sandbox arguments exactly.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PinnedPlan"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        },
+        {
+          "id": "ParticipantSessionLifecycle",
+          "properties": [
+            "PreparedEvidence"
+          ],
+          "limits": "Socket path bound only; session lifecycle unchanged."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestvm/platform_other.go",
+      "sha256": "799da1ff4874add3721e9f9c80a4b618efac3c5c87cee65fae5fcadded2b6054",
+      "disposition": "modeled",
+      "reason": "Other platforms stay unsupported, with the conservative 103-byte limit.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PinnedPlan"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        },
+        {
+          "id": "ParticipantSessionLifecycle",
+          "properties": [
+            "PreparedEvidence"
+          ],
+          "limits": "Socket path bound only; session lifecycle unchanged."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestvm/prepare.go",
+      "sha256": "3487a96aecda980793371ad652d12733ba706ac972415af5d7e8098845843322",
+      "disposition": "modeled",
+      "reason": "Plan admission and the -sandbox arguments come from the platform file; all other fixed paused-plan arguments are unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PinnedPlan",
+            "PausedExactControl",
+            "PreparedIdentity"
+          ],
+          "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestvm/prepare_test.go",
+      "sha256": "f8457cb22397700374fdd34c06d5391778b4bde8bd72b471ef339cf9920e9746",
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
+    },
+    {
+      "path": "internal/workload/guestvm/session.go",
+      "sha256": "01248f5add2e9c1a2623f0856355d857837a5544c8c49b39d9f743adbf84a6f3",
+      "disposition": "modeled",
+      "reason": "The private endpoint length check uses the platform sun_path limit (unchanged 107 on Linux).",
+      "models": [
+        {
+          "id": "ParticipantSessionLifecycle",
+          "properties": [
+            "PreparedEvidence",
+            "PreparationOptIn"
+          ],
+          "limits": "Socket path bound only; session lifecycle unchanged."
+        }
+      ]
+    },
+    {
+      "path": "internal/workload/guestvm/session_test.go",
+      "sha256": "7965f6ae7fbcb17d5fc0a35df38801666140952d1cdea14e921a90fa5b0eecca",
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "89b4ec41597f175adf52f6b51373372d3bcab8e7eee8cfa99c8ac38b92235afc",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-macos workflow runs Darwin tests and the Apple silicon rehearsal.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "9739d973c71cf024f2398934273281733f8db55232e199b7854743b8e0bf1667",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-macos workflow runs Darwin tests and the Apple silicon rehearsal.",
+      "models": []
+    },
+    {
       "path": "test/battle/README.md",
-      "sha256": "f9b20ba8e43f1b87790bc1a20722dcd23fc803b7e86b481301ea9ccb19d602ab",
+      "sha256": "4fdfc44ef9c43cfb34387b372745cb19126d95b6cbb2673e286274c42e6bf72e",
       "disposition": "test-support",
-      "reason": "Documents TLS trust selection for the opt-in rehearsal image builder; not evidence of guest execution.",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
       "models": []
     },
     {
-      "path": "test/battle/image/repo_relay.py",
-      "sha256": "233d287f3e7d1605c1e0d5274641f2946995d206edd3da32e5e580cb5389dcde",
+      "path": "test/battle/image/build_bundle.py",
+      "sha256": "2f1c48668955eec1de9b4a5783ed8c5fc54f99a6feab4e2292d14f4bb90a4d34",
       "disposition": "test-support",
-      "reason": "Opt-in rehearsal image build helper only; removes machine-specific CA path while preserving certificate and hostname verification. No product runtime code or model predicate changes.",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
       "models": []
     },
     {
-      "path": "test/battle/image/test_repo_relay.py",
-      "sha256": "f8d3cd61070cc61973fa19dd502a73051164bf521d4ce3ef5de7a304304c7a92",
+      "path": "test/battle/image/test_build_bundle.py",
+      "sha256": "8c835e432b07a8c873f786acf28a82212f677f28801054d567fb06fda1111990",
       "disposition": "test-support",
-      "reason": "Offline regression checks default and explicit trust selection, fail-closed invalid overrides, and loopback listener. No real VM or TLS execution is claimed.",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
+    },
+    {
+      "path": "test/battle/rehearsal.py",
+      "sha256": "a424553bbf1f148c458c62ab8bd63ced3d17de88b02375526f0460c96dc002fe",
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
       "models": []
     }
   ]

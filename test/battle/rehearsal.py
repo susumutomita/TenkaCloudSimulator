@@ -175,18 +175,37 @@ def sdk_credentials(c):
     return {'aws_access_key_id': c['AccessKeyId'], 'aws_secret_access_key': c['SecretAccessKey'], 'aws_session_token': c['SessionToken']}
 
 
+def process_table():
+    """(pid, argv0, full command line) for every process; /proc on Linux, ps on macOS."""
+    if os.path.isdir('/proc'):
+        for pid in os.listdir('/proc'):
+            if not pid.isdigit():
+                continue
+            try:
+                raw = pathlib.Path('/proc', pid, 'cmdline').read_bytes().split(b'\0')
+            except OSError:
+                continue
+            if raw and raw[0]:
+                yield int(pid), raw[0], b' '.join(raw)
+        return
+    listing = subprocess.run(['ps', '-axww', '-o', 'pid=,command='], capture_output=True, check=True).stdout
+    for line in listing.splitlines():
+        pid, _, command = line.strip().partition(b' ')
+        if pid.isdigit() and command:
+            yield int(pid), command.split(b' ', 1)[0], command
+
+
 def qemu_processes():
-    found = []
-    for pid in os.listdir('/proc'):
-        if not pid.isdigit():
-            continue
-        try:
-            raw = pathlib.Path('/proc', pid, 'cmdline').read_bytes().split(b'\0')
-        except OSError:
-            continue
-        if raw and b'qemu-system' in raw[0] and any(str(RUNTIME_DIR).encode() in part for part in raw):
-            found.append(int(pid))
-    return found
+    """QEMU guests of this run."""
+    runtime = str(RUNTIME_DIR).encode()
+    return [pid for pid, argv0, command in process_table() if runtime in command and b'qemu-system' in argv0]
+
+
+def supervisor_processes():
+    """Darwin child supervisors of this run (none exist on Linux)."""
+    runtime = str(RUNTIME_DIR).encode()
+    return [pid for pid, argv0, command in process_table()
+            if runtime in command and b'__tenkacloud-guest-supervisor' in command and b'qemu-system' not in argv0]
 
 
 def runtime_listing():
@@ -435,7 +454,7 @@ try:
     check(p, 'battle-runtime-configured', status == 200 and availability.get('configured') is True, availability=availability)
     caller = client('sts').get_caller_identity()
     check(p, 'native-operator-identity', caller['Account'] == '999999999999', account=caller['Account'])
-    check(p, 'no-vm-before-deployment', qemu_processes() == [], qemuPids=qemu_processes())
+    check(p, 'no-vm-before-deployment', qemu_processes() == [] and supervisor_processes() == [], qemuPids=qemu_processes(), supervisorPids=supervisor_processes())
 
     # ------------------------------------------------------------ initialize
     p = phase('initialize')
@@ -483,7 +502,8 @@ try:
     check(p, 'outputs-default-endpoints-empty', outputs.get('FrontendUrl') == '' and outputs.get('ApiUrl') == '' and bool(host_hint) and instance.startswith('i-'),
           frontendUrl=outputs.get('FrontendUrl'), apiUrl=outputs.get('ApiUrl'), ec2HostHint=host_hint, instanceId=instance)
     pids = qemu_processes()
-    check(p, 'one-real-qemu-guest-process', len(pids) == 1, qemuPids=pids)
+    check(p, 'one-real-qemu-guest-process', len(pids) == 1 and len(supervisor_processes()) == (1 if sys.platform == 'darwin' else 0),
+          qemuPids=pids, supervisorPids=supervisor_processes())
     report['runtimeDirectoryAfterLaunch'] = runtime_listing()
     owner = {'eventId': 'rehearsal-event-1', 'teamId': 'team1', 'jobId': 'job-' + secrets.token_hex(6), 'unitHash': hashlib.sha256(TEMPLATE).hexdigest(),
              'deployedAt': int(time.time() * 1000), 'stackId': stack_id, 'instanceId': instance}
@@ -628,9 +648,10 @@ try:
         time.sleep(1)
     check(p, 'stack-deleted', delete_error is None and (final.startswith('GONE') or final == 'DELETE_COMPLETE'), deleteError=delete_error, finalStatus=final, seconds=round(time.time() - started, 1))
     deadline = time.time() + 30
-    while qemu_processes() and time.time() < deadline:
+    while (qemu_processes() or supervisor_processes()) and time.time() < deadline:
         time.sleep(0.5)
-    check(p, 'guest-process-exited', qemu_processes() == [], before=before, after=qemu_processes())
+    check(p, 'guest-process-exited', qemu_processes() == [] and supervisor_processes() == [], before=before, after=qemu_processes(),
+          supervisorsAfter=supervisor_processes())
     roles = [r['RoleName'] for r in client('iam').list_roles()['Roles']]
     check(p, 'stack-iam-roles-removed', not any(r.startswith(prefix) for r in roles), remainingRoles=roles)
     exit_code = 0
@@ -653,7 +674,7 @@ finally:
         process.wait()
     sim_log.close()
     time.sleep(1)
-    leftovers = qemu_processes()
+    leftovers = qemu_processes() + supervisor_processes()
     listing = runtime_listing()
     report['runtimeDirectoryAfterShutdown'] = listing
     sockets = [line for line in listing if line.endswith('.sock')]

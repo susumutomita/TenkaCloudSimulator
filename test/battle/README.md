@@ -6,8 +6,27 @@ TenkaCloudChallenge checkout against a Simulator started with
 in it, and the script drives initialize → operate → grade → cleanup through the
 Simulator's authenticated HTTP surfaces. No real AWS endpoint is used.
 
-It is an opt-in local rehearsal. CI does not run it, because it needs an
-emulator and a guest image that are not in this repository.
+It is an opt-in local rehearsal for Linux/amd64 and macOS/arm64 (Apple silicon).
+The required `ci` job does not run it, because it needs an emulator and a guest
+image that are not in this repository. The `battle-macos` workflow builds both on
+a GitHub macOS runner and runs it there for changes to the VM runtime.
+
+## Quick start
+
+```sh
+# macOS: brew install qemu        Ubuntu 24.04: apt install qemu-system-x86 qemu-utils genisoimage
+make build
+python3 test/battle/image/build_bundle.py --out /abs/new-bundle
+python3 test/battle/rehearsal.py --binary "$PWD/dist/tenkacloud-simulator" \
+  --bundle /abs/new-bundle --challenge-root /abs/TenkaCloudChallenge --work /tmp/hwb/r1
+```
+
+`build_bundle.py` performs every step under [Guest image](#guest-image) on the
+machine that will run the bundle, with the seed tool and builder QEMU arguments
+fixed in the script. It needs Go, network access to `cdn.amazonlinux.com` and
+about 6 GB of free disk. Keep `--work` short: guest control sockets live below
+it, and Unix socket paths are limited to 107 bytes on Linux and 103 on macOS. A
+longer path fails `CreateStack` before any guest starts.
 
 ## What a pass means, and what it does not
 
@@ -25,6 +44,10 @@ A pass shows, for the binary and bundle named in `report.json`:
 - Sealing the capability, deleting the stack and stopping the Simulator leave no
   guest process, and the Simulator exits 0.
 
+On macOS each emulator also runs under a private supervisor process (the
+simulator executable re-entered by `guestprocess`); the cleanup checks require that
+no supervisor remains either. QEMU's seccomp `-sandbox` exists only on Linux.
+
 It does **not** show TenkaCloud host or Portal support: the host keeps this
 Battle disabled in simulator mode, so this script stands in for the host. It
 computes points itself from `metadata.json` (`uptime-flat`, +100 / −100); the
@@ -36,7 +59,7 @@ waited for; only its revert command is run. One team is exercised, not two.
 ## What the bundle must contain
 
 The runtime takes a pinned archive plus manifest (see
-[opt-in runtime setup](../../docs/start.md#explicit-linux-battle-runtime)).
+[opt-in runtime setup](../../docs/start.md#explicit-battle-runtime-linuxamd64-and-macosarm64)).
 `pack_bundle.py TREE ARCHIVE MANIFEST bin/qemu-system-x86_64` writes both from a
 directory tree. The rehearsal used this tree:
 
@@ -48,6 +71,10 @@ directory tree. The rehearsal used this tree:
 | `firmware/efi-virtio.rom` | `ipxe-qemu`, loaded by the fixed `virtio-net-pci` device |
 | `firmware/kvmvapic.bin` | `qemu-system-data` |
 | `images/al2023-battle.qcow2` | official AL2023 KVM image, prepared as below |
+
+On macOS `build_bundle.py` takes the emulator from Homebrew's `qemu` and the
+firmware from the directories that `qemu-system-x86_64 -L help` lists. It adds a
+TCG module only when the emulator was built with loadable modules.
 
 The emulator starts with an empty environment and uses the shared libraries of
 the machine it runs on, so build the bundle on the machine that will run it.
@@ -75,7 +102,9 @@ of the copy prepares it:
    `scripts/guest-image/session-overlay.py`; put the tar in `LOCAL_DIR` and its
    digest in `image/builder-user-data.sh`.
 3. Boot the copy once with QEMU user networking and a NoCloud seed whose
-   `user-data` is `image/builder-user-data.sh`. The script installs
+   `user-data` is `image/builder-user-data.sh` (volume label `cidata`, written by
+   `genisoimage` on Linux or `hdiutil makehybrid` on macOS; see
+   `builder_command` in `image/build_bundle.py` for the QEMU arguments). The script installs
    `qemu-guest-agent`, stores nginx and its missing dependencies in a
    signature-checked `file://` repository, disables the network repositories,
    installs the relay overlay, checks that `dnf` resolves nginx offline and that

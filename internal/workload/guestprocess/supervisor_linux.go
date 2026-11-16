@@ -8,12 +8,6 @@ import (
 	"syscall"
 )
 
-// Bound the extra OS threads independently from the scheduler's GOMAXPROCS.
-// This budget bounds creator-thread retention, not the number of live children.
-const maxSupervisorBound = 16
-
-var supervisorSlots = make(chan struct{}, maxSupervisorBound)
-
 // LaunchSupervisorBound opts into Linux creator-thread-death SIGKILL for this
 // single trusted child. It is not durable ownership, descendant containment or
 // a guarantee against a stopped/hung supervisor. The executable must preserve
