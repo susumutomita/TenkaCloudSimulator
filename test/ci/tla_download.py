@@ -30,7 +30,8 @@ def configured_command():
     if shlex.split(lines[index - 1].strip()) != ['python3', 'test/ci/tla_download.py']:
         raise AssertionError(f'{WORKFLOW}: local transport suite must precede download')
     following = shlex.split(lines[index + 1].strip())
-    if following != ['TLA_JAR=/tmp/tla2tools.jar', 'python3', 'scripts/check-formal.py', '--merge-gate']:
+    if following != ['TLA_JAR=/tmp/tla2tools.jar', 'python3', 'scripts/check-formal.py', '--merge-gate',
+                     '--shard', '$SHARD/10', '--reports', 'reports/formal/shard-$SHARD']:
         raise AssertionError('immutable formal checker changed')
     return shlex.split(lines[index].strip())
 
