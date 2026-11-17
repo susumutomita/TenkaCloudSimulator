@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"strings"
@@ -101,6 +102,8 @@ func (h terminalHandler) control(w http.ResponseWriter, r *http.Request, scope t
 		return
 	}
 	if err != nil {
+		// The participant sees only the generic refusal; the operator log keeps the cause.
+		slog.Error("terminal operation refused or outcome unknown", "action", r.Header.Get("X-Amz-Target"), "error", err)
 		http.Error(w, "Terminal operation refused or outcome unknown", 409)
 		return
 	}

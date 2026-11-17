@@ -530,6 +530,17 @@ try:
     participant = sdk_credentials(viewer)
     identity = client('sts', participant).get_caller_identity()
     check(p, 'participant-assumed-original-viewer-role', identity['Account'] == '000000000000', arn=identity['Arn'])
+    # A session started before the guest's relay answers fails and, by design, keeps the target
+    # busy. Open it only after the guest serves the original UserData's api (owned probe),
+    # as a participant who first registers endpoints and waits for scoring does.
+    waited = time.time()
+    api = None
+    while time.time() - waited < args.userdata_timeout:
+        api = probe_slot(receipt, 'api')
+        if api.get('httpStatus') == 200:
+            break
+        time.sleep(10)
+    check(p, 'guest-api-answers-before-terminal', bool(api) and api.get('httpStatus') == 200, seconds=round(time.time() - waited, 1), observation=api)
     terminal = Terminal(participant, instance)
     session_id = terminal.start()
     check(p, 'participant-session-manager-shell-ready', True, sessionIdPrefix=session_id[:12])
@@ -662,6 +673,10 @@ except SystemExit as stop:
 except BaseException as error:  # the failure is preserved in the report, never converted to success
     report['failure'] = f'{type(error).__name__}: {str(error)[:500]}'
     log('FAILURE ' + report['failure'])
+    sim_log.flush()
+    # The operator log names internal causes the API deliberately withholds.
+    for line in (WORK / 'simulator.log').read_text(errors='replace').splitlines()[-15:]:
+        log('SIMULATOR ' + line[:400])
 finally:
     p = phase('shutdown')
     report['runtimeDirectoryBeforeShutdown'] = runtime_listing()

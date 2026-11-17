@@ -79,7 +79,8 @@ func TestCanonicalSessionEndpointInspectionRejectsOverlongMemoryOnly(t *testing.
 		t.Fatal(err)
 	}
 	parent := shortDir(t)
-	target := filepath.Join(parent, strings.Repeat("x", 96-len(parent)-1))
+	// Directory length L with L+len("/qmp.sock") within the limit but L+len("/session.sock") beyond it.
+	target := filepath.Join(parent, strings.Repeat("x", maxUnixSocketPath-11-len(parent)-1))
 	if err := os.Rename(p.Directory(), target); err != nil {
 		t.Fatal(err)
 	}

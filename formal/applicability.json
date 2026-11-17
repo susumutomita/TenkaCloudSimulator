@@ -147,6 +147,21 @@
       "models": []
     },
     {
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "104d07da192fdaf709ec0e2a853852a2a7704b984c6bee80990d7b3874c3cb4c",
+      "disposition": "modeled",
+      "reason": "Logs the internal cause of a generic InternalFailure to the operator log, as S3 already does; the API response is unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "PublicationAdmission"
+          ],
+          "limits": "Operator logging only; no stack state, ordering or response change is modeled or made."
+        }
+      ]
+    },
+    {
       "path": "internal/aws/ec2_cloudformation_adapter_linux.go",
       "sha256": null,
       "disposition": "modeled",
@@ -457,6 +472,21 @@
             "ConfigurationAdmission"
           ],
           "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/terminal_channel.go",
+      "sha256": "a065cc0011eed3dc0629e3cffd89090f6ffe3db879189c3a6b6e4fbd12576ea6",
+      "disposition": "modeled",
+      "reason": "Logs the internal cause of a refused terminal operation to the operator log; the participant still receives the same generic 409.",
+      "models": [
+        {
+          "id": "ParticipantSessionLifecycle",
+          "properties": [
+            "BoundAdmission"
+          ],
+          "limits": "Operator logging only; session admission and lifecycle are unchanged."
         }
       ]
     },
@@ -846,7 +876,7 @@
     },
     {
       "path": "internal/workload/guestvm/session_test.go",
-      "sha256": "012bc2eecbb2ef3c636ca185634e65a43714188ca5921893402db80c62bec53e",
+      "sha256": "3a90c35d843f9a7ea71769db2a25e75a7cb65339e962d08739f150c67961383a",
       "disposition": "test-support",
       "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
       "models": []
@@ -895,7 +925,7 @@
     },
     {
       "path": "test/battle/rehearsal.py",
-      "sha256": "a786c3414553a8cf5b8d2c56fb60914ca65e6ade15f2517d1a5aac7f36691dca",
+      "sha256": "2575abff729cc2af20712a612b58ca7f3ad3063eccfaad74340582ae5b76e8b6",
       "disposition": "test-support",
       "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
       "models": []
