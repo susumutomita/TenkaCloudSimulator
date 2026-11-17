@@ -72,6 +72,11 @@ func TestDarwinHelper(t *testing.T) {
 		}
 		os.Exit(0)
 	case "private":
+		// Check FD4 first: registering FD3 with the runtime poller creates the
+		// child's own kqueue, which may legitimately take the lowest free number.
+		if _, err := unix.FcntlInt(supervisorControlFD, unix.F_GETFD, 0); !errors.Is(err, unix.EBADF) {
+			os.Exit(46)
+		}
 		// FD3 is the private endpoint; echo one byte back through it.
 		f := os.NewFile(PrivateFD, "private")
 		var b [1]byte
@@ -80,9 +85,6 @@ func TestDarwinHelper(t *testing.T) {
 		}
 		if _, err := f.Write(b[:]); err != nil {
 			os.Exit(49)
-		}
-		if _, err := unix.FcntlInt(supervisorControlFD, unix.F_GETFD, 0); !errors.Is(err, unix.EBADF) {
-			os.Exit(46)
 		}
 		os.Exit(0)
 	case "owner":

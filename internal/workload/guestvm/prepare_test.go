@@ -27,7 +27,13 @@ func shortDir(t *testing.T) string {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { os.RemoveAll(dir) })
-	return dir
+	// Preparation rejects directories reached through a symlink, and macOS
+	// temporary directories live under the /var -> /private/var alias.
+	canonical, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return canonical
 }
 func digest(b []byte) string { v := sha256.Sum256(b); return hex.EncodeToString(v[:]) }
 func imageHeader() []byte {

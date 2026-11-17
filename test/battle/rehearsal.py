@@ -436,7 +436,9 @@ try:
     deadline = time.time() + 600  # bundle extraction verifies every byte of the pinned archive first
     while True:
         if process.poll() is not None:
-            raise RuntimeError(f'simulator exited during startup: {process.returncode}')
+            sim_log.flush()
+            tail = (WORK / 'simulator.log').read_text(errors='replace').strip().splitlines()[-3:]
+            raise RuntimeError(f'simulator exited during startup: {process.returncode}: {" | ".join(tail)[-400:]}')
         if token_path.exists():
             TOKEN = token_path.read_text().strip()
             try:
