@@ -5,9 +5,11 @@ import "sync/atomic"
 // Private per-invocation provenance, never a provider-supplied authority bit.
 type localInjectionKey struct{}
 type localInjectionToken struct {
-	used      atomic.Bool
-	completed atomic.Bool
-	eligible  atomic.Bool
+	sharedCurrent func() error
+	used          atomic.Bool
+	notApplied    atomic.Bool
+	completed     atomic.Bool
+	eligible      atomic.Bool
 }
 type localInjectionCompleted struct {
 	token *localInjectionToken

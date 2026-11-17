@@ -1,87 +1,67 @@
 {
   "version": 1,
-  "base_sha": "7fd7bcbc754238ea7f15db0dfa06af62a445aa09",
+  "base_sha": "39344f078a428d8cd9096aacf40d3ef54b795547",
   "changes": [
     {
-      "path": "Makefile",
-      "sha256": "2a132fcdfbc9f777ba6e940a11ed50658fdccbcb2a2636a2fff91682290f4a11",
+      "path": "internal/workload/guesttcp/local_injection_outcome.go",
+      "sha256": "ccd7c22ab6fe39628070c284655b12f796fd3d61d2e17bfbc01b32c24d0a7bfb",
       "disposition": "modeled",
-      "reason": "Makefile remains in the registered StartupTokenVisibility scope. This diff only adds optional developer verification targets and contract tests; existing startup target and token visibility invocation are unchanged. Preserve its model binding rather than exempting a registered source path.",
+      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
       "models": [
         {
-          "id": "StartupTokenVisibility",
+          "id": "OwnedProbeSessionLifecycle",
           "properties": [
-            "FileIdentityFrozen",
-            "CreatedFilePrivate",
-            "HistoryVisibility",
-            "InvalidFileNeverEmits"
+            "NoUnsafeException",
+            "NoTokenReplay",
+            "FailedPacketNotPublished",
+            "NoNeedlessSeal"
           ],
-          "limits": "Existing finite startup-token specification is unchanged. It abstracts token-file and display decisions, not developer subprocess execution, runner hash integrity, receipts, build freshness or implementation refinement. Adapter behavior is checked by native Python tests; no new TLC execution is claimed."
+          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
         }
       ]
     },
     {
-      "path": "docs/contributing/verification.md",
-      "sha256": "9df33c048830e4f28d97d8bcd8028dc67eeeb3f12073109fb267cdf28d95704a",
-      "disposition": "documentation",
-      "reason": "Documents the development-only adapter, pinned source, evidence limits and blocked VM lane; does not change implementation or model claims.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "ed66707c427e0380880c4e4f6651370bd30706dd7acd3b086ac36291bbba2ce4",
-      "disposition": "formal-infrastructure",
-      "reason": "Classifies only six exact reviewed developer adapter paths using existing nonformal categories; unknown adjacent paths and all registered model scopes still require existing checks. No model, invariant or validation bypass changes.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "fe59fd336327535d436805aea13fe7f81ab656d4ba50bbf0b981a0faae6280ea",
-      "disposition": "formal-infrastructure",
-      "reason": "Adds positive exact-path classification and negative adjacent-path tests for the developer adapter to existing formal infrastructure regression coverage; preserves all rejection tests.",
-      "models": []
-    },
-    {
-      "path": "scripts/verification/run.py",
-      "sha256": "c950584409849a0f2109550ab8d66f5995635843992f6becfc6429473dc67705",
-      "disposition": "validation-tooling",
-      "reason": "Development-only launcher checks vendored runner integrity before executing validation commands; not linked into simulator runtime or provider state machines.",
-      "models": []
-    },
-    {
-      "path": "scripts/verification/test_adapter.py",
-      "sha256": "6aa22cfac7422e5bd69740e28a7fe1467b0ad41e968fad0fd8b9255862ef64cf",
+      "path": "internal/workload/guesttcp/local_injection_outcome_test.go",
+      "sha256": "91b8fa0a8481e73642f9963f02eeb48ead9714df0ca438b1e58d92c6d4f8d67e",
       "disposition": "test-support",
-      "reason": "Offline adapter contract tests cover pin integrity, tamper refusal, native command preservation and blocked VM evidence; no production implementation.",
+      "reason": "Deterministic cancellation-window regressions and fail-closed provider/shared-lifetime counterexamples; no runtime surface.",
       "models": []
     },
     {
-      "path": "scripts/verification/upstream.json",
-      "sha256": "14390a7652ce2278dd6c282469424fc840385eb86d2f48ebf61a2da6e9b3e3e3",
-      "disposition": "validation-tooling",
-      "reason": "Immutable source and hash provenance for the development-only runner, not runtime configuration.",
-      "models": []
+      "path": "internal/workload/guesttcp/owned_probe_session.go",
+      "sha256": "b32679d14912f4a96e3888c3fa0e9c840ae40d5e51424f703b002b0222eab9b4",
+      "disposition": "modeled",
+      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
+      "models": [
+        {
+          "id": "OwnedProbeSessionLifecycle",
+          "properties": [
+            "NoUnsafeException",
+            "NoTokenReplay",
+            "FailedPacketNotPublished",
+            "NoNeedlessSeal"
+          ],
+          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
+        }
+      ]
     },
     {
-      "path": "scripts/verification/vendor/LICENSE",
-      "sha256": "1476f81dd9aa0aa3ec6589fd3eaf509fc1b584c0e1f581589735dc609aa7db81",
-      "disposition": "documentation",
-      "reason": "MIT license attribution for the vendored developer runner; no executable behavior.",
-      "models": []
-    },
-    {
-      "path": "scripts/verification/vendor/verify.py",
-      "sha256": "a6b451e9dd98d14f1753136a7d25d82a50956b76ea822a6ec8cef623fcb5ff8c",
-      "disposition": "validation-tooling",
-      "reason": "Pinned development-only subprocess/receipt runner, not simulator runtime; records actual check failures and blocked checks without replacing existing acceptance or formal gates.",
-      "models": []
-    },
-    {
-      "path": "verification.json",
-      "sha256": "d69b80237f65e873ec892cb5d88f0bd3529fee76801fcc1da352eff6dc18ab50",
-      "disposition": "validation-tooling",
-      "reason": "Explicit developer check map invokes existing native checks and marks unwired VM acceptance blocked; no simulator state or protocol behavior changes.",
-      "models": []
+      "path": "internal/workload/guesttcp/transport.go",
+      "sha256": "0ca48e5e6bd18e65ba1e3083f9f54483fc68d2166d834e778afb646d41706b6c",
+      "disposition": "modeled",
+      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
+      "models": [
+        {
+          "id": "OwnedProbeSessionLifecycle",
+          "properties": [
+            "NoUnsafeException",
+            "NoTokenReplay",
+            "FailedPacketNotPublished",
+            "NoNeedlessSeal"
+          ],
+          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
+        }
+      ]
     }
   ]
 }
