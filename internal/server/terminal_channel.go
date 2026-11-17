@@ -77,20 +77,24 @@ func (h terminalHandler) control(w http.ResponseWriter, r *http.Request, scope t
 		return
 	}
 	var value any
+	var action string // A fixed name: the operator log never echoes the request header.
 	switch r.Header.Get("X-Amz-Target") {
 	case "AmazonSSM.StartSession":
+		action = "StartSession"
 		if input.Target != scope.Target || input.SessionId != "" {
 			http.Error(w, "Terminal target mismatch", 403)
 			return
 		}
 		value, err = h.store.Start(r, scope.Region, input.Target, input.DocumentName)
 	case "AmazonSSM.ResumeSession":
+		action = "ResumeSession"
 		if input.Target != "" || input.DocumentName != "" || input.SessionId == "" {
 			http.Error(w, "Invalid terminal request", 400)
 			return
 		}
 		value, err = h.store.Resume(r, scope.Region, input.SessionId)
 	case "AmazonSSM.TerminateSession":
+		action = "TerminateSession"
 		if input.Target != "" || input.DocumentName != "" || input.SessionId == "" {
 			http.Error(w, "Invalid terminal request", 400)
 			return
@@ -103,7 +107,7 @@ func (h terminalHandler) control(w http.ResponseWriter, r *http.Request, scope t
 	}
 	if err != nil {
 		// The participant sees only the generic refusal; the operator log keeps the cause.
-		slog.Error("terminal operation refused or outcome unknown", "action", r.Header.Get("X-Amz-Target"), "error", err)
+		slog.Error("terminal operation refused or outcome unknown", "action", action, "error", err)
 		http.Error(w, "Terminal operation refused or outcome unknown", 409)
 		return
 	}

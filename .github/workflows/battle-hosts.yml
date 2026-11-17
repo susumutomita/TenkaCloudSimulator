@@ -53,7 +53,11 @@ jobs:
           GOTOOLCHAIN: local
         run: |
           go vet ./...
-          go test -count=1 -race ./internal/workload/guestprocess/ ./internal/workload/guestvm/ ./internal/workload/probeclock/ ./cmd/simulator/
+          go test -count=1 -race ./internal/workload/guestprocess/ ./internal/workload/guestvm/ ./internal/workload/probeclock/
+          # The rest of these packages belongs to the Linux ci gate; its wall-clock
+          # startup tests are not Battle runtime evidence on a slower macOS runner.
+          go test -count=1 -race -run 'QGA' ./internal/aws/
+          go test -count=1 -race -run 'Battle|StrictRuntime' ./cmd/simulator/
   battle-rehearsal:
     name: Unchanged Hello World Battle (${{ matrix.target }}, QEMU TCG)
     strategy:

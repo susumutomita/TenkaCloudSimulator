@@ -4,7 +4,7 @@
   "changes": [
     {
       "path": ".github/workflows/battle-hosts.yml",
-      "sha256": "6f21fb466a56b4b2240abb6588fe9e829983ca67274ad27d91a2701a62ce4ad7",
+      "sha256": "88bb0646dfed5b4dcfde55e6e8c0c70965706e0b5064314d868ec8f0e75f5aeb",
       "disposition": "formal-infrastructure",
       "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-hosts workflow runs the runtime package tests and the rehearsal on macOS arm64/amd64 and Linux arm64.",
       "models": []
@@ -71,6 +71,27 @@
       ]
     },
     {
+      "path": "cmd/simulator/battle_runtime_linux_test.go",
+      "sha256": null,
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/battle_runtime_loader_linux_test.go",
+      "sha256": null,
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/battle_runtime_loader_unix_test.go",
+      "sha256": "14a4c39237c11f62117ad687c9b31e8b3f057f66764e999a342c74a572249bda",
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
+    },
+    {
       "path": "cmd/simulator/battle_runtime_other.go",
       "sha256": "5b667078bb92a29faa10198762e11982546f1e6af6611808accc07ac5c980a61",
       "disposition": "modeled",
@@ -100,6 +121,13 @@
           "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
         }
       ]
+    },
+    {
+      "path": "cmd/simulator/battle_runtime_unix_test.go",
+      "sha256": "c62773cd4c74ac816bf46a7fdcdaf97e28622072c48eee971e89bfdb8fd7a81e",
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
     },
     {
       "path": "cmd/simulator/main.go",
@@ -371,17 +399,18 @@
     },
     {
       "path": "internal/aws/ec2_vm_nic_unix.go",
-      "sha256": "7407dcd8dbfc4692d791bb36086b252867ed0a3684ea4f0c0bfa2651f63b85c2",
+      "sha256": "a461a095cc0c096275fa21b518a6e15ce5f9fc2c9bdde74c88780de72ba93608",
       "disposition": "modeled",
-      "reason": "Renamed from ec2_vm_nic_linux.go with linux || darwin; contents unchanged.",
+      "reason": "Renamed from ec2_vm_nic_linux.go with linux || darwin; the canonical QGA operations now pass the macOS listen-queue predicate. NIC ownership and attachment are unchanged.",
       "models": [
         {
           "id": "CanonicalVMComposition",
           "properties": [
             "NetworkOwnership",
-            "FrozenNetwork"
+            "FrozenNetwork",
+            "PrivateAgentReadiness"
           ],
-          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+          "limits": "Bounded ordering model only: readiness still requires the exact private QGA channel and a matching guest-sync-delimited handshake. The macOS listen-queue refusal (connect(2) ECONNREFUSED while QEMU holds an earlier closed attempt) is an OS obligation covered by ec2_vm_qga_readiness_unix_test.go and the battle-hosts macOS rehearsal; no socket, kernel or Go refinement is claimed."
         }
       ]
     },
@@ -401,19 +430,33 @@
       ]
     },
     {
+      "path": "internal/aws/ec2_vm_qga_readiness_linux_test.go",
+      "sha256": null,
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
+    },
+    {
       "path": "internal/aws/ec2_vm_qga_readiness_unix.go",
-      "sha256": "914407109090a61f55837f112183f2b540cb25a0358e958404fcf9850cd8a4e0",
+      "sha256": "65636f7131048f19d3b18adc84d8de9ae608594420389eed9f076df2a327abe6",
       "disposition": "modeled",
-      "reason": "Renamed from ec2_vm_qga_readiness_linux.go with linux || darwin; contents unchanged.",
+      "reason": "Renamed from ec2_vm_qga_readiness_linux.go with linux || darwin. On macOS only, a dial refused because the agent socket listen queue is full is retried after a pause, bounded by the unchanged 120 s startup budget and 1200 dials, without a handshake; every other dial, permission or protocol failure stays terminal and readiness still needs the exact private channel and handshake.",
       "models": [
         {
           "id": "CanonicalVMComposition",
           "properties": [
             "PrivateAgentReadiness"
           ],
-          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+          "limits": "Bounded ordering model only: readiness still requires the exact private QGA channel and a matching guest-sync-delimited handshake. The macOS listen-queue refusal (connect(2) ECONNREFUSED while QEMU holds an earlier closed attempt) is an OS obligation covered by ec2_vm_qga_readiness_unix_test.go and the battle-hosts macOS rehearsal; no socket, kernel or Go refinement is claimed."
         }
       ]
+    },
+    {
+      "path": "internal/aws/ec2_vm_qga_readiness_unix_test.go",
+      "sha256": "f8ab4d62699a66e7db2a88a8d313c6407bed55cabfae3adec9a16120c9358eff",
+      "disposition": "test-support",
+      "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
+      "models": []
     },
     {
       "path": "internal/server/battle_capabilities_linux.go",
@@ -477,9 +520,9 @@
     },
     {
       "path": "internal/server/terminal_channel.go",
-      "sha256": "a065cc0011eed3dc0629e3cffd89090f6ffe3db879189c3a6b6e4fbd12576ea6",
+      "sha256": "cc5a650666a2e9eecd666369f765a4dc467259bdb280172299a49d34a62a0d05",
       "disposition": "modeled",
-      "reason": "Logs the internal cause of a refused terminal operation to the operator log; the participant still receives the same generic 409.",
+      "reason": "Logs the internal cause of a refused terminal operation, with a fixed action name rather than the request header, to the operator log; the participant still receives the same generic 409.",
       "models": [
         {
           "id": "ParticipantSessionLifecycle",
