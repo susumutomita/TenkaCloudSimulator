@@ -38,7 +38,7 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 	flags.SetOutput(output)
 	listen := flags.String("listen", "127.0.0.1:4566", "HTTP listen address (console: /_simulator/console/)")
 	clockFD := flags.Int("battle-clock-proof-fd", 0, "Managed Linux launcher private clock pipe (only 3)")
-	battleRuntime := flags.String("battle-runtime-config", "", "Explicit private pinned Battle runtime configuration for Linux/amd64 or macOS/arm64 (does not qualify Host clocks)")
+	battleRuntime := flags.String("battle-runtime-config", "", "Explicit private pinned Battle runtime configuration for Linux or macOS on amd64/arm64 (does not qualify Host clocks)")
 	statePath := flags.String("state", ":memory:", "SQLite state path; default is ephemeral memory")
 	remote := flags.Bool("allow-remote", false, "Allow binding beyond loopback; use only in an isolated trusted network")
 	tokenFile := flags.String("token-file", "simulator-token", "Private local operator access-token file (created with mode 0600)")

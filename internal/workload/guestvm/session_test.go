@@ -104,7 +104,7 @@ func TestCanonicalSessionPreparationRejectsUnsupportedPlatform(t *testing.T) {
 	}
 	parent := shortDir(t)
 	p, err := PrepareWithNetworkAndSession(context.Background(), parent, bundle, layout, acquire(), []byte("unchanged"), networkConfig(), info.SHA256)
-	if p != nil || err == nil || err.Error() != "guest launch plan supports Linux/amd64 and macOS/arm64 only" {
+	if p != nil || err == nil || err.Error() != "guest launch plan supports Linux and macOS on amd64 or arm64 only" {
 		t.Fatalf("unsupported platform preparation=%v err=%v", p, err)
 	}
 	entries, err := os.ReadDir(parent)

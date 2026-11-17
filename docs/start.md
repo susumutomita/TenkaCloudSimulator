@@ -136,11 +136,13 @@ original five protected models. Exact changed-blob records and required model/
 property guards are maintained together. New integration-head Go/PTY/TLC and
 hosted CI are separate checks; source-only restacking is not fresh execution.
 
-### Explicit Battle runtime (Linux/amd64 and macOS/arm64)
+### Explicit Battle runtime (Linux and macOS)
 
 `--battle-runtime-config /absolute/private/runtime.json` selects the bounded
-VM provider on Linux/amd64 or on Apple silicon (macOS/arm64). Both run the same
-x86_64 guest under QEMU TCG; neither uses KVM or HVF. It requires authenticated
+VM provider on Linux or macOS, on amd64 or arm64 (Intel or Apple silicon). Every
+host runs the same x86_64 guest under QEMU TCG; none uses KVM or HVF, so the host
+architecture only selects the emulator build. On Windows use the Linux build in
+WSL2. It requires authenticated
 numeric loopback operation;
 `--unsafe-no-auth` and `--allow-remote` cannot be combined with it. Default startup
 still does not enable VM workloads. The configuration file and runtime directory

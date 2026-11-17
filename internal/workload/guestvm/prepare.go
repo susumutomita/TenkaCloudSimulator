@@ -58,7 +58,7 @@ func (p *Prepared) QMPSocket() string { return filepath.Join(p.directory, "qmp.s
 func (p *Prepared) QGASocket() string { return filepath.Join(p.directory, "qga.sock") }
 
 // Invocation describes a fixed, paused, network-disabled x86_64 TCG VM on a
-// qualified Linux/amd64 or macOS/arm64 host.
+// qualified Linux or macOS host (amd64 or arm64).
 // Arguments are not participant-extensible. Starting it is NOT authorized by
 // preparation: a durable lifecycle owner must still bind/fence the launch and
 // prove its containment, process identity and exit. No environment is inherited
@@ -123,7 +123,7 @@ func prepare(ctx context.Context, parent string, bundle *guestbundle.Bundle, lay
 		return nil, err
 	}
 	if !launchPlatformSupported() {
-		return nil, errors.New("guest launch plan supports Linux/amd64 and macOS/arm64 only")
+		return nil, errors.New("guest launch plan supports Linux and macOS on amd64 or arm64 only")
 	}
 	if !fencePattern.MatchString(intent.Fence) || intent.Operation != 1 || intent.Action != guestlease.Acquire || intent.Lease != "" {
 		return nil, errors.New("guest preparation requires persisted acquire intent")

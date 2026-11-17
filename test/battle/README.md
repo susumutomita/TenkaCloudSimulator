@@ -6,15 +6,16 @@ TenkaCloudChallenge checkout against a Simulator started with
 in it, and the script drives initialize → operate → grade → cleanup through the
 Simulator's authenticated HTTP surfaces. No real AWS endpoint is used.
 
-It is an opt-in local rehearsal for Linux/amd64 and macOS/arm64 (Apple silicon).
-The required `ci` job does not run it, because it needs an emulator and a guest
-image that are not in this repository. The `battle-macos` workflow builds both on
-a GitHub macOS runner and runs it there for changes to the VM runtime.
+It is an opt-in local rehearsal for Linux and macOS on amd64 or arm64 (on Windows,
+use WSL2). The required `ci` job does not run it, because it needs an emulator and
+a guest image that are not in this repository. The `battle-hosts` workflow builds
+both and runs it on GitHub's macOS (Apple silicon and Intel) and Linux arm64
+runners for changes to the VM runtime; Linux/amd64 is the original rehearsal host.
 
 ## Quick start
 
 ```sh
-# macOS: brew install qemu        Ubuntu 24.04: apt install qemu-system-x86 qemu-utils genisoimage
+# macOS: brew install qemu        Ubuntu 24.04 (amd64 or arm64): apt install qemu-system-x86 qemu-utils genisoimage
 make build
 python3 test/battle/image/build_bundle.py --out /abs/new-bundle
 python3 test/battle/rehearsal.py --binary "$PWD/dist/tenkacloud-simulator" \
@@ -59,7 +60,7 @@ waited for; only its revert command is run. One team is exercised, not two.
 ## What the bundle must contain
 
 The runtime takes a pinned archive plus manifest (see
-[opt-in runtime setup](../../docs/start.md#explicit-battle-runtime-linuxamd64-and-macosarm64)).
+[opt-in runtime setup](../../docs/start.md#explicit-battle-runtime-linux-and-macos)).
 `pack_bundle.py TREE ARCHIVE MANIFEST bin/qemu-system-x86_64` writes both from a
 directory tree. The rehearsal used this tree:
 

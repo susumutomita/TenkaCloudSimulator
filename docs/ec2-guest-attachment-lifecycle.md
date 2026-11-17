@@ -5,7 +5,7 @@ probe resource with an exact held EC2GuestLeaseStore record. The same trusted
 resource supplies EC2Issuance and PersistentDescriptor. Metadata equality is not
 physical authority. This coordinator correlates an already-issued resource; the
 issuer, VM attachment and credential provider are separate dependencies, not
-created by the coordinator. See [explicit Battle runtime](start.md#explicit-battle-runtime-linuxamd64-and-macosarm64)
+created by the coordinator. See [explicit Battle runtime](start.md#explicit-battle-runtime-linux-and-macos)
 for the current opt-in composition and its separate qualification requirements.
 
 Attach records canonical bounded policy and incarnation data before constructing

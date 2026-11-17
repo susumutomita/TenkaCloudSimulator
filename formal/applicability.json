@@ -3,24 +3,24 @@
   "base_sha": "bc6072f95119fc887825483d28313b6d952507d4",
   "changes": [
     {
-      "path": ".github/workflows/battle-macos.yml",
-      "sha256": "e73ce8865714b35426a3885a91eefd3c6ea13888ee9dcf5395cbceb2cb5a4225",
+      "path": ".github/workflows/battle-hosts.yml",
+      "sha256": "6f21fb466a56b4b2240abb6588fe9e829983ca67274ad27d91a2701a62ce4ad7",
       "disposition": "formal-infrastructure",
-      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-macos workflow runs Darwin tests and the Apple silicon rehearsal.",
+      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-hosts workflow runs the runtime package tests and the rehearsal on macOS arm64/amd64 and Linux arm64.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "21235ce16e4fe8d3081ca2572909a255c6df66d19a1e39911ba7b46de6eea236",
+      "sha256": "a6b759f13de756606892c4a4ec18a9d7bc3df063ba85802bdf56a772b602e668",
       "disposition": "documentation",
       "reason": "Documents the macOS/arm64 Battle runtime option, its Darwin supervisor and limits.",
       "models": []
     },
     {
       "path": "cmd/simulator/battle_platform.go",
-      "sha256": "f589881bbf0995ba2632683ce561c8322cb68793ba42ed0910e58475f5c5b9cc",
+      "sha256": "cedc7d4503b765e0fb5f833854e1f8d733b852d540b1ba983771468a8fefbb0c",
       "disposition": "modeled",
-      "reason": "Single platform admission: Linux/amd64 or macOS/arm64.",
+      "reason": "Single platform admission: Linux or macOS on amd64 or arm64; every host runs the same x86_64 TCG guest.",
       "models": [
         {
           "id": "CanonicalVMComposition",
@@ -29,6 +29,21 @@
             "ConfiguredIsNotReady"
           ],
           "limits": "Bounded ordering model only. Darwin child supervision (control-socket EOF, SIGKILL of an unreaped child, kqueue exit observation and the reap receipt) is an OS obligation tested by process_darwin_test.go and the battle-macos rehearsal, not by TLC; no PID/FD identity, syscall, kqueue or Go refinement is claimed."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/battle_runtime_config.go",
+      "sha256": "1089351a6ddb8bec1d91c2c1f5347fe223e2825321f82b9669af3b55807bbcfc",
+      "disposition": "modeled",
+      "reason": "Comment-only: names the shared Battle platform gate instead of Linux/amd64.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "ConfigurationAdmission"
+          ],
+          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
         }
       ]
     },
@@ -88,7 +103,7 @@
     },
     {
       "path": "cmd/simulator/main.go",
-      "sha256": "3349fd9d65e97bf7d0a4ef4cc905bc0c25de3ee58614917be7fe2e7b31c1b1c7",
+      "sha256": "8ff0b0f4ea7bfc1e386be7696cb0b8b9ab6170cd72bbfb074002084d3efc5ade",
       "disposition": "modeled",
       "reason": "Calls guestprocess.RunSupervisorIfRequested first (a no-op except for a Darwin supervisor invocation, which exits before flags, tokens or listeners exist) and updates the flag help text.",
       "models": [
@@ -112,14 +127,14 @@
     },
     {
       "path": "docs/ec2-guest-attachment-lifecycle.md",
-      "sha256": "7db9e93c2194b68e80188f516bddda07b2a0dc80819bcf773ffd1c811382992f",
+      "sha256": "eda657131bbcc1f66c36c09aaac93053ec2dad51fc10c95df2c0cf363f9f60d0",
       "disposition": "documentation",
       "reason": "Documents the macOS/arm64 Battle runtime option, its Darwin supervisor and limits.",
       "models": []
     },
     {
       "path": "docs/start.md",
-      "sha256": "03a2d6570be1d662b1359c4f5ba344dcdb56591f201a16fe20ba5d6af3b1d315",
+      "sha256": "bbbe6daa979baf77a2f189eade5436b7634be8345a4730f66069bceb3859b5e4",
       "disposition": "documentation",
       "reason": "Documents the macOS/arm64 Battle runtime option, its Darwin supervisor and limits.",
       "models": []
@@ -128,7 +143,7 @@
       "path": "formal/models.json",
       "sha256": "41e53439c7e523d22a940ed7eaad38ae6107ea9759014444f2e3f78b5369b01e",
       "disposition": "formal-infrastructure",
-      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-macos workflow runs Darwin tests and the Apple silicon rehearsal.",
+      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-hosts workflow runs the runtime package tests and the rehearsal on macOS arm64/amd64 and Linux arm64.",
       "models": []
     },
     {
@@ -725,9 +740,9 @@
     },
     {
       "path": "internal/workload/guestvm/platform_darwin.go",
-      "sha256": "1b162a3b89c38a65a69de904786581f8c38edf9de0eea0f430a10bce6910e2cb",
+      "sha256": "ac5747e4e609e9ab8a8b0b07c591d31fe1420170a925c57cdb8ef99cb5687c1c",
       "disposition": "modeled",
-      "reason": "Darwin admits arm64 hosts for the same x86_64 TCG plan, uses the 103-byte sun_path limit and omits the Linux-only -sandbox.",
+      "reason": "Darwin admits arm64 and amd64 hosts for the same x86_64 TCG plan, uses the 103-byte sun_path limit and omits the Linux-only -sandbox.",
       "models": [
         {
           "id": "CanonicalVMComposition",
@@ -747,9 +762,9 @@
     },
     {
       "path": "internal/workload/guestvm/platform_linux.go",
-      "sha256": "5dd85e053245f52e37ade31441bfc4b0d9956188987605452dd5dc6b38290858",
+      "sha256": "51722271e8b56bde0f386684e9e1fc62da003b51608d46efc5db83c2daac990d",
       "disposition": "modeled",
-      "reason": "Linux keeps Linux/amd64 admission, the 107-byte socket path limit and the seccomp -sandbox arguments exactly.",
+      "reason": "Linux admits amd64 and arm64 hosts for the same x86_64 TCG plan and keeps the 107-byte socket path limit and the seccomp -sandbox arguments exactly.",
       "models": [
         {
           "id": "CanonicalVMComposition",
@@ -791,7 +806,7 @@
     },
     {
       "path": "internal/workload/guestvm/prepare.go",
-      "sha256": "3487a96aecda980793371ad652d12733ba706ac972415af5d7e8098845843322",
+      "sha256": "ca2d840435be4fcd639641dd1ef7feca3f5f20ea6581abd1d641e5a597c310d5",
       "disposition": "modeled",
       "reason": "Plan admission and the -sandbox arguments come from the platform file; all other fixed paused-plan arguments are unchanged.",
       "models": [
@@ -808,7 +823,7 @@
     },
     {
       "path": "internal/workload/guestvm/prepare_test.go",
-      "sha256": "f8457cb22397700374fdd34c06d5391778b4bde8bd72b471ef339cf9920e9746",
+      "sha256": "f7670821a76251b855c94e46d8523b5d1eda5c20a980f9e59ffb0cfbb34667e9",
       "disposition": "test-support",
       "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
       "models": []
@@ -831,7 +846,7 @@
     },
     {
       "path": "internal/workload/guestvm/session_test.go",
-      "sha256": "7965f6ae7fbcb17d5fc0a35df38801666140952d1cdea14e921a90fa5b0eecca",
+      "sha256": "012bc2eecbb2ef3c636ca185634e65a43714188ca5921893402db80c62bec53e",
       "disposition": "test-support",
       "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
       "models": []
@@ -840,26 +855,26 @@
       "path": "scripts/formal_model_gate.py",
       "sha256": "845313479b1d582ad8242a7861e4be110fd355921672df11fdc4804da6a1e57d",
       "disposition": "formal-infrastructure",
-      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-macos workflow runs Darwin tests and the Apple silicon rehearsal.",
+      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-hosts workflow runs the runtime package tests and the rehearsal on macOS arm64/amd64 and Linux arm64.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
       "sha256": "71d122ca397eee98c8050922cb900de0681bbb091b4357724fd6370318b5ebe5",
       "disposition": "formal-infrastructure",
-      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-macos workflow runs Darwin tests and the Apple silicon rehearsal.",
+      "reason": "Updates registry/gate source-scope pins for the renamed linux || darwin files and the new Darwin files; no model, property, bound or mutant changes. The battle-hosts workflow runs the runtime package tests and the rehearsal on macOS arm64/amd64 and Linux arm64.",
       "models": []
     },
     {
       "path": "test/battle/README.md",
-      "sha256": "4fdfc44ef9c43cfb34387b372745cb19126d95b6cbb2673e286274c42e6bf72e",
+      "sha256": "3f3572328bc223d996bd23aaf060dd04b1b2e7b72b50ec358a9dcae65f0b1c78",
       "disposition": "test-support",
       "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
       "models": []
     },
     {
       "path": "test/battle/image/build_bundle.py",
-      "sha256": "2f1c48668955eec1de9b4a5783ed8c5fc54f99a6feab4e2292d14f4bb90a4d34",
+      "sha256": "7e594934835d26cc3d794515ac54ca76dbf1da7bcbcbe5cc9effdb56eb2ad15f",
       "disposition": "test-support",
       "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
       "models": []

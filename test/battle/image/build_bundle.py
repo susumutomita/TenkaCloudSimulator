@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the pinned Battle guest bundle on this machine (Linux/amd64 or macOS/arm64).
+"""Build the pinned Battle guest bundle on this machine (Linux or macOS, amd64 or arm64).
 
 Usage: build_bundle.py --out NEW_DIR [--work NEW_DIR] [--qemu PATH] [--keep-work]
 
@@ -137,8 +137,8 @@ def main():
     parser.add_argument('--keep-work', action='store_true')
     args = parser.parse_args()
 
-    if (sys.platform, os.uname().machine) not in (('linux', 'x86_64'), ('darwin', 'arm64')):
-        raise SystemExit('the Battle runtime is qualified on Linux/amd64 and macOS/arm64 only')
+    if sys.platform not in ('linux', 'darwin') or os.uname().machine not in ('x86_64', 'aarch64', 'arm64'):
+        raise SystemExit('the Battle runtime is qualified on Linux and macOS (amd64 or arm64) only; use WSL2 on Windows')
     found = args.qemu or shutil.which('qemu-system-x86_64')
     if not found:
         raise SystemExit('qemu-system-x86_64 not found (macOS: brew install qemu; Ubuntu: apt install qemu-system-x86)')

@@ -82,7 +82,7 @@ func acquire() guestlease.Intent {
 func requireLinux(t *testing.T) {
 	t.Helper()
 	if !launchPlatformSupported() {
-		t.Skip("deployment plan is Linux/amd64 and macOS/arm64 only")
+		t.Skip("deployment plan is Linux and macOS on amd64 or arm64 only")
 	}
 }
 func TestPreparePrivateIndependentStateAndPausedPlan(t *testing.T) {

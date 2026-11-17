@@ -8,9 +8,9 @@ import "runtime"
 // including the terminating NUL).
 const maxUnixSocketPath = 103
 
-// launchPlatformSupported names the qualified host for the fixed TCG plan:
-// Apple silicon emulating the same x86_64 guest. HVF is not used.
-func launchPlatformSupported() bool { return runtime.GOARCH == "arm64" }
+// launchPlatformSupported names the qualified hosts for the fixed x86_64 TCG
+// plan: Apple silicon and Intel Macs. HVF is not used.
+func launchPlatformSupported() bool { return runtime.GOARCH == "arm64" || runtime.GOARCH == "amd64" }
 
 // QEMU's -sandbox is seccomp-based and is not built on Darwin. The Darwin child
 // supervisor (guestprocess) still binds the emulator to its owner; no syscall
