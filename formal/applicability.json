@@ -224,9 +224,9 @@
     },
     {
       "path": "internal/aws/ec2_cloudformation_runtime_unix.go",
-      "sha256": "161174f038288d21e5d097ec55a6a4516c9e303fb6975c758968c9e853275269",
+      "sha256": "cb24c2e8f53be4cf79b2cac207ee3b8de8880c67aa75d71bb377da6332192e71",
       "disposition": "modeled",
-      "reason": "Renamed from ec2_cloudformation_runtime_linux.go with linux || darwin. Adds one operator log line with the server-generated instance ID and the guest launch error when LaunchVMAndAttach fails; the CreateStack response, publication admission and cleanup ordering are unchanged.",
+      "reason": "Renamed from ec2_cloudformation_runtime_linux.go with linux || darwin. Adds one deferred operator log line, with the server-generated instance ID, the elapsed seconds and the error, whenever Launch fails; the CreateStack response, publication admission and cleanup ordering are unchanged.",
       "models": [
         {
           "id": "CanonicalVMComposition",
