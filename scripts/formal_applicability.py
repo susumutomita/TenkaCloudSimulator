@@ -27,6 +27,9 @@ FORMAL_INFRA = {'formal/models.json', 'formal/tla2tools.sha256',
                 'scripts/formal_support/ProbeOperationSeedReachability.cfg',
                 }
 KNOWN_VALIDATION = {
+    # Exact reviewed developer-only adapter paths, not a general scripts exemption.
+    'scripts/verification/run.py', 'scripts/verification/vendor/verify.py',
+    'scripts/verification/upstream.json', 'verification.json',
     'scripts/smithy-contracts.py',
     'scripts/factory_acceptance.py',  # Offline development-only executed acceptance evidence.
     'scripts/software_factory.py',  # Local development evidence/claim gate, never simulator runtime.
@@ -40,6 +43,7 @@ KNOWN_VALIDATION = {
 }
 NONFORMAL = {
     'documentation': [
+        'scripts/verification/vendor/LICENSE',
         'internal/workload/guesthvf/README.md',
         'internal/workload/probeclock/DARWIN.md',
         'tools/guesthvf-preflight/README.md',
@@ -54,6 +58,7 @@ NONFORMAL = {
                      'internal/server/apidocs/**',
                      'internal/server/landing/index.html', 'internal/server/landing/landing.css'],
     'test-support': [
+        'scripts/verification/test_adapter.py',
         'tools/mac-hvf-probe/test_boot_probe.py',
         'tools/mac-hvf-probe/test_builder_launch.py',
         'tools/mac-hvf-probe/test_builder_plan.py',

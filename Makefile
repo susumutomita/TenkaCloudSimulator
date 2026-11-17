@@ -26,6 +26,7 @@ test: test-scripts test-go
 	$(PYTHON) scripts/check-coverage.py $(COVERAGE_PROFILE)
 
 test-scripts:
+	$(PYTHON) -m unittest discover -s scripts/verification -p 'test_*.py'
 	$(PYTHON) -m unittest discover -s test/battle/image -p 'test_*.py'
 	$(PYTHON) scripts/smithy-contracts.py --check
 	$(PYTHON) scripts/test-smithy-contracts.py
@@ -69,3 +70,11 @@ cross-check:
 .PHONY: audit
 audit: build
 	$(PYTHON) test/e2e/audit.py
+
+# Optional evidence wrappers; native gates and merge policy are unchanged.
+.PHONY: verify verify_release
+verify:
+	$(PYTHON) scripts/verification/run.py fast
+
+verify_release:
+	$(PYTHON) scripts/verification/run.py release
