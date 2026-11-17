@@ -17,6 +17,30 @@ from formal_applicability import GateError, RECORD, changes, disposition, git, i
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class CommonVerificationClassificationTests(unittest.TestCase):
+    def test_only_reviewed_development_adapter_paths_are_classified(self):
+        expected = {
+            'validation-tooling': ('scripts/verification/run.py',
+                'scripts/verification/vendor/verify.py',
+                'scripts/verification/upstream.json', 'verification.json'),
+            'test-support': ('scripts/verification/test_adapter.py',),
+            'documentation': ('scripts/verification/vendor/LICENSE',),
+        }
+        for kind, paths in expected.items():
+            for path in paths:
+                self.assertEqual(disposition(path), kind, path)
+
+    def test_adjacent_unreviewed_and_runtime_paths_remain_unclassified(self):
+        for path in ('scripts/verification/other.py',
+                     'scripts/verification/test_other.py',
+                     'scripts/verification/vendor/other.py',
+                     'scripts/verification/vendor/LICENSE.py',
+                     'scripts/verification/upstream.json.py',
+                     'verification-extra.json',
+                     'internal/core/verification.go'):
+            self.assertIsNone(disposition(path), path)
+
+
 class BattleFixtureClassificationTests(unittest.TestCase):
     def test_only_exact_reviewed_battle_documents_and_fixtures_are_nonruntime(self):
         expected = {
