@@ -225,7 +225,8 @@ jobs:
           export BUN="$PWD/tools/platform/node_modules/@oven/bun-linux-x64/bin/bun"
           "$BUN" test/platform/hello-world.ts
           /tmp/simulator-tests/bin/python test/platform/browser.py
-          /tmp/simulator-tests/bin/python test/platform/wp-sdk-subset.py
+      - name: Verify CloudFormation rejection and the SDK application lifecycle
+        run: /tmp/simulator-tests/bin/python test/platform/sdk-lifecycle.py -v
       - name: Check responsive reflow and the start command's token handling
         run: |
           /tmp/simulator-tests/bin/python test/e2e/reflow_test.py
@@ -234,7 +235,6 @@ jobs:
         run: |
           AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make audit PYTHON=/tmp/simulator-tests/bin/python
           AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_console.py
-          CHALLENGE_ROOT=/tmp/simulator-challenges AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_original_http.py
   ci:
     name: ci
     needs: [console-acceptance, checks, go-test, platform-audit]

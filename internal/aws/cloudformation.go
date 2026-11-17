@@ -22,6 +22,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/catalog"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 	"go.yaml.in/yaml/v3"
 )
@@ -36,6 +37,7 @@ type StackStore struct {
 type StackResource struct {
 	LogicalID, Type, PhysicalID string
 	Properties                  map[string]any
+	Retain                      bool              `json:",omitempty"`
 	NativeIAM                   *stackNativeIAM   `json:",omitempty"`
 	StateHash                   string            `json:",omitempty"`
 	StateParts                  map[string]string `json:",omitempty"`
@@ -53,6 +55,12 @@ type StackRecord struct {
 }
 
 func NewStackStore(db *sql.DB) (*StackStore, error) {
+	if _, err := NewELBStore(db); err != nil {
+		return nil, err
+	}
+	if _, err := NewCloudFrontStore(db); err != nil {
+		return nil, err
+	}
 	if _, err := NewEC2NetworkStore(db); err != nil {
 		return nil, err
 	}
@@ -60,6 +68,9 @@ func NewStackStore(db *sql.DB) (*StackStore, error) {
 		return nil, err
 	}
 	if _, err := NewLambdaPermissionStore(db); err != nil {
+		return nil, err
+	}
+	if err := catalog.InitECSTaskStorage(db); err != nil {
 		return nil, err
 	}
 	if _, err := NewIAMRoleStore(db); err != nil {
@@ -86,7 +97,7 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 		}
 		return stackTaggedYAMLNode(n.Content[0], depth+1, nodes)
 	}
-	if n.Tag == "!Equals" || n.Tag == "!If" || n.Tag == "!Select" {
+	if n.Tag == "!Equals" || n.Tag == "!Not" || n.Tag == "!And" || n.Tag == "!If" || n.Tag == "!Select" {
 		if n.Kind != yaml.SequenceNode {
 			return nil, fmt.Errorf("intrinsic shorthand requires a sequence")
 		}
@@ -98,13 +109,7 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 			}
 			values = append(values, value)
 		}
-		key := "Fn::Equals"
-		if n.Tag == "!If" {
-			key = "Fn::If"
-		} else if n.Tag == "!Select" {
-			key = "Fn::Select"
-		}
-		return map[string]any{key: values}, nil
+		return map[string]any{"Fn::" + strings.TrimPrefix(n.Tag, "!"): values}, nil
 	}
 	if n.Tag == "!Base64" || n.Tag == "!GetAZs" {
 		if n.Kind == yaml.ScalarNode && n.Value == "" && n.Style&(yaml.DoubleQuotedStyle|yaml.SingleQuotedStyle|yaml.LiteralStyle|yaml.FoldedStyle) == 0 {
@@ -125,7 +130,10 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 		return map[string]any{"Fn::" + n.Tag[1:]: value}, nil
 	}
 	if strings.HasPrefix(n.Tag, "!") && !strings.HasPrefix(n.Tag, "!!") && n.Kind != yaml.ScalarNode {
-		return nil, fmt.Errorf("intrinsic shorthand must be scalar")
+		return nil, fmt.Errorf("intrinsic shorthand must be scalar at line %d, column %d", n.Line, n.Column)
+	}
+	if n.Tag == "!Condition" {
+		return map[string]any{"Condition": n.Value}, nil
 	}
 	if n.Tag == "!Ref" {
 		return map[string]any{"Ref": n.Value}, nil
@@ -166,7 +174,7 @@ func stackTaggedYAMLNode(n *yaml.Node, depth int, nodes *int) (any, error) {
 		return a, nil
 	case yaml.ScalarNode:
 		if n.Tag == "!!bool" {
-			return n.Value == "true", nil
+			return strings.EqualFold(n.Value, "true"), nil
 		}
 		if n.Tag == "!!null" {
 			return nil, nil
@@ -435,44 +443,21 @@ func compileStack(region, name, body string, parameters map[string]string, capab
 }
 
 func compileStackWithParameters(region, name, body string, parameters map[string]string, capabilities string, resolveParameters stackParameterResolver) (StackRecord, error) {
+	return compileStackWithResolvers(region, name, body, parameters, capabilities, resolveParameters, nil)
+}
+
+func compileStackWithResolvers(region, name, body string, parameters map[string]string, capabilities string, resolveParameters stackParameterResolver, nextTaskRevision func(stackID, family string) (int, error)) (StackRecord, error) {
 	fail := func(message string) (StackRecord, error) {
 		return StackRecord{}, ssmFailure{"ValidationError", message}
 	}
-	if !stackCreateName.MatchString(name) || len(body) == 0 || len(body) > 51200 {
-		return fail("Use a valid stack name and TemplateBody of 1–51200 bytes.")
+	if !stackCreateName.MatchString(name) {
+		return fail("Use a valid stack name.")
 	}
-	var node yaml.Node
-	if yaml.Unmarshal([]byte(body), &node) != nil || len(node.Content) == 0 {
-		return fail("Invalid YAML/JSON template.")
-	}
-	value, err := taggedYAML(&node)
+	template, err := parseStackTemplate(body)
 	if err != nil {
 		return fail(err.Error())
 	}
-	template := object(value)
-	for k := range template {
-		switch k {
-		case "AWSTemplateFormatVersion", "Description", "Parameters", "Conditions", "Resources", "Outputs":
-		default:
-			return fail("Unsupported template section: " + k)
-		}
-	}
 	resources := object(template["Resources"])
-	if len(resources) == 0 || len(resources) > 100 {
-		return fail("Require 1–100 supported resources.")
-	}
-	for _, value := range resources {
-		r := object(value)
-		kind := stringValue(r["Type"])
-		if kind != "AWS::SSM::Parameter" && kind != "AWS::IAM::Role" && kind != "AWS::IAM::InstanceProfile" && kind != "AWS::S3::Bucket" && kind != "AWS::Lambda::Function" && !stackAPIKind(kind) && !stackNetworkKind(kind) && kind != "AWS::EC2::Instance" {
-			return fail("Unsupported resource type: " + kind)
-		}
-		for k := range r {
-			if k != "Type" && k != "Properties" && k != "DependsOn" && k != "Condition" {
-				return fail("Unsupported resource attribute: " + k)
-			}
-		}
-	}
 	bytes := make([]byte, 16)
 	if _, err = rand.Read(bytes); err != nil {
 		return StackRecord{}, err
@@ -488,6 +473,9 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 	values, e := stackParameterValues(definitions, parameters)
 	if e != nil {
 		return fail(e.Error())
+	}
+	if err := checkStackRules(object(template["Rules"]), definitions, values, true); err != nil {
+		return fail(err.Error())
 	}
 	for key, value := range values {
 		refs[key] = value
@@ -565,6 +553,7 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 		return fail(err.Error())
 	}
 	var declaredRoles []StackResource
+	nextRevision := map[string]int{}
 	for _, key := range keys {
 		raw := object(resources[key])
 		kind := stringValue(raw["Type"])
@@ -594,6 +583,14 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 			if e != nil {
 				return fail(e.Error())
 			}
+		} else if kind == stackVpcOrigin {
+			if _, _, e := stackVpcOriginConfig(properties); e != nil {
+				return fail(e.Error())
+			}
+			sum := sha256.Sum256([]byte(id + "\x00" + key))
+			physical = "vo_" + hex.EncodeToString(sum[:8])
+			attrs[key+".Id"] = physical
+			attrs[key+".Arn"] = cloudFrontARNPrefix + physical
 		} else if kind == "AWS::SSM::Parameter" {
 			for k := range properties {
 				switch k {
@@ -622,6 +619,27 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 				return fail("Parameter description exceeds 1024 bytes.")
 			}
 			attrs[key+".Value"] = value
+		} else if kind == stackTaskDefinition {
+			family := stringValue(properties["Family"])
+			revision := nextRevision[family]
+			if revision == 0 {
+				revision = 1
+				if nextTaskRevision != nil && enabled[key] {
+					revision, e = nextTaskRevision(id, family)
+					if e != nil {
+						return StackRecord{}, e
+					}
+				}
+			}
+			definition, err := prepareStackECSTask(region, properties, revision)
+			if err != nil {
+				return fail(err.Error())
+			}
+			if enabled[key] {
+				nextRevision[family] = revision + 1
+			}
+			physical = definition.ARN()
+			attrs[key+".TaskDefinitionArn"] = physical
 		} else if kind == "AWS::Lambda::Function" {
 			f, e := compileStackFunction(region, name, id, key, properties)
 			if e != nil {
@@ -650,7 +668,7 @@ func compileStackWithParameters(region, name, body string, parameters map[string
 		if kind == "AWS::ApiGateway::Stage" {
 			refs[key] = stringValue(properties["StageName"])
 		}
-		compiled := StackResource{LogicalID: key, Type: kind, PhysicalID: physical, Properties: properties, NativeIAM: nativeIAM}
+		compiled := StackResource{LogicalID: key, Type: kind, PhysicalID: physical, Properties: properties, NativeIAM: nativeIAM, Retain: raw["DeletionPolicy"] == "Retain"}
 		if kind == "AWS::IAM::Role" {
 			declaredRoles = append(declaredRoles, compiled)
 		}
@@ -782,6 +800,15 @@ func (s *StackStore) createCheckedContext(ctx context.Context, record StackRecor
 			}
 			continue // Remains IN_PROGRESS until actual readiness outside SQL.
 		}
+		if r.Type == stackTaskDefinition {
+			if err = createStackECSTask(tx, record, r); err != nil {
+				return err
+			}
+			if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
+				return err
+			}
+			continue
+		}
 		if r.NativeIAM != nil {
 			if err = createStackIAM(tx, record, &r); err != nil {
 				return err
@@ -808,6 +835,16 @@ func (s *StackStore) createCheckedContext(ctx context.Context, record StackRecor
 			if err = createStackAPI(context.Background(), tx, record, r); err != nil {
 				return err
 			}
+			if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
+				return err
+			}
+			continue
+		}
+		if r.Type == stackVpcOrigin {
+			if err = createStackVpcOrigin(ctx, tx, record, &r); err != nil {
+				return err
+			}
+			record.Resources[index] = r
 			if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
 				return err
 			}
@@ -1009,7 +1046,15 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 		if owned != 1 {
 			return ssmFailure{"ValidationError", "Stack resource ownership changed; deletion refused."}
 		}
-		if r.NativeIAM != nil {
+		if r.Type == stackTaskDefinition {
+			if r.Retain {
+				if err = appendStackEvent(tx, records[0], &r, "DELETE_SKIPPED"); err != nil {
+					return err
+				}
+				continue
+			}
+			err = catalog.DeregisterStackTaskDefinition(tx, region, r.PhysicalID)
+		} else if r.NativeIAM != nil {
 			err = deleteStackIAM(tx, r)
 		} else if r.Type == "AWS::EC2::Instance" {
 			// Actual retained owner cleanup completed outside this transaction.
@@ -1018,6 +1063,8 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 			err = deleteStackNetwork(context.Background(), tx, records[0], r)
 		} else if stackAPIKind(r.Type) {
 			err = deleteStackAPI(context.Background(), tx, region, r)
+		} else if r.Type == stackVpcOrigin {
+			err = deleteStackVpcOrigin(context.Background(), tx, r)
 		} else if r.Type == "AWS::SSM::Parameter" {
 			_, err = tx.Exec("DELETE FROM aws_ssm_parameters WHERE region=? AND name=?", region, r.PhysicalID)
 		} else if r.Type == "AWS::Lambda::Function" {
@@ -1091,6 +1138,8 @@ func (s *StackStore) deleteChecked(region, name string, authorize func(StackReco
 			continue
 		}
 		switch resource.Type {
+		case stackVpcOrigin:
+			err = tx.QueryRow("SELECT count(*) FROM aws_cloudfront_vpc_origins WHERE id=?", resource.PhysicalID).Scan(&remaining)
 		case "AWS::SSM::Parameter":
 			err = tx.QueryRow("SELECT count(*) FROM aws_ssm_parameters WHERE region=? AND name=?", region, resource.PhysicalID).Scan(&remaining)
 		case "AWS::S3::Bucket":
@@ -1182,8 +1231,8 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	action := form.Get("Action")
-	if action != "CreateStack" && action != "DescribeStacks" && action != "DeleteStack" && action != "DescribeStackEvents" {
-		cfnError(w, ssmFailure{"NotImplemented", "Only CreateStack, DescribeStacks, DescribeStackEvents and DeleteStack are supported."})
+	if action != "CreateStack" && action != "DescribeStacks" && action != "DeleteStack" && action != "DescribeStackEvents" && action != "ValidateTemplate" {
+		cfnError(w, ssmFailure{"NotImplemented", "Only CreateStack, DescribeStacks, DescribeStackEvents, DeleteStack and ValidateTemplate are supported."})
 		return
 	}
 	if form.Get("Version") != "2010-05-15" {
@@ -1195,6 +1244,13 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 		if len(values) != 1 {
 			fail("Repeated Query fields are unsupported.")
 			return
+		}
+		if action == "ValidateTemplate" {
+			if key != "Action" && key != "Version" && key != "TemplateBody" {
+				fail("ValidateTemplate supports inline TemplateBody only.")
+				return
+			}
+			continue
 		}
 		if strings.Contains(key, ".member.") {
 			parts := strings.Split(key, ".")
@@ -1279,6 +1335,17 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 
 	name := form.Get("StackName")
 	switch action {
+	case "ValidateTemplate":
+		if err = authorize("*"); err != nil {
+			cfnError(w, err)
+			return
+		}
+		result, err := validateStackTemplate(form.Get("TemplateBody"))
+		if err != nil {
+			fail(err.Error())
+			return
+		}
+		cfnResponse(w, action, result)
 	case "CreateStack":
 		if !stackCreateName.MatchString(name) {
 			fail("Use a valid stack name.")
@@ -1327,13 +1394,18 @@ func (g *Gateway) serveCFN(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		record, err := compileStackWithParameters(region, name, form.Get("TemplateBody"), parameters, form.Get("Capabilities.member.1"),
+		record, err := compileStackWithResolvers(region, name, form.Get("TemplateBody"), parameters, form.Get("Capabilities.member.1"),
 			func(stackID string, keys map[string]string) (map[string]string, error) {
 				// Authorize the actual generated ARN before reading source values.
 				if e := authorize(stackID); e != nil {
 					return nil, e
 				}
 				return g.Stacks.resolveSSMParameters(r.Context(), region, keys, authorizeAction)
+			}, func(id, family string) (int, error) {
+				if err := authorize(id); err != nil {
+					return 0, err
+				}
+				return catalog.NextECSTaskRevision(g.Stacks.db, region, stackECSAccount, family)
 			})
 		if err == nil {
 			record.Tags, record.ClientToken, record.RequestHash = tags, clientToken, requestHash
