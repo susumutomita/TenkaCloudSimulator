@@ -592,7 +592,7 @@ func (t *Transport) commitLocalInjection(ctx context.Context, frame []byte, appl
 func (t *Transport) commitContextMode(ctx context.Context, direction FrameDirection, frame []byte, apply func() error, local bool) error {
 	var token *localInjectionToken
 	if local {
-		token = &localInjectionToken{}
+		token = &localInjectionToken{sharedCurrent: t.admissionError}
 		ctx = context.WithValue(ctx, localInjectionKey{}, token)
 	}
 
@@ -616,7 +616,10 @@ func (t *Transport) commitContextMode(ctx context.Context, direction FrameDirect
 			return ErrCommit
 		}
 		called = true
-		if applied = admission(); applied == nil {
+		if applied = admission(); applied != nil && token != nil && direction == FromGuest && t.admissionError() == nil && observationContextError(ctx) != nil {
+			token.notApplied.Store(true)
+		}
+		if applied == nil {
 			applied = apply()
 			if token != nil && direction == FromGuest {
 				raw := applied

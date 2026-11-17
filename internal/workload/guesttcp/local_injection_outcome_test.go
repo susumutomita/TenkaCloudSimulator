@@ -164,12 +164,15 @@ func TestLocalInjectionProviderAndOwnerFailuresStayTerminal(t *testing.T) {
 }
 
 func TestLocalInjectionCancellationWindows(t *testing.T) {
-	for _, window := range []string{"inside apply", "after transport postcheck", "after owner callback"} {
+	for _, window := range []string{"before owner callback", "before transport callback", "inside apply", "after transport postcheck", "after owner callback"} {
 		t.Run(window, func(t *testing.T) {
 			child, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			resource := &issuedMemoryResource{stream: &ownedMemoryStream{closed: make(chan struct{})}}
 			resource.transaction = func(_ context.Context, _ OwnedProbeAcceptance, f func() error) error {
+				if window == "before owner callback" {
+					cancel()
+				}
 				e := f()
 				if window == "after owner callback" {
 					if e != nil {
@@ -182,6 +185,9 @@ func TestLocalInjectionCancellationWindows(t *testing.T) {
 			owner := ownedFixture(t, resource)
 			committer := commitFunc(func(c context.Context, d FrameDirection, b []byte, apply func() error) error {
 				return owner.CommitFrame(c, d, b, func() error {
+					if window == "before transport callback" {
+						cancel()
+					}
 					e := apply()
 					if window == "after transport postcheck" {
 						if e != nil {
@@ -201,7 +207,7 @@ func TestLocalInjectionCancellationWindows(t *testing.T) {
 				}
 				return nil
 			})
-			if !called || !errors.Is(e, context.Canceled) || owner.terminal.Load() {
+			if called != (window != "before owner callback" && window != "before transport callback") || !errors.Is(e, context.Canceled) || owner.terminal.Load() {
 				t.Fatalf("called=%v result=%v terminal=%v", called, e, owner.terminal.Load())
 			}
 		})
@@ -253,7 +259,7 @@ func TestLocalInjectionWrongKindAndLateOwnerRevokeSeal(t *testing.T) {
 			}
 			var e error
 			if mode == "observation kind" {
-				token := &localInjectionToken{}
+				token := &localInjectionToken{sharedCurrent: func() error { return nil }}
 				c := context.WithValue(child, localInjectionKey{}, token)
 				e = owner.transaction(c, OwnedProbeAcceptance{Direction: FromGuest, Observation: &ProbeHTTPObservation{}}, func() error { token.completed.Store(true); token.eligible.Store(true); cancel(); return nil })
 			} else {
@@ -278,6 +284,85 @@ func TestLocalInjectionWrongKindAndLateOwnerRevokeSeal(t *testing.T) {
 			}
 			if e == nil || !owner.terminal.Load() {
 				t.Fatalf("invalid exemption: %v terminal=%v", e, owner.terminal.Load())
+			}
+		})
+	}
+}
+
+func TestLocalInjectionPreAdmissionFailuresStayTerminal(t *testing.T) {
+	for _, mode := range []string{"propagate", "wrap", "swallow", "independent", "twice", "owner revoke", "generic", "write"} {
+		t.Run(mode, func(t *testing.T) {
+			child, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			resource := &issuedMemoryResource{stream: &ownedMemoryStream{closed: make(chan struct{})}}
+			var owner *OwnedProbeSession
+			resource.transaction = func(_ context.Context, _ OwnedProbeAcceptance, f func() error) error {
+				cancel()
+				if mode == "owner revoke" {
+					owner.Revoke()
+				}
+				e := f()
+				switch mode {
+				case "wrap":
+					return errors.Join(e, errors.New("provider failure"))
+				case "swallow":
+					return nil
+				case "independent":
+					return errors.New("provider failure")
+				case "twice":
+					_ = f()
+				}
+				return e
+			}
+			owner = ownedFixture(t, resource)
+			transport := &Transport{ctx: owner.ctx, owner: owner}
+			apply := func() error { t.Error("canceled injection entered"); return nil }
+			var e error
+			switch mode {
+			case "generic":
+				e = transport.commitContext(child, FromGuest, reverseTCPFrame(config()), apply)
+			case "write":
+				token := &localInjectionToken{sharedCurrent: func() error { return nil }}
+				e = owner.transaction(context.WithValue(child, localInjectionKey{}, token), OwnedProbeAcceptance{Direction: ToGuest}, apply)
+			default:
+				e = transport.commitLocalInjection(child, reverseTCPFrame(config()), apply)
+			}
+			if e == nil || owner.terminal.Load() != (mode != "propagate") {
+				t.Fatalf("result=%v terminal=%v", e, owner.terminal.Load())
+			}
+		})
+	}
+}
+
+func TestLocalInjectionPreAdmissionSharedFailureStillSeals(t *testing.T) {
+	for _, window := range []string{"before owner callback", "before transport callback"} {
+		t.Run(window, func(t *testing.T) {
+			child, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			shared, seal := context.WithCancel(context.Background())
+			defer seal()
+			resource := &issuedMemoryResource{stream: &ownedMemoryStream{closed: make(chan struct{})}}
+			resource.transaction = func(_ context.Context, _ OwnedProbeAcceptance, f func() error) error {
+				if window == "before owner callback" {
+					seal()
+					cancel()
+				}
+				return f()
+			}
+			owner := ownedFixture(t, resource)
+			committer := commitFunc(func(c context.Context, d FrameDirection, b []byte, apply func() error) error {
+				return owner.CommitFrame(c, d, b, func() error {
+					if window == "before transport callback" {
+						seal()
+						cancel()
+					}
+					return apply()
+				})
+			})
+			transport := &Transport{ctx: shared, owner: committer}
+			e := transport.commitLocalInjection(child, reverseTCPFrame(config()), func() error { t.Error("canceled apply entered"); return nil })
+			if e == nil || !owner.terminal.Load() {
+				t.Fatalf("result=%v terminal=%v", e, owner.terminal.Load())
 			}
 		})
 	}

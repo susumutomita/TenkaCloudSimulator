@@ -284,6 +284,7 @@ func (s *OwnedProbeSession) transaction(ctx context.Context, a OwnedProbeAccepta
 	var applied error
 	var callbackError *ownedCallbackError
 	producerOutcome := false
+	applyEntered := false
 	returned := false
 	defer func() {
 		if !returned {
@@ -303,6 +304,7 @@ func (s *OwnedProbeSession) transaction(ctx context.Context, a OwnedProbeAccepta
 		}
 		called = true
 		if applied = s.current(ctx); applied == nil {
+			applyEntered = true
 			applied = apply()
 			marker, marked := applied.(*localInjectionCompleted)
 			producerOutcome = applied == nil || marked && marker.token == token
@@ -327,7 +329,11 @@ func (s *OwnedProbeSession) transaction(ctx context.Context, a OwnedProbeAccepta
 	}
 	propagated, exact := err.(*ownedCallbackError)
 	exactPropagation := callbackError == nil && err == nil || callbackError != nil && exact && propagated == callbackError
-	safeLocal := called && claimed && token.completed.Load() && token.eligible.Load() && producerOutcome && a.Direction == FromGuest && a.Observation == nil && exactPropagation && observationContextError(ctx) != nil && s.current(s.ctx) == nil
+	// A canceled child can lose admission before apply is entered. No local
+	// injection occurred in that case; exact provider error propagation is still
+	// required, and this never excuses a write or a shared-owner failure.
+	localOutcome := !applyEntered || token != nil && (token.notApplied.Load() || token.completed.Load() && token.eligible.Load() && producerOutcome)
+	safeLocal := called && claimed && token.sharedCurrent != nil && token.sharedCurrent() == nil && localOutcome && a.Direction == FromGuest && a.Observation == nil && exactPropagation && observationContextError(ctx) != nil && s.current(s.ctx) == nil
 
 	if called && result != nil && !safeLocal {
 		s.Revoke()
