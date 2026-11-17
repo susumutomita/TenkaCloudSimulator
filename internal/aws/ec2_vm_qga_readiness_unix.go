@@ -1,4 +1,4 @@
-//go:build linux
+//go:build linux || darwin
 
 package aws
 
@@ -7,7 +7,9 @@ import (
 	"errors"
 	"io"
 	"net"
+	"runtime"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/qga"
@@ -16,11 +18,28 @@ import (
 const vmQGAStartupBudget = 120 * time.Second
 const vmQGAMaxHandshakes = 60
 
+// vmQGAMaxBusyDials bounds dials refused by a full listen queue: one per pause
+// for the whole startup budget.
+const vmQGAMaxBusyDials = 1200
+
 type qgaBootOperations struct {
 	dial      func(context.Context, string) (qga.Transport, error)
 	handshake func(context.Context, qga.Transport) (io.Closer, error)
 	pause     func(context.Context) error
+	// busy reports a dial refused only because the agent socket's listen
+	// queue is full. Nil means every dial failure is terminal.
+	busy func(error) bool
 }
+
+// qgaListenerBusy is true only on macOS, where connect(2) reports a full
+// listen queue as ECONNREFUSED. QEMU there keeps holding an earlier closed
+// readiness attempt until the guest agent opens its port, so later attempts
+// queue up and are refused while the guest boots. On Linux a refused
+// connection means no listener remains and stays terminal.
+func qgaListenerBusy(err error) bool {
+	return runtime.GOOS == "darwin" && errors.Is(err, syscall.ECONNREFUSED)
+}
+
 type trackedQGATransport struct {
 	qga.Transport
 	once     sync.Once
@@ -33,19 +52,22 @@ func (t *trackedQGATransport) Close() error {
 }
 
 // Only the side-effect-free guest-sync-delimited initialization may be retried.
-// No guest-exec handle exists yet. Dial/permission/protocol failures are terminal;
-// the original admission/lifetime bounds and per-RPC limit are never renewed.
+// No guest-exec handle exists yet. Dial/permission/protocol failures are terminal,
+// except a dial that ops.busy attributes to a full listen queue; it is retried
+// after a pause without a handshake. The original admission/lifetime bounds and
+// per-RPC limit are never renewed.
 func awaitCanonicalQGA(parent context.Context, path string, ops qgaBootOperations) (io.Closer, error) {
 	if parent == nil {
 		return nil, errGuestLease
 	}
 	ctx, cancel := context.WithTimeout(parent, vmQGAStartupBudget)
 	defer cancel()
+	busyDials := 0
 	for attempt := 0; attempt < vmQGAMaxHandshakes; attempt++ {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		raw, err := ops.dial(ctx, path)
+		raw, err := dialQGA(ctx, path, ops, &busyDials)
 		if err != nil {
 			if raw != nil {
 				return raw, err
@@ -82,4 +104,20 @@ func awaitCanonicalQGA(parent context.Context, path string, ops qgaBootOperation
 		}
 	}
 	return nil, context.DeadlineExceeded
+}
+
+// dialQGA dials once, and again after a pause while ops.busy attributes the
+// refusal to a full listen queue. busyDials is shared by the whole readiness
+// wait so the bound never renews.
+func dialQGA(ctx context.Context, path string, ops qgaBootOperations, busyDials *int) (qga.Transport, error) {
+	for {
+		raw, err := ops.dial(ctx, path)
+		if err == nil || raw != nil || ops.busy == nil || !ops.busy(err) || *busyDials == vmQGAMaxBusyDials {
+			return raw, err
+		}
+		*busyDials++
+		if err = ops.pause(ctx); err != nil {
+			return nil, err
+		}
+	}
 }

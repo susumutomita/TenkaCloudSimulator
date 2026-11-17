@@ -1,4 +1,4 @@
-//go:build linux
+//go:build linux || darwin
 
 package aws
 
@@ -7,6 +7,9 @@ import (
 	"errors"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/qga"
 	"io"
+	"net"
+	"os"
+	"runtime"
 	"syscall"
 	"testing"
 	"time"
@@ -86,5 +89,70 @@ func TestCanonicalQGAReadinessMemoryOnly(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// A refused dial is retried only when ops.busy attributes it to a full listen
+// queue, without a handshake, and within a bound that never renews.
+func TestCanonicalQGAReadinessRetriesOnlyBusyListenQueue(t *testing.T) {
+	refused := &net.OpError{Op: "dial", Net: "unix", Err: os.NewSyscallError("connect", syscall.ECONNREFUSED)}
+	queueFull := func(err error) bool { return errors.Is(err, syscall.ECONNREFUSED) }
+	for _, mode := range []string{"busy-then-ready", "busy-exhaustion", "refused-terminal", "busy-cancel"} {
+		t.Run(mode, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			dials, handshakes, pauses := 0, 0, 0
+			ops := qgaBootOperations{dial: func(context.Context, string) (qga.Transport, error) {
+				dials++
+				if mode == "busy-then-ready" && dials == 3 {
+					return &qgaBootMemoryTransport{}, nil
+				}
+				return nil, refused
+			}, handshake: func(_ context.Context, tr qga.Transport) (io.Closer, error) {
+				handshakes++
+				return tr, nil
+			}, pause: func(ctx context.Context) error {
+				pauses++
+				if mode == "busy-cancel" {
+					cancel()
+				}
+				return ctx.Err()
+			}}
+			if mode != "refused-terminal" {
+				ops.busy = queueFull
+			}
+			client, err := awaitCanonicalQGA(ctx, "/fixed/private/qga.sock", ops)
+			switch mode {
+			case "busy-then-ready":
+				if err != nil || client == nil || dials != 3 || handshakes != 1 || pauses != 2 {
+					t.Fatal(dials, handshakes, pauses, err)
+				}
+				_ = client.Close()
+			case "busy-exhaustion":
+				if !errors.Is(err, syscall.ECONNREFUSED) || client != nil || dials != vmQGAMaxBusyDials+1 || handshakes != 0 {
+					t.Fatal(dials, handshakes, err)
+				}
+			case "refused-terminal":
+				if !errors.Is(err, syscall.ECONNREFUSED) || dials != 1 || pauses != 0 {
+					t.Fatal("refusal retried without a busy listen queue", dials, err)
+				}
+			case "busy-cancel":
+				if !errors.Is(err, context.Canceled) || dials != 1 || handshakes != 0 {
+					t.Fatal(dials, handshakes, err)
+				}
+			}
+		})
+	}
+}
+
+func TestQGAListenerBusyOnlyForMacOSRefusal(t *testing.T) {
+	refused := &net.OpError{Op: "dial", Net: "unix", Err: os.NewSyscallError("connect", syscall.ECONNREFUSED)}
+	if qgaListenerBusy(refused) != (runtime.GOOS == "darwin") {
+		t.Fatal("a refused connection is a full listen queue only on macOS")
+	}
+	for _, err := range []error{syscall.ENOENT, syscall.EPERM, syscall.EAGAIN, context.DeadlineExceeded} {
+		if qgaListenerBusy(err) {
+			t.Fatal("not a listen-queue refusal", err)
+		}
 	}
 }

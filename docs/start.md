@@ -136,10 +136,14 @@ original five protected models. Exact changed-blob records and required model/
 property guards are maintained together. New integration-head Go/PTY/TLC and
 hosted CI are separate checks; source-only restacking is not fresh execution.
 
-### Explicit Linux Battle runtime
+### Explicit Battle runtime (Linux and macOS)
 
 `--battle-runtime-config /absolute/private/runtime.json` selects the bounded
-Linux/amd64 VM provider. It requires authenticated numeric loopback operation;
+VM provider on Linux or macOS, on amd64 or arm64 (Intel or Apple silicon). Every
+host runs the same x86_64 guest under QEMU TCG; none uses KVM or HVF, so the host
+architecture only selects the emulator build. On Windows use the Linux build in
+WSL2. It requires authenticated
+numeric loopback operation;
 `--unsafe-no-auth` and `--allow-remote` cannot be combined with it. Default startup
 still does not enable VM workloads. The configuration file and runtime directory
 must be private; the directory cannot be a symlink.
@@ -179,6 +183,18 @@ supply an independently qualified conservative mapping from its original
 monotonic deadlines into this domain. Without that mapping, the Host must keep
 Battle unavailable. No automatic synchronizer or real-machine qualification is
 provided by the configuration file.
+
+On macOS, Darwin has neither pidfd nor PDEATHSIG. Each emulator therefore runs
+under a private supervisor: the simulator executable re-entered with an internal
+argument. The supervisor holds one end of a private control socket, SIGKILLs and
+reaps the emulator when that socket reaches EOF (an explicit stop, or loss of the
+simulator for any reason), and only then reports the reap. QEMU's seccomp
+`-sandbox` is Linux-only and is not passed on macOS; no syscall filter is claimed
+for the emulator there. Unix socket paths are limited to 103 bytes on macOS (107
+on Linux), so keep `runtimeDirectory` short. The owned-clock launch
+(`--battle-clock-proof-fd`) still requires the Linux FD4 executable contract and
+is refused on macOS; only the configured clock domain is available there.
+[The local rehearsal](../test/battle/README.md) builds a bundle on either host.
 
 The provider's `PublicDnsName`/IMDS hostname is a reserved `.simulator.invalid`
 label, not publicly resolvable DNS. Host probing uses authenticated, owner-bound

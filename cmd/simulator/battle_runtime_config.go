@@ -1,7 +1,7 @@
 package main
 
 // Configuration admission is shared; successful validation does not qualify a
-// platform, start a guest, or bypass the Linux/amd64 runtime gate.
+// platform, start a guest, or bypass the Battle platform gate.
 import (
 	"bytes"
 	"encoding/hex"

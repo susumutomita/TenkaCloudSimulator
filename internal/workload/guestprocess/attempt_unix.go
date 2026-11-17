@@ -1,4 +1,4 @@
-//go:build linux
+//go:build linux || darwin
 
 package guestprocess
 
@@ -7,11 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"runtime"
-	"strconv"
-	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"golang.org/x/sys/unix"
@@ -127,11 +123,7 @@ func duplicateAnonymousPipe(file *os.File) (*os.File, error) {
 	if err == nil {
 		// fstat alone also accepts named FIFOs. Inspect only our private duplicate,
 		// never a caller descriptor that could close/reuse between operations.
-		var target string
-		target, err = os.Readlink("/proc/self/fd/" + strconv.Itoa(fd))
-		if err == nil && (!strings.HasPrefix(target, "pipe:[") || !strings.HasSuffix(target, "]")) {
-			err = ErrUnsupported
-		}
+		err = requireAnonymousPipe(fd)
 	}
 	if err != nil {
 		return nil, errors.Join(fmt.Errorf("guestprocess: unsupported private endpoint: %w", err), private.Close())
@@ -140,9 +132,10 @@ func duplicateAnonymousPipe(file *os.File) (*os.File, error) {
 }
 
 func (a *LaunchAttempt) run(spec Spec, private *os.File, start func(string, []string, *os.ProcAttr) (*os.Process, error), closePrivate func(*os.File) error) {
-	runtime.LockOSThread()
-	// Never unlock. Retirement on uncertainty requests PDEATHSIG without
-	// manufacturing exit evidence or releasing the retained admission debt.
+	lockCreatorThread()
+	// Never unlock. On Linux, retirement on uncertainty requests PDEATHSIG
+	// without manufacturing exit evidence or releasing the retained admission
+	// debt. Darwin binds the child to its supervisor process instead.
 	// This check does not interrupt or bound an already-entered kernel exec.
 	checkedStart := func(name string, args []string, attr *os.ProcAttr) (*os.Process, error) {
 		if err := attemptContextError(a.ctx); err != nil {
@@ -150,7 +143,7 @@ func (a *LaunchAttempt) run(spec Spec, private *os.File, start func(string, []st
 		}
 		return start(name, args, attr)
 	}
-	p, launchErr := launchWithFile(a.ctx, spec, syscall.SIGKILL, private, checkedStart)
+	p, launchErr := launchBound(a.ctx, spec, private, checkedStart)
 	// The closer is scoped to this attempt; production always uses File.Close.
 	closeErr := closePrivate(private)
 	if closeErr != nil {

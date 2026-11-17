@@ -11,8 +11,16 @@ import gzip
 import hashlib
 import json
 import os
+import platform
 import sys
 import tarfile
+
+# The manifest names the platform that will run the emulator (Go naming); the
+# Simulator refuses a bundle whose os/arch differ from its own host.
+GOOS = {'linux': 'linux', 'darwin': 'darwin'}.get(sys.platform)
+GOARCH = {'x86_64': 'amd64', 'amd64': 'amd64', 'aarch64': 'arm64', 'arm64': 'arm64'}.get(platform.machine().lower())
+if GOOS is None or GOARCH is None:
+    raise SystemExit(f'unsupported bundle host {sys.platform}/{platform.machine()}')
 
 tree, out_archive, out_manifest, executable = sys.argv[1:5]
 files = []
@@ -55,7 +63,7 @@ archive_digest = hashlib.sha256()
 with open(out_archive, 'rb') as source:
     for chunk in iter(lambda: source.read(1 << 20), b''):
         archive_digest.update(chunk)
-manifest = {'os': 'linux', 'arch': 'amd64', 'archiveSha256': archive_digest.hexdigest(), 'files': entries}
+manifest = {'os': GOOS, 'arch': GOARCH, 'archiveSha256': archive_digest.hexdigest(), 'files': entries}
 data = json.dumps(manifest, indent=1, sort_keys=True).encode() + b'\n'
 with open(out_manifest, 'xb') as out:
     out.write(data)

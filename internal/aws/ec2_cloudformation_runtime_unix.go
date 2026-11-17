@@ -1,4 +1,4 @@
-//go:build linux
+//go:build linux || darwin
 
 package aws
 
@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/netip"
 	"strings"
 	"sync"
@@ -185,6 +186,15 @@ func (r *EC2InstanceRuntime) Launch(ctx context.Context, plan *EC2InstancePlan) 
 	if r == nil || plan == nil || ctx == nil || plan.runtime != r {
 		return nil, errGuestLease
 	}
+	instance, started := plan.InstanceID, time.Now()
+	defer func() {
+		// CreateStack answers only a generic InternalFailure; the operator log keeps
+		// every guest launch cause. The instance ID is server-generated and launch
+		// errors come from the VM runtime, not from request headers.
+		if resultErr != nil {
+			slog.Error("Battle guest launch failed", "instance", instance, "seconds", time.Since(started).Seconds(), "error", resultErr)
+		}
+	}()
 	captured := *plan
 	captured.SecurityGroupIDs = append([]string(nil), plan.SecurityGroupIDs...)
 	captured.UserData = append([]byte(nil), plan.UserData...)
