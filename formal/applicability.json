@@ -175,21 +175,6 @@
       "models": []
     },
     {
-      "path": "internal/aws/cloudformation.go",
-      "sha256": "104d07da192fdaf709ec0e2a853852a2a7704b984c6bee80990d7b3874c3cb4c",
-      "disposition": "modeled",
-      "reason": "Logs the internal cause of a generic InternalFailure to the operator log, as S3 already does; the API response is unchanged.",
-      "models": [
-        {
-          "id": "CanonicalVMComposition",
-          "properties": [
-            "PublicationAdmission"
-          ],
-          "limits": "Operator logging only; no stack state, ordering or response change is modeled or made."
-        }
-      ]
-    },
-    {
       "path": "internal/aws/ec2_cloudformation_adapter_linux.go",
       "sha256": null,
       "disposition": "modeled",
@@ -239,9 +224,9 @@
     },
     {
       "path": "internal/aws/ec2_cloudformation_runtime_unix.go",
-      "sha256": "89a9b505bfa1aca59cf5eb6007b283893f5d9debfd7f66511d3aca0402d807c0",
+      "sha256": "161174f038288d21e5d097ec55a6a4516c9e303fb6975c758968c9e853275269",
       "disposition": "modeled",
-      "reason": "Renamed from ec2_cloudformation_runtime_linux.go with linux || darwin; contents unchanged.",
+      "reason": "Renamed from ec2_cloudformation_runtime_linux.go with linux || darwin. Adds one operator log line with the server-generated instance ID and the guest launch error when LaunchVMAndAttach fails; the CreateStack response, publication admission and cleanup ordering are unchanged.",
       "models": [
         {
           "id": "CanonicalVMComposition",
@@ -249,7 +234,7 @@
             "PublicationAdmission",
             "IndependentCleanup"
           ],
-          "limits": "File rename and build-constraint widening only (linux -> linux || darwin); function bodies are unchanged. Darwin execution evidence comes from the battle-macos workflow, not from this model."
+          "limits": "Operator logging only; no stack state, ordering or response change is modeled or made. Darwin execution evidence comes from the battle-hosts workflow."
         }
       ]
     },
@@ -947,14 +932,14 @@
     },
     {
       "path": "test/battle/image/build_bundle.py",
-      "sha256": "7e594934835d26cc3d794515ac54ca76dbf1da7bcbcbe5cc9effdb56eb2ad15f",
+      "sha256": "059839bb93cb120255d7b7f3b2c83c06d5f506860a2e63be5f7cbd8b51e131ba",
       "disposition": "test-support",
       "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
       "models": []
     },
     {
       "path": "test/battle/image/test_build_bundle.py",
-      "sha256": "8c835e432b07a8c873f786acf28a82212f677f28801054d567fb06fda1111990",
+      "sha256": "d9412df4ef091d666c6114d54761ecfc7b65caa136acaf3c4ee27e748324342b",
       "disposition": "test-support",
       "reason": "Tests or opt-in rehearsal tooling for the Darwin runtime and portable bundle build; no product runtime code.",
       "models": []

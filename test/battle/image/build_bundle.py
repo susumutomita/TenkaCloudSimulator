@@ -123,6 +123,21 @@ def fetch(url, target):
         shutil.copyfileobj(response, out, 1 << 20)
 
 
+def scratch_directory(requested):
+    """Creates the scratch directory this run owns and later removes.
+
+    A named directory must not exist yet, so cleanup can never delete earlier
+    or unrelated content."""
+    if not requested:
+        return pathlib.Path(tempfile.mkdtemp(prefix='battle-bundle-'))
+    work = pathlib.Path(requested).resolve()
+    try:
+        work.mkdir(parents=True, exist_ok=False)
+    except FileExistsError:
+        raise SystemExit(f'--work {work} already exists; name a new directory') from None
+    return work
+
+
 def run(command, **kwargs):
     log('run ' + ' '.join(command[:4]) + (' ...' if len(command) > 4 else ''))
     return subprocess.run(command, check=True, **kwargs)
@@ -157,8 +172,7 @@ def main():
 
     out = pathlib.Path(args.out).resolve()
     out.mkdir(parents=True, exist_ok=False)
-    work = pathlib.Path(args.work).resolve() if args.work else pathlib.Path(tempfile.mkdtemp(prefix='battle-bundle-'))
-    work.mkdir(parents=True, exist_ok=True)
+    work = scratch_directory(args.work)
     log(f'emulator {emulator} ({version}); modules {modules}; work {work}')
     try:
         # 1. Official image, verified before use.

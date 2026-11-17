@@ -13,7 +13,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -1173,10 +1172,7 @@ func cfnResponse(w http.ResponseWriter, action, result string) {
 func cfnError(w http.ResponseWriter, err error) {
 	code, message, status := "InternalFailure", "Simulator stack operation failed.", 500
 	var e ssmFailure
-	if !errors.As(err, &e) {
-		// The caller sees only the generic failure; the operator log keeps the cause, as for S3.
-		slog.Error("CloudFormation stack operation failed", "error", err)
-	} else {
+	if errors.As(err, &e) {
 		code, message, status = e.code, e.message, 400
 		if code == "AccessDenied" {
 			status = 403

@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/netip"
 	"strings"
 	"sync"
@@ -341,6 +342,9 @@ func (r *EC2InstanceRuntime) Launch(ctx context.Context, plan *EC2InstancePlan) 
 		r.mu.Unlock()
 	}
 	if e != nil {
+		// CreateStack answers only a generic InternalFailure; the operator log
+		// keeps the guest launch cause. Neither value comes from the request.
+		slog.Error("Battle guest VM launch failed", "instance", plan.InstanceID, "error", e)
 		known, transferred := receipt.PassiveOwnership()
 		if known && !transferred {
 			e = errors.Join(e, passive.Close())

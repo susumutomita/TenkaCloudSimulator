@@ -51,6 +51,18 @@ class BuildBundleHelperTests(unittest.TestCase):
         self.assertNotIn('hostfwd', ' '.join(command))
         self.assertIn('-no-reboot', command)
 
+    def test_a_named_work_directory_must_be_new_and_is_never_reused(self):
+        with tempfile.TemporaryDirectory() as parent:
+            existing = pathlib.Path(parent, 'kept')
+            existing.mkdir()
+            (existing / 'unrelated').write_text('keep me')
+            with self.assertRaises(SystemExit):
+                build_bundle.scratch_directory(str(existing))
+            self.assertEqual((existing / 'unrelated').read_text(), 'keep me')
+            fresh = build_bundle.scratch_directory(str(pathlib.Path(parent, 'new', 'work')))
+            self.assertTrue(fresh.is_dir())
+            self.assertEqual(list(fresh.iterdir()), [])
+
     def test_qcow2_header_length_reads_version_and_length(self):
         with tempfile.NamedTemporaryFile() as disk:
             header = bytearray(104)
