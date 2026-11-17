@@ -1,4 +1,4 @@
-//go:build linux
+//go:build linux || darwin
 
 package guestprocess
 
@@ -9,8 +9,6 @@ import (
 	"os"
 	"sync"
 	"time"
-
-	"golang.org/x/sys/unix"
 )
 
 // NICLaunch owns a newly created socket pair and the exact child inheriting its
@@ -45,7 +43,7 @@ type nicPair struct {
 }
 
 func createNICPair() (nicPair, error) {
-	fds, err := unix.Socketpair(unix.AF_UNIX, unix.SOCK_STREAM|unix.SOCK_CLOEXEC|unix.SOCK_NONBLOCK, 0)
+	fds, err := socketPair()
 	if err != nil {
 		return nicPair{}, err
 	}

@@ -16,7 +16,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/workload/guestbundle"
@@ -58,7 +57,8 @@ func (p *Prepared) Directory() string { return p.directory }
 func (p *Prepared) QMPSocket() string { return filepath.Join(p.directory, "qmp.sock") }
 func (p *Prepared) QGASocket() string { return filepath.Join(p.directory, "qga.sock") }
 
-// Invocation describes a fixed, paused, network-disabled Linux/amd64 TCG VM.
+// Invocation describes a fixed, paused, network-disabled x86_64 TCG VM on a
+// qualified Linux or macOS host (amd64 or arm64).
 // Arguments are not participant-extensible. Starting it is NOT authorized by
 // preparation: a durable lifecycle owner must still bind/fence the launch and
 // prove its containment, process identity and exit. No environment is inherited
@@ -77,13 +77,15 @@ func (p *Prepared) Invocation() Invocation {
 	inv := Invocation{Executable: p.emulator, Env: []string{}, Args: []string{
 		"-no-user-config", "-nodefaults", "-machine", "pc,accel=tcg", "-cpu", "max", "-m", "1024", "-smp", "1", "-S",
 		"-uuid", p.record.UUID, "-L", filepath.Dir(p.firmware), "-bios", p.firmware, "-display", "none", "-vga", "none", "-monitor", "none", "-serial", "none", "-nic", "none", "-no-reboot",
-		"-sandbox", "on,obsolete=deny,elevateprivileges=deny,spawn=deny,resourcecontrol=deny",
+	}}
+	inv.Args = append(inv.Args, qemuSandboxArgs...)
+	inv.Args = append(inv.Args,
 		"-blockdev", string(root), "-device", "virtio-blk-pci,drive=root",
 		"-blockdev", string(seed), "-device", "ide-cd,drive=seed",
-		"-qmp", "unix:" + p.QMPSocket() + ",server=on,wait=off",
-		"-device", "virtio-serial-pci", "-chardev", "socket,id=qga,path=" + p.QGASocket() + ",server=on,wait=off",
+		"-qmp", "unix:"+p.QMPSocket()+",server=on,wait=off",
+		"-device", "virtio-serial-pci", "-chardev", "socket,id=qga,path="+p.QGASocket()+",server=on,wait=off",
 		"-device", "virtserialport,chardev=qga,name=org.qemu.guest_agent.0",
-	}}
+	)
 	if p.record.SessionImageSHA256 != "" {
 		inv.Args = append(inv.Args, "-chardev", "socket,id=session,path="+p.SessionSocket()+",server=on,wait=off", "-device", "virtserialport,chardev=session,name=org.tenkacloud.session.0")
 	}
@@ -120,8 +122,8 @@ func prepare(ctx context.Context, parent string, bundle *guestbundle.Bundle, lay
 	if err = ctx.Err(); err != nil {
 		return nil, err
 	}
-	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
-		return nil, errors.New("guest launch plan supports Linux/amd64 only")
+	if !launchPlatformSupported() {
+		return nil, errors.New("guest launch plan supports Linux and macOS on amd64 or arm64 only")
 	}
 	if !fencePattern.MatchString(intent.Fence) || intent.Operation != 1 || intent.Action != guestlease.Acquire || intent.Lease != "" {
 		return nil, errors.New("guest preparation requires persisted acquire intent")

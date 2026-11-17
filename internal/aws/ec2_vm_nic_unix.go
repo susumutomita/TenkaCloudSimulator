@@ -1,4 +1,4 @@
-//go:build linux
+//go:build linux || darwin
 
 package aws
 
@@ -361,6 +361,7 @@ func canonicalVMNICOperations() vmNICOperations {
 					}
 					return c, err
 				},
+				busy: qgaListenerBusy,
 				pause: func(ctx context.Context) error {
 					timer := time.NewTimer(100 * time.Millisecond)
 					defer timer.Stop()

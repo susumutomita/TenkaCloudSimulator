@@ -1,4 +1,4 @@
-//go:build linux
+//go:build linux || darwin
 
 package main
 
@@ -37,7 +37,12 @@ type inertBattleBundle struct {
 
 func newInertBattleBundle(t *testing.T) *inertBattleBundle {
 	t.Helper()
-	dir := t.TempDir()
+	// macOS temporary directories sit behind /var -> /private/var; the loader
+	// refuses an aliased runtime directory, as an operator path would be refused.
+	dir, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
 	if e := os.Chmod(dir, 0700); e != nil {
 		t.Fatal(e)
 	}

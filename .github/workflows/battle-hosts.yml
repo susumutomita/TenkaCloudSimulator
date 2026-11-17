@@ -1,0 +1,134 @@
+name: battle-hosts
+# Host-platform evidence for the Battle VM runtime: Darwin child supervision and
+# the unchanged Hello World Battle on a real QEMU TCG guest on macOS (Apple silicon
+# and Intel) and Linux arm64. Linux/amd64 is the original rehearsal host. Every
+# host emulates the same x86_64 guest with TCG, so no nested virtualization is
+# needed. The rehearsal stands in for the host; it is not TenkaCloud acceptance.
+on:
+  pull_request:
+    paths:
+      - 'internal/workload/guestprocess/**'
+      - 'internal/workload/guestvm/**'
+      - 'internal/aws/ec2_*'
+      - 'internal/server/battle_*'
+      - 'cmd/simulator/battle_*'
+      - 'test/battle/**'
+      - '.github/workflows/battle-hosts.yml'
+  workflow_dispatch:
+    inputs:
+      challenge_ref:
+        description: TenkaCloudChallenge commit holding the unchanged problem
+        required: false
+        default: 5b5cd1a422e98d2648784aaea7fde02bc722e96d
+permissions:
+  contents: read
+env:
+  CHALLENGE_REF: ${{ inputs.challenge_ref || '5b5cd1a422e98d2648784aaea7fde02bc722e96d' }}
+jobs:
+  runtime-unit:
+    name: Runtime package tests (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            target: darwin_arm64
+          - runner: macos-15-intel
+            target: darwin_amd64
+          - runner: ubuntu-24.04-arm
+            target: linux_arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Vet and test the Battle runtime packages
+        env:
+          GOTOOLCHAIN: local
+        run: |
+          go vet ./...
+          go test -count=1 -race ./internal/workload/guestprocess/ ./internal/workload/guestvm/ ./internal/workload/probeclock/
+          # The rest of these packages belongs to the Linux ci gate; its wall-clock
+          # startup tests are not Battle runtime evidence on a slower macOS runner.
+          go test -count=1 -race -run 'QGA' ./internal/aws/
+          go test -count=1 -race -run 'Battle|StrictRuntime' ./cmd/simulator/
+  battle-rehearsal:
+    name: Unchanged Hello World Battle (${{ matrix.target }}, QEMU TCG)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            target: darwin_arm64
+          - runner: macos-15-intel
+            target: darwin_amd64
+          - runner: ubuntu-24.04-arm
+            target: linux_arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          repository: susumutomita/TenkaCloudChallenge
+          ref: ${{ env.CHALLENGE_REF }}
+          path: challenge
+          persist-credentials: false
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Install the emulator and pinned SDK
+        timeout-minutes: 20
+        run: |
+          if [ "$RUNNER_OS" = macOS ]; then
+            brew install qemu
+          else
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends qemu-system-x86 qemu-utils genisoimage
+          fi
+          qemu-system-x86_64 --version
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install boto3==1.42.0 botocore==1.41.6 jmespath==1.1.0 python-dateutil==2.9.0.post0 s3transfer==0.16.1 six==1.17.0 urllib3==2.8.0
+      - name: Build the simulator under test
+        env:
+          GOTOOLCHAIN: local
+        run: make build
+      - name: Build the pinned guest bundle on this machine
+        timeout-minutes: 90
+        env:
+          GOTOOLCHAIN: local
+        run: |
+          # macOS: the system trust store export. Certificate and hostname checks stay on.
+          if [ "$RUNNER_OS" = macOS ]; then export SSL_CERT_FILE=/etc/ssl/cert.pem; fi
+          python3 test/battle/image/build_bundle.py --out "$RUNNER_TEMP/bundle" --work /tmp/bb --keep-work
+      - name: Run the rehearsal
+        timeout-minutes: 60
+        run: |
+          rm -rf /tmp/bb/tree /tmp/bb/download
+          mkdir -m 700 /tmp/hwb
+          "$RUNNER_TEMP/venv/bin/python" -I test/battle/rehearsal.py --binary "$PWD/dist/tenkacloud-simulator" \
+            --bundle "$RUNNER_TEMP/bundle" --challenge-root "$PWD/challenge" --work /tmp/hwb/r1
+      - name: Retain rehearsal evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: battle-${{ matrix.target }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            ${{ runner.temp }}/bundle/manifest.json
+            ${{ runner.temp }}/bundle/build-summary.json
+            /tmp/bb/builder-serial.log
+            /tmp/bb/provenance.jsonl
+            /tmp/hwb/r1/report.json
+            /tmp/hwb/r1/simulator.log
+          if-no-files-found: warn
+          retention-days: 14

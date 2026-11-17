@@ -11,9 +11,9 @@ One Go binary includes the consoles, API reference, SQLite and Python Lambda run
 or real cloud connection. Use dummy credentials and practice data only.**
 
 An explicitly configured Battle VM runtime is separate from these default API
-simulation requirements: it needs Linux/amd64, a trusted pinned QEMU/firmware/image
+simulation requirements: it needs Linux or macOS (amd64 or arm64; WSL2 on Windows), a trusted pinned QEMU/firmware/image
 bundle and private operator configuration. Host clock qualification is also
-required; enabling the flag does not establish it. See [opt-in runtime setup](docs/start.md#explicit-linux-battle-runtime).
+required; enabling the flag does not establish it. See [opt-in runtime setup](docs/start.md#explicit-battle-runtime-linux-and-macos).
 
 ## Start and sign in
 

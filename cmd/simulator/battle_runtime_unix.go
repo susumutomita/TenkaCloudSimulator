@@ -1,4 +1,4 @@
-//go:build linux
+//go:build linux || darwin
 
 package main
 
@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"time"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws"
@@ -22,8 +21,8 @@ import (
 )
 
 func validateBattlePlatform() error {
-	if runtime.GOARCH != "amd64" {
-		return errors.New("Battle runtime requires Linux/amd64")
+	if !battlePlatformSupported() {
+		return errBattlePlatform
 	}
 	return nil
 }
@@ -42,8 +41,8 @@ func newBattleServer(ctx context.Context, path, origin, state string, options se
 	return loadBattleServer(ctx, path, origin, state, options, server.NewWithBattleRuntime)
 }
 func loadBattleServer(ctx context.Context, path, origin, state string, options server.ProviderConfig, create battleServerConstructor) (http.Handler, func() error, error) {
-	if runtime.GOARCH != "amd64" {
-		return nil, nil, errors.New("Battle runtime requires Linux/amd64")
+	if !battlePlatformSupported() {
+		return nil, nil, errBattlePlatform
 	}
 	cfg, e := readBattleRuntimeFile(path, time.Now())
 	if e != nil {

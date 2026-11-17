@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -97,7 +96,7 @@ func TestBattleRuntimeStrictJSONAndUnsafeFlags(t *testing.T) {
 }
 
 func TestSharedBattleAdmissionDoesNotEnableUnsupportedRuntime(t *testing.T) {
-	if runtime.GOOS == "linux" && runtime.GOARCH == "amd64" {
+	if battlePlatformSupported() {
 		t.Skip("unsupported-platform assertion")
 	}
 	if validateBattlePlatform() == nil {

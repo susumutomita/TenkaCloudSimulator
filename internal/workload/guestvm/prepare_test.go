@@ -27,7 +27,13 @@ func shortDir(t *testing.T) string {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { os.RemoveAll(dir) })
-	return dir
+	// Preparation rejects directories reached through a symlink, and macOS
+	// temporary directories live under the /var -> /private/var alias.
+	canonical, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return canonical
 }
 func digest(b []byte) string { v := sha256.Sum256(b); return hex.EncodeToString(v[:]) }
 func imageHeader() []byte {
@@ -81,8 +87,8 @@ func acquire() guestlease.Intent {
 }
 func requireLinux(t *testing.T) {
 	t.Helper()
-	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
-		t.Skip("deployment plan is Linux/amd64 only")
+	if !launchPlatformSupported() {
+		t.Skip("deployment plan is Linux and macOS on amd64 or arm64 only")
 	}
 }
 func TestPreparePrivateIndependentStateAndPausedPlan(t *testing.T) {
@@ -138,10 +144,14 @@ func TestPreparePrivateIndependentStateAndPausedPlan(t *testing.T) {
 		t.Fatal("missing executable or inherited environment")
 	}
 	joined := strings.Join(args.Args, "\n")
-	for _, required := range []string{"-S\n", "-nic\nnone", "-monitor\nnone", "-serial\nnone", "-no-user-config", "-nodefaults", "-sandbox", "-uuid\n" + saved.UUID, "-L\n", "\"backing\":null", "\"read-only\":true"} {
+	for _, required := range []string{"-S\n", "-nic\nnone", "-monitor\nnone", "-serial\nnone", "-no-user-config", "-nodefaults", "-uuid\n" + saved.UUID, "-L\n", "\"backing\":null", "\"read-only\":true"} {
 		if !strings.Contains(joined, required) {
 			t.Fatal("missing fixed restriction", required)
 		}
+	}
+	// QEMU's seccomp sandbox exists only on Linux; it is never silently dropped there.
+	if (runtime.GOOS == "linux") != strings.Contains(joined, "-sandbox\non,obsolete=deny,elevateprivileges=deny,spawn=deny,resourcecontrol=deny") {
+		t.Fatal("sandbox arguments do not match the platform")
 	}
 	if strings.Contains(joined, string(userData)) || strings.Contains(joined, "hostfwd") || strings.Contains(joined, "-fsdev") {
 		t.Fatal("unexpected data/host access in plan")
