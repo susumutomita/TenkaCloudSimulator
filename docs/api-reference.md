@@ -1,7 +1,7 @@
 # Local API reference navigation
 
 Open `/_simulator/docs/` after signing in to the local simulator. The reference
-uses the embedded Scalar1.76.4 renderer and OpenAPI3.1 document; it does not load
+uses the embedded Scalar1.75.1 renderer and OpenAPI3.1 document; it does not load
 remote fonts, scripts, proxy services or cloud APIs. Session cookies remain
 same-origin, authentication persistence is disabled, and curl/SDK examples still
 require a host-issued simulator token. Dummy AWS wire credentials are not login

@@ -1,67 +1,104 @@
 {
   "version": 1,
-  "base_sha": "39344f078a428d8cd9096aacf40d3ef54b795547",
+  "base_sha": "4be504d6eaf42c4f7e2d939d3b325e44374d802e",
   "changes": [
     {
-      "path": "internal/workload/guesttcp/local_injection_outcome.go",
-      "sha256": "ccd7c22ab6fe39628070c284655b12f796fd3d61d2e17bfbc01b32c24d0a7bfb",
-      "disposition": "modeled",
-      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
-      "models": [
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
-        }
-      ]
-    },
-    {
-      "path": "internal/workload/guesttcp/local_injection_outcome_test.go",
-      "sha256": "91b8fa0a8481e73642f9963f02eeb48ead9714df0ca438b1e58d92c6d4f8d67e",
-      "disposition": "test-support",
-      "reason": "Deterministic cancellation-window regressions and fail-closed provider/shared-lifetime counterexamples; no runtime surface.",
+      "path": "docs/api-reference.md",
+      "sha256": "0ffefbce2afd781c61307ccfbe266a9277a0861bdaf45080f48fbdc6c1c78b1c",
+      "disposition": "documentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
       "models": []
     },
     {
-      "path": "internal/workload/guesttcp/owned_probe_session.go",
-      "sha256": "b32679d14912f4a96e3888c3fa0e9c840ae40d5e51424f703b002b0222eab9b4",
-      "disposition": "modeled",
-      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
-      "models": [
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
-        }
-      ]
+      "path": "internal/legal/assets/SCALAR-BUNDLED-NOTICES.txt",
+      "sha256": "86741c02c767d72255fe72db4c420b77f42886705c83893db8b41194211017ea",
+      "disposition": "documentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
     },
     {
-      "path": "internal/workload/guesttcp/transport.go",
-      "sha256": "0ca48e5e6bd18e65ba1e3083f9f54483fc68d2166d834e778afb646d41706b6c",
-      "disposition": "modeled",
-      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
-      "models": [
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
-        }
-      ]
+      "path": "internal/server/apidocs/scalar.css",
+      "sha256": "9b22c58a25f5c5f41475edac9aa8dfa739b145ad36160458df5dfbe4c59974df",
+      "disposition": "presentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/scalar.js",
+      "sha256": "0eb0fe6be4084c87fd52dac9c5429ecb92f148beb82ae3aa5dfeb1619dd89a73",
+      "disposition": "presentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/scalar.js.LEGAL.txt",
+      "sha256": "df494d255417a600281ed1d41171e24ae77f2d468f8a88290977bcdf39bd8edf",
+      "disposition": "presentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
+    },
+    {
+      "path": "third_party/SCALAR-BUNDLED-NOTICES.txt",
+      "sha256": "86741c02c767d72255fe72db4c420b77f42886705c83893db8b41194211017ea",
+      "disposition": "documentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
+    },
+    {
+      "path": "third_party/color-picker-removal.json",
+      "sha256": "da99cb83c14e7dad79973bb54dadb1ea1410f5af9d1f878b0d5f96cccf759a3b",
+      "disposition": "documentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
+    },
+    {
+      "path": "third_party/scalar-bundled-packages.json",
+      "sha256": "62449f3e5b0d8f8db760dfdb25ca8363568a4704edfe7f5b3fb6957e4fea2070",
+      "disposition": "documentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
+    },
+    {
+      "path": "third_party/scalar.json",
+      "sha256": "4a2da0f8c8dbc7933e5fd1e2222bb344f99ca32ccff47113a1c53dcbfc4cd9af",
+      "disposition": "documentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
+    },
+    {
+      "path": "tools/scalar/bundle-digests.json",
+      "sha256": "cd4123df36e63ba94a6b355735699b8a8571b95ab9e0affb2ded2911df2d68fe",
+      "disposition": "presentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
+    },
+    {
+      "path": "tools/scalar/bundle-inputs.json",
+      "sha256": "64900cc4d31e0cccced4b6e7726696286bdb2c4bda26ad9699921dcd0eb3688d",
+      "disposition": "presentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
+    },
+    {
+      "path": "tools/scalar/notices.py",
+      "sha256": "388554e6d5ee48c5ba6166db25f3ab706abfb4d15dd2935a8e91bcaafe767d20",
+      "disposition": "presentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
+    },
+    {
+      "path": "tools/scalar/package-lock.json",
+      "sha256": "99403667de7477ae53bfe17cfd7cb614f4227715994e6abb020d73d838fdf150",
+      "disposition": "presentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
+    },
+    {
+      "path": "tools/scalar/package.json",
+      "sha256": "650979218cfa690dcd1f06e45b0ad0e1e086c474afaa598d588455f4500f9d43",
+      "disposition": "presentation",
+      "reason": "Pin the published Scalar 1.75.1 dependency tree and reproduce its embedded renderer, asset graph, integrity metadata and exact upstream license notices to remove the Unhead 3/unplugin/picomatch build dependency chain; preserve existing native OpenAPI, authentication, same-origin transport and response-view logic without changing formal models or gates.",
+      "models": []
     }
   ]
 }
