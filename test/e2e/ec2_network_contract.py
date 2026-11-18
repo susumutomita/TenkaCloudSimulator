@@ -55,7 +55,9 @@ class NetworkContract(unittest.TestCase):
     def rejected(self, operation, code, **kwargs):
         with self.assertRaises(ClientError) as caught:
             operation(**kwargs)
-        self.assertEqual(caught.exception.response['Error']['Code'], code)
+        self.assertTrue(caught.exception.response['Error']['Code'])
+        if code is not None:
+            self.assertEqual(caught.exception.response['Error']['Code'], code)
         self.assertGreaterEqual(caught.exception.response['ResponseMetadata']['HTTPStatusCode'], 400)
 
     def state(self):
@@ -114,9 +116,9 @@ class NetworkContract(unittest.TestCase):
         cases['cross-vpc-association'] = body
         for label, body in cases.items():
             with self.subTest(label=label):
-                # Relationship errors currently surface as InternalFailure (a reported
-                # local compatibility gap); compile-time shape errors are ValidationError.
-                code = 'InternalFailure' if label in ('absent-table', 'absent-gateway', 'cross-vpc-association') else 'ValidationError'
+                # Relationship failures must reject atomically. Do not bless the
+                # observed InternalFailure classification as an AWS contract.
+                code = None if label in ('absent-table', 'absent-gateway', 'cross-vpc-association') else 'ValidationError'
                 self.rejected(self.cfn.create_stack, code, StackName='invalid-' + label, TemplateBody=json.dumps(body))
                 self.assertEqual(self.state(), before)
         # Reuse a rejected name: no hidden stack/name claim may remain.
