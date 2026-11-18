@@ -3,7 +3,9 @@ package guesttcp
 import (
 	"context"
 	"errors"
+	"io"
 	"net"
+	"net/http"
 	"sync"
 	"testing"
 	"time"
@@ -122,9 +124,51 @@ func TestHTTPProbeScopeFailedResultRetainsTuple(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := operationSettled(t, h)
-	req := <-f.requests
+	req, err := waitProbeRequest(ctx, f.requests)
+	if err != nil {
+		t.Fatalf("peer request missing after settlement: %v; result=%v routeReady=%t", err, got.ResultError, got.RouteReady)
+	}
 	if got.ResultError == nil || !got.RouteReady || got.Route != req.route || got.Observation.StatusCode != 0 {
 		t.Fatal("failed request lost route or fabricated success", got)
+	}
+}
+
+func waitProbeRequest(ctx context.Context, requests <-chan probeHTTPRequest) (probeHTTPRequest, error) {
+	select {
+	case request, ok := <-requests:
+		if !ok {
+			return probeHTTPRequest{}, io.EOF
+		}
+		return request, nil
+	case <-ctx.Done():
+		return probeHTTPRequest{}, ctx.Err()
+	}
+}
+
+func TestProbeRequestWaitRejectsMissingRequest(t *testing.T) {
+	for _, expired := range []bool{false, true} {
+		ctx, cancel := context.WithCancel(context.Background())
+		want := error(context.Canceled)
+		if expired {
+			cancel()
+			ctx, cancel = context.WithDeadline(context.Background(), time.Now().Add(-time.Second))
+			want = context.DeadlineExceeded
+		}
+		cancel()
+		if _, err := waitProbeRequest(ctx, make(chan probeHTTPRequest)); !errors.Is(err, want) {
+			t.Fatal("missing request did not preserve cancellation", err)
+		}
+	}
+	closed := make(chan probeHTTPRequest)
+	close(closed)
+	if _, err := waitProbeRequest(context.Background(), closed); !errors.Is(err, io.EOF) {
+		t.Fatal("closed peer request channel fabricated a request", err)
+	}
+	request := probeHTTPRequest{request: new(http.Request)}
+	ready := make(chan probeHTTPRequest, 1)
+	ready <- request
+	if got, err := waitProbeRequest(context.Background(), ready); err != nil || got != request {
+		t.Fatal("peer request was lost", got, err)
 	}
 }
 func TestHTTPProbeScopeSnapshotAfterRevocation(t *testing.T) {

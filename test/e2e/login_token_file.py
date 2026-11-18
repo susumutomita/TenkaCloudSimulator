@@ -69,6 +69,14 @@ with tempfile.TemporaryDirectory(prefix='login-file-dummy-') as folder,running(a
  def loaded(page):expect(page.get_by_role('status').filter(has_text='Token loaded. Choose Open sandbox to verify it.')).to_be_visible()
  def released(page,kind='resolve'):
   page.evaluate('(kind)=>window.__pendingFiles.shift()[kind]()',kind)
+ def pending_file_read(page):
+  # Keep the real page CSP: wait_for_function evaluates its predicate via eval.
+  # Observe the same fixture condition with the existing 5-second page budget.
+  deadline=time.monotonic()+5
+  while True:
+   if page.evaluate('window.__pendingFiles.length===1'):return
+   if time.monotonic()>=deadline:raise AssertionError('Expected one pending token-file read')
+   time.sleep(.01)
  def submit(page,want):
   with page.expect_response(lambda r:r.request.method=='POST'and r.url==endpoint+'/_simulator/login')as post:page.get_by_role('button',name='Open sandbox',exact=True).click()
   assert post.value.status==want,'Unexpected strict server authentication status'
@@ -106,13 +114,13 @@ with tempfile.TemporaryDirectory(prefix='login-file-dummy-') as folder,running(a
  expect(page.get_by_role('button',name='Account menu',exact=True)).to_be_visible();report['BusyRealSubmissionBlocksAdditionalChooserAndEarlyAuthentication']=True
  page=fresh();choose(page,valid);loaded(page);choose(page,None);check_value(page,token);report['EmptySelectionPreservesInput']=True
  late=fixture('late-old.txt',secrets.token_hex(32).encode())
- page=fresh();choose(page,late);page.wait_for_function('window.__pendingFiles.length===1');expect(page.get_by_role('button',name='Open sandbox',exact=True)).to_be_disabled();choose(page,valid);loaded(page);released(page);check_value(page,token);report['NewFileWinsLateOldRead']=True
- page=fresh();choose(page,late);page.wait_for_function('window.__pendingFiles.length===1');field(page).focus();page.keyboard.type('newer');released(page,'reject');check_value(page,'newer');expect(page.get_by_text('Could not read that token file. Choose it again.',exact=True)).to_have_count(0);report['NewTypingIgnoresLateFileError']=True
+ page=fresh();choose(page,late);pending_file_read(page);expect(page.get_by_role('button',name='Open sandbox',exact=True)).to_be_disabled();choose(page,valid);loaded(page);released(page);check_value(page,token);report['NewFileWinsLateOldRead']=True
+ page=fresh();choose(page,late);pending_file_read(page);field(page).focus();page.keyboard.type('newer');released(page,'reject');check_value(page,'newer');expect(page.get_by_text('Could not read that token file. Choose it again.',exact=True)).to_have_count(0);report['NewTypingIgnoresLateFileError']=True
  # Clipboard seeding is confined to a separate SETUP context. TEST stays default.
  seed=browser.new_context(permissions=['clipboard-read','clipboard-write']);contexts.append(seed);setup=seed.new_page();setup.goto(endpoint+'/_simulator/login');setup.evaluate('(v)=>navigator.clipboard.writeText(v)',token)
- page=fresh();choose(page,late);page.wait_for_function('window.__pendingFiles.length===1');field(page).focus();page.keyboard.press('Control+V');check_value(page,token);released(page,'reject');check_value(page,token);expect(page.get_by_text('Could not read that token file. Choose it again.',exact=True)).to_have_count(0);report['ActualNativePasteInvalidatesFileRead']=True
- page=fresh();choose(page,late);page.wait_for_function('window.__pendingFiles.length===1');page.get_by_role('button',name='日本語',exact=True).click();released(page,'reject');expect(page.get_by_text('トークンファイルを読み取れませんでした。選び直してください。',exact=True)).to_be_visible();page.get_by_role('button',name='English',exact=True).click();expect(page.get_by_text('Could not read that token file. Choose it again.',exact=True)).to_be_visible();report['CurrentFileFailureVisibleAndLanguageDoesNotRemount']=True
- page=fresh();choose(page,late);page.wait_for_function('window.__pendingFiles.length===1');page.goto(endpoint+'/_simulator/login');check_value(page,'');report['NavigationDoesNotKeepSelectedCredential']=True
+ page=fresh();choose(page,late);pending_file_read(page);field(page).focus();page.keyboard.press('ControlOrMeta+V');check_value(page,token);released(page,'reject');check_value(page,token);expect(page.get_by_text('Could not read that token file. Choose it again.',exact=True)).to_have_count(0);report['ActualNativePasteInvalidatesFileRead']=True
+ page=fresh();choose(page,late);pending_file_read(page);page.get_by_role('button',name='日本語',exact=True).click();released(page,'reject');expect(page.get_by_text('トークンファイルを読み取れませんでした。選び直してください。',exact=True)).to_be_visible();page.get_by_role('button',name='English',exact=True).click();expect(page.get_by_text('Could not read that token file. Choose it again.',exact=True)).to_be_visible();report['CurrentFileFailureVisibleAndLanguageDoesNotRemount']=True
+ page=fresh();choose(page,late);pending_file_read(page);page.goto(endpoint+'/_simulator/login');check_value(page,'');report['NavigationDoesNotKeepSelectedCredential']=True
  page=fresh();axe=Path(os.environ['AXE_SCRIPT']);assert hashlib.sha256(axe.read_bytes()).hexdigest()==json.loads((axe.parent/'provenance.json').read_text())['bundleSha256']
  for width in (1440,390):
   page.set_viewport_size({'width':width,'height':1000});assert_reflow(page);page.evaluate(axe.read_text());violations=page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})")['violations'];assert not violations,'Login file UI axe violations';page.screenshot(path=str(REPORTS/f'login-token-file-{width}.png'),full_page=True,animations='disabled')

@@ -58,12 +58,29 @@ def run():
                 page.get_by_role("menuitem", name="Key Management Service", exact=True).click()
             assert keys_response.value.status==200
             expect(page.get_by_role("heading", name=re.compile(r"^Customer managed keys"))).to_be_visible()
+            expect(page.locator('[data-cloudwatch-motion]')).to_have_count(0)
+            assert not page.evaluate("document.body.classList.contains('awsui-motion-disabled')"), 'CloudWatch motion escaped its retired view'
             expect(page.get_by_role("table", name="Customer managed keys", exact=True)).to_be_visible()
             expect(page.get_by_role("heading", name="No customer managed keys", exact=True)).to_be_visible()
             expect(page.get_by_role("button", name="Refresh keys", exact=True)).to_be_enabled()
             page.get_by_role("button", name="Services", exact=True).click()
             page.get_by_role("menuitem", name="CloudWatch Logs", exact=True).click()
             expect(page.get_by_role("heading", name=re.compile(r"^Log groups"))).to_be_visible()
+            # Sample the normal first180ms rather than disabling browser
+            # animation or retrying a failed contrast assertion.
+            samples = page.evaluate("""() => new Promise(resolve => {
+                const start=performance.now(), samples=[];
+                function sample(){
+                    const root=document.querySelector('[data-cloudwatch-motion]');
+                    const alert=root?.querySelector('[class*="awsui_alert_"]');
+                    samples.push({opacity:alert?getComputedStyle(alert).opacity:null,
+                        scoped:!!root?.classList.contains('awsui-motion-disabled'),
+                        bodyDisabled:document.body.classList.contains('awsui-motion-disabled')});
+                    if(performance.now()-start<180)requestAnimationFrame(sample);else resolve(samples);
+                }sample();
+            })""")
+            assert samples and all(s['opacity']=='1' and s['scoped'] and not s['bodyDisabled'] for s in samples), 'CloudWatch alert lost first-paint contrast or changed global motion'
+            (REPORTS/"cloudwatch-initial-motion.json").write_text(json.dumps(samples,indent=2)+"\n")
             audit("log-groups")
             page.get_by_role("button", name="Create log group", exact=True).click()
             page.get_by_label("Log group name", exact=True).fill("/aws/console-example")

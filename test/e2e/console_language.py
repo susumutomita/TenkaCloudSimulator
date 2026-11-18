@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import sys
 import tempfile
 import time
 from urllib.parse import urlsplit
@@ -88,11 +89,18 @@ def run_console_language():
                         services.focus(); services.press('Enter')
                         search = page.get_by_role('searchbox', name=('サービスを検索:' if current == 'ja' else 'Search services in')+' '+provider_name, exact=True)
                         expect(search).to_be_focused(); search.fill(service_name)
-                        # Home/End inside a text input edit its caret. They must
-                        # neither move focus into the menu nor select a service.
-                        search.press('Home'); expect(search).to_be_focused()
+                        # macOS Home/End scroll a scrollable document. Neither
+                        # key may be consumed by the service menu on any OS.
+                        search.evaluate("el=>{window.__searchNativeKeys=[];el.addEventListener('keydown',event=>window.__searchNativeKeys.push(event));}")
+                        for key in ('Home', 'End'):
+                            search.press(key); expect(search).to_be_focused()
+                            expect(search).to_have_value(service_name)
+                        assert search.evaluate("window.__searchNativeKeys.length===2 && window.__searchNativeKeys.every(event=>!event.defaultPrevented)"), 'Service menu consumed native Home/End'
+                        # Retain exact caret bounds using each OS's native
+                        # line-editing shortcuts, without setting selection.
+                        search.press('Meta+ArrowLeft' if sys.platform == 'darwin' else 'Home'); expect(search).to_be_focused()
                         assert search.evaluate('(el)=>el.selectionStart===0 && el.selectionEnd===0'), 'Home must retain native search cursor editing'
-                        search.press('End'); expect(search).to_be_focused()
+                        search.press('Meta+ArrowRight' if sys.platform == 'darwin' else 'End'); expect(search).to_be_focused()
                         assert search.evaluate('(el)=>el.selectionStart===el.value.length && el.selectionEnd===el.value.length'), 'End must retain native search cursor editing'
                         expect(search).to_have_value(service_name)
                         item = page.get_by_role('menuitem', name=service_name, exact=True)

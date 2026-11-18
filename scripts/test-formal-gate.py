@@ -3459,7 +3459,7 @@ class FormalGateTests(unittest.TestCase):
             load_registry(self.root)
 
     def test_guesttcp_exact_dependency_pins_and_checksums_are_required(self):
-        expected = {'gvisor.dev/gvisor': ['gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8 h1:Zy8IV/+FMLxy6j6p87vk/vQGKcdnbprwjTxc8UiUtsA=', 'gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8/go.mod h1:QkHjoMIBaYtpVufgwv3keYAbln78mBoCuShZrPrer1Q='], 'github.com/google/btree': ['github.com/google/btree v1.1.2 h1:xf4v41cLI2Z6FxbKm+8Bu+m8ifhj15JuZ9sa0jZCMUU=', 'github.com/google/btree v1.1.2/go.mod h1:qOPhT0dTNdNzV6Z/lhRX0YXUafgPLFUh+gZMl761Gm4='], 'golang.org/x/exp': ['golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa h1:FRnLl4eNAQl8hwxVVC17teOw8kdjVDVAiFMtgUdTSRQ=', 'golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa/go.mod h1:zk2irFbV9DP96SEBUUAy67IdHUaZuSnrz1n472HUCLE='], 'golang.org/x/time': ['golang.org/x/time v0.12.0 h1:ScB/8o8olJvc+CQPWrK3fPZNfh7qgwCrY0zJmoEQLSE=', 'golang.org/x/time v0.12.0/go.mod h1:CDIdPxbZBQxdj6cxyCIdrNogrJKMJ7pr37NYpMcMDSg=']}
+        expected = {'gvisor.dev/gvisor': ['gvisor.dev/gvisor v0.0.0-20260909235104-1db01ca840f4 h1:IyKvejmukmnokiyneuLVIMiFYlnRJEy2cceShDCA/3Y=', 'gvisor.dev/gvisor v0.0.0-20260909235104-1db01ca840f4/go.mod h1:8aLQqUBHDH8fY5y60lzmwDpMMbQCcT3EBfoSwhfaGCY='], 'github.com/google/btree': ['github.com/google/btree v1.1.2 h1:xf4v41cLI2Z6FxbKm+8Bu+m8ifhj15JuZ9sa0jZCMUU=', 'github.com/google/btree v1.1.2/go.mod h1:qOPhT0dTNdNzV6Z/lhRX0YXUafgPLFUh+gZMl761Gm4='], 'golang.org/x/exp': ['golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc h1:TS73t7x3KarrNd5qAipmspBDS1rkMcgVG/fS1aRb4Rc=', 'golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc/go.mod h1:A+z0yzpGtvnG90cToK5n2tu8UJVP2XUATh+r+sfOOOc='], 'golang.org/x/time': ['golang.org/x/time v0.15.0 h1:bbrp8t3bGUeFOx08pvsMYRTCVSMk89u4tKbNOZbp88U=', 'golang.org/x/time v0.15.0/go.mod h1:Y4YMaQmXwGQZoFaVFk4YpCt4FLQMYKZe9oeV/f4MSno=']}
         original_mod = (self.root / 'go.mod').read_text()
         original_sum = (self.root / 'go.sum').read_text()
         for module, lines in expected.items():
@@ -3489,7 +3489,7 @@ class FormalGateTests(unittest.TestCase):
     def test_guesttcp_require_parser_rejects_commented_pin_spoof(self):
         original = (self.root / 'go.mod').read_text()
         module = 'gvisor.dev/gvisor'
-        version = 'v0.0.0-20260224225140-573d5e7127a8'
+        version = 'v0.0.0-20260909235104-1db01ca840f4'
         pin = module + ' ' + version
         for comment, expected in (('/*\n' + pin + '\n*/', 'malformed guesttcp module comment'), ('// ' + pin, 'reviewed module pin changed')):
             altered = original.replace(pin, '') + '\n' + comment + '\nrequire ' + module + ' v0.0.0\n'
@@ -3499,13 +3499,13 @@ class FormalGateTests(unittest.TestCase):
 
     def test_guesttcp_require_parser_accepts_real_single_line(self):
         original = (self.root / 'go.mod').read_text()
-        pin = 'gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8'
+        pin = 'gvisor.dev/gvisor v0.0.0-20260909235104-1db01ca840f4'
         (self.root / 'go.mod').write_text(original.replace(pin, '') + '\nrequire ' + pin + ' // selected\n')
         validate_guesttcp_module_pins(self.root)
 
     def test_guesttcp_require_parser_rejects_duplicates_and_malformed_input(self):
         original = (self.root / 'go.mod').read_text()
-        pin = 'gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8'
+        pin = 'gvisor.dev/gvisor v0.0.0-20260909235104-1db01ca840f4'
         for suffix in ('require ' + pin, 'require (', '/* unclosed', 'require extra tokens v1.0.0', 'unknown directive'):
             (self.root / 'go.mod').write_text(original + '\n' + suffix + '\n')
             with self.subTest(suffix=suffix), self.assertRaises(GateError):
@@ -3513,7 +3513,7 @@ class FormalGateTests(unittest.TestCase):
 
     def test_guesttcp_altered_pin_blocks_suite_before_tlc(self):
         original = (self.root / 'go.mod').read_text()
-        (self.root / 'go.mod').write_text(original.replace('gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8', 'gvisor.dev/gvisor v0.0.0'))
+        (self.root / 'go.mod').write_text(original.replace('gvisor.dev/gvisor v0.0.0-20260909235104-1db01ca840f4', 'gvisor.dev/gvisor v0.0.0'))
         # Registry/schema and historical applicability do not enforce current pins.
         load_registry(self.root)
         with patch('formal_model_gate.subprocess.run') as process:
@@ -3530,7 +3530,7 @@ class FormalGateTests(unittest.TestCase):
         namespace = dict(vars(gate))
         exec(compile(source.replace(call, ''), '<removed-pin-guard>', 'exec'), namespace)
         original = (self.root / 'go.mod').read_text()
-        (self.root / 'go.mod').write_text(original.replace('gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8', 'gvisor.dev/gvisor v0.0.0'))
+        (self.root / 'go.mod').write_text(original.replace('gvisor.dev/gvisor v0.0.0-20260909235104-1db01ca840f4', 'gvisor.dev/gvisor v0.0.0'))
         jar = self.root / 'fixture.jar'
         jar.write_bytes(b'controlled guard-removal fixture only')
         (self.root / 'formal/tla2tools.sha256').write_text(hashlib.sha256(jar.read_bytes()).hexdigest() + '  tla2tools.jar\n')
@@ -3543,7 +3543,7 @@ class FormalGateTests(unittest.TestCase):
         content = {name: (self.root / name).read_bytes() for name in ('go.mod', 'go.sum')}
         (self.root / 'go.mod').write_text('unrelated current worktree')
         validate_guesttcp_module_pins(self.root, content)
-        content['go.mod'] = content['go.mod'].replace(b'gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8', b'gvisor.dev/gvisor v0.0.0')
+        content['go.mod'] = content['go.mod'].replace(b'gvisor.dev/gvisor v0.0.0-20260909235104-1db01ca840f4', b'gvisor.dev/gvisor v0.0.0')
         with self.assertRaisesRegex(GateError, 'reviewed module pin changed'):
             validate_guesttcp_module_pins(self.root, content)
 

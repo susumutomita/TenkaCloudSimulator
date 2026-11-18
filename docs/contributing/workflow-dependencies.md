@@ -50,10 +50,12 @@ calls in `release.yml` continue to use the caller's commit.
 
 ## Check rollout prerequisites and limits
 
-GitHub documents this feature for GitHub Enterprise Cloud. Confirm plan support
-and actual workflow execution before relying on runtime enforcement. If an
-organization or enterprise restricts allowed actions, confirm that the locked
-commit SHAs are allowed: tag-only allowlist entries do not match onboarded pins.
+GitHub's [October 28, 2026 GA announcement](https://github.blog/changelog/2026-10-28-github-actions-workflow-lockfiles-are-generally-available/)
+includes Free, Team, GitHub Enterprise Cloud, and Enterprise Cloud with data
+residency. The CLI supports github.com and *.ghe.com; GitHub Enterprise Server
+is unsupported. If an organization or enterprise restricts allowed actions,
+confirm that the locked commit SHAs are allowed: tag-only allowlist entries do
+not match onboarded pins.
 This change does not modify repository, organization, or enterprise settings,
 rulesets, required checks, or security policies. An administrator can evaluate
 the separate Require lockfile policy after confirming coverage and compatibility.

@@ -8,14 +8,18 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"golang.org/x/sys/unix"
+	"flag"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
+
+	"golang.org/x/sys/unix"
 )
 
 func TestDarwinBootstrapChild(t *testing.T) {
@@ -46,11 +50,61 @@ func bootstrapCommand(t *testing.T, mode string, f *os.File) (*exec.Cmd, *bytes.
 	t.Cleanup(cancel)
 	cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestDarwinBootstrapChild$")
 	cmd.Env = []string{"TCS_TEST_CLOCK_FD3=" + mode}
+	if testing.CoverMode() != "" {
+		dir := flag.Lookup("test.gocoverdir")
+		if dir == nil || dir.Value.String() == "" {
+			t.Fatal("covered bootstrap test requires the parent coverage directory")
+		}
+		cmd.Env = append(cmd.Env, "GOCOVERDIR="+dir.Value.String())
+	}
 	cmd.ExtraFiles = []*os.File{f}
 	output := new(bytes.Buffer)
 	cmd.Stdout = output
 	cmd.Stderr = output
 	return cmd, output
+}
+
+func TestDarwinBootstrapCoverageCountersJoinParent(t *testing.T) {
+	if testing.CoverMode() == "" {
+		t.Skip("requires coverage instrumentation")
+	}
+	file, err := os.CreateTemp(t.TempDir(), "rejected-file")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	cmd, output := bootstrapCommand(t, "regular", file)
+	if err := cmd.Run(); err != nil || output.Len() != 0 {
+		t.Fatal("coverage child must exit silently", err)
+	}
+	dir := flag.Lookup("test.gocoverdir").Value.String()
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), "covcounters.") && strings.Contains(file.Name(), fmt.Sprintf(".%d.", cmd.Process.Pid)) {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("child counters are missing from the parent report's input directory")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	tool := exec.CommandContext(ctx, filepath.Join(runtime.GOROOT(), "bin", "go"), "tool", "covdata", "func", "-i="+dir)
+	data, err := tool.CombinedOutput()
+	if err != nil {
+		t.Fatal("merge child coverage", err, string(data))
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) == 3 && fields[1] == "BootstrapInherited" && fields[2] == "100.0%" {
+			return
+		}
+	}
+	t.Fatal("merged child counters do not cover BootstrapInherited")
 }
 func TestDarwinPrivateInheritedPipeBootstrap(t *testing.T) {
 	read, write, e := os.Pipe()
