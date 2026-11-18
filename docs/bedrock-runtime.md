@@ -8,8 +8,8 @@ disabled, unmapped, missing or unreachable backend returns an error, never a
 made-up answer.
 
 This page covers the bounded contract of [Issue #453](https://github.com/susumutomita/TenkaCloudSimulator/issues/453)
-phases P0 and P1. The Apple Foundation Models backend (P2), streaming, tool use
-and Claude Code compatibility (P3) are **not implemented**; see
+phases P0–P2: Ollama and an optional Apple Foundation Models helper. Streaming,
+tool use and Claude Code compatibility (P3) are **not implemented**; see
 [What is not supported](#what-is-not-supported).
 
 ## Start it with Ollama
@@ -28,9 +28,10 @@ and Claude Code compatibility (P3) are **not implemented**; see
 
 | Flag | Meaning |
 | --- | --- |
-| `--bedrock-runtime-backend` | `ollama` or `apple`. Absent means disabled. `apple` currently refuses to start (see below). |
+| `--bedrock-runtime-backend` | `ollama` or `apple`. Absent means disabled. `apple` requires an explicitly configured native helper (see below). |
+| `--bedrock-apple-helper` | Absolute path to the trusted optional helper, used only with `apple`. No PATH search, environment discovery or automatic build. |
 | `--bedrock-ollama-url` | `http://<numeric loopback IP>:<port>`, default `http://127.0.0.1:11434`. Host names, HTTPS, credentials, paths, queries and non-loopback addresses are refused. |
-| `--bedrock-model` | Repeatable `MODEL_ID=LOCAL_MODEL`, 1–32 mappings. `MODEL_ID` uses the Bedrock foundation-model ID form, including geography-prefixed IDs such as `us.anthropic.…`. `LOCAL_MODEL` is an Ollama tag; `:cloud` and `-cloud` tags are refused because Ollama runs them remotely. |
+| `--bedrock-model` | Repeatable `MODEL_ID=LOCAL_MODEL`, 1–32 mappings. `MODEL_ID` uses the Bedrock foundation-model ID form, including geography-prefixed IDs such as `us.anthropic.…`. `LOCAL_MODEL` is `system` for Apple or an Ollama tag; `:cloud` and `-cloud` tags are refused because Ollama runs them remotely. |
 | `--bedrock-runtime-timeout` | Per-request generation deadline, 1s–5m, default 1m. |
 | `--bedrock-runtime-concurrency` | Simultaneous generations, 1–8, default 2. Extra requests fail at once with `ThrottlingException`; they are not queued. |
 
@@ -171,12 +172,81 @@ Ollama error bodies are never echoed, because they may quote the prompt.
 
 ## Apple Foundation Models
 
-`--bedrock-runtime-backend apple` is reserved for Apple's on-device
-Foundation Models. This build includes **no** macOS adapter: the native helper
-and build boundary have not been verified on supported Apple hardware and OS,
-so startup fails with "the Apple Foundation Models backend is unavailable in
-this build" on every platform. It never switches to Ollama or any other
-backend.
+`apple` uses only `SystemLanguageModel.default`, the on-device model. It does
+not use Private Cloud Compute. It requires an **Apple silicon Mac, macOS 27+
+and an already available Apple Intelligence model**. The simulator never enables
+Apple Intelligence, changes security/OS settings or downloads models. Availability
+is checked at startup and before every generation; device ineligibility,
+Apple Intelligence disabled, model not ready and unsupported OS fail explicitly.
+
+The native helper is a separate, optional executable. The normal `make build`
+still produces the same standalone `CGO_ENABLED=0` Go binary, including on Linux
+and Windows, and never requires Swift. Build the helper yourself on an Apple
+silicon Mac with Xcode's **macOS 27 SDK / Swift 6.4+**:
+
+```sh
+make build-apple-helper
+./dist/tenkacloud-apple-helper --check
+./dist/tenkacloud-simulator --state ./practice.db --token-file ./simulator-token \
+  --bedrock-runtime-backend apple \
+  --bedrock-apple-helper "$PWD/dist/tenkacloud-apple-helper" \
+  --bedrock-model anthropic.claude-3-haiku-20240307-v1:0=system
+```
+
+Only operator mapping to `system` is accepted. Missing helper, unsupported host,
+failed availability check or lost model availability never chooses Ollama, a
+cloud model or a fabricated answer. The shared authentication, IAM, request size,
+concurrency, deadline and shutdown admission rules remain in force.
+
+**Native boundary.** The trusted helper has the operator's native process
+privileges; this is not a guest-code sandbox. Use an executable you built and
+control. Go invokes the absolute path directly with `--check` or `--generate`,
+without a shell or inherited environment. A versioned JSON message travels over
+bounded stdin/stdout pipes, never prompt arguments, files or sockets. Stderr and
+unrecognized error details are discarded. Startup has a 10-second probe deadline;
+each generation uses a fresh process and in-memory session. Cancellation kills
+and reaps the helper. This bounds the helper process, not Apple's internal service
+scheduler. The native implementation makes no network requests, launches no
+children, serializes no transcript and adds no prompt/response logs. The OS and
+Apple framework remain outside the simulator's persistence guarantees.
+
+**Bounded differences from Ollama.** System instructions and previous user and
+assistant turns become typed transcript entries, preserving their roles. Apple
+supports temperature and either topP (greater than 0, at most 1) or topK; zero
+topP or combining topP and topK is refused
+with `ModelErrorException` (424). Its context window and guardrails remain in
+force: overlong context, refusals, unsupported language/options or native errors
+fail without truncating the supplied history or substituting text.
+
+The macOS 27 minimum is deliberate: its public
+[token usage API](https://developer.apple.com/documentation/foundationmodels/languagemodelsession/usage-swift.struct)
+provides actual input/output counts; earlier APIs cannot satisfy this adapter's
+truthful usage/termination contract. The framework exposes no public stop reason.
+A successful reply below the requested cap returns `end_turn` and those native
+counts. A reply **at the token cap is refused** with `ModelErrorException`, even
+if a natural end might coincide with the cap; the adapter does not guess
+`max_tokens`. Non-text transcript entries and generated reasoning are refused.
+These restrictions intentionally narrow the shared wire contract. Swift's SDK
+availability declarations and build boundary are described in
+[native/apple/README.md](../native/apple/README.md).
+
+Offline acceptance through the built binary and boto3 uses a synthetic helper:
+
+```sh
+make e2e-apple
+```
+
+On a supported Mac with the already available model, explicitly request real
+on-device acceptance (InvokeModel, Converse with history, sampling, token-cap
+refusal and no prompt/reply in SQLite):
+
+```sh
+make e2e-apple APPLE_HELPER="$PWD/dist/tenkacloud-apple-helper"
+```
+
+These tests send only synthetic content, omit generated text from their report,
+and perform no download or settings change. An unavailable real model fails the
+check; it is not replaced with the test double. Neither check verifies Claude Code.
 
 ## What is not supported
 
@@ -193,7 +263,7 @@ backend.
 
 ## Verification
 
-Tests use synthetic prompts and test doubles only:
+The default gates use synthetic prompts and test doubles:
 
 - `internal/inference`: URL and model-name validation, actual HTTP calls to a
   fake Ollama server (request body, options, every failure mapping, no proxy,
@@ -213,5 +283,7 @@ Tests use synthetic prompts and test doubles only:
   shutdown, slots and truthful results, with fourteen sensitivity controls
   ([model contract](formal-bedrock-runtime.md)).
 
-None of these use a real model, Apple hardware or Claude Code. Results with a
-real Ollama model are not part of these checks.
+The default gates do not use a real model or verify Claude Code. The optional
+`e2e-apple` command above distinguishes a process double from actual Apple
+hardware/model verification. Results with a real Ollama model are not part of
+these checks.

@@ -20,11 +20,11 @@ const (
 // bedrockCLIFlags holds parsed values only. It contacts no backend, opens no
 // listener and reads no environment variable; run validates before startup.
 type bedrockCLIFlags struct {
-	backend, ollamaURL                                        string
-	models                                                    []string
-	timeout                                                   time.Duration
-	concurrency                                               int
-	backendSet, urlSet, modelsSet, timeoutSet, concurrencySet bool
+	backend, ollamaURL, appleHelper                                           string
+	models                                                                    []string
+	timeout                                                                   time.Duration
+	concurrency                                                               int
+	backendSet, urlSet, appleHelperSet, modelsSet, timeoutSet, concurrencySet bool
 }
 
 // registerBedrockFlags adds the opt-in Bedrock Runtime flags. Every flag
@@ -49,6 +49,10 @@ func registerBedrockFlags(set *flag.FlagSet) (*bedrockCLIFlags, error) {
 	set.Func("bedrock-ollama-url", "Numeric-loopback Ollama URL (default "+inference.DefaultOllamaURL+"; no proxy, redirect or remote host)", func(value string) error {
 		values.ollamaURL = value
 		return once(&values.urlSet)
+	})
+	set.Func("bedrock-apple-helper", "Absolute path to the optional trusted macOS Foundation Models helper (Apple silicon, macOS 27+)", func(value string) error {
+		values.appleHelper = value
+		return once(&values.appleHelperSet)
 	})
 	set.Func("bedrock-model", "Repeatable operator mapping MODEL_ID=LOCAL_MODEL, for example anthropic.claude-3-haiku-20240307-v1:0=llama3.2:1b (models are never downloaded)", func(value string) error {
 		values.models, values.modelsSet = append(values.models, value), true
@@ -77,7 +81,7 @@ func registerBedrockFlags(set *flag.FlagSet) (*bedrockCLIFlags, error) {
 // A selected backend that is unavailable fails startup; nothing falls back.
 func validateBedrockFlags(values bedrockCLIFlags, unsafeNoAuth bool) (*aws.BedrockRuntime, error) {
 	if !values.backendSet {
-		if values.urlSet || values.modelsSet || values.timeoutSet || values.concurrencySet {
+		if values.urlSet || values.appleHelperSet || values.modelsSet || values.timeoutSet || values.concurrencySet {
 			return nil, errors.New("Bedrock Runtime flags require --bedrock-runtime-backend")
 		}
 		return nil, nil
@@ -88,6 +92,9 @@ func validateBedrockFlags(values bedrockCLIFlags, unsafeNoAuth bool) (*aws.Bedro
 	var backend inference.Backend
 	switch values.backend {
 	case "ollama":
+		if values.appleHelperSet {
+			return nil, errors.New("--bedrock-apple-helper applies only to --bedrock-runtime-backend apple")
+		}
 		raw := values.ollamaURL
 		if !values.urlSet {
 			raw = inference.DefaultOllamaURL
@@ -101,7 +108,10 @@ func validateBedrockFlags(values bedrockCLIFlags, unsafeNoAuth bool) (*aws.Bedro
 		if values.urlSet {
 			return nil, errors.New("--bedrock-ollama-url applies only to --bedrock-runtime-backend ollama")
 		}
-		apple, err := inference.AppleFoundationModels()
+		if !values.appleHelperSet {
+			return nil, fmt.Errorf("--bedrock-runtime-backend apple: %w", inference.ErrAppleUnavailable)
+		}
+		apple, err := inference.NewAppleFoundationModels(values.appleHelper)
 		if err != nil {
 			return nil, fmt.Errorf("--bedrock-runtime-backend apple: %w", err)
 		}

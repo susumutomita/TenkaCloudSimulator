@@ -13,6 +13,19 @@ build:
 	mkdir -p dist
 	CGO_ENABLED=0 $(GO) build -trimpath -ldflags='-s -w' -o $(BINARY) ./cmd/simulator
 
+# Optional native sidecar. Never a dependency of build/test/cross-check.
+.PHONY: build-apple-helper
+build-apple-helper:
+	@test "$$(uname -s)-$$(uname -m)" = Darwin-arm64 || { echo 'Apple silicon macOS required'; exit 1; }
+	mkdir -p dist
+	xcrun swiftc -module-cache-path dist/apple-module-cache -parse-as-library -O -target arm64-apple-macos26.0 native/apple/main.swift -o dist/tenkacloud-apple-helper
+
+# No helper means a synthetic process double; set APPLE_HELPER explicitly for
+# real on-device acceptance. Neither target downloads a model or enables AI.
+.PHONY: e2e-apple
+e2e-apple: build
+	$(PYTHON) test/e2e/apple_foundation_models.py $(if $(APPLE_HELPER),--helper "$(APPLE_HELPER)")
+
 dev: build
 	./$(BINARY)
 

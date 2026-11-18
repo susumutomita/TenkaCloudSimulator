@@ -78,7 +78,7 @@ def free_port():
 
 
 @contextlib.contextmanager
-def simulator(directory, extra):
+def simulator(directory, extra, private_texts=()):
     port = free_port()
     endpoint = 'http://127.0.0.1:%d' % port
     token_file = Path(directory) / 'operator-token'
@@ -106,6 +106,7 @@ def simulator(directory, extra):
         stdout, stderr = process.communicate(timeout=10)
         assert process.returncode == 0, (process.returncode, stderr)
         assert PROMPT not in stdout + stderr and REPLY not in stdout + stderr, 'inference text was logged'
+        assert all(text not in stdout + stderr for text in private_texts if len(text) >= 8), 'inference text was logged'
 
 
 def refused(extra, expected):
