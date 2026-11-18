@@ -6,14 +6,21 @@
       "path": "test/battle/image/test_rehearsal_cleanup.py",
       "sha256": "68db3db251403de84cf3222a05e3ed6c403e4a30fb532109ffade7aa8c44606a",
       "disposition": "test-support",
-      "reason": "Offline regression oracle executes the real rehearsal observation/check via AST extraction without script startup, simulator, API or VM access. It checks error classification, bounded timeout and failure propagation; it changes no production state transition and makes no finite-model or real cleanup claim.",
+      "reason": "Offline independently reviewed regression oracle for the real rehearsal boundaries via AST isolation without startup imports, API/VM access or child execution. Tests preserve verdict/scoring/cleanup evidence and reject error-as-absence or raw/unknown public diagnostics with synthetic canaries; no runtime/model transition change or actual cleanup claim.",
+      "models": []
+    },
+    {
+      "path": "test/battle/image/test_rehearsal_public_output.py",
+      "sha256": "e6cd4e634001c48e6177076cb79c7e45172045a7300918c748ca1fd0684d2276",
+      "disposition": "test-support",
+      "reason": "Offline independently reviewed regression oracle for the real rehearsal boundaries via AST isolation without startup imports, API/VM access or child execution. Tests preserve verdict/scoring/cleanup evidence and reject error-as-absence or raw/unknown public diagnostics with synthetic canaries; no runtime/model transition change or actual cleanup claim.",
       "models": []
     },
     {
       "path": "test/battle/rehearsal.py",
-      "sha256": "e3d3a4990d4e9cf977446c28f2045bb7c777fd598f1c6d5e13dd9e13a470d2ba",
+      "sha256": "a9ea66d5a07a6ce5575fd5af9f40c421d4402ff5d3a3555b0c3bb93955f7c9bc",
       "disposition": "test-support",
-      "reason": "Host-side Battle test driver only: stop treating unavailable DescribeStacks observations as deletion success; accept only DELETE_COMPLETE or the explicit local missing-stack response. No simulator runtime, CloudFormation resource lifecycle, authority or formal model changes. Offline tests cover this verifier; actual VM/resource cleanup and whole Battle acceptance remain unverified.",
+      "reason": "Host-side Battle verifier only: require explicit stack absence and publish a finite allowlist of typed diagnostics instead of raw guest/API/exception/child output. Original execution, score arithmetic and cleanup predicates are retained; no simulator runtime, authority or finite model transition changes. Offline canary/error/cleanup tests are separate from real VM/resource cleanup.",
       "models": []
     }
   ]
