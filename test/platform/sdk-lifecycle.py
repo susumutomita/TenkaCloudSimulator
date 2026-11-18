@@ -1,4 +1,4 @@
-"""Verify CloudFormation's byte limit and an ordinary application through local AWS APIs."""
+"""Verify local CloudFormation application and network SDK contracts in the PR gate."""
 import json
 from pathlib import Path
 import sys
@@ -12,6 +12,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "test/e2e"))
 from check import running
 from cloudformation_ssm_parameters import client
+# unittest.main discovers these four tests alongside StackLifecycle. The existing
+# required platform-audit PR job invokes this runner; failures share its exit code.
+from ec2_network_contract import NetworkContract
 
 
 def template(description):
