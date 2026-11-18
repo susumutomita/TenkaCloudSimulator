@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"net/netip"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -105,6 +106,28 @@ func TestPersistentConstructorPreservesOwnership(t *testing.T) {
 }
 
 func TestPersistentProbeRetirementPreservesSharedService(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		workers int
+	}{
+		{"session capacity", 1},
+		{"worker capacity", maxWorkers/guestnet.MaxActiveProbeSessions + 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if len(slots) != 0 || passiveWorkerCount() != 0 {
+				t.Fatal("prior engine or worker debt was not retired")
+			}
+			previous := runtime.GOMAXPROCS(tc.workers)
+			t.Cleanup(func() { runtime.GOMAXPROCS(previous) })
+			// Exercise each real limit separately; neither capacity is changed.
+			active := min(guestnet.MaxActiveProbeSessions, maxWorkers/tc.workers)
+			testPersistentProbeRetirementPreservesSharedService(t, active, tc.workers)
+		})
+	}
+}
+
+func testPersistentProbeRetirementPreservesSharedService(t *testing.T, active, workers int) {
+	t.Helper()
 	baseline := len(slots)
 	tr, remote, s := persistentFixture(t, memoryCommitter)
 	if s.lifetimeCalls.Load() != 1 {
@@ -117,17 +140,26 @@ func TestPersistentProbeRetirementPreservesSharedService(t *testing.T) {
 		t.Fatal("implicit default engine", err)
 	}
 	var probes []*ProbeExchange
-	for range guestnet.MaxActiveProbeSessions {
+	for range active {
 		probes = append(probes, persistentProbe(t, tr, context.Background(), 80))
 	}
+	if passiveWorkerCount() != active*workers {
+		t.Fatal("live child worker reservations do not match admitted engines")
+	}
 	if _, err := tr.OpenProbe(context.Background(), 80); !errors.Is(err, ErrCapacity) {
-		t.Fatal("active child limit", err)
+		t.Fatal("effective child/worker limit", err)
+	}
+	if passiveWorkerCount() != active*workers || len(slots) != baseline+active {
+		t.Fatal("rejected admission changed worker or engine reservations")
 	}
 	first := probes[0].session.Route().LocalPort
 	for _, p := range probes {
 		if err := p.Close(); err != nil {
 			t.Fatal(err)
 		}
+	}
+	if passiveWorkerCount() != 0 || len(slots) != baseline {
+		t.Fatal("retired probes retained worker or engine capacity")
 	}
 	next := persistentProbe(t, tr, context.Background(), 8080)
 	if next.session.Route().LocalPort <= first {
@@ -147,7 +179,7 @@ func TestPersistentProbeRetirementPreservesSharedService(t *testing.T) {
 	if err := tr.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if len(slots) != baseline || s.closes.Load() != 1 {
+	if len(slots) != baseline || passiveWorkerCount() != 0 || s.closes.Load() != 1 {
 		t.Fatal("owned child/service cleanup lost")
 	}
 }
