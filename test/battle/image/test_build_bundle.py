@@ -1,4 +1,6 @@
 """Offline checks for build_bundle.py helpers; nothing is downloaded, built or booted."""
+import copy
+import json
 import pathlib
 import sys
 import tempfile
@@ -10,6 +12,35 @@ import build_bundle  # noqa: E402
 
 
 class BuildBundleHelperTests(unittest.TestCase):
+    def test_overlay_provenance_matches_current_inputs(self):
+        receipt = json.loads((pathlib.Path(build_bundle.__file__).with_name('session-overlay-provenance.json')).read_text())
+        user_data = pathlib.Path(build_bundle.__file__).with_name('builder-user-data.sh').read_text()
+        build_bundle.validate_overlay_provenance(build_bundle.REPO, receipt, user_data)
+
+    def test_overlay_provenance_rejects_stale_or_forged_inputs(self):
+        receipt = json.loads((pathlib.Path(build_bundle.__file__).with_name('session-overlay-provenance.json')).read_text())
+        user_data = pathlib.Path(build_bundle.__file__).with_name('builder-user-data.sh').read_text()
+        mutations = [
+            ('version', 2), ('toolchain', 'go1.26.2'),
+            ('target', {'GOOS': 'linux', 'GOARCH': 'arm64', 'CGO_ENABLED': '0', 'GOAMD64': 'v1'}),
+            ('flags', ['-trimpath', '-buildvcs=false', '-ldflags=-buildid=']),
+            ('overlay_sha256', '0' * 64), ('binary_sha256', 'not-a-digest'),
+            ('source_sha256', {**receipt['source_sha256'], 'go.mod': '0' * 64}),
+            ('source_sha256', {k: v for k, v in receipt['source_sha256'].items() if k != 'go.mod'}),
+            ('source_sha256', {**receipt['source_sha256'], '../outside': '0' * 64}),
+        ]
+        for key, value in mutations:
+            with self.subTest(field=key, value=value):
+                changed = copy.deepcopy(receipt)
+                changed[key] = value
+                with self.assertRaises(SystemExit):
+                    build_bundle.validate_overlay_provenance(build_bundle.REPO, changed, user_data)
+        # A Go directive change is enough to change the relay build ID even when
+        # its actual package/dependency source stays the same.
+        with patch.object(build_bundle, 'sha256', side_effect=lambda p: '0' * 64 if p.name == 'go.mod' else receipt['source_sha256'][str(p.relative_to(build_bundle.REPO))]):
+            with self.assertRaisesRegex(SystemExit, 'source drift: go.mod'):
+                build_bundle.validate_overlay_provenance(build_bundle.REPO, receipt, user_data)
+
     def test_overlay_pin_is_read_from_the_committed_user_data(self):
         user_data = (pathlib.Path(build_bundle.__file__).with_name('builder-user-data.sh')).read_text()
         self.assertRegex(build_bundle.pinned_overlay_digest(user_data), r'^[0-9a-f]{64}$')
