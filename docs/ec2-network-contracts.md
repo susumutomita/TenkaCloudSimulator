@@ -1,11 +1,13 @@
 # Bounded EC2/CloudFormation network contracts (#467)
 
 Owner: Issue #467 contract-test worker. Base: main
-`4be504d6eaf42c4f7e2d939d3b325e44374d802e`; dedicated branch
+`d2dd8bca79d60b3b76db6ee34c4bbac3e839897d`; dedicated branch
 `test/467-route-contracts`. Ownership is limited to this document,
 `test/e2e/ec2_network_contract.py` and
-`test/e2e/fixtures/ec2-network-contract.json`. No runtime, compiler, shared
-Gateway, CI, authentication, isolation or coverage gate changes.
+`test/e2e/fixtures/ec2-network-contract.json`, the registration in
+`test/platform/sdk-lifecycle.py`, and this PR's `formal/applicability.json`.
+No runtime, compiler, shared Gateway, workflow, dependency, authentication,
+isolation or coverage gate changes.
 
 ## Oracle and scope
 
@@ -51,6 +53,7 @@ From a checkout with the existing `scripts/requirements-test.txt` dependencies:
 ```sh
 make build
 python3 test/e2e/ec2_network_contract.py
+python3 test/platform/sdk-lifecycle.py -v
 make before-commit
 make e2e
 ```
@@ -61,7 +64,15 @@ temporary DB and token authority using the existing E2E harness; every SDK clien
 has an explicit local endpoint, dummy credentials, disabled proxies and retries.
 Cleanup is registered before assertions; the harness terminates only its own
 process. A failing assertion is never converted to a skip or success. This focused
-script is manually invoked; global CI was deliberately left unchanged.
+script remains directly runnable and its four TestCase methods are also imported
+by `test/platform/sdk-lifecycle.py`. `unittest.main` discovers them alongside the
+two existing stack tests and returns nonzero on any failure/error. The existing
+`.github/workflows/ci.yml` `platform-audit` job invokes that runner with `-v`
+without a release/tag condition on every `pull_request`; the aggregate `ci` job
+requires `platform-audit` to succeed. The heavier `e2e` job is release/manual only
+and is not the PR protection used here. Registration adds four short authenticated
+loopback CLI lifecycles (about 3–11 seconds in focused local runs); it adds no
+browser, VM, AWS or AWS Emulator execution and no new CI job.
 
 Outputs/GetAtt agreement cannot establish actual route-table/association native
 Describe consistency because those endpoints are unavailable on this base. Full
