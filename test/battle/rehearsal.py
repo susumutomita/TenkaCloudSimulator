@@ -299,7 +299,7 @@ def sdk_credentials(c):
 
 
 def process_table():
-    """(pid, argv0, full command line) for every process; /proc on Linux, ps on macOS."""
+    """(pid, argv, lossy) observations; only Linux preserves argv boundaries."""
     if os.path.isdir('/proc'):
         for pid in os.listdir('/proc'):
             if not pid.isdigit():
@@ -309,26 +309,79 @@ def process_table():
             except OSError:
                 continue
             if raw and raw[0]:
-                yield int(pid), raw[0], b' '.join(raw)
+                if raw[-1] == b'':
+                    raw.pop()
+                yield int(pid), raw, False
         return
     listing = subprocess.run(['ps', '-axww', '-o', 'pid=,command='], capture_output=True, check=True).stdout
     for line in listing.splitlines():
         pid, _, command = line.strip().partition(b' ')
         if pid.isdigit() and command:
-            yield int(pid), command.split(b' ', 1)[0], command
+            yield int(pid), command.split(), True
+
+
+def qemu_executable(value):
+    return re.fullmatch(rb'qemu-system-[A-Za-z0-9_-]+', os.path.basename(value)) is not None
+
+
+def owned_guest_processes(wanted_role):
+    """Observe a private QMP path, never infer authority to signal a PID.
+
+    ps cannot recover argument boundaries. Reject ambiguous candidates rather
+    than certifying cleanup from a guessed split; never include raw argv in the
+    diagnostic. Linux keeps the kernel's NUL-separated argv, including spaces.
+    """
+    runtime = str(RUNTIME_DIR).encode()
+    result = []
+    for pid, argv, lossy in process_table():
+        role = ('qemu' if qemu_executable(argv[0]) else
+                'supervisor' if len(argv) > 3 and argv[1] == b'__tenkacloud-guest-supervisor'
+                and argv[2] in (b'none', b'fd3') and qemu_executable(argv[3]) else None)
+        if role is not None and role != wanted_role:
+            continue
+        if role is None and not any(qemu_executable(value) for value in argv):
+            continue
+        qmp = [argv[i + 1] if i + 1 < len(argv) else b''
+               for i, value in enumerate(argv) if value == b'-qmp']
+        if not qmp:
+            continue
+        own = False
+        for endpoint in qmp:
+            prefix, suffix = b'unix:', b',server=on,wait=off'
+            # This rehearsal owns only its private Unix QMP sockets. A TCP
+            # monitor, or a Unix socket under another root, is not ours even
+            # when that unrelated VM uses different QMP options.
+            if endpoint.startswith(b'tcp:'):
+                continue
+            if not endpoint.startswith(prefix):
+                raise RuntimeError('process ownership observation ambiguous')
+            if lossy and any(value in runtime for value in (b' ', b'\t', b'\n', b'\r', b'"', b"'", b'\\')):
+                raise RuntimeError('process ownership observation ambiguous')
+            path = endpoint[len(prefix):]
+            if not path.startswith(runtime + b'/'):
+                continue
+            if not endpoint.endswith(suffix):
+                raise RuntimeError('process ownership observation ambiguous')
+            path = endpoint[len(prefix):-len(suffix)]
+            if (os.path.normpath(path) != path or not path.endswith(b'/qmp.sock')
+                    or (lossy and any(value in path for value in (b'"', b"'", b'\\')))):
+                raise RuntimeError('process ownership observation ambiguous')
+            own = True
+        if own:
+            if role is None or len(qmp) != 1:
+                raise RuntimeError('process ownership observation ambiguous')
+            result.append(pid)
+    return result
 
 
 def qemu_processes():
     """QEMU guests of this run."""
-    runtime = str(RUNTIME_DIR).encode()
-    return [pid for pid, argv0, command in process_table() if runtime in command and b'qemu-system' in argv0]
+    return owned_guest_processes('qemu')
 
 
 def supervisor_processes():
     """Darwin child supervisors of this run (none exist on Linux)."""
-    runtime = str(RUNTIME_DIR).encode()
-    return [pid for pid, argv0, command in process_table()
-            if runtime in command and b'__tenkacloud-guest-supervisor' in command and b'qemu-system' not in argv0]
+    return owned_guest_processes('supervisor')
 
 
 def runtime_listing():
