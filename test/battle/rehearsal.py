@@ -653,13 +653,20 @@ try:
     while time.time() < deadline:
         try:
             found = describe.describe_stacks(StackName=stack_id)['Stacks']
-            final = found[0]['StackStatus'] if found else 'GONE'
+            final = found[0]['StackStatus'] if found else 'UNKNOWN'
         except ClientError as error:
-            final = 'GONE:' + error.response['Error']['Code']
-        if final.startswith('GONE') or final in ('DELETE_COMPLETE', 'DELETE_FAILED'):
+            # Only the simulator's explicit named-stack absence proves deletion.
+            # Other API errors leave cleanup unconfirmed and must propagate.
+            detail = error.response.get('Error', {})
+            status = error.response.get('ResponseMetadata', {}).get('HTTPStatusCode')
+            if (detail.get('Code') != 'ValidationError'
+                    or detail.get('Message') != 'Stack does not exist.' or status != 400):
+                raise
+            final = 'GONE'
+        if final in ('GONE', 'DELETE_COMPLETE', 'DELETE_FAILED'):
             break
         time.sleep(1)
-    check(p, 'stack-deleted', delete_error is None and (final.startswith('GONE') or final == 'DELETE_COMPLETE'), deleteError=delete_error, finalStatus=final, seconds=round(time.time() - started, 1))
+    check(p, 'stack-deleted', delete_error is None and final in ('GONE', 'DELETE_COMPLETE'), deleteError=delete_error, finalStatus=final, seconds=round(time.time() - started, 1))
     deadline = time.time() + 30
     while (qemu_processes() or supervisor_processes()) and time.time() < deadline:
         time.sleep(0.5)
