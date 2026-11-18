@@ -17,6 +17,14 @@ from formal_applicability import GateError, RECORD, changes, disposition, git, i
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class DependencyAutomationClassificationTests(unittest.TestCase):
+    def test_only_exact_dependabot_config_is_build_metadata(self):
+        self.assertEqual(disposition('.github/dependabot.yml'), 'build-metadata')
+        for path in ('.github/dependabot.py', '.github/dependabot.yml.py',
+                     '.github/other.yml', 'internal/core/dependabot.go'):
+            self.assertIsNone(disposition(path), path)
+
+
 class CommonVerificationClassificationTests(unittest.TestCase):
     def test_apple_native_readme_does_not_exempt_runtime_code(self):
         self.assertEqual(disposition('native/apple/README.md'), 'documentation')

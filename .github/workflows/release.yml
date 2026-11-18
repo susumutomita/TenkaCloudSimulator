@@ -34,11 +34,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@v4.3.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
-      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+      - uses: actions/setup-go@v6.5.0
         with:
           go-version: '1.26.11'
           cache: true
@@ -52,7 +52,7 @@ jobs:
           python3 scripts/build-release.py --ref "$SOURCE_COMMIT" --version "$RELEASE_VERSION" --output dist/release
           python3 scripts/verify-release.py dist/release --commit "$SOURCE_COMMIT" --version "$RELEASE_VERSION"
       - name: Retain candidate for native execution and publication
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: simulator-release-${{ github.event.pull_request.head.sha || github.sha }}
           path: dist/release/*
@@ -75,11 +75,11 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@v4.3.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@v4.3.0
         with:
           name: simulator-release-${{ github.event.pull_request.head.sha || github.sha }}
           path: release
@@ -98,10 +98,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@v4.3.1
         with:
           persist-credentials: false
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@v4.3.0
         with:
           name: simulator-release-${{ github.sha }}
           path: release
