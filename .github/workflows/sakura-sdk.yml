@@ -1,0 +1,44 @@
+name: Sakura SDK acceptance
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sakura-sdk:
+    name: Pinned Sakura SDK against two standalone CLIs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: '1.26.11'
+          cache: true
+          cache-dependency-path: |
+            go.sum
+            test/sdk/sakura/go.sum
+      - name: Build actual simulator and isolated pinned SDK fixture
+        run: |
+          make build
+          cd test/sdk/sakura
+          go mod download
+          go mod verify
+          go vet ./...
+          go test -race ./...
+          go build -mod=readonly -o ../../../dist/sakura-sdk .
+      - name: Verify real SDK effects, errors, isolation and cleanup
+        run: |
+          python3 -m unittest discover -s test/e2e -p test_sakura_sdk.py -v
+          python3 test/e2e/sakura_sdk.py --binary dist/tenkacloud-simulator --client dist/sakura-sdk --report reports/sakura-sdk.json
+      - name: Retain safe SDK evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: sakura-sdk-${{ github.event.pull_request.head.sha || github.sha }}
+          path: reports/sakura-sdk.json
+          if-no-files-found: error
+          retention-days: 14
