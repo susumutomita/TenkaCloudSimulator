@@ -4,6 +4,11 @@ The required `ci` job verifies the actual Go module, embedded console/API refere
 and SQLite runtime. Node/npm, Python/Chromium/SDK and Java are development tools;
 the resulting statically linked executable does not require them at runtime.
 
+The separate `Verify action dependency lockfile` workflow checks every workflow's
+official action lockfile coverage and upstream pins with read-only permissions.
+See [maintain workflow dependencies](contributing/workflow-dependencies.md) for
+generation, review, Dependabot updates, and rollout limits.
+
 Every push to main, pull request and manual run checks out the exact tested head.
 The jobs below run in parallel, and the required `ci` job passes only when
 `console-acceptance`, `checks`, every `go-test` shard and `platform-audit` succeeded:
