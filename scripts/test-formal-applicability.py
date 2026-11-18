@@ -26,6 +26,11 @@ class DependencyAutomationClassificationTests(unittest.TestCase):
 
 
 class CommonVerificationClassificationTests(unittest.TestCase):
+    def test_apple_native_readme_does_not_exempt_runtime_code(self):
+        self.assertEqual(disposition('native/apple/README.md'), 'documentation')
+        for path in ('native/apple/main.swift', 'native/apple/README.md.swift', 'native/apple/other.swift'):
+            self.assertIsNone(disposition(path), path)
+
     def test_only_reviewed_development_adapter_paths_are_classified(self):
         expected = {
             'validation-tooling': ('scripts/verification/run.py',
