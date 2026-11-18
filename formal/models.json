@@ -17612,7 +17612,7 @@
     "TruthfulFailure",
     "NoPersistence"
    ],
-   "limits": "Finite admission/result abstraction of the opt-in local Bedrock Runtime only. Assumes the authenticated exercise identity, IAM decision, strict body validation and Ollama transport pins are computed correctly; the shutdown and canceled responses are distinct kinds here but share ServiceUnavailableException on the wire. No Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, token counts, streaming, tool use, Apple backend, Claude Code or liveness proof. Native, CLI and SDK tests independently cover implementation boundaries.",
+   "limits": "Finite admission/result abstraction of the opt-in local Bedrock Runtime only. Assumes the authenticated exercise identity, IAM decision, strict body validation and Ollama transport pins are computed correctly; the shutdown and canceled responses are distinct kinds here but share ServiceUnavailableException on the wire. No Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, token counts, streaming, tool use, concrete Apple hardware/API availability, native pipe/process execution, OS service lifetime, Claude Code or liveness proof. Native, CLI and SDK tests independently cover implementation boundaries.",
    "source_scope": [
     "cmd/simulator/bedrock_flags.go",
     "cmd/simulator/main.go",
@@ -17625,7 +17625,8 @@
     "internal/inference/ollama.go",
     "internal/server/bedrock_runtime.go",
     "internal/server/sakura_provider.go",
-    "internal/server/server.go"
+    "internal/server/server.go",
+    "native/apple/main.swift"
    ],
    "mutants": [
     {

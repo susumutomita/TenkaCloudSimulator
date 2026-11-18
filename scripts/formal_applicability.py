@@ -43,6 +43,7 @@ KNOWN_VALIDATION = {
 }
 NONFORMAL = {
     'documentation': [
+        'native/apple/README.md',
         'scripts/verification/vendor/LICENSE',
         'internal/workload/guesthvf/README.md',
         'internal/workload/probeclock/DARWIN.md',
