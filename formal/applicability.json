@@ -1,68 +1,29 @@
 {
   "version": 1,
-  "base_sha": "62c12a5380640ead27f223e0036fb6e3260e2042",
+  "base_sha": "d2dd8bca79d60b3b76db6ee34c4bbac3e839897d",
   "changes": [
     {
-      "path": ".github/workflows/sakura-sdk.yml",
-      "sha256": "cc64dc65b17ebccb510caf774280c38cf88944c6e1d8b6043a7689485ca53bfe",
-      "disposition": "formal-infrastructure",
-      "reason": "Pinned development-only community SDK fixture and hosted acceptance against owned local processes; exhaustive cleanup regression attempts every CLI close before returning a redacted failure. Existing runtime/model behavior, isolation, registry, properties and gate thresholds are unchanged.",
-      "models": []
+      "path": "internal/workload/guesttcp/http_probe_scope_test.go",
+      "sha256": "55e6b912dbaea84821267c71f1f2d2b29f7ace5c34a92878153d3b9a9553becd",
+      "disposition": "modeled",
+      "reason": "Test-only request receive honors its existing context deadline and reports missing-request/result state instead of hanging; negative cancellation/closed-channel and positive delivery regressions preserve the request/route assertions. Publication failures remain unresolved.",
+      "models": [
+        {
+          "id": "ProbeOperationLifecycle",
+          "properties": [
+            "ResultSticky",
+            "RouteRetained",
+            "SettlementEvidence"
+          ],
+          "limits": "Existing finite model covers retained result, route and settlement relationships, not Go request-channel scheduling or Darwin gVisor progress. This change only bounds a test receive and adds diagnostic assertions; runtime and model transitions are unchanged. Publication failures remain unresolved."
+        }
+      ]
     },
     {
-      "path": "docs/sakura-sdk-compatibility.md",
-      "sha256": "9ebea9024615888e675d8fad360c292a7b16b47eac6dfb073001eb3f15d04b68",
-      "disposition": "documentation",
-      "reason": "Pinned development-only community SDK fixture and hosted acceptance against owned local processes; exhaustive cleanup regression attempts every CLI close before returning a redacted failure. Existing runtime/model behavior, isolation, registry, properties and gate thresholds are unchanged.",
-      "models": []
-    },
-    {
-      "path": "docs/sakura.md",
-      "sha256": "7d7c7bdef059b77af09424192b338053415ad35a7cfbead1df9e0a44d9f248ff",
-      "disposition": "documentation",
-      "reason": "Pinned development-only community SDK fixture and hosted acceptance against owned local processes; exhaustive cleanup regression attempts every CLI close before returning a redacted failure. Existing runtime/model behavior, isolation, registry, properties and gate thresholds are unchanged.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/sakura_sdk.py",
-      "sha256": "ea60a97069d159cb0e3cdcc432d8bfd1a98b14f3ab0e854baf5a2c174d69e65c",
+      "path": "internal/workload/probeclock/bootstrap_darwin_test.go",
+      "sha256": "82f2084d9b4057f249e00fede351cd0f55960ef0e2c2a1fb599977f091c3caae",
       "disposition": "test-support",
-      "reason": "Pinned development-only community SDK fixture and hosted acceptance against owned local processes; exhaustive cleanup regression attempts every CLI close before returning a redacted failure. Existing runtime/model behavior, isolation, registry, properties and gate thresholds are unchanged.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_sakura_sdk.py",
-      "sha256": "866f578a823e175e8f17e02bdd4b4ae2b01a1bda818994e34f73daf200bb9242",
-      "disposition": "test-support",
-      "reason": "Pinned development-only community SDK fixture and hosted acceptance against owned local processes; exhaustive cleanup regression attempts every CLI close before returning a redacted failure. Existing runtime/model behavior, isolation, registry, properties and gate thresholds are unchanged.",
-      "models": []
-    },
-    {
-      "path": "test/sdk/sakura/go.mod",
-      "sha256": "1f42c5934e94753a42c583614fdb23649c2ba33fd8f567ee140ea267f840f7da",
-      "disposition": "test-support",
-      "reason": "Pinned development-only community SDK fixture and hosted acceptance against owned local processes; exhaustive cleanup regression attempts every CLI close before returning a redacted failure. Existing runtime/model behavior, isolation, registry, properties and gate thresholds are unchanged.",
-      "models": []
-    },
-    {
-      "path": "test/sdk/sakura/go.sum",
-      "sha256": "a13fb698c58dcbe7c9fc00a12580e902e02cf0bf736a4c97d06ab9c43abf3530",
-      "disposition": "test-support",
-      "reason": "Pinned development-only community SDK fixture and hosted acceptance against owned local processes; exhaustive cleanup regression attempts every CLI close before returning a redacted failure. Existing runtime/model behavior, isolation, registry, properties and gate thresholds are unchanged.",
-      "models": []
-    },
-    {
-      "path": "test/sdk/sakura/main.go",
-      "sha256": "09cfad7b628833833acded7d8580a7489a5c73e5b59b6e592f9c60965709af6f",
-      "disposition": "test-support",
-      "reason": "Pinned development-only community SDK fixture and hosted acceptance against owned local processes; exhaustive cleanup regression attempts every CLI close before returning a redacted failure. Existing runtime/model behavior, isolation, registry, properties and gate thresholds are unchanged.",
-      "models": []
-    },
-    {
-      "path": "test/sdk/sakura/main_test.go",
-      "sha256": "2a93d6beda9a3b4144f1ff3f561b498d59cd4697143a8114277eefb2313c8b09",
-      "disposition": "test-support",
-      "reason": "Pinned development-only community SDK fixture and hosted acceptance against owned local processes; exhaustive cleanup regression attempts every CLI close before returning a redacted failure. Existing runtime/model behavior, isolation, registry, properties and gate thresholds are unchanged.",
+      "reason": "Darwin-only test harness propagates the parent coverage directory to the private bootstrap child and verifies silent output plus child-counter aggregation; simulator bootstrap and containment behavior are unchanged.",
       "models": []
     }
   ]
