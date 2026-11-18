@@ -129,9 +129,12 @@ community SDK over two standalone endpoints with9 SDK plus4 native requests per
 endpoint. SDK cleanup and peer preservation were checked against actual SQLite.
 Those historical receipts are not a current-main global gate pass.
 
-The native two-CLI probe is now a mandatory Conformance wrapper. The community SDK
-fixture remains an isolated development module outside runtime dependencies and
-is **not yet a mandatory hosted SDK gate**. It verifies the real serializer and
+The native two-CLI probe is now a mandatory Conformance wrapper. The pinned community SDK
+fixture is checked in as an isolated development module outside runtime
+dependencies. The dedicated `Sakura SDK acceptance` workflow runs on every pull
+request and main push, without a path filter or opt-in condition. Its
+`Pinned Sakura SDK against two standalone CLIs` job fails when SDK acceptance
+fails; repository branch-protection requirements are managed separately. It verifies the real serializer and
 response decoder through a terminal loopback-only middleware, not stock SDK
 credentials, default endpoint rewriting, retries, waiters or real-cloud behavior.
 The initial real SDK501 for its no-icon default was preserved before the narrow
