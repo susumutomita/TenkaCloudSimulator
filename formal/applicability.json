@@ -1,67 +1,62 @@
 {
   "version": 1,
-  "base_sha": "39344f078a428d8cd9096aacf40d3ef54b795547",
+  "base_sha": "4be504d6eaf42c4f7e2d939d3b325e44374d802e",
   "changes": [
     {
-      "path": "internal/workload/guesttcp/local_injection_outcome.go",
-      "sha256": "ccd7c22ab6fe39628070c284655b12f796fd3d61d2e17bfbc01b32c24d0a7bfb",
-      "disposition": "modeled",
-      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
-      "models": [
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
-        }
-      ]
-    },
-    {
-      "path": "internal/workload/guesttcp/local_injection_outcome_test.go",
-      "sha256": "91b8fa0a8481e73642f9963f02eeb48ead9714df0ca438b1e58d92c6d4f8d67e",
-      "disposition": "test-support",
-      "reason": "Deterministic cancellation-window regressions and fail-closed provider/shared-lifetime counterexamples; no runtime surface.",
+      "path": ".github/workflows/sakura-sdk.yml",
+      "sha256": "8bda6d34498dbbb7237985233f4a20bced6af47be55c9a75d51e2d11b56652e4",
+      "disposition": "formal-infrastructure",
+      "reason": "Dedicated read-only, immutable-HEAD Sakura SDK acceptance workflow with pinned actions; adds unconditional PR/main execution without changing existing CI, model admission, thresholds, registry, source scopes or TLC controls.",
       "models": []
     },
     {
-      "path": "internal/workload/guesttcp/owned_probe_session.go",
-      "sha256": "b32679d14912f4a96e3888c3fa0e9c840ae40d5e51424f703b002b0222eab9b4",
-      "disposition": "modeled",
-      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
-      "models": [
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
-        }
-      ]
+      "path": "docs/sakura-sdk-compatibility.md",
+      "sha256": "9ebea9024615888e675d8fad360c292a7b16b47eac6dfb073001eb3f15d04b68",
+      "disposition": "documentation",
+      "reason": "Document the checked-in SDK fixture and unconditional hosted job, retaining the bounded metadata and unverified stock SDK/cloud behavior limits; no runtime or model change.",
+      "models": []
     },
     {
-      "path": "internal/workload/guesttcp/transport.go",
-      "sha256": "0ca48e5e6bd18e65ba1e3083f9f54483fc68d2166d834e778afb646d41706b6c",
-      "disposition": "modeled",
-      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
-      "models": [
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
-        }
-      ]
+      "path": "docs/sakura.md",
+      "sha256": "7d7c7bdef059b77af09424192b338053415ad35a7cfbead1df9e0a44d9f248ff",
+      "disposition": "documentation",
+      "reason": "Document the checked-in SDK fixture and unconditional hosted job, retaining the bounded metadata and unverified stock SDK/cloud behavior limits; no runtime or model change.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/sakura_sdk.py",
+      "sha256": "ab3ac7ae2fed9d775a49c11105af72500a139462894e4e32b615d0fbe3d249a3",
+      "disposition": "test-support",
+      "reason": "Development-only pinned community SDK fixture and two-CLI acceptance; verifies existing Disk serializer/decoder, local-only transport, native state and isolation without changing simulator runtime or formal model behavior.",
+      "models": []
+    },
+    {
+      "path": "test/sdk/sakura/go.mod",
+      "sha256": "1f42c5934e94753a42c583614fdb23649c2ba33fd8f567ee140ea267f840f7da",
+      "disposition": "test-support",
+      "reason": "Development-only pinned community SDK fixture and two-CLI acceptance; verifies existing Disk serializer/decoder, local-only transport, native state and isolation without changing simulator runtime or formal model behavior.",
+      "models": []
+    },
+    {
+      "path": "test/sdk/sakura/go.sum",
+      "sha256": "a13fb698c58dcbe7c9fc00a12580e902e02cf0bf736a4c97d06ab9c43abf3530",
+      "disposition": "test-support",
+      "reason": "Development-only pinned community SDK fixture and two-CLI acceptance; verifies existing Disk serializer/decoder, local-only transport, native state and isolation without changing simulator runtime or formal model behavior.",
+      "models": []
+    },
+    {
+      "path": "test/sdk/sakura/main.go",
+      "sha256": "09cfad7b628833833acded7d8580a7489a5c73e5b59b6e592f9c60965709af6f",
+      "disposition": "test-support",
+      "reason": "Development-only pinned community SDK fixture and two-CLI acceptance; verifies existing Disk serializer/decoder, local-only transport, native state and isolation without changing simulator runtime or formal model behavior.",
+      "models": []
+    },
+    {
+      "path": "test/sdk/sakura/main_test.go",
+      "sha256": "2a93d6beda9a3b4144f1ff3f561b498d59cd4697143a8114277eefb2313c8b09",
+      "disposition": "test-support",
+      "reason": "Development-only pinned community SDK fixture and two-CLI acceptance; verifies existing Disk serializer/decoder, local-only transport, native state and isolation without changing simulator runtime or formal model behavior.",
+      "models": []
     }
   ]
 }
