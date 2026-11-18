@@ -345,16 +345,24 @@ def owned_guest_processes(wanted_role):
                for i, value in enumerate(argv) if value == b'-qmp']
         if not qmp:
             continue
-        if lossy and any(value in runtime for value in (b' ', b'\t', b'\n', b'\r', b'"', b"'", b'\\')):
-            raise RuntimeError('process ownership observation ambiguous')
         own = False
         for endpoint in qmp:
             prefix, suffix = b'unix:', b',server=on,wait=off'
-            if not endpoint.startswith(prefix) or not endpoint.endswith(suffix):
+            # This rehearsal owns only its private Unix QMP sockets. A TCP
+            # monitor, or a Unix socket under another root, is not ours even
+            # when that unrelated VM uses different QMP options.
+            if endpoint.startswith(b'tcp:'):
+                continue
+            if not endpoint.startswith(prefix):
                 raise RuntimeError('process ownership observation ambiguous')
-            path = endpoint[len(prefix):-len(suffix)]
+            if lossy and any(value in runtime for value in (b' ', b'\t', b'\n', b'\r', b'"', b"'", b'\\')):
+                raise RuntimeError('process ownership observation ambiguous')
+            path = endpoint[len(prefix):]
             if not path.startswith(runtime + b'/'):
                 continue
+            if not endpoint.endswith(suffix):
+                raise RuntimeError('process ownership observation ambiguous')
+            path = endpoint[len(prefix):-len(suffix)]
             if (os.path.normpath(path) != path or not path.endswith(b'/qmp.sock')
                     or (lossy and any(value in path for value in (b'"', b"'", b'\\')))):
                 raise RuntimeError('process ownership observation ambiguous')

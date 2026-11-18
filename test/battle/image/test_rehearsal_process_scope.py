@@ -226,6 +226,35 @@ class RehearsalProcessScopeTests(unittest.TestCase):
                 with self.assertRaises(AssertionError):
                     self.assertEqual(namespace[kind](), [101])
 
+    def test_unrelated_tcp_qmp_peer_only_is_not_counted(self):
+        for platform, kind, argv in self.combinations():
+            with self.subTest(platform=platform, kind=kind):
+                peer = argv(PEER)
+                peer[-1] = 'tcp:127.0.0.1:4444,server=on,wait=off'
+                self.assertEqual(self.inspect(platform, kind, [(202, peer)]), [])
+
+    def test_own_unix_qmp_with_unrelated_tcp_peer_retains_only_own(self):
+        for platform, kind, argv in self.combinations():
+            with self.subTest(platform=platform, kind=kind):
+                peer = argv(PEER)
+                peer[-1] = 'tcp:127.0.0.1:4444,server=on,wait=off'
+                rows = [(101, argv(ROOT)), (202, peer)]
+                self.assertEqual(self.inspect(platform, kind, rows), [101])
+
+    def test_distinct_unix_peer_with_alternative_qmp_options_is_not_counted(self):
+        for platform, kind, argv in self.combinations():
+            with self.subTest(platform=platform, kind=kind):
+                peer = argv(PEER)
+                peer[-1] = f'unix:{PEER}/instance/qmp.sock,server=on,wait=on'
+                self.assertEqual(self.inspect(platform, kind, [(202, peer)]), [])
+
+    def test_own_qmp_with_invalid_owned_options_remains_fixed_failure(self):
+        for platform, kind, argv in self.combinations():
+            with self.subTest(platform=platform, kind=kind):
+                own = argv(ROOT)
+                own[-1] = f'unix:{ROOT}/instance/qmp.sock,server=off,wait=off'
+                self.assert_ambiguous(platform, kind, [(101, own)])
+
 
 if __name__ == '__main__':
     unittest.main()
