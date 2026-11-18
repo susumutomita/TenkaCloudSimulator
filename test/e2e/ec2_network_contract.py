@@ -108,6 +108,9 @@ class NetworkContract(unittest.TestCase):
         body = copy.deepcopy(self.template)
         body['Resources']['OtherVpc'] = {'Type': 'AWS::EC2::VPC', 'Properties': {'CidrBlock': '10.68.0.0/16'}}
         body['Resources']['Table']['Properties']['VpcId'] = {'Ref': 'OtherVpc'}
+        # Isolate the association constraint: a route through the first VPC's
+        # gateway would independently make this template invalid.
+        del body['Resources']['Route']
         cases['cross-vpc-association'] = body
         for label, body in cases.items():
             with self.subTest(label=label):
