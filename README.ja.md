@@ -12,7 +12,7 @@ AWSを中心に、Google Cloud・Azure・任意で有効化するSakuraの一部
 
 ## 起動してサインインする
 
-**Go 1.26・GNU make・POSIXシェル**を用意し、リポジトリのルートで実行します。
+**Go 1.26.3以降・GNU make・POSIXシェル**を用意し、リポジトリのルートで実行します。
 
 ```sh
 make start

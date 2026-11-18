@@ -17,7 +17,7 @@ required; enabling the flag does not establish it. See [opt-in runtime setup](do
 
 ## Start and sign in
 
-From the repository root, with **Go 1.26, GNU make and a POSIX shell** installed:
+From the repository root, with **Go 1.26.3 or newer, GNU make and a POSIX shell** installed:
 
 ```sh
 make start

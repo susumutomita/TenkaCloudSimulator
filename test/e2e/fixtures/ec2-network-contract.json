@@ -1,0 +1,21 @@
+{
+  "Resources": {
+    "Association": {"Type": "AWS::EC2::SubnetRouteTableAssociation", "Properties": {"SubnetId": {"Ref": "Subnet"}, "RouteTableId": {"Ref": "Table"}}},
+    "Route": {"Type": "AWS::EC2::Route", "DependsOn": "Attachment", "Properties": {"RouteTableId": {"Ref": "Table"}, "DestinationCidrBlock": "0.0.0.0/0", "GatewayId": {"Ref": "Gateway"}}},
+    "Table": {"Type": "AWS::EC2::RouteTable", "Properties": {"VpcId": {"Ref": "Vpc"}}},
+    "Subnet": {"Type": "AWS::EC2::Subnet", "Properties": {"VpcId": {"Ref": "Vpc"}, "CidrBlock": "10.67.1.0/24"}},
+    "Attachment": {"Type": "AWS::EC2::VPCGatewayAttachment", "Properties": {"VpcId": {"Ref": "Vpc"}, "InternetGatewayId": {"Ref": "Gateway"}}},
+    "Gateway": {"Type": "AWS::EC2::InternetGateway"},
+    "Vpc": {"Type": "AWS::EC2::VPC", "Properties": {"CidrBlock": "10.67.123.45/16"}}
+  },
+  "Outputs": {
+    "Vpc": {"Value": {"Ref": "Vpc"}},
+    "Cidr": {"Value": {"Fn::GetAtt": ["Vpc", "CidrBlock"]}},
+    "Subnet": {"Value": {"Ref": "Subnet"}},
+    "SubnetVpc": {"Value": {"Fn::GetAtt": ["Subnet", "VpcId"]}},
+    "Table": {"Value": {"Ref": "Table"}},
+    "TableAttribute": {"Value": {"Fn::GetAtt": ["Table", "RouteTableId"]}},
+    "Association": {"Value": {"Ref": "Association"}},
+    "AssociationAttribute": {"Value": {"Fn::GetAtt": ["Association", "Id"]}}
+  }
+}
