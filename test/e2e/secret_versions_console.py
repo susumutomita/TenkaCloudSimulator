@@ -12,6 +12,7 @@ import shutil
 import sqlite3
 import tempfile
 import time
+from datetime import timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -148,7 +149,7 @@ def run():
                 for item in expected[:20]:
                     expect(table.get_by_text(item["VersionId"], exact=True)).to_be_visible()
                     row = table.get_by_role("row").filter(has=page.get_by_text(item["VersionId"], exact=True))
-                    expect(row.get_by_text(item["CreatedDate"].isoformat(timespec="milliseconds").replace("+00:00", "Z"), exact=True)).to_be_visible()
+                    expect(row.get_by_text(item["CreatedDate"].astimezone(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z"), exact=True)).to_be_visible()
                 page.get_by_role("button", name="Next page", exact=True).focus()
                 page.keyboard.press("Enter")
                 for item in expected[20:]:
