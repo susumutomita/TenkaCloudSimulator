@@ -5,36 +5,36 @@
     {
       "path": "test/battle/image/OVERLAY-PROVENANCE.md",
       "sha256": "e43a223f8c0d1e98a9718cd0ff525053f67a4c26639061bcfa616be23c816720",
-      "disposition": "documentation",
-      "reason": "Reproduce the reviewed guest relay overlay with the required Go1.26.3 module directive and fixed Go1.26.11 compiler. Bind source/recipe/binary/tar provenance and retain independent host/guest SHA checks; no simulator protocol, guest behavior or finite-model transition changes.",
+      "disposition": "test-support",
+      "reason": "Build/rehearsal support documentation under existing test/** classification; explains independently reproduced compiler-directive build-ID drift and provenance review. No runtime implementation or model transition changes.",
       "models": []
     },
     {
       "path": "test/battle/image/build_bundle.py",
       "sha256": "c460038194f3bec2ae0b36bb94bdc210ba3960142d8e10f5967c95c9fba354ec",
-      "disposition": "formal-infrastructure",
-      "reason": "Reproduce the reviewed guest relay overlay with the required Go1.26.3 module directive and fixed Go1.26.11 compiler. Bind source/recipe/binary/tar provenance and retain independent host/guest SHA checks; no simulator protocol, guest behavior or finite-model transition changes.",
+      "disposition": "test-support",
+      "reason": "Test-only Battle image builder under existing test/** classification; validates committed source/compiler/recipe/binary provenance while retaining host tar and guest SHA checks. Does not change simulator runtime or guest implementation.",
       "models": []
     },
     {
       "path": "test/battle/image/builder-user-data.sh",
       "sha256": "ac0acd7bc0e1273cbbf13e5a362b8de2d2459c7210346c550f6c7312965b1c3a",
-      "disposition": "formal-infrastructure",
-      "reason": "Reproduce the reviewed guest relay overlay with the required Go1.26.3 module directive and fixed Go1.26.11 compiler. Bind source/recipe/binary/tar provenance and retain independent host/guest SHA checks; no simulator protocol, guest behavior or finite-model transition changes.",
+      "disposition": "test-support",
+      "reason": "Rehearsal image fixture under existing test/** classification; only the independently reproduced overlay SHA pin changes, preserving all commands and checksum enforcement.",
       "models": []
     },
     {
       "path": "test/battle/image/session-overlay-provenance.json",
       "sha256": "caf4e26adf0a38030df981cce602d2057eb9e970748d78593192ef28379cd50b",
-      "disposition": "formal-infrastructure",
-      "reason": "Reproduce the reviewed guest relay overlay with the required Go1.26.3 module directive and fixed Go1.26.11 compiler. Bind source/recipe/binary/tar provenance and retain independent host/guest SHA checks; no simulator protocol, guest behavior or finite-model transition changes.",
+      "disposition": "test-support",
+      "reason": "Test image build provenance under existing test/** classification; records immutable diagnostic source/recipe/binary/tar hashes, not runtime configuration or finite-model state.",
       "models": []
     },
     {
       "path": "test/battle/image/test_build_bundle.py",
       "sha256": "9965966833d7c71c4aa9cfbcd3a291fe45ab7a71fd1dd8f66cf1059755e4c426",
-      "disposition": "formal-infrastructure",
-      "reason": "Reproduce the reviewed guest relay overlay with the required Go1.26.3 module directive and fixed Go1.26.11 compiler. Bind source/recipe/binary/tar provenance and retain independent host/guest SHA checks; no simulator protocol, guest behavior or finite-model transition changes.",
+      "disposition": "test-support",
+      "reason": "Offline image-builder unit/negative regression tests under existing test/** classification; stale input, target, flags and checksum rejection assertions do not alter production implementation.",
       "models": []
     }
   ]
