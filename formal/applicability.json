@@ -1,67 +1,83 @@
 {
   "version": 1,
-  "base_sha": "39344f078a428d8cd9096aacf40d3ef54b795547",
+  "base_sha": "4be504d6eaf42c4f7e2d939d3b325e44374d802e",
   "changes": [
     {
-      "path": "internal/workload/guesttcp/local_injection_outcome.go",
-      "sha256": "ccd7c22ab6fe39628070c284655b12f796fd3d61d2e17bfbc01b32c24d0a7bfb",
-      "disposition": "modeled",
-      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
-      "models": [
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
-        }
-      ]
-    },
-    {
-      "path": "internal/workload/guesttcp/local_injection_outcome_test.go",
-      "sha256": "91b8fa0a8481e73642f9963f02eeb48ead9714df0ca438b1e58d92c6d4f8d67e",
-      "disposition": "test-support",
-      "reason": "Deterministic cancellation-window regressions and fail-closed provider/shared-lifetime counterexamples; no runtime surface.",
+      "path": ".github/dependabot.yml",
+      "sha256": "eada67e1b7f73d16a4c240ede6193c4852a2b0887e678a23dc7a3462810502e7",
+      "disposition": "build-metadata",
+      "reason": "Weekly GitHub Actions version-update configuration only; no simulator runtime, transition, authority or model change.",
       "models": []
     },
     {
-      "path": "internal/workload/guesttcp/owned_probe_session.go",
-      "sha256": "b32679d14912f4a96e3888c3fa0e9c840ae40d5e51424f703b002b0222eab9b4",
-      "disposition": "modeled",
-      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
-      "models": [
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
-        }
-      ]
+      "path": ".github/workflows/actions.lock",
+      "sha256": "69e0618a9d987fffce51e4c62b7daa295af69e134a0a779fc56bb54d0cefd7e9",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action dependency lockfile onboarding and read-only stale verification; action commit identities are preserved, with no modeled runtime/state transition change.",
+      "models": []
     },
     {
-      "path": "internal/workload/guesttcp/transport.go",
-      "sha256": "0ca48e5e6bd18e65ba1e3083f9f54483fc68d2166d834e778afb646d41706b6c",
-      "disposition": "modeled",
-      "reason": "Preserve the shared owner only for a private one-use local-injection outcome with no apply or completed safe apply; retain exact provider propagation, live shared transport, direction and owner guards.",
-      "models": [
-        {
-          "id": "OwnedProbeSessionLifecycle",
-          "properties": [
-            "NoUnsafeException",
-            "NoTokenReplay",
-            "FailedPacketNotPublished",
-            "NoNeedlessSeal"
-          ],
-          "limits": "Existing bounded lifecycle model abstracts callback scheduling and does not prove Go context races or either pre-apply window. Deterministic Go tests and repeated real in-memory TCP race runs cover these concrete windows; no model or property changed."
-        }
-      ]
+      "path": ".github/workflows/battle-hosts.yml",
+      "sha256": "d61658a7df6cfb2b16aa463488e5478d9057b4e69ebb808329066c1a57ce3e3b",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action dependency lockfile onboarding and read-only stale verification; action commit identities are preserved, with no modeled runtime/state transition change.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "8da01e1437635626275c6ada749841c5e96a2077eccb2135ab575709aee555d6",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action dependency lockfile onboarding and read-only stale verification; action commit identities are preserved, with no modeled runtime/state transition change.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/formal.yml",
+      "sha256": "c349ba6bfdeb4c8e27f432738385d0d593ab9122e2c7db9d748edd8bb09b46cc",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action dependency lockfile onboarding and read-only stale verification; action commit identities are preserved, with no modeled runtime/state transition change.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "sha256": "a4de19a6d50ccffaf1905818ec9969faf7eac788f2cd6a69737dfbdf9f4cc0f1",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action dependency lockfile onboarding and read-only stale verification; action commit identities are preserved, with no modeled runtime/state transition change.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/verify-actions-lock.yml",
+      "sha256": "920a34b2609686cae265dbe26e1864ec9282d2d670e1d909464368da5a54a941",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action dependency lockfile onboarding and read-only stale verification; action commit identities are preserved, with no modeled runtime/state transition change.",
+      "models": []
+    },
+    {
+      "path": "docs/ci.md",
+      "sha256": "15a29e6ab6d17fc2755842e136fc6bcde5ed68d2de065ac7f3446f1361cd83a2",
+      "disposition": "documentation",
+      "reason": "Contributor documentation for official action lockfile generation, review, compatibility and security limits; no simulator behavior change.",
+      "models": []
+    },
+    {
+      "path": "docs/contributing/workflow-dependencies.md",
+      "sha256": "2511c25fd9e59ad5793fe55b9f3d845000df21a6f378c1f1eb4b49b53e1a054d",
+      "disposition": "documentation",
+      "reason": "Contributor documentation for official action lockfile generation, review, compatibility and security limits; no simulator behavior change.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_applicability.py",
+      "sha256": "c6354f32f610b66a6e408456ca18cc5ccf4e40e297a5e8df60db247df2b40206",
+      "disposition": "formal-infrastructure",
+      "reason": "Classify only the exact Dependabot YAML configuration as build metadata; unknown adjacent and runtime paths remain fail-closed.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "bd8e389679c66eb975c595a6bbca4d49e75043699df988b1e34d357da85bcebe",
+      "disposition": "formal-infrastructure",
+      "reason": "Regression checks the exact Dependabot metadata classification and rejection of adjacent unreviewed/runtime paths.",
+      "models": []
     }
   ]
 }

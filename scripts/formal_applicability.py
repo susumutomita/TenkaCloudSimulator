@@ -71,7 +71,7 @@ NONFORMAL = {
                      'internal/aws/testdata/smithy/sqs.json',
                      'internal/aws/testdata/smithy/sqs-contracts.json', 'internal/aws/testdata/hello-world-battle-original.yaml', 'internal/aws/testdata/host-battle-bootstrap/provenance.json', 'internal/aws/testdata/host-battle-bootstrap/template.json', 'internal/server/testdata/battle-deployment-key-v1.json', 'scripts/guest-image/test_session_overlay.py', 'internal/aws/testdata/hello-world-battle-iam-fragment.yaml', 'internal/aws/testdata/sts-original/hello-world.yaml', 'test/**', '*_test.go', 'scripts/test-*.py',
                      'internal/aws/testdata/dynamodb_size_sdk.py'],
-    'build-metadata': ['Makefile', '.gitignore', '.gitattributes', '.github/CODEOWNERS',
+    'build-metadata': ['Makefile', '.gitignore', '.gitattributes', '.github/CODEOWNERS', '.github/dependabot.yml',
                        '.github/PULL_REQUEST_TEMPLATE.md'],
 }
 
