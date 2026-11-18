@@ -32,7 +32,9 @@ jobs:
           go test -race ./...
           go build -mod=readonly -o ../../../dist/sakura-sdk .
       - name: Verify real SDK effects, errors, isolation and cleanup
-        run: python3 test/e2e/sakura_sdk.py --binary dist/tenkacloud-simulator --client dist/sakura-sdk --report reports/sakura-sdk.json
+        run: |
+          python3 -m unittest discover -s test/e2e -p test_sakura_sdk.py -v
+          python3 test/e2e/sakura_sdk.py --binary dist/tenkacloud-simulator --client dist/sakura-sdk --report reports/sakura-sdk.json
       - name: Retain safe SDK evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

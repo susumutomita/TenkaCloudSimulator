@@ -39,8 +39,18 @@ def run(binary, client, report):
                 cli.call('DELETE', BASE + '/1')
                 assert cli.call('GET', BASE)['Disks'] == []
         finally:
+            cleanup_failures = 0
             for cli in reversed(owned):
-                cli.close()
+                try:
+                    cli.close()
+                except BaseException:
+                    # A reader/leak failure or interrupt from close must not
+                    # skip another close attempt. Never expose raw errors.
+                    cleanup_failures += 1
+            if cleanup_failures:
+                raise AssertionError(
+                    '%s owned CLI cleanup checks failed; details redacted' % cleanup_failures
+                ) from None
     result = {
         'success': True,
         'binarySHA256': hashlib.sha256(Path(binary).read_bytes()).hexdigest(),
