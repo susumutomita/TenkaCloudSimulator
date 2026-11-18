@@ -1,26 +1,19 @@
 {
   "version": 1,
-  "base_sha": "dc0f8333b2b8b0487324f418d64e9d4a1c18c212",
+  "base_sha": "c53df63ec8b1d1655c9bf4b613cfac01afd35547",
   "changes": [
     {
-      "path": "test/battle/image/test_rehearsal_cleanup.py",
-      "sha256": "68db3db251403de84cf3222a05e3ed6c403e4a30fb532109ffade7aa8c44606a",
+      "path": "test/battle/image/test_rehearsal_process_scope.py",
+      "sha256": "4149f93acba12c5c91cce9153b358a4d26563aecddf80dcce3bdb6aed8db296f",
       "disposition": "test-support",
-      "reason": "Offline independently reviewed regression oracle for the real rehearsal boundaries via AST isolation without startup imports, API/VM access or child execution. Tests preserve verdict/scoring/cleanup evidence and reject error-as-absence or raw/unknown public diagnostics with synthetic canaries; no runtime/model transition change or actual cleanup claim.",
-      "models": []
-    },
-    {
-      "path": "test/battle/image/test_rehearsal_public_output.py",
-      "sha256": "e6cd4e634001c48e6177076cb79c7e45172045a7300918c748ca1fd0684d2276",
-      "disposition": "test-support",
-      "reason": "Offline independently reviewed regression oracle for the real rehearsal boundaries via AST isolation without startup imports, API/VM access or child execution. Tests preserve verdict/scoring/cleanup evidence and reject error-as-absence or raw/unknown public diagnostics with synthetic canaries; no runtime/model transition change or actual cleanup claim.",
+      "reason": "Independent offline acceptance for the rehearsal observer's declared of-this-run scope. Synthetic Linux proc argv and Darwin ps rows exercise own/peer/prefix ownership, true leftovers and fixed ambiguity diagnostics using isolated script definitions. No VM, provider API, authority, runtime state or finite-model transition changes; this does not qualify actual two-team isolation.",
       "models": []
     },
     {
       "path": "test/battle/rehearsal.py",
-      "sha256": "a9ea66d5a07a6ce5575fd5af9f40c421d4402ff5d3a3555b0c3bb93955f7c9bc",
+      "sha256": "e006b25a20a90affc7c3e5f3c4bb58d789a449295519edca916eb0f26f630e94",
       "disposition": "test-support",
-      "reason": "Host-side Battle verifier only: require explicit stack absence and publish a finite allowlist of typed diagnostics instead of raw guest/API/exception/child output. Original execution, score arithmetic and cleanup predicates are retained; no simulator runtime, authority or finite model transition changes. Offline canary/error/cleanup tests are separate from real VM/resource cleanup.",
+      "reason": "Host-side Battle verifier only: preserve Linux argv boundaries and attribute guest/supervisor observations through the canonical private QMP path with directory boundaries; ambiguous observations fail with a fixed diagnostic. Execution, grading, cleanup predicates and runtime authority are unchanged. This is observer correctness, not physical containment, real cleanup, two-team or timer qualification; no simulator implementation/model transition changes.",
       "models": []
     }
   ]
