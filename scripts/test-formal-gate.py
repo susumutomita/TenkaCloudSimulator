@@ -693,7 +693,7 @@ class FormalGateTests(unittest.TestCase):
         model = next(m for m in json.loads(original)['models'] if m['id'] == 'BedrockRuntimeAdmission')
         expected_properties = {'AuthorizationFirst', 'BackendOnlyAfterAdmission', 'ConcurrencyBound', 'NoCallAfterClose', 'NoFallback', 'NoPersistence', 'SuccessOnlyFromBackend', 'TruthfulFailure', 'TypeOK'}
         expected_controls = {'AdmitAfterClose', 'CallUnsupportedOperation', 'FallbackBackend', 'IgnoreConcurrency', 'LeakSlot', 'MapBeforeAuthorization', 'MisreportMissingModel', 'OmitAuthorization', 'OmitEnablement', 'OmitMapping', 'OmitValidation', 'PersistPrompt', 'ShutdownClaimsBackendFailure', 'SyntheticDisabledSuccess'}
-        expected_scope = {'cmd/simulator/bedrock_flags.go', 'cmd/simulator/main.go', 'internal/aws/bedrock_runtime.go', 'internal/aws/bedrock_runtime_messages.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/inference/apple.go', 'internal/inference/inference.go', 'internal/inference/ollama.go', 'internal/server/bedrock_runtime.go', 'internal/server/sakura_provider.go', 'internal/server/server.go'}
+        expected_scope = {'native/apple/main.swift', 'cmd/simulator/bedrock_flags.go', 'cmd/simulator/main.go', 'internal/aws/bedrock_runtime.go', 'internal/aws/bedrock_runtime_messages.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/inference/apple.go', 'internal/inference/inference.go', 'internal/inference/ollama.go', 'internal/server/bedrock_runtime.go', 'internal/server/sakura_provider.go', 'internal/server/server.go'}
         self.assertEqual(set(model['properties']), expected_properties)
         self.assertEqual({m['id'] for m in model['mutants']}, expected_controls)
         self.assertEqual(set(model['source_scope']), expected_scope)

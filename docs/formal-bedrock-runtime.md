@@ -41,7 +41,8 @@ or a shutdown, and persisting the prompt.
 | `closed`, `Cancel` | `BedrockRuntime.Close`/`generate` and `Bounded.Generate` |
 | `Finish` result mapping | `bedrockInferenceError` and the `inference` error kinds |
 | One configured backend | `cmd/simulator/bedrock_flags.go`, `NewBedrockRuntime`, `Gateway.BedrockRuntime` |
-| No persistence | no SQLite or log write in the runtime path |
+| Native backend outcome | `internal/inference/apple.go` bounded versioned helper exchange and `native/apple/main.swift` on-device generation or fixed failure code; concrete SDK/process semantics remain assumptions |
+| No persistence | no SQLite or log write in the runtime path; fresh in-memory native session for each helper invocation |
 
 ## Limits
 
@@ -49,6 +50,9 @@ The IAM decision, strict JSON validation, Ollama transport pins, deadline
 arithmetic, listener deadlines and token counts are assumed, not modeled. The
 model's shutdown and cancellation results are distinct kinds, while the wire
 uses `ServiceUnavailableException` for both with distinct messages. Streaming,
-tool use, the Apple backend, Claude Code and liveness are outside the model.
+tool use, concrete Apple hardware/API availability, pipe framing/process reaping,
+OS service lifecycle, Claude Code and liveness are outside the model. The optional
+Apple helper is bound only to the same abstract selected-backend outcome and
+no-persistence/no-fallback properties; this is not a proof of native refinement.
 The Go, CLI and boto3 tests listed in [Bedrock Runtime](bedrock-runtime.md)
 check the implementation boundaries independently.

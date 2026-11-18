@@ -1,33 +1,33 @@
 {
   "version": 1,
-  "base_sha": "ae646405f370106a411841df798ce459679b5a42",
+  "base_sha": "94a0ae2afe19ae494a6bd6fad5c846f16e6d7c77",
   "changes": [
     {
       "path": "README.ja.md",
       "sha256": "9a0ccf017327e2fc75352e6cb7018a17d6c2153b014ad0f226ec676183a947ac",
       "disposition": "documentation",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "f578e3163f6a3529d45dae10442ac6ee8ef810697005f9c3607bd0e1b8cbb0cb",
+      "sha256": "c45d470dc6fcbcdf3dfa63870d18048f85fe2340f97e0b128f87479a2b95c3d6",
       "disposition": "documentation",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     },
     {
       "path": "docs/guesttcp-dependency-boundary.md",
       "sha256": "a5aca6f5603bd26a1723df2785b076fc89991ad7e7044e2a630e80793d753633",
       "disposition": "documentation",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     },
     {
       "path": "go.mod",
       "sha256": "45ca3311750b5abaffdca174b483da2b7047834e85b582830badb1e7574f4d56",
       "disposition": "modeled",
-      "reason": "Reviewed dependency selection or test-only lifecycle correspondence; no application implementation or finite model transition changed. Exact pins, source assumptions, original notices and native regression evidence are updated without relaxing guards.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": [
         {
           "id": "WAFRequestEvaluation",
@@ -37,7 +37,7 @@
             "FirstTerminatingRuleWins",
             "UnassociatedAllows"
           ],
-          "limits": "Existing finite orchestration model retains its external-library assumptions. It does not prove the gVisor assembly, network protocol implementation, Go scheduling or dependency security. Native CAS/publication/worker-budget tests and canonical vulnerability scanning validate the concrete dependency change independently."
+          "limits": "Finite orchestration properties retain their external-library assumptions. They do not prove assembly, network protocol implementation, scheduling or dependency security; native CAS/publication/worker-limit tests and a canonical dated vulnerability scan validate those concerns independently."
         },
         {
           "id": "EngineLifecycle",
@@ -61,7 +61,7 @@
             "ReleaseAfterDestroy",
             "LateConnectionJoin"
           ],
-          "limits": "Existing finite orchestration model retains its external-library assumptions. It does not prove the gVisor assembly, network protocol implementation, Go scheduling or dependency security. Native CAS/publication/worker-budget tests and canonical vulnerability scanning validate the concrete dependency change independently."
+          "limits": "Finite orchestration properties retain their external-library assumptions. They do not prove assembly, network protocol implementation, scheduling or dependency security; native CAS/publication/worker-limit tests and a canonical dated vulnerability scan validate those concerns independently."
         },
         {
           "id": "ListenerLifecycle",
@@ -80,7 +80,7 @@
             "TimerResetAttempted",
             "SequenceRetention"
           ],
-          "limits": "Existing finite orchestration model retains its external-library assumptions. It does not prove the gVisor assembly, network protocol implementation, Go scheduling or dependency security. Native CAS/publication/worker-budget tests and canonical vulnerability scanning validate the concrete dependency change independently."
+          "limits": "Finite orchestration properties retain their external-library assumptions. They do not prove assembly, network protocol implementation, scheduling or dependency security; native CAS/publication/worker-limit tests and a canonical dated vulnerability scan validate those concerns independently."
         }
       ]
     },
@@ -88,7 +88,7 @@
       "path": "go.sum",
       "sha256": "e68499d806de877a1535ae951b3cb1a6aa1162587459eb9aa63d89f5467a4c3b",
       "disposition": "modeled",
-      "reason": "Reviewed dependency selection or test-only lifecycle correspondence; no application implementation or finite model transition changed. Exact pins, source assumptions, original notices and native regression evidence are updated without relaxing guards.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": [
         {
           "id": "WAFRequestEvaluation",
@@ -98,7 +98,7 @@
             "FirstTerminatingRuleWins",
             "UnassociatedAllows"
           ],
-          "limits": "Existing finite orchestration model retains its external-library assumptions. It does not prove the gVisor assembly, network protocol implementation, Go scheduling or dependency security. Native CAS/publication/worker-budget tests and canonical vulnerability scanning validate the concrete dependency change independently."
+          "limits": "Finite orchestration properties retain their external-library assumptions. They do not prove assembly, network protocol implementation, scheduling or dependency security; native CAS/publication/worker-limit tests and a canonical dated vulnerability scan validate those concerns independently."
         },
         {
           "id": "EngineLifecycle",
@@ -122,7 +122,7 @@
             "ReleaseAfterDestroy",
             "LateConnectionJoin"
           ],
-          "limits": "Existing finite orchestration model retains its external-library assumptions. It does not prove the gVisor assembly, network protocol implementation, Go scheduling or dependency security. Native CAS/publication/worker-budget tests and canonical vulnerability scanning validate the concrete dependency change independently."
+          "limits": "Finite orchestration properties retain their external-library assumptions. They do not prove assembly, network protocol implementation, scheduling or dependency security; native CAS/publication/worker-limit tests and a canonical dated vulnerability scan validate those concerns independently."
         },
         {
           "id": "ListenerLifecycle",
@@ -141,7 +141,7 @@
             "TimerResetAttempted",
             "SequenceRetention"
           ],
-          "limits": "Existing finite orchestration model retains its external-library assumptions. It does not prove the gVisor assembly, network protocol implementation, Go scheduling or dependency security. Native CAS/publication/worker-budget tests and canonical vulnerability scanning validate the concrete dependency change independently."
+          "limits": "Finite orchestration properties retain their external-library assumptions. They do not prove assembly, network protocol implementation, scheduling or dependency security; native CAS/publication/worker-limit tests and a canonical dated vulnerability scan validate those concerns independently."
         }
       ]
     },
@@ -149,28 +149,28 @@
       "path": "internal/legal/assets/GO-NOTICES.txt",
       "sha256": "6609f4ec52451c28c9cbd843a1fd8020607de60b32391521e1ad37b72340a884",
       "disposition": "documentation",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     },
     {
       "path": "internal/legal/assets/GUESTTCP-NOTICES.txt",
       "sha256": "c611fca59af0c876d8e108ec57bcb3e8ed102be4e140508af8087d9865ade41a",
       "disposition": "documentation",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     },
     {
       "path": "internal/workload/guesttcp/dependency_cas_test.go",
       "sha256": "31c95d7b1de87e993e5803b29faa64e8e8ae0db9d90c9d4dcd746e10fb55536b",
       "disposition": "test-support",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     },
     {
       "path": "internal/workload/guesttcp/http_probe_scope_test.go",
       "sha256": "55e6b912dbaea84821267c71f1f2d2b29f7ace5c34a92878153d3b9a9553becd",
       "disposition": "modeled",
-      "reason": "Reviewed dependency selection or test-only lifecycle correspondence; no application implementation or finite model transition changed. Exact pins, source assumptions, original notices and native regression evidence are updated without relaxing guards.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": [
         {
           "id": "ProbeOperationLifecycle",
@@ -201,7 +201,7 @@
             "NoLateHostAcceptance",
             "EvictedForgotten"
           ],
-          "limits": "Existing finite orchestration model retains its external-library assumptions. It does not prove the gVisor assembly, network protocol implementation, Go scheduling or dependency security. Native CAS/publication/worker-budget tests and canonical vulnerability scanning validate the concrete dependency change independently."
+          "limits": "Finite orchestration properties retain their external-library assumptions. They do not prove assembly, network protocol implementation, scheduling or dependency security; native CAS/publication/worker-limit tests and a canonical dated vulnerability scan validate those concerns independently."
         }
       ]
     },
@@ -209,7 +209,7 @@
       "path": "internal/workload/guesttcp/transport_persistent_test.go",
       "sha256": "bd9555b17853c67b78e01a2f806b15293c1aa61a47b6f40ca4227c213bae75a4",
       "disposition": "modeled",
-      "reason": "Reviewed dependency selection or test-only lifecycle correspondence; no application implementation or finite model transition changed. Exact pins, source assumptions, original notices and native regression evidence are updated without relaxing guards.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": [
         {
           "id": "PersistentTransportLifecycle",
@@ -226,7 +226,7 @@
             "NoLateSuccess",
             "EffectRetained"
           ],
-          "limits": "Existing finite orchestration model retains its external-library assumptions. It does not prove the gVisor assembly, network protocol implementation, Go scheduling or dependency security. Native CAS/publication/worker-budget tests and canonical vulnerability scanning validate the concrete dependency change independently."
+          "limits": "Finite orchestration properties retain their external-library assumptions. They do not prove assembly, network protocol implementation, scheduling or dependency security; native CAS/publication/worker-limit tests and a canonical dated vulnerability scan validate those concerns independently."
         },
         {
           "id": "PersistentIngressPolicy",
@@ -237,7 +237,7 @@
             "OwnedProbeAbuseRevokes",
             "AcceptOnlyOwnedValid"
           ],
-          "limits": "Existing finite orchestration model retains its external-library assumptions. It does not prove the gVisor assembly, network protocol implementation, Go scheduling or dependency security. Native CAS/publication/worker-budget tests and canonical vulnerability scanning validate the concrete dependency change independently."
+          "limits": "Finite orchestration properties retain their external-library assumptions. They do not prove assembly, network protocol implementation, scheduling or dependency security; native CAS/publication/worker-limit tests and a canonical dated vulnerability scan validate those concerns independently."
         }
       ]
     },
@@ -245,42 +245,42 @@
       "path": "internal/workload/probeclock/bootstrap_darwin_test.go",
       "sha256": "82f2084d9b4057f249e00fede351cd0f55960ef0e2c2a1fb599977f091c3caae",
       "disposition": "test-support",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "36ba1f81e3db63613628527360ff1e47ce3869bb73012d0f1fb1c035d2de499a",
+      "sha256": "c976cdda25bf86978c99bb9f43001b234052f15f50ec0d0a946905be451114be",
       "disposition": "formal-infrastructure",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "d11316298367aa87e5994a6603b65accb1f3292f94e5d83c18449adae83cfd1b",
+      "sha256": "7c2532f3dd394237e0a84fefef0d4955c665c91bd184ef405147c8cd557fa926",
       "disposition": "formal-infrastructure",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     },
     {
       "path": "third_party/GO-NOTICES.txt",
       "sha256": "6609f4ec52451c28c9cbd843a1fd8020607de60b32391521e1ad37b72340a884",
       "disposition": "documentation",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     },
     {
       "path": "third_party/GUESTTCP-NOTICES.txt",
       "sha256": "c611fca59af0c876d8e108ec57bcb3e8ed102be4e140508af8087d9865ade41a",
       "disposition": "documentation",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     },
     {
       "path": "third_party/guesttcp.json",
       "sha256": "2c04e38a4ade196afa9db577f5ffa2ceff3613d3e05f2611db453f134229a39a",
       "disposition": "documentation",
-      "reason": "Exact-source dependency provenance, original license notices, minimum-Go documentation or test/support tooling for the reviewed ARM64 race CAS and child-coverage repair; no simulator protocol, ownership or authority behavior is changed.",
+      "reason": "Exact-source gVisor ARM64 race CAS repair, original notice/provenance update or native test correspondence. No application implementation or finite model transition is changed; all prior deadline, ownership, worker-budget, pin and coverage guards remain enforced.",
       "models": []
     }
   ]

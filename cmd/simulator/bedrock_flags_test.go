@@ -43,7 +43,7 @@ func TestBedrockFlagsDefaultDisabledAndRejectOrphanOptions(t *testing.T) {
 			t.Fatal("Bedrock Runtime became enabled by default")
 		}
 	}
-	for _, orphan := range []string{"--bedrock-ollama-url=" + "http://127.0.0.1:11434", "--bedrock-model=a.b=c", "--bedrock-runtime-timeout=5s", "--bedrock-runtime-concurrency=1"} {
+	for _, orphan := range []string{"--bedrock-apple-helper=/synthetic-helper", "--bedrock-ollama-url=" + "http://127.0.0.1:11434", "--bedrock-model=a.b=c", "--bedrock-runtime-timeout=5s", "--bedrock-runtime-concurrency=1"} {
 		values, err := parsedBedrockFlags(t, orphan)
 		if err != nil {
 			t.Fatal(err)
@@ -52,7 +52,7 @@ func TestBedrockFlagsDefaultDisabledAndRejectOrphanOptions(t *testing.T) {
 			t.Fatalf("%s silently ignored: %v", orphan, err)
 		}
 	}
-	for _, malformed := range [][]string{{"--bedrock-runtime-timeout=soon"}, {"--bedrock-runtime-concurrency=two"},
+	for _, malformed := range [][]string{{"--bedrock-apple-helper=/a", "--bedrock-apple-helper=/b"}, {"--bedrock-runtime-timeout=soon"}, {"--bedrock-runtime-concurrency=two"},
 		{"--bedrock-runtime-backend=apple", "--bedrock-runtime-backend=ollama"}, {"--bedrock-ollama-url=http://127.0.0.1:1", "--bedrock-ollama-url=http://127.0.0.1:2"},
 		{"--bedrock-runtime-timeout=5s", "--bedrock-runtime-timeout=6s"}, {"--bedrock-runtime-concurrency=1", "--bedrock-runtime-concurrency=2"}} {
 		if _, err := parsedBedrockFlags(t, malformed...); err == nil {
@@ -96,6 +96,7 @@ func TestBedrockFlagsRefuseUnsafeUnavailableAndAmbiguousConfiguration(t *testing
 		want   string
 	}{
 		{[]string{"--bedrock-runtime-backend=ollama", model}, true, "authenticated access"},
+		{[]string{"--bedrock-runtime-backend=ollama", "--bedrock-apple-helper=/synthetic-helper", model}, false, "applies only"},
 		{[]string{"--bedrock-runtime-backend=apple", model}, false, "Apple Foundation Models backend is unavailable"},
 		{[]string{"--bedrock-runtime-backend=apple", "--bedrock-ollama-url=http://127.0.0.1:11434", model}, false, "applies only"},
 		{[]string{"--bedrock-runtime-backend=", model}, false, "must be ollama or apple"},
