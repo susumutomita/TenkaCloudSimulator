@@ -23,8 +23,8 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  def field(page):return page.get_by_label('Access token',exact=True)
  def paste(page,value,select_all=True):
   page.evaluate('(value)=>navigator.clipboard.writeText(value)',value);field(page).focus()
-  if select_all:page.keyboard.press('Control+A')
-  before=page.evaluate('window.__pasteEvents.length');page.keyboard.press('Control+V')
+  if select_all:page.keyboard.press('ControlOrMeta+A')
+  before=page.evaluate('window.__pasteEvents.length');page.keyboard.press('ControlOrMeta+V')
   if value:assert page.evaluate('(before)=>window.__pasteEvents.slice(before).some(e=>e.trusted&&e.plainAvailable)',before),'Missing actual trusted plain clipboard event'
  def check_value(page,expected):
   for _ in range(150):
@@ -175,11 +175,11 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  page.get_by_role('button',name='English',exact=True).click();check_value(page,token);submit(page,303);success(page)
  report['nativeDOMValueSurvivesBlurAndLocaleRerender']=True
  report['actual1PasswordExtensionVerified']=False
- page=fresh();paste(page,token);check_value(page,token);page.keyboard.press('Control+Z');check_value(page,'');report['normalNativeUndo']=True
+ page=fresh();paste(page,token);check_value(page,token);page.keyboard.press('ControlOrMeta+Z');check_value(page,'');report['normalNativeUndo']=True
  # Partial selection replacement must preserve the unaffected prefix.
  before=token[:32]+'x'*32;page.keyboard.type(before);page.keyboard.press('End')
  for _ in range(32):page.keyboard.press('Shift+ArrowLeft')
- paste(page,token[32:],False);check_value(page,token);page.keyboard.press('Control+Z');check_value(page,before);report['selectedReplacementUndo']=True
+ paste(page,token[32:],False);check_value(page,token);page.keyboard.press('ControlOrMeta+Z');check_value(page,before);report['selectedReplacementUndo']=True
  paste(page,token+'\r\n');check_value(page,token);submit(page,303,True);success(page)
  page.get_by_role('button',name='Account menu',exact=True).click();page.get_by_role('menuitem',name='Sign out',exact=True).click();expect(page.get_by_role('heading',name='Open your local sandbox',exact=True)).to_be_visible();assert page.request.get(endpoint+'/_simulator/v1/capabilities').status==401
  paste(page,token);submit(page,303,True);success(page);report['actualValidKeyboardLoginLogoutRelogin']=True
@@ -192,7 +192,7 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
  page=fresh();page.clock.install();page.clock.pause_at('2030-01-01T00:00:00Z');field(page).evaluate('input=>input.addEventListener("paste",e=>e.preventDefault())');paste(page,secrets.token_hex(32));paste(page,token);page.clock.run_for(1);check_value(page,token);report['newerPasteInvalidatesOlderPaste']=True
  # A later real HTML-only paste must cancel an older pending plain paste.
  page=fresh();page.clock.install();page.clock.pause_at('2030-01-01T00:00:00Z');field(page).evaluate('input=>input.addEventListener("paste",e=>e.preventDefault(),{once:true})');paste(page,token)
- page.evaluate("async value=>navigator.clipboard.write([new ClipboardItem({'text/html':new Blob(['<b>'+value+'</b>'],{type:'text/html'})})])",token);field(page).focus();page.keyboard.press('Control+V');page.clock.run_for(1);check_value(page,'');report['actualHTMLPasteInvalidatesOlderPendingPlainPaste']=True
+ page.evaluate("async value=>navigator.clipboard.write([new ClipboardItem({'text/html':new Blob(['<b>'+value+'</b>'],{type:'text/html'})})])",token);field(page).focus();page.keyboard.press('ControlOrMeta+V');page.clock.run_for(1);check_value(page,'');report['actualHTMLPasteInvalidatesOlderPendingPlainPaste']=True
  # ClipboardEvent without clipboardData is synthetic, explicitly not OS paste.
  page=fresh();page.clock.install();page.clock.pause_at('2030-01-01T00:00:00Z');field(page).evaluate('input=>input.addEventListener("paste",e=>e.preventDefault(),{once:true})');paste(page,token);field(page).evaluate('input=>input.dispatchEvent(new ClipboardEvent("paste",{bubbles:true,cancelable:true}))');page.clock.run_for(1);check_value(page,'');report['syntheticNullClipboardDataInvalidatesPendingSafely']=True
  # Enter is pressed before the paused next-task fallback can execute.
@@ -203,7 +203,7 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
   page=fresh();paste(page,value);check_value(page,value);submit(page,401);expect(page.get_by_text('Invalid or expired access token',exact=True)).to_be_visible();assert page.request.get(endpoint+'/_simulator/v1/capabilities').status==401
  report['invalidSpacesLabelsEscapeRemainRejected']=True
  page=fresh();paste(page,'');check_value(page,'');page.get_by_role('button',name='Open sandbox',exact=True).click();expect(page.get_by_text('Enter your access token. If paste left this blank, copy the token as plain text.',exact=True)).to_be_visible();assert page.request.get(endpoint+'/_simulator/v1/capabilities').status==401;report['emptyClipboardNoAuthentication']=True
- page=fresh();page.evaluate("async value=>navigator.clipboard.write([new ClipboardItem({'text/html':new Blob(['<b>'+value+'</b>'],{type:'text/html'})})])",token);field(page).focus();page.keyboard.press('Control+V');check_value(page,'');expect(page.get_by_text('The clipboard has no plain-text token. Copy the token as plain text and paste again.',exact=True)).to_be_visible();assert page.request.get(endpoint+'/_simulator/v1/capabilities').status==401;report['HTMLOnlyNotInterpretedAndExplained']=True
+ page=fresh();page.evaluate("async value=>navigator.clipboard.write([new ClipboardItem({'text/html':new Blob(['<b>'+value+'</b>'],{type:'text/html'})})])",token);field(page).focus();page.keyboard.press('ControlOrMeta+V');check_value(page,'');expect(page.get_by_text('The clipboard has no plain-text token. Copy the token as plain text and paste again.',exact=True)).to_be_visible();assert page.request.get(endpoint+'/_simulator/v1/capabilities').status==401;report['HTMLOnlyNotInterpretedAndExplained']=True
  for failure in ('network',403,429,500):
   page=fresh();paste(page,token)
   def refuse(route):

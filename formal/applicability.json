@@ -1,182 +1,33 @@
 {
   "version": 1,
-  "base_sha": "ae646405f370106a411841df798ce459679b5a42",
+  "base_sha": "94a0ae2afe19ae494a6bd6fad5c846f16e6d7c77",
   "changes": [
     {
-      "path": "AGENTS.md",
-      "sha256": "35cc3d7c5a30b0bf179a077a0a57620ef06791597a8f9b7f501ceb013bc58eee",
-      "disposition": "documentation",
-      "reason": "Document the explicit optional native boundary, operator configuration, bounded limitations and separate actual-versus-synthetic verification; no executable state transition is introduced by this document.",
-      "models": []
-    },
-    {
-      "path": "Makefile",
-      "sha256": "6ac50553302685f9107d0610dc2a29899776e9a97ccf5e90a428d067ce7319f3",
-      "disposition": "modeled",
-      "reason": "Preserve the existing start/build token authority and visibility targets unchanged while adding explicit optional native build/acceptance targets; no token is emitted or authorization relaxed by the new targets.",
-      "models": [
-        {
-          "id": "StartupTokenVisibility",
-          "properties": [
-            "FileIdentityFrozen",
-            "CreatedFilePrivate",
-            "HistoryVisibility",
-            "InvalidFileNeverEmits"
-          ],
-          "limits": "Existing finite startup-token visibility abstraction only. The existing start target and token-file implementation are unchanged. Swift compilation/native inference and concrete Make/shell/file permissions are not proved by this binding; the standard start-script acceptance and actual native tests provide independent evidence."
-        }
-      ]
-    },
-    {
-      "path": "README.md",
-      "sha256": "f68b107b87e2db9f33d2c6d1f6c275f74d8d9963b2d7d8b080862639ab50c250",
-      "disposition": "documentation",
-      "reason": "Document the explicit optional native boundary, operator configuration, bounded limitations and separate actual-versus-synthetic verification; no executable state transition is introduced by this document.",
-      "models": []
-    },
-    {
-      "path": "cmd/simulator/bedrock_flags.go",
-      "sha256": "1292d6ca801d3120a4bea95dc2a2afdbaeee6b4e36754ced6b95089607485d87",
-      "disposition": "modeled",
-      "reason": "Select only the explicitly configured Apple helper or Ollama backend; missing helper and unavailable native model fail startup without backend substitution. Existing admission/authentication order is retained.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "NoFallback",
-            "SuccessOnlyFromBackend",
-            "TruthfulFailure",
-            "NoPersistence"
-          ],
-          "limits": "Existing two-request/one-slot abstract admission and backend outcome model only. Native macOS availability, Swift/Go JSON/pipe execution, process lifetime/cancellation, model behavior, tokenizer/stop metadata and Go refinement are not proved; synthetic process tests and actual on-device SDK calls independently check those concrete boundaries."
-        }
-      ]
-    },
-    {
-      "path": "cmd/simulator/bedrock_flags_test.go",
-      "sha256": "1df1eba0701b9ba4f0f58b80f1aa0dcc1b6a9b71b3277bb5bc3b46c4acba7463",
+      "path": "test/e2e/api_cloud_sections.py",
+      "sha256": "fe3c074509eb41b457f53e00229b7b8914b9826d6c60d1982097a6c6dcad82d6",
       "disposition": "test-support",
-      "reason": "Exercise duplicate/orphan helper flags and backend-specific rejection, keeping all existing Ollama flag cases.",
+      "reason": "Correct E2E setup and native-platform/CSP harness assumptions while preserving every baseline assertion, strict authentication, default page CSP and existing axe checks. Production handlers, assets, dependencies and finite models are unchanged.",
       "models": []
     },
     {
-      "path": "docs/bedrock-runtime.md",
-      "sha256": "fefb8da58f17174b9fe3b65de1eb0cfc841a42a5e877930bec99ade7b22ded70",
-      "disposition": "documentation",
-      "reason": "Document the explicit optional native boundary, operator configuration, bounded limitations and separate actual-versus-synthetic verification; no executable state transition is introduced by this document.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "7346bf521170113d84597112de66860b0dffebc1636023ff36279ba372f884f1",
-      "disposition": "documentation",
-      "reason": "Document the explicit optional native boundary, operator configuration, bounded limitations and separate actual-versus-synthetic verification; no executable state transition is introduced by this document.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-bedrock-runtime.md",
-      "sha256": "d1c8196c3f082e0538df618bbe639530d1993e8f00a21ea080da7592db540486",
-      "disposition": "documentation",
-      "reason": "Document the explicit optional native boundary, operator configuration, bounded limitations and separate actual-versus-synthetic verification; no executable state transition is introduced by this document.",
-      "models": []
-    },
-    {
-      "path": "formal/models.json",
-      "sha256": "4764a8bfd96b1feb25854a5863b94e53d7164036b3491d0d7b703a468a820aab",
-      "disposition": "formal-infrastructure",
-      "reason": "Extend the existing Bedrock admission/result abstraction to the exact optional helper path, preserving all properties and sensitivity controls and explicitly excluding concrete native execution from refinement claims.",
-      "models": []
-    },
-    {
-      "path": "internal/inference/apple.go",
-      "sha256": "60eb3111bc67dbb6d9018bda9caff2f7878fc94e68b4b6fe42350c82293e5626",
-      "disposition": "modeled",
-      "reason": "Map the selected native helper result to actual text or a typed failure, enforce bounded exchange/cancellation and reject ambiguous token-limit results; never synthesize inference, persist text or choose another backend.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "NoFallback",
-            "SuccessOnlyFromBackend",
-            "TruthfulFailure",
-            "NoPersistence"
-          ],
-          "limits": "Existing two-request/one-slot abstract admission and backend outcome model only. Native macOS availability, Swift/Go JSON/pipe execution, process lifetime/cancellation, model behavior, tokenizer/stop metadata and Go refinement are not proved; synthetic process tests and actual on-device SDK calls independently check those concrete boundaries."
-        }
-      ]
-    },
-    {
-      "path": "internal/inference/apple_test.go",
-      "sha256": "d3950e41c96f26b9e42a8fc5ce47b129b1e17ed8c728ce86a6e0d904edfb432c",
+      "path": "test/e2e/console_language.py",
+      "sha256": "20ecb887beb0998cb79d96bb79bea8c2c4b428414cff1e6fe6ad99fada6f14a2",
       "disposition": "test-support",
-      "reason": "Synthetic process-boundary doubles check exact role/options translation, availability/errors, bounded stdout, cancellation/reaping and non-echoing private text; no hardware verification is implied.",
+      "reason": "Correct E2E setup and native-platform/CSP harness assumptions while preserving every baseline assertion, strict authentication, default page CSP and existing axe checks. Production handlers, assets, dependencies and finite models are unchanged.",
       "models": []
     },
     {
-      "path": "native/apple/README.md",
-      "sha256": "07aba2f38e18a8e1b9fc0d5131b5d90a19059624d68e8949688f4bbb14a8ec61",
-      "disposition": "documentation",
-      "reason": "Document the explicit optional native boundary, operator configuration, bounded limitations and separate actual-versus-synthetic verification; no executable state transition is introduced by this document.",
-      "models": []
-    },
-    {
-      "path": "native/apple/main.swift",
-      "sha256": "fcd97cc5635a2b1286b9ca0cb626173bee12846628cae6aa4faf021c3a905e13",
-      "disposition": "modeled",
-      "reason": "Use only the on-device SystemLanguageModel.default in a fresh in-memory session; actual generation or fixed failure codes, no cloud/model/synthetic fallback and no transcript serialization or logging.",
-      "models": [
-        {
-          "id": "BedrockRuntimeAdmission",
-          "properties": [
-            "NoFallback",
-            "SuccessOnlyFromBackend",
-            "TruthfulFailure",
-            "NoPersistence"
-          ],
-          "limits": "Existing two-request/one-slot abstract admission and backend outcome model only. Native macOS availability, Swift/Go JSON/pipe execution, process lifetime/cancellation, model behavior, tokenizer/stop metadata and Go refinement are not proved; synthetic process tests and actual on-device SDK calls independently check those concrete boundaries."
-        }
-      ]
-    },
-    {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "f3c03fc8a01c8cf445554436c21e212200b9ebeb283f9ea3d536d8a52c2d08d6",
-      "disposition": "formal-infrastructure",
-      "reason": "Classify only the exact new nonexecutable native README as documentation. Swift runtime paths remain unclassified and require modeled correspondence.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "611a766e73034c02c5ee6091e1be3107cb1430a94ab6a02ea153725ca7f3fbbe",
-      "disposition": "formal-infrastructure",
-      "reason": "Protect the additive native helper source correspondence while preserving all mandatory existing model identities, invariants and controls.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "3070b6e99be53711b7c21542e846eaba42118a754faedf894758a6ef51df3962",
-      "disposition": "formal-infrastructure",
-      "reason": "Detect accidental runtime exemption adjacent to the exact native README classification.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "36f34013da48f2dec102d421466ba28c88d9f9bb984cfa2053177bafd9134527",
-      "disposition": "formal-infrastructure",
-      "reason": "Extend the existing source-scope removal counterexamples to the optional native helper; no detector or required property is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/apple_foundation_models.py",
-      "sha256": "b43a99b1be91a7a083a0fed647edf47bf1e8a6583c5965f2651fe52cc9f1c596",
+      "path": "test/e2e/login_paste.py",
+      "sha256": "4ea907b81d99b624d2488f719c1319c8533eebd9158a5e2718bdaeb3f0585ce7",
       "disposition": "test-support",
-      "reason": "Explicitly distinguish a synthetic process double from opt-in actual on-device SDK/HTTP acceptance, using synthetic prompts and no generated text in reports.",
+      "reason": "Correct E2E setup and native-platform/CSP harness assumptions while preserving every baseline assertion, strict authentication, default page CSP and existing axe checks. Production handlers, assets, dependencies and finite models are unchanged.",
       "models": []
     },
     {
-      "path": "test/e2e/bedrock_runtime.py",
-      "sha256": "cca837711aad71917f0d192d3e022085fd8251ec5ee7468fc36e1932443a25a7",
+      "path": "test/e2e/login_token_file.py",
+      "sha256": "d959d902b3576d0b815f0d9be6e7c97a7bf278f5630527021833eebc0eab402d",
       "disposition": "test-support",
-      "reason": "Add optional in-memory response text checks to the existing process-log privacy assertion without changing the previous Ollama acceptance cases.",
+      "reason": "Correct E2E setup and native-platform/CSP harness assumptions while preserving every baseline assertion, strict authentication, default page CSP and existing axe checks. Production handlers, assets, dependencies and finite models are unchanged.",
       "models": []
     }
   ]
