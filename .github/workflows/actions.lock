@@ -5,12 +5,12 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/battle-hosts.yml':
         - 'actions/checkout@v4.3.1'
-        - 'actions/setup-go@v6.5.0'
+        - 'actions/setup-go@v7.0.0'
         - 'actions/upload-artifact@v4.6.2'
     '.github/workflows/ci.yml':
         - 'actions/checkout@v4.3.1'
         - 'actions/download-artifact@v4.3.0'
-        - 'actions/setup-go@v6.5.0'
+        - 'actions/setup-go@v7.0.0'
         - 'actions/upload-artifact@v4.6.2'
     '.github/workflows/formal.yml':
         - 'actions/checkout@v4.3.1'
@@ -19,11 +19,11 @@ workflows:
     '.github/workflows/release.yml':
         - 'actions/checkout@v4.3.1'
         - 'actions/download-artifact@v4.3.0'
-        - 'actions/setup-go@v6.5.0'
+        - 'actions/setup-go@v7.0.0'
         - 'actions/upload-artifact@v4.6.2'
     '.github/workflows/sakura-sdk.yml':
         - 'actions/checkout@v4.3.1'
-        - 'actions/setup-go@v6.5.0'
+        - 'actions/setup-go@v7.0.0'
         - 'actions/upload-artifact@v4.6.2'
     '.github/workflows/verify-actions-lock.yml':
         - 'actions/checkout@v4.3.1'
@@ -38,9 +38,9 @@ dependencies:
         commit: 'sha1-d3f86a106a0bac45b974a628896c90dbdf5c8093'
         owner_id: 44036562
         repo_id: 192626254
-    'actions/setup-go@v6.5.0':
-        ref: 'v6.5.0'
-        commit: 'sha1-924ae3a1cded613372ab5595356fb5720e22ba16'
+    'actions/setup-go@v7.0.0':
+        ref: 'v7.0.0'
+        commit: 'sha1-b7ad1dad31e06c5925ef5d2fc7ad053ef454303e'
         owner_id: 44036562
         repo_id: 192624594
     'actions/upload-artifact@v4.6.2':
