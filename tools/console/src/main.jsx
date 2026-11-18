@@ -150,7 +150,11 @@ function Console(){
   useEffect(()=>{if(ready){setDetail(null);setMessage('');load()}},[ready,capabilities,service,bucket,region,principal,navigationVersion,showVersions]);
   function dismissResourceForm(){setModal(null);setModalError('');setForm({});file.current=null;}
   useEffect(()=>{const change=()=>{const routedRegion=new URLSearchParams(location.hash.split('?')[1]||'').get('region');if(routedRegion)setRegion(routedRegion);generation.current++;setNavigationVersion(v=>v+1);setService(routeService());setBucket(null);setShowVersions(false);setBucketTab('objects');setDetail(null);setFilter('');setSelected([]);dismissResourceForm();};addEventListener('hashchange',change);return()=>removeEventListener('hashchange',change);},[]);
-  function navigate(next){if(saving||!serviceAvailable(next,capabilities))return;const hash=hashForService(next);if(!hash)return;generation.current++;setNavigationVersion(v=>v+1);setService(next);setBucket(null);setShowVersions(false);setBucketTab('objects');setDetail(null);setFilter('');setSelected([]);dismissResourceForm();location.hash=hash;}
+  function navigate(next){if(saving||!serviceAvailable(next,capabilities))return;const hash=hashForService(next);if(!hash)return;generation.current++;setNavigationVersion(v=>v+1);setService(next);setBucket(null);setShowVersions(false);setBucketTab('objects');setDetail(null);setFilter('');setSelected([]);dismissResourceForm();
+    // This transition already committed the React screen. Keep browser history
+    // without dispatching a second hashchange that remounts and aborts its reads.
+    if(location.hash!=='#'+hash)history.pushState(null,'','#'+hash);
+  }
   function changeRegion(next){if(saving||next===region)return;if(service==='ssm')history.replaceState(null,'','#/parameters?'+new URLSearchParams({region:next}).toString());generation.current++;setRegion(next);setBucket(null);setShowVersions(false);setBucketTab('objects');setDetail(null);setSelected([]);setFilter('');setModal(null);setModalError('');setError('');setMessage('');}
   function openStackHistory(stackName){setDetail({stackName,revision:++stackDetailsGeneration.current});}
   async function inspect(item){

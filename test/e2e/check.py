@@ -73,6 +73,9 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_single_service_navigation_and_history_commit(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name("navigation_single_commit.py"))],check=True,timeout=90)
+
  def test_autoscaling_plans_reference_contract_detectors(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("test_autoscaling_plans_openapi.py"))],check=True,timeout=60)
 
