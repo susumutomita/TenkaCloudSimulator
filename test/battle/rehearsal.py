@@ -21,6 +21,7 @@ import argparse
 import base64
 import hashlib
 import json
+import math
 import os
 import pathlib
 import re
@@ -103,12 +104,131 @@ def stamp():
     return time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
 
 
+PUBLIC_PHASES = ('startup', 'initialize', 'operate', 'grade', 'cleanup', 'shutdown')
+PUBLIC_CHECKS = (
+    'battle-capability-receipt', 'battle-runtime-configured', 'capability-sealed-and-joined',
+    'create-stack-response', 'disruption-stops-frontend-and-penalizes',
+    'guest-api-answers-before-terminal', 'guest-process-exited', 'healthy-round-awards-points',
+    'imds-public-hostname-in-login-banner', 'native-operator-identity',
+    'no-points-before-registration', 'no-vm-before-deployment', 'one-real-qemu-guest-process',
+    'operator-disruption-run-shell-script', 'operator-revert-run-shell-script',
+    'operator-second-disruption', 'original-userdata-finished', 'outputs-default-endpoints-empty',
+    'participant-assumed-original-viewer-role', 'participant-recovers-with-systemctl-start-nginx',
+    'participant-registered-both-endpoints', 'participant-session-manager-shell-ready',
+    'participant-shell-executes-in-guest', 'probe-refused-after-seal',
+    'recovery-restores-points', 'revert-restores-points', 'score-ledger-consistent',
+    'second-disruption-penalizes', 'second-minute-awards-points',
+    'simulator-exit-and-no-guest-left', 'simulator-ready-with-pinned-bundle',
+    'stack-create-complete', 'stack-deleted', 'stack-iam-roles-removed',
+    'userdata-installed-and-started-services', 'watching-participant-stays-attached-past-a-minute',
+)
+PUBLIC_ROUNDS = ('before-registration', 'healthy-1', 'healthy-2', 'after-disruption',
+                 'after-participant-recovery', 'after-second-disruption', 'after-operator-revert')
+PUBLIC_FAILURES = ('RuntimeError', 'TimeoutError', 'ConnectionError', 'OSError',
+                   'ClientError', 'KeyboardInterrupt', 'ValueError', 'TypeError', 'UnexpectedError')
+PUBLIC_STATUSES = ('CREATE_IN_PROGRESS', 'CREATE_COMPLETE', 'CREATE_FAILED',
+                   'ROLLBACK_IN_PROGRESS', 'ROLLBACK_COMPLETE', 'ROLLBACK_FAILED',
+                   'DELETE_IN_PROGRESS', 'DELETE_COMPLETE', 'DELETE_FAILED',
+                   'GONE', 'UNKNOWN', 'Success', 'Failed', 'TimedOut', 'Cancelled')
+
+
+def public_number(value, lower, upper, integer=False):
+    # Do not coerce unknown objects, booleans, nonfinite floats or arbitrary text.
+    return (type(value) is int or not integer and type(value) is float) and lower <= value <= upper and math.isfinite(value)
+
+
+def public_details(value):
+    out = {}
+    if type(value) is not dict:
+        return out
+    for key, lower, upper, integer in (
+            ('exitCode', -255, 255, True), ('responseCode', -255, 255, True),
+            ('httpStatus', 100, 599, True), ('seconds', 0, 86400, False),
+            ('startupSeconds', 0, 86400, False), ('latencyMs', 0, 86400000, False),
+            ('points', -1000000000, 1000000000, True), ('total', -1000000000, 1000000000, True),
+            ('linesSeen', 0, 1000000, True), ('pingsAnswered', 0, 1000000, True),
+            ('remainingRuntimeEntries', 0, 1000000, True)):
+        candidate = value.get(key)
+        if public_number(candidate, lower, upper, integer):
+            out[key] = candidate
+    for key in ('status', 'finalStatus'):
+        candidate = value.get(key)
+        if type(candidate) is str and candidate in PUBLIC_STATUSES:
+            out[key] = candidate
+    for key in ('responded', 'settled', 'resultReady'):
+        if type(value.get(key)) is bool:
+            out[key] = value[key]
+    return out
+
+
+def public_failure(error):
+    name = type(error).__name__
+    return name if name in PUBLIC_FAILURES else 'UnexpectedError'
+
+
+def public_report(value):
+    # This is a public evidence schema, not a recursive secret-pattern filter.
+    # All free-form guest/API/exception text and unknown fields stay private.
+    out = {'schemaVersion': 1, 'phases': [], 'score': {'rounds': []}}
+    for key in ('templateSha256', 'metadataSha256'):
+        digest = value.get(key)
+        if type(digest) is str and re.fullmatch('[a-f0-9]{64}', digest):
+            out[key] = digest
+    for key, fields in (('bundle', ('manifestSha256', 'baseDiskSha256')),
+                        ('simulator', ('binarySha256',))):
+        source = value.get(key)
+        if type(source) is dict:
+            out[key] = {name: source[name] for name in fields
+                        if type(source.get(name)) is str and re.fullmatch('[a-f0-9]{64}', source[name])}
+    if type(value.get('result')) is str and value['result'] in ('PASS', 'PARTIAL', 'FAIL'):
+        out['result'] = value['result']
+    if 'failure' in value:
+        failure = value['failure']
+        out['failure'] = failure if type(failure) is str and failure in PUBLIC_FAILURES else 'UnexpectedError'
+    phases = value.get('phases')
+    for entry in phases if type(phases) is list else ():
+        if type(entry) is not dict or type(entry.get('name')) is not str or entry['name'] not in PUBLIC_PHASES:
+            continue
+        phase_entry = {'name': entry['name'], 'checks': []}
+        checks = entry.get('checks')
+        for item in checks if type(checks) is list else ():
+            if (type(item) is dict and type(item.get('name')) is str
+                    and item['name'] in PUBLIC_CHECKS and type(item.get('passed')) is bool):
+                phase_entry['checks'].append({'name': item['name'], 'passed': item['passed'], **public_details(item)})
+        out['phases'].append(phase_entry)
+    score = value.get('score')
+    if type(score) is dict:
+        out['score'].update(public_details({'total': score.get('total')}))
+        rounds = score.get('rounds')
+        for entry in rounds if type(rounds) is list else ():
+            if type(entry) is not dict or type(entry.get('label')) is not str or entry['label'] not in PUBLIC_ROUNDS:
+                continue
+            round_entry = {'label': entry['label'], **public_details(entry), 'observations': []}
+            observations = entry.get('observations')
+            for item in observations if type(observations) is list else ():
+                if type(item) is dict and type(item.get('slot')) is str and item['slot'] in ('frontend', 'api'):
+                    round_entry['observations'].append({'slot': item['slot'], **public_details(item)})
+            out['score']['rounds'].append(round_entry)
+    return out
+
+
 def log(message):
-    print(f'[{stamp()} +{time.time() - T0:7.1f}s] {message}', flush=True)
+    # Every accepted console message is assembled only from authored constants.
+    allowed = ({f'=== {name} ===' for name in PUBLIC_PHASES}
+               | {f'{status} {name}' for status in ('PASS', 'FAIL') for name in PUBLIC_CHECKS}
+               | {f'SCORE {name}' for name in PUBLIC_ROUNDS}
+               | {'FAILURE', 'SHUTDOWN', 'RESULT PASS', 'RESULT PARTIAL', 'RESULT FAIL'})
+    text = message if type(message) is str and message in allowed else 'DIAGNOSTIC WITHHELD'
+    print(f'[{stamp()} +{time.time() - T0:7.1f}s] {text}', flush=True)
 
 
 def save():
-    REPORT.write_text(json.dumps(report, indent=1, sort_keys=True) + '\n')
+    public = public_report(report)
+    REPORT.write_text(json.dumps(public, indent=1, sort_keys=True, allow_nan=False) + '\n')
+    summary = {'result': public.get('result', 'IN_PROGRESS')}
+    if 'failure' in public:
+        summary['failure'] = public['failure']
+    (WORK / 'simulator.log').write_text(json.dumps(summary, sort_keys=True) + '\n')
 
 
 def phase(name):
@@ -121,7 +241,7 @@ def phase(name):
 def check(entry, name, passed, **detail):
     item = {'name': name, 'passed': bool(passed), 'at': stamp(), **detail}
     entry['checks'].append(item)
-    log(f"{'PASS' if passed else 'FAIL'} {name} {json.dumps(detail, sort_keys=True, default=str)[:600]}")
+    log(f"{'PASS' if passed else 'FAIL'} {name}")
     save()
     if not passed:
         raise RuntimeError(f'{name} failed')
@@ -136,7 +256,10 @@ ENDPOINT = f'http://127.0.0.1:{PORT}'
 ORIGIN = ENDPOINT
 token_path = WORK / 'operator-token'
 state_path = WORK / 'state.db'
-sim_log = open(WORK / 'simulator.log', 'wb')
+# The workflow uploads simulator.log only. Never attach a raw child stream to it.
+sim_log = open(WORK / 'simulator-private.log', 'xb',
+               opener=lambda path, flags: os.open(path, flags, 0o600))
+(WORK / 'simulator.log').write_text('{"result": "IN_PROGRESS"}\n')
 process = subprocess.Popen(
     [args.binary, '--listen', f'127.0.0.1:{PORT}', '--state', str(state_path), '--token-file', str(token_path),
      '--battle-runtime-config', str(RUNTIME_CONFIG)],
@@ -261,7 +384,7 @@ def score_round(label, registered, receipt):
     report['score']['total'] += entry['points']
     entry['total'] = report['score']['total']
     report['score']['rounds'].append(entry)
-    log(f"SCORE {label}: {entry['points']:+d} (total {entry['total']}) {json.dumps(entry['observations'], sort_keys=True)[:400]}")
+    log(f'SCORE {label}')
     save()
     return entry
 
@@ -551,8 +674,6 @@ try:
     waited = time.time()
     code, text = terminal.run('sudo cloud-init status --wait; sudo cloud-init status --long | head -12', args.userdata_timeout)
     check(p, 'original-userdata-finished', code is not None, exitCode=code, seconds=round(time.time() - waited, 1), transcript=text[-900:])
-    code, text = terminal.run("sudo tail -n 25 /var/log/cloud-init-output.log", 60)
-    report['cloudInitOutputTail'] = text[-3000:]
     code, text = terminal.run("rpm -q nginx python3; systemctl is-active nginx tenkacloud-api; curl -s -o /dev/null -w 'frontend=%{http_code}\\n' http://127.0.0.1/; curl -s -w ' api=%{http_code}\\n' http://127.0.0.1:8080/healthz", 120)
     check(p, 'userdata-installed-and-started-services', code == 0 and 'frontend=200' in text and 'api=200' in text, exitCode=code, transcript=text[-700:])
     code, text = terminal.run('cat /etc/profile.d/tenkacloud-hello.sh | grep -E "FrontendUrl|ApiUrl"', 60)
@@ -676,14 +797,11 @@ try:
     check(p, 'stack-iam-roles-removed', not any(r.startswith(prefix) for r in roles), remainingRoles=roles)
     exit_code = 0
 except SystemExit as stop:
-    exit_code = int(stop.code or 0)
+    exit_code = stop.code if type(stop.code) is int and -255 <= stop.code <= 255 else (0 if stop.code is None else 1)
 except BaseException as error:  # the failure is preserved in the report, never converted to success
-    report['failure'] = f'{type(error).__name__}: {str(error)[:500]}'
-    log('FAILURE ' + report['failure'])
+    report['failure'] = public_failure(error)
+    log('FAILURE')
     sim_log.flush()
-    # The operator log names internal causes the API deliberately withholds.
-    for line in (WORK / 'simulator.log').read_text(errors='replace').splitlines()[-15:]:
-        log('SIMULATOR ' + line[:400])
 finally:
     p = phase('shutdown')
     report['runtimeDirectoryBeforeShutdown'] = runtime_listing()
@@ -705,11 +823,11 @@ finally:
     shutdown_ok = process.returncode == 0 and leftovers == []
     p['checks'].append({'name': 'simulator-exit-and-no-guest-left', 'passed': shutdown_ok, 'exitCode': process.returncode, 'qemuPids': leftovers,
                         'remainingRuntimeEntries': len(listing), 'remainingSockets': sockets})
-    log(f"{'PASS' if shutdown_ok else 'FAIL'} simulator exit {process.returncode}, qemu left {leftovers}, runtime entries {len(listing)}")
+    log('SHUTDOWN')
     if not shutdown_ok:
         exit_code = 1
     report['result'] = 'PASS' if exit_code == 0 and 'failure' not in report and not args.stop_after else ('PARTIAL' if exit_code == 0 else 'FAIL')
     report['finishedAt'] = stamp()
     save()
-    log(f"RESULT {report['result']} score={report['score']['total']}")
+    log(f"RESULT {report['result']}")
 sys.exit(exit_code)
