@@ -115,6 +115,7 @@ def run():
                     }""")
                     assert palette['light'] == {'--scalar-color-3': '#595959', '--scalar-sidebar-search-color': '#595959',
                         '--scalar-color-green': '#006644', '--scalar-color-red': '#b42318', '--scalar-color-orange': '#9c3b00'}
+                    computed_palettes.append({'width': width, **palette})
                     assert_reflow(page)
                     page.evaluate(axe.read_text())
                     result = page.evaluate("async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})")
@@ -136,6 +137,9 @@ def run():
                         assert not content_axe['violations'], [(v['id'], len(v['nodes'])) for v in content_axe['violations']]
                         page.screenshot(path=str(REPORTS / 'api-cloud-sections-390-content.png'))
 
+                for palette in computed_palettes:
+                    width = palette['width']
+                    page.set_viewport_size({'width': width, 'height': 1000})
                     # A status-only guide does not require Scalar to mount any
                     # request cards. Navigate to a real operation before testing
                     # its dark palette, rather than relying on cached cards.
@@ -145,7 +149,6 @@ def run():
                     expect(cards.first).to_be_visible()
                     palette['nestedRed'] = cards.evaluate_all("nodes=>nodes.map(node=>getComputedStyle(node).getPropertyValue('--scalar-color-red').trim())")
                     assert palette['nestedRed'] and set(palette['nestedRed']) == {'#ff8a80'}
-                    computed_palettes.append({'width': width, **palette})
                     assert_reflow(page)
                     page.screenshot(path=str(REPORTS / f'api-cloud-cards-{width}.png'))
 
