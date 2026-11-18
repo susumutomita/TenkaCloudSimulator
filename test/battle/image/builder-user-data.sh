@@ -6,7 +6,7 @@
 # Set these three values for the image release and relay overlay being built:
 RELAY=http://10.0.2.2:8099   # repo_relay.py on the builder host, reached through QEMU user networking
 GUID=707b7dfd96f868bd1650473d34d918a106283766d54260bc446abe9beefb6523   # mirror.list GUID of AL2023 2023.12.20261112
-OVERLAY_SHA256=22993580ff7a55b918bd062269a192dc647172e6dd906e6fd93bb7d15e4528eb   # session-overlay.py receipt
+OVERLAY_SHA256=f553a660f9cd672dc30867b90f28c283e565ad9bf7ee98a30a255e1fc3a789d9   # session-overlay.py receipt
 main() {
   exec > >(tee /dev/ttyS0) 2>&1
   set -eux

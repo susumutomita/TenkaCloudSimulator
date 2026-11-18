@@ -68,6 +68,28 @@ def pinned_overlay_digest(user_data):
     return found[0]
 
 
+def validate_overlay_provenance(repo, receipt, user_data):
+    """Reject stale build inputs before downloading an image or launching QEMU."""
+    files = {'go.mod', 'go.sum', 'LICENSE',
+             'guest/ssm-relay/tenkacloud-session-relay.service',
+             'scripts/guest-image/session-overlay.py'}
+    for folder in ('guest/ssm-relay', 'internal/workload/guestsession'):
+        files.update(str(p.relative_to(repo)) for p in (repo / folder).glob('*.go')
+                     if not p.name.endswith('_test.go'))
+    if (receipt.get('version') != 1 or receipt.get('toolchain') != 'go1.26.11'
+            or receipt.get('target') != {'GOOS': 'linux', 'GOARCH': 'amd64',
+                                        'CGO_ENABLED': '0', 'GOAMD64': 'v1'}
+            or receipt.get('flags') != ['-trimpath', '-buildvcs=false']
+            or set(receipt.get('source_sha256', {})) != files
+            or receipt.get('overlay_sha256') != pinned_overlay_digest(user_data)
+            or not re.fullmatch(r'[0-9a-f]{64}', receipt.get('binary_sha256', ''))):
+        raise SystemExit('invalid session overlay provenance; review and regenerate the pinned artifact')
+    for name, expected in receipt['source_sha256'].items():
+        path = repo / name
+        if path.is_symlink() or not path.is_file() or sha256(path) != expected:
+            raise SystemExit(f'session overlay source drift: {name}; review and regenerate the pinned artifact')
+
+
 def data_directories(help_text):
     """Directories listed by `qemu-system-x86_64 -L help`, in search order."""
     return [pathlib.Path(line.strip()) for line in help_text.splitlines() if line.strip().startswith('/')]
@@ -170,6 +192,12 @@ def main():
     user_data = (HERE / 'builder-user-data.sh').read_text()
     overlay_pin = pinned_overlay_digest(user_data)
 
+    provenance = json.loads((HERE / 'session-overlay-provenance.json').read_text())
+    validate_overlay_provenance(REPO, provenance, user_data)
+    toolchain = subprocess.run(['go', 'env', 'GOVERSION'], env=dict(os.environ, GOTOOLCHAIN='local'), capture_output=True, text=True, check=True).stdout.strip()
+    if toolchain != provenance['toolchain']:
+        raise SystemExit(f'session overlay requires {provenance["toolchain"]}, found {toolchain}')
+
     out = pathlib.Path(args.out).resolve()
     out.mkdir(parents=True, exist_ok=False)
     work = scratch_directory(args.work)
@@ -192,8 +220,10 @@ def main():
         local = work / 'local'
         local.mkdir()
         relay = work / 'tenkacloud-session-relay'
-        env = dict(os.environ, CGO_ENABLED='0', GOOS='linux', GOARCH='amd64')
+        env = dict(os.environ, CGO_ENABLED='0', GOOS='linux', GOARCH='amd64', GOAMD64='v1', GOFLAGS='', GOWORK='off', GOTOOLCHAIN='local')
         run(['go', 'build', '-trimpath', '-buildvcs=false', '-o', str(relay), './guest/ssm-relay'], cwd=REPO, env=env)
+        if sha256(relay) != provenance['binary_sha256']:
+            raise SystemExit('session relay binary differs from reviewed provenance')
         unit = REPO / 'guest/ssm-relay/tenkacloud-session-relay.service'
         license_file = REPO / 'LICENSE'
         receipt = json.loads(run([sys.executable, '-I', str(REPO / 'scripts/guest-image/session-overlay.py'),
