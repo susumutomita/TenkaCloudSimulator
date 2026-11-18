@@ -36,7 +36,7 @@ for (name,version),(directory,info) in sorted(packages.items()):
         origins={'@headlessui/vue':('tailwindlabs/headlessui','LICENSE'),'@ai-sdk/provider-utils':('vercel/ai','LICENSE')}
         assert name in origins,f'No upstream notice located for {name}@{version}'
         registry=json.loads(urllib.request.urlopen('https://registry.npmjs.org/'+name+'/'+version).read())
-        pinned_refs={'@ai-sdk/provider-utils':'6e14ffaa7e66594b926891583a4dab61910743d0'}
+        pinned_refs={'@ai-sdk/provider-utils':'a2d8be2aa0c024f1e3d275d94b67cc17c9159043'}
         commit=registry.get('gitHead') or pinned_refs.get(name);assert commit,f'No immutable upstream ref for {name}'
         if name=='@ai-sdk/provider-utils':
             source=json.loads(urllib.request.urlopen('https://raw.githubusercontent.com/vercel/ai/'+commit+'/packages/provider-utils/package.json').read())
