@@ -1,40 +1,26 @@
 {
   "version": 1,
-  "base_sha": "241cb37c5e7802cc349fd4bcdbc41b86de4fc2cf",
+  "base_sha": "dc0f8333b2b8b0487324f418d64e9d4a1c18c212",
   "changes": [
     {
-      "path": "test/battle/image/OVERLAY-PROVENANCE.md",
-      "sha256": "e43a223f8c0d1e98a9718cd0ff525053f67a4c26639061bcfa616be23c816720",
+      "path": "test/battle/image/test_rehearsal_cleanup.py",
+      "sha256": "68db3db251403de84cf3222a05e3ed6c403e4a30fb532109ffade7aa8c44606a",
       "disposition": "test-support",
-      "reason": "Build/rehearsal support documentation under existing test/** classification; explains independently reproduced compiler-directive build-ID drift and provenance review. No runtime implementation or model transition changes.",
+      "reason": "Offline independently reviewed regression oracle for the real rehearsal boundaries via AST isolation without startup imports, API/VM access or child execution. Tests preserve verdict/scoring/cleanup evidence and reject error-as-absence or raw/unknown public diagnostics with synthetic canaries; no runtime/model transition change or actual cleanup claim.",
       "models": []
     },
     {
-      "path": "test/battle/image/build_bundle.py",
-      "sha256": "c460038194f3bec2ae0b36bb94bdc210ba3960142d8e10f5967c95c9fba354ec",
+      "path": "test/battle/image/test_rehearsal_public_output.py",
+      "sha256": "e6cd4e634001c48e6177076cb79c7e45172045a7300918c748ca1fd0684d2276",
       "disposition": "test-support",
-      "reason": "Test-only Battle image builder under existing test/** classification; validates committed source/compiler/recipe/binary provenance while retaining host tar and guest SHA checks. Does not change simulator runtime or guest implementation.",
+      "reason": "Offline independently reviewed regression oracle for the real rehearsal boundaries via AST isolation without startup imports, API/VM access or child execution. Tests preserve verdict/scoring/cleanup evidence and reject error-as-absence or raw/unknown public diagnostics with synthetic canaries; no runtime/model transition change or actual cleanup claim.",
       "models": []
     },
     {
-      "path": "test/battle/image/builder-user-data.sh",
-      "sha256": "ac0acd7bc0e1273cbbf13e5a362b8de2d2459c7210346c550f6c7312965b1c3a",
+      "path": "test/battle/rehearsal.py",
+      "sha256": "a9ea66d5a07a6ce5575fd5af9f40c421d4402ff5d3a3555b0c3bb93955f7c9bc",
       "disposition": "test-support",
-      "reason": "Rehearsal image fixture under existing test/** classification; only the independently reproduced overlay SHA pin changes, preserving all commands and checksum enforcement.",
-      "models": []
-    },
-    {
-      "path": "test/battle/image/session-overlay-provenance.json",
-      "sha256": "caf4e26adf0a38030df981cce602d2057eb9e970748d78593192ef28379cd50b",
-      "disposition": "test-support",
-      "reason": "Test image build provenance under existing test/** classification; records immutable diagnostic source/recipe/binary/tar hashes, not runtime configuration or finite-model state.",
-      "models": []
-    },
-    {
-      "path": "test/battle/image/test_build_bundle.py",
-      "sha256": "9965966833d7c71c4aa9cfbcd3a291fe45ab7a71fd1dd8f66cf1059755e4c426",
-      "disposition": "test-support",
-      "reason": "Offline image-builder unit/negative regression tests under existing test/** classification; stale input, target, flags and checksum rejection assertions do not alter production implementation.",
+      "reason": "Host-side Battle verifier only: require explicit stack absence and publish a finite allowlist of typed diagnostics instead of raw guest/API/exception/child output. Original execution, score arithmetic and cleanup predicates are retained; no simulator runtime, authority or finite model transition changes. Offline canary/error/cleanup tests are separate from real VM/resource cleanup.",
       "models": []
     }
   ]
