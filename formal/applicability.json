@@ -1,26 +1,89 @@
 {
   "version": 1,
-  "base_sha": "dc0f8333b2b8b0487324f418d64e9d4a1c18c212",
+  "base_sha": "c53df63ec8b1d1655c9bf4b613cfac01afd35547",
   "changes": [
     {
-      "path": "test/battle/image/test_rehearsal_cleanup.py",
-      "sha256": "68db3db251403de84cf3222a05e3ed6c403e4a30fb532109ffade7aa8c44606a",
-      "disposition": "test-support",
-      "reason": "Offline independently reviewed regression oracle for the real rehearsal boundaries via AST isolation without startup imports, API/VM access or child execution. Tests preserve verdict/scoring/cleanup evidence and reject error-as-absence or raw/unknown public diagnostics with synthetic canaries; no runtime/model transition change or actual cleanup claim.",
+      "path": ".github/dependabot.yml",
+      "sha256": "eada67e1b7f73d16a4c240ede6193c4852a2b0887e678a23dc7a3462810502e7",
+      "disposition": "build-metadata",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
       "models": []
     },
     {
-      "path": "test/battle/image/test_rehearsal_public_output.py",
-      "sha256": "e6cd4e634001c48e6177076cb79c7e45172045a7300918c748ca1fd0684d2276",
-      "disposition": "test-support",
-      "reason": "Offline independently reviewed regression oracle for the real rehearsal boundaries via AST isolation without startup imports, API/VM access or child execution. Tests preserve verdict/scoring/cleanup evidence and reject error-as-absence or raw/unknown public diagnostics with synthetic canaries; no runtime/model transition change or actual cleanup claim.",
+      "path": ".github/workflows/actions.lock",
+      "sha256": "d4704f2cfd2f5c76e703accc3a3e7f1ae2ac59238b0e3dcb473ad7947393898a",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
       "models": []
     },
     {
-      "path": "test/battle/rehearsal.py",
-      "sha256": "a9ea66d5a07a6ce5575fd5af9f40c421d4402ff5d3a3555b0c3bb93955f7c9bc",
-      "disposition": "test-support",
-      "reason": "Host-side Battle verifier only: require explicit stack absence and publish a finite allowlist of typed diagnostics instead of raw guest/API/exception/child output. Original execution, score arithmetic and cleanup predicates are retained; no simulator runtime, authority or finite model transition changes. Offline canary/error/cleanup tests are separate from real VM/resource cleanup.",
+      "path": ".github/workflows/battle-hosts.yml",
+      "sha256": "d61658a7df6cfb2b16aa463488e5478d9057b4e69ebb808329066c1a57ce3e3b",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "8da01e1437635626275c6ada749841c5e96a2077eccb2135ab575709aee555d6",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/formal.yml",
+      "sha256": "c349ba6bfdeb4c8e27f432738385d0d593ab9122e2c7db9d748edd8bb09b46cc",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "sha256": "a4de19a6d50ccffaf1905818ec9969faf7eac788f2cd6a69737dfbdf9f4cc0f1",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/sakura-sdk.yml",
+      "sha256": "9f246f4f96915aa4666f47c9012298eaf05f49b3625b400b8073e7cdf6fa2c31",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/verify-actions-lock.yml",
+      "sha256": "920a34b2609686cae265dbe26e1864ec9282d2d670e1d909464368da5a54a941",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
+      "models": []
+    },
+    {
+      "path": "docs/ci.md",
+      "sha256": "15a29e6ab6d17fc2755842e136fc6bcde5ed68d2de065ac7f3446f1361cd83a2",
+      "disposition": "documentation",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
+      "models": []
+    },
+    {
+      "path": "docs/contributing/workflow-dependencies.md",
+      "sha256": "2cc34af7161fcd592242b9d621efc261dc6bed9003de5d009a3bc951034c9c97",
+      "disposition": "documentation",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_applicability.py",
+      "sha256": "32ed79a91f8c0e081096151f60c1ea64ae3c92702bc7d1b6169f1aae7cd0d572",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "25cc1c33fdeb8bd033837622168744e67d0bbc5812691575f9010e0edef8ed47",
+      "disposition": "formal-infrastructure",
+      "reason": "Official action lockfile onboarding, exact-path dependency automation validation or contributor documentation. Resolved action commit identities and simulator/model behavior are preserved; no security setting or permission is changed.",
       "models": []
     }
   ]
