@@ -263,6 +263,76 @@
       "models": []
     },
     {
+      "path": "test/e2e/api_cloud_sections.py",
+      "sha256": "203f59bda16670460bef7c04341504d990c45c8bd1bc482e4f0426dafa1cb971",
+      "disposition": "test-support",
+      "reason": "Correct native OS keyboard, strict-CSP wait, lazy-card setup or UTC timestamp oracle while preserving exact identity/authority/event/response and baseline accessibility checks. Production handlers/assets, dependency pins and finite models are unchanged.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/console_language.py",
+      "sha256": "20ecb887beb0998cb79d96bb79bea8c2c4b428414cff1e6fe6ad99fada6f14a2",
+      "disposition": "test-support",
+      "reason": "Correct native OS keyboard, strict-CSP wait, lazy-card setup or UTC timestamp oracle while preserving exact identity/authority/event/response and baseline accessibility checks. Production handlers/assets, dependency pins and finite models are unchanged.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/landing_topology.py",
+      "sha256": "33da2b0fba360b4f2b0a5750b6fff96b554ec6fd313493227ceac742796a0a16",
+      "disposition": "test-support",
+      "reason": "Correct native OS keyboard, strict-CSP wait, lazy-card setup or UTC timestamp oracle while preserving exact identity/authority/event/response and baseline accessibility checks. Production handlers/assets, dependency pins and finite models are unchanged.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/login_paste.py",
+      "sha256": "4ea907b81d99b624d2488f719c1319c8533eebd9158a5e2718bdaeb3f0585ce7",
+      "disposition": "modeled",
+      "reason": "Correct native OS keyboard, strict-CSP wait, lazy-card setup or UTC timestamp oracle while preserving exact identity/authority/event/response and baseline accessibility checks. Production handlers/assets, dependency pins and finite models are unchanged.",
+      "models": [
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "The unchanged finite input-intent model does not prove browser keyboard mapping, clipboard trust, CSP behavior or harness coverage. Real loopback native clipboard/file E2E and negative authentication/race scenarios validate those assumptions separately."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/login_token_file.py",
+      "sha256": "d959d902b3576d0b815f0d9be6e7c97a7bf278f5630527021833eebc0eab402d",
+      "disposition": "modeled",
+      "reason": "Correct native OS keyboard, strict-CSP wait, lazy-card setup or UTC timestamp oracle while preserving exact identity/authority/event/response and baseline accessibility checks. Production handlers/assets, dependency pins and finite models are unchanged.",
+      "models": [
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "The unchanged finite input-intent model does not prove browser keyboard mapping, clipboard trust, CSP behavior or harness coverage. Real loopback native clipboard/file E2E and negative authentication/race scenarios validate those assumptions separately."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/secret_versions_console.py",
+      "sha256": "bc471a4aec3c4b005ea174cc7c2b74e5e1f11f4c1dd74c57d7106938aba8b66d",
+      "disposition": "test-support",
+      "reason": "Correct native OS keyboard, strict-CSP wait, lazy-card setup or UTC timestamp oracle while preserving exact identity/authority/event/response and baseline accessibility checks. Production handlers/assets, dependency pins and finite models are unchanged.",
+      "models": []
+    },
+    {
       "path": "third_party/GO-NOTICES.txt",
       "sha256": "6609f4ec52451c28c9cbd843a1fd8020607de60b32391521e1ad37b72340a884",
       "disposition": "documentation",

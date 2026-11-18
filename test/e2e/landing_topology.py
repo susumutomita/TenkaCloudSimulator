@@ -11,6 +11,7 @@ import json
 import os
 import re
 import shutil
+import sys
 
 PREFIX = '/_simulator/'
 ASSET_PREFIX = PREFIX + 'landing/'
@@ -193,7 +194,7 @@ def fragment_and_modifier_case(page, root, origin, oracle, responses, errors, re
         no_popup_observed = False
         try:
             with page.context.expect_page(timeout=1000) as opened:
-                target.click(modifiers=['Control'])
+                target.click(modifiers=['Meta' if sys.platform == 'darwin' else 'Control'])
             popup = opened.value
         except PlaywrightTimeoutError:
             no_popup_observed = True
@@ -219,7 +220,7 @@ def fragment_and_modifier_case(page, root, origin, oracle, responses, errors, re
             popup_root, _ = assert_source_content(popup, oracle, True)
             assert_selection(popup_root, 'aws', 'aws-s3')
         probe = page.evaluate('window.__lpModifierProbe')
-        assert probe == {'trusted':True,'ctrl':True,'meta':False,'shift':False,'alt':False,'button':0,'defaultPrevented':False}
+        assert probe == {'trusted':True,'ctrl':sys.platform != 'darwin','meta':sys.platform == 'darwin','shift':False,'alt':False,'button':0,'defaultPrevented':False}
         assert page.url == original_url
         assert_selection(root, 'aws', 'aws-iam')
         drain()

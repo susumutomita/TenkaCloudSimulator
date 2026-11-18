@@ -115,7 +115,6 @@ def run():
                     }""")
                     assert palette['light'] == {'--scalar-color-3': '#595959', '--scalar-sidebar-search-color': '#595959',
                         '--scalar-color-green': '#006644', '--scalar-color-red': '#b42318', '--scalar-color-orange': '#9c3b00'}
-                    assert palette['nestedRed'] and set(palette['nestedRed']) == {'#ff8a80'}
                     computed_palettes.append({'width': width, **palette})
                     assert_reflow(page)
                     page.evaluate(axe.read_text())
@@ -137,6 +136,21 @@ def run():
                         (REPORTS / 'api-cloud-sections-axe-390-content.json').write_text(json.dumps(content_axe, indent=2) + '\n')
                         assert not content_axe['violations'], [(v['id'], len(v['nodes'])) for v in content_axe['violations']]
                         page.screenshot(path=str(REPORTS / 'api-cloud-sections-390-content.png'))
+
+                for palette in computed_palettes:
+                    width = palette['width']
+                    page.set_viewport_size({'width': width, 'height': 1000})
+                    # A status-only guide does not require Scalar to mount any
+                    # request cards. Navigate to a real operation before testing
+                    # its dark palette, rather than relying on cached cards.
+                    page.goto(endpoint + '/_simulator/docs/#tag/s3-basic-object-storage')
+                    expect(page.get_by_role('button', name='Test Request (get /)', exact=True)).to_be_visible()
+                    cards = page.locator('#reference .request-card.dark-mode')
+                    expect(cards.first).to_be_visible()
+                    palette['nestedRed'] = cards.evaluate_all("nodes=>nodes.map(node=>getComputedStyle(node).getPropertyValue('--scalar-color-red').trim())")
+                    assert palette['nestedRed'] and set(palette['nestedRed']) == {'#ff8a80'}
+                    assert_reflow(page)
+                    page.screenshot(path=str(REPORTS / f'api-cloud-cards-{width}.png'))
 
                 page.set_viewport_size({'width': 1440, 'height': 1000})
                 cases = [
