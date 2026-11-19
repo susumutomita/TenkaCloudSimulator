@@ -80,8 +80,10 @@ A host can open the participant's existing local STS session in the actual
 Cloudscape Parameter Store console without exposing its operator token. Sign
 `POST /_simulator/v1/console-handoffs` using the participant's local SigV4 STS
 credentials, service `sts`, and `Content-Type: application/json`. The exact body
-is `{"ParameterName":"/practice/own","Region":"us-east-1"}`. Both fields are
-required; unknown fields fail. The response is `{"Code":"…","ExpiresAt":"…"}`.
+is `{"ParameterName":"/practice/own","Region":"us-east-1"}`, or
+`{"InstanceId":"i-0123456789abcdef0","Region":"us-east-1"}` for an EC2 instance
+(see below). Exactly one of `ParameterName` and `InstanceId` is required, together
+with `Region`; giving both, neither, or an unknown field fails with 400. The response is `{"Code":"…","ExpiresAt":"…"}`.
 The code is a 256-bit random, single-use reference, valid for at most 60 seconds
 and never beyond the original STS expiry. Issuance is capped at 1000 outstanding
 codes per process. No operator, legacy participant token, or unsigned request
@@ -118,8 +120,9 @@ restriction does not change the SDK credentials' own permissions or replace the
 one-process/database/token-authority-per-team hosting contract.
 
 Capabilities advertise `consoleHandoff: {version: 1, services:
-["ssm-parameter"]}`. Bound browser discovery also includes its own
-`consoleScope` (parameterName and region), allowing a one-parameter list and
+["ssm-parameter", "ec2-instance"]}`. A host treats `"ec2-instance"` as the signal
+that the instance entry below exists. Bound browser discovery also includes its own
+`consoleScope` (parameterName or instanceId, and region), allowing a one-parameter list and
 detail/refresh through GetParameter without DescribeParameters. Older binaries
 must show an explicit upgrade requirement in the host rather than falling back
 to operator login. Embeddings without Access do not provide handoff authority.
@@ -155,3 +158,24 @@ and the formal-policy suite passed 78 tests. The final native source also passed
 `make before-commit`: all packages under the race detector, 20,316/21,251
 statements (95.60%), vet, asset/license checks, module verification and build.
 Full exact-commit browser and formal gates remain required before merge.
+
+### Instance handoff: Session Manager inside the console
+
+`{"InstanceId":"i-…","Region":"…"}` (`^i-[a-f0-9]{8,32}$`) is issued, answered
+(`{"Code","ExpiresAt"}`) and redeemed exactly like the parameter handoff; a host
+changes only the request body. Issuance applies the same checks as the terminal
+handoff (`TerminalBinding`): participant STS credentials only, never the operator
+token, `ssm:StartSession` on that instance, bound to the target, region and the
+original participant session. Expired or replaced credentials, another instance
+or another region cannot issue or use it.
+
+The resulting console session shows only Console Home, EC2 (that one instance;
+`DescribeInstances` filtered server-side, requiring `ec2:DescribeInstances`) and
+Systems Manager → Session Manager. Its cookie can call EC2 discovery for its own
+region, the readiness route and the existing terminal control/channel routes for
+its own instance. Other EC2 resources and instances, Parameter Store, generic AWS
+APIs, identity routes and further handoffs are refused. Session Manager shows the
+instance as *Preparing* and disables **Start session** until the server reports
+the guest relay as answering (`GET /_simulator/v1/terminal-readiness`); this does
+not depend on URL registration or grading. Parameter-only handoffs and the
+code-paste terminal handoff are unchanged.

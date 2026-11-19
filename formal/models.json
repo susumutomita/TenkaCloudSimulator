@@ -7242,7 +7242,7 @@
    "id": "ConsoleHandoff",
    "model": "formal/ConsoleHandoff.tla",
    "config": "formal/ConsoleHandoff.cfg",
-   "bounds": "One opaque handoff, two redemption attempts, one bound browser and one unrelated live browser; time0..3, parent expiry2, handoff TTL1, browser TTL1 or3, two role generations, policy Boolean, two parameters/regions, Get/Put/Delete actions.",
+   "bounds": "One opaque handoff, two redemption attempts, one bound browser and one unrelated live browser; time0..3, parent expiry2, handoff TTL1, browser TTL1 or3, two role generations, policy Boolean, two targets/regions, one target kind per handoff (parameter or instance), Boolean guest relay, Get/Put/Delete/Describe/Terminal actions.",
    "properties": [
     "TypeOK",
     "OperatorRefused",
@@ -7252,6 +7252,7 @@
     "RedeemRequiresFreshParent",
     "UseRequiresFreshAuthority",
     "ExactDestination",
+    "TerminalRequiresRelay",
     "LogoutRejectsReplay",
     "UnrelatedSessionsPreserved",
     "SDKAuthorityPreserved"
@@ -7265,7 +7266,13 @@
     "internal/aws/sts_credentials_test.go",
     "internal/aws/sts_roles.go",
     "internal/server/server.go",
-    "internal/aws/ssm.go"
+    "internal/aws/ssm.go",
+    "internal/aws/sts_terminal_binding.go",
+    "internal/aws/ec2_read.go",
+    "internal/aws/ssm_sessions.go",
+    "internal/server/terminal_channel.go",
+    "internal/server/terminal_handoff.go",
+    "internal/server/console_instance_handoff_test.go"
    ],
    "mutants": [
     {
@@ -7415,7 +7422,7 @@
      "id": "SkipAction",
      "edits": [
       {
-       "old": "a \\in {\"Get\",\"Put\"} (* ExactAction *)",
+       "old": "((kind = \"parameter\" /\\ a \\in {\"Get\",\"Put\"})\n                     \\/ (kind = \"instance\" /\\ a \\in {\"Describe\",\"Terminal\"})) (* ExactAction *)",
        "new": "TRUE (* ExactAction *)",
        "count": 1
       }
@@ -7487,6 +7494,28 @@
       }
      ],
      "expect_invariant": "RedeemRequiresFreshParent"
+    },
+    {
+     "id": "CrossKindAction",
+     "edits": [
+      {
+       "old": "((kind = \"parameter\" /\\ a \\in {\"Get\",\"Put\"})\n                     \\/ (kind = \"instance\" /\\ a \\in {\"Describe\",\"Terminal\"})) (* ExactAction *)",
+       "new": "a \\in {\"Get\",\"Put\",\"Describe\",\"Terminal\"} (* ExactAction *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDestination"
+    },
+    {
+     "id": "SkipRelay",
+     "edits": [
+      {
+       "old": "(a # \"Terminal\" \\/ relay) (* RelayReady *)",
+       "new": "TRUE (* RelayReady *)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TerminalRequiresRelay"
     }
    ]
   },
@@ -17194,6 +17223,7 @@
    "source_scope": [
     "tools/console/src/ssm-terminal-client.mjs",
     "tools/console/src/ssm-terminal.jsx",
+    "tools/console/src/session-manager.jsx",
     "tools/console/src/main.jsx",
     "internal/server/web/app.js"
    ],

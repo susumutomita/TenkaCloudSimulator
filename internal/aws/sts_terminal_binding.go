@@ -41,3 +41,29 @@ func checkTerminalBoundary(r *http.Request, region, target string) error {
 	}
 	return nil
 }
+
+type consoleInstanceBoundaryKey struct{}
+type consoleInstanceBoundary struct{ region, instance string }
+
+// ConsoleInstanceBinding authorizes a browser console session for exactly one
+// instance. It applies the terminal handoff checks (participant STS only, never
+// the operator, ssm:StartSession on the instance, original session) and adds a
+// console boundary, so the session can describe that instance and open its
+// terminal but cannot reach any other EC2 resource or generic AWS API.
+func (a *STSAuthority) ConsoleInstanceBinding(r *http.Request, region, instance string) (func(*http.Request) (*http.Request, SDKIdentity, error), error) {
+	if _, exists := r.Context().Value(consoleInstanceBoundaryKey{}).(consoleInstanceBoundary); exists {
+		return nil, fmt.Errorf("console bindings cannot mint handoffs")
+	}
+	terminal, err := a.TerminalBinding(r, region, instance)
+	if err != nil {
+		return nil, err
+	}
+	return func(request *http.Request) (*http.Request, SDKIdentity, error) {
+		bound, identity, err := terminal(request)
+		if err != nil {
+			return nil, SDKIdentity{}, err
+		}
+		ctx := context.WithValue(bound.Context(), consoleInstanceBoundaryKey{}, consoleInstanceBoundary{region, instance})
+		return bound.Clone(ctx), identity, nil
+	}, nil
+}

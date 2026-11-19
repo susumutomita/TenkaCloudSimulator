@@ -99,7 +99,14 @@ func (g *Gateway) serveEC2Read(w http.ResponseWriter, r *http.Request) {
 	if principal == "" {
 		principal = core.Administrator
 	}
-	if principal != core.Administrator {
+	boundary, instanceScoped := r.Context().Value(consoleInstanceBoundaryKey{}).(consoleInstanceBoundary)
+	if instanceScoped {
+		policy, ok := SDKPolicyFromContext(r.Context())
+		if action != "DescribeInstances" || region != boundary.region || !ok || core.Evaluate(policy, "ec2:DescribeInstances", "*") != "allowed" {
+			fail("UnauthorizedOperation", "This console session is limited to its own instance.", 403)
+			return
+		}
+	} else if principal != core.Administrator {
 		policy, found, e := g.Identities.PolicyContext(r.Context(), principal)
 		if e != nil {
 			fail("InternalError", "Identity state unavailable.", 500)
@@ -114,6 +121,9 @@ func (g *Gateway) serveEC2Read(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fail("InternalError", "Local discovery state is inconsistent or exceeds the 1000-resource bound.", 500)
 		return
+	}
+	if instanceScoped {
+		out.Reservations = onlyInstance(out.Reservations, boundary.instance)
 	}
 	out.XMLName = xml.Name{Local: action + "Response"}
 	out.XMLNS = "http://ec2.amazonaws.com/doc/2016-11-15/"
@@ -270,4 +280,23 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 		out.Reservations = append(out.Reservations, ec2ReservationRead{Owner: "000000000000", Instances: []ec2InstanceRead{instance}})
 	}
 	return out, tx.Commit()
+}
+
+// onlyInstance keeps the one bound instance; every other resource is dropped
+// before serialization.
+func onlyInstance(reservations []ec2ReservationRead, id string) []ec2ReservationRead {
+	kept := []ec2ReservationRead{}
+	for _, reservation := range reservations {
+		instances := []ec2InstanceRead{}
+		for _, instance := range reservation.Instances {
+			if instance.ID == id {
+				instances = append(instances, instance)
+			}
+		}
+		if len(instances) > 0 {
+			reservation.Instances = instances
+			kept = append(kept, reservation)
+		}
+	}
+	return kept
 }

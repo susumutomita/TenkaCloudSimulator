@@ -47,6 +47,10 @@ func (h terminalHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.control(w, r, scope)
 		return
 	}
+	if r.URL.Path == "/_simulator/v1/terminal-readiness" {
+		h.readiness(w, r, scope)
+		return
+	}
 	prefix := "/_simulator/v1/terminal-channel/"
 	if !strings.HasPrefix(r.URL.Path, prefix) || r.Method != "GET" {
 		http.NotFound(w, r)
@@ -58,6 +62,19 @@ func (h terminalHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.channel(w, r, id)
+}
+
+// readiness reports only whether the guest relay for the scoped target can be
+// opened now. It starts nothing and never depends on URL registration or grading.
+func (h terminalHandler) readiness(w http.ResponseWriter, r *http.Request, scope terminalScope) {
+	if r.Method != "GET" {
+		w.WriteHeader(405)
+		return
+	}
+	connectable := h.store.Connectable(r.Context(), scope.Region, scope.Target)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store")
+	_ = json.NewEncoder(w).Encode(map[string]any{"Target": scope.Target, "Region": scope.Region, "Connectable": connectable})
 }
 func (h terminalHandler) control(w http.ResponseWriter, r *http.Request, scope terminalScope) {
 	if r.Method != "POST" || r.Header.Get("Content-Type") != "application/x-amz-json-1.1" || len(r.Header.Values("X-Amz-Target")) != 1 {

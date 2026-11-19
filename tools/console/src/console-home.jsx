@@ -14,6 +14,7 @@ export const SERVICE_PRESENTATION = Object.freeze({
   wafv2: {category:'security', color:'red', icon:'key', en:'Manage regional web ACLs', ja:'リージョンのウェブACLを管理'},
   s3: {category:'storage', color:'green', icon:'storage', en:'Store and manage objects', ja:'オブジェクトを保存・管理'},
   ssm: {category:'management', color:'pink', icon:'settings', en:'Manage systems and configuration', ja:'システムと設定を管理'},
+  'ssm-session': {category:'management', color:'pink', icon:'settings', en:'Connect to the instance with a shell session', ja:'シェルセッションでインスタンスに接続'},
   lambda: {category:'compute', color:'orange', icon:'compute', en:'Run functions', ja:'関数を実行'},
   iam: {category:'security', color:'red', icon:'key', en:'Manage identities and access', ja:'IDとアクセスを管理'},
   apigateway: {category:'networking', color:'purple', icon:'gateway', en:'Create and manage APIs', ja:'APIを作成・管理'},

@@ -70,6 +70,11 @@ func SDKPolicyFromContext(ctx context.Context) (core.Policy, bool) {
 
 // sdkDecision consumes the policy from the same snapshot as role-generation validation.
 func (g *Gateway) sdkDecision(r *http.Request, principal, action, resource string) (string, error) {
+	// An instance console session reaches EC2 discovery and the terminal store
+	// through their own checks; it never obtains a generic native decision.
+	if _, ok := r.Context().Value(consoleInstanceBoundaryKey{}).(consoleInstanceBoundary); ok {
+		return "implicitDeny", nil
+	}
 	if resourceLimit, ok := r.Context().Value(consoleParameterBoundaryKey{}).(consoleParameterBoundary); ok {
 		if resource != resourceLimit.arn || (action != "ssm:GetParameter" && action != "ssm:PutParameter") {
 			return "implicitDeny", nil
