@@ -18817,6 +18817,54 @@
      "expect_invariant": "PublicationFollowsAdmission"
     }
    ]
-  }
+  },
+  {
+  "id": "SakuraServerMetadata",
+  "model": "formal/SakuraServerMetadata.tla",
+  "config": "formal/SakuraServerMetadata.cfg",
+  "bounds": "Two owner/realm slots and matching persisted bindings; IDs 1..3, next 1..4, live quota 2 per store and two symbolic patch values; no step limit; finite observation quotient.",
+  "properties": [
+   "TypeOK",
+   "FrozenScope",
+   "OnlyOwnerRealmLookup",
+   "ReopenBinding",
+   "FailureFrame",
+   "PeerFrame",
+   "ReadAndReopenSnapshot",
+   "FreshCommittedID",
+   "AllocatorOnlyCreate",
+   "CommitExact",
+   "StoredIDsAndQuota"
+  ],
+  "limits": "Abstract trusted-leaf metadata admission and atomic stores only. Realm equality is opaque; mount comparison is separate from HTTP marker. Not HTTP dispatch/parsing, host authentication, actual SQL/locking/crash or Go refinement, generation randomness, combined patches, collection list/query, SDK, Terraform, or real VM behavior.",
+  "source_scope": [
+   "internal/sakura/iaas/server_http.go",
+   "internal/sakura/iaas/server_store.go"
+  ],
+  "mutants": [
+   {
+    "id": "AcceptWrongServerRealm",
+    "edits": [
+     {
+      "old": "Authorized(q) == /\\ <<q.sub,q.realm>> = stores[q.r].binding",
+      "new": "Authorized(q) == /\\ q.sub = stores[q.r].binding[1]",
+      "count": 1
+     }
+    ],
+    "expect_invariant": "OnlyOwnerRealmLookup"
+   },
+   {
+    "id": "ReuseDeletedServerID",
+    "edits": [
+     {
+      "old": "FreshSlot(r) == stores[r].next",
+      "new": "FreshSlot(r) == CHOOSE i \\in Ids : /\\ stores[r].rows[i] = Nil /\\ \\A j \\in Ids : stores[r].rows[j] = Nil => i <= j",
+      "count": 1
+     }
+    ],
+    "expect_invariant": "FreshCommittedID"
+   }
+  ]
+ }
  ]
 }
