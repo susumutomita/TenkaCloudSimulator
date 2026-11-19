@@ -1,35 +1,118 @@
 # SimpleDB first acceptance registration
 
-This is additive factory registration, not a service implementation or a passed product acceptance. The immutable TestWriter snapshot is `7253c5b5dd9b0ba4574fbfe8bb2209228f99ba6d`, based on main `a53131cd61030c8d238823478ec96917b19e95ef`; its nine files remain byte-for-byte unchanged.
+## Current candidate and limits
 
-## Integration boundary
+The isolated SimpleDB candidate at `6aaac45c3fc33489b2024d755f8e9f1ccc0fd638`
+contains the independently reviewed native implementation from `82b7ffc`.
+It implements these five local Query APIs:
 
-Read-only comparison found main still at `a53131c`. Azure Queue #502 has its separate clean implementation checkout at `92028d29ca4eb803f1d4a19a4cf177a8e1ad5b3b`; GCP DNS #343 acceptance is clean at `aaaecd2764540ac1dd306f110b89362fb60536c6`, while its separate leaf worktree contains uncommitted implementation work. None is main integration evidence.
+- `CreateDomain`: idempotent creation.
+- `ListDomains`: bounded pagination.
+- `DeleteDomain`: delete the domain and its items.
+- `PutAttributes`: add or replace attribute values atomically.
+- `GetAttributes`: read attributes, optionally filtered by name.
 
-Only the two shared registration scripts were adapted from the committed GCP acceptance snapshot (which already includes Azure registration):
+The composed server uses account `000000000000` and region `us-east-1`.
+Another region is rejected, not selected from an arbitrary request header.
+Requests use POST at the root, form encoding, Version `2009-04-15`, and explicit
+`X-Simulator-Service: sdb`. The existing `NewAccess` local authentication wrapper
+is required. The Gateway uses its trusted actor and the existing IAM decision
+path; dummy AWS signing fields do not authenticate a caller. The caller-owned
+SQLite database stores the same state across supported operations and restart.
 
-- `scripts/factory_acceptance.py`: upstream snapshot Git blob `f7f22b4c3f77350106c5f4e2c90a23950a29930a`.
-- `scripts/test-factory-acceptance.py`: upstream snapshot Git blob `8e459d3d71a026659e6c91625fd8e97d96cf7bf4`.
+This is not full SimpleDB compatibility. Select, conditional writes,
+DomainMetadata and DeleteAttributes are unsupported. No console, external AWS
+connection, additional credential mechanism or multiregion service claim is made.
+Pagination tokens are local to one Store instance; continuation across restart
+is not supported.
 
-SQS/Azure/GCP suite identities, commands, operation lists and provider-specific path rules are retained. Operation eligibility now also selects the path authority, preventing mixed AWS suite lists from authorizing SQS paths for a SimpleDB operation or the reverse. No other provider oracle, runtime or leaf test is imported. Existing legacy source-pin semantics are preserved; this change does not certify Azure/GCP oracle provenance or product acceptance.
+At that exact candidate, the six frozen native tests and twelve validation
+subtests passed with the real server handler, authentication wrapper and SQLite,
+using HTTP recorders without listeners. The independent leaf contract passed all
+seven cases; focused Gateway and adapter checks also passed. These results were
+independently reviewed. **Actual AWS SDK wire acceptance has not been run.**
+A source change needs fresh exact-HEAD evidence.
 
-`DEFAULT_SUITES` explicitly retains main's SQS lifecycle. Azure/GCP implementations are absent on this base, and SimpleDB is unimplemented. Registration is not default activation: these suites run only when selected with `--suite`. Nothing is reported as skipped or passed for an unselected suite. Activating a service in the default gate requires a separate reviewed integration with its actual implementation and independent acceptance. This avoids making current main's normal gate depend on unintegrated leaf packages or RED oracles.
+## Isolated registry and default
 
-## SimpleDB registration
+The registry contains the original SQS suite and the four SimpleDB suites below.
+There are no Azure Queue or GCP DNS registrations in this isolated branch.
+The original SQS descriptor is unchanged.
+
+`DEFAULT_SUITES` is only `sqs-lifecycle`. SimpleDB registration is not automatic
+activation: all four SimpleDB surfaces must be selected explicitly. An unselected
+surface is neither passed nor skipped evidence.
 
 - `simpledb-first-oracle`: immutable TestWriter fixture/hash consistency only.
-- `simpledb-first-native`: all six named native tests and all twelve required validation subtests; first five APIs, real HTTP handler and SQLite, no SDK/UI.
-- `simpledb-first-sdk-wire`: fixed SDK entrypoint, existing required boto3/botocore versions, same-clean-HEAD CLI build, four required wire cases. Missing dependencies, product RED, preflight-only, timeout and cleanup failure cannot pass.
-- `simpledb-first-sdk-harness-controls`: all three named pure detector controls, not SDK execution.
+- `simpledb-first-native`: six named native tests and twelve required validation
+  subtests; five native APIs, real handler and SQLite, not SDK/UI.
+- `simpledb-first-sdk-wire`: pinned SDK, freshly built same-clean-HEAD CLI, four
+  required wire cases. Missing dependencies, product failure, preflight-only,
+  timeout and cleanup failure cannot pass.
+- `simpledb-first-sdk-harness-controls`: three pure detector controls, not
+  actual SDK execution.
 
-A SimpleDB finding's scope validation requires all four suites, plus one of exactly CreateDomain/ListDomains/DeleteDomain/PutAttributes/GetAttributes and explicitly listed leaf Go paths. Pure checks cannot authorize a product finding. Select, conditional writes, DomainMetadata, DeleteAttributes, gateway/server/auth and fixture edits are outside this registration's implementation path authority.
+In a separately approved local-only SDK test environment, the explicit selection
+is:
 
-`test/factory/simpledb-registration.json` pins all nine original TestWriter files plus the fixed SDK entrypoint. The suite descriptors, exact commands and leaf path list are also included in the SimpleDB source binding. Receipts bind clean HEAD, source binding, suite set, command/toolchain, process exit, named tests/cases and log hash. A timeout is failed evidence and allows graceful owned-CLI cleanup before forced termination. Reports remain local, never automatically published.
+```sh
+python3 scripts/factory_acceptance.py \
+  --suite simpledb-first-oracle \
+  --suite simpledb-first-native \
+  --suite simpledb-first-sdk-wire \
+  --suite simpledb-first-sdk-harness-controls \
+  --output /tmp/simpledb-acceptance.json
+```
 
-The SDK entrypoint checks the existing official pins before attempting a build. Python invocation paths retain venv symlinks so the reviewed environment is not replaced by its base interpreter; receipts bind that invocation path. It installs nothing and accepts no arbitrary command, binary, report or endpoint from a finding. The CLI is built into an owned temporary directory with the configured single Go executable and the existing offline environment. The immutable SDK harness uses authentication-enabled numeric loopback with dummy credentials/local token; no new SigV2 credential authority is added. SIGTERM/SIGINT unwind its cleanup; primary product and cleanup failures remain separate. Actual SDK wire execution remains unverified on this environment if pinned dependencies are unavailable.
+This command executes the SDK/CLI surface, including a local listener; it is not
+a read-only preflight. Do not run it where local listeners or its required
+environment configuration are disallowed.
 
-## Required evidence before a service claim
+## Immutable inputs and authority boundaries
 
-Registration alone does not make #300 ready: native tests currently stop at CreateDomain HTTP501 from the CloudFormation fallback. A failed receipt must stay failed; later assertions are prepared but not observed. Actual SDK wire cannot be replaced by its pure controls. The registered leaf scope alone cannot implement a passing composed server/CLI: a separately owned SimpleDB adapter/Gateway/server integration is still absent. It needs its own explicit integration-scope acceptance/ownership handoff before any implementation claim can be considered executable. Do not broaden the leaf allowlist to grant shared integration paths. After separate authorization and that integration, the owner must run all registered surfaces on the exact clean implementation candidate, with all required AGENTS gates and independent review. Existing claim/attempt/denial history is not reset.
+The original TestWriter snapshot is
+`7253c5b5dd9b0ba4574fbfe8bb2209228f99ba6d`, based on main
+`a53131cd61030c8d238823478ec96917b19e95ef`. Its nine files remain byte-for-byte
+unchanged. `test/factory/simpledb-registration.json` pins these files and the
+fixed SDK entrypoint. Suite descriptors, exact commands and leaf paths are part
+of the source binding. Receipts bind clean HEAD, inputs, toolchain, process exit,
+required cases and log hashes.
 
-Run `python3 scripts/test-factory-acceptance.py` for the combined SQS/Azure/GCP/SimpleDB registration detectors and `python3 scripts/test-software-factory.py` for ledger regression. Synthetic logs in detector tests are controls, not product acceptance receipts. No runtime implementation, claim, push, PR, merge or release is part of this registration change.
+A finding's registered scope requires all four suites and one of the five
+operations above. Its implementation allowlist remains explicitly named leaf
+Go files. Gateway/server/auth, adapter transport and fixture edits are not granted
+authority by that leaf registration. The separately reviewed integration does
+not silently broaden this allowlist or reset prior claim/attempt history.
+
+## SDK and remaining release evidence
+
+The SDK entrypoint checks the repository pins `boto3==1.42.0` and
+`botocore==1.41.6` before a build. It installs nothing. All transitive dependencies
+and the chosen Python version still need verification in the approved environment.
+The fixture removes ambient AWS/BOTO and proxy settings, uses dummy credentials
+and an authenticated numeric-loopback endpoint. Use it only where those initial
+settings and local execution are already permitted, not to bypass restrictions.
+
+The fixed entrypoint builds the exact clean candidate with the configured Go
+tool. Receipts retain the Python invocation path, including a venv path.
+Preflight, synthetic events and pure detector controls cannot substitute for
+real SDK CRUD, restart, pagination, validation and verified cleanup.
+
+Before merge, obtain the missing exact-HEAD SDK evidence, the normal
+[working-contract gates](../../AGENTS.md), independent final review and
+[formal applicability/model evidence](../formal-validation.md).
+The current prep branch retains main's applicability file unchanged; it does
+**not** classify or formally validate the SimpleDB runtime changes.
+
+Run `python3 scripts/test-factory-acceptance.py` for the SQS/SimpleDB registration
+detectors. Their synthetic events are controls, not product acceptance receipts.
+No ledger action, PR publication, merge or release follows automatically.
+
+## Historical registration stage
+
+The initial registration-only snapshot had no SimpleDB implementation; its
+native tests stopped at CreateDomain HTTP501 from the CloudFormation fallback.
+That was an observed historical failure, not the current native result.
+Its registration scripts also carried Azure/GCP descriptors. The isolated prep
+removed those foreign registrations and adjusted only the registry-union detector.
+The original functional oracles were not changed.
