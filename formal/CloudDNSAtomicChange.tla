@@ -4,7 +4,7 @@ CONSTANTS Projects, Subjects, None
 ASSUME /\ Cardinality(Projects) = 2 /\ Cardinality(Subjects) = 2
        /\ None \notin Projects \cup Subjects
 
-\* STANDALONE, UNREGISTERED CANDIDATE. Two projects/subjects (including aliased
+\* Bounded Cloud DNS model. Two projects/subjects (including aliased
 \* owners), one zone slot/project, generations 1..2, two user keys plus apex.
 \* Values abstract IP and TTL to bits. Three successful changes globally bound
 \* exploration; normal history budget two plus one whole-pair deletion cleanup.
@@ -70,11 +70,14 @@ Stage(p, claimed, actor, mode, expectedDelete, value) ==
            old.generation, mode, IF mode = "remove" THEN None ELSE value))
  IN
  /\ tx.phase = "idle" /\ old.present /\ commits < 3
- /\ tx' = [phase |-> IF authorized /\ valid /\ room THEN "staged" ELSE "denied",
+ \* Denied proposals cannot proceed to Write and only phase/before remain observable.
+ /\ tx' = IF authorized /\ valid /\ room
+    THEN [phase |-> "staged",
        project |-> p, claimed |-> claimed, actor |-> actor, mode |-> mode,
        expectedDelete |-> expectedDelete, value |-> value, before |-> db,
        expectedPair |-> nextPair, expectedHistory |-> history,
        candidatePair |-> old.pair, candidateHistory |-> old.history]
+    ELSE [NoTx EXCEPT !.phase = "denied", !.before = db]
  /\ UNCHANGED <<owners, db, commits, last, tokens, tokenLast>>
 Write ==
  /\ tx.phase = "staged"
@@ -120,7 +123,7 @@ Commit ==
 \* verification. Tentative storage never becomes publicly visible on failure.
 Abort ==
  /\ tx.phase # "idle" /\ db' = db
- /\ last' = Event("abort", tx.before, db', tx)
+ /\ last' = Event("abort", tx.before, db', NoTx)
  /\ tx' = NoTx
  /\ UNCHANGED <<owners, commits, tokens, tokenLast>>
 

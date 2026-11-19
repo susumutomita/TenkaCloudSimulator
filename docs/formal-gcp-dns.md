@@ -4,10 +4,11 @@
 [configuration](../formal/CloudDNSAtomicChange.cfg) describe a bounded local
 Cloud DNS API candidate for
 [#343](https://github.com/susumutomita/TenkaCloudSimulator/issues/343). The
-specification is unchanged from its isolated source
-`e28de2eb336eb3cb3496e8ee63a17a2dab950e30`. The local integration candidate
-registers the model. It has passed static registry and applicability checks,
-but neither the baseline nor its sensitivity controls have run in TLC.
+specification is derived from its isolated source
+`e28de2eb336eb3cb3496e8ee63a17a2dab950e30`. Denied stages retain the
+unchanged-store witness; aborts retain their before/after witnesses without
+copying the discarded proposal. Successful stages and commits retain their
+full intent. This candidate is registered but has not run in TLC.
 
 ## Correspondence to the local transaction
 
@@ -34,8 +35,7 @@ does not cover byte accounting, parsing, DNS serving, sockets, SDK behavior or
 Terraform compatibility.
 
 The registry lists two sensitivity controls for rejecting stale paired data
-and a missing receipt. They describe intended invariant failures, not observed
-results. The applicability record is bound to the integration base
+and a missing receipt. They describe intended invariant failures; this revision has no TLC results. The applicability record is bound to the integration base
 `e1c83bc1ffe8062b6c15f2a1b941f49d1ec81433`; older work records describe their
 own historical bases. Neither the static checks nor the scope review
 establishes a TLC result, formal gate pass, AWS behavior, or Terraform
