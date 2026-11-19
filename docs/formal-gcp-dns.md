@@ -1,12 +1,13 @@
 # Cloud DNS atomic change model
 
 [CloudDNSAtomicChange](../formal/CloudDNSAtomicChange.tla) and its
-[configuration](../formal/CloudDNSAtomicChange.cfg) are a standalone,
-unregistered model candidate for the bounded local Cloud DNS API in
+[configuration](../formal/CloudDNSAtomicChange.cfg) describe a bounded local
+Cloud DNS API candidate for
 [#343](https://github.com/susumutomita/TenkaCloudSimulator/issues/343). The
-specification is attached without changes from its isolated source
-`e28de2eb336eb3cb3496e8ee63a17a2dab950e30`. It has not been executed or
-registered on this integration candidate.
+specification is unchanged from its isolated source
+`e28de2eb336eb3cb3496e8ee63a17a2dab950e30`. The local integration candidate
+registers the model. It has passed static registry and applicability checks,
+but neither the baseline nor its sensitivity controls have run in TLC.
 
 ## Correspondence to the local transaction
 
@@ -32,7 +33,10 @@ separate evidence. Neither gives a Go or SQLite refinement proof. The model
 does not cover byte accounting, parsing, DNS serving, sockets, SDK behavior or
 Terraform compatibility.
 
-Future registry work must review checked invariants and the exact source
-scope, specify and run a mutation matrix, run model checking, and bind the
-result to exact-blob applicability. No mutation result, formal gate pass or
-readiness for publication is claimed here.
+The registry lists two sensitivity controls for rejecting stale paired data
+and a missing receipt. They describe intended invariant failures, not observed
+results. The applicability record is bound to the integration base
+`e1c83bc1ffe8062b6c15f2a1b941f49d1ec81433`; older work records describe their
+own historical bases. Neither the static checks nor the scope review
+establishes a TLC result, formal gate pass, AWS behavior, or Terraform
+compatibility.
