@@ -18837,10 +18837,9 @@
    "HistoryPrefixPreserved",
    "ReceiptSequenceExact",
    "NonemptyDeletionRefused",
-   "NoOldGenerationReuse",
    "CleanupAdmissibleAtQuota"
   ],
-  "limits": "Bounded model candidate, baseline and mutation results pending. Paired fixture, not a production-wide invariant. DeniedStateUnchanged refers only to Abort. Generation checks cover child change/RRset page tokens, not managedZones. Fixed trusted owner map and issued tokens abstract migration, HMAC, HTTP/parser/router, SQL/Go refinement and transactions under crash, budgets, liveness, serving, SDK and Terraform.",
+  "limits": "Storage-only projection. Paired fixture, not a production-wide invariant. DeniedStateUnchanged refers only to Abort. Fixed trusted owner map abstracts migration. No HTTP/router, SQL/Go refinement, crash, budgets, liveness, serving, SDK or Terraform claim.",
   "source_scope": [
    "internal/gcp/dns/engine.go",
    "internal/gcp/dns/model.go",
@@ -18871,6 +18870,36 @@
      }
     ],
     "expect_invariant": "CommittedStateMatchesIntent"
+   }
+  ]
+ },
+ {
+  "id": "CloudDNSChildToken",
+  "model": "formal/CloudDNSChildToken.tla",
+  "config": "formal/CloudDNSChildToken.cfg",
+  "bounds": "Two projects/subjects (owner aliasing allowed), one zone slot per project, generations 1..2 and all genuinely issued project/generation pairs.",
+  "properties": [
+   "TypeOK",
+   "NoOldGenerationReuse"
+  ],
+  "limits": "Child collection paging only, not managedZones. Omits transaction phase and the storage-empty deletion guard to overapproximate possible token traces. No HMAC, encoding, filter, HTTP, SDK or Terraform claim.",
+  "source_scope": [
+   "internal/gcp/dns/engine.go",
+   "internal/gcp/dns/model.go",
+   "internal/gcp/dns/operations.go",
+   "internal/gcp/dns/pagination.go"
+  ],
+  "mutants": [
+   {
+    "id": "AcceptOldGeneration",
+    "edits": [
+     {
+      "old": "/\\ token.project = p /\\ token.generation = zones[p].generation",
+      "new": "/\\ token.project = p",
+      "count": 1
+     }
+    ],
+    "expect_invariant": "NoOldGenerationReuse"
    }
   ]
  }

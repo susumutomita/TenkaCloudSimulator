@@ -18,7 +18,7 @@
     },
     {
       "path": "docs/formal-gcp-dns.md",
-      "sha256": "3b4effaa97df447a4bf61e3a37a535181089fe3ed4111b87a0e04ae43cd6878f",
+      "sha256": "5ca2317732cb05cc3ad65acbb473d319d700914458041de3286b13e411507742",
       "disposition": "documentation",
       "reason": "Documents supported DNS scope, source correspondence, development acceptance and limitations; no runtime behavior.",
       "models": []
@@ -32,7 +32,7 @@
     },
     {
       "path": "formal/CloudDNSAtomicChange.cfg",
-      "sha256": "60878075eb17cbb51d39cbfb30de83af2e29804d88a530353b577eb363ce6268",
+      "sha256": "f50dcc4f21eed874026bf90e5eb2c3b9c213710077773ec05d6aa23b89441ee3",
       "disposition": "modeled",
       "reason": "Defines the bounded staged/written/observed/verified/commit or abort fixture and selected invariants for DNS state.",
       "models": [
@@ -41,8 +41,7 @@
           "properties": [
             "PendingInvisible",
             "CommittedStateMatchesIntent",
-            "ReceiptSequenceExact",
-            "NoOldGenerationReuse"
+            "ReceiptSequenceExact"
           ],
           "limits": "Unexecuted candidate baseline and exact mutation outcomes pending. Paired fixture and Abort-specific unchanged property; no Go refinement or real SQL proof."
         }
@@ -50,7 +49,7 @@
     },
     {
       "path": "formal/CloudDNSAtomicChange.tla",
-      "sha256": "664fd0d23e380de79e7cdf82cf5f1c7640e4c987f34a69ba48525370123277d4",
+      "sha256": "0283bea5554017cb28bd6a7a091ca0642f7ad381d95072c9107019c0533420ef",
       "disposition": "modeled",
       "reason": "Defines the bounded staged/written/observed/verified/commit or abort fixture and selected invariants for DNS state.",
       "models": [
@@ -59,18 +58,47 @@
           "properties": [
             "PendingInvisible",
             "CommittedStateMatchesIntent",
-            "ReceiptSequenceExact",
-            "NoOldGenerationReuse"
+            "ReceiptSequenceExact"
           ],
           "limits": "Unexecuted candidate baseline and exact mutation outcomes pending. Paired fixture and Abort-specific unchanged property; no Go refinement or real SQL proof."
         }
       ]
     },
     {
+      "path": "formal/CloudDNSChildToken.cfg",
+      "sha256": "da8f3c213fc8c0dcb0fea52140268f75f8c421241b0075acad18162f78c65305",
+      "disposition": "modeled",
+      "reason": "Separates bounded child page-token ownership and generation observations; no runtime change.",
+      "models": [
+        {
+          "id": "CloudDNSChildToken",
+          "properties": [
+            "NoOldGenerationReuse"
+          ],
+          "limits": "Child collection only; no route, HMAC, encoding, filtering or Terraform behavior. Token trace model overapproximates storage guards."
+        }
+      ]
+    },
+    {
+      "path": "formal/CloudDNSChildToken.tla",
+      "sha256": "7ba1d0e6ce7869405e2dfb6601ee9fe78f5fe5104a37b531fb35cc515d450313",
+      "disposition": "modeled",
+      "reason": "Separates bounded child page-token ownership and generation observations; no runtime change.",
+      "models": [
+        {
+          "id": "CloudDNSChildToken",
+          "properties": [
+            "NoOldGenerationReuse"
+          ],
+          "limits": "Child collection only; no route, HMAC, encoding, filtering or Terraform behavior. Token trace model overapproximates storage guards."
+        }
+      ]
+    },
+    {
       "path": "formal/models.json",
-      "sha256": "96f0e5152807f1b094c3a8a934a218c5ab385e76b8e5b60be892f154e7e95f02",
+      "sha256": "c9c7dc978c5b96b4309b39f4a812908a8bf5b6f4613208bc8abe9d5fc8316bf0",
       "disposition": "formal-infrastructure",
-      "reason": "Adds an exact bound model registry entry and two as-yet-unexecuted sensitivity controls without removing existing entries or controls.",
+      "reason": "Partitions the DNS registration into storage and child-token models, preserving both original controls and adding one generation control; legacy registrations unchanged.",
       "models": []
     },
     {
@@ -128,10 +156,16 @@
           "id": "CloudDNSAtomicChange",
           "properties": [
             "OnlyOwnerCommits",
-            "NonemptyDeletionRefused",
-            "NoOldGenerationReuse"
+            "NonemptyDeletionRefused"
           ],
           "limits": "Operation correspondence only; route resolution and provider API descriptor are not formalized."
+        },
+        {
+          "id": "CloudDNSChildToken",
+          "properties": [
+            "NoOldGenerationReuse"
+          ],
+          "limits": "Child collection only; no route, HMAC, encoding, filtering or Terraform behavior. Token trace model overapproximates storage guards."
         }
       ]
     },
@@ -162,11 +196,11 @@
       "reason": "Project, zone child collection and generation correspond to bounded scoped issuance and reuse.",
       "models": [
         {
-          "id": "CloudDNSAtomicChange",
+          "id": "CloudDNSChildToken",
           "properties": [
             "NoOldGenerationReuse"
           ],
-          "limits": "Managed-zone list uses project-wide scope. HMAC, cursor encoding, filters/offsets and stable traversal under concurrent writes are not modeled."
+          "limits": "Child collection only; no route, HMAC, encoding, filtering or Terraform behavior. Token trace model overapproximates storage guards."
         }
       ]
     },

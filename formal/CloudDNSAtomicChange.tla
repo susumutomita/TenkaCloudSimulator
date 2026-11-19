@@ -10,7 +10,7 @@ ASSUME /\ Cardinality(Projects) = 2 /\ Cardinality(Subjects) = 2
 \* exploration; normal history budget two plus one whole-pair deletion cleanup.
 \* The global cutoff is NOT a runtime quota. No fairness/eventual-cleanup claim.
 \* Trusted owner map is fixed; constructor migration/SQL bootstrap is outside
-\* this model. Tokens are assumed genuinely issued; HMAC is not modeled.
+\* this model. See CloudDNSChildToken for the separate paging projection.
 \* No SQL/Go refinement, actual triggers, HMAC/HTTP parser, byte accounting,
 \* DNS serving/propagation, sockets, SDK or cloud comparison is established.
 \* Native correspondence: operations.go applyChange; store.go verifyChangeState;
@@ -35,29 +35,25 @@ NoTx == [phase |-> "idle", project |-> FirstProject,
 Event(kind, before, after, proposal) ==
  [kind |-> kind, before |-> before, after |-> after, proposal |-> proposal]
 
-VARIABLES owners, db, tx, commits, last, tokens, tokenLast
-vars == <<owners, db, tx, commits, last, tokens, tokenLast>>
+VARIABLES owners, db, tx, commits, last
+vars == <<owners, db, tx, commits, last>>
 Init ==
  /\ owners \in [Projects -> Subjects]
  /\ db = InitialDB /\ tx = NoTx /\ commits = 0
  /\ last = Event("none", InitialDB, InitialDB, NoTx)
- /\ tokens = {}
- /\ tokenLast = [accepted |-> FALSE, target |-> FirstProject,
-       tokenProject |-> FirstProject, tokenGeneration |-> 0,
-       seenGeneration |-> 0, present |-> FALSE, authorized |-> FALSE]
 
 Create(p, actor) ==
  /\ tx.phase = "idle" /\ owners[p] = actor /\ ~db[p].present /\ db[p].generation < 2
  /\ db' = [db EXCEPT ![p] = [present |-> TRUE,
        generation |-> db[p].generation + 1, pair |-> EmptyPair, history |-> <<>>]]
  /\ last' = Event("create", db, db', [NoTx EXCEPT !.project = p, !.claimed = p, !.actor = actor])
- /\ UNCHANGED <<owners, tx, commits, tokens, tokenLast>>
+ /\ UNCHANGED <<owners, tx, commits>>
 Delete(p, actor) ==
  /\ tx.phase = "idle" /\ owners[p] = actor
  /\ db[p].present /\ db[p].pair = EmptyPair
  /\ db' = [db EXCEPT ![p].present = FALSE, ![p].history = <<>>]
  /\ last' = Event("delete", db, db', [NoTx EXCEPT !.project = p, !.claimed = p, !.actor = actor])
- /\ UNCHANGED <<owners, tx, commits, tokens, tokenLast>>
+ /\ UNCHANGED <<owners, tx, commits>>
 
 Stage(p, claimed, actor, mode, expectedDelete, value) ==
  LET old == db[p]
@@ -78,12 +74,13 @@ Stage(p, claimed, actor, mode, expectedDelete, value) ==
        expectedPair |-> nextPair, expectedHistory |-> history,
        candidatePair |-> old.pair, candidateHistory |-> old.history]
     ELSE [NoTx EXCEPT !.phase = "denied", !.before = db]
- /\ UNCHANGED <<owners, db, commits, last, tokens, tokenLast>>
+ /\ last' = Event("none", InitialDB, InitialDB, NoTx)
+ /\ UNCHANGED <<owners, db, commits>>
 Write ==
  /\ tx.phase = "staged"
  /\ tx' = [tx EXCEPT !.phase = "written",
        !.candidatePair = tx.expectedPair, !.candidateHistory = tx.expectedHistory]
- /\ UNCHANGED <<owners, db, commits, last, tokens, tokenLast>>
+ /\ UNCHANGED <<owners, db, commits, last>>
 Changed(v) == IF v = None THEN Zero ELSE [v EXCEPT !.ip = 1-v.ip]
 DriftKinds == {"none", "reinsertOld", "wrongValue", "apexLost",
                "receiptLost", "receiptMoved", "priorHistoryChanged"}
@@ -104,49 +101,34 @@ Disturb(d) ==
  /\ tx.phase = "written"
  /\ tx' = [tx EXCEPT !.phase = "observed",
        !.candidatePair = pair, !.candidateHistory = history]
- /\ UNCHANGED <<owners, db, commits, last, tokens, tokenLast>>
+ /\ UNCHANGED <<owners, db, commits, last>>
 Verify ==
  LET matches == tx.candidatePair = tx.expectedPair
                 /\ tx.candidateHistory = tx.expectedHistory
  IN
  /\ tx.phase = "observed"
  /\ tx' = [tx EXCEPT !.phase = IF matches THEN "verified" ELSE "refused"]
- /\ UNCHANGED <<owners, db, commits, last, tokens, tokenLast>>
+ /\ UNCHANGED <<owners, db, commits, last>>
 Commit ==
  /\ tx.phase = "verified"
  /\ db' = [db EXCEPT ![tx.project].pair = tx.candidatePair,
                      ![tx.project].history = tx.candidateHistory]
  /\ last' = Event("commit", tx.before, db', tx)
  /\ tx' = NoTx /\ commits' = commits+1
- /\ UNCHANGED <<owners, tokens, tokenLast>>
+ /\ UNCHANGED <<owners>>
 \* Abort is possible at every active phase, including a failed COMMIT after
 \* verification. Tentative storage never becomes publicly visible on failure.
 Abort ==
  /\ tx.phase # "idle" /\ db' = db
  /\ last' = Event("abort", tx.before, db', NoTx)
  /\ tx' = NoTx
- /\ UNCHANGED <<owners, commits, tokens, tokenLast>>
+ /\ UNCHANGED <<owners, commits>>
 
-IssueToken(p) ==
- /\ tx.phase = "idle" /\ db[p].present
- /\ tokens' = tokens \cup {[project |-> p, generation |-> db[p].generation]}
- /\ UNCHANGED <<owners, db, tx, commits, last, tokenLast>>
-UseToken(p, actor, token) ==
- LET allowed == db[p].present /\ owners[p] = actor
-                /\ token.project = p /\ token.generation = db[p].generation
- IN
- /\ tx.phase = "idle" /\ token \in tokens
- /\ tokenLast' = [accepted |-> allowed, target |-> p,
-       tokenProject |-> token.project, tokenGeneration |-> token.generation,
-       seenGeneration |-> db[p].generation, present |-> db[p].present,
-       authorized |-> owners[p] = actor]
- /\ UNCHANGED <<owners, db, tx, commits, last, tokens>>
 Next ==
- (\E p \in Projects : (\E actor \in Subjects : Create(p,actor) \/ Delete(p,actor)) \/ IssueToken(p)
+ (\E p \in Projects : (\E actor \in Subjects : Create(p,actor) \/ Delete(p,actor))
    \/ (\E claimed \in Projects, actor \in Subjects, mode \in {"put","remove"},
           old \in Values, value \in Values \ {None} :
-             Stage(p,claimed,actor,mode,old,value))
-   \/ (\E actor \in Subjects, token \in tokens : UseToken(p,actor,token)))
+             Stage(p,claimed,actor,mode,old,value)))
  \/ Write \/ (\E d \in DriftKinds : Disturb(d)) \/ Verify \/ Commit \/ Abort
  \/ UNCHANGED vars
 
@@ -157,7 +139,6 @@ TypeOK ==
        /\ db[p].present \in BOOLEAN /\ db[p].generation \in 0..2
        /\ db[p].pair \in [left:Values,right:Values,apex:BOOLEAN]
        /\ Len(db[p].history) <= 3
- /\ tokens \subseteq [project:Projects,generation:1..2]
 NoOrphanRecords == \A p \in Projects : ~db[p].present =>
  db[p].pair = EmptyPair /\ db[p].history = <<>>
 AtomicPair == \A p \in Projects : db[p].pair.left = db[p].pair.right
@@ -189,10 +170,6 @@ ReceiptSequenceExact == \A p \in Projects :
    /\ db[p].history[i].generation = db[p].generation
 NonemptyDeletionRefused == last.kind = "delete" =>
  last.before[last.proposal.project].pair = EmptyPair
-NoOldGenerationReuse == tokenLast.accepted =>
- /\ tokenLast.present /\ tokenLast.authorized
- /\ tokenLast.tokenProject = tokenLast.target
- /\ tokenLast.tokenGeneration = tokenLast.seenGeneration
 CleanupAdmissibleAtQuota == \A p \in Projects :
  (tx.phase = "idle" /\ db[p].present /\ db[p].pair.left # None
   /\ Len(db[p].history) >= 2 /\ commits < 3) =>
