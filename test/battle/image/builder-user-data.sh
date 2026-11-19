@@ -8,7 +8,14 @@ RELAY=http://10.0.2.2:8099   # repo_relay.py on the builder host, reached throug
 GUID=707b7dfd96f868bd1650473d34d918a106283766d54260bc446abe9beefb6523   # mirror.list GUID of AL2023 2023.12.20261112
 OVERLAY_SHA256=f553a660f9cd672dc30867b90f28c283e565ad9bf7ee98a30a255e1fc3a789d9   # session-overlay.py receipt
 main() {
-  exec > >(tee /dev/ttyS0) 2>&1
+  # serial-getty@ttyS0 can start while this runs and hang up every descriptor
+  # already open on the port, so a descriptor opened here once loses the rest of
+  # the console log, BUILDER-DONE included. Open the port again for each line.
+  exec > >(while IFS= read -r line || [ -n "$line" ]; do
+    printf '%s\n' "$line"
+    printf '%s\n' "$line" 2>/dev/null >/dev/ttyS0 || true
+  done) 2>&1
+  CONSOLE=$!
   set -eux
   echo "BUILDER-START $(date -u +%FT%TZ)"
   OFFLINE=/var/local/tenkacloud-offline-repo
@@ -100,6 +107,9 @@ REPO
   cloud-init clean --logs
   sync
   echo "BUILDER-DONE $(date -u +%FT%TZ)"
+  # Close the pipe and let the console writer drain before the guest powers off.
+  exec >/dev/null 2>&1
+  wait "$CONSOLE" || true
   poweroff
 }
 main
