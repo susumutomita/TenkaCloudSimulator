@@ -202,6 +202,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 	if options.terminalSessions != nil {
 		mux.Handle("/_simulator/v1/terminal-control", options.terminalSessions)
 		mux.Handle("/_simulator/v1/terminal-channel/", options.terminalSessions)
+		mux.Handle("/_simulator/v1/terminal-readiness", options.terminalSessions)
 	}
 	mux.HandleFunc("/_simulator/", serveLanding)
 	mux.Handle("/_simulator/licenses/", http.StripPrefix("/_simulator/licenses/", legal.Handler()))
@@ -263,7 +264,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 			http.Error(w, "Cross-site requests are not allowed", 403)
 			return
 		}
-		if strings.HasPrefix(r.URL.Path, "/_simulator/v1/") && r.URL.Path != "/_simulator/v1/capabilities" && r.URL.Path != catalogDescriptorsPath && r.URL.Path != gcpCatalogDescriptorsPath && r.URL.Path != azureCatalogDescriptorsPath && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/iam/") && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/lambda/") && !(options.battleCapabilities != nil && strings.HasPrefix(r.URL.Path, "/_simulator/v1/battle-capabilities/")) && !(options.terminalSessions != nil && (r.URL.Path == "/_simulator/v1/terminal-control" || strings.HasPrefix(r.URL.Path, "/_simulator/v1/terminal-channel/"))) {
+		if strings.HasPrefix(r.URL.Path, "/_simulator/v1/") && r.URL.Path != "/_simulator/v1/capabilities" && r.URL.Path != catalogDescriptorsPath && r.URL.Path != gcpCatalogDescriptorsPath && r.URL.Path != azureCatalogDescriptorsPath && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/iam/") && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/lambda/") && !(options.battleCapabilities != nil && strings.HasPrefix(r.URL.Path, "/_simulator/v1/battle-capabilities/")) && !(options.terminalSessions != nil && (r.URL.Path == "/_simulator/v1/terminal-control" || r.URL.Path == "/_simulator/v1/terminal-readiness" || strings.HasPrefix(r.URL.Path, "/_simulator/v1/terminal-channel/"))) {
 			http.NotFound(w, r)
 			return
 		}

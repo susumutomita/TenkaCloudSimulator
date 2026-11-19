@@ -185,7 +185,8 @@ interaction. Drag reordering and AWS account-level synchronization are not
 implemented. The simulator's existing capability and participant-session filter
 still applies to Services, search and Favorites. A scoped Parameter Store handoff
 continues to show only Console Home and Systems Manager, even if this browser
-previously pinned S3. This is a session-scope restriction, not dynamic IAM-policy
+previously pinned S3. An EC2-instance handoff shows only Console Home, EC2 (its
+instance) and Systems Manager → Session Manager. This is a session-scope restriction, not dynamic IAM-policy
 discovery; stars never grant API permission or change the session.
 
 ### Read-only EC2 and VPC inspection
@@ -204,3 +205,16 @@ result. Switching identity, region or service discards old in-flight responses.
 The initial read API is for the local operator/exercise-identity context, not a
 new STS participant authorization surface. Each team's isolated process/database
 remains the tenancy boundary.
+
+### Session Manager for the handed-off instance
+
+A console session created by an `{InstanceId, Region}` handoff adds
+Systems Manager → Session Manager. It lists the one instance with its state:
+*Connectable* when the server reports the guest relay answering, otherwise
+*Preparing* with a message and a disabled **Start session**. The EC2 instance
+view offers **Connect with Session Manager** for the same instance. Start opens
+the terminal inside the console through the existing participant terminal channel
+and client: input is bounded to 8 KiB, output stays inert text capped at 1 MiB,
+and reconnecting after a disconnect is an explicit **Reconnect**; **Terminate**
+ends the guest session. No pasted code and no TenkaCloud URL registration or
+scoring is involved. This is not the AWS session-manager-plugin protocol.

@@ -18,9 +18,13 @@ import (
 
 type consoleScopeKey struct{}
 type consoleScope struct {
-	ParameterName string `json:"parameterName"`
+	ParameterName string `json:"parameterName,omitempty"`
+	InstanceID    string `json:"instanceId,omitempty"`
 	Region        string `json:"region"`
 }
+
+var consoleInstancePattern = regexp.MustCompile(`^i-[a-f0-9]{8,32}$`)
+var consoleParameterPattern = regexp.MustCompile(`^/?[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*$`)
 
 func consoleScopeFromRequest(r *http.Request) any { return r.Context().Value(consoleScopeKey{}) }
 
@@ -28,7 +32,7 @@ func consoleScopeFromRequest(r *http.Request) any { return r.Context().Value(con
 // make an unauthenticated embedding advertise an authority it does not provide.
 func addConsoleHandoffCapabilities(w http.ResponseWriter, r *http.Request, capabilities map[string]any) map[string]any {
 	if w.Header().Get("X-Simulator-Authentication") == "required" {
-		capabilities["consoleHandoff"] = map[string]any{"version": 1, "services": []string{"ssm-parameter"}}
+		capabilities["consoleHandoff"] = map[string]any{"version": 1, "services": []string{"ssm-parameter", "ec2-instance"}}
 		// Native SigV4 is verified by the same Access wrapper; an embedding without it has none.
 		capabilities["nativeSdk"] = map[string]any{"version": 1, "services": aws.NativeSDKServices}
 		if scope := consoleScopeFromRequest(r); scope != nil {
@@ -52,22 +56,39 @@ func (a *Access) issueConsoleHandoff(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(405)
 		return
 	}
-	var input struct{ ParameterName, Region string }
+	// Exactly one target: a Parameter Store parameter or an EC2 instance.
+	var input struct {
+		ParameterName, InstanceId *string
+		Region                    string
+	}
 	d := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096))
 	d.DisallowUnknownFields()
 	regionOK := false
-	if d.Decode(&input) != nil || d.Decode(new(any)) != io.EOF {
+	if d.Decode(&input) != nil || d.Decode(new(any)) != io.EOF || (input.ParameterName == nil) == (input.InstanceId == nil) {
 		http.Error(w, "Invalid console destination", 400)
 		return
 	}
 	for _, region := range aws.Regions {
 		regionOK = regionOK || region == input.Region
 	}
-	if !regionOK || !regexp.MustCompile(`^/?[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*$`).MatchString(input.ParameterName) || len(input.ParameterName) > 1011 {
-		http.Error(w, "Invalid console destination", 400)
-		return
+	var scope consoleScope
+	var bind func(*http.Request) (*http.Request, aws.SDKIdentity, error)
+	var err error
+	if input.InstanceId != nil {
+		if !regionOK || !consoleInstancePattern.MatchString(*input.InstanceId) {
+			http.Error(w, "Invalid console destination", 400)
+			return
+		}
+		scope = consoleScope{InstanceID: *input.InstanceId, Region: input.Region}
+		bind, err = a.sdk.ConsoleInstanceBinding(r, input.Region, *input.InstanceId)
+	} else {
+		if !regionOK || !consoleParameterPattern.MatchString(*input.ParameterName) || len(*input.ParameterName) > 1011 {
+			http.Error(w, "Invalid console destination", 400)
+			return
+		}
+		scope = consoleScope{ParameterName: *input.ParameterName, Region: input.Region}
+		bind, err = a.sdk.ConsoleBinding(r, input.Region, *input.ParameterName)
 	}
-	bind, err := a.sdk.ConsoleBinding(r, input.Region, input.ParameterName)
 	if err != nil {
 		http.Error(w, "Participant STS credentials required", 403)
 		return
@@ -98,7 +119,7 @@ func (a *Access) issueConsoleHandoff(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Console-handoff limit reached", 429)
 		return
 	}
-	a.handoffs[sha256.Sum256([]byte(code))] = consoleHandoff{expires: expires, destination: destination, bind: bind, scope: consoleScope{input.ParameterName, input.Region}}
+	a.handoffs[sha256.Sum256([]byte(code))] = consoleHandoff{expires: expires, destination: destination, bind: bind, scope: scope}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]any{"Code": code, "ExpiresAt": expires.Format(time.RFC3339)})
 }
@@ -205,14 +226,49 @@ func (a *Access) consoleBrowserRequest(r *http.Request, token string) (*http.Req
 	// The embedded reference is static documentation, not an API grant. Its
 	// same-origin request client still passes through the scoped native checks.
 	allowed := r.Method == "GET" && (r.URL.Path == "/_simulator/v1/capabilities" || strings.HasPrefix(r.URL.Path, "/_simulator/console/") || strings.HasPrefix(r.URL.Path, "/_simulator/docs/"))
-	nativeHeaders := r.Header.Get("Authorization") == "" && r.Header.Get("X-Amz-Security-Token") == "" && (r.Header.Get("X-Simulator-Service") == "" || r.Header.Get("X-Simulator-Service") == "ssm")
-	for _, name := range []string{"Content-Type", "X-Amz-Target", "X-Simulator-Service", "X-Simulator-Region", "X-Simulator-Principal"} {
-		nativeHeaders = nativeHeaders && len(r.Header.Values(name)) <= 1
+	if session.scope.InstanceID != "" {
+		allowed = allowed || instanceConsoleRequestAllowed(r)
+	} else {
+		nativeHeaders := r.Header.Get("Authorization") == "" && r.Header.Get("X-Amz-Security-Token") == "" && (r.Header.Get("X-Simulator-Service") == "" || r.Header.Get("X-Simulator-Service") == "ssm")
+		for _, name := range []string{"Content-Type", "X-Amz-Target", "X-Simulator-Service", "X-Simulator-Region", "X-Simulator-Principal"} {
+			nativeHeaders = nativeHeaders && len(r.Header.Values(name)) <= 1
+		}
+		allowed = allowed || (nativeHeaders && r.URL.RawPath == "" && r.Method == "POST" && r.URL.Path == "/" && r.URL.RawQuery == "" && r.Header.Get("Content-Type") == "application/x-amz-json-1.1" && (r.Header.Get("X-Amz-Target") == "AmazonSSM.GetParameter" || r.Header.Get("X-Amz-Target") == "AmazonSSM.PutParameter"))
 	}
-	allowed = allowed || (nativeHeaders && r.URL.RawPath == "" && r.Method == "POST" && r.URL.Path == "/" && r.URL.RawQuery == "" && r.Header.Get("Content-Type") == "application/x-amz-json-1.1" && (r.Header.Get("X-Amz-Target") == "AmazonSSM.GetParameter" || r.Header.Get("X-Amz-Target") == "AmazonSSM.PutParameter"))
 	if !allowed {
 		return r, identity.Principal, false, true
 	}
 	request = request.WithContext(context.WithValue(request.Context(), consoleScopeKey{}, session.scope))
+	if session.scope.InstanceID != "" {
+		// The terminal handler accepts only this Access-created target; the
+		// original participant session and boundary are enforced again by the store.
+		request = request.WithContext(context.WithValue(request.Context(), terminalScopeKey{}, terminalScope{Target: session.scope.InstanceID, Region: session.scope.Region}))
+	}
 	return request, identity.Principal, true, true
+}
+
+// instanceConsoleRequestAllowed lists the only non-static requests an instance
+// console session may make: EC2 discovery (filtered server-side to the bound
+// instance) and the existing terminal routes.
+func instanceConsoleRequestAllowed(r *http.Request) bool {
+	if r.Header.Get("Authorization") != "" || r.Header.Get("X-Amz-Security-Token") != "" || r.URL.RawQuery != "" {
+		return false
+	}
+	for _, name := range []string{"Content-Type", "X-Amz-Target", "X-Simulator-Service", "X-Simulator-Region", "X-Simulator-Principal"} {
+		if len(r.Header.Values(name)) > 1 {
+			return false
+		}
+	}
+	path := r.URL.Path
+	switch {
+	case r.Method == "POST" && path == "/":
+		return r.URL.RawPath == "" && r.Header.Get("X-Simulator-Service") == "ec2" && r.Header.Get("X-Amz-Target") == "" && strings.HasPrefix(r.Header.Get("Content-Type"), "application/x-www-form-urlencoded")
+	case r.Method == "POST" && path == "/_simulator/v1/terminal-control":
+		return r.URL.RawPath == ""
+	case r.Method == "GET" && path == "/_simulator/v1/terminal-readiness":
+		return r.URL.RawPath == ""
+	case r.Method == "GET" && strings.HasPrefix(path, "/_simulator/v1/terminal-channel/"):
+		return r.Header.Get("Origin") != ""
+	}
+	return false
 }

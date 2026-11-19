@@ -10,6 +10,7 @@ export const SERVICES = Object.freeze([
   {id: 'vpc', provider: 'aws', label: 'VPC', capability: 'ec2', route: '/vpc', keywords: 'network virtual private cloud ネットワーク 仮想プライベートクラウド'},
   {id: 's3', provider: 'aws', label: 'S3', capability: 's3', route: '/s3', keywords: 'bucket object バケット オブジェクト ストレージ'},
   {id: 'ssm', provider: 'aws', label: 'Systems Manager', capability: 'ssm', route: '/parameters', keywords: 'parameter store パラメータ 設定 システムマネージャー パラメータストア'},
+  {id: 'ssm-session', provider: 'aws', label: 'Session Manager', capability: 'ssm', route: '/session-manager', keywords: 'systems manager session shell terminal connect セッションマネージャー セッション ターミナル 接続 システムマネージャー'},
   {id: 'lambda', provider: 'aws', label: 'Lambda', capability: 'lambda', route: '/lambda', keywords: 'function 関数 ラムダ'},
   {id: 'iam', provider: 'aws', label: 'IAM', capability: 'iam', route: '/iam', keywords: 'role identity ロール 権限 アイアム アクセス管理'},
   {id: 'wafv2', provider: 'aws', label: 'AWS WAF', capability: 'wafv2', route: '/wafv2', keywords: 'web acl firewall rules ウェブACL ファイアウォール ルール'},
@@ -49,9 +50,12 @@ export function serviceAvailable(id, capabilities) {
   if (id === 'home') return !!capabilities;
   const service = serviceDescriptor(id);
   if (!service || !capabilities) return false;
-  // A participant handoff only exposes its bound SSM scope. This presentation
-  // restriction never replaces the server's exact-resource authorization.
-  if (capabilities.consoleScope && id !== 'ssm') return false;
+  // A participant handoff exposes only its bound target: one parameter, or one
+  // instance (EC2 and Session Manager). This presentation restriction never
+  // replaces the server's exact-resource authorization.
+  const handoff = capabilities.consoleScope;
+  if (id === 'ssm-session') return typeof handoff?.instanceId === 'string' && !!capabilities.services?.ssm;
+  if (handoff && (typeof handoff.instanceId === 'string' ? id !== 'ec2' : id !== 'ssm')) return false;
   if (id === 'ec2' || id === 'vpc') {
     const ec2=capabilities.services?.ec2;
     return ec2?.console === true && Array.isArray(ec2.operations) && ['DescribeInstances','DescribeVpcs'].every(op=>ec2.operations.includes(op));
@@ -86,7 +90,7 @@ export function servicesForProvider(provider, capabilities, query = '') {
 export function serviceFromHash(hash) {
   if (!hash || hash === '#' || hash === '#/') return 'home';
   const first = /^#\/([^/?]+)(?:[/?]|$)/.exec(hash)?.[1];
-  const aliases = {secrets: 'secretsmanager', parameters: 'ssm', stacks: 'cfn', functions: 'lambda', roles: 'iam'};
+  const aliases = {'session-manager': 'ssm-session', secrets: 'secretsmanager', parameters: 'ssm', stacks: 'cfn', functions: 'lambda', roles: 'iam'};
   const id = aliases[first] ?? first;
   return id === 'home' || serviceDescriptor(id) ? id : null;
 }

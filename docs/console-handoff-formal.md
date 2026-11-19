@@ -2,7 +2,10 @@
 
 `formal/ConsoleHandoff.tla` is a separate bounded model, not an extension of the
 claims made for `BrowserSessions` or `STSSessionLifecycle`. The registry retains
-all 58 existing models and adds this 59th model. No implementation refinement or
+all 58 existing models and adds this 59th model.
+It now also covers the instance target kind: a handoff names either a parameter
+(Get/Put) or an instance (Describe and the start of its terminal session), and a
+terminal start requires an answering guest relay. No implementation refinement or
 GUI/SDK execution follows from TLC success.
 
 ## Correspondence
@@ -19,6 +22,17 @@ GUI/SDK execution follows from TLC success.
   observes parent presence, generation and expiry,
   the current policy verdict, exact parameter and region, and Get/Put rather
   than Delete. Metadata/assets are outside the modeled data operation.
+- `Issue(who, k)` also fixes the target kind. `Use` accepts `Describe` and
+  `Terminal` only for an instance handoff and `Get`/`Put` only for a parameter
+  handoff (`instanceConsoleRequestAllowed`, `ConsoleInstanceBinding`, the EC2
+  read boundary in `ec2_read.go`); `Terminal` additionally requires `relay`
+  (`SSMSessionStore.Start` resolving the retained guest). The relay may change at
+  any time. `TerminalRequiresRelay` and the `CrossKindAction`/`SkipRelay` controls
+  check this. The terminal channel itself remains modeled by `TerminalClientEpoch`;
+  this model does not claim channel, token or I/O behavior. The console's
+  `session-manager.jsx` drives that same client, so it is registered in
+  `TerminalClientEpoch`'s source scope; its readiness polling and the disabled
+  Start state are presentation and not modeled there.
 - `Logout` represents `revokeBrowser` in `access.go`. It removes only the current
   browser, leaving an unrelated live session and SDK authority unchanged.
 - `Environment` advances time, removes the parent, changes the role generation,
@@ -56,7 +70,7 @@ Historical request witnesses copy the prestate and requested destination. The
 acceptance invariants read those values directly without reusing admission
 helpers. Structural invariants independently inspect code consumption, successful
 redemption count, stored deadlines, logout state, unrelated sessions and SDK
-credential sets. Twenty required mutants remove or widen each admission class,
+credential sets. Twenty-two required mutants remove or widen each admission class,
 including separate generation checks, introduce replay or retained logout
 cookies, extend deadlines, revoke a peer/SDK credential, or grant browser SDK
 authority. The gate requires each named counterexample, not merely a failing run.

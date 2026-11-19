@@ -4146,6 +4146,7 @@ class FormalGateTests(unittest.TestCase):
                                                 'DiscardPreservesIdentity'],
                                  'source_scope': ['tools/console/src/ssm-terminal-client.mjs',
                                                   'tools/console/src/ssm-terminal.jsx',
+                                                  'tools/console/src/session-manager.jsx',
                                                   'tools/console/src/main.jsx',
                                                   'internal/server/web/app.js']}}
         registry_path = self.root / 'formal/models.json'

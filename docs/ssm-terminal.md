@@ -10,7 +10,12 @@ A participant requests a terminal code from the Host's authenticated credentials
 page. The Host uses the current job's participant viewer role, not the deploy
 role or operator token, to sign a target-bound handoff. Copy the one-use code,
 open the token-free Simulator terminal page, and paste the code into its form.
-This is a manual handoff, not automatic sign-in. The form redeems by same-origin
+This is a manual handoff, not automatic sign-in. (A console opened with an
+`{InstanceId, Region}` handoff is the other entry: its participant signs in to
+the console automatically and starts the same terminal from Systems Manager →
+Session Manager, with no pasted code. See [console sessions](console-sessions.md).
+Both entries use one session store, one target-bound policy check and the same
+limits.) The form redeems by same-origin
 POST and redirects to a clean console URL. Codes are not query parameters.
 
 The resulting HttpOnly, SameSite=Strict cookie is separate from the existing
