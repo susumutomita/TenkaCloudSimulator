@@ -16,6 +16,16 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = 'test/factory/upstream/source.json'
 # Fixed reviewed commands only. Never execute command strings from findings/reports.
 SUITES = {
+    'gcp-dns-atomic-lifecycle': {
+        'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestCloudDNSFactoryAtomicLifecycle$', './internal/gcp/dns'],
+        'test': 'TestCloudDNSFactoryAtomicLifecycle',
+        'provider': 'gcp-dns',
+        'operations': ['dns.managedZones.create', 'dns.managedZones.get', 'dns.managedZones.list', 'dns.managedZones.delete',
+                       'dns.changes.create', 'dns.changes.get', 'dns.changes.list',
+                       'dns.resourceRecordSets.get', 'dns.resourceRecordSets.list'],
+        'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/gcp/dns',
+        'scope': 'Cloud DNS leaf HTTP/SQLite atomic lifecycle; not host auth, router, official SDK, console, formal validation, DNS serving/propagation, Google IAM or whole-service compatibility',
+    },
     'sqs-lifecycle': {
         'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestSQSFactoryFidelityLifecycle$', './internal/aws'],
         'test': 'TestSQSFactoryFidelityLifecycle',
@@ -48,13 +58,22 @@ def validate_scope(suites, provider, operation, paths):
     require(suites and set(suites) <= set(SUITES), 'registered acceptance suites required')
     require(any(SUITES[s]['provider'] == provider and operation in SUITES[s]['operations'] for s in suites),
             'acceptance suite does not cover this provider/operation')
-    # Pilot covers only SQS handlers/store and their adjacent tests. Cross-service,
-    # UI/docs and shared-core fixes need independently registered broader suites.
+    # A receipt never authorizes another provider's or shared integration files.
+    sqs = provider == 'aws' and 'sqs-lifecycle' in suites
+    gcp_dns = provider == 'gcp-dns' and 'gcp-dns-atomic-lifecycle' in suites
     for path in paths:
         p = Path(path)
-        covered = path in ('internal/aws/sqs.go', 'internal/aws/sqs_store.go', 'formal/applicability.json') or (
+        sqs_path = path in ('internal/aws/sqs.go', 'internal/aws/sqs_store.go', 'formal/applicability.json') or (
             p.parent.as_posix() == 'internal/aws' and p.name.startswith('sqs_') and p.name.endswith('_test.go'))
-        require(covered, 'SQS pilot does not cover claimed path: ' + path)
+        dns_path = path in {
+            'internal/gcp/dns/engine.go', 'internal/gcp/dns/model.go',
+            'internal/gcp/dns/records.go', 'internal/gcp/dns/store.go',
+            'internal/gcp/dns/operations.go', 'internal/gcp/dns/pagination.go',
+            'internal/gcp/dns/factory_lifecycle_test.go', 'internal/gcp/dns/factory_sqlfault_test.go',
+            'internal/gcp/dns/factory_observation_test.go',
+            'internal/gcp/dns/dns_test.go', 'internal/gcp/dns/sql_faults_test.go',
+        }
+        require((sqs and sqs_path) or (gcp_dns and dns_path), 'acceptance suite does not cover claimed path: ' + path)
 
 
 def candidate_paths(base, head, root=ROOT):

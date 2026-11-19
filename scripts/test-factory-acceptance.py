@@ -131,4 +131,69 @@ class AcceptanceTests(unittest.TestCase):
     def test_empty_duplicate_suites_refused(self):
         for suites in [[],['sqs-lifecycle']*2]:
             with self.assertRaises(ValueError):gate.verify(self.path,self.head,suites,self.root)
+class CloudDNSRegistrationTests(unittest.TestCase):
+    suite = 'gcp-dns-atomic-lifecycle'
+
+    def test_fixed_command_provider_operations_and_leaf_scope(self):
+        spec = gate.SUITES[self.suite]
+        self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run',
+                                      '^TestCloudDNSFactoryAtomicLifecycle$', './internal/gcp/dns'])
+        self.assertEqual(spec['test'], 'TestCloudDNSFactoryAtomicLifecycle')
+        self.assertEqual(spec['package'], 'github.com/susumutomita/TenkaCloudSimulator/internal/gcp/dns')
+        self.assertEqual(spec['provider'], 'gcp-dns')
+        self.assertEqual(spec['operations'], [
+            'dns.managedZones.create', 'dns.managedZones.get', 'dns.managedZones.list', 'dns.managedZones.delete',
+            'dns.changes.create', 'dns.changes.get', 'dns.changes.list',
+            'dns.resourceRecordSets.get', 'dns.resourceRecordSets.list'])
+        for operation in spec['operations']:
+            gate.validate_scope([self.suite], 'gcp-dns', operation, [
+                'internal/gcp/dns/engine.go', 'internal/gcp/dns/model.go',
+                'internal/gcp/dns/records.go', 'internal/gcp/dns/store.go',
+                'internal/gcp/dns/operations.go', 'internal/gcp/dns/pagination.go',
+                'internal/gcp/dns/factory_lifecycle_test.go', 'internal/gcp/dns/factory_sqlfault_test.go',
+                'internal/gcp/dns/factory_observation_test.go',
+                'internal/gcp/dns/dns_test.go', 'internal/gcp/dns/sql_faults_test.go'])
+
+    def test_no_cross_provider_or_shared_integration_authority(self):
+        all_suites = [self.suite, 'sqs-lifecycle']
+        for suites, provider, operation, path in [
+            (['sqs-lifecycle'], 'gcp-dns', 'dns.changes.create', 'internal/gcp/dns/engine.go'),
+            (all_suites, 'gcp-dns', 'dns.changes.create', 'internal/aws/sqs_store.go'),
+            (all_suites, 'aws', 'DeleteMessage', 'internal/gcp/dns/engine.go'),
+            ([self.suite], 'gcp', 'dns.changes.create', 'internal/gcp/dns/engine.go'),
+            ([self.suite], 'gcp-dns', 'dns.policies.create', 'internal/gcp/dns/engine.go'),
+        ]:
+            with self.subTest(provider=provider, path=path), self.assertRaises(ValueError):
+                gate.validate_scope(suites, provider, operation, [path])
+        for path in ['internal/gcp/storage/store.go', 'internal/gcp/appengine/engine.go',
+                     'internal/gcp/dns/unknown.go', 'internal/gcp/dns/nested/engine.go',
+                     'internal/gcp/dns/../storage/store.go', 'internal/gcp/dns/model.json',
+                     'internal/server/cloud_storage.go', 'internal/provider/registry.go',
+                     'test/e2e/gcp_dns_sdk.py', 'test/e2e/check.py', 'tools/gcpmodels/dns.py',
+                     'formal/models.json', 'formal/applicability.json', 'formal/CloudDNSAtomicChange.tla',
+                     'docs/gcp-dns.md', 'README.md', 'scripts/factory_acceptance.py']:
+            with self.subTest(path=path), self.assertRaises(ValueError):
+                gate.validate_scope(all_suites, 'gcp-dns', 'dns.changes.create', [path])
+
+    def test_requires_exact_test_and_package_not_another_passing_suite(self):
+        spec = gate.SUITES[self.suite]
+        events = [dict(Action='run', Package=spec['package'], Test=spec['test']),
+                  dict(Action='pass', Package=spec['package'], Test=spec['test']),
+                  dict(Action='pass', Package=spec['package'])]
+        def encode(items):
+            return ('\n'.join(json.dumps(e) for e in items) + '\n').encode()
+        gate.verdict(encode(events), self.suite, 0)
+        for items in [[], events[2:], events[:2], events + events]:
+            with self.assertRaises(ValueError):
+                gate.verdict(encode(items), self.suite, 0)
+        for field, value in [('Action', 'skip'), ('Action', 'fail'),
+                             ('Test', 'TestSQSFactoryFidelityLifecycle'), ('Package', 'foreign')]:
+            bad = copy.deepcopy(events)
+            bad[1][field] = value
+            with self.assertRaises(ValueError):
+                gate.verdict(encode(bad), self.suite, 0)
+        for code in [1, -1]:
+            with self.assertRaises(ValueError):
+                gate.verdict(encode(events), self.suite, code)
+
 if __name__=='__main__':unittest.main()
