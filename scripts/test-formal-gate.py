@@ -550,7 +550,7 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         baseline = json.loads(original)
         entry = next(m for m in baseline['models'] if m['id'] == 'ConsoleHandoff')
-        self.assertEqual(set(entry['properties']), {'ParentLifetimeBound', 'ExactDestination', 'AttemptConsumesCode', 'OneTimeRedemption', 'RedeemRequiresFreshParent', 'OperatorRefused', 'UnrelatedSessionsPreserved', 'LogoutRejectsReplay', 'TypeOK', 'SDKAuthorityPreserved', 'UseRequiresFreshAuthority'})
+        self.assertEqual(set(entry['properties']), {'ParentLifetimeBound', 'ExactDestination', 'AttemptConsumesCode', 'OneTimeRedemption', 'RedeemRequiresFreshParent', 'OperatorRefused', 'UnrelatedSessionsPreserved', 'LogoutRejectsReplay', 'TypeOK', 'SDKAuthorityPreserved', 'UseRequiresFreshAuthority', 'TerminalRequiresRelay'})
         self.assertEqual({m['id'] for m in entry['mutants']}, {'SkipParameter', 'RevokeSDK', 'SkipRedeemExpiry', 'SkipUseGeneration', 'CachePolicy', 'ExtendHandoff', 'SkipRedeemGeneration', 'SkipCookie', 'SkipRegion', 'SkipBrowserExpiry', 'ReuseCode', 'SkipAction', 'SkipRedeemParent', 'RevokePeer', 'KeepLoggedOutCookie', 'ExtendBrowser', 'IgnoreConsumedCode', 'SkipUseParent', 'GrantBrowserSDK', 'AllowOperator'})
         model_path, config_path = self.root / entry['model'], self.root / entry['config']
         model_bytes, config_bytes = model_path.read_bytes(), config_path.read_bytes()
