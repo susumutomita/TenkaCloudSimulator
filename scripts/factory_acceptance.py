@@ -27,6 +27,51 @@ SUITES = {
 }
 
 
+# Registration is distinct from activation. Preserve main's existing default;
+# SimpleDB acceptance remains explicit-only; registration is not activation.
+DEFAULT_SUITES = ('sqs-lifecycle',)
+SIMPLEDB_SUITES = ('simpledb-first-oracle', 'simpledb-first-native',
+                  'simpledb-first-sdk-wire', 'simpledb-first-sdk-harness-controls')
+SIMPLEDB_OPERATIONS = ['CreateDomain', 'ListDomains', 'DeleteDomain', 'PutAttributes', 'GetAttributes']
+SIMPLEDB_NATIVE_TESTS = ['TestSimpleDBFirstHarnessReadiness', 'TestSimpleDBFirstDomainItems',
+    'TestSimpleDBFirstRestartDeletion', 'TestSimpleDBFirstListPagination',
+    'TestSimpleDBFirstValidation', 'TestSimpleDBFirstDefaultPageBoundary']
+SIMPLEDB_NEGATIVE_TESTS = ['TestSimpleDBFirstValidation/' + name for name in (
+    'create-missing-name', 'create-short-name', 'create-space-name', 'list-zero',
+    'list-over-limit', 'list-invalid-token', 'put-missing-item', 'put-missing-value',
+    'put-empty-attribute', 'get-missing-domain', 'get-invalid-consistency',
+    'put-partial-valid-then-missing')]
+# Only explicitly reviewed leaf files; no Gateway, server, auth or shared registry.
+SIMPLEDB_PATHS = frozenset('internal/aws/simpledb/' + name for name in (
+    'store.go', 'domain.go', 'item.go', 'query.go', 'validation.go', 'pagination.go',
+    'store_test.go', 'domain_test.go', 'item_test.go', 'query_test.go',
+    'validation_test.go', 'pagination_test.go'))
+SUITES.update({
+ 'simpledb-first-oracle': {
+    'argv': ['go', 'test', '-json', '-count=1', './test/factory/testdata/simpledb/oracle'],
+    'tests': ['TestSimpleDBFirstOracle'],
+    'package': 'github.com/susumutomita/TenkaCloudSimulator/test/factory/testdata/simpledb/oracle',
+    'provider': 'aws', 'operations': [], 'scope': 'Pure TestWriter hash integrity only; not product acceptance'},
+ 'simpledb-first-native': {
+    'argv': ['go', 'test', '-p=1', '-json', '-count=1', '-timeout=60s', './test/factory/testdata/simpledb/native'],
+    'tests': SIMPLEDB_NATIVE_TESTS + SIMPLEDB_NEGATIVE_TESTS,
+    'package': 'github.com/susumutomita/TenkaCloudSimulator/test/factory/testdata/simpledb/native',
+    'provider': 'aws', 'operations': SIMPLEDB_OPERATIONS,
+    'scope': 'First five native SimpleDB APIs/SQLite; not SDK, UI, Select, conditional writes or whole service'},
+ 'simpledb-first-sdk-wire': {
+    'argv': ['python3', '-B', 'scripts/test-simpledb-factory-sdk.py'], 'format': 'simpledb-sdk-v1',
+    'provider': 'aws', 'operations': SIMPLEDB_OPERATIONS,
+    'scope': 'Fixed local boto3 + freshly built same-HEAD CLI; no real AWS or new signature authority'},
+ 'simpledb-first-sdk-harness-controls': {
+    'argv': ['python3', '-B', 'test/factory/testdata/simpledb/test_sdk_harness.py', '-v'],
+    'format': 'python-unittest', 'tests': [
+       'test_missing_attribute_fields_are_product_failure',
+       'test_cleanup_failure_preserves_primary_product_failure',
+       'test_sdk_origin_guard_rejects_any_other_origin'],
+    'provider': 'aws', 'operations': [], 'scope': 'Pure SDK harness controls; no SDK/product execution'},
+})
+
+
 def require(ok, reason):
     if not ok:
         raise ValueError(reason)
@@ -48,13 +93,18 @@ def validate_scope(suites, provider, operation, paths):
     require(suites and set(suites) <= set(SUITES), 'registered acceptance suites required')
     require(any(SUITES[s]['provider'] == provider and operation in SUITES[s]['operations'] for s in suites),
             'acceptance suite does not cover this provider/operation')
-    # Pilot covers only SQS handlers/store and their adjacent tests. Cross-service,
-    # UI/docs and shared-core fixes need independently registered broader suites.
+    eligible = {name for name in suites if SUITES[name]['provider'] == provider and operation in SUITES[name]['operations']}
+    simpledb = bool(eligible.intersection(SIMPLEDB_SUITES))
+    if simpledb:
+        require(set(SIMPLEDB_SUITES) <= set(suites), 'all independent SimpleDB surfaces required, including SDK')
+    require(isinstance(paths, list) and paths and len(paths) == len(set(paths)), 'nonempty unique ownership paths required')
+    # A receipt never authorizes another service/provider or shared integration files.
+    sqs = provider == 'aws' and 'sqs-lifecycle' in eligible
     for path in paths:
         p = Path(path)
-        covered = path in ('internal/aws/sqs.go', 'internal/aws/sqs_store.go', 'formal/applicability.json') or (
+        sqs_path = path in ('internal/aws/sqs.go', 'internal/aws/sqs_store.go', 'formal/applicability.json') or (
             p.parent.as_posix() == 'internal/aws' and p.name.startswith('sqs_') and p.name.endswith('_test.go'))
-        require(covered, 'SQS pilot does not cover claimed path: ' + path)
+        require((sqs and sqs_path) or (simpledb and path in SIMPLEDB_PATHS), 'acceptance suite does not cover claimed path: ' + path)
 
 
 def candidate_paths(base, head, root=ROOT):
@@ -69,7 +119,7 @@ def clean_head(root):
     return git(root, 'rev-parse', 'HEAD')
 
 
-def source_hash(root):
+def legacy_source_hash(root):
     raw = (root / SOURCE).read_bytes()
     source = json.loads(raw)
     require(re.fullmatch(r'[0-9a-f]{40}', source['commit']), 'upstream immutable SHA required')
@@ -83,15 +133,57 @@ def source_hash(root):
     return digest(raw)
 
 
-def verdict(log, suite, returncode):
+def source_hash(root, suites=None):
+    selected = set(suites or DEFAULT_SUITES)
+    if not selected.intersection(SIMPLEDB_SUITES):
+        return legacy_source_hash(root)  # Preserve legacy receipts and SQS provenance.
+    registry = root/'test/factory/simpledb-registration.json'
+    raw = registry.read_bytes()
+    data = json.loads(raw)
+    require(data.get('test_writer_commit') == '7253c5b5dd9b0ba4574fbfe8bb2209228f99ba6d', 'wrong TestWriter snapshot')
+    expected = set('test/factory/testdata/simpledb/' + n for n in (
+        'README.md', 'files.sha256.json', 'native/acceptance_test.go', 'oracle/fixture_test.go',
+        'oracle/fixtures.json', 'oracle/oracle.json', 'registration-proposal.json',
+        'sdk_wire.py', 'test_sdk_harness.py')) | {'scripts/test-simpledb-factory-sdk.py'}
+    require(set(data.get('files', {})) == expected, 'SimpleDB oracle/helper set differs')
+    for name, checksum in data['files'].items():
+        file = root/name
+        require(not file.is_symlink() and file.resolve().is_relative_to(root.resolve()), 'unsafe SimpleDB input')
+        require(digest(file.read_bytes()) == checksum, 'SimpleDB oracle/helper changed: ' + name)
+    binding = {'registration_sha256': digest(raw), 'suites': {name: SUITES[name] for name in SIMPLEDB_SUITES},
+               'paths': sorted(SIMPLEDB_PATHS)}
+    if selected - set(SIMPLEDB_SUITES):
+        binding['legacy_source_sha256'] = legacy_source_hash(root)
+    return digest(json.dumps(binding, sort_keys=True).encode())
+
+
+def verdict(log, suite, returncode, head=None):
     require(returncode == 0, 'acceptance process failed or timed out')
+    spec = SUITES[suite]
+    if spec.get('format') == 'simpledb-sdk-v1':
+        result = json.loads(log.decode())
+        require(head and result.get('factory_sdk_v1') is True and result.get('head') == head, 'SDK receipt HEAD missing/different')
+        require(result.get('status') == 'PASS' and not result.get('cleanup_errors'), 'SDK product/harness/cleanup did not pass')
+        require(result.get('passed_cases') == ['sdk-domain-items', 'sdk-restart-cascade', 'sdk-list-pages', 'sdk-negative-cases'], 'required SDK cases missing/duplicate')
+        require(result.get('sdk_pins') == {'boto3': '1.42.0', 'botocore': '1.41.6'}, 'SDK pins differ')
+        require(re.fullmatch('[0-9a-f]{64}', result.get('binary_sha256', '')), 'built CLI hash required')
+        require(result.get('python') == executable_command(['python3'])[0] and result.get('go') == executable_command(['go'])[0], 'SDK toolchain differs')
+        return
+    if spec.get('format') == 'python-unittest':
+        lines = log.decode().splitlines()
+        for name in spec['tests']:
+            require(sum(bool(re.fullmatch(re.escape(name) + r' \(.*\) \.\.\. ok', line)) for line in lines) == 1, 'required pure harness test missing/duplicate')
+        require(lines.count('OK') == 1 and sum(bool(re.fullmatch(r'Ran 3 tests in [0-9.]+s', line)) for line in lines) == 1, 'pure harness completion missing')
+        require(not any(word in log.decode() for word in ('skipped', 'FAILED', 'ERROR', 'expected failure', 'unexpected success')), 'pure harness skip/failure refused')
+        return
     events = [json.loads(line) for line in log.decode().splitlines() if line.strip()]
     require(events, 'no test events')
-    require(not any(e.get('Action') in ('skip', 'fail') for e in events), 'failed or skipped tests are not acceptance')
-    package, test = SUITES[suite]['package'], SUITES[suite]['test']
-    runs = [e for e in events if e.get('Package') == package and e.get('Test') == test and e.get('Action') == 'run']
-    passes = [e for e in events if e.get('Package') == package and e.get('Test') == test and e.get('Action') == 'pass']
-    require(len(runs) == 1 and len(passes) == 1, 'required test did not execute exactly once')
+    require(not any(e.get('Action') in ('skip', 'fail', 'build-fail') for e in events), 'failed or skipped tests are not acceptance')
+    package = spec['package']
+    for test in spec.get('tests', [spec.get('test')]):
+        runs = [e for e in events if e.get('Package') == package and e.get('Test') == test and e.get('Action') == 'run']
+        passes = [e for e in events if e.get('Package') == package and e.get('Test') == test and e.get('Action') == 'pass']
+        require(len(runs) == 1 and len(passes) == 1, 'required test did not execute exactly once: ' + str(test))
     require(any(e.get('Package') == package and not e.get('Test') and e.get('Action') == 'pass' for e in events), 'package completion missing')
 
 
@@ -108,19 +200,19 @@ def execution_environment():
 
 def executable_command(command):
     command = list(command)
-    if command[0] == 'go':
-        requested = os.environ.get('GO', 'go')
-        require(requested and not any(c in requested for c in ('\n', '\r', '\x00')), 'GO must be one executable path, not a shell command')
+    if command[0] in ('go', 'python3'):
+        requested = os.environ.get('GO', 'go') if command[0] == 'go' else os.environ.get('FACTORY_SDK_PYTHON', sys.executable)
+        require(requested and not any(c in requested for c in ('\n', '\r', '\x00')), 'tool must be one executable path, not a shell command')
         executable = shutil.which(requested)
         require(executable, 'configured Go executable unavailable')
-        command[0] = str(Path(executable).resolve())
+        command[0] = str(Path(executable).parent.resolve()/Path(executable).name) if command[0] == 'python3' else str(Path(executable).resolve())
     return command
 
 
 def run(root, output, suites, timeout=300):
     require(suites and len(suites) == len(set(suites)) and set(suites) <= set(SUITES), 'unknown/duplicate/empty acceptance suites')
     head = clean_head(root)
-    pin = source_hash(root)
+    pin = source_hash(root, suites)
     report = {'version': 1, 'head': head, 'source_sha256': pin, 'checks': {}, 'status': 'failed'}
     output = output.resolve()
     # Output must not overwrite tracked source. Repository-local reports must be ignored.
@@ -133,16 +225,24 @@ def run(root, output, suites, timeout=300):
             command = SUITES[suite]['argv']
             effective_command = executable_command(command)
             env = execution_environment()
+            if suite == 'simpledb-first-sdk-wire':
+                env.update(FACTORY_HEAD=head, FACTORY_GO=executable_command(['go'])[0], FACTORY_PYTHON=effective_command[0], CGO_ENABLED='0')
             with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
                 process = subprocess.Popen(effective_command, cwd=root, env=env, stdout=stdout, stderr=stderr, start_new_session=True)
                 try:
                     returncode = process.wait(timeout=timeout)
                 except subprocess.TimeoutExpired:
-                    os.killpg(process.pid, signal.SIGKILL)
-                    process.wait()
+                    os.killpg(process.pid, signal.SIGTERM)
+                    try:
+                        process.wait(timeout=10)  # Allow SDK's finally to stop its owned CLI.
+                    except subprocess.TimeoutExpired:
+                        os.killpg(process.pid, signal.SIGKILL)
+                        process.wait()
                     returncode = -1
                 stdout.seek(0); log = stdout.read()
                 stderr.seek(0); errors = stderr.read()
+                if SUITES[suite].get('format') == 'python-unittest':
+                    log += errors  # unittest writes its named events to stderr.
             # Local logs may contain test data; never publish them automatically.
             logpath = output.with_name(output.stem + '-' + suite + '.jsonl')
             errpath = output.with_name(output.stem + '-' + suite + '.stderr')
@@ -150,9 +250,9 @@ def run(root, output, suites, timeout=300):
             entry = {'status':'failed', 'argv':command, 'executed_argv':effective_command, 'returncode':returncode, 'log':logpath.name,
                      'log_sha256':digest(log), 'scope':SUITES[suite]['scope']}
             report['checks'][suite] = entry
-            verdict(log, suite, returncode)
+            verdict(log, suite, returncode, head)
             entry['status'] = 'passed'
-        require(clean_head(root) == head and source_hash(root) == pin, 'inputs changed during acceptance')
+        require(clean_head(root) == head and source_hash(root, suites) == pin, 'inputs changed during acceptance')
         report['status'] = 'passed'
     finally:
         output.write_text(json.dumps(report, indent=2) + '\n')
@@ -165,7 +265,7 @@ def verify(path, head, suites, root=ROOT):
     report = json.loads(path.read_text())
     require(report.get('version') == 1 and report.get('head') == head and report.get('status') == 'passed', 'acceptance is not passed at candidate HEAD')
     require(clean_head(root) == head, 'review checkout is not clean candidate HEAD')
-    require(report.get('source_sha256') == source_hash(root), 'acceptance oracle changed')
+    require(report.get('source_sha256') == source_hash(root, suites), 'acceptance oracle changed')
     require(set(report.get('checks', {})) == set(suites), 'acceptance suite set differs')
     for suite in suites:
         entry = report['checks'][suite]
@@ -175,7 +275,7 @@ def verify(path, head, suites, root=ROOT):
         require(isinstance(name,str) and Path(name).name == name and name not in ('','.','..'), 'unsafe evidence path')
         log = (path.parent / name).read_bytes()
         require(digest(log) == entry['log_sha256'], 'acceptance log changed')
-        verdict(log, suite, entry['returncode'])
+        verdict(log, suite, entry['returncode'], head)
     return report
 
 
@@ -185,12 +285,12 @@ def main():
     p.add_argument('--suite', choices=sorted(SUITES), action='append')
     p.add_argument('--verify', action='store_true')
     args = p.parse_args()
-    suites = args.suite or list(SUITES)
+    suites = args.suite or list(DEFAULT_SUITES)
     if args.verify:
         verify(args.output, clean_head(ROOT), suites)
     else:
         run(ROOT, args.output, suites)
-    print('factory acceptance passed; scope: Go gateway/SQLite only')
+    print('factory checks passed; suites: ' + ', '.join(suites))
 
 if __name__ == '__main__':
     try:

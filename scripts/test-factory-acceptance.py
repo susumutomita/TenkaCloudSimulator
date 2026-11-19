@@ -131,4 +131,11 @@ class AcceptanceTests(unittest.TestCase):
     def test_empty_duplicate_suites_refused(self):
         for suites in [[],['sqs-lifecycle']*2]:
             with self.assertRaises(ValueError):gate.verify(self.path,self.head,suites,self.root)
+# Keep the additive registration detector suite in the ordinary existing gate.
+import importlib.util
+_simpledb_spec = importlib.util.spec_from_file_location('simpledb_registration_tests', Path(__file__).with_name('test-simpledb-factory-registration.py'))
+_simpledb_tests = importlib.util.module_from_spec(_simpledb_spec)
+_simpledb_spec.loader.exec_module(_simpledb_tests)
+SimpleDBRegistrationTests = _simpledb_tests.SimpleDBRegistrationTests
+
 if __name__=='__main__':unittest.main()

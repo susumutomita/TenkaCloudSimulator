@@ -13,6 +13,7 @@ import (
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/catalog"
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/simpledb"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/legal"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/provider"
@@ -91,6 +92,11 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		_ = store.Close()
 		return nil, nil, err
 	}
+	simpleDB, err := simpledb.NewStore(store.Database())
+	if err != nil {
+		_ = store.Close()
+		return nil, nil, err
+	}
 	stacks, err := aws.NewStackStore(store.Database())
 	if err != nil {
 		_ = store.Close()
@@ -163,7 +169,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		_ = store.Close()
 		return nil, nil, err
 	}
-	gateway := &aws.Gateway{AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, Catalog: catalogEngine, CatalogOwns: catalogEngine.Owns, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
+	gateway := &aws.Gateway{SimpleDB: simpleDB, SimpleDBScope: simpledb.Scope{Account: "000000000000", Region: "us-east-1"}, AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, Catalog: catalogEngine, CatalogOwns: catalogEngine.Owns, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
 	if options.commandAPI != nil {
 		gateway.Commands = options.commandAPI()
 	}
