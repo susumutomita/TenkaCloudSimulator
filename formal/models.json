@@ -18817,6 +18817,62 @@
      "expect_invariant": "PublicationFollowsAdmission"
     }
    ]
-  }
+  },
+ {
+  "id": "CloudDNSAtomicChange",
+  "model": "formal/CloudDNSAtomicChange.tla",
+  "config": "formal/CloudDNSAtomicChange.cfg",
+  "bounds": "Two projects/subjects, one zone slot per project, generations 1..2, protected apex plus two paired fixture keys, abstract IP and TTL, at most three global commits and normal history bound two with deletion-only cleanup.",
+  "properties": [
+   "TypeOK",
+   "NoOrphanRecords",
+   "AtomicPair",
+   "ApexPreserved",
+   "PendingInvisible",
+   "DeniedStateUnchanged",
+   "OnlyOwnerCommits",
+   "ExactDeletionRequired",
+   "CommittedStateMatchesIntent",
+   "OtherProjectUnchanged",
+   "HistoryPrefixPreserved",
+   "ReceiptSequenceExact",
+   "NonemptyDeletionRefused",
+   "NoOldGenerationReuse",
+   "CleanupAdmissibleAtQuota"
+  ],
+  "limits": "Bounded model candidate, baseline and mutation results pending. Paired fixture, not a production-wide invariant. DeniedStateUnchanged refers only to Abort. Generation checks cover child change/RRset page tokens, not managedZones. Fixed trusted owner map and issued tokens abstract migration, HMAC, HTTP/parser/router, SQL/Go refinement and transactions under crash, budgets, liveness, serving, SDK and Terraform.",
+  "source_scope": [
+   "internal/gcp/dns/engine.go",
+   "internal/gcp/dns/model.go",
+   "internal/gcp/dns/operations.go",
+   "internal/gcp/dns/pagination.go",
+   "internal/gcp/dns/records.go",
+   "internal/gcp/dns/store.go"
+  ],
+  "mutants": [
+   {
+    "id": "AcceptPreviousPairedState",
+    "edits": [
+     {
+      "old": "tx.candidatePair = tx.expectedPair",
+      "new": "(tx.candidatePair = tx.expectedPair \\/ tx.candidatePair = tx.before[tx.project].pair)",
+      "count": 1
+     }
+    ],
+    "expect_invariant": "CommittedStateMatchesIntent"
+   },
+   {
+    "id": "AcceptMissingNewestReceipt",
+    "edits": [
+     {
+      "old": "/\\ tx.candidateHistory = tx.expectedHistory",
+      "new": "/\\ (tx.candidateHistory = tx.expectedHistory \\/ tx.candidateHistory = SubSeq(tx.expectedHistory,1,Len(tx.expectedHistory)-1))",
+      "count": 1
+     }
+    ],
+    "expect_invariant": "CommittedStateMatchesIntent"
+   }
+  ]
+ }
  ]
 }
