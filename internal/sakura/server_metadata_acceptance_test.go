@@ -115,6 +115,7 @@ func TestSakuraServerMetadataAcceptanceCRUD(t *testing.T) {
 	serverMetadataCall(t, h, "GET", serverMetadataPath+"/"+id, "", &a, 404)
 	serverMetadataList(t, h, &a, map[string][2]string{}) // before any cleanup
 	newID := serverMetadataRequire(t, serverMetadataCall(t, h, "POST", serverMetadataPath, serverMetadataCreate, &a, 201), "", "metadata-fixture", "before")
+	serverMetadataCall(t, h, "GET", serverMetadataPath+"/"+id, "", &a, 404) // recreation must not resurrect the old row
 	if newID == id {
 		t.Fatal("deleted identity reused")
 	}
@@ -129,6 +130,7 @@ func TestSakuraServerMetadataAcceptanceRefusals(t *testing.T) {
 	id := serverMetadataRequire(t, serverMetadataCall(t, h, "POST", serverMetadataPath, serverMetadataCreate, &a, 201), "", "metadata-fixture", "before")
 	expected := map[string][2]string{id: {"metadata-fixture", "before"}}
 	before := serverMetadataList(t, h, &a, expected)
+	resourceBefore := serverMetadataCall(t, h, "GET", serverMetadataPath+"/"+id, "", &a, 200)
 	diskBefore := frame(t, db)
 	cases := []struct {
 		name, method, path, body string
@@ -137,6 +139,16 @@ func TestSakuraServerMetadataAcceptanceRefusals(t *testing.T) {
 	}{
 		{"missing actor", "DELETE", serverMetadataPath + "/" + id, "", nil, false},
 		{"other owner", "DELETE", serverMetadataPath + "/" + id, "", &common.Actor{CredentialIdentity: "other", ExerciseIdentity: "other", CredentialRole: common.CredentialParticipant}, false},
+		{"missing actor GET", "GET", serverMetadataPath + "/" + id, "", nil, false},
+		{"missing actor list", "GET", serverMetadataPath + `?{"Count":10,"From":0}`, "", nil, false},
+		{"missing actor PUT", "PUT", serverMetadataPath + "/" + id, serverMetadataUpdate, nil, false},
+		{"other owner GET", "GET", serverMetadataPath + "/" + id, "", &common.Actor{CredentialIdentity: "other", ExerciseIdentity: "other", CredentialRole: common.CredentialParticipant}, false},
+		{"other owner list", "GET", serverMetadataPath + `?{"Count":10,"From":0}`, "", &common.Actor{CredentialIdentity: "other", ExerciseIdentity: "other", CredentialRole: common.CredentialParticipant}, false},
+		{"other owner PUT", "PUT", serverMetadataPath + "/" + id, serverMetadataUpdate, &common.Actor{CredentialIdentity: "other", ExerciseIdentity: "other", CredentialRole: common.CredentialParticipant}, false},
+		{"PUT unknown", "PUT", serverMetadataPath + "/" + id, `{"Server":{"Name":"changed","Unexpected":true}}`, &a, false},
+		{"PUT icon", "PUT", serverMetadataPath + "/" + id, `{"Server":{"Name":"changed","Icon":{"ID":99}}}`, &a, false},
+		{"PUT private host", "PUT", serverMetadataPath + "/" + id, `{"Server":{"Name":"changed","PrivateHost":{"ID":99}}}`, &a, false},
+		{"PUT plan mutation", "PUT", serverMetadataPath + "/" + id, `{"Server":{"Name":"changed","ServerPlan":{"CPU":4,"MemoryMB":8192}}}`, &a, false},
 		{"bad marker", "DELETE", serverMetadataPath + "/" + id, "", &a, true},
 		{"other zone", "DELETE", strings.Replace(serverMetadataPath, "is1a", "tk1a", 1) + "/" + id, "", &a, false},
 		{"encoded delimiter", "DELETE", strings.Replace(serverMetadataPath, "/cloud/zone", "/cloud%2Fzone", 1) + "/" + id, "", &a, false},
@@ -173,6 +185,12 @@ func TestSakuraServerMetadataAcceptanceRefusals(t *testing.T) {
 			}
 			w := httptest.NewRecorder()
 			h.ServeHTTP(w, r)
+			if (tc.actor == nil || tc.actor.ExerciseIdentity != config.Owner) && w.Code != http.StatusForbidden {
+				t.Fatalf("owner denial status %d want 403", w.Code)
+			}
+			if strings.HasPrefix(tc.name, "PUT ") && w.Code != http.StatusBadRequest {
+				t.Fatalf("invalid PUT status %d want 400", w.Code)
+			}
 			if w.Code < 400 || w.Code >= 500 {
 				t.Fatalf("rejection status %d", w.Code)
 			}
@@ -188,7 +206,11 @@ func TestSakuraServerMetadataAcceptanceRefusals(t *testing.T) {
 			if got := serverMetadataList(t, h, &a, expected); !reflect.DeepEqual(got, before) {
 				t.Fatal("refusal mutated complete listing")
 			}
-			serverMetadataRequire(t, serverMetadataCall(t, h, "GET", serverMetadataPath+"/"+id, "", &a, 200), id, "metadata-fixture", "before")
+			after := serverMetadataCall(t, h, "GET", serverMetadataPath+"/"+id, "", &a, 200)
+			serverMetadataRequire(t, after, id, "metadata-fixture", "before")
+			if !reflect.DeepEqual(after, resourceBefore) {
+				t.Fatal("refusal changed resource envelope")
+			}
 			if frame(t, db) != diskBefore {
 				t.Fatal("refusal mutated Disk")
 			}
