@@ -87,8 +87,8 @@ func (g *Gateway) serveEC2Read(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	action := fields.Get("Action")
-	if fields.Get("Version") != "2016-11-15" || (action != "DescribeInstances" && action != "DescribeVpcs") {
-		fail("UnsupportedOperation", "Only DescribeInstances and DescribeVpcs version 2016-11-15 are supported.", 400)
+	if fields.Get("Version") != "2016-11-15" || (action != "DescribeInstances" && action != "DescribeVpcs" && action != "DescribeSubnets") {
+		fail("UnsupportedOperation", "Only DescribeInstances, DescribeVpcs and DescribeSubnets version 2016-11-15 are supported.", 400)
 		return
 	}
 	if g.Stacks == nil || g.Identities == nil {
@@ -158,7 +158,18 @@ type ec2VPCRead struct {
 	CIDR string   `xml:"cidrBlock"`
 	Tags []ec2Tag `xml:"tagSet>item"`
 }
+type ec2SubnetRead struct {
+	ID    string   `xml:"subnetId"`
+	VPC   string   `xml:"vpcId"`
+	CIDR  string   `xml:"cidrBlock"`
+	State string   `xml:"state"`
+	Tags  []ec2Tag `xml:"tagSet>item"`
+}
+type ec2SubnetSet struct {
+	Items []ec2SubnetRead `xml:"item"`
+}
 type ec2ReadResponse struct {
+	Subnets      *ec2SubnetSet `xml:"subnetSet,omitempty"`
 	XMLName      xml.Name
 	XMLNS        string               `xml:"xmlns,attr"`
 	RequestID    string               `xml:"requestId"`
@@ -188,6 +199,9 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 	kind := "AWS::EC2::VPC"
 	if action == "DescribeInstances" {
 		kind = "AWS::EC2::Instance"
+	} else if action == "DescribeSubnets" {
+		kind = "AWS::EC2::Subnet"
+		out.Subnets = &ec2SubnetSet{}
 	}
 	rows, e := tx.QueryContext(ctx, `SELECT o.physical_id,o.stack_id,s.document FROM aws_cfn_ownership o JOIN aws_cfn_stacks s ON s.id=o.stack_id WHERE o.namespace=? AND o.kind=? AND s.region=? ORDER BY o.physical_id LIMIT 1001`, stackResourceNamespace(region, kind), kind, region)
 	if e != nil {
@@ -229,12 +243,16 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 		if resource == nil {
 			return out, fmt.Errorf("missing resource")
 		}
-		if kind == "AWS::EC2::VPC" {
+		if kind == "AWS::EC2::VPC" || kind == "AWS::EC2::Subnet" {
 			v, e := networkRead(ctx, tx, region, item.id)
 			if e != nil || v.StackID != item.stack || v.Kind != kind {
 				return out, fmt.Errorf("network identity")
 			}
-			out.VPCs = append(out.VPCs, ec2VPCRead{v.ID, v.CIDR, ec2ReadTags(v.Tags)})
+			if kind == "AWS::EC2::Subnet" {
+				out.Subnets.Items = append(out.Subnets.Items, ec2SubnetRead{v.ID, v.VPCID, v.CIDR, "available", ec2ReadTags(v.Tags)})
+			} else {
+				out.VPCs = append(out.VPCs, ec2VPCRead{v.ID, v.CIDR, ec2ReadTags(v.Tags)})
+			}
 			continue
 		}
 		props := resource.Properties
