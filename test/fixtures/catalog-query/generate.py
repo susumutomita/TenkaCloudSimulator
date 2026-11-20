@@ -1,12 +1,12 @@
 """Generate Query protocol request vectors with botocore's own serializer.
 
-Development-only. Writes internal/aws/catalog/testdata/query_serializer.json:
+Development-only. Writes test/fixtures/catalog-query/serializer.json:
 each case holds the parameters given to botocore, the exact form body that
 botocore's QuerySerializer and AWSRequest preparation produce, and the
 parameters normalized to JSON (blobs as base64, timestamps as RFC 3339). The
 Go decoder test parses each body and must recover the normalized parameters.
 
-Usage: python tools/awsmodels/query_vectors.py  (requires the pinned botocore
+Usage: python test/fixtures/catalog-query/generate.py  (requires the pinned botocore
 from scripts/requirements-test.txt).
 """
 import base64
@@ -21,8 +21,8 @@ from botocore.awsrequest import create_request_object, prepare_request_dict
 from botocore.model import ServiceModel
 from botocore.serialize import create_serializer
 
-ROOT = Path(__file__).resolve().parents[2]
-OUTPUT = ROOT / 'internal/aws/catalog/testdata/query_serializer.json'
+ROOT = Path(__file__).resolve().parents[3]
+OUTPUT = ROOT / 'test/fixtures/catalog-query/serializer.json'
 PINNED = '1.41.6'
 
 # A synthetic Query model covering every serialization trait: renamed and
@@ -126,7 +126,7 @@ def main():
     cases += [{'model': service, 'name': service + ' ' + operation, 'operation': operation,
                'body': wire(session.get_service_model(service), operation, params), 'params': normalize(params)}
               for service, operation, params in SERVICE_CASES]
-    data = {'generator': 'tools/awsmodels/query_vectors.py', 'botocore': botocore.__version__, 'synthetic': SYNTHETIC, 'cases': cases}
+    data = {'generator': 'test/fixtures/catalog-query/generate.py', 'botocore': botocore.__version__, 'synthetic': SYNTHETIC, 'cases': cases}
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(data, indent=1, sort_keys=True, ensure_ascii=False) + '\n')
     print(f'Wrote {len(cases)} botocore Query vectors to {OUTPUT.relative_to(ROOT)}')

@@ -745,9 +745,9 @@ func TestQueryReferenceDescribesFormAndXMLWire(t *testing.T) {
 }
 
 // The checked-in vectors are botocore's own QuerySerializer output; see
-// tools/awsmodels/query_vectors.py. Each body decodes back to its parameters.
+// test/fixtures/catalog-query/generate.py. Each body decodes back to its parameters.
 func TestQueryDecoderAcceptsBotocoreSerializerBytes(t *testing.T) {
-	data, err := os.ReadFile("testdata/query_serializer.json")
+	data, err := os.ReadFile("../../../test/fixtures/catalog-query/serializer.json")
 	if err != nil {
 		t.Fatal(err)
 	}

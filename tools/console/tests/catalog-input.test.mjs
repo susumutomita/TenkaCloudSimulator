@@ -10,7 +10,7 @@ import * as query from '../src/catalog-query.mjs';
 // is fresh) and bodies botocore's own Query serializer produced.
 const {services} = JSON.parse(fs.readFileSync(new URL('./fixtures/catalog-descriptors.json', import.meta.url), 'utf8'));
 const service = model => services.find(s => s.model === model);
-const vectors = JSON.parse(fs.readFileSync(new URL('../../../internal/aws/catalog/testdata/query_serializer.json', import.meta.url), 'utf8')).cases;
+const vectors = JSON.parse(fs.readFileSync(new URL('../../../test/fixtures/catalog-query/serializer.json', import.meta.url), 'utf8')).cases;
 const vector = (model, operation) => vectors.find(c => c.model === model && c.operation === operation);
 const resource = (model, kind) => service(model).resources.find(r => r.kind === kind);
 

@@ -15,8 +15,8 @@ vm.runInNewContext(compiled, {module: view, exports: view.exports, console, URLS
 const {buildCatalogRequest} = view.exports;
 
 // Bodies botocore 1.41.6's own QuerySerializer produced for these inputs
-// (tools/awsmodels/query_vectors.py writes them).
-const vectors = JSON.parse(fs.readFileSync(new URL('../../../internal/aws/catalog/testdata/query_serializer.json', import.meta.url), 'utf8'));
+// (test/fixtures/catalog-query/generate.py writes them).
+const vectors = JSON.parse(fs.readFileSync(new URL('../../../test/fixtures/catalog-query/serializer.json', import.meta.url), 'utf8'));
 const botocore = operation => vectors.cases.find(c => c.model === 'rds' && c.operation === operation);
 
 // Descriptor fragments as /_simulator/v1/catalog/aws serves them for RDS.

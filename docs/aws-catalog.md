@@ -144,9 +144,9 @@ response.
   with axe at 1440 px and 390 px, checking shared native state, including an
   RDS lifecycle for every kind through the console and RDS reference **Send**
   requests checked with boto3.
-- `internal/aws/catalog/testdata/query_serializer.json` holds request bodies
+- `test/fixtures/catalog-query/serializer.json` holds request bodies
   produced by botocore's own Query serializer
-  (`tools/awsmodels/query_vectors.py`); the Go decoder and the console request
+  (`test/fixtures/catalog-query/generate.py`); the Go decoder and the console request
   builder are both checked against them.
 - `formal/CatalogResourceLifecycle.tla` checks bounded store invariants with 12
   mutation controls, and `formal/CatalogConsoleEpoch.tla` checks view epochs,
