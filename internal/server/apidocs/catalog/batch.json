@@ -1,0 +1,2616 @@
+{
+ "components": {
+  "schemas": {
+   "CapacityLimit": {
+    "additionalProperties": false,
+    "properties": {
+     "capacityUnit": {
+      "type": "string"
+     },
+     "maxCapacity": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ComputeEnvironmentDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "computeEnvironmentArn": {
+      "type": "string"
+     },
+     "computeEnvironmentName": {
+      "type": "string"
+     },
+     "computeResources": {
+      "$ref": "#/components/schemas/ComputeResource"
+     },
+     "containerOrchestrationType": {
+      "enum": [
+       "ECS",
+       "EKS"
+      ],
+      "type": "string"
+     },
+     "context": {
+      "type": "string"
+     },
+     "ecsClusterArn": {
+      "type": "string"
+     },
+     "eksConfiguration": {
+      "$ref": "#/components/schemas/EksConfiguration"
+     },
+     "serviceRole": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "UPDATING",
+       "DELETING",
+       "DELETED",
+       "VALID",
+       "INVALID"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "type": {
+      "enum": [
+       "MANAGED",
+       "UNMANAGED"
+      ],
+      "type": "string"
+     },
+     "unmanagedvCpus": {
+      "type": "integer"
+     },
+     "updatePolicy": {
+      "$ref": "#/components/schemas/UpdatePolicy"
+     },
+     "uuid": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "computeEnvironmentName",
+     "computeEnvironmentArn"
+    ],
+    "type": "object"
+   },
+   "ComputeEnvironmentOrder": {
+    "additionalProperties": false,
+    "properties": {
+     "computeEnvironment": {
+      "type": "string"
+     },
+     "order": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "order",
+     "computeEnvironment"
+    ],
+    "type": "object"
+   },
+   "ComputeResource": {
+    "additionalProperties": false,
+    "properties": {
+     "allocationStrategy": {
+      "enum": [
+       "BEST_FIT",
+       "BEST_FIT_PROGRESSIVE",
+       "SPOT_CAPACITY_OPTIMIZED",
+       "SPOT_PRICE_CAPACITY_OPTIMIZED"
+      ],
+      "type": "string"
+     },
+     "bidPercentage": {
+      "type": "integer"
+     },
+     "desiredvCpus": {
+      "type": "integer"
+     },
+     "ec2Configuration": {
+      "items": {
+       "$ref": "#/components/schemas/Ec2Configuration"
+      },
+      "type": "array"
+     },
+     "ec2KeyPair": {
+      "type": "string"
+     },
+     "imageId": {
+      "type": "string"
+     },
+     "instanceRole": {
+      "type": "string"
+     },
+     "instanceTypes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "launchTemplate": {
+      "$ref": "#/components/schemas/LaunchTemplateSpecification"
+     },
+     "maxvCpus": {
+      "type": "integer"
+     },
+     "minvCpus": {
+      "type": "integer"
+     },
+     "placementGroup": {
+      "type": "string"
+     },
+     "securityGroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "spotIamFleetRole": {
+      "type": "string"
+     },
+     "subnets": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": {
+      "enum": [
+       "EC2",
+       "SPOT",
+       "FARGATE",
+       "FARGATE_SPOT"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "maxvCpus",
+     "subnets"
+    ],
+    "type": "object"
+   },
+   "ComputeResourceUpdate": {
+    "additionalProperties": false,
+    "properties": {
+     "allocationStrategy": {
+      "enum": [
+       "BEST_FIT_PROGRESSIVE",
+       "SPOT_CAPACITY_OPTIMIZED",
+       "SPOT_PRICE_CAPACITY_OPTIMIZED"
+      ],
+      "type": "string"
+     },
+     "bidPercentage": {
+      "type": "integer"
+     },
+     "desiredvCpus": {
+      "type": "integer"
+     },
+     "ec2Configuration": {
+      "items": {
+       "$ref": "#/components/schemas/Ec2Configuration"
+      },
+      "type": "array"
+     },
+     "ec2KeyPair": {
+      "type": "string"
+     },
+     "imageId": {
+      "type": "string"
+     },
+     "instanceRole": {
+      "type": "string"
+     },
+     "instanceTypes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "launchTemplate": {
+      "$ref": "#/components/schemas/LaunchTemplateSpecification"
+     },
+     "maxvCpus": {
+      "type": "integer"
+     },
+     "minvCpus": {
+      "type": "integer"
+     },
+     "placementGroup": {
+      "type": "string"
+     },
+     "securityGroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "subnets": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": {
+      "enum": [
+       "EC2",
+       "SPOT",
+       "FARGATE",
+       "FARGATE_SPOT"
+      ],
+      "type": "string"
+     },
+     "updateToLatestImageVersion": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ConsumableResourceSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "consumableResourceArn": {
+      "type": "string"
+     },
+     "consumableResourceName": {
+      "type": "string"
+     },
+     "inUseQuantity": {
+      "type": "integer"
+     },
+     "resourceType": {
+      "type": "string"
+     },
+     "totalQuantity": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "consumableResourceArn",
+     "consumableResourceName"
+    ],
+    "type": "object"
+   },
+   "Ec2Configuration": {
+    "additionalProperties": false,
+    "properties": {
+     "imageIdOverride": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "imageKubernetesVersion": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "imageType": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "imageType"
+    ],
+    "type": "object"
+   },
+   "EksConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "eksClusterArn": {
+      "type": "string"
+     },
+     "kubernetesNamespace": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "eksClusterArn",
+     "kubernetesNamespace"
+    ],
+    "type": "object"
+   },
+   "FairsharePolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "computeReservation": {
+      "type": "integer"
+     },
+     "shareDecaySeconds": {
+      "type": "integer"
+     },
+     "shareDistribution": {
+      "items": {
+       "$ref": "#/components/schemas/ShareAttributes"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "JobQueueDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "computeEnvironmentOrder": {
+      "items": {
+       "$ref": "#/components/schemas/ComputeEnvironmentOrder"
+      },
+      "type": "array"
+     },
+     "jobQueueArn": {
+      "type": "string"
+     },
+     "jobQueueName": {
+      "type": "string"
+     },
+     "jobQueueType": {
+      "enum": [
+       "EKS",
+       "ECS",
+       "ECS_FARGATE",
+       "SAGEMAKER_TRAINING"
+      ],
+      "type": "string"
+     },
+     "jobStateTimeLimitActions": {
+      "items": {
+       "$ref": "#/components/schemas/JobStateTimeLimitAction"
+      },
+      "type": "array"
+     },
+     "priority": {
+      "type": "integer"
+     },
+     "schedulingPolicyArn": {
+      "type": "string"
+     },
+     "serviceEnvironmentOrder": {
+      "items": {
+       "$ref": "#/components/schemas/ServiceEnvironmentOrder"
+      },
+      "type": "array"
+     },
+     "state": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "UPDATING",
+       "DELETING",
+       "DELETED",
+       "VALID",
+       "INVALID"
+      ],
+      "type": "string"
+     },
+     "statusReason": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "jobQueueName",
+     "jobQueueArn",
+     "state",
+     "priority",
+     "computeEnvironmentOrder"
+    ],
+    "type": "object"
+   },
+   "JobStateTimeLimitAction": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "CANCEL",
+       "TERMINATE"
+      ],
+      "type": "string"
+     },
+     "maxTimeSeconds": {
+      "type": "integer"
+     },
+     "reason": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "RUNNABLE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "reason",
+     "state",
+     "maxTimeSeconds",
+     "action"
+    ],
+    "type": "object"
+   },
+   "KeyValuesPair": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "values": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LaunchTemplateSpecification": {
+    "additionalProperties": false,
+    "properties": {
+     "launchTemplateId": {
+      "type": "string"
+     },
+     "launchTemplateName": {
+      "type": "string"
+     },
+     "overrides": {
+      "items": {
+       "$ref": "#/components/schemas/LaunchTemplateSpecificationOverride"
+      },
+      "type": "array"
+     },
+     "userdataType": {
+      "enum": [
+       "EKS_BOOTSTRAP_SH",
+       "EKS_NODEADM"
+      ],
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LaunchTemplateSpecificationOverride": {
+    "additionalProperties": false,
+    "properties": {
+     "launchTemplateId": {
+      "type": "string"
+     },
+     "launchTemplateName": {
+      "type": "string"
+     },
+     "targetInstanceTypes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "userdataType": {
+      "enum": [
+       "EKS_BOOTSTRAP_SH",
+       "EKS_NODEADM"
+      ],
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SchedulingPolicyDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "fairsharePolicy": {
+      "$ref": "#/components/schemas/FairsharePolicy"
+     },
+     "name": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "name",
+     "arn"
+    ],
+    "type": "object"
+   },
+   "SchedulingPolicyListingDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn"
+    ],
+    "type": "object"
+   },
+   "ServiceEnvironmentDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "capacityLimits": {
+      "items": {
+       "$ref": "#/components/schemas/CapacityLimit"
+      },
+      "type": "array"
+     },
+     "serviceEnvironmentArn": {
+      "type": "string"
+     },
+     "serviceEnvironmentName": {
+      "type": "string"
+     },
+     "serviceEnvironmentType": {
+      "enum": [
+       "SAGEMAKER_TRAINING"
+      ],
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "UPDATING",
+       "DELETING",
+       "DELETED",
+       "VALID",
+       "INVALID"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "serviceEnvironmentName",
+     "serviceEnvironmentArn",
+     "serviceEnvironmentType",
+     "capacityLimits"
+    ],
+    "type": "object"
+   },
+   "ServiceEnvironmentOrder": {
+    "additionalProperties": false,
+    "properties": {
+     "order": {
+      "type": "integer"
+     },
+     "serviceEnvironment": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "order",
+     "serviceEnvironment"
+    ],
+    "type": "object"
+   },
+   "ShareAttributes": {
+    "additionalProperties": false,
+    "properties": {
+     "shareIdentifier": {
+      "type": "string"
+     },
+     "weightFactor": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "shareIdentifier"
+    ],
+    "type": "object"
+   },
+   "UpdatePolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "jobExecutionTimeoutMinutes": {
+      "maximum": 360,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "terminateJobsOnUpdate": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Batch API (2016-08-10). Every other official operation returns HTTP 501 UnknownOperationException. Scheduling policies, consumable resources, compute environments, job queues and service environments are stored configuration records: no job is submitted, scheduled, run, listed, described or terminated, no instance, ECS or EKS cluster, Fargate task or SageMaker training job exists, and a compute environment stays CREATING with no ecsClusterArn. SubmitJob, SubmitServiceJob, CancelJob, TerminateJob, TerminateServiceJob, DescribeJobs, ListJobs, ListServiceJobs, DescribeServiceJob, ListJobsByConsumableResource, GetJobQueueSnapshot and every other official operation not bound here return UnknownOperationException with HTTP 501. Job definitions are not implemented: RegisterJobDefinition numbers revisions as name:revision and DeregisterJobDefinition marks a revision INACTIVE instead of deleting it, which the stored model does not express, so RegisterJobDefinition, DeregisterJobDefinition and DescribeJobDefinitions return HTTP 501. UpdateConsumableResource is not implemented: its SET, ADD and SUBTRACT quantity operations need the in-use accounting of running jobs, so total quantities are fixed at creation and availableQuantity always equals totalQuantity. Describe operations fail with ClientException (HTTP 400) when a named compute environment, job queue, service environment or scheduling policy does not exist, where AWS omits it from the result; Describe by name accepts a name or an ARN. ListConsumableResources filters are refused, and createdAt of a consumable resource is not reported because the stored clock is not epoch milliseconds. References are stored without being resolved: the compute environments and service environments of a job queue order, subnets, security groups, launch templates, instance roles, service roles, EKS clusters and Spot fleet roles are not checked, a queue is VALID at once even if its compute environments are not, and UpdateComputeEnvironment changes only state, unmanagedvCpus, serviceRole, updatePolicy and context (computeResources updates are refused). A schedulingPolicyArn must name a stored scheduling policy, but deleting a scheduling policy, compute environment or service environment that a queue still uses succeeds, and a compute environment need not be DISABLED before deletion. Names are 1 to 128 letters, digits, hyphens or underscores. A compute environment's containerOrchestrationType is ECS, or EKS when eksConfiguration is given; MANAGED compute environments require computeResources, unmanagedvCpus applies only to UNMANAGED ones, and Fargate compute resources refuse ec2KeyPair and instanceRole. A job queue holds at most three compute environments. Fair-share policies accept computeReservation 0 to 99 and shareDecaySeconds 0 to 604800. Each Region holds at most 50 resources of each kind (local limit). Tags apply to every kind by ARN.",
+  "title": "AWS Batch (simulator catalog)",
+  "version": "2016-08-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/v1/createcomputeenvironment": {
+   "post": {
+    "operationId": "batchCreateComputeEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "computeEnvironmentName": {
+          "type": "string"
+         },
+         "computeResources": {
+          "$ref": "#/components/schemas/ComputeResource"
+         },
+         "context": {
+          "type": "string"
+         },
+         "eksConfiguration": {
+          "$ref": "#/components/schemas/EksConfiguration"
+         },
+         "serviceRole": {
+          "type": "string"
+         },
+         "state": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         },
+         "type": {
+          "enum": [
+           "MANAGED",
+           "UNMANAGED"
+          ],
+          "type": "string"
+         },
+         "unmanagedvCpus": {
+          "type": "integer"
+         }
+        },
+        "required": [
+         "computeEnvironmentName",
+         "type"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "computeEnvironmentArn": {
+           "type": "string"
+          },
+          "computeEnvironmentName": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateComputeEnvironment",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/createconsumableresource": {
+   "post": {
+    "operationId": "batchCreateConsumableResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "consumableResourceName": {
+          "type": "string"
+         },
+         "resourceType": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         },
+         "totalQuantity": {
+          "type": "integer"
+         }
+        },
+        "required": [
+         "consumableResourceName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "consumableResourceArn": {
+           "type": "string"
+          },
+          "consumableResourceName": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateConsumableResource",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/createjobqueue": {
+   "post": {
+    "operationId": "batchCreateJobQueue",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "computeEnvironmentOrder": {
+          "items": {
+           "$ref": "#/components/schemas/ComputeEnvironmentOrder"
+          },
+          "type": "array"
+         },
+         "jobQueueName": {
+          "type": "string"
+         },
+         "jobQueueType": {
+          "enum": [
+           "EKS",
+           "ECS",
+           "ECS_FARGATE",
+           "SAGEMAKER_TRAINING"
+          ],
+          "type": "string"
+         },
+         "jobStateTimeLimitActions": {
+          "items": {
+           "$ref": "#/components/schemas/JobStateTimeLimitAction"
+          },
+          "type": "array"
+         },
+         "priority": {
+          "type": "integer"
+         },
+         "schedulingPolicyArn": {
+          "type": "string"
+         },
+         "serviceEnvironmentOrder": {
+          "items": {
+           "$ref": "#/components/schemas/ServiceEnvironmentOrder"
+          },
+          "type": "array"
+         },
+         "state": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "jobQueueName",
+         "priority"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "jobQueueArn": {
+           "type": "string"
+          },
+          "jobQueueName": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateJobQueue",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/createschedulingpolicy": {
+   "post": {
+    "operationId": "batchCreateSchedulingPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "fairsharePolicy": {
+          "$ref": "#/components/schemas/FairsharePolicy"
+         },
+         "name": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSchedulingPolicy",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/createserviceenvironment": {
+   "post": {
+    "operationId": "batchCreateServiceEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "capacityLimits": {
+          "items": {
+           "$ref": "#/components/schemas/CapacityLimit"
+          },
+          "type": "array"
+         },
+         "serviceEnvironmentName": {
+          "type": "string"
+         },
+         "serviceEnvironmentType": {
+          "enum": [
+           "SAGEMAKER_TRAINING"
+          ],
+          "type": "string"
+         },
+         "state": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "capacityLimits",
+         "serviceEnvironmentName",
+         "serviceEnvironmentType"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "serviceEnvironmentArn": {
+           "type": "string"
+          },
+          "serviceEnvironmentName": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateServiceEnvironment",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/deletecomputeenvironment": {
+   "post": {
+    "operationId": "batchDeleteComputeEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "computeEnvironment": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "computeEnvironment"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteComputeEnvironment",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/deleteconsumableresource": {
+   "post": {
+    "operationId": "batchDeleteConsumableResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "consumableResource": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "consumableResource"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteConsumableResource",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/deletejobqueue": {
+   "post": {
+    "operationId": "batchDeleteJobQueue",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "jobQueue": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "jobQueue"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteJobQueue",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/deleteschedulingpolicy": {
+   "post": {
+    "operationId": "batchDeleteSchedulingPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSchedulingPolicy",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/deleteserviceenvironment": {
+   "post": {
+    "operationId": "batchDeleteServiceEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "serviceEnvironment": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "serviceEnvironment"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteServiceEnvironment",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/describecomputeenvironments": {
+   "post": {
+    "operationId": "batchDescribeComputeEnvironments",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "computeEnvironments": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "maxResults": {
+          "type": "integer"
+         },
+         "nextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "computeEnvironments": {
+           "items": {
+            "$ref": "#/components/schemas/ComputeEnvironmentDetail"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeComputeEnvironments",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/describeconsumableresource": {
+   "post": {
+    "operationId": "batchDescribeConsumableResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "consumableResource": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "consumableResource"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "availableQuantity": {
+           "type": "integer"
+          },
+          "consumableResourceArn": {
+           "type": "string"
+          },
+          "consumableResourceName": {
+           "type": "string"
+          },
+          "createdAt": {
+           "type": "integer"
+          },
+          "inUseQuantity": {
+           "type": "integer"
+          },
+          "resourceType": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          },
+          "totalQuantity": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeConsumableResource",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/describejobqueues": {
+   "post": {
+    "operationId": "batchDescribeJobQueues",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "jobQueues": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "maxResults": {
+          "type": "integer"
+         },
+         "nextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "jobQueues": {
+           "items": {
+            "$ref": "#/components/schemas/JobQueueDetail"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeJobQueues",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/describeschedulingpolicies": {
+   "post": {
+    "operationId": "batchDescribeSchedulingPolicies",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arns": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "arns"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "schedulingPolicies": {
+           "items": {
+            "$ref": "#/components/schemas/SchedulingPolicyDetail"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeSchedulingPolicies",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/describeserviceenvironments": {
+   "post": {
+    "operationId": "batchDescribeServiceEnvironments",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "type": "integer"
+         },
+         "nextToken": {
+          "type": "string"
+         },
+         "serviceEnvironments": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "serviceEnvironments": {
+           "items": {
+            "$ref": "#/components/schemas/ServiceEnvironmentDetail"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeServiceEnvironments",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/listconsumableresources": {
+   "post": {
+    "operationId": "batchListConsumableResources",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "filters": {
+          "items": {
+           "$ref": "#/components/schemas/KeyValuesPair"
+          },
+          "type": "array"
+         },
+         "maxResults": {
+          "type": "integer"
+         },
+         "nextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "consumableResources": {
+           "items": {
+            "$ref": "#/components/schemas/ConsumableResourceSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListConsumableResources",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/listschedulingpolicies": {
+   "post": {
+    "operationId": "batchListSchedulingPolicies",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "type": "integer"
+         },
+         "nextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "schedulingPolicies": {
+           "items": {
+            "$ref": "#/components/schemas/SchedulingPolicyListingDetail"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSchedulingPolicies",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "batchUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Batch"
+    ]
+   },
+   "get": {
+    "operationId": "batchListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Batch"
+    ]
+   },
+   "post": {
+    "operationId": "batchTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/updatecomputeenvironment": {
+   "post": {
+    "operationId": "batchUpdateComputeEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "computeEnvironment": {
+          "type": "string"
+         },
+         "computeResources": {
+          "$ref": "#/components/schemas/ComputeResourceUpdate"
+         },
+         "context": {
+          "type": "string"
+         },
+         "serviceRole": {
+          "type": "string"
+         },
+         "state": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "unmanagedvCpus": {
+          "type": "integer"
+         },
+         "updatePolicy": {
+          "$ref": "#/components/schemas/UpdatePolicy"
+         }
+        },
+        "required": [
+         "computeEnvironment"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "computeEnvironmentArn": {
+           "type": "string"
+          },
+          "computeEnvironmentName": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateComputeEnvironment",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/updatejobqueue": {
+   "post": {
+    "operationId": "batchUpdateJobQueue",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "computeEnvironmentOrder": {
+          "items": {
+           "$ref": "#/components/schemas/ComputeEnvironmentOrder"
+          },
+          "type": "array"
+         },
+         "jobQueue": {
+          "type": "string"
+         },
+         "jobStateTimeLimitActions": {
+          "items": {
+           "$ref": "#/components/schemas/JobStateTimeLimitAction"
+          },
+          "type": "array"
+         },
+         "priority": {
+          "type": "integer"
+         },
+         "schedulingPolicyArn": {
+          "type": "string"
+         },
+         "serviceEnvironmentOrder": {
+          "items": {
+           "$ref": "#/components/schemas/ServiceEnvironmentOrder"
+          },
+          "type": "array"
+         },
+         "state": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "jobQueue"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "jobQueueArn": {
+           "type": "string"
+          },
+          "jobQueueName": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateJobQueue",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/updateschedulingpolicy": {
+   "post": {
+    "operationId": "batchUpdateSchedulingPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "type": "string"
+         },
+         "fairsharePolicy": {
+          "$ref": "#/components/schemas/FairsharePolicy"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSchedulingPolicy",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  },
+  "/v1/updateserviceenvironment": {
+   "post": {
+    "operationId": "batchUpdateServiceEnvironment",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "batch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "capacityLimits": {
+          "items": {
+           "$ref": "#/components/schemas/CapacityLimit"
+          },
+          "type": "array"
+         },
+         "serviceEnvironment": {
+          "type": "string"
+         },
+         "state": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "serviceEnvironment"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "serviceEnvironmentArn": {
+           "type": "string"
+          },
+          "serviceEnvironmentName": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateServiceEnvironment",
+    "tags": [
+     "AWS Batch"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Batch API (2016-08-10). Every other official operation returns HTTP 501 UnknownOperationException. Scheduling policies, consumable resources, compute environments, job queues and service environments are stored configuration records: no job is submitted, scheduled, run, listed, described or terminated, no instance, ECS or EKS cluster, Fargate task or SageMaker training job exists, and a compute environment stays CREATING with no ecsClusterArn. SubmitJob, SubmitServiceJob, CancelJob, TerminateJob, TerminateServiceJob, DescribeJobs, ListJobs, ListServiceJobs, DescribeServiceJob, ListJobsByConsumableResource, GetJobQueueSnapshot and every other official operation not bound here return UnknownOperationException with HTTP 501. Job definitions are not implemented: RegisterJobDefinition numbers revisions as name:revision and DeregisterJobDefinition marks a revision INACTIVE instead of deleting it, which the stored model does not express, so RegisterJobDefinition, DeregisterJobDefinition and DescribeJobDefinitions return HTTP 501. UpdateConsumableResource is not implemented: its SET, ADD and SUBTRACT quantity operations need the in-use accounting of running jobs, so total quantities are fixed at creation and availableQuantity always equals totalQuantity. Describe operations fail with ClientException (HTTP 400) when a named compute environment, job queue, service environment or scheduling policy does not exist, where AWS omits it from the result; Describe by name accepts a name or an ARN. ListConsumableResources filters are refused, and createdAt of a consumable resource is not reported because the stored clock is not epoch milliseconds. References are stored without being resolved: the compute environments and service environments of a job queue order, subnets, security groups, launch templates, instance roles, service roles, EKS clusters and Spot fleet roles are not checked, a queue is VALID at once even if its compute environments are not, and UpdateComputeEnvironment changes only state, unmanagedvCpus, serviceRole, updatePolicy and context (computeResources updates are refused). A schedulingPolicyArn must name a stored scheduling policy, but deleting a scheduling policy, compute environment or service environment that a queue still uses succeeds, and a compute environment need not be DISABLED before deletion. Names are 1 to 128 letters, digits, hyphens or underscores. A compute environment's containerOrchestrationType is ECS, or EKS when eksConfiguration is given; MANAGED compute environments require computeResources, unmanagedvCpus applies only to UNMANAGED ones, and Fargate compute resources refuse ec2KeyPair and instanceRole. A job queue holds at most three compute environments. Fair-share policies accept computeReservation 0 to 99 and shareDecaySeconds 0 to 604800. Each Region holds at most 50 resources of each kind (local limit). Tags apply to every kind by ARN.",
+   "name": "AWS Batch"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/batch/2016-08-10/service-2.json",
+  "sha256": "57e480ed2d42cc223187de7269662e936c5339023297a7055327f051727bbefb",
+  "license": "Apache-2.0"
+ }
+}
