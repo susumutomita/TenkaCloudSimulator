@@ -13,7 +13,7 @@ network, OAuth or real AWS call is executed or simulated.
 
 ## Services
 
-The catalog serves 113 services. The [generated service table](aws-catalog-services.md)
+The catalog serves 115 services. The [generated service table](aws-catalog-services.md)
 lists each service's Issues, protocol, implemented operations and bounds; it is
 checked against the reviewed specifications by `go test ./internal/aws/catalog`.
 The capability document lists the same services under `services.catalog`,
@@ -26,8 +26,9 @@ Apache Flink, AWS Data Pipeline, Amazon SWF, AWS Batch, CodeStar
 Notifications, Amazon Managed Grafana, AWS Organizations, Service Quotas,
 Application Auto Scaling, Amazon Cognito, AWS Network Firewall, AWS Control
 Tower, AWS Launch Wizard, Amazon Keyspaces and Amazon Comprehend Medical.
-Amazon RDS is served over the Query protocol. Services that use the EC2 or
-REST-XML protocols are not served by the catalog yet.
+Amazon RDS, Amazon ElastiCache and Amazon Redshift are served over the Query
+protocol. Services that use the EC2 or REST-XML protocols are not served by the
+catalog yet.
 Products assessed as not servable at all, with evidence, are listed in the
 [coverage assessment](coverage-assessment.md).
 
@@ -38,7 +39,7 @@ Products assessed as not servable at all, with evidence, are listed in the
   service. Unsigned first-party console and API-reference requests use
   `X-Simulator-Service` instead. Signatures are never verified; use dummy
   `TCSIM` credentials. The catalog claims a Query form POST only when that
-  service is a catalog Query service (`rds`), so IAM, STS, SNS, Elastic Load
+  service is a catalog Query service (`rds`, `elasticache`, `redshift`), so IAM, STS, SNS, Elastic Load
   Balancing, CloudFormation and EC2 requests keep their native handlers.
 - Query requests are form-encoded POSTs to `/` with `Action` and the model's
   `Version`, flattened as botocore serializes them (`Tags.Tag.1.Key`,
@@ -76,7 +77,7 @@ describes and deletes resources with each service's native requests, including
 child resources such as Amplify branches. Complex official members remain
 available through SDKs and the API reference.
 
-For Query services (RDS) the console sends the same form bodies as botocore
+For Query services (RDS, ElastiCache and Redshift) the console sends the same form bodies as botocore
 (`Action`, `Version`, `SubnetIds.SubnetIdentifier.1`, an empty list as
 `Name=`) to `/` with `X-Simulator-Service`, and decodes the XML response with
 the output shapes the descriptors publish (`xmlShapes`, `output`,
