@@ -1,0 +1,26 @@
+{
+ "client": "cleanroomsml",
+ "steps": [
+  {"op": "create_training_dataset", "args": {"name": "fixture-events", "roleArn": "arn:aws:iam::000000000000:role/fixture-cleanrooms-ml", "description": "fixture events", "tags": {"team": "a"}, "trainingData": [{"type": "INTERACTIONS", "inputConfig": {"schema": [{"columnName": "user", "columnTypes": ["USER_ID"]}], "dataSource": {"glueDataSource": {"tableName": "events", "databaseName": "ml"}}}}]}, "save": {"dataset": "trainingDatasetArn"}},
+  {"op": "get_training_dataset", "args": {"trainingDatasetArn": "${dataset}"}, "expect": {"name": "fixture-events", "status": "ACTIVE", "tags": {"team": "a"}}},
+  {"op": "list_training_datasets", "args": {}, "expect": {"trainingDatasets#count": 1}},
+  {"op": "create_configured_model_algorithm", "args": {"name": "fixture-trainer", "roleArn": "arn:aws:iam::000000000000:role/fixture-cleanrooms-ml", "trainingContainerConfig": {"imageUri": "registry.example/trainer:1"}}, "save": {"algorithm": "configuredModelAlgorithmArn"}},
+  {"op": "get_configured_model_algorithm", "args": {"configuredModelAlgorithmArn": "${algorithm}"}, "expect": {"name": "fixture-trainer", "trainingContainerConfig.imageUri": "registry.example/trainer:1"}},
+  {"op": "list_configured_model_algorithms", "args": {}, "expect": {"configuredModelAlgorithms#count": 1}},
+  {"op": "tag_resource", "args": {"resourceArn": "${dataset}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${dataset}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${dataset}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "get_training_dataset", "args": {"trainingDatasetArn": "arn:aws:cleanrooms-ml:us-east-1:000000000000:training-dataset/missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_training_datasets", "args": {}, "expect": {"trainingDatasets#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_training_dataset", "args": {"trainingDatasetArn": "${dataset}"}, "expect": {"name": "fixture-events"}}
+ ],
+ "cleanup": [
+  {"op": "delete_training_dataset", "args": {"trainingDatasetArn": "${dataset}"}},
+  {"op": "delete_configured_model_algorithm", "args": {"configuredModelAlgorithmArn": "${algorithm}"}},
+  {"op": "list_training_datasets", "args": {}, "expect": {"trainingDatasets#count": 0}}
+ ]
+}

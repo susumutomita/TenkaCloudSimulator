@@ -1,0 +1,570 @@
+{
+ "components": {
+  "schemas": {
+   "CreateDomainRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "CreateDomain",
+      "type": "string"
+     },
+     "DomainName": {
+      "maxLength": 28,
+      "minLength": 3,
+      "type": "string"
+     },
+     "Version": {
+      "const": "2013-01-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "DomainName"
+    ],
+    "title": "CreateDomain",
+    "type": "object"
+   },
+   "CreateDomainResponse": {
+    "properties": {
+     "CreateDomainResult": {
+      "$ref": "#/components/schemas/CreateDomainResponse",
+      "xml": {
+       "name": "CreateDomainResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateDomainResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateDomainResponse",
+     "namespace": "http://cloudsearch.amazonaws.com/doc/2013-01-01/"
+    }
+   },
+   "DeleteDomainRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteDomain",
+      "type": "string"
+     },
+     "DomainName": {
+      "maxLength": 28,
+      "minLength": 3,
+      "type": "string"
+     },
+     "Version": {
+      "const": "2013-01-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "DomainName"
+    ],
+    "title": "DeleteDomain",
+    "type": "object"
+   },
+   "DeleteDomainResponse": {
+    "properties": {
+     "DeleteDomainResult": {
+      "$ref": "#/components/schemas/DeleteDomainResponse",
+      "xml": {
+       "name": "DeleteDomainResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteDomainResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteDomainResponse",
+     "namespace": "http://cloudsearch.amazonaws.com/doc/2013-01-01/"
+    }
+   },
+   "DescribeDomainsRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^DomainNames\\.member\\.[1-9][0-9]*$": {
+      "maxLength": 28,
+      "minLength": 3,
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "DescribeDomains",
+      "type": "string"
+     },
+     "DomainNames": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2013-01-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeDomains",
+    "type": "object"
+   },
+   "DescribeDomainsResponse": {
+    "properties": {
+     "DescribeDomainsResult": {
+      "$ref": "#/components/schemas/DescribeDomainsResponse",
+      "xml": {
+       "name": "DescribeDomainsResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeDomainsResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeDomainsResponse",
+     "namespace": "http://cloudsearch.amazonaws.com/doc/2013-01-01/"
+    }
+   },
+   "DomainStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "ARN": {
+      "type": "string"
+     },
+     "Created": {
+      "type": "boolean"
+     },
+     "Deleted": {
+      "type": "boolean"
+     },
+     "DocService": {
+      "$ref": "#/components/schemas/ServiceEndpoint"
+     },
+     "DomainId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DomainName": {
+      "maxLength": 28,
+      "minLength": 3,
+      "type": "string"
+     },
+     "Limits": {
+      "$ref": "#/components/schemas/Limits"
+     },
+     "Processing": {
+      "type": "boolean"
+     },
+     "RequiresIndexDocuments": {
+      "type": "boolean"
+     },
+     "SearchInstanceCount": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "SearchInstanceType": {
+      "type": "string"
+     },
+     "SearchPartitionCount": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "SearchService": {
+      "$ref": "#/components/schemas/ServiceEndpoint"
+     }
+    },
+    "required": [
+     "DomainId",
+     "DomainName",
+     "RequiresIndexDocuments"
+    ],
+    "type": "object"
+   },
+   "ErrorResponse": {
+    "properties": {
+     "Error": {
+      "properties": {
+       "Code": {
+        "type": "string"
+       },
+       "Message": {
+        "type": "string"
+       },
+       "Type": {
+        "enum": [
+         "Sender",
+         "Receiver"
+        ],
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "RequestId": {
+      "type": "string"
+     }
+    },
+    "type": "object",
+    "xml": {
+     "name": "ErrorResponse",
+     "namespace": "http://cloudsearch.amazonaws.com/doc/2013-01-01/"
+    }
+   },
+   "Limits": {
+    "additionalProperties": false,
+    "properties": {
+     "MaximumPartitionCount": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "MaximumReplicationCount": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "MaximumReplicationCount",
+     "MaximumPartitionCount"
+    ],
+    "type": "object"
+   },
+   "ResponseMetadata": {
+    "properties": {
+     "RequestId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServiceEndpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "Endpoint": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon CloudSearch API (2013-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Search domains are stored records: no search instance, index, document or search exists, no DocService or SearchService endpoint is ever returned, and the instance type, partition count and replication limits are never reported. Every other official operation returns UnknownOperationException with HTTP 501, including all index field, expression, suggester, analysis scheme, access policy, scaling, availability and endpoint option APIs, IndexDocuments, BuildSuggesters and ListDomainNames. A domain is Created at once, never Processing and never RequiresIndexDocuments; DomainId is the account ID and the name joined by a slash as AWS reports it. DeleteDomain returns the domain with Deleted true and removes it, so DescribeDomains no longer lists it, whereas AWS keeps it listed for several minutes. CloudSearch has no tagging API, so no tags are stored. DescribeDomains with DomainNames fails for a name that does not exist, with InvalidParameterValue because the official operation models no not-found exception, instead of omitting it. DeleteDomain of an unknown name fails the same way. The limit of 100 domains per Region is local.",
+  "title": "Amazon CloudSearch (simulator catalog)",
+  "version": "2013-01-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/#Action=CreateDomain": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateDomainResponse holding the CreateDomainResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "cloudsearchCreateDomain",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon CloudSearch; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "cloudsearch",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "cloudsearch",
+       "enum": [
+        "cloudsearch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateDomain",
+        "DomainName": "example",
+        "Version": "2013-01-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateDomainRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateDomainResponse"
+        }
+       }
+      },
+      "description": "XML CreateDomainResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateDomain",
+    "tags": [
+     "Amazon CloudSearch"
+    ]
+   }
+  },
+  "/#Action=DeleteDomain": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteDomainResponse holding the DeleteDomainResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "cloudsearchDeleteDomain",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon CloudSearch; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "cloudsearch",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "cloudsearch",
+       "enum": [
+        "cloudsearch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteDomain",
+        "DomainName": "example",
+        "Version": "2013-01-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteDomainRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteDomainResponse"
+        }
+       }
+      },
+      "description": "XML DeleteDomainResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteDomain",
+    "tags": [
+     "Amazon CloudSearch"
+    ]
+   }
+  },
+  "/#Action=DescribeDomains": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeDomainsResponse holding the DescribeDomainsResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "cloudsearchDescribeDomains",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon CloudSearch; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "cloudsearch",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "cloudsearch",
+       "enum": [
+        "cloudsearch"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeDomains",
+        "Version": "2013-01-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeDomainsRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeDomainsResponse"
+        }
+       }
+      },
+      "description": "XML DescribeDomainsResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeDomains",
+    "tags": [
+     "Amazon CloudSearch"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon CloudSearch API (2013-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Search domains are stored records: no search instance, index, document or search exists, no DocService or SearchService endpoint is ever returned, and the instance type, partition count and replication limits are never reported. Every other official operation returns UnknownOperationException with HTTP 501, including all index field, expression, suggester, analysis scheme, access policy, scaling, availability and endpoint option APIs, IndexDocuments, BuildSuggesters and ListDomainNames. A domain is Created at once, never Processing and never RequiresIndexDocuments; DomainId is the account ID and the name joined by a slash as AWS reports it. DeleteDomain returns the domain with Deleted true and removes it, so DescribeDomains no longer lists it, whereas AWS keeps it listed for several minutes. CloudSearch has no tagging API, so no tags are stored. DescribeDomains with DomainNames fails for a name that does not exist, with InvalidParameterValue because the official operation models no not-found exception, instead of omitting it. DeleteDomain of an unknown name fails the same way. The limit of 100 domains per Region is local.",
+   "name": "Amazon CloudSearch"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/cloudsearch/2013-01-01/service-2.json",
+  "sha256": "eeaf305370d8035f137fa1d078bfdae8c5a98fe5e6722261901c6d80c72bd781",
+  "license": "Apache-2.0"
+ }
+}

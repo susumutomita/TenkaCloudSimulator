@@ -1,0 +1,1793 @@
+{
+ "components": {
+  "schemas": {
+   "DomainSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "type": "string"
+     },
+     "domainVersion": {
+      "enum": [
+       "V1",
+       "V2"
+      ],
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "managedAccountId": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "portalUrl": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "AVAILABLE",
+       "CREATION_FAILED",
+       "DELETING",
+       "DELETED",
+       "DELETION_FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "arn",
+     "createdAt",
+     "id",
+     "managedAccountId",
+     "name",
+     "status"
+    ],
+    "type": "object"
+   },
+   "EnvironmentConfigurationUserParameter": {
+    "additionalProperties": false,
+    "properties": {
+     "environmentConfigurationName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "environmentId": {
+      "type": "string"
+     },
+     "environmentParameters": {
+      "items": {
+       "$ref": "#/components/schemas/EnvironmentParameter"
+      },
+      "type": "array"
+     },
+     "environmentResolvedAccount": {
+      "$ref": "#/components/schemas/EnvironmentResolvedAccount"
+     }
+    },
+    "type": "object"
+   },
+   "EnvironmentDeploymentDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "environmentFailureReasons": {
+      "additionalProperties": {
+       "items": {
+        "$ref": "#/components/schemas/EnvironmentError"
+       },
+       "type": "array"
+      },
+      "type": "object"
+     },
+     "overallDeploymentStatus": {
+      "enum": [
+       "PENDING_DEPLOYMENT",
+       "IN_PROGRESS",
+       "SUCCESSFUL",
+       "FAILED_VALIDATION",
+       "FAILED_DEPLOYMENT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EnvironmentError": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "message"
+    ],
+    "type": "object"
+   },
+   "EnvironmentParameter": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EnvironmentResolvedAccount": {
+    "additionalProperties": false,
+    "properties": {
+     "awsAccountId": {
+      "type": "string"
+     },
+     "regionName": {
+      "type": "string"
+     },
+     "sourceAccountPoolId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "awsAccountId",
+     "regionName"
+    ],
+    "type": "object"
+   },
+   "ProjectDeletionError": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProjectSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "domainId": {
+      "type": "string"
+     },
+     "domainUnitId": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "failureReasons": {
+      "items": {
+       "$ref": "#/components/schemas/ProjectDeletionError"
+      },
+      "type": "array"
+     },
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "projectStatus": {
+      "enum": [
+       "ACTIVE",
+       "DELETING",
+       "DELETE_FAILED",
+       "UPDATING",
+       "UPDATE_FAILED",
+       "MOVING"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "createdBy",
+     "domainId",
+     "id",
+     "name"
+    ],
+    "type": "object"
+   },
+   "ResourceTag": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "source": {
+      "enum": [
+       "PROJECT",
+       "PROJECT_PROFILE"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "source",
+     "value"
+    ],
+    "type": "object"
+   },
+   "SingleSignOn": {
+    "additionalProperties": false,
+    "properties": {
+     "idcInstanceArn": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "IAM_IDC",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "userAssignment": {
+      "enum": [
+       "AUTOMATIC",
+       "MANUAL"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon DataZone API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Domains and projects are stored records: no data portal, catalog, environment, data source, asset, subscription, connection or run exists, no portalUrl or rootDomainUnitId is returned, and every other official operation returns UnknownOperationException with HTTP 501. A domain is AVAILABLE at once, DeleteDomain returns the domain with status DELETING and removes it, and a project is ACTIVE at once. Business glossaries and glossary terms are not implemented: a glossary names its owning project and a term its glossary, and the stored model cannot check either reference or keep it from dangling when the project is deleted. Domain units, project profiles, form types, asset types and environments are not implemented either. Domains use no IAM Identity Center: singleSignOn with type IAM_IDC is refused. The execution role, service role and KMS key are stored without being resolved and nothing is encrypted. A domain with projects cannot be deleted even when skipDeletionCheck is sent, which is otherwise accepted without effect, and a project is deleted whether or not skipDeletionCheck is sent. Projects accept only a name and a description. domainUnitId, projectProfileId, glossaryTerms, resourceTags, userParameters and environmentDeploymentDetails refer to units, profiles, terms or environments that do not exist and are refused; project names are unique within a domain, createdBy is always simulator, and the project ARN used for authorization (domain/\u003cdomain id\u003e/project/\u003cproject id\u003e) is a simulator form because projects have no ARN. ListProjects accepts only the name filter, and the limits of 10 domains per Region and 100 projects per domain are local. Tags apply to domains by ARN.",
+  "title": "Amazon DataZone (simulator catalog)",
+  "version": "2018-05-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "datazoneUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   },
+   "get": {
+    "operationId": "datazoneListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   },
+   "post": {
+    "operationId": "datazoneTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   }
+  },
+  "/v2/domains": {
+   "get": {
+    "operationId": "datazoneListDomains",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 25,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 8192,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "status",
+      "schema": {
+       "enum": [
+        "CREATING",
+        "AVAILABLE",
+        "CREATION_FAILED",
+        "DELETING",
+        "DELETED",
+        "DELETION_FAILED"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/DomainSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 8192,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListDomains",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   },
+   "post": {
+    "operationId": "datazoneCreateDomain",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "description": {
+          "type": "string"
+         },
+         "domainExecutionRole": {
+          "type": "string"
+         },
+         "domainVersion": {
+          "enum": [
+           "V1",
+           "V2"
+          ],
+          "type": "string"
+         },
+         "kmsKeyIdentifier": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         },
+         "serviceRole": {
+          "type": "string"
+         },
+         "singleSignOn": {
+          "$ref": "#/components/schemas/SingleSignOn"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "domainExecutionRole",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "description": {
+           "type": "string"
+          },
+          "domainExecutionRole": {
+           "type": "string"
+          },
+          "domainVersion": {
+           "enum": [
+            "V1",
+            "V2"
+           ],
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "kmsKeyIdentifier": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "portalUrl": {
+           "type": "string"
+          },
+          "rootDomainUnitId": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "serviceRole": {
+           "type": "string"
+          },
+          "singleSignOn": {
+           "$ref": "#/components/schemas/SingleSignOn"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "AVAILABLE",
+            "CREATION_FAILED",
+            "DELETING",
+            "DELETED",
+            "DELETION_FAILED"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateDomain",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   }
+  },
+  "/v2/domains/{domainIdentifier}/projects": {
+   "get": {
+    "operationId": "datazoneListProjects",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "domainIdentifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "groupIdentifier",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "name",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 8192,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "userIdentifier",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/ProjectSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 8192,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListProjects",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   },
+   "post": {
+    "operationId": "datazoneCreateProject",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "domainIdentifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "domainUnitId": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "glossaryTerms": {
+          "items": {
+           "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "type": "array"
+         },
+         "name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "projectProfileId": {
+          "type": "string"
+         },
+         "resourceTags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 25,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "userParameters": {
+          "items": {
+           "$ref": "#/components/schemas/EnvironmentConfigurationUserParameter"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "createdBy": {
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "domainId": {
+           "type": "string"
+          },
+          "domainUnitId": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "environmentDeploymentDetails": {
+           "$ref": "#/components/schemas/EnvironmentDeploymentDetails"
+          },
+          "failureReasons": {
+           "items": {
+            "$ref": "#/components/schemas/ProjectDeletionError"
+           },
+           "type": "array"
+          },
+          "glossaryTerms": {
+           "items": {
+            "type": "string"
+           },
+           "maxItems": 20,
+           "minItems": 1,
+           "type": "array"
+          },
+          "id": {
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "projectProfileId": {
+           "type": "string"
+          },
+          "projectStatus": {
+           "enum": [
+            "ACTIVE",
+            "DELETING",
+            "DELETE_FAILED",
+            "UPDATING",
+            "UPDATE_FAILED",
+            "MOVING"
+           ],
+           "type": "string"
+          },
+          "resourceTags": {
+           "items": {
+            "$ref": "#/components/schemas/ResourceTag"
+           },
+           "maxItems": 25,
+           "minItems": 0,
+           "type": "array"
+          },
+          "userParameters": {
+           "items": {
+            "$ref": "#/components/schemas/EnvironmentConfigurationUserParameter"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateProject",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   }
+  },
+  "/v2/domains/{domainIdentifier}/projects/{identifier}": {
+   "delete": {
+    "operationId": "datazoneDeleteProject",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "domainIdentifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "skipDeletionCheck",
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteProject",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   },
+   "get": {
+    "operationId": "datazoneGetProject",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "domainIdentifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "createdBy": {
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "domainId": {
+           "type": "string"
+          },
+          "domainUnitId": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "environmentDeploymentDetails": {
+           "$ref": "#/components/schemas/EnvironmentDeploymentDetails"
+          },
+          "failureReasons": {
+           "items": {
+            "$ref": "#/components/schemas/ProjectDeletionError"
+           },
+           "type": "array"
+          },
+          "glossaryTerms": {
+           "items": {
+            "type": "string"
+           },
+           "maxItems": 20,
+           "minItems": 1,
+           "type": "array"
+          },
+          "id": {
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "projectProfileId": {
+           "type": "string"
+          },
+          "projectStatus": {
+           "enum": [
+            "ACTIVE",
+            "DELETING",
+            "DELETE_FAILED",
+            "UPDATING",
+            "UPDATE_FAILED",
+            "MOVING"
+           ],
+           "type": "string"
+          },
+          "resourceTags": {
+           "items": {
+            "$ref": "#/components/schemas/ResourceTag"
+           },
+           "maxItems": 25,
+           "minItems": 0,
+           "type": "array"
+          },
+          "userParameters": {
+           "items": {
+            "$ref": "#/components/schemas/EnvironmentConfigurationUserParameter"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetProject",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   },
+   "patch": {
+    "operationId": "datazoneUpdateProject",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "domainIdentifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "domainUnitId": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "environmentDeploymentDetails": {
+          "$ref": "#/components/schemas/EnvironmentDeploymentDetails"
+         },
+         "glossaryTerms": {
+          "items": {
+           "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "type": "array"
+         },
+         "name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "projectProfileVersion": {
+          "type": "string"
+         },
+         "resourceTags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 25,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "userParameters": {
+          "items": {
+           "$ref": "#/components/schemas/EnvironmentConfigurationUserParameter"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "createdBy": {
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "domainId": {
+           "type": "string"
+          },
+          "domainUnitId": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "environmentDeploymentDetails": {
+           "$ref": "#/components/schemas/EnvironmentDeploymentDetails"
+          },
+          "failureReasons": {
+           "items": {
+            "$ref": "#/components/schemas/ProjectDeletionError"
+           },
+           "type": "array"
+          },
+          "glossaryTerms": {
+           "items": {
+            "type": "string"
+           },
+           "maxItems": 20,
+           "minItems": 1,
+           "type": "array"
+          },
+          "id": {
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "projectProfileId": {
+           "type": "string"
+          },
+          "projectStatus": {
+           "enum": [
+            "ACTIVE",
+            "DELETING",
+            "DELETE_FAILED",
+            "UPDATING",
+            "UPDATE_FAILED",
+            "MOVING"
+           ],
+           "type": "string"
+          },
+          "resourceTags": {
+           "items": {
+            "$ref": "#/components/schemas/ResourceTag"
+           },
+           "maxItems": 25,
+           "minItems": 0,
+           "type": "array"
+          },
+          "userParameters": {
+           "items": {
+            "$ref": "#/components/schemas/EnvironmentConfigurationUserParameter"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateProject",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   }
+  },
+  "/v2/domains/{identifier}": {
+   "delete": {
+    "operationId": "datazoneDeleteDomain",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clientToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "skipDeletionCheck",
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "status": {
+           "enum": [
+            "CREATING",
+            "AVAILABLE",
+            "CREATION_FAILED",
+            "DELETING",
+            "DELETED",
+            "DELETION_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteDomain",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   },
+   "get": {
+    "operationId": "datazoneGetDomain",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "type": "string"
+          },
+          "domainExecutionRole": {
+           "type": "string"
+          },
+          "domainVersion": {
+           "enum": [
+            "V1",
+            "V2"
+           ],
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "kmsKeyIdentifier": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "type": "string"
+          },
+          "portalUrl": {
+           "type": "string"
+          },
+          "rootDomainUnitId": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "serviceRole": {
+           "type": "string"
+          },
+          "singleSignOn": {
+           "$ref": "#/components/schemas/SingleSignOn"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "AVAILABLE",
+            "CREATION_FAILED",
+            "DELETING",
+            "DELETED",
+            "DELETION_FAILED"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetDomain",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   },
+   "put": {
+    "operationId": "datazoneUpdateDomain",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "datazone"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clientToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "type": "string"
+         },
+         "domainExecutionRole": {
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         },
+         "serviceRole": {
+          "type": "string"
+         },
+         "singleSignOn": {
+          "$ref": "#/components/schemas/SingleSignOn"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "description": {
+           "type": "string"
+          },
+          "domainExecutionRole": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "name": {
+           "type": "string"
+          },
+          "rootDomainUnitId": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "serviceRole": {
+           "type": "string"
+          },
+          "singleSignOn": {
+           "$ref": "#/components/schemas/SingleSignOn"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateDomain",
+    "tags": [
+     "Amazon DataZone"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon DataZone API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. Domains and projects are stored records: no data portal, catalog, environment, data source, asset, subscription, connection or run exists, no portalUrl or rootDomainUnitId is returned, and every other official operation returns UnknownOperationException with HTTP 501. A domain is AVAILABLE at once, DeleteDomain returns the domain with status DELETING and removes it, and a project is ACTIVE at once. Business glossaries and glossary terms are not implemented: a glossary names its owning project and a term its glossary, and the stored model cannot check either reference or keep it from dangling when the project is deleted. Domain units, project profiles, form types, asset types and environments are not implemented either. Domains use no IAM Identity Center: singleSignOn with type IAM_IDC is refused. The execution role, service role and KMS key are stored without being resolved and nothing is encrypted. A domain with projects cannot be deleted even when skipDeletionCheck is sent, which is otherwise accepted without effect, and a project is deleted whether or not skipDeletionCheck is sent. Projects accept only a name and a description. domainUnitId, projectProfileId, glossaryTerms, resourceTags, userParameters and environmentDeploymentDetails refer to units, profiles, terms or environments that do not exist and are refused; project names are unique within a domain, createdBy is always simulator, and the project ARN used for authorization (domain/\u003cdomain id\u003e/project/\u003cproject id\u003e) is a simulator form because projects have no ARN. ListProjects accepts only the name filter, and the limits of 10 domains per Region and 100 projects per domain are local. Tags apply to domains by ARN.",
+   "name": "Amazon DataZone"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/datazone/2018-05-10/service-2.json",
+  "sha256": "d672e934b89a3bd454b518253a1202e2e7f8a7398cf9b83d48e1edf62de35540",
+  "license": "Apache-2.0"
+ }
+}
