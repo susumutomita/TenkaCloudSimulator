@@ -1,0 +1,41 @@
+{
+ "client": "rds",
+ "denied": "AccessDenied",
+ "steps": [
+  {"op": "create_db_subnet_group", "args": {"DBSubnetGroupName": "Fixture-Subnets", "DBSubnetGroupDescription": "fixture", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b"], "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"subnets": "DBSubnetGroup.DBSubnetGroupArn"}, "expect": {"DBSubnetGroup.DBSubnetGroupName": "fixture-subnets", "DBSubnetGroup.Subnets#count": 2}},
+  {"op": "describe_db_subnet_groups", "args": {"DBSubnetGroupName": "fixture-subnets", "Filters": []}, "expect": {"DBSubnetGroups#count": 1, "DBSubnetGroups[0].DBSubnetGroupDescription": "fixture"}},
+  {"op": "modify_db_subnet_group", "args": {"DBSubnetGroupName": "fixture-subnets", "DBSubnetGroupDescription": "three", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b", "subnet-0123456789abcdef0"]}, "expect": {"DBSubnetGroup.Subnets#count": 3, "DBSubnetGroup.DBSubnetGroupDescription": "three"}},
+  {"op": "create_db_subnet_group", "args": {"DBSubnetGroupName": "one-zone", "DBSubnetGroupDescription": "x", "SubnetIds": ["subnet-0a1b2c3d"]}, "error": "DBSubnetGroupDoesNotCoverEnoughAZs", "status": 400},
+  {"op": "create_db_parameter_group", "args": {"DBParameterGroupName": "fixture-params", "DBParameterGroupFamily": "mysql8.0", "Description": "fixture"}, "save": {"params": "DBParameterGroup.DBParameterGroupArn"}, "expect": {"DBParameterGroup.DBParameterGroupArn": "arn:aws:rds:us-east-1:000000000000:pg:fixture-params"}},
+  {"op": "describe_db_parameter_groups", "args": {"DBParameterGroupName": "fixture-params"}, "expect": {"DBParameterGroups[0].DBParameterGroupFamily": "mysql8.0"}},
+  {"op": "describe_db_parameter_groups", "args": {"DBParameterGroupName": "missing"}, "error": "DBParameterGroupNotFound", "status": 404},
+  {"op": "create_db_cluster_parameter_group", "args": {"DBClusterParameterGroupName": "fixture-cluster", "DBParameterGroupFamily": "aurora-postgresql16", "Description": "fixture"}, "expect": {"DBClusterParameterGroup.DBClusterParameterGroupName": "fixture-cluster"}},
+  {"op": "describe_db_cluster_parameter_groups", "args": {}, "expect": {"DBClusterParameterGroups#count": 1}},
+  {"op": "create_option_group", "args": {"OptionGroupName": "fixture-options", "EngineName": "mysql", "MajorEngineVersion": "8.0", "OptionGroupDescription": "fixture"}, "expect": {"OptionGroup.Options#count": 0}},
+  {"op": "describe_option_groups", "args": {"EngineName": "mysql", "MajorEngineVersion": "8.0"}, "expect": {"OptionGroupsList#count": 1}},
+  {"op": "add_tags_to_resource", "args": {"ResourceName": "${params}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "remove_tags_from_resource", "args": {"ResourceName": "${subnets}", "TagKeys": ["team"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${params}", "Filters": []}, "expect": {"TagList": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${subnets}"}, "expect": {"TagList#count": 0}},
+  {"op": "create_db_instance", "args": {"DBInstanceIdentifier": "fixture", "DBInstanceClass": "db.t3.micro", "Engine": "mysql"}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "describe_db_subnet_groups", "args": {}, "expect": {"DBSubnetGroups#count": 0}},
+  {"op": "describe_db_parameter_groups", "args": {}, "expect": {"DBParameterGroups#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_db_subnet_groups", "args": {"DBSubnetGroupName": "fixture-subnets"}, "expect": {"DBSubnetGroups[0].Subnets#count": 3}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${params}"}, "expect": {"TagList": [{"Key": "stage", "Value": "dev"}]}}
+ ],
+ "cleanup": [
+  {"op": "delete_db_subnet_group", "args": {"DBSubnetGroupName": "fixture-subnets"}},
+  {"op": "delete_db_parameter_group", "args": {"DBParameterGroupName": "fixture-params"}},
+  {"op": "delete_db_cluster_parameter_group", "args": {"DBClusterParameterGroupName": "fixture-cluster"}},
+  {"op": "delete_option_group", "args": {"OptionGroupName": "fixture-options"}},
+  {"op": "delete_db_subnet_group", "args": {"DBSubnetGroupName": "fixture-subnets"}, "error": "DBSubnetGroupNotFoundFault", "status": 404},
+  {"op": "describe_db_subnet_groups", "args": {}, "expect": {"DBSubnetGroups#count": 0}},
+  {"op": "describe_db_parameter_groups", "args": {}, "expect": {"DBParameterGroups#count": 0}},
+  {"op": "describe_db_cluster_parameter_groups", "args": {}, "expect": {"DBClusterParameterGroups#count": 0}},
+  {"op": "describe_option_groups", "args": {}, "expect": {"OptionGroupsList#count": 0}}
+ ]
+}

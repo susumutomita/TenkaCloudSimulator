@@ -51,7 +51,7 @@ func TestBrokenSpecificationsFailComposition(t *testing.T) {
 	}
 	h := newHarness(t, ecr)
 	protocol := syntheticModel()
-	protocol.Metadata.Protocol = "query"
+	protocol.Metadata.Protocol = "rest-xml"
 	b, err := bindModel(syntheticSpec(), protocol)
 	if err != nil {
 		t.Fatal(err)

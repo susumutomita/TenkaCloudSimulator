@@ -966,7 +966,12 @@ func (q *request) list() (map[string]any, error) {
 		}
 	}
 	var failures []any
-	if names, ok := q.input[q.op.Names].([]any); ok {
+	names, ok := q.input[q.op.Names].([]any)
+	if name, single := q.input[q.op.Names].(string); single {
+		// A string Names member (RDS DBSubnetGroupName) names one resource.
+		names, ok = []any{name}, true
+	}
+	if ok {
 		selected := []row{}
 		for _, name := range names {
 			identifier, _ := name.(string)

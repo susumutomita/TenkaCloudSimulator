@@ -1,5 +1,7 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {useLocale} from './i18n.jsx';
+import {decodeQuery,queryBody} from './catalog-query.mjs';
+import {example,fromWire,parseComplex,parseTagLines,tagPairs,tagShape,tagValue,toWire} from './catalog-input.mjs';
 import Alert from '@cloudscape-design/components/alert';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
@@ -16,6 +18,7 @@ import Select from '@cloudscape-design/components/select';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import Tabs from '@cloudscape-design/components/tabs';
+import Textarea from '@cloudscape-design/components/textarea';
 import Toggle from '@cloudscape-design/components/toggle';
 
 // Generic console for the model-driven catalog. Every request uses the
@@ -23,7 +26,9 @@ import Toggle from '@cloudscape-design/components/toggle';
 // Inputs are keyed by official member names; the wire uses each member's
 // serialized locationName, exactly as SDKs send it.
 export function buildCatalogRequest(service,op,input,region){
- if(service.protocol==='json'){const body={};for(const member of op.members)if(member.name in input)body[member.locationName||member.name]=input[member.name];
+ // Query: a form POST to / named by the signing scope, as botocore sends it.
+ if(service.protocol==='query')return {path:'/',options:{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=utf-8','X-Simulator-Service':service.signingName,'X-Simulator-Region':region},body:queryBody(service,op,input)}};
+ if(service.protocol==='json'){const body={};for(const member of op.members)if(member.name in input)body[member.locationName||member.name]=member.shape?toWire(service.inputShapes,member.shape,input[member.name]):input[member.name];
   return {path:'/',options:{method:'POST',headers:{'Content-Type':'application/x-amz-json-'+service.jsonVersion,'X-Amz-Target':service.targetPrefix+'.'+op.name,'X-Simulator-Region':region},body:JSON.stringify(body)}}}
  let [path,queryText]=op.uri.split('?');const query=new URLSearchParams(queryText||'');const body={};
  const headers={'X-Simulator-Service':service.signingName,'X-Simulator-Region':region};
@@ -32,24 +37,58 @@ export function buildCatalogRequest(service,op,input,region){
   if(member.location==='uri')path=path.replace('{'+wire+'+}',String(value).split('/').map(encodeURIComponent).join('/')).replace('{'+wire+'}',encodeURIComponent(String(value)));
   else if(member.location==='querystring')(Array.isArray(value)?value:[value]).forEach(item=>query.append(wire,String(item)));
   else if(member.location==='header')headers[wire]=String(value);
-  else body[wire]=value;
+  else body[wire]=member.shape?toWire(service.inputShapes,member.shape,value):value;
  }
  const search=query.toString();const hasBody=Object.keys(body).length>0;
  if(hasBody)headers['Content-Type']='application/json';
  return {path:path+(search?'?'+search:''),options:{method:op.method,headers,...(hasBody?{body:JSON.stringify(body)}:{})}};
 }
 
-// Only simple official members are editable in the form; complex members
-// remain available to SDK clients and the API reference.
+// Form members: scalars, string lists, and complex members whose official
+// input shape the descriptor publishes (tags as key=value lines, other
+// structures, maps and lists of structures as validated JSON values).
+const SCALARS=['string','integer','long','float','double','boolean','timestamp','blob'];
 export function formMembers(op,skip){
- return (op?.members||[]).filter(m=>!skip.has(m.name)&&(['string','integer','long','boolean'].includes(m.type)||m.type==='list'&&m.element==='string'));
+ return (op?.members||[]).filter(m=>!skip.has(m.name)&&(SCALARS.includes(m.type)||m.type==='list'&&m.element==='string'||!!m.shape));
 }
 
-export function convertField(member,text){
+// control names how a member is edited.
+export function control(service,member){
+ if(member.shape)return tagShape(service?.inputShapes,member.shape)?'tags':'json';
+ if(member.type==='boolean')return 'toggle';
+ return member.enum?'enum':'text';
+}
+
+export function convertField(member,text,service){
+ if(member.shape){const form=tagShape(service?.inputShapes,member.shape);return form?tagValue(form,parseTagLines(text)):parseComplex(service?.inputShapes,member,text)}
  if(member.type==='boolean')return text===true;
- if(member.type==='integer'||member.type==='long'){const n=Number(text);if(!Number.isInteger(n))throw Error(member.name+' must be an integer.');return n}
+ if(member.type==='integer'||member.type==='long'){const n=Number(text);if(String(text).trim()===''||!Number.isInteger(n))throw Error(member.name+' must be an integer.');return n}
+ if(member.type==='float'||member.type==='double'){const n=Number(text);if(String(text).trim()===''||!Number.isFinite(n))throw Error(member.name+' must be a number.');return n}
  if(member.type==='list')return String(text).split(',').map(s=>s.trim()).filter(Boolean);
  return String(text);
+}
+
+// fieldText renders a current value as the text its control edits, so an
+// update form starts from the resource as the service last described it.
+export function fieldText(service,member,value){
+ if(value===undefined||value===null)return member.type==='boolean'?false:'';
+ const kind=control(service,member);
+ if(kind==='tags')return tagPairs(value).map(([k,v])=>k+'='+v).join('\n');
+ if(kind==='json')return JSON.stringify(fromWire(service.inputShapes,member.shape,value),null,2);
+ if(kind==='toggle')return value===true;
+ if(Array.isArray(value))return value.join(', ');
+ return typeof value==='object'?'':String(value);
+}
+
+// resourceARN is the described ARN, or the simulator's ARN template filled
+// for a resource whose shape carries none (Redshift parameter groups).
+export function resourceARN(service,resource,value,region){
+ if(!value)return '';
+ if(value[resource.arnWire])return value[resource.arnWire];
+ if(!resource.arnTemplate)return '';
+ const name=value[resource.nameWire],id=value[resource.idWire]??name;
+ if(!name&&!id)return '';
+ return resource.arnTemplate.replaceAll('{partition}','aws').replaceAll('{region}',service.global?'':region).replaceAll('{account}',service.account).replaceAll('{name}',name??id).replaceAll('{id}',id);
 }
 
 const isScalar=v=>v===null||['string','number','boolean'].includes(typeof v);
@@ -64,6 +103,9 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const [parents,setParents]=useState([]),[parent,setParent]=useState(''),[items,setItems]=useState([]),[next,setNext]=useState('');
  const [detail,setDetail]=useState(null),[tags,setTags]=useState(null),[mode,setMode]=useState('list'),[form,setForm]=useState({});
  const [loading,setLoading]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[confirm,setConfirm]=useState(null);
+ // The listed row a detail view shows, the open edit form (current values
+ // and the values it started from) and the new-tag fields.
+ const [selected,setSelected]=useState(null),[editing,setEditing]=useState(null),[tagForm,setTagForm]=useState({key:'',value:''});
  const revision=useRef(0),alive=useRef(true);
  const service=(services||[]).find(s=>s.model===model);
  const resource=service?.resources.find(r=>r.kind===kind)||service?.resources[0];
@@ -83,7 +125,9 @@ export default function CatalogView({region,request,catalog,onSaving}){
  async function call(op,input){
   const account=Object.fromEntries((op.members||[]).filter(m=>m.required&&(service.accountMembers||[]).includes(m.name)).map(m=>[m.name,service.account]));
   const {path,options}=buildCatalogRequest(service,op,{...account,...(op.fixed||{}),...input},region);
-  const response=await request(path,options);const text=await response.text();return text?JSON.parse(text):{};
+  const response=await request(path,options);const text=await response.text();
+  if(service.protocol==='query')return decodeQuery(service,op,text);
+  return text?JSON.parse(text):{};
  }
  // List rows carry the list's own serialized identity keys, which may differ
  // from the read shape's (nameWire/idWire/arnWire).
@@ -116,7 +160,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
  // A selection passes its parent explicitly: the state update is not yet
  // visible to this render's closure.
  async function load(token='',preferred=parent){
-  if(!service||!resource)return;const epoch=fresh();setLoading(true);setError('');setMode('list');setDetail(null);setTags(null);
+  if(!service||!resource)return;const epoch=fresh();setLoading(true);setError('');setMode('list');setDetail(null);setTags(null);setEditing(null);setSelected(null);
   try{
    let scope=preferred;if(parentResource){scope=await loadParents(epoch,preferred);if(!valid(epoch))return;if(!scope){setItems([]);setNext('');return}}
    const list=resource.operations.list;if(!list){setItems([]);return}
@@ -126,14 +170,23 @@ export default function CatalogView({region,request,catalog,onSaving}){
  }
  useEffect(()=>{load()},[model,kind,region]);
  async function inspect(item){
-  const read=resource.operations.read;const epoch=fresh();setError('');setMode('detail');setTags(null);
+  const read=resource.operations.read;const epoch=fresh();setError('');setMode('detail');setTags(null);setEditing(null);setSelected(item);
   // Without a read operation, a list that describes named resources gives
   // the details; otherwise the listed projection is the detail view.
   if(!read){
    const describe=resource.operations.describe,list=resource.operations.list;
-   if(!describe||!list?.valueItems){setDetail(item);setLoading(false);return}
+   // A describe operation whose names member is one string (RDS
+   // DescribeDBSubnetGroups DBSubnetGroupName) reads one resource by name.
+   if(describe&&(describe.members||[]).some(m=>m.name===describe.names&&m.type==='string')){
+    setLoading(true);setDetail(null);
+    try{const page=await call(describe,{...parentInput(describe),[describe.names]:identity(item)});if(!valid(epoch))return;
+     const value=(page[describe.items]||[])[0]||item;setDetail(value);await loadTags(epoch,value)}
+    catch(e){if(valid(epoch))setError(e.message)}finally{if(valid(epoch))setLoading(false)}
+    return;
+   }
+   if(!describe||!list?.valueItems){setDetail(item);setLoading(false);await loadTags(epoch,item);return}
    setLoading(true);setDetail(null);
-   try{const page=await call(describe,{...parentInput(describe),[describe.names]:[item[list.valueMember]]});if(valid(epoch))setDetail((page[describe.items]||[])[0]||item)}
+   try{const page=await call(describe,{...parentInput(describe),[describe.names]:[item[list.valueMember]]});if(!valid(epoch))return;const value=(page[describe.items]||[])[0]||item;setDetail(value);await loadTags(epoch,value)}
    catch(e){if(valid(epoch))setError(e.message)}finally{if(valid(epoch))setLoading(false)}
    return;
   }
@@ -141,16 +194,21 @@ export default function CatalogView({region,request,catalog,onSaving}){
   try{
    const out=await call(read,{...parentInput(read),[read.lookup]:lookupValue(item,read)});if(!valid(epoch))return;
    const value=read.wrapper?out[read.wrapper]:out;setDetail(value);
-   const arn=value?.[resource.arnWire];const listTags=service.tagging?.['list-tags'];
-   if(arn&&listTags){try{const tagged=await call(listTags,{[listTags.lookup]:arn});if(valid(epoch))setTags(tagged.Tags||tagged.tags||null)}catch{/* Tag permission is independent of read permission. */}}
+   await loadTags(epoch,value);
   }catch(e){if(valid(epoch))setError(e.message)}finally{if(valid(epoch))setLoading(false)}
+ }
+ async function loadTags(epoch,value){
+  const arn=resourceARN(service,resource,value,region);const listTags=service.tagging?.['list-tags'];
+  // Without a list-tags operation the description itself carries the tags.
+  if(!listTags&&resource.tagsWire){if(valid(epoch))setTags(value?.[resource.tagsWire]||[]);return}
+  if(arn&&listTags){try{const tagged=await call(listTags,{[listTags.lookup]:arn});if(valid(epoch))setTags((listTags.tagsKey&&tagged[listTags.tagsKey])||tagged.Tags||tagged.tags||null)}catch{/* Tag permission is independent of read permission. */}}
  }
  async function create(){
   const op=resource.operations.create;fresh();setBusy(true);onSaving(true);setError('');setNotice('');
   let created=false;
   try{
    const input={...parentInput(op)};
-   for(const member of formMembers(op,skipped(op))){const raw=form[member.name];if(raw===undefined||raw==='')continue;input[member.name]=convertField(member,raw)}
+   for(const member of formMembers(op,skipped(op))){const raw=form[member.name];if(raw===undefined||raw==='')continue;input[member.name]=convertField(member,raw,service)}
    await call(op,input);created=true;
   }catch(e){if(alive.current)setError(e.message)}finally{if(alive.current){setBusy(false);onSaving(false)}}
   // Reload only after an acknowledged write so a failure stays visible.
@@ -164,7 +222,69 @@ export default function CatalogView({region,request,catalog,onSaving}){
   if(removed&&alive.current){await load();if(alive.current)setNotice(t('Resource deleted.','リソースを削除しました。'))}
  }
  // Fixed and account members are filled by call(), so the form omits them.
- const skipped=op=>new Set([op?.parent,'tags','Tags','ClientToken','clientToken','ClientRequestToken','clientRequestToken',...Object.keys(op?.fixed||{}),...(service?.accountMembers||[])].filter(Boolean));
+ const skipped=op=>new Set([op?.parent,'ClientToken','clientToken','ClientRequestToken','clientRequestToken',...Object.keys(op?.fixed||{}),...(service?.accountMembers||[])].filter(Boolean));
+ // One native write per action; the detail is read again from the service
+ // only after the write is acknowledged, and a failure stays visible.
+ async function writeDetail(op,input,done){
+  fresh();setBusy(true);onSaving(true);setError('');setNotice('');
+  let written=false;
+  try{await call(op,input);written=true}
+  catch(e){if(alive.current)setError(e.message)}finally{if(alive.current){setBusy(false);onSaving(false)}}
+  if(written&&alive.current){const item=selected;await inspect(item);if(alive.current)setNotice(done)}
+  return written;
+ }
+ const updateOp=resource?.operations.update;
+ const updateFields=updateOp?formMembers(updateOp,new Set([...skipped(updateOp),updateOp.lookup,...(updateOp.lookupAlt||[])])).filter(m=>!updateOp.editable||updateOp.editable.includes(m.name)):[];
+ function startEdit(){
+  const values=Object.fromEntries(updateFields.map(m=>[m.name,fieldText(service,m,detail?.[m.locationName||m.name])]));
+  setNotice('');setEditing({values,initial:values});
+ }
+ async function saveUpdate(){
+  const op=updateOp,input={...parentInput(op),[op.lookup]:lookupValue(selected,op)};let changed=false;
+  try{
+   for(const member of updateFields){
+    const raw=editing.values[member.name],before=editing.initial[member.name];
+    if(raw===before&&!member.required)continue;
+    if(raw===''||raw===undefined){if(member.required)throw Error(member.name+' '+t('is required.','は必須です。'));throw Error(member.name+': '+t('clearing a value is not supported here; use an SDK.','ここでは値を空にできません。SDK を使ってください。'))}
+    input[member.name]=convertField(member,raw,service);changed=changed||raw!==before;
+   }
+   if(!changed)throw Error(t('Change at least one field.','少なくとも 1 つの項目を変更してください。'));
+  }catch(e){setError(e.message);return}
+  const ok=await writeDetail(op,input,t('Resource updated.','リソースを更新しました。'));
+  if(ok&&alive.current)setEditing(null);
+ }
+ // Tag operations take the resource's ARN, or the identity their lookup
+ // member's official pattern accepts.
+ const tagTarget=op=>{
+  const arn=resourceARN(service,resource,detail,region);const values=[arn,detail?.[resource.idWire],detail?.[resource.nameWire]].filter(Boolean);
+  const member=(op.members||[]).find(m=>m.name===op.lookup);
+  if(member?.pattern){try{const re=new RegExp('^(?:'+member.pattern+')$');const hit=values.find(v=>re.test(String(v)));if(hit!==undefined)return hit}catch{/* An RE2-only pattern keeps the ARN. */}}
+  return values[0]||'';
+ };
+ const tagOp=service?.tagging?.tag,untagOp=service?.tagging?.untag;
+ const tagsMember=tagOp?.members?.find(m=>m.shape&&tagShape(service.inputShapes,m.shape));
+ const keysMember=untagOp?.members?.find(m=>m.name!==untagOp.lookup&&m.type==='list'&&m.element==='string');
+ async function addTag(){
+  const key=tagForm.key.trim();
+  if(!key){setError(t('Enter a tag key.','タグキーを入力してください。'));return}
+  const ok=await writeDetail(tagOp,{[tagOp.lookup]:tagTarget(tagOp),[tagsMember.name]:tagValue(tagShape(service.inputShapes,tagsMember.shape),[[key,tagForm.value]])},t('Tag added.','タグを追加しました。'));
+  if(ok&&alive.current)setTagForm({key:'',value:''});
+ }
+ async function removeTag(key){
+  await writeDetail(untagOp,{[untagOp.lookup]:tagTarget(untagOp),[keysMember.name]:[key]},t('Tag removed.','タグを削除しました。'));
+ }
+ // One form control per member; values are kept as the text the control
+ // edits and converted (and validated) only when the form is submitted.
+ function field(member,values,update){
+  const set=value=>update(current=>({...current,[member.name]:value}));
+  const label=member.name+(member.required?'':' ('+t('optional','任意')+')');
+  const kind=control(service,member);
+  if(kind==='toggle')return <Toggle key={member.name} checked={values[member.name]===true} onChange={e=>set(e.detail.checked)}>{member.name}</Toggle>;
+  if(kind==='enum')return <FormField key={member.name} label={label}><Select selectedOption={values[member.name]?{value:values[member.name],label:values[member.name]}:null} placeholder={t('Choose','選択')} onChange={e=>set(e.detail.selectedOption.value)} options={member.enum.map(v=>({value:v,label:v}))}/></FormField>;
+  if(kind==='tags')return <FormField key={member.name} label={label} description={t('One key=value per line.','1 行に 1 つの key=value を入力します。')}><Textarea rows={3} value={values[member.name]??''} onChange={e=>set(e.detail.value)} placeholder="team=web"/></FormField>;
+  if(kind==='json')return <FormField key={member.name} label={label} description={t('JSON value with official member names, for example ','公式メンバー名による JSON 値。例: ')+JSON.stringify(example(service.inputShapes,member.shape))}><Textarea rows={4} value={values[member.name]??''} onChange={e=>set(e.detail.value)} spellcheck={false}/></FormField>;
+  return <FormField key={member.name} label={label} description={member.type==='list'?t('Comma-separated values','カンマ区切りの値'):undefined}><Input value={values[member.name]??''} onChange={e=>set(e.detail.value)} inputMode={['integer','long','float','double'].includes(member.type)?'numeric':undefined}/></FormField>;
+ }
  const createOp=resource?.operations.create;
  const fields=useMemo(()=>formMembers(createOp,skipped(createOp)),[createOp]);
  if(descriptorError)return <Alert type="error">{descriptorError}</Alert>;
@@ -182,19 +302,28 @@ export default function CatalogView({region,request,catalog,onSaving}){
    <Tabs activeTabId={resource.kind} onChange={e=>{if(!busy){setKind(e.detail.activeTabId);setParent('')}}} tabs={service.resources.map(r=>({id:r.kind,label:r.kind}))}/>
    {parentResource&&<FormField label={parentResource.kind}><Select selectedOption={parent?{value:parent,label:parent}:null} placeholder={t('Create a parent resource first','先に親リソースを作成してください')} disabled={busy||!parents.length}
      onChange={e=>{const chosen=e.detail.selectedOption.value;setParent(chosen);load('',chosen)}} options={parents.map(p=>{const pk=rowKeys(parentResource);const v=p[pk.id]||p[pk.name]||p[pk.arn];return {value:v,label:p[pk.name]||v}})}/></FormField>}
-   {mode==='detail'?<Container header={<Header variant="h2" actions={<Button onClick={()=>load()}>{t('Back to list','一覧に戻る')}</Button>}>{t('Details','詳細')}</Header>}>
-     {loading?<Box>{t('Loading','読み込み中')}</Box>:detail?<SpaceBetween size="m"><KeyValuePairs columns={2} items={Object.entries(detail).filter(([,v])=>isScalar(v)).map(([k,v])=>({label:k,value:display(v)}))}/>
-      {Object.entries(detail).filter(([,v])=>!isScalar(v)).map(([k,v])=><FormField key={k} label={k}><pre className="catalog-json">{JSON.stringify(v,null,2)}</pre></FormField>)}
-      {tags&&<FormField label={t('Tags','タグ')}><pre className="catalog-json">{JSON.stringify(tags,null,2)}</pre></FormField>}</SpaceBetween>:null}
+   {mode==='detail'?<Container header={<Header variant="h2" actions={<SpaceBetween direction="horizontal" size="xs">{updateOp&&updateFields.length>0&&detail&&!editing&&<Button disabled={busy||loading} onClick={startEdit}>{t('Edit','編集')}</Button>}<Button disabled={busy} onClick={()=>load()}>{t('Back to list','一覧に戻る')}</Button></SpaceBetween>}>{t('Details','詳細')}</Header>}>
+     {loading?<Box>{t('Loading','読み込み中')}</Box>:detail?<SpaceBetween size="m">
+      {editing&&<form onSubmit={e=>{e.preventDefault();saveUpdate()}}><Form header={<Header variant="h3" description={t('Changes are sent with ','変更は ')+updateOp.name+t('. Only changed fields and required fields are sent.',' で送信されます。変更した項目と必須項目だけを送信します。')}>{t('Edit','編集')} {identity(selected)}</Header>}
+        actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={()=>setEditing(null)}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy}>{t('Save changes','変更を保存')}</Button></SpaceBetween>}>
+       <SpaceBetween size="m">{updateFields.map(member=>field(member,editing.values,values=>setEditing(current=>current&&{...current,values:values(current.values)})))}</SpaceBetween></Form></form>}
+      <KeyValuePairs columns={2} items={Object.entries(detail).filter(([,v])=>isScalar(v)).map(([k,v])=>({label:<span className="catalog-key">{k}</span>,value:<span className="catalog-key">{display(v)}</span>}))}/>
+      {Object.entries(detail).filter(([k,v])=>!isScalar(v)&&k!==resource.tagsWire).map(([k,v])=><FormField key={k} label={k}><pre className="catalog-json">{JSON.stringify(v,null,2)}</pre></FormField>)}
+      {tags!==null&&<Table variant="embedded" items={tagPairs(tags).map(([key,value])=>({key,value}))} trackBy="key" empty={<Box textAlign="center">{t('No tags','タグはありません')}</Box>}
+        header={<Header variant="h3" counter={'('+tagPairs(tags).length+')'}>{t('Tags','タグ')}</Header>}
+        columnDefinitions={[{id:'key',header:t('Key','キー'),cell:tag=>tag.key},{id:'value',header:t('Value','値'),cell:tag=>tag.value||'-'},
+         ...(untagOp&&keysMember&&tagTarget(untagOp)?[{id:'remove',header:t('Actions','アクション'),cell:tag=><Button disabled={busy} ariaLabel={t('Remove tag','タグを削除')+' '+tag.key} onClick={()=>removeTag(tag.key)}>{t('Remove','削除')}</Button>}]:[])]}/>}
+      {tagOp&&tagsMember&&tagTarget(tagOp)&&<form onSubmit={e=>{e.preventDefault();addTag()}}><Form actions={<Button formAction="submit" disabled={busy} loading={busy}>{t('Add tag','タグを追加')}</Button>}><SpaceBetween direction="horizontal" size="s">
+       <FormField label={t('Tag key','タグキー')}><Input value={tagForm.key} onChange={e=>setTagForm(f=>({...f,key:e.detail.value}))}/></FormField>
+       <FormField label={t('Tag value','タグ値')+' ('+t('optional','任意')+')'}><Input value={tagForm.value} onChange={e=>setTagForm(f=>({...f,value:e.detail.value}))}/></FormField>
+      </SpaceBetween></Form></form>}</SpaceBetween>:null}
     </Container>:
     <Table loading={loading} loadingText={t('Loading resources','リソースを読み込み中')} items={items} columnDefinitions={[...columns,{id:'actions',header:t('Actions','アクション'),cell:item=>resource.operations.delete?<Button disabled={busy} ariaLabel={t('Delete','削除')+' '+identity(item)} onClick={()=>setConfirm(item)}>{t('Delete','削除')}</Button>:null}]}
      header={<Header counter={'('+items.length+')'} actions={<SpaceBetween direction="horizontal" size="xs"><Button iconName="refresh" ariaLabel={t('Refresh','更新')} disabled={busy} onClick={()=>load()}/>{next&&<Button disabled={busy} onClick={()=>load(next)}>{t('Next page','次のページ')}</Button>}</SpaceBetween>}>{resource.kind}</Header>}
      empty={<Box textAlign="center">{t('No resources','リソースはありません')}</Box>}/>}
    {createOp&&(!parentResource||parent)&&<Container header={<Header variant="h2">{t('Create','作成')} {resource.kind}</Header>}>
     <form onSubmit={e=>{e.preventDefault();create()}}><Form actions={<Button variant="primary" formAction="submit" loading={busy}>{t('Create','作成')}</Button>}><SpaceBetween size="m">
-     {fields.map(member=>member.type==='boolean'?<Toggle key={member.name} checked={form[member.name]===true} onChange={e=>setForm(f=>({...f,[member.name]:e.detail.checked}))}>{member.name}</Toggle>
-      :member.enum?<FormField key={member.name} label={member.name+(member.required?'':' ('+t('optional','任意')+')')}><Select selectedOption={form[member.name]?{value:form[member.name],label:form[member.name]}:null} placeholder={t('Choose','選択')} onChange={e=>setForm(f=>({...f,[member.name]:e.detail.selectedOption.value}))} options={member.enum.map(v=>({value:v,label:v}))}/></FormField>
-      :<FormField key={member.name} label={member.name+(member.required?'':' ('+t('optional','任意')+')')} description={member.type==='list'?t('Comma-separated values','カンマ区切りの値'):undefined}><Input value={form[member.name]??''} onChange={e=>setForm(f=>({...f,[member.name]:e.detail.value}))} inputMode={member.type==='integer'||member.type==='long'?'numeric':undefined}/></FormField>)}
+     {fields.map(member=>field(member,form,values=>setForm(values)))}
     </SpaceBetween></Form></form></Container>}
    <Modal visible={!!confirm} onDismiss={()=>setConfirm(null)} header={t('Delete resource','リソースを削除')} footer={<Box float="right"><SpaceBetween direction="horizontal" size="xs"><Button onClick={()=>setConfirm(null)}>{t('Cancel','キャンセル')}</Button><Button variant="primary" onClick={()=>remove(confirm)}>{t('Delete','削除')}</Button></SpaceBetween></Box>}>
     {t('Delete','削除')} <strong>{identity(confirm||{})}</strong>?

@@ -39,6 +39,8 @@ type Engine struct {
 	bindings  []*binding
 	byTarget  map[string]*binding
 	bySigning map[string][]*binding
+	// byQuery maps the signing name of each Query protocol service.
+	byQuery map[string]*binding
 }
 
 // New validates every reviewed specification against its embedded official
@@ -54,7 +56,7 @@ func New(db *sql.DB, cfg Config, services []*Service) (*Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	e := &Engine{cfg: cfg, store: s, byTarget: map[string]*binding{}, bySigning: map[string][]*binding{}}
+	e := &Engine{cfg: cfg, store: s, byTarget: map[string]*binding{}, bySigning: map[string][]*binding{}, byQuery: map[string]*binding{}}
 	seen := map[string]bool{}
 	for _, spec := range services {
 		if seen[spec.Model] {
@@ -79,7 +81,19 @@ func (e *Engine) add(b *binding) error {
 		e.byTarget[b.model.Metadata.TargetPrefix] = b
 	case "rest-json":
 		name := b.signingName()
+		if e.byQuery[name] != nil {
+			return fmt.Errorf("catalog service %s shares signing name %s with a Query service", b.spec.Model, name)
+		}
 		e.bySigning[name] = append(e.bySigning[name], b)
+	case "query":
+		name := b.signingName()
+		if e.byQuery[name] != nil || len(e.bySigning[name]) > 0 {
+			return fmt.Errorf("catalog service %s shares signing name %s with another service", b.spec.Model, name)
+		}
+		if err := queryCompatible(b.model); err != nil {
+			return fmt.Errorf("catalog service %s: %w", b.spec.Model, err)
+		}
+		e.byQuery[name] = b
 	default:
 		return fmt.Errorf("catalog service %s uses unsupported protocol %s", b.spec.Model, b.model.Metadata.Protocol)
 	}
@@ -185,7 +199,16 @@ func bindModel(spec *Service, model *Model) (*binding, error) {
 }
 
 // Owns reports whether the request addresses a catalog service: a JSON
-// protocol target prefix, or a REST signing scope owned by the catalog.
+// protocol target prefix, or a REST or Query signing scope owned by the
+// catalog. Query services are claimed only by their own signing scope (or,
+// for unsigned requests, X-Simulator-Service), so a form POST signed for, or
+// unsigned and hinted at, a native Query service such as IAM, STS, SNS, ELB
+// or CloudFormation is never claimed. Contradictory selectors are decided
+// by the signing scope: Owns claims an rds-signed request that also names
+// another service in X-Simulator-Service, or uses a method other than POST,
+// and RDS refuses it with an error. Handlers the gateway consults before
+// the catalog (for example SNS, STS and ELB by X-Simulator-Service) still
+// take such a request first. Either way no extra authority is granted.
 func (e *Engine) Owns(r *http.Request) bool {
 	if target := r.Header.Get("X-Amz-Target"); target != "" {
 		cut := strings.LastIndex(target, ".")
@@ -195,8 +218,9 @@ func (e *Engine) Owns(r *http.Request) bool {
 		_, owned := e.byTarget[target[:cut]]
 		return owned
 	}
-	_, owned := e.bySigning[restService(r)]
-	return owned
+	service := restService(r)
+	_, owned := e.bySigning[service]
+	return owned || e.byQuery[service] != nil
 }
 
 // restService names the REST service of a request: the SigV4 credential
@@ -228,6 +252,10 @@ func credentialService(r *http.Request) string {
 
 // ServeHTTP decodes, authorizes, executes and encodes one catalog request.
 func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if b := e.queryBinding(r); b != nil {
+		e.serveQuery(w, r, b)
+		return
+	}
 	b, op, labels, failure := e.resolve(r)
 	if failure != nil {
 		var model *Model
@@ -258,6 +286,13 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		e.fail(w, b, op, err)
 		return
 	}
+	e.run(w, r, b, op, region, raw)
+}
+
+// run validates a decoded raw input tree against the official input shape,
+// then authorizes, executes and encodes one operation in any protocol.
+func (e *Engine) run(w http.ResponseWriter, r *http.Request, b *binding, op *Op, region string, raw map[string]any) {
+	official := b.model.Operations[op.Name]
 	input := map[string]any{}
 	if official.Input != "" {
 		d := &decoder{model: b.model}
@@ -367,15 +402,21 @@ func (e *Engine) region(r *http.Request, b *binding) (string, error) {
 	return "", invalid("Unsupported simulator region.")
 }
 
-// fail maps a typed failure onto the operation's modeled exception.
+// fail maps a typed failure onto the operation's modeled exception. A nil
+// operation (a Query request whose Action is not yet known) uses the
+// protocol's common error for the failure family.
 func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
 	var f *fault
 	if !errors.As(err, &f) {
 		f = &fault{kind: "internal", message: "Simulator catalog state operation failed."}
 	}
-	code, status := b.errorCode(op.Name, f.kind)
-	if f.code != "" {
-		for _, name := range b.model.Operations[op.Name].Errors {
+	name := ""
+	if op != nil {
+		name = op.Name
+	}
+	code, status := b.errorCode(name, f.kind)
+	if official := b.model.Operations[name]; f.code != "" && official != nil {
+		for _, name := range official.Errors {
 			if name == f.code {
 				code, status = name, b.status(name, f.kind)
 			}
@@ -422,6 +463,17 @@ var familyDefaults = map[string][2]any{
 	"token":         {"ValidationException", 400},
 }
 
+// queryDefaults are the AWS common Query protocol errors used when the
+// operation models no exception for a failure family.
+var queryDefaults = map[string][2]any{
+	"validation": {"InvalidParameterValue", 400}, "unsupported": {"InvalidParameterValue", 400},
+	"token": {"InvalidParameterValue", 400}, "notfound": {"InvalidParameterValue", 400},
+	"conflict": {"InvalidParameterValue", 400}, "dependents": {"InvalidParameterValue", 400},
+	"limit": {"InvalidParameterValue", 400}, "tags": {"InvalidParameterValue", 400},
+	"mismatch": {"InvalidParameterValue", 400}, "denied": {"AccessDenied", 403},
+	"internal": {"InternalFailure", 500}, "serialization": {"MalformedQueryString", 400},
+}
+
 // unrelatedFragment reports modeled exceptions that only look like a family
 // member: errors about dependent keys, tag counts or request throttling.
 func unrelatedFragment(name, kind string) bool {
@@ -449,6 +501,9 @@ func (b *binding) errorCode(opName, kind string) (string, int) {
 				return name, b.status(name, "validation")
 			}
 		}
+	}
+	if b.model.Metadata.Protocol == "query" {
+		return queryDefaults[kind][0].(string), queryDefaults[kind][1].(int)
 	}
 	code := familyDefaults[kind][0].(string)
 	return code, b.status(code, kind)
