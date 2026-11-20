@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"bytes"
+	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -9,8 +10,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
+	"reflect"
+	"runtime"
 	"strings"
 	"testing"
+	"unicode/utf8"
 )
 
 // xnode is a generic parsed XML element.
@@ -362,6 +367,9 @@ func TestQueryRoutingNeverClaimsNativeQueryServices(t *testing.T) {
 	for _, headers := range []map[string]string{
 		{},
 		{"X-Amz-Target": "AmazonRDS.DescribeDBSubnetGroups"},
+		// A JSON target always selects the JSON path, even under the rds scope.
+		{"X-Amz-Target": "AmazonRDS.DescribeDBSubnetGroups", "Authorization": "AWS4-HMAC-SHA256 Credential=TCSIM/20261106/us-east-1/rds/aws4_request"},
+		{"X-Amz-Target": "AmazonRDS.DescribeDBSubnetGroups", "X-Simulator-Service": "rds"},
 		{"X-Simulator-Service": "rds", "Authorization": "AWS4-HMAC-SHA256 Credential=TCSIM/20261106/us-east-1/iam/aws4_request"},
 	} {
 		req := httptest.NewRequest("POST", "/", strings.NewReader(body))
@@ -626,6 +634,15 @@ func TestRDSChecksApplyDocumentedRules(t *testing.T) {
 		{"records too many", rdsDescribe("DBSubnetGroupName"), map[string]any{"MaxRecords": int64(101)}, "validation"},
 		{"records", rdsDescribe("DBSubnetGroupName"), map[string]any{"MaxRecords": int64(20)}, ""},
 		{"tag without key", rdsTags, map[string]any{"Tags": []any{map[string]any{"Value": "v"}}}, "validation"},
+		{"tag value prefix", rdsTags, map[string]any{"Tags": []any{map[string]any{"Key": "team", "Value": "rds:x"}}}, "validation"},
+		{"tag key 129", rdsTags, map[string]any{"Tags": []any{map[string]any{"Key": strings.Repeat("k", 129)}}}, "validation"},
+		{"tag key 128", rdsTags, map[string]any{"Tags": []any{map[string]any{"Key": strings.Repeat("ê", 128), "Value": strings.Repeat("v", 256)}}}, ""},
+		{"tag value 257", rdsTags, map[string]any{"Tags": []any{map[string]any{"Key": "k", "Value": strings.Repeat("v", 257)}}}, "validation"},
+		{"tag key set", rdsTags, map[string]any{"Tags": []any{map[string]any{"Key": "a*b"}}}, "validation"},
+		{"tag documented set", rdsTags, map[string]any{"Tags": []any{map[string]any{"Key": "Team 1_.:/=+-@", "Value": ""}}}, ""},
+		{"option group name and engine", rdsDescribeOptionGroups, map[string]any{"OptionGroupName": "og", "EngineName": "mysql"}, "validation"},
+		{"option group name and major", rdsDescribeOptionGroups, map[string]any{"OptionGroupName": "og", "MajorEngineVersion": "8.0"}, "validation"},
+		{"option group name", rdsDescribeOptionGroups, map[string]any{"OptionGroupName": "og"}, ""},
 		{"tag", rdsTags, map[string]any{"Tags": []any{map[string]any{"Key": "team"}}}, ""},
 		{"delete lowercases", rdsLower("DBSubnetGroupName"), map[string]any{"DBSubnetGroupName": "ABC"}, ""},
 	}
@@ -639,6 +656,12 @@ func TestRDSChecksApplyDocumentedRules(t *testing.T) {
 			t.Fatalf("%s = %v, want %s", c.name, err, c.code)
 		}
 	}
+	for _, check := range []func(map[string]any) error{rdsDescribe("DBSubnetGroupName"), rdsDescribeOptionGroups, rdsNoFilters} {
+		empty, given := map[string]any{"Filters": []any{}}, map[string]any{"Filters": []any{map[string]any{}}}
+		if check(empty) != nil || check(given) != nil || empty["Filters"] != nil || given["Filters"] == nil {
+			t.Fatalf("an empty Filters list must mean no filter and a given one stay: %v %v", empty, given)
+		}
+	}
 	input := map[string]any{"DBSubnetGroupName": "MixedCase", "SubnetIds": ids(2)}
 	if err := rdsCreateSubnetGroup(input); err != nil || input["DBSubnetGroupName"] != "mixedcase" || input["SubnetIds"] != nil || len(input["Subnets"].([]any)) != 2 {
 		t.Fatalf("normalized %v %v", input, err)
@@ -648,19 +671,27 @@ func TestRDSChecksApplyDocumentedRules(t *testing.T) {
 func TestQueryReferenceDescribesFormAndXMLWire(t *testing.T) {
 	h := newHarness(t, rds)
 	document := h.engine.OpenAPI()["rds"]
-	post := document["paths"].(map[string]any)["/"].(map[string]any)["post"].(map[string]any)
+	paths := document["paths"].(map[string]any)
+	if len(paths) != len(rds.Ops) {
+		t.Fatalf("one runnable entry per Action: %d paths", len(paths))
+	}
+	post := paths["/#Action=CreateDBSubnetGroup"].(map[string]any)["post"].(map[string]any)
 	content := post["requestBody"].(map[string]any)["content"].(map[string]any)
-	if _, ok := content["application/x-www-form-urlencoded"]; !ok || len(content) != 1 {
+	form, ok := content["application/x-www-form-urlencoded"].(map[string]any)
+	if !ok || len(content) != 1 || form["example"].(map[string]any)["Action"] != "CreateDBSubnetGroup" || form["example"].(map[string]any)["DBSubnetGroupName"] != "example" {
 		t.Fatalf("request media %v", content)
 	}
-	responses := post["responses"].(map[string]any)
-	if _, ok := responses["200"].(map[string]any)["content"].(map[string]any)["text/xml"]; !ok {
-		t.Fatalf("response media %v", responses["200"])
+	header := post["parameters"].([]any)[0].(map[string]any)
+	if header["name"] != "X-Simulator-Service" || header["required"] != true || header["schema"].(map[string]any)["default"] != "rds" {
+		t.Fatalf("an unsigned reference request must name the service: %v", header)
+	}
+	if _, ok := post["responses"].(map[string]any)["200"].(map[string]any)["content"].(map[string]any)["text/xml"]; !ok {
+		t.Fatalf("response media %v", post["responses"])
 	}
 	schemas := document["components"].(map[string]any)["schemas"].(map[string]any)
-	form := schemas["CreateDBSubnetGroupRequest"].(map[string]any)
-	if _, ok := form["patternProperties"].(map[string]any)[`^SubnetIds\.SubnetIdentifier\.[1-9][0-9]*$`]; !ok {
-		t.Fatalf("form patterns %v", form["patternProperties"])
+	request := schemas["CreateDBSubnetGroupRequest"].(map[string]any)
+	if _, ok := request["patternProperties"].(map[string]any)[`^SubnetIds\.SubnetIdentifier\.[1-9][0-9]*$`]; !ok {
+		t.Fatalf("form patterns %v", request["patternProperties"])
 	}
 	response := schemas["CreateDBSubnetGroupResponse"].(map[string]any)
 	if response["xml"].(map[string]any)["namespace"] != "http://rds.amazonaws.com/doc/2014-10-31/" || response["properties"].(map[string]any)["CreateDBSubnetGroupResult"] == nil {
@@ -669,22 +700,311 @@ func TestQueryReferenceDescribesFormAndXMLWire(t *testing.T) {
 	if _, ok := schemas["DeleteDBSubnetGroupResponse"].(map[string]any)["properties"].(map[string]any)["ResponseMetadata"]; !ok {
 		t.Fatal("delete response lacks ResponseMetadata")
 	}
-	// Maps and unwrapped outputs are described by the same rules.
+	// The synthetic model: maps, renamed and flattened lists, unwrapped output.
 	m := queryModel()
 	m.Shapes["EchoOutput"] = m.Shapes["EchoInput"]
 	b := &binding{spec: &Service{Model: "querysynthetic", Title: "Q", Ops: []Op{{Name: "Echo"}}}, model: m}
 	schemas = map[string]any{}
-	b.queryPath([]Op{{Name: "Echo"}}, schemas, "Q")
-	patterns := schemas["EchoRequest"].(map[string]any)["patternProperties"].(map[string]any)
+	b.queryPaths([]Op{{Name: "Echo"}}, schemas, "Q")
+	echo := schemas["EchoRequest"].(map[string]any)
+	patterns := echo["patternProperties"].(map[string]any)
 	for _, want := range []string{`^Dict\.entry\.[1-9][0-9]*\.Name$`, `^Dict\.entry\.[1-9][0-9]*\.Val$`, `^FlatDict\.[1-9][0-9]*\.value\.Key$`, `^Item\.[1-9][0-9]*$`, `^Grid\.member\.[1-9][0-9]*\.member\.[1-9][0-9]*$`} {
 		if _, ok := patterns[want]; !ok {
 			t.Fatalf("missing %s in %v", want, patterns)
 		}
 	}
-	if props := schemas["EchoRequest"].(map[string]any)["properties"].(map[string]any); props["In.X"] == nil || props["Alias"] == nil {
-		t.Fatalf("named fields %v", props)
+	props := echo["properties"].(map[string]any)
+	if props["In.X"] == nil || props["Alias"] == nil || props["Flat"] == nil || props["Item"] != nil {
+		t.Fatalf("named fields (an empty renamed flattened list is sent as Flat=): %v", props)
 	}
-	if schemas["EchoResponse"].(map[string]any)["properties"].(map[string]any)["EchoOutput"] == nil {
-		t.Fatal("unwrapped output not described")
+	// An output without a result wrapper puts its members directly in the
+	// response element, as the encoder writes them.
+	unwrapped := schemas["EchoResponse"].(map[string]any)
+	if all := unwrapped["allOf"].([]any); len(all) != 1 || all[0].(map[string]any)["$ref"] != "#/components/schemas/EchoOutput" || unwrapped["properties"].(map[string]any)["EchoOutput"] != nil {
+		t.Fatalf("unwrapped output %v", unwrapped)
+	}
+	output := schemas["EchoOutput"].(map[string]any)["properties"].(map[string]any)
+	for key, wrapped := range map[string]bool{"Item": false, "FlatBare": false, "Plain": true, "Pairs": true} {
+		list := output[key].(map[string]any)
+		if list["xml"].(map[string]any)["wrapped"] != wrapped {
+			t.Fatalf("%s wrapped = %v", key, list["xml"])
+		}
+		if !wrapped && list["items"].(map[string]any)["xml"].(map[string]any)["name"] != key {
+			t.Fatalf("%s flattened elements are named %v", key, list["items"])
+		}
+	}
+	// The written XML matches: flattened elements repeat under the key.
+	recorder := httptest.NewRecorder()
+	op := m.Operations["Echo"]
+	writeOutput(recorder, m, op, map[string]any{"Flat": []any{"a"}, "FlatBare": []any{"b"}, "Plain": []any{"c"}})
+	root := parseXML(t, recorder.Body.Bytes())
+	if root.get("Item").text != "a" || root.get("FlatBare").text != "b" || root.get("Plain", "member").text != "c" {
+		t.Fatalf("encoder %s", recorder.Body)
+	}
+}
+
+// The checked-in vectors are botocore's own QuerySerializer output; see
+// tools/awsmodels/query_vectors.py. Each body decodes back to its parameters.
+func TestQueryDecoderAcceptsBotocoreSerializerBytes(t *testing.T) {
+	data, err := os.ReadFile("testdata/query_serializer.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var vectors struct {
+		Botocore  string `json:"botocore"`
+		Synthetic struct {
+			Metadata Metadata          `json:"metadata"`
+			Shapes   map[string]*Shape `json:"shapes"`
+		} `json:"synthetic"`
+		Cases []struct {
+			Model, Name, Operation, Body string
+			Params                       map[string]any
+		} `json:"cases"`
+	}
+	if err := json.Unmarshal(data, &vectors); err != nil || vectors.Botocore != "1.41.6" || len(vectors.Cases) < 10 {
+		t.Fatalf("vectors %v %s", err, vectors.Botocore)
+	}
+	synthetic := &Model{Name: "querysynthetic", Metadata: vectors.Synthetic.Metadata, Shapes: vectors.Synthetic.Shapes,
+		Operations: map[string]*Operation{"Echo": {Name: "Echo", Input: "EchoInput"}}}
+	official, err := loadModel("rds")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range vectors.Cases {
+		m := synthetic
+		if c.Model == "rds" {
+			m = official
+		}
+		form, err := url.ParseQuery(c.Body)
+		if err != nil || form.Get("Action") != c.Operation || form.Get("Version") != m.Metadata.APIVersion {
+			t.Fatalf("%s: body %q", c.Name, c.Body)
+		}
+		delete(form, "Action")
+		delete(form, "Version")
+		op := m.Operations[c.Operation]
+		raw, err := queryInput(m, op, form)
+		if err != nil {
+			t.Fatalf("%s: botocore bytes refused: %v (%s)", c.Name, err, c.Body)
+		}
+		decoded, err := (&decoder{model: m}).decode(op.Input, raw, op.Input, 0)
+		if err != nil {
+			t.Fatalf("%s: %v", c.Name, err)
+		}
+		got, _ := json.Marshal(stored(decoded))
+		want, _ := json.Marshal(c.Params)
+		var gotTree, wantTree any
+		_ = json.Unmarshal(got, &gotTree)
+		_ = json.Unmarshal(want, &wantTree)
+		if !reflect.DeepEqual(gotTree, wantTree) {
+			t.Fatalf("%s:\n got %s\nwant %s", c.Name, got, want)
+		}
+	}
+}
+
+// One long parameter name or many parameters are refused before a form tree
+// is built, so a request cannot make the decoder allocate more than its size.
+func TestQueryFormBoundsAllocationBeforeBuildingTheTree(t *testing.T) {
+	h := newHarness(t, rds)
+	deep := strings.Repeat("a.", (maxRequestBytes-200)/2) + "a=1"
+	var many strings.Builder
+	// More distinct nodes than maxFormNodes, below url.ParseQuery's own
+	// parameter-count limit.
+	for i := 0; i <= maxFormNodes; i++ {
+		fmt.Fprintf(&many, "&P%d=1", i)
+	}
+	wide := strings.Repeat("a.", maxFormSegments-1) + "a"
+	for name, body := range map[string]string{"one deep name": deep, "many names": many.String()[1:], "segments at the bound": wide + "=1&" + wide + "b=1"} {
+		var before, after runtime.MemStats
+		runtime.GC()
+		runtime.ReadMemStats(&before)
+		r := h.form("Action=DescribeDBSubnetGroups&Version=2014-10-31&"+body, nil)
+		runtime.ReadMemStats(&after)
+		if allocated := after.TotalAlloc - before.TotalAlloc; allocated > 32<<20 {
+			t.Fatalf("%s allocated %d bytes", name, allocated)
+		}
+		expectQuery(t, r, 400, "InvalidParameterValue")
+		if len(r.raw) > 2048 {
+			t.Fatalf("%s echoed %d bytes", name, len(r.raw))
+		}
+	}
+	if _, err := queryInput(h.binding("rds").model, h.binding("rds").model.Operations["DescribeDBSubnetGroups"], url.Values{strings.Repeat("a.", maxFormSegments) + "a": {"1"}}); err == nil || !strings.Contains(err.Error(), "bounded nesting") {
+		t.Fatalf("segment bound %v", err)
+	}
+}
+
+// Text XML 1.0 cannot carry is refused on input, never altered on output.
+func TestQueryInputRefusesTextXMLCannotCarry(t *testing.T) {
+	h := newHarness(t, rds)
+	for _, text := range []string{"a\x00b", "a\x01b", "a\x0bb", "a\uFFFEb", "a\xffb"} {
+		form := url.Values{"Action": {"CreateDBParameterGroup"}, "Version": {"2014-10-31"}, "DBParameterGroupName": {"app"}, "DBParameterGroupFamily": {"mysql8.0"}, "Description": {text}}
+		expectQuery(t, h.form(form.Encode(), nil), 400, "InvalidParameterValue")
+		form = url.Values{"Action": {"DescribeDBSubnetGroups"}, "Version": {"2014-10-31"}, "X" + text: {"1"}}
+		if r := h.form(form.Encode(), nil); r.code() != "InvalidParameterValue" || !utf8.ValidString(r.raw) {
+			t.Fatalf("%q in a name: %s", text, r.raw)
+		}
+	}
+	for _, text := range []string{"tab\tnew\nline\r", "テナ☁", "\U0001F600"} {
+		r := h.query("CreateDBParameterGroup", "DBParameterGroupName", fmt.Sprintf("p%d", len(text)), "DBParameterGroupFamily", "mysql8.0", "Description", text)
+		if got := r.result(t, "CreateDBParameterGroup").get("DBParameterGroup", "Description").text; got != text {
+			t.Fatalf("description %q came back as %q", text, got)
+		}
+	}
+}
+
+// Error messages are XML-escaped, so client text cannot change the document.
+func TestQueryErrorMessagesAreEscaped(t *testing.T) {
+	h := newHarness(t, rds)
+	r := h.form("Action="+url.QueryEscape("</Message><Code>Forged</Code>&")+"&Version=2014-10-31", nil)
+	expectQuery(t, r, 400, "InvalidAction")
+	if got := r.root.get("Error", "Message").text; got != "Unknown operation </Message><Code>Forged</Code>&." || len(r.root.get("Error").all("Code")) != 1 {
+		t.Fatalf("message %q: %s", got, r.raw)
+	}
+}
+
+// A denied caller learns nothing from describe-by-name: an existing and a
+// missing name get the same refusal.
+func TestRDSDescribeByNameAuthorizesBeforeDisclosure(t *testing.T) {
+	h := newHarness(t, rds)
+	h.query("CreateDBSubnetGroup", "DBSubnetGroupName", "real", "DBSubnetGroupDescription", "d",
+		"SubnetIds.SubnetIdentifier.1", "subnet-0a1b2c3d", "SubnetIds.SubnetIdentifier.2", "subnet-4e5f6a7b").result(t, "CreateDBSubnetGroup")
+	h.query("CreateDBParameterGroup", "DBParameterGroupName", "real", "DBParameterGroupFamily", "f", "Description", "d").result(t, "CreateDBParameterGroup")
+	h.policy.deny["rds:DescribeDBSubnetGroups"] = true
+	h.policy.deny["rds:DescribeDBParameterGroups"] = true
+	for _, action := range []string{"DescribeDBSubnetGroups", "DescribeDBParameterGroups"} {
+		member := map[string]string{"DescribeDBSubnetGroups": "DBSubnetGroupName", "DescribeDBParameterGroups": "DBParameterGroupName"}[action]
+		existing, missing := h.query(action, member, "real"), h.query(action, member, "missing")
+		expectQuery(t, existing, 403, "AccessDenied")
+		expectQuery(t, missing, 403, "AccessDenied")
+		if existing.root.get("Error", "Message").text != missing.root.get("Error", "Message").text {
+			t.Fatalf("%s discloses existence: %s / %s", action, existing.raw, missing.raw)
+		}
+	}
+}
+
+// botocore sends an empty renamed flattened list under the member's own
+// name and nothing for an empty structure map value; those forms decode,
+// and the forms botocore never sends are refused.
+func TestQueryDecoderMatchesBotocoreEmptyForms(t *testing.T) {
+	m := queryModel()
+	op := m.Operations["Echo"]
+	raw, err := queryInput(m, op, url.Values{"Flat": {""}, "FlatDict.1.key": {"a"}, "FlatDict.2.key": {"b"}, "FlatDict.2.value.Value": {"v"}})
+	if err != nil || len(raw["Flat"].([]any)) != 0 || len(raw["FlatDict"].(map[string]any)["a"].(map[string]any)) != 0 {
+		t.Fatalf("empty forms %v %v", raw, err)
+	}
+	for name, bad := range map[string]url.Values{
+		"element name empty":   {"Item": {""}},
+		"element name value":   {"Item": {"x"}},
+		"own name with values": {"Flat": {"x"}},
+		"own name children":    {"Flat.1": {"x"}},
+		"both forms":           {"Flat": {""}, "Item.1": {"x"}},
+		"scalar value missing": {"Dict.entry.1.Name": {"a"}},
+	} {
+		if _, err := queryInput(m, op, bad); err == nil {
+			t.Fatalf("%s was accepted", name)
+		}
+	}
+}
+
+// Contradictory selectors grant nothing: the signing scope decides, and an
+// rds-signed request that names another service or method is refused by RDS.
+func TestQueryContradictorySelectorsAreDecidedByTheSigningScope(t *testing.T) {
+	h := newHarness(t, rds)
+	req := httptest.NewRequest("POST", "/", strings.NewReader("Action=ListRoles&Version=2010-05-08"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("X-Simulator-Service", "iam")
+	sign(req, "rds", "us-east-1")
+	if !h.engine.Owns(req) {
+		t.Fatal("the rds scope must decide")
+	}
+	expectQuery(t, h.send(req), 400, "InvalidAction")
+	for _, method := range []string{"GET", "PUT", "DELETE"} {
+		req := httptest.NewRequest(method, "/", strings.NewReader("Action=DescribeDBSubnetGroups&Version=2014-10-31"))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		sign(req, "rds", "us-east-1")
+		if !h.engine.Owns(req) {
+			t.Fatalf("rds-signed %s not owned", method)
+		}
+		expectQuery(t, h.send(req), 400, "MalformedQueryString")
+	}
+}
+
+// Descriptors tell first-party clients how to send Query forms and decode
+// the XML; JSON and REST descriptors carry none of these fields.
+func TestQueryDescriptorsDescribeFormKeysAndXMLShapes(t *testing.T) {
+	h := newHarness(t, rds, ecr, amplify)
+	for _, d := range h.engine.Describe() {
+		data, _ := json.Marshal(d)
+		if d.Model != "rds" {
+			for _, key := range []string{`"xmlShapes"`, `"resultWrapper"`, `"itemKey"`, `"tagsKey"`, `"emptyKey"`} {
+				if bytes.Contains(data, []byte(key)) {
+					t.Fatalf("%s descriptor gained %s", d.Model, key)
+				}
+			}
+			continue
+		}
+		if d.APIVersion != "2014-10-31" || d.SigningName != "rds" {
+			t.Fatalf("rds descriptor %s %s", d.APIVersion, d.SigningName)
+		}
+		subnets := d.Resources[0]
+		create := subnets.Ops["create"]
+		var ids MemberDescriptor
+		for _, m := range create.Members {
+			if m.Name == "SubnetIds" {
+				ids = m
+			}
+		}
+		if ids.Key != "SubnetIds" || ids.ItemKey != "SubnetIdentifier" || ids.Flattened || create.Output != "CreateDBSubnetGroupResult" || create.ResultWrapper != "CreateDBSubnetGroupResult" || create.Wrapper != "DBSubnetGroup" {
+			t.Fatalf("create descriptor %+v %+v", ids, create)
+		}
+		list := subnets.Ops["list"]
+		if list.Names != "DBSubnetGroupName" || list.Items != "DBSubnetGroups" || list.OutputToken != "Marker" {
+			t.Fatalf("list descriptor %+v", list)
+		}
+		if d.Tagging["list-tags"].TagsKey != "TagList" {
+			t.Fatalf("tagging %+v", d.Tagging)
+		}
+		shapes := d.XMLShapes
+		message, groups := shapes["DBSubnetGroupMessage"], shapes["DBSubnetGroups"]
+		if message.Type != "structure" || groups.Type != "list" || groups.Item.Element != "DBSubnetGroup" || shapes["SubnetList"].Item.Element != "Subnet" || shapes["Tag"].Type != "structure" {
+			t.Fatalf("xml shapes %+v %+v", message, groups)
+		}
+		for name, shape := range shapes {
+			for _, ref := range append([]XMLMember{}, shape.Members...) {
+				if _, ok := shapes[ref.Shape]; !ok {
+					t.Fatalf("%s.%s references undescribed %s", name, ref.Name, ref.Shape)
+				}
+			}
+		}
+	}
+	// Maps and flattened members are described as the encoder writes them.
+	m := queryModel()
+	m.Shapes["EchoOutput"] = m.Shapes["EchoInput"]
+	b := &binding{model: m}
+	shapes := map[string]XMLShape{}
+	b.xmlShapes("EchoOutput", shapes)
+	if dict := shapes["Dict"]; dict.Key.Element != "Name" || dict.Value.Element != "Val" {
+		t.Fatalf("map %+v", dict)
+	}
+	for _, member := range shapes["EchoOutput"].Members {
+		if member.Name == "Flat" && (member.Element != "Item" || !member.Flattened) || member.Name == "Alias" && member.Element != "Alias" || member.Name == "Inner" && member.Element != "In" {
+			t.Fatalf("member %+v", member)
+		}
+	}
+}
+
+// Reference examples fill every required top-level scalar so Send is runnable.
+func TestQueryReferenceExamplesFillRequiredScalars(t *testing.T) {
+	m := queryModel()
+	m.Shapes["Kind"] = &Shape{Type: "string", Enum: []string{"A", "B"}}
+	m.Shapes["EchoInput"].Members["Kind"] = Member{Shape: "Kind"}
+	m.Shapes["EchoInput"].Required = []string{"Name", "Kind", "Count", "On", "Pairs", "At"}
+	b := &binding{model: m}
+	got := b.formExample("Echo", m.Operations["Echo"])
+	want := map[string]any{"Action": "Echo", "Version": "2026-01-01", "Name": "example", "Kind": "A", "Count": "1", "On": "false"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("example %v", got)
+	}
+	if got := b.formExample("NoInput", &Operation{}); len(got) != 2 {
+		t.Fatalf("no-input example %v", got)
 	}
 }

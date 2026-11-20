@@ -1,5 +1,6 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {useLocale} from './i18n.jsx';
+import {decodeQuery,queryBody} from './catalog-query.mjs';
 import Alert from '@cloudscape-design/components/alert';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
@@ -23,6 +24,8 @@ import Toggle from '@cloudscape-design/components/toggle';
 // Inputs are keyed by official member names; the wire uses each member's
 // serialized locationName, exactly as SDKs send it.
 export function buildCatalogRequest(service,op,input,region){
+ // Query: a form POST to / named by the signing scope, as botocore sends it.
+ if(service.protocol==='query')return {path:'/',options:{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=utf-8','X-Simulator-Service':service.signingName,'X-Simulator-Region':region},body:queryBody(service,op,input)}};
  if(service.protocol==='json'){const body={};for(const member of op.members)if(member.name in input)body[member.locationName||member.name]=input[member.name];
   return {path:'/',options:{method:'POST',headers:{'Content-Type':'application/x-amz-json-'+service.jsonVersion,'X-Amz-Target':service.targetPrefix+'.'+op.name,'X-Simulator-Region':region},body:JSON.stringify(body)}}}
  let [path,queryText]=op.uri.split('?');const query=new URLSearchParams(queryText||'');const body={};
@@ -83,7 +86,9 @@ export default function CatalogView({region,request,catalog,onSaving}){
  async function call(op,input){
   const account=Object.fromEntries((op.members||[]).filter(m=>m.required&&(service.accountMembers||[]).includes(m.name)).map(m=>[m.name,service.account]));
   const {path,options}=buildCatalogRequest(service,op,{...account,...(op.fixed||{}),...input},region);
-  const response=await request(path,options);const text=await response.text();return text?JSON.parse(text):{};
+  const response=await request(path,options);const text=await response.text();
+  if(service.protocol==='query')return decodeQuery(service,op,text);
+  return text?JSON.parse(text):{};
  }
  // List rows carry the list's own serialized identity keys, which may differ
  // from the read shape's (nameWire/idWire/arnWire).
@@ -131,6 +136,15 @@ export default function CatalogView({region,request,catalog,onSaving}){
   // the details; otherwise the listed projection is the detail view.
   if(!read){
    const describe=resource.operations.describe,list=resource.operations.list;
+   // A describe operation whose names member is one string (RDS
+   // DescribeDBSubnetGroups DBSubnetGroupName) reads one resource by name.
+   if(describe&&(describe.members||[]).some(m=>m.name===describe.names&&m.type==='string')){
+    setLoading(true);setDetail(null);
+    try{const page=await call(describe,{...parentInput(describe),[describe.names]:identity(item)});if(!valid(epoch))return;
+     const value=(page[describe.items]||[])[0]||item;setDetail(value);await loadTags(epoch,value)}
+    catch(e){if(valid(epoch))setError(e.message)}finally{if(valid(epoch))setLoading(false)}
+    return;
+   }
    if(!describe||!list?.valueItems){setDetail(item);setLoading(false);return}
    setLoading(true);setDetail(null);
    try{const page=await call(describe,{...parentInput(describe),[describe.names]:[item[list.valueMember]]});if(valid(epoch))setDetail((page[describe.items]||[])[0]||item)}
@@ -141,9 +155,12 @@ export default function CatalogView({region,request,catalog,onSaving}){
   try{
    const out=await call(read,{...parentInput(read),[read.lookup]:lookupValue(item,read)});if(!valid(epoch))return;
    const value=read.wrapper?out[read.wrapper]:out;setDetail(value);
-   const arn=value?.[resource.arnWire];const listTags=service.tagging?.['list-tags'];
-   if(arn&&listTags){try{const tagged=await call(listTags,{[listTags.lookup]:arn});if(valid(epoch))setTags(tagged.Tags||tagged.tags||null)}catch{/* Tag permission is independent of read permission. */}}
+   await loadTags(epoch,value);
   }catch(e){if(valid(epoch))setError(e.message)}finally{if(valid(epoch))setLoading(false)}
+ }
+ async function loadTags(epoch,value){
+  const arn=value?.[resource.arnWire];const listTags=service.tagging?.['list-tags'];
+  if(arn&&listTags){try{const tagged=await call(listTags,{[listTags.lookup]:arn});if(valid(epoch))setTags((listTags.tagsKey&&tagged[listTags.tagsKey])||tagged.Tags||tagged.tags||null)}catch{/* Tag permission is independent of read permission. */}}
  }
  async function create(){
   const op=resource.operations.create;fresh();setBusy(true);onSaving(true);setError('');setNotice('');

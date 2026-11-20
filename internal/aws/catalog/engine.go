@@ -200,9 +200,15 @@ func bindModel(spec *Service, model *Model) (*binding, error) {
 
 // Owns reports whether the request addresses a catalog service: a JSON
 // protocol target prefix, or a REST or Query signing scope owned by the
-// catalog. Query services are claimed only by their own signing scope (or
-// X-Simulator-Service), so form POSTs of native Query services such as IAM,
-// STS, SNS, ELB and CloudFormation never reach the catalog.
+// catalog. Query services are claimed only by their own signing scope (or,
+// for unsigned requests, X-Simulator-Service), so a form POST signed for, or
+// unsigned and hinted at, a native Query service such as IAM, STS, SNS, ELB
+// or CloudFormation is never claimed. Contradictory selectors are decided
+// by the signing scope: Owns claims an rds-signed request that also names
+// another service in X-Simulator-Service, or uses a method other than POST,
+// and RDS refuses it with an error. Handlers the gateway consults before
+// the catalog (for example SNS, STS and ELB by X-Simulator-Service) still
+// take such a request first. Either way no extra authority is granted.
 func (e *Engine) Owns(r *http.Request) bool {
 	if target := r.Header.Get("X-Amz-Target"); target != "" {
 		cut := strings.LastIndex(target, ".")

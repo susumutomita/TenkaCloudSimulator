@@ -19,6 +19,36 @@ type MemberDescriptor struct {
 	// Pattern is the official string pattern, so clients send a value the
 	// member accepts (for example an ID rather than a display name).
 	Pattern string `json:"pattern,omitempty"`
+	// Query protocol only. Key is the form parameter name; a list sends
+	// its elements as Key.ItemKey.N, or Key.N when Flattened, and an empty
+	// list as EmptyKey= (botocore's own name for an empty renamed list).
+	Key       string `json:"key,omitempty"`
+	ItemKey   string `json:"itemKey,omitempty"`
+	EmptyKey  string `json:"emptyKey,omitempty"`
+	Flattened bool   `json:"flattened,omitempty"`
+}
+
+// XMLMember is one member of a Query response structure: Name is the key
+// of the decoded object (the same key JSON protocols use) and Element the
+// XML element that carries it.
+type XMLMember struct {
+	Name      string `json:"name"`
+	Element   string `json:"element"`
+	Shape     string `json:"shape"`
+	Flattened bool   `json:"flattened,omitempty"`
+}
+
+// XMLShape tells first-party clients how to decode a Query XML response
+// unambiguously: an empty list from a missing member, a one-element list
+// from a structure, and each scalar type.
+type XMLShape struct {
+	Type    string      `json:"type"`
+	Members []XMLMember `json:"members,omitempty"`
+	// Item is a list's element (Element is "" when only flattened); Key
+	// and Value are a map entry's elements.
+	Item  *XMLMember `json:"item,omitempty"`
+	Key   *XMLMember `json:"key,omitempty"`
+	Value *XMLMember `json:"value,omitempty"`
 }
 
 // OpDescriptor tells first-party clients how to send one official operation.
@@ -58,6 +88,12 @@ type OpDescriptor struct {
 	// Fixed holds input members, by official name, that every request of
 	// this operation sends with these values.
 	Fixed map[string]any `json:"fixed,omitempty"`
+	// Query protocol only: the output shape (a key of the service's
+	// XMLShapes), its result wrapper element and, for list-tags, the
+	// decoded key that holds the tags.
+	Output        string `json:"output,omitempty"`
+	ResultWrapper string `json:"resultWrapper,omitempty"`
+	TagsKey       string `json:"tagsKey,omitempty"`
 }
 
 // ResourceDescriptor describes one reviewed resource kind. The *Member
@@ -99,6 +135,9 @@ type Descriptor struct {
 	Tagging        map[string]OpDescriptor `json:"tagging,omitempty"`
 	Bounds         []string                `json:"bounds"`
 	Source         Source                  `json:"source"`
+	// Query protocol only: the request Version and every output shape the
+	// bound operations can return.
+	XMLShapes map[string]XMLShape `json:"xmlShapes,omitempty"`
 }
 
 // Describe lists every catalog service for capabilities and clients.
@@ -118,6 +157,14 @@ func (b *binding) describe() Descriptor {
 		Protocol: m.Metadata.Protocol, JSONVersion: m.Metadata.JSONVersion, TargetPrefix: m.Metadata.TargetPrefix,
 		SigningName: b.signingName(), IAMPrefix: b.spec.IAMPrefix, Global: b.spec.Global, Issues: b.spec.Issues, AccountMembers: b.spec.AccountMembers,
 		Official: len(m.Routes), Bounds: b.spec.Bounds, Source: m.Source}
+	if m.Metadata.Protocol == "query" {
+		d.XMLShapes = map[string]XMLShape{}
+		for _, op := range b.spec.Ops {
+			if output := m.Operations[op.Name].Output; output != "" {
+				b.xmlShapes(output, d.XMLShapes)
+			}
+		}
+	}
 	for _, op := range b.spec.Ops {
 		d.Operations = append(d.Operations, op.Name)
 	}
@@ -176,6 +223,18 @@ func (b *binding) describeOp(op *Op, res *Resource) OpDescriptor {
 			if shape.Type == "list" {
 				md.Element = b.model.shape(shape.Member.Shape).Type
 			}
+			if b.model.Metadata.Protocol == "query" {
+				md.Key = b.model.memberKey(name, member)
+				if shape.Type == "list" {
+					md.Flattened = b.model.flattened(&member)
+					if !md.Flattened {
+						md.ItemKey = b.model.serialName(shape.Member, "member")
+					}
+					if own := b.model.serialName(&member, name); own != md.Key {
+						md.EmptyKey = own
+					}
+				}
+			}
 			od.Members = append(od.Members, md)
 		}
 	}
@@ -200,6 +259,16 @@ func (b *binding) describeOp(op *Op, res *Resource) OpDescriptor {
 				if shape := b.model.shape(member.Shape); shape.Type == "list" && b.model.shape(shape.Member.Shape).Type == "string" {
 					od.ValueItems, od.ValueMember = member.wire(name), b.resourceWire(res, op.ListValue)
 					break
+				}
+			}
+		}
+	}
+	if b.model.Metadata.Protocol == "query" {
+		od.Output, od.ResultWrapper = official.Output, official.ResultWrapper
+		if output := b.model.Shapes[official.Output]; output != nil && op.Kind == ListTags {
+			for _, name := range output.sortedMembers() {
+				if b.model.isTagShape(output.Members[name].Shape) {
+					od.TagsKey = output.Members[name].wire(name)
 				}
 			}
 		}
@@ -287,4 +356,32 @@ func lookupKey(lookup string, res *Resource) string {
 		return "id"
 	}
 	return "name"
+}
+
+// xmlShapes registers a shape and every shape it reaches for Query decoding.
+func (b *binding) xmlShapes(name string, out map[string]XMLShape) {
+	if _, done := out[name]; done {
+		return
+	}
+	m := b.model
+	shape := m.shape(name)
+	x := XMLShape{Type: shape.Type}
+	out[name] = x
+	ref := func(r *Member, fallback string) *XMLMember {
+		b.xmlShapes(r.Shape, out)
+		return &XMLMember{Element: m.serialName(r, fallback), Shape: r.Shape}
+	}
+	switch shape.Type {
+	case "structure":
+		for _, member := range shape.sortedMembers() {
+			r := shape.Members[member]
+			b.xmlShapes(r.Shape, out)
+			x.Members = append(x.Members, XMLMember{Name: r.wire(member), Element: m.memberKey(member, r), Shape: r.Shape, Flattened: m.flattened(&r)})
+		}
+	case "list":
+		x.Item = ref(shape.Member, "member")
+	case "map":
+		x.Key, x.Value = ref(shape.Key, "key"), ref(shape.Value, "value")
+	}
+	out[name] = x
 }

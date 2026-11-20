@@ -1,0 +1,388 @@
+{
+ "botocore": "1.41.6",
+ "cases": [
+  {
+   "body": "Action=Echo&Version=2026-01-01&Name=n+%26+m&Count=7&Ratio=1.5&On=true&At=2026-11-20T01%3A02%3A03Z&Data=aGk%3D&Pairs.Pair.1.Key=k1&Pairs.Pair.1.Value=v1&Pairs.Pair.2.Key=k2&Plain.member.1=p&Item.1=a&Item.2=b&FlatBare.1=c&Grid.member.1.member.1=g&Grid.member.2=&Dict.entry.1.Name=dk&Dict.entry.1.Val=dv&FlatDict.1.key=fk&FlatDict.1.value.Key=pk&In.X=x&Alias=r&Node.Child.Name=leaf",
+   "model": "synthetic",
+   "name": "every trait",
+   "operation": "Echo",
+   "params": {
+    "At": "2026-11-20T01:02:03Z",
+    "Count": 7,
+    "Data": "aGk=",
+    "Dict": {
+     "dk": "dv"
+    },
+    "Flat": [
+     "a",
+     "b"
+    ],
+    "FlatBare": [
+     "c"
+    ],
+    "FlatDict": {
+     "fk": {
+      "Key": "pk"
+     }
+    },
+    "Grid": [
+     [
+      "g"
+     ],
+     []
+    ],
+    "Inner": {
+     "X": "x"
+    },
+    "Name": "n & m",
+    "Node": {
+     "Child": {
+      "Name": "leaf"
+     }
+    },
+    "On": true,
+    "Pairs": [
+     {
+      "Key": "k1",
+      "Value": "v1"
+     },
+     {
+      "Key": "k2"
+     }
+    ],
+    "Plain": [
+     "p"
+    ],
+    "Ratio": 1.5,
+    "Renamed": "r"
+   }
+  },
+  {
+   "body": "Action=Echo&Version=2026-01-01&Pairs=&Plain=&Flat=&FlatBare=&Grid=",
+   "model": "synthetic",
+   "name": "empty lists",
+   "operation": "Echo",
+   "params": {
+    "Flat": [],
+    "FlatBare": [],
+    "Grid": [],
+    "Pairs": [],
+    "Plain": []
+   }
+  },
+  {
+   "body": "Action=Echo&Version=2026-01-01&On=false&Count=0&Ratio=-0.25",
+   "model": "synthetic",
+   "name": "false and zero",
+   "operation": "Echo",
+   "params": {
+    "Count": 0,
+    "On": false,
+    "Ratio": -0.25
+   }
+  },
+  {
+   "body": "Action=Echo&Version=2026-01-01&FlatDict.1.key=a&FlatDict.2.key=b&FlatDict.2.value.Value=v",
+   "model": "synthetic",
+   "name": "map with empty structure value",
+   "operation": "Echo",
+   "params": {
+    "FlatDict": {
+     "a": {},
+     "b": {
+      "Value": "v"
+     }
+    }
+   }
+  },
+  {
+   "body": "Action=Echo&Version=2026-01-01&Name=%E3%83%86%E3%83%8A+%E2%98%81+%2B%25%26%3D",
+   "model": "synthetic",
+   "name": "unicode text",
+   "operation": "Echo",
+   "params": {
+    "Name": "テナ ☁ +%&="
+   }
+  },
+  {
+   "body": "Action=CreateDBSubnetGroup&Version=2014-10-31&DBSubnetGroupName=app&DBSubnetGroupDescription=app+subnets&SubnetIds.SubnetIdentifier.1=subnet-0a1b2c3d&SubnetIds.SubnetIdentifier.2=subnet-4e5f6a7b&Tags.Tag.1.Key=team&Tags.Tag.1.Value=a",
+   "model": "rds",
+   "name": "CreateDBSubnetGroup",
+   "operation": "CreateDBSubnetGroup",
+   "params": {
+    "DBSubnetGroupDescription": "app subnets",
+    "DBSubnetGroupName": "app",
+    "SubnetIds": [
+     "subnet-0a1b2c3d",
+     "subnet-4e5f6a7b"
+    ],
+    "Tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ]
+   }
+  },
+  {
+   "body": "Action=ModifyDBSubnetGroup&Version=2014-10-31&DBSubnetGroupName=app&SubnetIds.SubnetIdentifier.1=subnet-0a1b2c3d&SubnetIds.SubnetIdentifier.2=subnet-4e5f6a7b",
+   "model": "rds",
+   "name": "ModifyDBSubnetGroup",
+   "operation": "ModifyDBSubnetGroup",
+   "params": {
+    "DBSubnetGroupName": "app",
+    "SubnetIds": [
+     "subnet-0a1b2c3d",
+     "subnet-4e5f6a7b"
+    ]
+   }
+  },
+  {
+   "body": "Action=DescribeDBSubnetGroups&Version=2014-10-31&DBSubnetGroupName=app&Filters=&MaxRecords=20&Marker=m",
+   "model": "rds",
+   "name": "DescribeDBSubnetGroups",
+   "operation": "DescribeDBSubnetGroups",
+   "params": {
+    "DBSubnetGroupName": "app",
+    "Filters": [],
+    "Marker": "m",
+    "MaxRecords": 20
+   }
+  },
+  {
+   "body": "Action=DescribeOptionGroups&Version=2014-10-31&EngineName=mysql&MajorEngineVersion=8.0",
+   "model": "rds",
+   "name": "DescribeOptionGroups",
+   "operation": "DescribeOptionGroups",
+   "params": {
+    "EngineName": "mysql",
+    "MajorEngineVersion": "8.0"
+   }
+  },
+  {
+   "body": "Action=AddTagsToResource&Version=2014-10-31&ResourceName=arn%3Aaws%3Ards%3Aus-east-1%3A000000000000%3Asubgrp%3Aapp&Tags.Tag.1.Key=a&Tags.Tag.1.Value=b&Tags.Tag.2.Key=c&Tags.Tag.2.Value=",
+   "model": "rds",
+   "name": "AddTagsToResource",
+   "operation": "AddTagsToResource",
+   "params": {
+    "ResourceName": "arn:aws:rds:us-east-1:000000000000:subgrp:app",
+    "Tags": [
+     {
+      "Key": "a",
+      "Value": "b"
+     },
+     {
+      "Key": "c",
+      "Value": ""
+     }
+    ]
+   }
+  },
+  {
+   "body": "Action=RemoveTagsFromResource&Version=2014-10-31&ResourceName=arn%3Aaws%3Ards%3Aus-east-1%3A000000000000%3Asubgrp%3Aapp&TagKeys.member.1=a&TagKeys.member.2=c",
+   "model": "rds",
+   "name": "RemoveTagsFromResource",
+   "operation": "RemoveTagsFromResource",
+   "params": {
+    "ResourceName": "arn:aws:rds:us-east-1:000000000000:subgrp:app",
+    "TagKeys": [
+     "a",
+     "c"
+    ]
+   }
+  },
+  {
+   "body": "Action=ListTagsForResource&Version=2014-10-31&ResourceName=arn%3Aaws%3Ards%3Aus-east-1%3A000000000000%3Asubgrp%3Aapp&Filters=",
+   "model": "rds",
+   "name": "ListTagsForResource",
+   "operation": "ListTagsForResource",
+   "params": {
+    "Filters": [],
+    "ResourceName": "arn:aws:rds:us-east-1:000000000000:subgrp:app"
+   }
+  }
+ ],
+ "generator": "tools/awsmodels/query_vectors.py",
+ "synthetic": {
+  "metadata": {
+   "apiVersion": "2026-01-01",
+   "endpointPrefix": "querysynthetic",
+   "protocol": "query",
+   "serviceId": "QuerySynthetic",
+   "signatureVersion": "v4",
+   "xmlNamespace": "urn:query"
+  },
+  "operations": {
+   "Echo": {
+    "http": {
+     "method": "POST",
+     "requestUri": "/"
+    },
+    "input": {
+     "shape": "EchoInput"
+    },
+    "name": "Echo"
+   }
+  },
+  "shapes": {
+   "Data": {
+    "type": "blob"
+   },
+   "Dbl": {
+    "type": "double"
+   },
+   "Dict": {
+    "key": {
+     "locationName": "Name",
+     "shape": "Text"
+    },
+    "type": "map",
+    "value": {
+     "locationName": "Val",
+     "shape": "Text"
+    }
+   },
+   "EchoInput": {
+    "members": {
+     "At": {
+      "shape": "Time"
+     },
+     "Count": {
+      "shape": "Int"
+     },
+     "Data": {
+      "shape": "Data"
+     },
+     "Dict": {
+      "shape": "Dict"
+     },
+     "Flat": {
+      "flattened": true,
+      "shape": "Flat"
+     },
+     "FlatBare": {
+      "shape": "FlatBare"
+     },
+     "FlatDict": {
+      "shape": "FlatDict"
+     },
+     "Grid": {
+      "shape": "Grid"
+     },
+     "Inner": {
+      "shape": "Inner"
+     },
+     "Name": {
+      "shape": "Text"
+     },
+     "Node": {
+      "shape": "Node"
+     },
+     "On": {
+      "shape": "Flag"
+     },
+     "Pairs": {
+      "shape": "Pairs"
+     },
+     "Plain": {
+      "shape": "Plain"
+     },
+     "Ratio": {
+      "shape": "Dbl"
+     },
+     "Renamed": {
+      "locationName": "Alias",
+      "shape": "Text"
+     }
+    },
+    "type": "structure"
+   },
+   "Flag": {
+    "type": "boolean"
+   },
+   "Flat": {
+    "member": {
+     "locationName": "Item",
+     "shape": "Text"
+    },
+    "type": "list"
+   },
+   "FlatBare": {
+    "flattened": true,
+    "member": {
+     "shape": "Text"
+    },
+    "type": "list"
+   },
+   "FlatDict": {
+    "flattened": true,
+    "key": {
+     "shape": "Text"
+    },
+    "type": "map",
+    "value": {
+     "shape": "Pair"
+    }
+   },
+   "Grid": {
+    "member": {
+     "shape": "Plain"
+    },
+    "type": "list"
+   },
+   "Inner": {
+    "locationName": "In",
+    "members": {
+     "X": {
+      "shape": "Text"
+     }
+    },
+    "type": "structure"
+   },
+   "Int": {
+    "type": "integer"
+   },
+   "Node": {
+    "members": {
+     "Child": {
+      "shape": "Node"
+     },
+     "Name": {
+      "shape": "Text"
+     }
+    },
+    "type": "structure"
+   },
+   "Pair": {
+    "members": {
+     "Key": {
+      "shape": "Text"
+     },
+     "Value": {
+      "shape": "Text"
+     }
+    },
+    "type": "structure"
+   },
+   "Pairs": {
+    "member": {
+     "locationName": "Pair",
+     "shape": "Pair"
+    },
+    "type": "list"
+   },
+   "Plain": {
+    "member": {
+     "shape": "Text"
+    },
+    "type": "list"
+   },
+   "Text": {
+    "type": "string"
+   },
+   "Time": {
+    "type": "timestamp"
+   }
+  }
+ }
+}

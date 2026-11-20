@@ -37,3 +37,33 @@ func TestCatalogQueryRoutingLeavesNativeQueryServicesAlone(t *testing.T) {
 		}
 	}
 }
+
+// Contradictory selectors are pinned: the rds scope decides for handlers
+// consulted after the catalog (IAM), RDS refuses other methods, and
+// handlers consulted before the catalog (SNS by its hint) keep the request.
+// No combination grants authority beyond the selected service's own checks.
+func TestCatalogQueryContradictorySelectorsArePinned(t *testing.T) {
+	s := instance(t)
+	const namespace = `xmlns="http://rds.amazonaws.com/doc/2014-10-31/"`
+	headers := func(extra map[string]string) map[string]string {
+		out := map[string]string{"Content-Type": "application/x-www-form-urlencoded",
+			"Authorization": "AWS4-HMAC-SHA256 Credential=TCSIMROUTE/20261120/us-east-1/rds/aws4_request, SignedHeaders=host, Signature=0"}
+		for k, v := range extra {
+			out[k] = v
+		}
+		return out
+	}
+	body := string(status(t, s, "POST", "/", "Action=ListRoles&Version=2010-05-08", 400, headers(map[string]string{"X-Simulator-Service": "iam"})))
+	if !strings.Contains(body, namespace) || !strings.Contains(body, "<Code>InvalidAction</Code>") {
+		t.Fatalf("rds scope with an iam hint: %s", body)
+	}
+	for _, method := range []string{"GET", "PUT"} {
+		body := string(status(t, s, method, "/", "Action=DescribeDBSubnetGroups&Version=2014-10-31", 400, headers(nil)))
+		if !strings.Contains(body, namespace) || !strings.Contains(body, "<Code>MalformedQueryString</Code>") {
+			t.Fatalf("rds-signed %s: %s", method, body)
+		}
+	}
+	if _, data := call(t, s, "POST", "/", "Action=ListTopics&Version=2010-03-31", headers(map[string]string{"X-Simulator-Service": "sns"})); strings.Contains(string(data), namespace) {
+		t.Fatalf("an sns hint is served by SNS before the catalog: %s", data)
+	}
+}

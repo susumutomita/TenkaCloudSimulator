@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"unicode/utf8"
 )
 
 // Reviewed bounded specifications for database, file storage, backup,
@@ -828,13 +829,13 @@ var rds = &Service{
 		{Name: "DeleteOptionGroup", Kind: Delete, Resource: "optionGroup", Lookup: "OptionGroupName"},
 		{Name: "AddTagsToResource", Kind: Tag, Lookup: "ResourceName", Check: rdsTags},
 		{Name: "RemoveTagsFromResource", Kind: Untag, Lookup: "ResourceName"},
-		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceName"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceName", Check: rdsNoFilters},
 	},
 	Bounds: []string{
 		"DB subnet groups, DB parameter groups, DB cluster parameter groups and option groups are stored configuration served over the Query protocol: no DB instance, cluster, proxy, snapshot, event subscription, network or database engine exists, and CreateDBInstance, CreateDBCluster, CreateDBSnapshot and every other official operation return UnknownOperationException with HTTP 501.",
 		"Parameter and option values are not modeled: ModifyDBParameterGroup, ResetDBParameterGroup, DescribeDBParameters, the cluster equivalents, CopyDBParameterGroup, ModifyOptionGroup and DescribeOptionGroupOptions are not implemented. Default parameter, option and subnet groups are not pre-created, and parameter group families, major engine versions and subnet IDs are stored without checking that they exist.",
 		"A subnet group needs 2 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs and is not checked for Availability Zone coverage; it reports no VPC, Availability Zone, Outpost, status or network type. DB subnet group and DB (cluster) parameter group names are stored in lowercase as documented, \"default\" subnet groups are refused, and option groups accept only the documented EngineName values.",
-		"Describe operations refuse Filters, accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name. Tag keys must be present and must not start with aws: or rds:. Tag operations on an unknown ARN fail with DBInstanceNotFound, the first not-found fault the official tag operations model, and ListTagsForResource refuses Filters.",
+		"Describe operations and ListTagsForResource refuse a non-empty Filters list (an empty one means no filter), Describe operations accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name, and DescribeOptionGroups refuses OptionGroupName together with EngineName or MajorEngineVersion. Tag keys are 1 to 128 and values at most 256 characters of letters, digits, spaces and _.:/=+-@, and neither may start with aws: or rds:. Tag operations on an unknown ARN fail with DBInstanceNotFound, the first not-found fault the official tag operations model.",
 	},
 }
 
@@ -859,8 +860,19 @@ func rdsLower(member string) func(map[string]any) error {
 	}
 }
 
+// rdsNoFilters drops an empty Filters list, which botocore sends as
+// "Filters=" for Filters=[] and which selects nothing; a non-empty list is
+// refused later as an unsupported member.
+func rdsNoFilters(input map[string]any) error {
+	if filters, ok := input["Filters"].([]any); ok && len(filters) == 0 {
+		delete(input, "Filters")
+	}
+	return nil
+}
+
 func rdsDescribe(member string) func(map[string]any) error {
 	return func(input map[string]any) error {
+		_ = rdsNoFilters(input)
 		lowerMember(input, member)
 		return rdsMaxRecords(input)
 	}
@@ -874,6 +886,14 @@ func rdsMaxRecords(input map[string]any) error {
 }
 
 func rdsDescribeOptionGroups(input map[string]any) error {
+	_ = rdsNoFilters(input)
+	if _, named := input["OptionGroupName"]; named {
+		_, engine := input["EngineName"]
+		_, major := input["MajorEngineVersion"]
+		if engine || major {
+			return invalid("OptionGroupName cannot be used together with EngineName or MajorEngineVersion.")
+		}
+	}
 	if _, major := input["MajorEngineVersion"]; major {
 		if _, engine := input["EngineName"]; !engine {
 			return invalid("MajorEngineVersion can be used only together with EngineName.")
@@ -973,15 +993,26 @@ func rdsSubnets(input map[string]any) error {
 	return nil
 }
 
-// rdsTags refuses tags without a key and the reserved aws: and rds: prefixes.
+// rdsTags applies the documented tag rules: keys of 1 to 128 and values of
+// at most 256 characters from the documented set, neither prefixed with
+// aws: or rds:. The documented pattern also admits an empty value.
 func rdsTags(input map[string]any) error {
 	tags, _ := input["Tags"].([]any)
 	for _, tag := range tags {
-		key, ok := tag.(map[string]any)["Key"].(string)
-		lower := strings.ToLower(key)
-		if !ok || key == "" || strings.HasPrefix(lower, "aws:") || strings.HasPrefix(lower, "rds:") {
-			return invalid("Tag keys are required and must not start with aws: or rds:.")
+		pair := tag.(map[string]any)
+		key, ok := pair["Key"].(string)
+		value, _ := pair["Value"].(string)
+		if !ok || !rdsTagText(key, 1, 128) || !rdsTagText(value, 0, 256) {
+			return invalid("Tag keys are 1 to 128 and values at most 256 letters, digits, spaces or _.:/=+-@, and neither may start with aws: or rds:.")
 		}
 	}
 	return nil
+}
+
+var rdsTagPattern = regexp.MustCompile(`^[\p{L}\p{Z}\p{N}_.:/=+\-@]*$`)
+
+func rdsTagText(text string, least, most int) bool {
+	lower := strings.ToLower(text)
+	n := utf8.RuneCountInString(text)
+	return n >= least && n <= most && rdsTagPattern.MatchString(text) && !strings.HasPrefix(lower, "aws:") && !strings.HasPrefix(lower, "rds:")
 }

@@ -11,13 +11,15 @@ from pathlib import Path
 import re
 import shutil
 import tempfile
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from playwright.sync_api import sync_playwright, expect
 from reflow import assert_reflow
 from aws_catalog import Team, refused
 
 REPORTS = Path(os.environ.get('SIMULATOR_REPORTS', 'reports')).resolve()
+# Optional directory for the two review screenshots (RDS list, reference Send).
+SHOTS = os.environ.get('CATALOG_SHOTS')
 
 
 def run():
@@ -51,6 +53,9 @@ def run():
                     target = request.headers.get('x-amz-target', '')
                     if target:
                         operations.add(target.rsplit('.', 1)[1])
+                    elif request.headers.get('content-type', '').startswith('application/x-www-form-urlencoded') and request.post_data:
+                        # Query protocol: the Action field names the operation.
+                        operations.update(parse_qs(request.post_data).get('Action', []))
                     elif request.headers.get('x-simulator-service'):
                         operations.add(request.method + ' ' + urlsplit(request.url).path.split('/')[1])
 
@@ -246,6 +251,63 @@ def run():
                 page.get_by_role('dialog').get_by_role('button', name='Delete').click()
                 expect(page.get_by_text('dependent resources', exact=False)).to_be_visible()
                 assert len(hosting.list_apps()['apps']) == 1
+                # Query protocol: RDS sends botocore's form bodies and reads XML.
+                databases = team.client('rds')
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^Amazon Relational Database Service')).click()
+                expect(page.get_by_role('tab', name='dbSubnetGroup')).to_be_visible()
+                page.get_by_label('DBSubnetGroupName', exact=True).fill('Console-Subnets')
+                page.get_by_label('DBSubnetGroupDescription', exact=True).fill('console subnets')
+                page.get_by_label('SubnetIds', exact=True).fill('subnet-0a1b2c3d, subnet-4e5f6a7b')
+                page.get_by_role('button', name='Create', exact=True).click()
+                expect(page.get_by_text('Resource created.')).to_be_visible()
+                expect(page.get_by_role('link', name='console-subnets')).to_be_visible()
+                groups = databases.describe_db_subnet_groups()['DBSubnetGroups']
+                assert [(g['DBSubnetGroupName'], [s['SubnetIdentifier'] for s in g['Subnets']]) for g in groups] == [('console-subnets', ['subnet-0a1b2c3d', 'subnet-4e5f6a7b'])], groups
+                audit('rds-list')
+                if SHOTS:
+                    Path(SHOTS).mkdir(parents=True, exist_ok=True)
+                    page.screenshot(path=str(Path(SHOTS) / 'console-rds-list.png'), animations='disabled')
+                databases.add_tags_to_resource(ResourceName=groups[0]['DBSubnetGroupArn'], Tags=[{'Key': 'stage', 'Value': 'console-dev'}])
+                page.get_by_role('link', name='console-subnets').click()
+                expect(page.get_by_text(groups[0]['DBSubnetGroupArn'], exact=True).first).to_be_visible()
+                expect(page.get_by_text('subnet-4e5f6a7b', exact=False).first).to_be_visible()
+                expect(page.get_by_text('console-dev', exact=False).first).to_be_visible()
+                page.get_by_role('button', name='Back to list').click()
+                # Service faults keep their official code and message.
+                page.get_by_label('DBSubnetGroupName', exact=True).fill('console-subnets')
+                page.get_by_label('DBSubnetGroupDescription', exact=True).fill('again')
+                page.get_by_label('SubnetIds', exact=True).fill('subnet-0a1b2c3d, subnet-4e5f6a7b')
+                page.get_by_role('button', name='Create', exact=True).click()
+                expect(page.get_by_text('DBSubnetGroupAlreadyExists: ', exact=False)).to_be_visible()
+                page.get_by_role('button', name='Delete console-subnets').click()
+                page.get_by_role('dialog').get_by_role('button', name='Delete').click()
+                expect(page.get_by_text('Resource deleted.')).to_be_visible()
+                assert databases.describe_db_subnet_groups()['DBSubnetGroups'] == []
+                # Every other RDS kind: create, list, open with tags, delete.
+                for kind, values, name, arn_key, describe in [
+                        ('dbParameterGroup', {'DBParameterGroupName': 'Console-Params', 'DBParameterGroupFamily': 'mysql8.0', 'Description': 'console'}, 'console-params', 'DBParameterGroupArn',
+                         lambda: databases.describe_db_parameter_groups()['DBParameterGroups']),
+                        ('dbClusterParameterGroup', {'DBClusterParameterGroupName': 'console-cluster', 'DBParameterGroupFamily': 'aurora-postgresql16', 'Description': 'console'}, 'console-cluster', 'DBClusterParameterGroupArn',
+                         lambda: databases.describe_db_cluster_parameter_groups()['DBClusterParameterGroups']),
+                        ('optionGroup', {'OptionGroupName': 'console-options', 'EngineName': 'mysql', 'MajorEngineVersion': '8.0', 'OptionGroupDescription': 'console'}, 'console-options', 'OptionGroupArn',
+                         lambda: databases.describe_option_groups()['OptionGroupsList'])]:
+                    page.get_by_role('tab', name=kind, exact=True).click()
+                    for label, value in values.items():
+                        page.get_by_label(label, exact=True).fill(value)
+                    page.get_by_role('button', name='Create', exact=True).click()
+                    expect(page.get_by_role('link', name=name)).to_be_visible()
+                    created = describe()
+                    assert len(created) == 1 and created[0][arn_key].endswith(':' + name), created
+                    databases.add_tags_to_resource(ResourceName=created[0][arn_key], Tags=[{'Key': 'kind', 'Value': kind}])
+                    page.get_by_role('link', name=name).click()
+                    expect(page.get_by_text(created[0][arn_key], exact=True).first).to_be_visible()
+                    expect(page.get_by_text('"' + kind + '"', exact=False).first).to_be_visible()
+                    page.get_by_role('button', name='Back to list').click()
+                    page.get_by_role('button', name='Delete ' + name).click()
+                    page.get_by_role('dialog').get_by_role('button', name='Delete').click()
+                    expect(page.get_by_text('Resource deleted.')).to_be_visible()
+                    assert describe() == [], kind
                 # Japanese presentation keeps identifiers and native state.
                 page.get_by_role('combobox', name='Language', exact=True).select_option('ja')
                 expect(page.get_by_role('heading', level=1, name='AWS サービスカタログ')).to_be_visible()
@@ -260,6 +322,36 @@ def run():
                 document = docs.evaluate("fetch('/_simulator/docs/catalog/ecr.json').then(r=>r.json())")
                 targets = document['paths']['/']['post']['parameters'][0]['schema']['enum']
                 assert 'AmazonEC2ContainerRegistry_V20150921.CreateRepository' in targets
+                # The RDS reference: each Action is runnable, and Send performs
+                # the real form POST that SDK clients see the result of.
+                rds_doc = docs.evaluate("fetch('/_simulator/docs/catalog/rds.json').then(r=>r.json())")
+                assert '/#Action=DescribeDBSubnetGroups' in rds_doc['paths'], sorted(rds_doc['paths'])
+                docs.goto(team.endpoint + '/_simulator/docs/catalog.html?api=rds')
+                expect(docs.get_by_text('Amazon Relational Database Service (simulator catalog)').first).to_be_visible(timeout=20000)
+
+                def send(action):
+                    docs.get_by_text(action, exact=True).first.click()
+                    docs.get_by_role('button', name=f'Test Request (post /#Action={action})', exact=True).click()
+                    with docs.expect_response(lambda r: r.request.method == 'POST' and urlsplit(r.url).path == '/') as received:
+                        docs.get_by_role('button', name=re.compile('^Send post request to ')).click()
+                    response = received.value
+                    form = parse_qs(response.request.post_data)
+                    assert form['Action'] == [action] and form['Version'] == ['2014-10-31'], form
+                    assert response.request.headers.get('x-simulator-service') == 'rds'
+                    assert response.status == 200 and response.headers['content-type'] == 'text/xml', (response.status, response.text())
+                    assert f'<{action}Response xmlns="http://rds.amazonaws.com/doc/2014-10-31/">' in response.text()
+                    return response
+
+                send('CreateDBParameterGroup')
+                created = databases.describe_db_parameter_groups()['DBParameterGroups']
+                assert [g['DBParameterGroupName'] for g in created] == ['example'], created
+                expect(docs.get_by_text('CreateDBParameterGroupResponse', exact=False).first).to_be_visible()
+                if SHOTS:
+                    docs.screenshot(path=str(Path(SHOTS) / 'reference-rds-send.png'), animations='disabled')
+                docs.get_by_role('button', name='Close Client', exact=True).click()
+                assert '<DBParameterGroupName>example</DBParameterGroupName>' in send('DescribeDBParameterGroups').text()
+                docs.get_by_role('button', name='Close Client', exact=True).click()
+                databases.delete_db_parameter_group(DBParameterGroupName='example')
                 browser.close()
             refused('BadRequestException', lambda: hosting.delete_app(appId=app['appId']))
             hosting.delete_branch(appId=app['appId'], branchName='main')
@@ -269,6 +361,8 @@ def run():
             team.stop()
     assert not outside and not errors, (outside, errors)
     assert {'CreateRepository', 'DescribeRepositories', 'DeleteRepository'} <= operations, operations
+    assert {'CreateDBSubnetGroup', 'DescribeDBSubnetGroups', 'DeleteDBSubnetGroup', 'ListTagsForResource', 'CreateDBParameterGroup', 'DeleteDBParameterGroup',
+            'CreateDBClusterParameterGroup', 'DescribeDBClusterParameterGroups', 'DeleteDBClusterParameterGroup', 'CreateOptionGroup', 'DescribeOptionGroups', 'DeleteOptionGroup'} <= operations, operations
     print(json.dumps({'catalogConsole': True, 'operations': sorted(operations), 'externalRequests': 0, 'axeWidths': [1440, 390]}))
 
 

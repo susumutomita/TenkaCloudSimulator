@@ -43,7 +43,10 @@ Products assessed as not servable at all, with evidence, are listed in the
 - Query requests are form-encoded POSTs to `/` with `Action` and the model's
   `Version`, flattened as botocore serializes them (`Tags.Tag.1.Key`,
   `TagKeys.member.1`, `entry.N.key`, an empty value for an empty list). Every
-  parameter must belong to the official input shape. Responses are
+  parameter must belong to the official input shape. Parameter names may have
+  at most 50 dot-separated segments and a form at most 4,096 distinct name
+  segments, and names or values containing characters XML 1.0 cannot carry
+  are refused, so a stored value is never altered in a response. Responses are
   `<Action>Response` XML with the result wrapper and
   `ResponseMetadata/RequestId`; errors are `ErrorResponse/Error/Code` with the
   modeled fault's official code (for example `DBParameterGroupNotFound`) and
@@ -73,8 +76,24 @@ describes and deletes resources with each service's native requests, including
 child resources such as Amplify branches. Complex official members remain
 available through SDKs and the API reference.
 
+For Query services (RDS) the console sends the same form bodies as botocore
+(`Action`, `Version`, `SubnetIds.SubnetIdentifier.1`, an empty list as
+`Name=`) to `/` with `X-Simulator-Service`, and decodes the XML response with
+the output shapes the descriptors publish (`xmlShapes`, `output`,
+`resultWrapper`, and per-member `key`, `itemKey`, `emptyKey`, `flattened`).
+Errors show the service's `Code` and `Message`. Every RDS kind can be listed,
+created from its string, number, boolean and string-list members, opened
+(through its `Describe*` call by name, with `ListTagsForResource` tags) and
+deleted. The console does not edit tags, `Filters`, or other structure members
+such as `Tags` on create, and has no update form (for example
+`ModifyDBSubnetGroup`); use an SDK or the API reference for those.
+
 The [catalog API reference](/_simulator/docs/catalog.html) serves one OpenAPI
-document per service, generated from the same embedded official shapes.
+document per service, generated from the same embedded official shapes. A Query
+service lists each Action as its own runnable entry `/#Action=<Name>`: the
+fragment only names the entry, and **Send** performs the real form-encoded
+`POST /` with the required `X-Simulator-Service` header and shows the XML
+response.
 
 ## Verification
 
@@ -89,10 +108,17 @@ document per service, generated from the same embedded official shapes.
 - `test/e2e/aws_catalog_fixtures.py` runs a reviewed native lifecycle for every
   other service from `test/e2e/catalog_fixtures/`: each bound operation must
   succeed at least once, an unpermitted participant is refused before any
-  change, a second team stays empty, state survives restart and cleanup leaves
-  nothing behind.
+  change (with the fixture's `denied` code, `AccessDenied` for Query services
+  and `AccessDeniedException` by default), a second team stays empty, state
+  survives restart and cleanup leaves nothing behind.
 - `test/e2e/aws_catalog_console.py` drives the console and reference in Chromium
-  with axe at 1440 px and 390 px, checking shared native state.
+  with axe at 1440 px and 390 px, checking shared native state, including an
+  RDS lifecycle for every kind through the console and RDS reference **Send**
+  requests checked with boto3.
+- `internal/aws/catalog/testdata/query_serializer.json` holds request bodies
+  produced by botocore's own Query serializer
+  (`tools/awsmodels/query_vectors.py`); the Go decoder and the console request
+  builder are both checked against them.
 - `formal/CatalogResourceLifecycle.tla` checks bounded store invariants with 12
   mutation controls, and `formal/CatalogConsoleEpoch.tla` checks view epochs,
   single writes and failure visibility with 5. They do not prove the Go or

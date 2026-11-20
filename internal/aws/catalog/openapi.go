@@ -31,7 +31,7 @@ func (b *binding) openAPI() map[string]any {
 	description := "Bounded simulator subset of the official " + m.Metadata.FullName + " API (" + m.Metadata.APIVersion + "). " +
 		"Every other official operation returns HTTP 501 UnknownOperationException. " + strings.Join(b.spec.Bounds, " ")
 	if m.Metadata.Protocol == "query" {
-		paths["/"] = b.queryPath(ops, schemas, tag)
+		paths = b.queryPaths(ops, schemas, tag)
 	} else if m.Metadata.Protocol == "json" {
 		targets := []any{}
 		examples := map[string]any{}
@@ -155,11 +155,21 @@ func (b *binding) schema(name string, schemas map[string]any, depth int) map[str
 		// Properties use the serialized (locationName) keys clients send;
 		// Query responses use the XML element names.
 		for _, member := range shape.sortedMembers() {
-			key := shape.Members[member].wire(member)
-			if b.model.Metadata.Protocol == "query" {
-				key = b.model.memberKey(member, shape.Members[member])
+			ref := shape.Members[member]
+			key := ref.wire(member)
+			if b.model.Metadata.Protocol != "query" {
+				props[key] = b.schema(ref.Shape, schemas, depth+1)
+				continue
 			}
-			props[key] = b.schema(shape.Members[member].Shape, schemas, depth+1)
+			key = b.model.memberKey(member, ref)
+			property := b.schema(ref.Shape, schemas, depth+1)
+			// A flattened list (member- or shape-level) repeats its
+			// elements directly inside the structure under this key.
+			if b.model.shape(ref.Shape).Type == "list" && b.model.flattened(&ref) {
+				property["xml"] = map[string]any{"wrapped": false}
+				property["items"].(map[string]any)["xml"] = map[string]any{"name": key}
+			}
+			props[key] = property
 		}
 		entry := map[string]any{"type": "object", "properties": props, "additionalProperties": false}
 		if len(shape.Required) > 0 {
@@ -184,7 +194,7 @@ func (b *binding) schema(name string, schemas map[string]any, depth int) map[str
 			for k, v := range out["items"].(map[string]any) {
 				items[k] = v
 			}
-			out["items"], out["xml"] = items, map[string]any{"wrapped": !shape.Flattened}
+			out["items"], out["xml"] = items, map[string]any{"wrapped": true}
 		}
 		bounds(out, shape, "minItems", "maxItems")
 		return out
@@ -261,33 +271,14 @@ func (b *binding) outputContent(shapeName string, schemas map[string]any) map[st
 	return map[string]any{"application/json": map[string]any{"schema": map[string]any{"type": "object", "properties": props}}}
 }
 
-// queryPath describes the shared Query endpoint: one form-encoded POST / per
-// Action whose fields follow botocore's Query serializer, answered with an
-// XML <Action>Response document or an XML ErrorResponse.
-func (b *binding) queryPath(ops []Op, schemas map[string]any, tag string) map[string]any {
+// queryPaths describes the Query endpoint with one entry per Action so each
+// is individually runnable. Every Action is the same form-encoded POST /;
+// the path fragment "#Action=<Name>" only distinguishes them in the
+// document and is never sent. Fields follow botocore's Query serializer and
+// responses are XML <Action>Response documents or an XML ErrorResponse.
+func (b *binding) queryPaths(ops []Op, schemas map[string]any, tag string) map[string]map[string]any {
 	m := b.model
 	namespace := xmlNamespace(m)
-	forms, results, examples := []any{}, []any{}, map[string]any{}
-	for _, op := range ops {
-		official := m.Operations[op.Name]
-		schemas[op.Name+"Request"] = b.formSchema(op.Name, official)
-		forms = append(forms, map[string]any{"$ref": "#/components/schemas/" + op.Name + "Request"})
-		examples[op.Name] = map[string]any{"summary": "Action=" + op.Name, "value": map[string]any{"Action": op.Name, "Version": m.Metadata.APIVersion}}
-		properties := map[string]any{"ResponseMetadata": map[string]any{"$ref": "#/components/schemas/ResponseMetadata"}}
-		if official.Output != "" {
-			result := map[string]any{"$ref": "#/components/schemas/" + official.Output}
-			b.schema(official.Output, schemas, 0)
-			if official.ResultWrapper != "" {
-				result["xml"] = map[string]any{"name": official.ResultWrapper}
-				properties[official.ResultWrapper] = result
-			} else {
-				properties[official.Output] = result
-			}
-		}
-		schemas[op.Name+"Response"] = map[string]any{"type": "object", "title": op.Name + "Response", "properties": properties,
-			"xml": map[string]any{"name": op.Name + "Response", "namespace": namespace}}
-		results = append(results, map[string]any{"$ref": "#/components/schemas/" + op.Name + "Response"})
-	}
 	schemas["ResponseMetadata"] = map[string]any{"type": "object", "properties": map[string]any{"RequestId": map[string]any{"type": "string"}}}
 	schemas["ErrorResponse"] = map[string]any{"type": "object", "xml": map[string]any{"name": "ErrorResponse", "namespace": namespace}, "properties": map[string]any{
 		"Error": map[string]any{"type": "object", "properties": map[string]any{
@@ -296,20 +287,73 @@ func (b *binding) queryPath(ops []Op, schemas map[string]any, tag string) map[st
 	failure := func(description string) map[string]any {
 		return map[string]any{"description": description, "content": map[string]any{"text/xml": map[string]any{"schema": map[string]any{"$ref": "#/components/schemas/ErrorResponse"}}}}
 	}
-	return map[string]any{"post": map[string]any{
-		"operationId": b.spec.Model + "QueryOperation", "tags": []any{tag}, "summary": tag + " Query " + m.Metadata.APIVersion + " operations",
-		"description": "Choose one implemented Action. Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. " +
-			"Responses are XML <Action>Response documents holding the result wrapper and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
-		"parameters":  []any{map[string]any{"name": "X-Simulator-Service", "in": "header", "required": false, "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.", "schema": map[string]any{"type": "string", "enum": []any{b.signingName()}}}},
-		"requestBody": map[string]any{"required": true, "content": map[string]any{"application/x-www-form-urlencoded": map[string]any{"schema": map[string]any{"oneOf": forms}, "examples": examples}}},
-		"responses": map[string]any{
-			"200": map[string]any{"description": "XML <Action>Response with the projected official output shape.", "content": map[string]any{"text/xml": map[string]any{"schema": map[string]any{"oneOf": results}}}},
-			"400": failure("Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."),
-			"403": failure("AccessDenied from local identity policy evaluation."),
-			"404": failure("Modeled not-found fault."),
-			"501": failure("UnknownOperationException: official operation not implemented by the simulator."),
-		},
-	}}
+	service := b.signingName()
+	paths := map[string]map[string]any{}
+	for _, op := range ops {
+		official := m.Operations[op.Name]
+		schemas[op.Name+"Request"] = b.formSchema(op.Name, official)
+		properties := map[string]any{"ResponseMetadata": map[string]any{"$ref": "#/components/schemas/ResponseMetadata"}}
+		response := map[string]any{"type": "object", "title": op.Name + "Response", "properties": properties,
+			"xml": map[string]any{"name": op.Name + "Response", "namespace": namespace}}
+		if official.Output != "" {
+			b.schema(official.Output, schemas, 0)
+			if official.ResultWrapper != "" {
+				properties[official.ResultWrapper] = map[string]any{"$ref": "#/components/schemas/" + official.Output, "xml": map[string]any{"name": official.ResultWrapper}}
+			} else {
+				// Without a result wrapper the output members sit directly
+				// in <Action>Response, as writeQueryOutput writes them.
+				response["allOf"] = []any{map[string]any{"$ref": "#/components/schemas/" + official.Output}}
+			}
+		}
+		schemas[op.Name+"Response"] = response
+		holds := "ResponseMetadata/RequestId"
+		if official.ResultWrapper != "" {
+			holds = "the " + official.ResultWrapper + " element and " + holds
+		}
+		paths["/#Action="+op.Name] = map[string]any{"post": map[string]any{
+			"operationId": b.spec.Model + op.Name, "tags": []any{tag}, "summary": op.Name,
+			"description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. " +
+				"The response is an XML " + op.Name + "Response holding " + holds + "; errors are ErrorResponse/Error/Code with the official error code.",
+			"parameters": []any{map[string]any{"name": "X-Simulator-Service", "in": "header", "required": true,
+				"description": "Routes this unsigned first-party request to " + b.spec.Title + "; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+				"schema":      map[string]any{"type": "string", "enum": []any{service}, "default": service}, "example": service}},
+			"requestBody": map[string]any{"required": true, "content": map[string]any{"application/x-www-form-urlencoded": map[string]any{
+				"schema": map[string]any{"$ref": "#/components/schemas/" + op.Name + "Request"}, "example": b.formExample(op.Name, official)}}},
+			"responses": map[string]any{
+				"200": map[string]any{"description": "XML " + op.Name + "Response with the projected official output shape.", "content": map[string]any{"text/xml": map[string]any{"schema": map[string]any{"$ref": "#/components/schemas/" + op.Name + "Response"}}}},
+				"400": failure("Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."),
+				"403": failure("AccessDenied from local identity policy evaluation."),
+				"404": failure("Modeled not-found fault."),
+				"501": failure("UnknownOperationException: official operation not implemented by the simulator."),
+			},
+		}}
+	}
+	return paths
+}
+
+// formExample fills Action, Version and each required top-level scalar
+// with a placeholder; list and structure members are added by the reader.
+func (b *binding) formExample(action string, official *Operation) map[string]any {
+	example := map[string]any{"Action": action, "Version": b.model.Metadata.APIVersion}
+	if official.Input == "" {
+		return example
+	}
+	shape := b.model.shape(official.Input)
+	for _, name := range shape.Required {
+		member := shape.Members[name]
+		target := b.model.shape(member.Shape)
+		switch {
+		case len(target.Enum) > 0:
+			example[b.model.memberKey(name, member)] = target.Enum[0]
+		case target.Type == "string":
+			example[b.model.memberKey(name, member)] = "example"
+		case target.Type == "integer" || target.Type == "long":
+			example[b.model.memberKey(name, member)] = "1"
+		case target.Type == "boolean":
+			example[b.model.memberKey(name, member)] = "false"
+		}
+	}
+	return example
 }
 
 // formSchema describes one Action's form fields. Scalars at the top level
@@ -327,7 +371,7 @@ func (b *binding) formSchema(action string, official *Operation) map[string]any 
 		for _, name := range shape.sortedMembers() {
 			member := shape.Members[name]
 			key := b.model.memberKey(name, member)
-			b.formFields(member.Shape, b.model.flattened(&member), key, regexp.QuoteMeta(key), props, patterns, 0)
+			b.memberFields(name, member, "", "", props, patterns, 0)
 			if slices.Contains(shape.Required, name) {
 				if _, scalar := props[key]; scalar && b.model.shape(member.Shape).Type != "list" {
 					required = append(required, key)
@@ -345,6 +389,37 @@ func (b *binding) formSchema(action string, official *Operation) map[string]any 
 		out["description"] = "Required list or structure members: " + strings.Join(nested, ", ") + "."
 	}
 	return out
+}
+
+// memberFields registers one structure member's fields below a prefix
+// (empty at the top level). A renamed flattened list sends its elements
+// under the element name but an empty list under the member's own name.
+func (b *binding) memberFields(name string, member Member, literal, pattern string, props, patterns map[string]any, depth int) {
+	join := func(key string) (string, string) {
+		if pattern == "" {
+			return key, regexp.QuoteMeta(key)
+		}
+		next := ""
+		if literal != "" {
+			next = literal + "." + key
+		}
+		return next, pattern + `\.` + regexp.QuoteMeta(key)
+	}
+	key, own := b.model.memberKey(name, member), b.model.serialName(&member, name)
+	keyLiteral, keyPattern := join(key)
+	b.formFields(member.Shape, b.model.flattened(&member), keyLiteral, keyPattern, props, patterns, depth)
+	if own == key {
+		return
+	}
+	ownLiteral, ownPattern := join(own)
+	empty := map[string]any{"type": "string", "const": "", "description": "An empty list."}
+	if keyLiteral != "" {
+		delete(props, keyLiteral)
+		props[ownLiteral] = empty
+	} else {
+		delete(patterns, "^"+keyPattern+"$")
+		patterns["^"+ownPattern+"$"] = empty
+	}
 }
 
 // formFields registers the form fields of one shape at a dotted prefix.
@@ -365,13 +440,7 @@ func (b *binding) formFields(shapeName string, flat bool, literal, pattern strin
 	switch shape.Type {
 	case "structure":
 		for _, name := range shape.sortedMembers() {
-			member := shape.Members[name]
-			key := b.model.memberKey(name, member)
-			next := ""
-			if literal != "" {
-				next = literal + "." + key
-			}
-			b.formFields(member.Shape, b.model.flattened(&member), next, pattern+`\.`+regexp.QuoteMeta(key), props, patterns, depth+1)
+			b.memberFields(name, shape.Members[name], literal, pattern, props, patterns, depth+1)
 		}
 	case "list":
 		field(map[string]any{"type": "string", "const": "", "description": "An empty list."})

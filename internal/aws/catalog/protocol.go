@@ -9,10 +9,12 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 const maxRequestBytes = 256 << 10
@@ -481,29 +483,46 @@ func (e *Engine) serveQuery(w http.ResponseWriter, r *http.Request, b *binding) 
 	e.run(w, r, b, op, region, raw)
 }
 
-// formNode is one dotted segment of a form parameter name.
+// Bounds on a Query form, checked before any tree is built. Each list or
+// map level adds two segments, so a parameter name never needs more than
+// maxFormSegments to reach maxDepth. These are local limits, not AWS quotas.
+const (
+	maxFormSegments = 2*maxDepth + 2
+	maxFormNodes    = maxNodes
+	maxFormNameText = 256
+)
+
+// formNode is one dotted segment of a form parameter name. Nodes keep only
+// their own segment and parent; the dotted path is built for error text.
 type formNode struct {
-	path     string
+	parent   *formNode
+	segment  string
 	value    *string
 	used     bool
 	children map[string]*formNode
 }
 
-func (n *formNode) child(segment string) *formNode {
-	if n.children[segment] == nil {
-		path := segment
-		if n.path != "" {
-			path = n.path + "." + segment
-		}
-		n.children[segment] = &formNode{path: path, children: map[string]*formNode{}}
+func (n *formNode) path() string {
+	var parts []string
+	for node := n; node != nil && node.parent != nil; node = node.parent {
+		parts = append(parts, node.segment)
 	}
-	return n.children[segment]
+	slices.Reverse(parts)
+	return clip(strings.Join(parts, "."))
+}
+
+// clip bounds a client-supplied name echoed in an error message.
+func clip(text string) string {
+	if len(text) > maxFormNameText {
+		return text[:maxFormNameText] + "..."
+	}
+	return text
 }
 
 // unused returns the first parameter, in name order, that no member consumed.
 func (n *formNode) unused() string {
 	if n.value != nil && !n.used {
-		return n.path
+		return n.path()
 	}
 	segments := make([]string, 0, len(n.children))
 	for segment := range n.children {
@@ -518,6 +537,17 @@ func (n *formNode) unused() string {
 	return ""
 }
 
+// xmlCharacters reports whether XML 1.0 can carry text unchanged, so a
+// stored value is never silently altered when a response echoes it.
+func xmlCharacters(text string) bool {
+	for _, r := range text {
+		if !(r == 0x09 || r == 0x0A || r == 0x0D || r >= 0x20 && r <= 0xD7FF || r >= 0xE000 && r <= 0xFFFD || r >= 0x10000 && r <= 0x10FFFF) {
+			return false
+		}
+	}
+	return utf8.ValidString(text)
+}
+
 // queryInput assembles a raw input tree from form parameters the way
 // botocore's Query serializer flattens them: structure members joined with
 // ".", list elements as <member name>.N from 1 (or N directly when
@@ -530,16 +560,31 @@ func queryInput(model *Model, op *Operation, form url.Values) (map[string]any, e
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
+	nodes := 0
 	for _, key := range keys {
 		if len(form[key]) != 1 {
-			return nil, invalid("Parameter %s must appear once.", key)
+			return nil, invalid("Parameter %s must appear once.", clip(key))
+		}
+		if strings.Count(key, ".") >= maxFormSegments {
+			return nil, invalid("Parameter %s exceeds the simulator's bounded nesting.", clip(key))
+		}
+		if !xmlCharacters(key) || !xmlCharacters(form[key][0]) {
+			return nil, invalid("Parameter %s contains characters XML 1.0 cannot carry.", clip(strings.ToValidUTF8(key, "?")))
 		}
 		node := root
 		for _, segment := range strings.Split(key, ".") {
 			if segment == "" {
-				return nil, invalid("Malformed parameter name %q.", key)
+				return nil, invalid("Malformed parameter name %q.", clip(key))
 			}
-			node = node.child(segment)
+			child := node.children[segment]
+			if child == nil {
+				if nodes++; nodes > maxFormNodes {
+					return nil, invalid("The request has more parameters than the simulator's bounded size.")
+				}
+				child = &formNode{parent: node, segment: segment, children: map[string]*formNode{}}
+				node.children[segment] = child
+			}
+			node = child
 		}
 		node.value = &form[key][0]
 	}
@@ -595,13 +640,13 @@ func (m *Model) memberKey(name string, ref Member) string {
 // leading zeros and non-numeric segments.
 func indexed(n *formNode) ([]*formNode, error) {
 	if n.value != nil {
-		return nil, invalid("Parameter %s must not carry a value.", n.path)
+		return nil, invalid("Parameter %s must not carry a value.", n.path())
 	}
 	items := make([]*formNode, len(n.children))
 	for segment, child := range n.children {
 		i, err := strconv.Atoi(segment)
 		if err != nil || i < 1 || i > len(items) || strconv.Itoa(i) != segment {
-			return nil, invalid("Parameter %s must be numbered consecutively from 1.", child.path)
+			return nil, invalid("Parameter %s must be numbered consecutively from 1.", child.path())
 		}
 		items[i-1] = child
 	}
@@ -612,18 +657,34 @@ func indexed(n *formNode) ([]*formNode, error) {
 // returns nil when n carries nothing this shape consumes.
 func (d *formDecoder) value(shapeName string, n *formNode, flat bool, depth int) (any, error) {
 	if depth > maxDepth {
-		return nil, invalid("Request structure exceeds the simulator's bounded nesting at %s.", n.path)
+		return nil, invalid("Request structure exceeds the simulator's bounded nesting at %s.", n.path())
 	}
 	shape := d.model.shape(shapeName)
 	switch shape.Type {
 	case "structure":
 		if n.value != nil {
-			return nil, invalid("Parameter %s names a structure and must not carry a value.", n.path)
+			return nil, invalid("Parameter %s names a structure and must not carry a value.", n.path())
 		}
 		out := map[string]any{}
 		for _, name := range shape.sortedMembers() {
 			member := shape.Members[name]
-			child := n.children[d.model.memberKey(name, member)]
+			key := d.model.memberKey(name, member)
+			child := n.children[key]
+			if own := d.model.serialName(&member, name); own != key {
+				// botocore names a flattened list's elements after its
+				// element but sends an empty one under the member's own name.
+				if empty := n.children[own]; empty != nil {
+					if child != nil || empty.value == nil || *empty.value != "" || len(empty.children) > 0 {
+						return nil, invalid("Parameter %s must be an empty value for an empty list.", empty.path())
+					}
+					empty.used = true
+					out[member.wire(name)] = []any{}
+					continue
+				}
+				if child != nil && child.value != nil {
+					return nil, invalid("Parameter %s names list elements and must not carry a value.", child.path())
+				}
+			}
 			if child == nil {
 				continue
 			}
@@ -644,7 +705,7 @@ func (d *formDecoder) value(shapeName string, n *formNode, flat bool, depth int)
 		container := n
 		if !flat {
 			if n.value != nil {
-				return nil, invalid("Parameter %s names a list and must not carry a value.", n.path)
+				return nil, invalid("Parameter %s names a list and must not carry a value.", n.path())
 			}
 			if container = n.children[d.model.serialName(shape.Member, "member")]; container == nil {
 				return nil, nil
@@ -661,7 +722,7 @@ func (d *formDecoder) value(shapeName string, n *formNode, flat bool, depth int)
 				return nil, err
 			}
 			if value == nil {
-				return nil, invalid("Parameter %s does not name a list element.", item.path)
+				return nil, invalid("Parameter %s does not name a list element.", item.path())
 			}
 			out = append(out, value)
 		}
@@ -670,7 +731,7 @@ func (d *formDecoder) value(shapeName string, n *formNode, flat bool, depth int)
 		container := n
 		if !flat {
 			if n.value != nil {
-				return nil, invalid("Parameter %s names a map and must not carry a value.", n.path)
+				return nil, invalid("Parameter %s names a map and must not carry a value.", n.path())
 			}
 			if container = n.children["entry"]; container == nil {
 				return nil, nil
@@ -684,22 +745,28 @@ func (d *formDecoder) value(shapeName string, n *formNode, flat bool, depth int)
 		out := make(map[string]any, len(entries))
 		for _, entry := range entries {
 			if entry.value != nil {
-				return nil, invalid("Parameter %s names a map entry and must not carry a value.", entry.path)
+				return nil, invalid("Parameter %s names a map entry and must not carry a value.", entry.path())
 			}
 			keyNode, valueNode := entry.children[keyName], entry.children[valueName]
-			if keyNode == nil || keyNode.value == nil || len(keyNode.children) > 0 || valueNode == nil {
-				return nil, invalid("Map entry %s needs one %s and one %s.", entry.path, keyName, valueName)
+			// botocore sends nothing for an empty structure value.
+			emptyStructure := valueNode == nil && d.model.shape(shape.Value.Shape).Type == "structure"
+			if keyNode == nil || keyNode.value == nil || len(keyNode.children) > 0 || valueNode == nil && !emptyStructure {
+				return nil, invalid("Map entry %s needs one %s and one %s.", entry.path(), keyName, valueName)
 			}
 			keyNode.used = true
 			if _, duplicate := out[*keyNode.value]; duplicate {
-				return nil, invalid("Map entry %s repeats key %q.", entry.path, *keyNode.value)
+				return nil, invalid("Map entry %s repeats key %q.", entry.path(), clip(*keyNode.value))
+			}
+			if emptyStructure {
+				out[*keyNode.value] = map[string]any{}
+				continue
 			}
 			value, err := d.value(shape.Value.Shape, valueNode, d.model.flattened(shape.Value), depth+1)
 			if err != nil {
 				return nil, err
 			}
 			if value == nil {
-				return nil, invalid("Map entry %s has no value.", entry.path)
+				return nil, invalid("Map entry %s has no value.", entry.path())
 			}
 			out[*keyNode.value] = value
 		}
