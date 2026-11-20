@@ -1,0 +1,26 @@
+{
+ "client": "healthlake",
+ "steps": [
+  {"op": "create_fhir_datastore", "args": {"DatastoreName": "fixture-records", "DatastoreTypeVersion": "R4", "Tags": [{"Key": "team", "Value": "a"}], "SseConfiguration": {"KmsEncryptionConfig": {"CmkType": "CUSTOMER_MANAGED_KMS_KEY", "KmsKeyId": "alias/fixture"}}, "IdentityProviderConfiguration": {"AuthorizationStrategy": "SMART_ON_FHIR", "Metadata": "{\"grant_types_supported\":[\"authorization_code\"],\"code_challenge_methods_supported\":[\"S256\"]}", "IdpLambdaArn": "arn:aws:lambda:us-east-1:000000000000:function:fixture-decode"}}, "save": {"store": "DatastoreId", "arn": "DatastoreArn"}, "expect": {"DatastoreStatus": "CREATING"}},
+  {"op": "describe_fhir_datastore", "args": {"DatastoreId": "${store}"}, "expect": {"DatastoreProperties.DatastoreArn": "${arn}", "DatastoreProperties.DatastoreName": "fixture-records", "DatastoreProperties.DatastoreStatus": "CREATING", "DatastoreProperties.SseConfiguration.KmsEncryptionConfig.KmsKeyId": "alias/fixture", "DatastoreProperties.IdentityProviderConfiguration.AuthorizationStrategy": "SMART_ON_FHIR"}},
+  {"op": "list_fhir_datastores", "args": {}, "expect": {"DatastorePropertiesList#count": 1, "DatastorePropertiesList[0].DatastoreId": "${store}"}},
+  {"op": "list_fhir_datastores", "args": {"Filter": {"DatastoreName": "fixture-records", "DatastoreStatus": "CREATING"}}, "expect": {"DatastorePropertiesList#count": 1}},
+  {"op": "list_fhir_datastores", "args": {"Filter": {"DatastoreStatus": "ACTIVE"}}, "expect": {"DatastorePropertiesList#count": 0}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${arn}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${arn}", "TagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${arn}"}, "expect": {"Tags#count": 1, "Tags[0].Key": "team"}},
+  {"op": "describe_fhir_datastore", "args": {"DatastoreId": "abcdefghijklmnopqrstuvwxyz012345"}, "error": "ResourceNotFoundException", "status": 400},
+  {"op": "create_fhir_datastore", "args": {"DatastoreTypeVersion": "R4", "PreloadDataConfig": {"PreloadDataType": "SYNTHEA"}}, "error": "ValidationException", "status": 400},
+  {"op": "list_fhir_import_jobs", "args": {"DatastoreId": "${store}"}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "list_fhir_datastores", "args": {}, "expect": {"DatastorePropertiesList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_fhir_datastore", "args": {"DatastoreId": "${store}"}, "expect": {"DatastoreProperties.DatastoreArn": "${arn}", "DatastoreProperties.DatastoreName": "fixture-records"}}
+ ],
+ "cleanup": [
+  {"op": "delete_fhir_datastore", "args": {"DatastoreId": "${store}"}, "expect": {"DatastoreStatus": "DELETING", "DatastoreArn": "${arn}"}},
+  {"op": "list_fhir_datastores", "args": {}, "expect": {"DatastorePropertiesList#count": 0}}
+ ]
+}
