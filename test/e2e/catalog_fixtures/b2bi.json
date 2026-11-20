@@ -1,0 +1,39 @@
+{
+ "client": "b2bi",
+ "steps": [
+  {"op": "create_profile", "args": {"name": "fixture-profile", "email": "ops@example.com", "phone": "+1 555 0100", "businessName": "Fixture Co", "logging": "ENABLED", "tags": [{"Key": "team", "Value": "a"}]}, "save": {"profile": "profileId", "profile_arn": "profileArn"}, "expect": {"logging": "ENABLED"}},
+  {"op": "get_profile", "args": {"profileId": "${profile}"}, "expect": {"name": "fixture-profile", "businessName": "Fixture Co"}},
+  {"op": "update_profile", "args": {"profileId": "${profile}", "name": "fixture-profile-2"}, "expect": {"name": "fixture-profile-2"}},
+  {"op": "list_profiles", "args": {}, "expect": {"profiles#count": 1}},
+  {"op": "create_transformer", "args": {"name": "x12_to_json", "fileFormat": "JSON", "mapping": {"templateLanguage": "JSONATA", "template": "{}"}}, "save": {"transformer": "transformerId"}, "expect": {"status": "inactive"}},
+  {"op": "get_transformer", "args": {"transformerId": "${transformer}"}, "expect": {"mapping.templateLanguage": "JSONATA"}},
+  {"op": "update_transformer", "args": {"transformerId": "${transformer}", "status": "active"}, "expect": {"status": "active"}},
+  {"op": "list_transformers", "args": {}, "expect": {"transformers#count": 1}},
+  {"op": "create_capability", "args": {"name": "inbound", "type": "edi", "configuration": {"edi": {"type": {"x12Details": {"transactionSet": "X12_214", "version": "VERSION_4010"}}, "inputLocation": {"bucketName": "fixture-inbox", "key": "in/"}, "outputLocation": {"bucketName": "fixture-outbox", "key": "out/"}, "transformerId": "${transformer}"}}}, "save": {"capability": "capabilityId"}},
+  {"op": "get_capability", "args": {"capabilityId": "${capability}"}, "expect": {"type": "edi"}},
+  {"op": "update_capability", "args": {"capabilityId": "${capability}", "name": "inbound-2"}, "expect": {"name": "inbound-2"}},
+  {"op": "list_capabilities", "args": {}, "expect": {"capabilities#count": 1}},
+  {"op": "create_partnership", "args": {"profileId": "${profile}", "name": "fixture-partner", "email": "partner@example.com", "capabilities": ["${capability}"]}, "save": {"partnership": "partnershipId", "partnership_arn": "partnershipArn"}},
+  {"op": "get_partnership", "args": {"partnershipId": "${partnership}"}, "expect": {"profileId": "${profile}"}},
+  {"op": "update_partnership", "args": {"partnershipId": "${partnership}", "name": "fixture-partner-2"}, "expect": {"name": "fixture-partner-2"}},
+  {"op": "list_partnerships", "args": {"profileId": "${profile}"}, "expect": {"partnerships#count": 1}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${partnership_arn}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${partnership_arn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${profile_arn}"}, "expect": {"Tags#count": 1}},
+  {"op": "create_profile", "args": {"name": "bad", "phone": "+1 555 0100", "businessName": "Bad", "logging": "ENABLED", "email": "no-at-sign"}, "error": "ValidationException"},
+  {"op": "get_profile", "args": {"profileId": "p-missing"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_profiles", "args": {}, "expect": {"profiles#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_partnership", "args": {"partnershipId": "${partnership}"}, "expect": {"name": "fixture-partner-2"}}
+ ],
+ "cleanup": [
+  {"op": "delete_partnership", "args": {"partnershipId": "${partnership}"}},
+  {"op": "delete_capability", "args": {"capabilityId": "${capability}"}},
+  {"op": "delete_transformer", "args": {"transformerId": "${transformer}"}},
+  {"op": "delete_profile", "args": {"profileId": "${profile}"}},
+  {"op": "list_profiles", "args": {}, "expect": {"profiles#count": 0}}
+ ]
+}
