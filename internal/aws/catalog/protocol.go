@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
+	"mime"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -296,6 +299,10 @@ func literalQuery(op *Operation) map[string]string {
 // writeOutput serializes a projected output according to the protocol.
 func writeOutput(w http.ResponseWriter, model *Model, op *Operation, output map[string]any) {
 	protocol := model.Metadata.Protocol
+	if protocol == "query" {
+		writeQueryOutput(w, model, op, output)
+		return
+	}
 	status := http.StatusOK
 	if op.HTTP.ResponseCode != 0 {
 		status = op.HTTP.ResponseCode
@@ -346,6 +353,10 @@ func writeOutput(w http.ResponseWriter, model *Model, op *Operation, output map[
 
 // writeError serializes a typed error with its documented status.
 func writeError(w http.ResponseWriter, model *Model, code string, status int, message string) {
+	if model != nil && model.Metadata.Protocol == "query" {
+		writeQueryError(w, model, code, status, message)
+		return
+	}
 	body := map[string]any{"message": message}
 	if model != nil {
 		if shape := model.Shapes[code]; shape != nil {
@@ -373,4 +384,499 @@ func contentType(model *Model) string {
 		return "application/x-amz-json-1.1"
 	}
 	return "application/json"
+}
+
+// The AWS Query protocol (botocore "query"): a form-encoded POST to / with
+// Action and Version, answered with an XML <Action>Response document.
+
+// queryCompatible refuses Query models that need wire behavior the engine
+// does not implement, so such a service fails composition instead of
+// silently mis-serializing: document shapes, XML attributes, HTTP-bound
+// members and streams.
+func queryCompatible(model *Model) error {
+	names := make([]string, 0, len(model.Shapes))
+	for name := range model.Shapes {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		shape := model.Shapes[name]
+		if shape.Document || shape.Streaming || shape.Event {
+			return fmt.Errorf("query shape %s is a document or stream", name)
+		}
+		for member, ref := range shape.Members {
+			if ref.XMLAttribute || ref.Location != "" || ref.Streaming || ref.EventPayload {
+				return fmt.Errorf("query member %s.%s uses an unsupported XML or HTTP binding", name, member)
+			}
+		}
+	}
+	return nil
+}
+
+// queryBinding returns the Query catalog service a request addresses by its
+// SigV4 credential scope (or X-Simulator-Service when unsigned).
+func (e *Engine) queryBinding(r *http.Request) *binding {
+	if r.Header.Get("X-Amz-Target") != "" {
+		return nil
+	}
+	return e.byQuery[restService(r)]
+}
+
+// serveQuery resolves the Action of one Query request and runs it.
+func (e *Engine) serveQuery(w http.ResponseWriter, r *http.Request, b *binding) {
+	media, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	if r.Method != http.MethodPost || r.URL.Path != "/" || r.URL.RawQuery != "" || media != "application/x-www-form-urlencoded" {
+		writeError(w, b.model, "MalformedQueryString", 400, "Use a form-encoded POST to / without a query string for Query protocol operations.")
+		return
+	}
+	body, err := readBody(w, r)
+	if err != nil {
+		e.fail(w, b, nil, err)
+		return
+	}
+	form, err := url.ParseQuery(string(body))
+	if err != nil {
+		writeError(w, b.model, "MalformedQueryString", 400, "The request body is not valid form encoding.")
+		return
+	}
+	actions := form["Action"]
+	if len(actions) == 0 || actions[0] == "" {
+		writeError(w, b.model, "MissingAction", 400, "The request must contain the parameter Action.")
+		return
+	}
+	if len(actions) != 1 {
+		writeError(w, b.model, "MalformedQueryString", 400, "The parameter Action must appear once.")
+		return
+	}
+	name := actions[0]
+	if _, official := b.model.Routes[name]; !official {
+		writeError(w, b.model, "InvalidAction", 400, "Unknown operation "+name+".")
+		return
+	}
+	op := b.ops[name]
+	if op == nil {
+		writeError(w, b.model, "UnknownOperationException", 501, "The simulator does not implement "+b.spec.Title+" "+name+".")
+		return
+	}
+	switch versions := form["Version"]; {
+	case len(versions) == 0:
+		writeError(w, b.model, "MissingParameter", 400, "The request must contain the parameter Version.")
+		return
+	case len(versions) != 1 || versions[0] != b.model.Metadata.APIVersion:
+		writeError(w, b.model, "InvalidParameterValue", 400, "Version must be "+b.model.Metadata.APIVersion+".")
+		return
+	}
+	delete(form, "Action")
+	delete(form, "Version")
+	region, err := e.region(r, b)
+	if err != nil {
+		e.fail(w, b, op, err)
+		return
+	}
+	raw, err := queryInput(b.model, b.model.Operations[name], form)
+	if err != nil {
+		e.fail(w, b, op, err)
+		return
+	}
+	e.run(w, r, b, op, region, raw)
+}
+
+// formNode is one dotted segment of a form parameter name.
+type formNode struct {
+	path     string
+	value    *string
+	used     bool
+	children map[string]*formNode
+}
+
+func (n *formNode) child(segment string) *formNode {
+	if n.children[segment] == nil {
+		path := segment
+		if n.path != "" {
+			path = n.path + "." + segment
+		}
+		n.children[segment] = &formNode{path: path, children: map[string]*formNode{}}
+	}
+	return n.children[segment]
+}
+
+// unused returns the first parameter, in name order, that no member consumed.
+func (n *formNode) unused() string {
+	if n.value != nil && !n.used {
+		return n.path
+	}
+	segments := make([]string, 0, len(n.children))
+	for segment := range n.children {
+		segments = append(segments, segment)
+	}
+	sort.Strings(segments)
+	for _, segment := range segments {
+		if path := n.children[segment].unused(); path != "" {
+			return path
+		}
+	}
+	return ""
+}
+
+// queryInput assembles a raw input tree from form parameters the way
+// botocore's Query serializer flattens them: structure members joined with
+// ".", list elements as <member name>.N from 1 (or N directly when
+// flattened), map entries as entry.N.key / entry.N.value, scalars as text and
+// empty lists as an empty value. Every parameter must be consumed.
+func queryInput(model *Model, op *Operation, form url.Values) (map[string]any, error) {
+	root := &formNode{children: map[string]*formNode{}}
+	keys := make([]string, 0, len(form))
+	for key := range form {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		if len(form[key]) != 1 {
+			return nil, invalid("Parameter %s must appear once.", key)
+		}
+		node := root
+		for _, segment := range strings.Split(key, ".") {
+			if segment == "" {
+				return nil, invalid("Malformed parameter name %q.", key)
+			}
+			node = node.child(segment)
+		}
+		node.value = &form[key][0]
+	}
+	raw := map[string]any{}
+	if op.Input != "" {
+		d := &formDecoder{model: model}
+		value, err := d.value(op.Input, root, false, 0)
+		if err != nil {
+			return nil, err
+		}
+		raw = value.(map[string]any)
+	}
+	if path := root.unused(); path != "" {
+		return nil, invalid("Unknown parameter %s is not part of the official input shape.", path)
+	}
+	return raw, nil
+}
+
+type formDecoder struct {
+	model *Model
+}
+
+// serialName is the Query/XML name of a shape reference: the reference's
+// locationName, the target shape's locationName, or the default.
+func (m *Model) serialName(ref *Member, fallback string) string {
+	if ref.LocationName != "" {
+		return ref.LocationName
+	}
+	if name := m.shape(ref.Shape).LocationName; name != "" {
+		return name
+	}
+	return fallback
+}
+
+// flattened reports a list or map serialized without its wrapper element.
+func (m *Model) flattened(ref *Member) bool {
+	return ref.Flattened || m.shape(ref.Shape).Flattened
+}
+
+// memberKey is the Query parameter segment and XML element name of a
+// structure member; a flattened list uses its element's name, as botocore
+// does.
+func (m *Model) memberKey(name string, ref Member) string {
+	if target := m.shape(ref.Shape); target.Type == "list" && m.flattened(&ref) {
+		if element := m.serialName(target.Member, ""); element != "" {
+			return element
+		}
+	}
+	return m.serialName(&ref, name)
+}
+
+// indexed returns the children of n numbered 1..N, refusing gaps, zero,
+// leading zeros and non-numeric segments.
+func indexed(n *formNode) ([]*formNode, error) {
+	if n.value != nil {
+		return nil, invalid("Parameter %s must not carry a value.", n.path)
+	}
+	items := make([]*formNode, len(n.children))
+	for segment, child := range n.children {
+		i, err := strconv.Atoi(segment)
+		if err != nil || i < 1 || i > len(items) || strconv.Itoa(i) != segment {
+			return nil, invalid("Parameter %s must be numbered consecutively from 1.", child.path)
+		}
+		items[i-1] = child
+	}
+	return items, nil
+}
+
+// value converts the form subtree n to a raw value of the named shape, or
+// returns nil when n carries nothing this shape consumes.
+func (d *formDecoder) value(shapeName string, n *formNode, flat bool, depth int) (any, error) {
+	if depth > maxDepth {
+		return nil, invalid("Request structure exceeds the simulator's bounded nesting at %s.", n.path)
+	}
+	shape := d.model.shape(shapeName)
+	switch shape.Type {
+	case "structure":
+		if n.value != nil {
+			return nil, invalid("Parameter %s names a structure and must not carry a value.", n.path)
+		}
+		out := map[string]any{}
+		for _, name := range shape.sortedMembers() {
+			member := shape.Members[name]
+			child := n.children[d.model.memberKey(name, member)]
+			if child == nil {
+				continue
+			}
+			value, err := d.value(member.Shape, child, d.model.flattened(&member), depth+1)
+			if err != nil {
+				return nil, err
+			}
+			if value != nil {
+				out[member.wire(name)] = value
+			}
+		}
+		return out, nil
+	case "list":
+		if n.value != nil && *n.value == "" && len(n.children) == 0 {
+			n.used = true
+			return []any{}, nil
+		}
+		container := n
+		if !flat {
+			if n.value != nil {
+				return nil, invalid("Parameter %s names a list and must not carry a value.", n.path)
+			}
+			if container = n.children[d.model.serialName(shape.Member, "member")]; container == nil {
+				return nil, nil
+			}
+		}
+		items, err := indexed(container)
+		if err != nil {
+			return nil, err
+		}
+		out := make([]any, 0, len(items))
+		for _, item := range items {
+			value, err := d.value(shape.Member.Shape, item, d.model.flattened(shape.Member), depth+1)
+			if err != nil {
+				return nil, err
+			}
+			if value == nil {
+				return nil, invalid("Parameter %s does not name a list element.", item.path)
+			}
+			out = append(out, value)
+		}
+		return out, nil
+	case "map":
+		container := n
+		if !flat {
+			if n.value != nil {
+				return nil, invalid("Parameter %s names a map and must not carry a value.", n.path)
+			}
+			if container = n.children["entry"]; container == nil {
+				return nil, nil
+			}
+		}
+		entries, err := indexed(container)
+		if err != nil {
+			return nil, err
+		}
+		keyName, valueName := d.model.serialName(shape.Key, "key"), d.model.serialName(shape.Value, "value")
+		out := make(map[string]any, len(entries))
+		for _, entry := range entries {
+			if entry.value != nil {
+				return nil, invalid("Parameter %s names a map entry and must not carry a value.", entry.path)
+			}
+			keyNode, valueNode := entry.children[keyName], entry.children[valueName]
+			if keyNode == nil || keyNode.value == nil || len(keyNode.children) > 0 || valueNode == nil {
+				return nil, invalid("Map entry %s needs one %s and one %s.", entry.path, keyName, valueName)
+			}
+			keyNode.used = true
+			if _, duplicate := out[*keyNode.value]; duplicate {
+				return nil, invalid("Map entry %s repeats key %q.", entry.path, *keyNode.value)
+			}
+			value, err := d.value(shape.Value.Shape, valueNode, d.model.flattened(shape.Value), depth+1)
+			if err != nil {
+				return nil, err
+			}
+			if value == nil {
+				return nil, invalid("Map entry %s has no value.", entry.path)
+			}
+			out[*keyNode.value] = value
+		}
+		return out, nil
+	}
+	if n.value == nil {
+		return nil, nil
+	}
+	n.used = true
+	return stringScalar(d.model, shapeName, *n.value, "query"), nil
+}
+
+// xmlNamespace is the service's official XML namespace.
+func xmlNamespace(model *Model) string {
+	switch ns := model.Metadata.XMLNamespace.(type) {
+	case string:
+		return ns
+	case map[string]any:
+		uri, _ := ns["uri"].(string)
+		return uri
+	}
+	return ""
+}
+
+func xmlText(buffer *bytes.Buffer, text string) {
+	_ = xml.EscapeText(buffer, []byte(text))
+}
+
+// queryRequestID identifies one Query response, as AWS RequestId values do.
+func queryRequestID() string {
+	id, _ := newID("uuid", "")
+	return id
+}
+
+// writeQueryOutput serializes a projected output as <Action>Response with
+// the operation's result wrapper and ResponseMetadata/RequestId.
+func writeQueryOutput(w http.ResponseWriter, model *Model, op *Operation, output map[string]any) {
+	var buffer bytes.Buffer
+	buffer.WriteString(xml.Header)
+	buffer.WriteString("<" + op.Name + "Response xmlns=\"")
+	xmlText(&buffer, xmlNamespace(model))
+	buffer.WriteString("\">")
+	if op.Output != "" {
+		shape := model.shape(op.Output)
+		wire := map[string]any{}
+		for name, value := range output {
+			wire[shape.Members[name].wire(name)] = value
+		}
+		if op.ResultWrapper != "" {
+			buffer.WriteString("<" + op.ResultWrapper + ">")
+		}
+		xmlMembers(&buffer, model, shape, wire)
+		if op.ResultWrapper != "" {
+			buffer.WriteString("</" + op.ResultWrapper + ">")
+		}
+	}
+	id := queryRequestID()
+	buffer.WriteString("<ResponseMetadata><RequestId>" + id + "</RequestId></ResponseMetadata></" + op.Name + "Response>")
+	status := http.StatusOK
+	if op.HTTP.ResponseCode != 0 {
+		status = op.HTTP.ResponseCode
+	}
+	writeXML(w, status, id, buffer.Bytes())
+}
+
+func writeXML(w http.ResponseWriter, status int, id string, body []byte) {
+	w.Header().Set("Content-Type", "text/xml")
+	w.Header().Set("X-Amzn-RequestId", id)
+	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+	w.WriteHeader(status)
+	_, _ = w.Write(body)
+}
+
+// xmlMembers writes the members of a structure in name order; flattened
+// lists and maps repeat their elements directly inside the structure.
+func xmlMembers(buffer *bytes.Buffer, model *Model, shape *Shape, object map[string]any) {
+	for _, name := range shape.sortedMembers() {
+		member := shape.Members[name]
+		value, ok := object[member.wire(name)]
+		if !ok {
+			continue
+		}
+		key := model.memberKey(name, member)
+		target := model.shape(member.Shape)
+		switch {
+		case target.Type == "list" && model.flattened(&member):
+			items, _ := value.([]any)
+			for _, item := range items {
+				xmlElement(buffer, model, key, target.Member.Shape, item)
+			}
+		case target.Type == "map" && model.flattened(&member):
+			xmlEntries(buffer, model, key, target, value)
+		default:
+			xmlElement(buffer, model, key, member.Shape, value)
+		}
+	}
+}
+
+func xmlEntries(buffer *bytes.Buffer, model *Model, tag string, shape *Shape, value any) {
+	object, _ := value.(map[string]any)
+	keys := make([]string, 0, len(object))
+	for key := range object {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	keyName, valueName := model.serialName(shape.Key, "key"), model.serialName(shape.Value, "value")
+	for _, key := range keys {
+		buffer.WriteString("<" + tag + ">")
+		xmlElement(buffer, model, keyName, shape.Key.Shape, key)
+		xmlElement(buffer, model, valueName, shape.Value.Shape, object[key])
+		buffer.WriteString("</" + tag + ">")
+	}
+}
+
+// xmlElement writes one projected value as the element tag.
+func xmlElement(buffer *bytes.Buffer, model *Model, tag, shapeName string, value any) {
+	shape := model.shape(shapeName)
+	switch shape.Type {
+	case "structure":
+		object, _ := value.(map[string]any)
+		buffer.WriteString("<" + tag + ">")
+		xmlMembers(buffer, model, shape, object)
+		buffer.WriteString("</" + tag + ">")
+		return
+	case "list":
+		items, _ := value.([]any)
+		element := model.serialName(shape.Member, "member")
+		buffer.WriteString("<" + tag + ">")
+		for _, item := range items {
+			xmlElement(buffer, model, element, shape.Member.Shape, item)
+		}
+		buffer.WriteString("</" + tag + ">")
+		return
+	case "map":
+		buffer.WriteString("<" + tag + ">")
+		xmlEntries(buffer, model, "entry", shape, value)
+		buffer.WriteString("</" + tag + ">")
+		return
+	}
+	var text string
+	switch v := value.(type) {
+	case string:
+		text = v
+	case bool:
+		text = strconv.FormatBool(v)
+	case int64:
+		text = strconv.FormatInt(v, 10)
+	case float64:
+		text = strconv.FormatFloat(v, 'g', -1, 64)
+	default:
+		text = fmt.Sprint(v)
+	}
+	buffer.WriteString("<" + tag + ">")
+	xmlText(buffer, text)
+	buffer.WriteString("</" + tag + ">")
+}
+
+// writeQueryError serializes ErrorResponse/Error with the modeled error's
+// official wire code (for example DBParameterGroupNotFound for the
+// DBParameterGroupNotFoundFault shape), so botocore raises that exception.
+func writeQueryError(w http.ResponseWriter, model *Model, code string, status int, message string) {
+	if shape := model.Shapes[code]; shape != nil && shape.Error != nil && shape.Error.Code != "" {
+		code = shape.Error.Code
+	}
+	party := "Sender"
+	if status >= 500 {
+		party = "Receiver"
+	}
+	var buffer bytes.Buffer
+	buffer.WriteString(xml.Header)
+	buffer.WriteString("<ErrorResponse xmlns=\"")
+	xmlText(&buffer, xmlNamespace(model))
+	buffer.WriteString("\"><Error><Type>" + party + "</Type><Code>")
+	xmlText(&buffer, code)
+	buffer.WriteString("</Code><Message>")
+	xmlText(&buffer, message)
+	id := queryRequestID()
+	buffer.WriteString("</Message></Error><RequestId>" + id + "</RequestId></ErrorResponse>")
+	writeXML(w, status, id, buffer.Bytes())
 }

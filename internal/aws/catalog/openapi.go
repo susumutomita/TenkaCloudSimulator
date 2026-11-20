@@ -2,13 +2,17 @@ package catalog
 
 import (
 	"fmt"
+	"regexp"
+	"slices"
 	"sort"
 	"strings"
 )
 
 // OpenAPI renders one service's implemented operations as an OpenAPI 3.1
 // document derived only from the embedded official shapes. JSON protocol
-// operations share POST / and are distinguished by the X-Amz-Target header.
+// operations share POST / and are distinguished by the X-Amz-Target header;
+// Query protocol operations share a form-encoded POST / distinguished by
+// Action and answer in XML.
 func (e *Engine) OpenAPI() map[string]map[string]any {
 	out := map[string]map[string]any{}
 	for _, b := range e.bindings {
@@ -26,7 +30,9 @@ func (b *binding) openAPI() map[string]any {
 	tag := b.spec.Title
 	description := "Bounded simulator subset of the official " + m.Metadata.FullName + " API (" + m.Metadata.APIVersion + "). " +
 		"Every other official operation returns HTTP 501 UnknownOperationException. " + strings.Join(b.spec.Bounds, " ")
-	if m.Metadata.Protocol == "json" {
+	if m.Metadata.Protocol == "query" {
+		paths["/"] = b.queryPath(ops, schemas, tag)
+	} else if m.Metadata.Protocol == "json" {
 		targets := []any{}
 		examples := map[string]any{}
 		for _, op := range ops {
@@ -146,9 +152,14 @@ func (b *binding) schema(name string, schemas map[string]any, depth int) map[str
 		}
 		props := map[string]any{}
 		schemas[name] = map[string]any{"type": "object"}
-		// Properties use the serialized (locationName) keys clients send.
+		// Properties use the serialized (locationName) keys clients send;
+		// Query responses use the XML element names.
 		for _, member := range shape.sortedMembers() {
-			props[shape.Members[member].wire(member)] = b.schema(shape.Members[member].Shape, schemas, depth+1)
+			key := shape.Members[member].wire(member)
+			if b.model.Metadata.Protocol == "query" {
+				key = b.model.memberKey(member, shape.Members[member])
+			}
+			props[key] = b.schema(shape.Members[member].Shape, schemas, depth+1)
 		}
 		entry := map[string]any{"type": "object", "properties": props, "additionalProperties": false}
 		if len(shape.Required) > 0 {
@@ -168,6 +179,13 @@ func (b *binding) schema(name string, schemas map[string]any, depth int) map[str
 		return ref
 	case "list":
 		out := map[string]any{"type": "array", "items": b.schema(shape.Member.Shape, schemas, depth+1)}
+		if b.model.Metadata.Protocol == "query" {
+			items := map[string]any{"xml": map[string]any{"name": b.model.serialName(shape.Member, "member")}}
+			for k, v := range out["items"].(map[string]any) {
+				items[k] = v
+			}
+			out["items"], out["xml"] = items, map[string]any{"wrapped": !shape.Flattened}
+		}
 		bounds(out, shape, "minItems", "maxItems")
 		return out
 	case "map":
@@ -196,6 +214,9 @@ func (b *binding) schema(name string, schemas map[string]any, depth int) map[str
 	case "boolean":
 		return map[string]any{"type": "boolean"}
 	case "timestamp":
+		if b.model.Metadata.Protocol == "query" {
+			return map[string]any{"type": "string", "format": "date-time"}
+		}
 		return map[string]any{"description": "Epoch seconds in JSON protocols", "type": []any{"number", "string"}}
 	case "blob":
 		return map[string]any{"type": "string", "contentEncoding": "base64"}
@@ -238,4 +259,136 @@ func (b *binding) outputContent(shapeName string, schemas map[string]any) map[st
 		}
 	}
 	return map[string]any{"application/json": map[string]any{"schema": map[string]any{"type": "object", "properties": props}}}
+}
+
+// queryPath describes the shared Query endpoint: one form-encoded POST / per
+// Action whose fields follow botocore's Query serializer, answered with an
+// XML <Action>Response document or an XML ErrorResponse.
+func (b *binding) queryPath(ops []Op, schemas map[string]any, tag string) map[string]any {
+	m := b.model
+	namespace := xmlNamespace(m)
+	forms, results, examples := []any{}, []any{}, map[string]any{}
+	for _, op := range ops {
+		official := m.Operations[op.Name]
+		schemas[op.Name+"Request"] = b.formSchema(op.Name, official)
+		forms = append(forms, map[string]any{"$ref": "#/components/schemas/" + op.Name + "Request"})
+		examples[op.Name] = map[string]any{"summary": "Action=" + op.Name, "value": map[string]any{"Action": op.Name, "Version": m.Metadata.APIVersion}}
+		properties := map[string]any{"ResponseMetadata": map[string]any{"$ref": "#/components/schemas/ResponseMetadata"}}
+		if official.Output != "" {
+			result := map[string]any{"$ref": "#/components/schemas/" + official.Output}
+			b.schema(official.Output, schemas, 0)
+			if official.ResultWrapper != "" {
+				result["xml"] = map[string]any{"name": official.ResultWrapper}
+				properties[official.ResultWrapper] = result
+			} else {
+				properties[official.Output] = result
+			}
+		}
+		schemas[op.Name+"Response"] = map[string]any{"type": "object", "title": op.Name + "Response", "properties": properties,
+			"xml": map[string]any{"name": op.Name + "Response", "namespace": namespace}}
+		results = append(results, map[string]any{"$ref": "#/components/schemas/" + op.Name + "Response"})
+	}
+	schemas["ResponseMetadata"] = map[string]any{"type": "object", "properties": map[string]any{"RequestId": map[string]any{"type": "string"}}}
+	schemas["ErrorResponse"] = map[string]any{"type": "object", "xml": map[string]any{"name": "ErrorResponse", "namespace": namespace}, "properties": map[string]any{
+		"Error": map[string]any{"type": "object", "properties": map[string]any{
+			"Type": map[string]any{"type": "string", "enum": []any{"Sender", "Receiver"}}, "Code": map[string]any{"type": "string"}, "Message": map[string]any{"type": "string"}}},
+		"RequestId": map[string]any{"type": "string"}}}
+	failure := func(description string) map[string]any {
+		return map[string]any{"description": description, "content": map[string]any{"text/xml": map[string]any{"schema": map[string]any{"$ref": "#/components/schemas/ErrorResponse"}}}}
+	}
+	return map[string]any{"post": map[string]any{
+		"operationId": b.spec.Model + "QueryOperation", "tags": []any{tag}, "summary": tag + " Query " + m.Metadata.APIVersion + " operations",
+		"description": "Choose one implemented Action. Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. " +
+			"Responses are XML <Action>Response documents holding the result wrapper and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+		"parameters":  []any{map[string]any{"name": "X-Simulator-Service", "in": "header", "required": false, "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.", "schema": map[string]any{"type": "string", "enum": []any{b.signingName()}}}},
+		"requestBody": map[string]any{"required": true, "content": map[string]any{"application/x-www-form-urlencoded": map[string]any{"schema": map[string]any{"oneOf": forms}, "examples": examples}}},
+		"responses": map[string]any{
+			"200": map[string]any{"description": "XML <Action>Response with the projected official output shape.", "content": map[string]any{"text/xml": map[string]any{"schema": map[string]any{"oneOf": results}}}},
+			"400": failure("Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."),
+			"403": failure("AccessDenied from local identity policy evaluation."),
+			"404": failure("Modeled not-found fault."),
+			"501": failure("UnknownOperationException: official operation not implemented by the simulator."),
+		},
+	}}
+}
+
+// formSchema describes one Action's form fields. Scalars at the top level
+// are named properties; nested and numbered fields are pattern properties.
+func (b *binding) formSchema(action string, official *Operation) map[string]any {
+	props := map[string]any{
+		"Action":  map[string]any{"type": "string", "const": action},
+		"Version": map[string]any{"type": "string", "const": b.model.Metadata.APIVersion},
+	}
+	patterns := map[string]any{}
+	required := []any{"Action", "Version"}
+	var nested []string
+	if official.Input != "" {
+		shape := b.model.shape(official.Input)
+		for _, name := range shape.sortedMembers() {
+			member := shape.Members[name]
+			key := b.model.memberKey(name, member)
+			b.formFields(member.Shape, b.model.flattened(&member), key, regexp.QuoteMeta(key), props, patterns, 0)
+			if slices.Contains(shape.Required, name) {
+				if _, scalar := props[key]; scalar && b.model.shape(member.Shape).Type != "list" {
+					required = append(required, key)
+				} else {
+					nested = append(nested, key)
+				}
+			}
+		}
+	}
+	out := map[string]any{"type": "object", "title": action, "properties": props, "required": required, "additionalProperties": false}
+	if len(patterns) > 0 {
+		out["patternProperties"] = patterns
+	}
+	if len(nested) > 0 {
+		out["description"] = "Required list or structure members: " + strings.Join(nested, ", ") + "."
+	}
+	return out
+}
+
+// formFields registers the form fields of one shape at a dotted prefix.
+// literal is the exact field name while no list index has been added.
+func (b *binding) formFields(shapeName string, flat bool, literal, pattern string, props, patterns map[string]any, depth int) {
+	if depth > 8 {
+		return
+	}
+	shape := b.model.shape(shapeName)
+	field := func(schema map[string]any) {
+		if literal != "" {
+			props[literal] = schema
+		} else {
+			patterns["^"+pattern+"$"] = schema
+		}
+	}
+	index := `\.[1-9][0-9]*`
+	switch shape.Type {
+	case "structure":
+		for _, name := range shape.sortedMembers() {
+			member := shape.Members[name]
+			key := b.model.memberKey(name, member)
+			next := ""
+			if literal != "" {
+				next = literal + "." + key
+			}
+			b.formFields(member.Shape, b.model.flattened(&member), next, pattern+`\.`+regexp.QuoteMeta(key), props, patterns, depth+1)
+		}
+	case "list":
+		field(map[string]any{"type": "string", "const": "", "description": "An empty list."})
+		prefix := pattern
+		if !flat {
+			prefix += `\.` + regexp.QuoteMeta(b.model.serialName(shape.Member, "member"))
+		}
+		b.formFields(shape.Member.Shape, b.model.flattened(shape.Member), "", prefix+index, props, patterns, depth+1)
+	case "map":
+		prefix := pattern
+		if !flat {
+			prefix += `\.entry`
+		}
+		prefix += index + `\.`
+		patterns["^"+prefix+regexp.QuoteMeta(b.model.serialName(shape.Key, "key"))+"$"] = b.schema(shape.Key.Shape, map[string]any{}, 0)
+		b.formFields(shape.Value.Shape, b.model.flattened(shape.Value), "", prefix+regexp.QuoteMeta(b.model.serialName(shape.Value, "value")), props, patterns, depth+1)
+	default:
+		field(b.schema(shapeName, map[string]any{}, 0))
+	}
 }

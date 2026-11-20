@@ -3,6 +3,7 @@ package catalog
 import (
 	"net"
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -791,6 +792,195 @@ func odbNetwork(input map[string]any) error {
 			if cidrsOverlap(block, subnet) {
 				return Failure("ValidationException", "Subnet CIDR ranges must not use the ranges reserved by OCI.")
 			}
+		}
+	}
+	return nil
+}
+
+// rds serves RDS configuration groups over the Query protocol. Nothing that
+// provisions or runs a database is bound.
+var rds = &Service{
+	Model: "rds", Title: "Amazon Relational Database Service", IAMPrefix: "rds", Issues: []int{130},
+	Resources: []*Resource{
+		{Kind: "dbSubnetGroup", Shape: "DBSubnetGroup", ID: "name", ARN: "arn:{partition}:rds:{region}:{account}:subgrp:{name}",
+			ARNMember: "DBSubnetGroupArn", NameMember: "DBSubnetGroupName", Unique: true, Limit: 50},
+		{Kind: "dbParameterGroup", Shape: "DBParameterGroup", ID: "name", ARN: "arn:{partition}:rds:{region}:{account}:pg:{name}",
+			ARNMember: "DBParameterGroupArn", NameMember: "DBParameterGroupName", Unique: true, Limit: 50},
+		{Kind: "dbClusterParameterGroup", Shape: "DBClusterParameterGroup", ID: "name", ARN: "arn:{partition}:rds:{region}:{account}:cluster-pg:{name}",
+			ARNMember: "DBClusterParameterGroupArn", NameMember: "DBClusterParameterGroupName", Unique: true, Limit: 50},
+		{Kind: "optionGroup", Shape: "OptionGroup", ID: "name", ARN: "arn:{partition}:rds:{region}:{account}:og:{name}",
+			ARNMember: "OptionGroupArn", NameMember: "OptionGroupName", Unique: true, Limit: 20, Generate: map[string]any{"Options": []any{}}},
+	},
+	Ops: []Op{
+		{Name: "CreateDBSubnetGroup", Kind: Create, Resource: "dbSubnetGroup", Check: rdsCreateSubnetGroup},
+		{Name: "DescribeDBSubnetGroups", Kind: List, Resource: "dbSubnetGroup", Names: "DBSubnetGroupName", Check: rdsDescribe("DBSubnetGroupName")},
+		{Name: "ModifyDBSubnetGroup", Kind: Update, Resource: "dbSubnetGroup", Lookup: "DBSubnetGroupName", Fields: []string{"DBSubnetGroupDescription", "Subnets"}, Check: rdsModifySubnetGroup},
+		{Name: "DeleteDBSubnetGroup", Kind: Delete, Resource: "dbSubnetGroup", Lookup: "DBSubnetGroupName", Check: rdsLower("DBSubnetGroupName")},
+		{Name: "CreateDBParameterGroup", Kind: Create, Resource: "dbParameterGroup", Check: rdsCreateGroup("DBParameterGroupName", true)},
+		{Name: "DescribeDBParameterGroups", Kind: List, Resource: "dbParameterGroup", Names: "DBParameterGroupName", Check: rdsDescribe("DBParameterGroupName")},
+		{Name: "DeleteDBParameterGroup", Kind: Delete, Resource: "dbParameterGroup", Lookup: "DBParameterGroupName", Check: rdsLower("DBParameterGroupName")},
+		{Name: "CreateDBClusterParameterGroup", Kind: Create, Resource: "dbClusterParameterGroup", Check: rdsCreateGroup("DBClusterParameterGroupName", false)},
+		{Name: "DescribeDBClusterParameterGroups", Kind: List, Resource: "dbClusterParameterGroup", Names: "DBClusterParameterGroupName", Check: rdsDescribe("DBClusterParameterGroupName")},
+		{Name: "DeleteDBClusterParameterGroup", Kind: Delete, Resource: "dbClusterParameterGroup", Lookup: "DBClusterParameterGroupName", Check: rdsLower("DBClusterParameterGroupName")},
+		{Name: "CreateOptionGroup", Kind: Create, Resource: "optionGroup", Check: rdsCreateOptionGroup},
+		{Name: "DescribeOptionGroups", Kind: List, Resource: "optionGroup", Names: "OptionGroupName",
+			Filters: map[string]string{"EngineName": "EngineName", "MajorEngineVersion": "MajorEngineVersion"}, Check: rdsDescribeOptionGroups},
+		{Name: "DeleteOptionGroup", Kind: Delete, Resource: "optionGroup", Lookup: "OptionGroupName"},
+		{Name: "AddTagsToResource", Kind: Tag, Lookup: "ResourceName", Check: rdsTags},
+		{Name: "RemoveTagsFromResource", Kind: Untag, Lookup: "ResourceName"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceName"},
+	},
+	Bounds: []string{
+		"DB subnet groups, DB parameter groups, DB cluster parameter groups and option groups are stored configuration served over the Query protocol: no DB instance, cluster, proxy, snapshot, event subscription, network or database engine exists, and CreateDBInstance, CreateDBCluster, CreateDBSnapshot and every other official operation return UnknownOperationException with HTTP 501.",
+		"Parameter and option values are not modeled: ModifyDBParameterGroup, ResetDBParameterGroup, DescribeDBParameters, the cluster equivalents, CopyDBParameterGroup, ModifyOptionGroup and DescribeOptionGroupOptions are not implemented. Default parameter, option and subnet groups are not pre-created, and parameter group families, major engine versions and subnet IDs are stored without checking that they exist.",
+		"A subnet group needs 2 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs and is not checked for Availability Zone coverage; it reports no VPC, Availability Zone, Outpost, status or network type. DB subnet group and DB (cluster) parameter group names are stored in lowercase as documented, \"default\" subnet groups are refused, and option groups accept only the documented EngineName values.",
+		"Describe operations refuse Filters, accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name. Tag keys must be present and must not start with aws: or rds:. Tag operations on an unknown ARN fail with DBInstanceNotFound, the first not-found fault the official tag operations model, and ListTagsForResource refuses Filters.",
+	},
+}
+
+var (
+	rdsSubnetGroupPattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9._ -]{0,254}$`)
+	rdsGroupPattern       = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9-]{0,254}$`)
+	rdsSubnetPattern      = regexp.MustCompile(`^subnet-(?:[0-9a-f]{8}|[0-9a-f]{17})$`)
+	rdsEngines            = []string{"db2-ae", "db2-se", "mariadb", "mysql", "oracle-ee", "oracle-ee-cdb", "oracle-se2", "oracle-se2-cdb", "postgres", "sqlserver-ee", "sqlserver-se", "sqlserver-ex", "sqlserver-web"}
+)
+
+// lowerMember stores a name in lowercase, as RDS documents for these names.
+func lowerMember(input map[string]any, member string) {
+	if name, ok := input[member].(string); ok {
+		input[member] = strings.ToLower(name)
+	}
+}
+
+func rdsLower(member string) func(map[string]any) error {
+	return func(input map[string]any) error {
+		lowerMember(input, member)
+		return nil
+	}
+}
+
+func rdsDescribe(member string) func(map[string]any) error {
+	return func(input map[string]any) error {
+		lowerMember(input, member)
+		return rdsMaxRecords(input)
+	}
+}
+
+func rdsMaxRecords(input map[string]any) error {
+	if n, ok := input["MaxRecords"].(int64); ok && (n < 20 || n > 100) {
+		return invalid("MaxRecords must be from 20 to 100.")
+	}
+	return nil
+}
+
+func rdsDescribeOptionGroups(input map[string]any) error {
+	if _, major := input["MajorEngineVersion"]; major {
+		if _, engine := input["EngineName"]; !engine {
+			return invalid("MajorEngineVersion can be used only together with EngineName.")
+		}
+	}
+	return rdsMaxRecords(input)
+}
+
+// rdsGroupName applies the documented parameter and option group name rules.
+func rdsGroupName(name string) error {
+	if !rdsGroupPattern.MatchString(name) || strings.HasSuffix(name, "-") || strings.Contains(name, "--") {
+		return invalid("Group names are 1 to 255 letters, digits or hyphens, start with a letter and contain no trailing or consecutive hyphens.")
+	}
+	return nil
+}
+
+// rdsCreateGroup stores a parameter group name in lowercase; named rules
+// apply where RDS documents them (DB parameter groups, not cluster ones).
+func rdsCreateGroup(member string, rules bool) func(map[string]any) error {
+	return func(input map[string]any) error {
+		if name, _ := input[member].(string); rules {
+			if err := rdsGroupName(name); err != nil {
+				return err
+			}
+		}
+		lowerMember(input, member)
+		return rdsTags(input)
+	}
+}
+
+func rdsCreateOptionGroup(input map[string]any) error {
+	name, _ := input["OptionGroupName"].(string)
+	if err := rdsGroupName(name); err != nil {
+		return err
+	}
+	engine, _ := input["EngineName"].(string)
+	if !slices.Contains(rdsEngines, engine) {
+		return invalid("EngineName must be one of %s.", strings.Join(rdsEngines, ", "))
+	}
+	return rdsTags(input)
+}
+
+func rdsSubnetGroupName(input map[string]any) error {
+	name, _ := input["DBSubnetGroupName"].(string)
+	if strings.EqualFold(name, "default") {
+		return invalid("The default DB subnet group cannot be created or modified.")
+	}
+	if !rdsSubnetGroupPattern.MatchString(name) {
+		return invalid("DB subnet group names are at most 255 letters, digits, periods, underscores, spaces or hyphens and start with a letter.")
+	}
+	lowerMember(input, "DBSubnetGroupName")
+	return nil
+}
+
+func rdsCreateSubnetGroup(input map[string]any) error {
+	if err := rdsSubnetGroupName(input); err != nil {
+		return err
+	}
+	if err := rdsSubnets(input); err != nil {
+		return err
+	}
+	return rdsTags(input)
+}
+
+func rdsModifySubnetGroup(input map[string]any) error {
+	if name, _ := input["DBSubnetGroupName"].(string); strings.EqualFold(name, "default") {
+		return invalid("The default DB subnet group cannot be created or modified.")
+	}
+	lowerMember(input, "DBSubnetGroupName")
+	return rdsSubnets(input)
+}
+
+// rdsSubnets stores the requested subnet IDs as the official Subnets list.
+func rdsSubnets(input map[string]any) error {
+	ids, _ := input["SubnetIds"].([]any)
+	seen := map[string]bool{}
+	subnets := make([]any, 0, len(ids))
+	for _, value := range ids {
+		id, _ := value.(string)
+		if !rdsSubnetPattern.MatchString(id) {
+			return Failure("InvalidSubnet", "Subnet IDs look like subnet-0123456789abcdef0.")
+		}
+		if seen[id] {
+			return invalid("Subnet %s is listed twice.", id)
+		}
+		seen[id] = true
+		subnets = append(subnets, map[string]any{"SubnetIdentifier": id})
+	}
+	if len(subnets) < 2 {
+		return Failure("DBSubnetGroupDoesNotCoverEnoughAZs", "A DB subnet group needs subnets in at least two Availability Zones; the simulator requires two distinct subnet IDs and does not resolve their zones.")
+	}
+	if len(subnets) > 20 {
+		return Failure("DBSubnetQuotaExceededFault", "A DB subnet group holds at most 20 subnets.")
+	}
+	delete(input, "SubnetIds")
+	input["Subnets"] = subnets
+	return nil
+}
+
+// rdsTags refuses tags without a key and the reserved aws: and rds: prefixes.
+func rdsTags(input map[string]any) error {
+	tags, _ := input["Tags"].([]any)
+	for _, tag := range tags {
+		key, ok := tag.(map[string]any)["Key"].(string)
+		lower := strings.ToLower(key)
+		if !ok || key == "" || strings.HasPrefix(lower, "aws:") || strings.HasPrefix(lower, "rds:") {
+			return invalid("Tag keys are required and must not start with aws: or rds:.")
 		}
 	}
 	return nil

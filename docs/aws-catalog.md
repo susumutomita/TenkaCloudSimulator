@@ -1,7 +1,7 @@
 # AWS service catalog
 
 The catalog serves bounded configuration metadata for additional AWS services
-through each service's own native protocol. Contracts come from documentation-free
+through each service's own native protocol: JSON 1.0/1.1, REST-JSON or Query. Contracts come from documentation-free
 subsets of the pinned official botocore 1.41.6 models; see
 [design 0007](design/0007-model-driven-aws-catalog.md).
 
@@ -13,7 +13,7 @@ network, OAuth or real AWS call is executed or simulated.
 
 ## Services
 
-The catalog serves 112 services. The [generated service table](aws-catalog-services.md)
+The catalog serves 113 services. The [generated service table](aws-catalog-services.md)
 lists each service's Issues, protocol, implemented operations and bounds; it is
 checked against the reviewed specifications by `go test ./internal/aws/catalog`.
 The capability document lists the same services under `services.catalog`,
@@ -26,17 +26,33 @@ Apache Flink, AWS Data Pipeline, Amazon SWF, AWS Batch, CodeStar
 Notifications, Amazon Managed Grafana, AWS Organizations, Service Quotas,
 Application Auto Scaling, Amazon Cognito, AWS Network Firewall, AWS Control
 Tower, AWS Launch Wizard, Amazon Keyspaces and Amazon Comprehend Medical.
-Services that use the Query, EC2 or REST-XML protocols are not served by the
-catalog yet.
+Amazon RDS is served over the Query protocol. Services that use the EC2 or
+REST-XML protocols are not served by the catalog yet.
 Products assessed as not servable at all, with evidence, are listed in the
 [coverage assessment](coverage-assessment.md).
 
 ## Routing and authorization
 
 - JSON protocols are routed by the official `X-Amz-Target` prefix.
-- REST-JSON protocols are routed by the SigV4 credential-scope service. Unsigned
-  first-party console and API-reference requests use `X-Simulator-Service`
-  instead. Signatures are never verified; use dummy `TCSIM` credentials.
+- REST-JSON and Query protocols are routed by the SigV4 credential-scope
+  service. Unsigned first-party console and API-reference requests use
+  `X-Simulator-Service` instead. Signatures are never verified; use dummy
+  `TCSIM` credentials. The catalog claims a Query form POST only when that
+  service is a catalog Query service (`rds`), so IAM, STS, SNS, Elastic Load
+  Balancing, CloudFormation and EC2 requests keep their native handlers.
+- Query requests are form-encoded POSTs to `/` with `Action` and the model's
+  `Version`, flattened as botocore serializes them (`Tags.Tag.1.Key`,
+  `TagKeys.member.1`, `entry.N.key`, an empty value for an empty list). Every
+  parameter must belong to the official input shape. Responses are
+  `<Action>Response` XML with the result wrapper and
+  `ResponseMetadata/RequestId`; errors are `ErrorResponse/Error/Code` with the
+  modeled fault's official code (for example `DBParameterGroupNotFound`) and
+  status. Failures without a modeled fault use the common Query errors
+  `InvalidParameterValue`, `AccessDenied` (403), `InternalFailure` (500),
+  `MissingAction`, `MissingParameter`, `MalformedQueryString` and, for an Action
+  the official model does not define, `InvalidAction`. Query models with
+  document shapes, XML attributes, HTTP-bound members or streams are refused
+  at composition.
 - Each operation is authorized as `<iam-prefix>:<Operation>` against the
   resource ARN before any disclosure or change. List operations use a wildcard
   ARN for the kind. Participant tokens bind the identity.
