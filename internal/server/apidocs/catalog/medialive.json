@@ -1,0 +1,7896 @@
+{
+ "components": {
+  "schemas": {
+   "AacSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "bitrate": {
+      "type": "number"
+     },
+     "codingMode": {
+      "enum": [
+       "AD_RECEIVER_MIX",
+       "CODING_MODE_1_0",
+       "CODING_MODE_1_1",
+       "CODING_MODE_2_0",
+       "CODING_MODE_5_1"
+      ],
+      "type": "string"
+     },
+     "inputType": {
+      "enum": [
+       "BROADCASTER_MIXED_AD",
+       "NORMAL"
+      ],
+      "type": "string"
+     },
+     "profile": {
+      "enum": [
+       "HEV1",
+       "HEV2",
+       "LC"
+      ],
+      "type": "string"
+     },
+     "rateControlMode": {
+      "enum": [
+       "CBR",
+       "VBR"
+      ],
+      "type": "string"
+     },
+     "rawFormat": {
+      "enum": [
+       "LATM_LOAS",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "sampleRate": {
+      "type": "number"
+     },
+     "spec": {
+      "enum": [
+       "MPEG2",
+       "MPEG4"
+      ],
+      "type": "string"
+     },
+     "vbrQuality": {
+      "enum": [
+       "HIGH",
+       "LOW",
+       "MEDIUM_HIGH",
+       "MEDIUM_LOW"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Ac3Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "attenuationControl": {
+      "enum": [
+       "ATTENUATE_3_DB",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "bitrate": {
+      "type": "number"
+     },
+     "bitstreamMode": {
+      "enum": [
+       "COMMENTARY",
+       "COMPLETE_MAIN",
+       "DIALOGUE",
+       "EMERGENCY",
+       "HEARING_IMPAIRED",
+       "MUSIC_AND_EFFECTS",
+       "VISUALLY_IMPAIRED",
+       "VOICE_OVER"
+      ],
+      "type": "string"
+     },
+     "codingMode": {
+      "enum": [
+       "CODING_MODE_1_0",
+       "CODING_MODE_1_1",
+       "CODING_MODE_2_0",
+       "CODING_MODE_3_2_LFE"
+      ],
+      "type": "string"
+     },
+     "dialnorm": {
+      "type": "integer"
+     },
+     "drcProfile": {
+      "enum": [
+       "FILM_STANDARD",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "lfeFilter": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "metadataControl": {
+      "enum": [
+       "FOLLOW_INPUT",
+       "USE_CONFIGURED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AdditionalDestinations": {
+    "additionalProperties": false,
+    "properties": {
+     "destination": {
+      "$ref": "#/components/schemas/OutputLocationRef"
+     }
+    },
+    "required": [
+     "destination"
+    ],
+    "type": "object"
+   },
+   "AncillarySourceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "sourceAncillaryChannelNumber": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "AnywhereSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "channelPlacementGroupId": {
+      "type": "string"
+     },
+     "clusterId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ArchiveCdnSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "archiveS3Settings": {
+      "$ref": "#/components/schemas/ArchiveS3Settings"
+     }
+    },
+    "type": "object"
+   },
+   "ArchiveContainerSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "m2tsSettings": {
+      "$ref": "#/components/schemas/M2tsSettings"
+     },
+     "rawSettings": {
+      "$ref": "#/components/schemas/RawSettings"
+     }
+    },
+    "type": "object"
+   },
+   "ArchiveGroupSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "archiveCdnSettings": {
+      "$ref": "#/components/schemas/ArchiveCdnSettings"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/OutputLocationRef"
+     },
+     "rolloverInterval": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "destination"
+    ],
+    "type": "object"
+   },
+   "ArchiveOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "containerSettings": {
+      "$ref": "#/components/schemas/ArchiveContainerSettings"
+     },
+     "extension": {
+      "type": "string"
+     },
+     "nameModifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "containerSettings"
+    ],
+    "type": "object"
+   },
+   "ArchiveS3Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "cannedAcl": {
+      "enum": [
+       "AUTHENTICATED_READ",
+       "BUCKET_OWNER_FULL_CONTROL",
+       "BUCKET_OWNER_READ",
+       "PUBLIC_READ"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AribDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "AribSourceSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "AudioChannelMapping": {
+    "additionalProperties": false,
+    "properties": {
+     "inputChannelLevels": {
+      "items": {
+       "$ref": "#/components/schemas/InputChannelLevel"
+      },
+      "type": "array"
+     },
+     "outputChannel": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "outputChannel",
+     "inputChannelLevels"
+    ],
+    "type": "object"
+   },
+   "AudioCodecSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "aacSettings": {
+      "$ref": "#/components/schemas/AacSettings"
+     },
+     "ac3Settings": {
+      "$ref": "#/components/schemas/Ac3Settings"
+     },
+     "eac3AtmosSettings": {
+      "$ref": "#/components/schemas/Eac3AtmosSettings"
+     },
+     "eac3Settings": {
+      "$ref": "#/components/schemas/Eac3Settings"
+     },
+     "mp2Settings": {
+      "$ref": "#/components/schemas/Mp2Settings"
+     },
+     "passThroughSettings": {
+      "$ref": "#/components/schemas/PassThroughSettings"
+     },
+     "wavSettings": {
+      "$ref": "#/components/schemas/WavSettings"
+     }
+    },
+    "type": "object"
+   },
+   "AudioDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "audioDashRoles": {
+      "items": {
+       "enum": [
+        "ALTERNATE",
+        "COMMENTARY",
+        "DESCRIPTION",
+        "DUB",
+        "EMERGENCY",
+        "ENHANCED-AUDIO-INTELLIGIBILITY",
+        "KARAOKE",
+        "MAIN",
+        "SUPPLEMENTARY"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "audioNormalizationSettings": {
+      "$ref": "#/components/schemas/AudioNormalizationSettings"
+     },
+     "audioSelectorName": {
+      "type": "string"
+     },
+     "audioType": {
+      "enum": [
+       "CLEAN_EFFECTS",
+       "HEARING_IMPAIRED",
+       "UNDEFINED",
+       "VISUAL_IMPAIRED_COMMENTARY"
+      ],
+      "type": "string"
+     },
+     "audioTypeControl": {
+      "enum": [
+       "FOLLOW_INPUT",
+       "USE_CONFIGURED"
+      ],
+      "type": "string"
+     },
+     "audioWatermarkingSettings": {
+      "$ref": "#/components/schemas/AudioWatermarkSettings"
+     },
+     "codecSettings": {
+      "$ref": "#/components/schemas/AudioCodecSettings"
+     },
+     "dvbDashAccessibility": {
+      "enum": [
+       "DVBDASH_1_VISUALLY_IMPAIRED",
+       "DVBDASH_2_HARD_OF_HEARING",
+       "DVBDASH_3_SUPPLEMENTAL_COMMENTARY",
+       "DVBDASH_4_DIRECTORS_COMMENTARY",
+       "DVBDASH_5_EDUCATIONAL_NOTES",
+       "DVBDASH_6_MAIN_PROGRAM",
+       "DVBDASH_7_CLEAN_FEED"
+      ],
+      "type": "string"
+     },
+     "languageCode": {
+      "type": "string"
+     },
+     "languageCodeControl": {
+      "enum": [
+       "FOLLOW_INPUT",
+       "USE_CONFIGURED"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "remixSettings": {
+      "$ref": "#/components/schemas/RemixSettings"
+     },
+     "streamName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "audioSelectorName",
+     "name"
+    ],
+    "type": "object"
+   },
+   "AudioDolbyEDecode": {
+    "additionalProperties": false,
+    "properties": {
+     "programSelection": {
+      "enum": [
+       "ALL_CHANNELS",
+       "PROGRAM_1",
+       "PROGRAM_2",
+       "PROGRAM_3",
+       "PROGRAM_4",
+       "PROGRAM_5",
+       "PROGRAM_6",
+       "PROGRAM_7",
+       "PROGRAM_8"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "programSelection"
+    ],
+    "type": "object"
+   },
+   "AudioHlsRenditionSelection": {
+    "additionalProperties": false,
+    "properties": {
+     "groupId": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "groupId"
+    ],
+    "type": "object"
+   },
+   "AudioLanguageSelection": {
+    "additionalProperties": false,
+    "properties": {
+     "languageCode": {
+      "type": "string"
+     },
+     "languageSelectionPolicy": {
+      "enum": [
+       "LOOSE",
+       "STRICT"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "languageCode"
+    ],
+    "type": "object"
+   },
+   "AudioNormalizationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "algorithm": {
+      "enum": [
+       "ITU_1770_1",
+       "ITU_1770_2"
+      ],
+      "type": "string"
+     },
+     "algorithmControl": {
+      "enum": [
+       "CORRECT_AUDIO"
+      ],
+      "type": "string"
+     },
+     "targetLkfs": {
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "AudioOnlyHlsSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "audioGroupId": {
+      "type": "string"
+     },
+     "audioOnlyImage": {
+      "$ref": "#/components/schemas/InputLocation"
+     },
+     "audioTrackType": {
+      "enum": [
+       "ALTERNATE_AUDIO_AUTO_SELECT",
+       "ALTERNATE_AUDIO_AUTO_SELECT_DEFAULT",
+       "ALTERNATE_AUDIO_NOT_AUTO_SELECT",
+       "AUDIO_ONLY_VARIANT_STREAM"
+      ],
+      "type": "string"
+     },
+     "segmentType": {
+      "enum": [
+       "AAC",
+       "FMP4"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AudioPidSelection": {
+    "additionalProperties": false,
+    "properties": {
+     "pid": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "pid"
+    ],
+    "type": "object"
+   },
+   "AudioSelector": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "selectorSettings": {
+      "$ref": "#/components/schemas/AudioSelectorSettings"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "AudioSelectorSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "audioHlsRenditionSelection": {
+      "$ref": "#/components/schemas/AudioHlsRenditionSelection"
+     },
+     "audioLanguageSelection": {
+      "$ref": "#/components/schemas/AudioLanguageSelection"
+     },
+     "audioPidSelection": {
+      "$ref": "#/components/schemas/AudioPidSelection"
+     },
+     "audioTrackSelection": {
+      "$ref": "#/components/schemas/AudioTrackSelection"
+     }
+    },
+    "type": "object"
+   },
+   "AudioSilenceFailoverSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "audioSelectorName": {
+      "type": "string"
+     },
+     "audioSilenceThresholdMsec": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "audioSelectorName"
+    ],
+    "type": "object"
+   },
+   "AudioTrack": {
+    "additionalProperties": false,
+    "properties": {
+     "track": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "track"
+    ],
+    "type": "object"
+   },
+   "AudioTrackSelection": {
+    "additionalProperties": false,
+    "properties": {
+     "dolbyEDecode": {
+      "$ref": "#/components/schemas/AudioDolbyEDecode"
+     },
+     "tracks": {
+      "items": {
+       "$ref": "#/components/schemas/AudioTrack"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "tracks"
+    ],
+    "type": "object"
+   },
+   "AudioWatermarkSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "nielsenWatermarksSettings": {
+      "$ref": "#/components/schemas/NielsenWatermarksSettings"
+     }
+    },
+    "type": "object"
+   },
+   "AutomaticInputFailoverSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "errorClearTimeMsec": {
+      "type": "integer"
+     },
+     "failoverConditions": {
+      "items": {
+       "$ref": "#/components/schemas/FailoverCondition"
+      },
+      "type": "array"
+     },
+     "inputPreference": {
+      "enum": [
+       "EQUAL_INPUT_PREFERENCE",
+       "PRIMARY_INPUT_PREFERRED"
+      ],
+      "type": "string"
+     },
+     "secondaryInputId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "secondaryInputId"
+    ],
+    "type": "object"
+   },
+   "Av1ColorSpaceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "colorSpacePassthroughSettings": {
+      "$ref": "#/components/schemas/ColorSpacePassthroughSettings"
+     },
+     "hdr10Settings": {
+      "$ref": "#/components/schemas/Hdr10Settings"
+     },
+     "rec601Settings": {
+      "$ref": "#/components/schemas/Rec601Settings"
+     },
+     "rec709Settings": {
+      "$ref": "#/components/schemas/Rec709Settings"
+     }
+    },
+    "type": "object"
+   },
+   "Av1Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "afdSignaling": {
+      "enum": [
+       "AUTO",
+       "FIXED",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "bitrate": {
+      "type": "integer"
+     },
+     "bufSize": {
+      "type": "integer"
+     },
+     "colorSpaceSettings": {
+      "$ref": "#/components/schemas/Av1ColorSpaceSettings"
+     },
+     "fixedAfd": {
+      "enum": [
+       "AFD_0000",
+       "AFD_0010",
+       "AFD_0011",
+       "AFD_0100",
+       "AFD_1000",
+       "AFD_1001",
+       "AFD_1010",
+       "AFD_1011",
+       "AFD_1101",
+       "AFD_1110",
+       "AFD_1111"
+      ],
+      "type": "string"
+     },
+     "framerateDenominator": {
+      "type": "integer"
+     },
+     "framerateNumerator": {
+      "type": "integer"
+     },
+     "gopSize": {
+      "type": "number"
+     },
+     "gopSizeUnits": {
+      "enum": [
+       "FRAMES",
+       "SECONDS"
+      ],
+      "type": "string"
+     },
+     "level": {
+      "enum": [
+       "AV1_LEVEL_2",
+       "AV1_LEVEL_2_1",
+       "AV1_LEVEL_3",
+       "AV1_LEVEL_3_1",
+       "AV1_LEVEL_4",
+       "AV1_LEVEL_4_1",
+       "AV1_LEVEL_5",
+       "AV1_LEVEL_5_1",
+       "AV1_LEVEL_5_2",
+       "AV1_LEVEL_5_3",
+       "AV1_LEVEL_6",
+       "AV1_LEVEL_6_1",
+       "AV1_LEVEL_6_2",
+       "AV1_LEVEL_6_3",
+       "AV1_LEVEL_AUTO"
+      ],
+      "type": "string"
+     },
+     "lookAheadRateControl": {
+      "enum": [
+       "HIGH",
+       "LOW",
+       "MEDIUM"
+      ],
+      "type": "string"
+     },
+     "maxBitrate": {
+      "type": "integer"
+     },
+     "minBitrate": {
+      "type": "integer"
+     },
+     "minIInterval": {
+      "type": "integer"
+     },
+     "parDenominator": {
+      "type": "integer"
+     },
+     "parNumerator": {
+      "type": "integer"
+     },
+     "qvbrQualityLevel": {
+      "type": "integer"
+     },
+     "rateControlMode": {
+      "enum": [
+       "CBR",
+       "QVBR"
+      ],
+      "type": "string"
+     },
+     "sceneChangeDetect": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "spatialAq": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "temporalAq": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "timecodeBurninSettings": {
+      "$ref": "#/components/schemas/TimecodeBurninSettings"
+     }
+    },
+    "required": [
+     "framerateNumerator",
+     "framerateDenominator"
+    ],
+    "type": "object"
+   },
+   "AvailBlanking": {
+    "additionalProperties": false,
+    "properties": {
+     "availBlankingImage": {
+      "$ref": "#/components/schemas/InputLocation"
+     },
+     "state": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AvailConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "availSettings": {
+      "$ref": "#/components/schemas/AvailSettings"
+     },
+     "scte35SegmentationScope": {
+      "enum": [
+       "ALL_OUTPUT_GROUPS",
+       "SCTE35_ENABLED_OUTPUT_GROUPS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AvailSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "esam": {
+      "$ref": "#/components/schemas/Esam"
+     },
+     "scte35SpliceInsert": {
+      "$ref": "#/components/schemas/Scte35SpliceInsert"
+     },
+     "scte35TimeSignalApos": {
+      "$ref": "#/components/schemas/Scte35TimeSignalApos"
+     }
+    },
+    "type": "object"
+   },
+   "BandwidthReductionFilterSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "postFilterSharpening": {
+      "enum": [
+       "DISABLED",
+       "SHARPENING_1",
+       "SHARPENING_2",
+       "SHARPENING_3"
+      ],
+      "type": "string"
+     },
+     "strength": {
+      "enum": [
+       "AUTO",
+       "STRENGTH_1",
+       "STRENGTH_2",
+       "STRENGTH_3",
+       "STRENGTH_4"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BlackoutSlate": {
+    "additionalProperties": false,
+    "properties": {
+     "blackoutSlateImage": {
+      "$ref": "#/components/schemas/InputLocation"
+     },
+     "networkEndBlackout": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "networkEndBlackoutImage": {
+      "$ref": "#/components/schemas/InputLocation"
+     },
+     "networkId": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "BurnInDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "alignment": {
+      "enum": [
+       "CENTERED",
+       "LEFT",
+       "SMART"
+      ],
+      "type": "string"
+     },
+     "backgroundColor": {
+      "enum": [
+       "BLACK",
+       "NONE",
+       "WHITE"
+      ],
+      "type": "string"
+     },
+     "backgroundOpacity": {
+      "type": "integer"
+     },
+     "font": {
+      "$ref": "#/components/schemas/InputLocation"
+     },
+     "fontColor": {
+      "enum": [
+       "BLACK",
+       "BLUE",
+       "GREEN",
+       "RED",
+       "WHITE",
+       "YELLOW"
+      ],
+      "type": "string"
+     },
+     "fontOpacity": {
+      "type": "integer"
+     },
+     "fontResolution": {
+      "type": "integer"
+     },
+     "fontSize": {
+      "type": "string"
+     },
+     "outlineColor": {
+      "enum": [
+       "BLACK",
+       "BLUE",
+       "GREEN",
+       "RED",
+       "WHITE",
+       "YELLOW"
+      ],
+      "type": "string"
+     },
+     "outlineSize": {
+      "type": "integer"
+     },
+     "shadowColor": {
+      "enum": [
+       "BLACK",
+       "NONE",
+       "WHITE"
+      ],
+      "type": "string"
+     },
+     "shadowOpacity": {
+      "type": "integer"
+     },
+     "shadowXOffset": {
+      "type": "integer"
+     },
+     "shadowYOffset": {
+      "type": "integer"
+     },
+     "subtitleRows": {
+      "enum": [
+       "ROWS_16",
+       "ROWS_20",
+       "ROWS_24"
+      ],
+      "type": "string"
+     },
+     "teletextGridControl": {
+      "enum": [
+       "FIXED",
+       "SCALED"
+      ],
+      "type": "string"
+     },
+     "xPosition": {
+      "type": "integer"
+     },
+     "yPosition": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "CaptionDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "accessibility": {
+      "enum": [
+       "DOES_NOT_IMPLEMENT_ACCESSIBILITY_FEATURES",
+       "IMPLEMENTS_ACCESSIBILITY_FEATURES"
+      ],
+      "type": "string"
+     },
+     "captionDashRoles": {
+      "items": {
+       "enum": [
+        "ALTERNATE",
+        "CAPTION",
+        "COMMENTARY",
+        "DESCRIPTION",
+        "DUB",
+        "EASYREADER",
+        "EMERGENCY",
+        "FORCED-SUBTITLE",
+        "KARAOKE",
+        "MAIN",
+        "METADATA",
+        "SUBTITLE",
+        "SUPPLEMENTARY"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "captionSelectorName": {
+      "type": "string"
+     },
+     "destinationSettings": {
+      "$ref": "#/components/schemas/CaptionDestinationSettings"
+     },
+     "dvbDashAccessibility": {
+      "enum": [
+       "DVBDASH_1_VISUALLY_IMPAIRED",
+       "DVBDASH_2_HARD_OF_HEARING",
+       "DVBDASH_3_SUPPLEMENTAL_COMMENTARY",
+       "DVBDASH_4_DIRECTORS_COMMENTARY",
+       "DVBDASH_5_EDUCATIONAL_NOTES",
+       "DVBDASH_6_MAIN_PROGRAM",
+       "DVBDASH_7_CLEAN_FEED"
+      ],
+      "type": "string"
+     },
+     "languageCode": {
+      "type": "string"
+     },
+     "languageDescription": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "captionSelectorName",
+     "name"
+    ],
+    "type": "object"
+   },
+   "CaptionDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "aribDestinationSettings": {
+      "$ref": "#/components/schemas/AribDestinationSettings"
+     },
+     "burnInDestinationSettings": {
+      "$ref": "#/components/schemas/BurnInDestinationSettings"
+     },
+     "dvbSubDestinationSettings": {
+      "$ref": "#/components/schemas/DvbSubDestinationSettings"
+     },
+     "ebuTtDDestinationSettings": {
+      "$ref": "#/components/schemas/EbuTtDDestinationSettings"
+     },
+     "embeddedDestinationSettings": {
+      "$ref": "#/components/schemas/EmbeddedDestinationSettings"
+     },
+     "embeddedPlusScte20DestinationSettings": {
+      "$ref": "#/components/schemas/EmbeddedPlusScte20DestinationSettings"
+     },
+     "rtmpCaptionInfoDestinationSettings": {
+      "$ref": "#/components/schemas/RtmpCaptionInfoDestinationSettings"
+     },
+     "scte20PlusEmbeddedDestinationSettings": {
+      "$ref": "#/components/schemas/Scte20PlusEmbeddedDestinationSettings"
+     },
+     "scte27DestinationSettings": {
+      "$ref": "#/components/schemas/Scte27DestinationSettings"
+     },
+     "smpteTtDestinationSettings": {
+      "$ref": "#/components/schemas/SmpteTtDestinationSettings"
+     },
+     "teletextDestinationSettings": {
+      "$ref": "#/components/schemas/TeletextDestinationSettings"
+     },
+     "ttmlDestinationSettings": {
+      "$ref": "#/components/schemas/TtmlDestinationSettings"
+     },
+     "webvttDestinationSettings": {
+      "$ref": "#/components/schemas/WebvttDestinationSettings"
+     }
+    },
+    "type": "object"
+   },
+   "CaptionLanguageMapping": {
+    "additionalProperties": false,
+    "properties": {
+     "captionChannel": {
+      "type": "integer"
+     },
+     "languageCode": {
+      "type": "string"
+     },
+     "languageDescription": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "languageCode",
+     "languageDescription",
+     "captionChannel"
+    ],
+    "type": "object"
+   },
+   "CaptionRectangle": {
+    "additionalProperties": false,
+    "properties": {
+     "height": {
+      "type": "number"
+     },
+     "leftOffset": {
+      "type": "number"
+     },
+     "topOffset": {
+      "type": "number"
+     },
+     "width": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "topOffset",
+     "height",
+     "width",
+     "leftOffset"
+    ],
+    "type": "object"
+   },
+   "CaptionSelector": {
+    "additionalProperties": false,
+    "properties": {
+     "languageCode": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "selectorSettings": {
+      "$ref": "#/components/schemas/CaptionSelectorSettings"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "CaptionSelectorSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "ancillarySourceSettings": {
+      "$ref": "#/components/schemas/AncillarySourceSettings"
+     },
+     "aribSourceSettings": {
+      "$ref": "#/components/schemas/AribSourceSettings"
+     },
+     "dvbSubSourceSettings": {
+      "$ref": "#/components/schemas/DvbSubSourceSettings"
+     },
+     "embeddedSourceSettings": {
+      "$ref": "#/components/schemas/EmbeddedSourceSettings"
+     },
+     "scte20SourceSettings": {
+      "$ref": "#/components/schemas/Scte20SourceSettings"
+     },
+     "scte27SourceSettings": {
+      "$ref": "#/components/schemas/Scte27SourceSettings"
+     },
+     "teletextSourceSettings": {
+      "$ref": "#/components/schemas/TeletextSourceSettings"
+     }
+    },
+    "type": "object"
+   },
+   "CdiInputSpecification": {
+    "additionalProperties": false,
+    "properties": {
+     "resolution": {
+      "enum": [
+       "SD",
+       "HD",
+       "FHD",
+       "UHD"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Channel": {
+    "additionalProperties": false,
+    "properties": {
+     "anywhereSettings": {
+      "$ref": "#/components/schemas/DescribeAnywhereSettings"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "cdiInputSpecification": {
+      "$ref": "#/components/schemas/CdiInputSpecification"
+     },
+     "channelClass": {
+      "enum": [
+       "STANDARD",
+       "SINGLE_PIPELINE"
+      ],
+      "type": "string"
+     },
+     "channelEngineVersion": {
+      "$ref": "#/components/schemas/ChannelEngineVersionResponse"
+     },
+     "destinations": {
+      "items": {
+       "$ref": "#/components/schemas/OutputDestination"
+      },
+      "type": "array"
+     },
+     "egressEndpoints": {
+      "items": {
+       "$ref": "#/components/schemas/ChannelEgressEndpoint"
+      },
+      "type": "array"
+     },
+     "encoderSettings": {
+      "$ref": "#/components/schemas/EncoderSettings"
+     },
+     "id": {
+      "type": "string"
+     },
+     "inputAttachments": {
+      "items": {
+       "$ref": "#/components/schemas/InputAttachment"
+      },
+      "type": "array"
+     },
+     "inputSpecification": {
+      "$ref": "#/components/schemas/InputSpecification"
+     },
+     "logLevel": {
+      "enum": [
+       "ERROR",
+       "WARNING",
+       "INFO",
+       "DEBUG",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "maintenance": {
+      "$ref": "#/components/schemas/MaintenanceStatus"
+     },
+     "name": {
+      "type": "string"
+     },
+     "pipelineDetails": {
+      "items": {
+       "$ref": "#/components/schemas/PipelineDetail"
+      },
+      "type": "array"
+     },
+     "pipelinesRunningCount": {
+      "type": "integer"
+     },
+     "roleArn": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "CREATING",
+       "CREATE_FAILED",
+       "IDLE",
+       "STARTING",
+       "RUNNING",
+       "RECOVERING",
+       "STOPPING",
+       "DELETING",
+       "DELETED",
+       "UPDATING",
+       "UPDATE_FAILED"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "vpc": {
+      "$ref": "#/components/schemas/VpcOutputSettingsDescription"
+     }
+    },
+    "type": "object"
+   },
+   "ChannelEgressEndpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "sourceIp": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ChannelEngineVersionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "version": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ChannelEngineVersionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "expirationDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ChannelSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "anywhereSettings": {
+      "$ref": "#/components/schemas/DescribeAnywhereSettings"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "cdiInputSpecification": {
+      "$ref": "#/components/schemas/CdiInputSpecification"
+     },
+     "channelClass": {
+      "enum": [
+       "STANDARD",
+       "SINGLE_PIPELINE"
+      ],
+      "type": "string"
+     },
+     "channelEngineVersion": {
+      "$ref": "#/components/schemas/ChannelEngineVersionResponse"
+     },
+     "destinations": {
+      "items": {
+       "$ref": "#/components/schemas/OutputDestination"
+      },
+      "type": "array"
+     },
+     "egressEndpoints": {
+      "items": {
+       "$ref": "#/components/schemas/ChannelEgressEndpoint"
+      },
+      "type": "array"
+     },
+     "id": {
+      "type": "string"
+     },
+     "inputAttachments": {
+      "items": {
+       "$ref": "#/components/schemas/InputAttachment"
+      },
+      "type": "array"
+     },
+     "inputSpecification": {
+      "$ref": "#/components/schemas/InputSpecification"
+     },
+     "logLevel": {
+      "enum": [
+       "ERROR",
+       "WARNING",
+       "INFO",
+       "DEBUG",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "maintenance": {
+      "$ref": "#/components/schemas/MaintenanceStatus"
+     },
+     "name": {
+      "type": "string"
+     },
+     "pipelinesRunningCount": {
+      "type": "integer"
+     },
+     "roleArn": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "CREATING",
+       "CREATE_FAILED",
+       "IDLE",
+       "STARTING",
+       "RUNNING",
+       "RECOVERING",
+       "STOPPING",
+       "DELETING",
+       "DELETED",
+       "UPDATING",
+       "UPDATE_FAILED"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "usedChannelEngineVersions": {
+      "items": {
+       "$ref": "#/components/schemas/ChannelEngineVersionResponse"
+      },
+      "type": "array"
+     },
+     "vpc": {
+      "$ref": "#/components/schemas/VpcOutputSettingsDescription"
+     }
+    },
+    "type": "object"
+   },
+   "CmafIngestCaptionLanguageMapping": {
+    "additionalProperties": false,
+    "properties": {
+     "captionChannel": {
+      "type": "integer"
+     },
+     "languageCode": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "languageCode",
+     "captionChannel"
+    ],
+    "type": "object"
+   },
+   "CmafIngestGroupSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalDestinations": {
+      "items": {
+       "$ref": "#/components/schemas/AdditionalDestinations"
+      },
+      "type": "array"
+     },
+     "captionLanguageMappings": {
+      "items": {
+       "$ref": "#/components/schemas/CmafIngestCaptionLanguageMapping"
+      },
+      "type": "array"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/OutputLocationRef"
+     },
+     "id3Behavior": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "id3NameModifier": {
+      "type": "string"
+     },
+     "klvBehavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "klvNameModifier": {
+      "type": "string"
+     },
+     "nielsenId3Behavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "nielsenId3NameModifier": {
+      "type": "string"
+     },
+     "scte35NameModifier": {
+      "type": "string"
+     },
+     "scte35Type": {
+      "enum": [
+       "NONE",
+       "SCTE_35_WITHOUT_SEGMENTATION"
+      ],
+      "type": "string"
+     },
+     "segmentLength": {
+      "type": "integer"
+     },
+     "segmentLengthUnits": {
+      "enum": [
+       "MILLISECONDS",
+       "SECONDS"
+      ],
+      "type": "string"
+     },
+     "sendDelayMs": {
+      "type": "integer"
+     },
+     "timedMetadataId3Frame": {
+      "enum": [
+       "NONE",
+       "PRIV",
+       "TDRL"
+      ],
+      "type": "string"
+     },
+     "timedMetadataId3Period": {
+      "type": "integer"
+     },
+     "timedMetadataPassthrough": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "destination"
+    ],
+    "type": "object"
+   },
+   "CmafIngestOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "nameModifier": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ColorCorrection": {
+    "additionalProperties": false,
+    "properties": {
+     "inputColorSpace": {
+      "enum": [
+       "HDR10",
+       "HLG_2020",
+       "REC_601",
+       "REC_709"
+      ],
+      "type": "string"
+     },
+     "outputColorSpace": {
+      "enum": [
+       "HDR10",
+       "HLG_2020",
+       "REC_601",
+       "REC_709"
+      ],
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "outputColorSpace",
+     "inputColorSpace",
+     "uri"
+    ],
+    "type": "object"
+   },
+   "ColorCorrectionSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "globalColorCorrections": {
+      "items": {
+       "$ref": "#/components/schemas/ColorCorrection"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "globalColorCorrections"
+    ],
+    "type": "object"
+   },
+   "ColorSpacePassthroughSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DescribeAnywhereSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "channelPlacementGroupId": {
+      "type": "string"
+     },
+     "clusterId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeNetworkSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "associatedClusterIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "id": {
+      "type": "string"
+     },
+     "ipPools": {
+      "items": {
+       "$ref": "#/components/schemas/IpPool"
+      },
+      "type": "array"
+     },
+     "name": {
+      "type": "string"
+     },
+     "routes": {
+      "items": {
+       "$ref": "#/components/schemas/Route"
+      },
+      "type": "array"
+     },
+     "state": {
+      "enum": [
+       "CREATING",
+       "CREATE_FAILED",
+       "ACTIVE",
+       "DELETING",
+       "IDLE",
+       "IN_USE",
+       "UPDATING",
+       "DELETE_FAILED",
+       "DELETED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DolbyVision81Settings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DvbNitSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "networkId": {
+      "type": "integer"
+     },
+     "networkName": {
+      "type": "string"
+     },
+     "repInterval": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "networkName",
+     "networkId"
+    ],
+    "type": "object"
+   },
+   "DvbSdtSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "outputSdt": {
+      "enum": [
+       "SDT_FOLLOW",
+       "SDT_FOLLOW_IF_PRESENT",
+       "SDT_MANUAL",
+       "SDT_NONE"
+      ],
+      "type": "string"
+     },
+     "repInterval": {
+      "type": "integer"
+     },
+     "serviceName": {
+      "type": "string"
+     },
+     "serviceProviderName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DvbSubDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "alignment": {
+      "enum": [
+       "CENTERED",
+       "LEFT",
+       "SMART"
+      ],
+      "type": "string"
+     },
+     "backgroundColor": {
+      "enum": [
+       "BLACK",
+       "NONE",
+       "WHITE"
+      ],
+      "type": "string"
+     },
+     "backgroundOpacity": {
+      "type": "integer"
+     },
+     "font": {
+      "$ref": "#/components/schemas/InputLocation"
+     },
+     "fontColor": {
+      "enum": [
+       "BLACK",
+       "BLUE",
+       "GREEN",
+       "RED",
+       "WHITE",
+       "YELLOW"
+      ],
+      "type": "string"
+     },
+     "fontOpacity": {
+      "type": "integer"
+     },
+     "fontResolution": {
+      "type": "integer"
+     },
+     "fontSize": {
+      "type": "string"
+     },
+     "outlineColor": {
+      "enum": [
+       "BLACK",
+       "BLUE",
+       "GREEN",
+       "RED",
+       "WHITE",
+       "YELLOW"
+      ],
+      "type": "string"
+     },
+     "outlineSize": {
+      "type": "integer"
+     },
+     "shadowColor": {
+      "enum": [
+       "BLACK",
+       "NONE",
+       "WHITE"
+      ],
+      "type": "string"
+     },
+     "shadowOpacity": {
+      "type": "integer"
+     },
+     "shadowXOffset": {
+      "type": "integer"
+     },
+     "shadowYOffset": {
+      "type": "integer"
+     },
+     "subtitleRows": {
+      "enum": [
+       "ROWS_16",
+       "ROWS_20",
+       "ROWS_24"
+      ],
+      "type": "string"
+     },
+     "teletextGridControl": {
+      "enum": [
+       "FIXED",
+       "SCALED"
+      ],
+      "type": "string"
+     },
+     "xPosition": {
+      "type": "integer"
+     },
+     "yPosition": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DvbSubSourceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "ocrLanguage": {
+      "enum": [
+       "DEU",
+       "ENG",
+       "FRA",
+       "NLD",
+       "POR",
+       "SPA"
+      ],
+      "type": "string"
+     },
+     "pid": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DvbTdtSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "repInterval": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Eac3AtmosSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "bitrate": {
+      "type": "number"
+     },
+     "codingMode": {
+      "enum": [
+       "CODING_MODE_5_1_4",
+       "CODING_MODE_7_1_4",
+       "CODING_MODE_9_1_6"
+      ],
+      "type": "string"
+     },
+     "dialnorm": {
+      "type": "integer"
+     },
+     "drcLine": {
+      "enum": [
+       "FILM_LIGHT",
+       "FILM_STANDARD",
+       "MUSIC_LIGHT",
+       "MUSIC_STANDARD",
+       "NONE",
+       "SPEECH"
+      ],
+      "type": "string"
+     },
+     "drcRf": {
+      "enum": [
+       "FILM_LIGHT",
+       "FILM_STANDARD",
+       "MUSIC_LIGHT",
+       "MUSIC_STANDARD",
+       "NONE",
+       "SPEECH"
+      ],
+      "type": "string"
+     },
+     "heightTrim": {
+      "type": "number"
+     },
+     "surroundTrim": {
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "Eac3Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "attenuationControl": {
+      "enum": [
+       "ATTENUATE_3_DB",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "bitrate": {
+      "type": "number"
+     },
+     "bitstreamMode": {
+      "enum": [
+       "COMMENTARY",
+       "COMPLETE_MAIN",
+       "EMERGENCY",
+       "HEARING_IMPAIRED",
+       "VISUALLY_IMPAIRED"
+      ],
+      "type": "string"
+     },
+     "codingMode": {
+      "enum": [
+       "CODING_MODE_1_0",
+       "CODING_MODE_2_0",
+       "CODING_MODE_3_2"
+      ],
+      "type": "string"
+     },
+     "dcFilter": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "dialnorm": {
+      "type": "integer"
+     },
+     "drcLine": {
+      "enum": [
+       "FILM_LIGHT",
+       "FILM_STANDARD",
+       "MUSIC_LIGHT",
+       "MUSIC_STANDARD",
+       "NONE",
+       "SPEECH"
+      ],
+      "type": "string"
+     },
+     "drcRf": {
+      "enum": [
+       "FILM_LIGHT",
+       "FILM_STANDARD",
+       "MUSIC_LIGHT",
+       "MUSIC_STANDARD",
+       "NONE",
+       "SPEECH"
+      ],
+      "type": "string"
+     },
+     "lfeControl": {
+      "enum": [
+       "LFE",
+       "NO_LFE"
+      ],
+      "type": "string"
+     },
+     "lfeFilter": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "loRoCenterMixLevel": {
+      "type": "number"
+     },
+     "loRoSurroundMixLevel": {
+      "type": "number"
+     },
+     "ltRtCenterMixLevel": {
+      "type": "number"
+     },
+     "ltRtSurroundMixLevel": {
+      "type": "number"
+     },
+     "metadataControl": {
+      "enum": [
+       "FOLLOW_INPUT",
+       "USE_CONFIGURED"
+      ],
+      "type": "string"
+     },
+     "passthroughControl": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "WHEN_POSSIBLE"
+      ],
+      "type": "string"
+     },
+     "phaseControl": {
+      "enum": [
+       "NO_SHIFT",
+       "SHIFT_90_DEGREES"
+      ],
+      "type": "string"
+     },
+     "stereoDownmix": {
+      "enum": [
+       "DPL2",
+       "LO_RO",
+       "LT_RT",
+       "NOT_INDICATED"
+      ],
+      "type": "string"
+     },
+     "surroundExMode": {
+      "enum": [
+       "DISABLED",
+       "ENABLED",
+       "NOT_INDICATED"
+      ],
+      "type": "string"
+     },
+     "surroundMode": {
+      "enum": [
+       "DISABLED",
+       "ENABLED",
+       "NOT_INDICATED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EbuTtDDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "copyrightHolder": {
+      "type": "string"
+     },
+     "defaultFontSize": {
+      "type": "integer"
+     },
+     "defaultLineHeight": {
+      "type": "integer"
+     },
+     "fillLineGap": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "fontFamily": {
+      "type": "string"
+     },
+     "styleControl": {
+      "enum": [
+       "EXCLUDE",
+       "INCLUDE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EmbeddedDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "EmbeddedPlusScte20DestinationSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "EmbeddedSourceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "convert608To708": {
+      "enum": [
+       "DISABLED",
+       "UPCONVERT"
+      ],
+      "type": "string"
+     },
+     "scte20Detection": {
+      "enum": [
+       "AUTO",
+       "OFF"
+      ],
+      "type": "string"
+     },
+     "source608ChannelNumber": {
+      "type": "integer"
+     },
+     "source608TrackNumber": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "EncoderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "audioDescriptions": {
+      "items": {
+       "$ref": "#/components/schemas/AudioDescription"
+      },
+      "type": "array"
+     },
+     "availBlanking": {
+      "$ref": "#/components/schemas/AvailBlanking"
+     },
+     "availConfiguration": {
+      "$ref": "#/components/schemas/AvailConfiguration"
+     },
+     "blackoutSlate": {
+      "$ref": "#/components/schemas/BlackoutSlate"
+     },
+     "captionDescriptions": {
+      "items": {
+       "$ref": "#/components/schemas/CaptionDescription"
+      },
+      "type": "array"
+     },
+     "colorCorrectionSettings": {
+      "$ref": "#/components/schemas/ColorCorrectionSettings"
+     },
+     "featureActivations": {
+      "$ref": "#/components/schemas/FeatureActivations"
+     },
+     "globalConfiguration": {
+      "$ref": "#/components/schemas/GlobalConfiguration"
+     },
+     "motionGraphicsConfiguration": {
+      "$ref": "#/components/schemas/MotionGraphicsConfiguration"
+     },
+     "nielsenConfiguration": {
+      "$ref": "#/components/schemas/NielsenConfiguration"
+     },
+     "outputGroups": {
+      "items": {
+       "$ref": "#/components/schemas/OutputGroup"
+      },
+      "type": "array"
+     },
+     "thumbnailConfiguration": {
+      "$ref": "#/components/schemas/ThumbnailConfiguration"
+     },
+     "timecodeConfig": {
+      "$ref": "#/components/schemas/TimecodeConfig"
+     },
+     "videoDescriptions": {
+      "items": {
+       "$ref": "#/components/schemas/VideoDescription"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "videoDescriptions",
+     "audioDescriptions",
+     "outputGroups",
+     "timecodeConfig"
+    ],
+    "type": "object"
+   },
+   "EpochLockingSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "customEpoch": {
+      "type": "string"
+     },
+     "jamSyncTime": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Esam": {
+    "additionalProperties": false,
+    "properties": {
+     "acquisitionPointId": {
+      "type": "string"
+     },
+     "adAvailOffset": {
+      "type": "integer"
+     },
+     "passwordParam": {
+      "type": "string"
+     },
+     "poisEndpoint": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     },
+     "zoneIdentity": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "acquisitionPointId",
+     "poisEndpoint"
+    ],
+    "type": "object"
+   },
+   "FailoverCondition": {
+    "additionalProperties": false,
+    "properties": {
+     "failoverConditionSettings": {
+      "$ref": "#/components/schemas/FailoverConditionSettings"
+     }
+    },
+    "type": "object"
+   },
+   "FailoverConditionSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "audioSilenceSettings": {
+      "$ref": "#/components/schemas/AudioSilenceFailoverSettings"
+     },
+     "inputLossSettings": {
+      "$ref": "#/components/schemas/InputLossFailoverSettings"
+     },
+     "videoBlackSettings": {
+      "$ref": "#/components/schemas/VideoBlackFailoverSettings"
+     }
+    },
+    "type": "object"
+   },
+   "FeatureActivations": {
+    "additionalProperties": false,
+    "properties": {
+     "inputPrepareScheduleActions": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "outputStaticImageOverlayScheduleActions": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FecOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "columnDepth": {
+      "type": "integer"
+     },
+     "includeFec": {
+      "enum": [
+       "COLUMN",
+       "COLUMN_AND_ROW"
+      ],
+      "type": "string"
+     },
+     "rowLength": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Fmp4HlsSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "audioRenditionSets": {
+      "type": "string"
+     },
+     "nielsenId3Behavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "timedMetadataBehavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FrameCaptureCdnSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "frameCaptureS3Settings": {
+      "$ref": "#/components/schemas/FrameCaptureS3Settings"
+     }
+    },
+    "type": "object"
+   },
+   "FrameCaptureGroupSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "destination": {
+      "$ref": "#/components/schemas/OutputLocationRef"
+     },
+     "frameCaptureCdnSettings": {
+      "$ref": "#/components/schemas/FrameCaptureCdnSettings"
+     }
+    },
+    "required": [
+     "destination"
+    ],
+    "type": "object"
+   },
+   "FrameCaptureHlsSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "FrameCaptureOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "nameModifier": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FrameCaptureS3Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "cannedAcl": {
+      "enum": [
+       "AUTHENTICATED_READ",
+       "BUCKET_OWNER_FULL_CONTROL",
+       "BUCKET_OWNER_READ",
+       "PUBLIC_READ"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FrameCaptureSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "captureInterval": {
+      "type": "integer"
+     },
+     "captureIntervalUnits": {
+      "enum": [
+       "MILLISECONDS",
+       "SECONDS"
+      ],
+      "type": "string"
+     },
+     "timecodeBurninSettings": {
+      "$ref": "#/components/schemas/TimecodeBurninSettings"
+     }
+    },
+    "type": "object"
+   },
+   "GlobalConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "initialAudioGain": {
+      "type": "integer"
+     },
+     "inputEndAction": {
+      "enum": [
+       "NONE",
+       "SWITCH_AND_LOOP_INPUTS"
+      ],
+      "type": "string"
+     },
+     "inputLossBehavior": {
+      "$ref": "#/components/schemas/InputLossBehavior"
+     },
+     "outputLockingMode": {
+      "enum": [
+       "EPOCH_LOCKING",
+       "PIPELINE_LOCKING",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "outputLockingSettings": {
+      "$ref": "#/components/schemas/OutputLockingSettings"
+     },
+     "outputTimingSource": {
+      "enum": [
+       "INPUT_CLOCK",
+       "SYSTEM_CLOCK"
+      ],
+      "type": "string"
+     },
+     "supportLowFramerateInputs": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "H264ColorSpaceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "colorSpacePassthroughSettings": {
+      "$ref": "#/components/schemas/ColorSpacePassthroughSettings"
+     },
+     "rec601Settings": {
+      "$ref": "#/components/schemas/Rec601Settings"
+     },
+     "rec709Settings": {
+      "$ref": "#/components/schemas/Rec709Settings"
+     }
+    },
+    "type": "object"
+   },
+   "H264FilterSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "bandwidthReductionFilterSettings": {
+      "$ref": "#/components/schemas/BandwidthReductionFilterSettings"
+     },
+     "temporalFilterSettings": {
+      "$ref": "#/components/schemas/TemporalFilterSettings"
+     }
+    },
+    "type": "object"
+   },
+   "H264Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "adaptiveQuantization": {
+      "enum": [
+       "AUTO",
+       "HIGH",
+       "HIGHER",
+       "LOW",
+       "MAX",
+       "MEDIUM",
+       "OFF"
+      ],
+      "type": "string"
+     },
+     "afdSignaling": {
+      "enum": [
+       "AUTO",
+       "FIXED",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "bitrate": {
+      "type": "integer"
+     },
+     "bufFillPct": {
+      "type": "integer"
+     },
+     "bufSize": {
+      "type": "integer"
+     },
+     "colorMetadata": {
+      "enum": [
+       "IGNORE",
+       "INSERT"
+      ],
+      "type": "string"
+     },
+     "colorSpaceSettings": {
+      "$ref": "#/components/schemas/H264ColorSpaceSettings"
+     },
+     "entropyEncoding": {
+      "enum": [
+       "CABAC",
+       "CAVLC"
+      ],
+      "type": "string"
+     },
+     "filterSettings": {
+      "$ref": "#/components/schemas/H264FilterSettings"
+     },
+     "fixedAfd": {
+      "enum": [
+       "AFD_0000",
+       "AFD_0010",
+       "AFD_0011",
+       "AFD_0100",
+       "AFD_1000",
+       "AFD_1001",
+       "AFD_1010",
+       "AFD_1011",
+       "AFD_1101",
+       "AFD_1110",
+       "AFD_1111"
+      ],
+      "type": "string"
+     },
+     "flickerAq": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "forceFieldPictures": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "framerateControl": {
+      "enum": [
+       "INITIALIZE_FROM_SOURCE",
+       "SPECIFIED"
+      ],
+      "type": "string"
+     },
+     "framerateDenominator": {
+      "type": "integer"
+     },
+     "framerateNumerator": {
+      "type": "integer"
+     },
+     "gopBReference": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "gopClosedCadence": {
+      "type": "integer"
+     },
+     "gopNumBFrames": {
+      "type": "integer"
+     },
+     "gopSize": {
+      "type": "number"
+     },
+     "gopSizeUnits": {
+      "enum": [
+       "FRAMES",
+       "SECONDS"
+      ],
+      "type": "string"
+     },
+     "level": {
+      "enum": [
+       "H264_LEVEL_1",
+       "H264_LEVEL_1_1",
+       "H264_LEVEL_1_2",
+       "H264_LEVEL_1_3",
+       "H264_LEVEL_2",
+       "H264_LEVEL_2_1",
+       "H264_LEVEL_2_2",
+       "H264_LEVEL_3",
+       "H264_LEVEL_3_1",
+       "H264_LEVEL_3_2",
+       "H264_LEVEL_4",
+       "H264_LEVEL_4_1",
+       "H264_LEVEL_4_2",
+       "H264_LEVEL_5",
+       "H264_LEVEL_5_1",
+       "H264_LEVEL_5_2",
+       "H264_LEVEL_AUTO"
+      ],
+      "type": "string"
+     },
+     "lookAheadRateControl": {
+      "enum": [
+       "HIGH",
+       "LOW",
+       "MEDIUM"
+      ],
+      "type": "string"
+     },
+     "maxBitrate": {
+      "type": "integer"
+     },
+     "minBitrate": {
+      "type": "integer"
+     },
+     "minIInterval": {
+      "type": "integer"
+     },
+     "minQp": {
+      "type": "integer"
+     },
+     "numRefFrames": {
+      "type": "integer"
+     },
+     "parControl": {
+      "enum": [
+       "INITIALIZE_FROM_SOURCE",
+       "SPECIFIED"
+      ],
+      "type": "string"
+     },
+     "parDenominator": {
+      "type": "integer"
+     },
+     "parNumerator": {
+      "type": "integer"
+     },
+     "profile": {
+      "enum": [
+       "BASELINE",
+       "HIGH",
+       "HIGH_10BIT",
+       "HIGH_422",
+       "HIGH_422_10BIT",
+       "MAIN"
+      ],
+      "type": "string"
+     },
+     "qualityLevel": {
+      "enum": [
+       "ENHANCED_QUALITY",
+       "STANDARD_QUALITY"
+      ],
+      "type": "string"
+     },
+     "qvbrQualityLevel": {
+      "type": "integer"
+     },
+     "rateControlMode": {
+      "enum": [
+       "CBR",
+       "MULTIPLEX",
+       "QVBR",
+       "VBR"
+      ],
+      "type": "string"
+     },
+     "scanType": {
+      "enum": [
+       "INTERLACED",
+       "PROGRESSIVE"
+      ],
+      "type": "string"
+     },
+     "sceneChangeDetect": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "slices": {
+      "type": "integer"
+     },
+     "softness": {
+      "type": "integer"
+     },
+     "spatialAq": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "subgopLength": {
+      "enum": [
+       "DYNAMIC",
+       "FIXED"
+      ],
+      "type": "string"
+     },
+     "syntax": {
+      "enum": [
+       "DEFAULT",
+       "RP2027"
+      ],
+      "type": "string"
+     },
+     "temporalAq": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "timecodeBurninSettings": {
+      "$ref": "#/components/schemas/TimecodeBurninSettings"
+     },
+     "timecodeInsertion": {
+      "enum": [
+       "DISABLED",
+       "PIC_TIMING_SEI"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "H265ColorSpaceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "colorSpacePassthroughSettings": {
+      "$ref": "#/components/schemas/ColorSpacePassthroughSettings"
+     },
+     "dolbyVision81Settings": {
+      "$ref": "#/components/schemas/DolbyVision81Settings"
+     },
+     "hdr10Settings": {
+      "$ref": "#/components/schemas/Hdr10Settings"
+     },
+     "hlg2020Settings": {
+      "$ref": "#/components/schemas/Hlg2020Settings"
+     },
+     "rec601Settings": {
+      "$ref": "#/components/schemas/Rec601Settings"
+     },
+     "rec709Settings": {
+      "$ref": "#/components/schemas/Rec709Settings"
+     }
+    },
+    "type": "object"
+   },
+   "H265FilterSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "bandwidthReductionFilterSettings": {
+      "$ref": "#/components/schemas/BandwidthReductionFilterSettings"
+     },
+     "temporalFilterSettings": {
+      "$ref": "#/components/schemas/TemporalFilterSettings"
+     }
+    },
+    "type": "object"
+   },
+   "H265Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "adaptiveQuantization": {
+      "enum": [
+       "AUTO",
+       "HIGH",
+       "HIGHER",
+       "LOW",
+       "MAX",
+       "MEDIUM",
+       "OFF"
+      ],
+      "type": "string"
+     },
+     "afdSignaling": {
+      "enum": [
+       "AUTO",
+       "FIXED",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "alternativeTransferFunction": {
+      "enum": [
+       "INSERT",
+       "OMIT"
+      ],
+      "type": "string"
+     },
+     "bitrate": {
+      "type": "integer"
+     },
+     "bufSize": {
+      "type": "integer"
+     },
+     "colorMetadata": {
+      "enum": [
+       "IGNORE",
+       "INSERT"
+      ],
+      "type": "string"
+     },
+     "colorSpaceSettings": {
+      "$ref": "#/components/schemas/H265ColorSpaceSettings"
+     },
+     "deblocking": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "filterSettings": {
+      "$ref": "#/components/schemas/H265FilterSettings"
+     },
+     "fixedAfd": {
+      "enum": [
+       "AFD_0000",
+       "AFD_0010",
+       "AFD_0011",
+       "AFD_0100",
+       "AFD_1000",
+       "AFD_1001",
+       "AFD_1010",
+       "AFD_1011",
+       "AFD_1101",
+       "AFD_1110",
+       "AFD_1111"
+      ],
+      "type": "string"
+     },
+     "flickerAq": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "framerateDenominator": {
+      "type": "integer"
+     },
+     "framerateNumerator": {
+      "type": "integer"
+     },
+     "gopBReference": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "gopClosedCadence": {
+      "type": "integer"
+     },
+     "gopNumBFrames": {
+      "type": "integer"
+     },
+     "gopSize": {
+      "type": "number"
+     },
+     "gopSizeUnits": {
+      "enum": [
+       "FRAMES",
+       "SECONDS"
+      ],
+      "type": "string"
+     },
+     "level": {
+      "enum": [
+       "H265_LEVEL_1",
+       "H265_LEVEL_2",
+       "H265_LEVEL_2_1",
+       "H265_LEVEL_3",
+       "H265_LEVEL_3_1",
+       "H265_LEVEL_4",
+       "H265_LEVEL_4_1",
+       "H265_LEVEL_5",
+       "H265_LEVEL_5_1",
+       "H265_LEVEL_5_2",
+       "H265_LEVEL_6",
+       "H265_LEVEL_6_1",
+       "H265_LEVEL_6_2",
+       "H265_LEVEL_AUTO"
+      ],
+      "type": "string"
+     },
+     "lookAheadRateControl": {
+      "enum": [
+       "HIGH",
+       "LOW",
+       "MEDIUM"
+      ],
+      "type": "string"
+     },
+     "maxBitrate": {
+      "type": "integer"
+     },
+     "minBitrate": {
+      "type": "integer"
+     },
+     "minIInterval": {
+      "type": "integer"
+     },
+     "minQp": {
+      "type": "integer"
+     },
+     "mvOverPictureBoundaries": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "mvTemporalPredictor": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "parDenominator": {
+      "type": "integer"
+     },
+     "parNumerator": {
+      "type": "integer"
+     },
+     "profile": {
+      "enum": [
+       "MAIN",
+       "MAIN_10BIT"
+      ],
+      "type": "string"
+     },
+     "qvbrQualityLevel": {
+      "type": "integer"
+     },
+     "rateControlMode": {
+      "enum": [
+       "CBR",
+       "MULTIPLEX",
+       "QVBR"
+      ],
+      "type": "string"
+     },
+     "scanType": {
+      "enum": [
+       "INTERLACED",
+       "PROGRESSIVE"
+      ],
+      "type": "string"
+     },
+     "sceneChangeDetect": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "slices": {
+      "type": "integer"
+     },
+     "subgopLength": {
+      "enum": [
+       "DYNAMIC",
+       "FIXED"
+      ],
+      "type": "string"
+     },
+     "tier": {
+      "enum": [
+       "HIGH",
+       "MAIN"
+      ],
+      "type": "string"
+     },
+     "tileHeight": {
+      "type": "integer"
+     },
+     "tilePadding": {
+      "enum": [
+       "NONE",
+       "PADDED"
+      ],
+      "type": "string"
+     },
+     "tileWidth": {
+      "type": "integer"
+     },
+     "timecodeBurninSettings": {
+      "$ref": "#/components/schemas/TimecodeBurninSettings"
+     },
+     "timecodeInsertion": {
+      "enum": [
+       "DISABLED",
+       "PIC_TIMING_SEI"
+      ],
+      "type": "string"
+     },
+     "treeblockSize": {
+      "enum": [
+       "AUTO",
+       "TREE_SIZE_32X32"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "framerateNumerator",
+     "framerateDenominator"
+    ],
+    "type": "object"
+   },
+   "Hdr10Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "maxCll": {
+      "type": "integer"
+     },
+     "maxFall": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Hlg2020Settings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "HlsAkamaiSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "connectionRetryInterval": {
+      "type": "integer"
+     },
+     "filecacheDuration": {
+      "type": "integer"
+     },
+     "httpTransferMode": {
+      "enum": [
+       "CHUNKED",
+       "NON_CHUNKED"
+      ],
+      "type": "string"
+     },
+     "numRetries": {
+      "type": "integer"
+     },
+     "restartDelay": {
+      "type": "integer"
+     },
+     "salt": {
+      "type": "string"
+     },
+     "token": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HlsBasicPutSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "connectionRetryInterval": {
+      "type": "integer"
+     },
+     "filecacheDuration": {
+      "type": "integer"
+     },
+     "numRetries": {
+      "type": "integer"
+     },
+     "restartDelay": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "HlsCdnSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "hlsAkamaiSettings": {
+      "$ref": "#/components/schemas/HlsAkamaiSettings"
+     },
+     "hlsBasicPutSettings": {
+      "$ref": "#/components/schemas/HlsBasicPutSettings"
+     },
+     "hlsMediaStoreSettings": {
+      "$ref": "#/components/schemas/HlsMediaStoreSettings"
+     },
+     "hlsS3Settings": {
+      "$ref": "#/components/schemas/HlsS3Settings"
+     },
+     "hlsWebdavSettings": {
+      "$ref": "#/components/schemas/HlsWebdavSettings"
+     }
+    },
+    "type": "object"
+   },
+   "HlsGroupSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "adMarkers": {
+      "items": {
+       "enum": [
+        "ADOBE",
+        "ELEMENTAL",
+        "ELEMENTAL_SCTE35"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "baseUrlContent": {
+      "type": "string"
+     },
+     "baseUrlContent1": {
+      "type": "string"
+     },
+     "baseUrlManifest": {
+      "type": "string"
+     },
+     "baseUrlManifest1": {
+      "type": "string"
+     },
+     "captionLanguageMappings": {
+      "items": {
+       "$ref": "#/components/schemas/CaptionLanguageMapping"
+      },
+      "type": "array"
+     },
+     "captionLanguageSetting": {
+      "enum": [
+       "INSERT",
+       "NONE",
+       "OMIT"
+      ],
+      "type": "string"
+     },
+     "clientCache": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "codecSpecification": {
+      "enum": [
+       "RFC_4281",
+       "RFC_6381"
+      ],
+      "type": "string"
+     },
+     "constantIv": {
+      "type": "string"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/OutputLocationRef"
+     },
+     "directoryStructure": {
+      "enum": [
+       "SINGLE_DIRECTORY",
+       "SUBDIRECTORY_PER_STREAM"
+      ],
+      "type": "string"
+     },
+     "discontinuityTags": {
+      "enum": [
+       "INSERT",
+       "NEVER_INSERT"
+      ],
+      "type": "string"
+     },
+     "encryptionType": {
+      "enum": [
+       "AES128",
+       "SAMPLE_AES"
+      ],
+      "type": "string"
+     },
+     "hlsCdnSettings": {
+      "$ref": "#/components/schemas/HlsCdnSettings"
+     },
+     "hlsId3SegmentTagging": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "iFrameOnlyPlaylists": {
+      "enum": [
+       "DISABLED",
+       "STANDARD"
+      ],
+      "type": "string"
+     },
+     "incompleteSegmentBehavior": {
+      "enum": [
+       "AUTO",
+       "SUPPRESS"
+      ],
+      "type": "string"
+     },
+     "indexNSegments": {
+      "type": "integer"
+     },
+     "inputLossAction": {
+      "enum": [
+       "EMIT_OUTPUT",
+       "PAUSE_OUTPUT"
+      ],
+      "type": "string"
+     },
+     "ivInManifest": {
+      "enum": [
+       "EXCLUDE",
+       "INCLUDE"
+      ],
+      "type": "string"
+     },
+     "ivSource": {
+      "enum": [
+       "EXPLICIT",
+       "FOLLOWS_SEGMENT_NUMBER"
+      ],
+      "type": "string"
+     },
+     "keepSegments": {
+      "type": "integer"
+     },
+     "keyFormat": {
+      "type": "string"
+     },
+     "keyFormatVersions": {
+      "type": "string"
+     },
+     "keyProviderSettings": {
+      "$ref": "#/components/schemas/KeyProviderSettings"
+     },
+     "manifestCompression": {
+      "enum": [
+       "GZIP",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "manifestDurationFormat": {
+      "enum": [
+       "FLOATING_POINT",
+       "INTEGER"
+      ],
+      "type": "string"
+     },
+     "minSegmentLength": {
+      "type": "integer"
+     },
+     "mode": {
+      "enum": [
+       "LIVE",
+       "VOD"
+      ],
+      "type": "string"
+     },
+     "outputSelection": {
+      "enum": [
+       "MANIFESTS_AND_SEGMENTS",
+       "SEGMENTS_ONLY",
+       "VARIANT_MANIFESTS_AND_SEGMENTS"
+      ],
+      "type": "string"
+     },
+     "programDateTime": {
+      "enum": [
+       "EXCLUDE",
+       "INCLUDE"
+      ],
+      "type": "string"
+     },
+     "programDateTimeClock": {
+      "enum": [
+       "INITIALIZE_FROM_OUTPUT_TIMECODE",
+       "SYSTEM_CLOCK"
+      ],
+      "type": "string"
+     },
+     "programDateTimePeriod": {
+      "type": "integer"
+     },
+     "redundantManifest": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "segmentLength": {
+      "type": "integer"
+     },
+     "segmentationMode": {
+      "enum": [
+       "USE_INPUT_SEGMENTATION",
+       "USE_SEGMENT_DURATION"
+      ],
+      "type": "string"
+     },
+     "segmentsPerSubdirectory": {
+      "type": "integer"
+     },
+     "streamInfResolution": {
+      "enum": [
+       "EXCLUDE",
+       "INCLUDE"
+      ],
+      "type": "string"
+     },
+     "timedMetadataId3Frame": {
+      "enum": [
+       "NONE",
+       "PRIV",
+       "TDRL"
+      ],
+      "type": "string"
+     },
+     "timedMetadataId3Period": {
+      "type": "integer"
+     },
+     "timestampDeltaMilliseconds": {
+      "type": "integer"
+     },
+     "tsFileMode": {
+      "enum": [
+       "SEGMENTED_FILES",
+       "SINGLE_FILE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "destination"
+    ],
+    "type": "object"
+   },
+   "HlsInputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "bandwidth": {
+      "type": "integer"
+     },
+     "bufferSegments": {
+      "type": "integer"
+     },
+     "retries": {
+      "type": "integer"
+     },
+     "retryInterval": {
+      "type": "integer"
+     },
+     "scte35Source": {
+      "enum": [
+       "MANIFEST",
+       "SEGMENTS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HlsMediaStoreSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "connectionRetryInterval": {
+      "type": "integer"
+     },
+     "filecacheDuration": {
+      "type": "integer"
+     },
+     "mediaStoreStorageClass": {
+      "enum": [
+       "TEMPORAL"
+      ],
+      "type": "string"
+     },
+     "numRetries": {
+      "type": "integer"
+     },
+     "restartDelay": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "HlsOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "h265PackagingType": {
+      "enum": [
+       "HEV1",
+       "HVC1"
+      ],
+      "type": "string"
+     },
+     "hlsSettings": {
+      "$ref": "#/components/schemas/HlsSettings"
+     },
+     "nameModifier": {
+      "type": "string"
+     },
+     "segmentModifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "hlsSettings"
+    ],
+    "type": "object"
+   },
+   "HlsS3Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "cannedAcl": {
+      "enum": [
+       "AUTHENTICATED_READ",
+       "BUCKET_OWNER_FULL_CONTROL",
+       "BUCKET_OWNER_READ",
+       "PUBLIC_READ"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HlsSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "audioOnlyHlsSettings": {
+      "$ref": "#/components/schemas/AudioOnlyHlsSettings"
+     },
+     "fmp4HlsSettings": {
+      "$ref": "#/components/schemas/Fmp4HlsSettings"
+     },
+     "frameCaptureHlsSettings": {
+      "$ref": "#/components/schemas/FrameCaptureHlsSettings"
+     },
+     "standardHlsSettings": {
+      "$ref": "#/components/schemas/StandardHlsSettings"
+     }
+    },
+    "type": "object"
+   },
+   "HlsWebdavSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "connectionRetryInterval": {
+      "type": "integer"
+     },
+     "filecacheDuration": {
+      "type": "integer"
+     },
+     "httpTransferMode": {
+      "enum": [
+       "CHUNKED",
+       "NON_CHUNKED"
+      ],
+      "type": "string"
+     },
+     "numRetries": {
+      "type": "integer"
+     },
+     "restartDelay": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "HtmlMotionGraphicsSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "InputAttachment": {
+    "additionalProperties": false,
+    "properties": {
+     "automaticInputFailoverSettings": {
+      "$ref": "#/components/schemas/AutomaticInputFailoverSettings"
+     },
+     "inputAttachmentName": {
+      "type": "string"
+     },
+     "inputId": {
+      "type": "string"
+     },
+     "inputSettings": {
+      "$ref": "#/components/schemas/InputSettings"
+     },
+     "logicalInterfaceNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "InputChannelLevel": {
+    "additionalProperties": false,
+    "properties": {
+     "gain": {
+      "type": "integer"
+     },
+     "inputChannel": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "inputChannel",
+     "gain"
+    ],
+    "type": "object"
+   },
+   "InputLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "passwordParam": {
+      "type": "string"
+     },
+     "uri": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "uri"
+    ],
+    "type": "object"
+   },
+   "InputLossBehavior": {
+    "additionalProperties": false,
+    "properties": {
+     "blackFrameMsec": {
+      "type": "integer"
+     },
+     "inputLossImageColor": {
+      "type": "string"
+     },
+     "inputLossImageSlate": {
+      "$ref": "#/components/schemas/InputLocation"
+     },
+     "inputLossImageType": {
+      "enum": [
+       "COLOR",
+       "SLATE"
+      ],
+      "type": "string"
+     },
+     "repeatFrameMsec": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "InputLossFailoverSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "inputLossThresholdMsec": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "InputSecurityGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "inputs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "state": {
+      "enum": [
+       "IDLE",
+       "IN_USE",
+       "UPDATING",
+       "DELETED"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "whitelistRules": {
+      "items": {
+       "$ref": "#/components/schemas/InputWhitelistRule"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "InputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "audioSelectors": {
+      "items": {
+       "$ref": "#/components/schemas/AudioSelector"
+      },
+      "type": "array"
+     },
+     "captionSelectors": {
+      "items": {
+       "$ref": "#/components/schemas/CaptionSelector"
+      },
+      "type": "array"
+     },
+     "deblockFilter": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "denoiseFilter": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "filterStrength": {
+      "type": "integer"
+     },
+     "inputFilter": {
+      "enum": [
+       "AUTO",
+       "DISABLED",
+       "FORCED"
+      ],
+      "type": "string"
+     },
+     "networkInputSettings": {
+      "$ref": "#/components/schemas/NetworkInputSettings"
+     },
+     "scte35Pid": {
+      "type": "integer"
+     },
+     "smpte2038DataPreference": {
+      "enum": [
+       "IGNORE",
+       "PREFER"
+      ],
+      "type": "string"
+     },
+     "sourceEndBehavior": {
+      "enum": [
+       "CONTINUE",
+       "LOOP"
+      ],
+      "type": "string"
+     },
+     "videoSelector": {
+      "$ref": "#/components/schemas/VideoSelector"
+     }
+    },
+    "type": "object"
+   },
+   "InputSpecification": {
+    "additionalProperties": false,
+    "properties": {
+     "codec": {
+      "enum": [
+       "MPEG2",
+       "AVC",
+       "HEVC"
+      ],
+      "type": "string"
+     },
+     "maximumBitrate": {
+      "enum": [
+       "MAX_10_MBPS",
+       "MAX_20_MBPS",
+       "MAX_50_MBPS"
+      ],
+      "type": "string"
+     },
+     "resolution": {
+      "enum": [
+       "SD",
+       "HD",
+       "UHD"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InputWhitelistRule": {
+    "additionalProperties": false,
+    "properties": {
+     "cidr": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InputWhitelistRuleCidr": {
+    "additionalProperties": false,
+    "properties": {
+     "cidr": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IpPool": {
+    "additionalProperties": false,
+    "properties": {
+     "cidr": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IpPoolCreateRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "cidr": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IpPoolUpdateRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "cidr": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "KeyProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "staticKeySettings": {
+      "$ref": "#/components/schemas/StaticKeySettings"
+     }
+    },
+    "type": "object"
+   },
+   "M2tsSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "absentInputAudioBehavior": {
+      "enum": [
+       "DROP",
+       "ENCODE_SILENCE"
+      ],
+      "type": "string"
+     },
+     "arib": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "aribCaptionsPid": {
+      "type": "string"
+     },
+     "aribCaptionsPidControl": {
+      "enum": [
+       "AUTO",
+       "USE_CONFIGURED"
+      ],
+      "type": "string"
+     },
+     "audioBufferModel": {
+      "enum": [
+       "ATSC",
+       "DVB"
+      ],
+      "type": "string"
+     },
+     "audioFramesPerPes": {
+      "type": "integer"
+     },
+     "audioPids": {
+      "type": "string"
+     },
+     "audioStreamType": {
+      "enum": [
+       "ATSC",
+       "DVB"
+      ],
+      "type": "string"
+     },
+     "bitrate": {
+      "type": "integer"
+     },
+     "bufferModel": {
+      "enum": [
+       "MULTIPLEX",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "ccDescriptor": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "dvbNitSettings": {
+      "$ref": "#/components/schemas/DvbNitSettings"
+     },
+     "dvbSdtSettings": {
+      "$ref": "#/components/schemas/DvbSdtSettings"
+     },
+     "dvbSubPids": {
+      "type": "string"
+     },
+     "dvbTdtSettings": {
+      "$ref": "#/components/schemas/DvbTdtSettings"
+     },
+     "dvbTeletextPid": {
+      "type": "string"
+     },
+     "ebif": {
+      "enum": [
+       "NONE",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "ebpAudioInterval": {
+      "enum": [
+       "VIDEO_AND_FIXED_INTERVALS",
+       "VIDEO_INTERVAL"
+      ],
+      "type": "string"
+     },
+     "ebpLookaheadMs": {
+      "type": "integer"
+     },
+     "ebpPlacement": {
+      "enum": [
+       "VIDEO_AND_AUDIO_PIDS",
+       "VIDEO_PID"
+      ],
+      "type": "string"
+     },
+     "ecmPid": {
+      "type": "string"
+     },
+     "esRateInPes": {
+      "enum": [
+       "EXCLUDE",
+       "INCLUDE"
+      ],
+      "type": "string"
+     },
+     "etvPlatformPid": {
+      "type": "string"
+     },
+     "etvSignalPid": {
+      "type": "string"
+     },
+     "fragmentTime": {
+      "type": "number"
+     },
+     "klv": {
+      "enum": [
+       "NONE",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "klvDataPids": {
+      "type": "string"
+     },
+     "nielsenId3Behavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "nullPacketBitrate": {
+      "type": "number"
+     },
+     "patInterval": {
+      "type": "integer"
+     },
+     "pcrControl": {
+      "enum": [
+       "CONFIGURED_PCR_PERIOD",
+       "PCR_EVERY_PES_PACKET"
+      ],
+      "type": "string"
+     },
+     "pcrPeriod": {
+      "type": "integer"
+     },
+     "pcrPid": {
+      "type": "string"
+     },
+     "pmtInterval": {
+      "type": "integer"
+     },
+     "pmtPid": {
+      "type": "string"
+     },
+     "programNum": {
+      "type": "integer"
+     },
+     "rateMode": {
+      "enum": [
+       "CBR",
+       "VBR"
+      ],
+      "type": "string"
+     },
+     "scte27Pids": {
+      "type": "string"
+     },
+     "scte35Control": {
+      "enum": [
+       "NONE",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "scte35Pid": {
+      "type": "string"
+     },
+     "scte35PrerollPullupMilliseconds": {
+      "type": "number"
+     },
+     "segmentationMarkers": {
+      "enum": [
+       "EBP",
+       "EBP_LEGACY",
+       "NONE",
+       "PSI_SEGSTART",
+       "RAI_ADAPT",
+       "RAI_SEGSTART"
+      ],
+      "type": "string"
+     },
+     "segmentationStyle": {
+      "enum": [
+       "MAINTAIN_CADENCE",
+       "RESET_CADENCE"
+      ],
+      "type": "string"
+     },
+     "segmentationTime": {
+      "type": "number"
+     },
+     "timedMetadataBehavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "timedMetadataPid": {
+      "type": "string"
+     },
+     "transportStreamId": {
+      "type": "integer"
+     },
+     "videoPid": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "M3u8Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "audioFramesPerPes": {
+      "type": "integer"
+     },
+     "audioPids": {
+      "type": "string"
+     },
+     "ecmPid": {
+      "type": "string"
+     },
+     "klvBehavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "klvDataPids": {
+      "type": "string"
+     },
+     "nielsenId3Behavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "patInterval": {
+      "type": "integer"
+     },
+     "pcrControl": {
+      "enum": [
+       "CONFIGURED_PCR_PERIOD",
+       "PCR_EVERY_PES_PACKET"
+      ],
+      "type": "string"
+     },
+     "pcrPeriod": {
+      "type": "integer"
+     },
+     "pcrPid": {
+      "type": "string"
+     },
+     "pmtInterval": {
+      "type": "integer"
+     },
+     "pmtPid": {
+      "type": "string"
+     },
+     "programNum": {
+      "type": "integer"
+     },
+     "scte35Behavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "scte35Pid": {
+      "type": "string"
+     },
+     "timedMetadataBehavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "timedMetadataPid": {
+      "type": "string"
+     },
+     "transportStreamId": {
+      "type": "integer"
+     },
+     "videoPid": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceCreateSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "maintenanceDay": {
+      "enum": [
+       "MONDAY",
+       "TUESDAY",
+       "WEDNESDAY",
+       "THURSDAY",
+       "FRIDAY",
+       "SATURDAY",
+       "SUNDAY"
+      ],
+      "type": "string"
+     },
+     "maintenanceStartTime": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "maintenanceDay": {
+      "enum": [
+       "MONDAY",
+       "TUESDAY",
+       "WEDNESDAY",
+       "THURSDAY",
+       "FRIDAY",
+       "SATURDAY",
+       "SUNDAY"
+      ],
+      "type": "string"
+     },
+     "maintenanceDeadline": {
+      "type": "string"
+     },
+     "maintenanceScheduledDate": {
+      "type": "string"
+     },
+     "maintenanceStartTime": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MaintenanceUpdateSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "maintenanceDay": {
+      "enum": [
+       "MONDAY",
+       "TUESDAY",
+       "WEDNESDAY",
+       "THURSDAY",
+       "FRIDAY",
+       "SATURDAY",
+       "SUNDAY"
+      ],
+      "type": "string"
+     },
+     "maintenanceScheduledDate": {
+      "type": "string"
+     },
+     "maintenanceStartTime": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MediaPackageGroupSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "destination": {
+      "$ref": "#/components/schemas/OutputLocationRef"
+     },
+     "mediapackageV2GroupSettings": {
+      "$ref": "#/components/schemas/MediaPackageV2GroupSettings"
+     }
+    },
+    "required": [
+     "destination"
+    ],
+    "type": "object"
+   },
+   "MediaPackageOutputDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "channelGroup": {
+      "type": "string"
+     },
+     "channelId": {
+      "type": "string"
+     },
+     "channelName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MediaPackageOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "mediaPackageV2DestinationSettings": {
+      "$ref": "#/components/schemas/MediaPackageV2DestinationSettings"
+     }
+    },
+    "type": "object"
+   },
+   "MediaPackageV2DestinationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "audioGroupId": {
+      "type": "string"
+     },
+     "audioRenditionSets": {
+      "type": "string"
+     },
+     "hlsAutoSelect": {
+      "enum": [
+       "NO",
+       "OMIT",
+       "YES"
+      ],
+      "type": "string"
+     },
+     "hlsDefault": {
+      "enum": [
+       "NO",
+       "OMIT",
+       "YES"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MediaPackageV2GroupSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "captionLanguageMappings": {
+      "items": {
+       "$ref": "#/components/schemas/CaptionLanguageMapping"
+      },
+      "type": "array"
+     },
+     "id3Behavior": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "klvBehavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "nielsenId3Behavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "scte35Type": {
+      "enum": [
+       "NONE",
+       "SCTE_35_WITHOUT_SEGMENTATION"
+      ],
+      "type": "string"
+     },
+     "segmentLength": {
+      "type": "integer"
+     },
+     "segmentLengthUnits": {
+      "enum": [
+       "MILLISECONDS",
+       "SECONDS"
+      ],
+      "type": "string"
+     },
+     "timedMetadataId3Frame": {
+      "enum": [
+       "NONE",
+       "PRIV",
+       "TDRL"
+      ],
+      "type": "string"
+     },
+     "timedMetadataId3Period": {
+      "type": "integer"
+     },
+     "timedMetadataPassthrough": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MotionGraphicsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "motionGraphicsInsertion": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "motionGraphicsSettings": {
+      "$ref": "#/components/schemas/MotionGraphicsSettings"
+     }
+    },
+    "required": [
+     "motionGraphicsSettings"
+    ],
+    "type": "object"
+   },
+   "MotionGraphicsSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "htmlMotionGraphicsSettings": {
+      "$ref": "#/components/schemas/HtmlMotionGraphicsSettings"
+     }
+    },
+    "type": "object"
+   },
+   "Mp2Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "bitrate": {
+      "type": "number"
+     },
+     "codingMode": {
+      "enum": [
+       "CODING_MODE_1_0",
+       "CODING_MODE_2_0"
+      ],
+      "type": "string"
+     },
+     "sampleRate": {
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "Mpeg2FilterSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "temporalFilterSettings": {
+      "$ref": "#/components/schemas/TemporalFilterSettings"
+     }
+    },
+    "type": "object"
+   },
+   "Mpeg2Settings": {
+    "additionalProperties": false,
+    "properties": {
+     "adaptiveQuantization": {
+      "enum": [
+       "AUTO",
+       "HIGH",
+       "LOW",
+       "MEDIUM",
+       "OFF"
+      ],
+      "type": "string"
+     },
+     "afdSignaling": {
+      "enum": [
+       "AUTO",
+       "FIXED",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "colorMetadata": {
+      "enum": [
+       "IGNORE",
+       "INSERT"
+      ],
+      "type": "string"
+     },
+     "colorSpace": {
+      "enum": [
+       "AUTO",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "displayAspectRatio": {
+      "enum": [
+       "DISPLAYRATIO16X9",
+       "DISPLAYRATIO4X3"
+      ],
+      "type": "string"
+     },
+     "filterSettings": {
+      "$ref": "#/components/schemas/Mpeg2FilterSettings"
+     },
+     "fixedAfd": {
+      "enum": [
+       "AFD_0000",
+       "AFD_0010",
+       "AFD_0011",
+       "AFD_0100",
+       "AFD_1000",
+       "AFD_1001",
+       "AFD_1010",
+       "AFD_1011",
+       "AFD_1101",
+       "AFD_1110",
+       "AFD_1111"
+      ],
+      "type": "string"
+     },
+     "framerateDenominator": {
+      "type": "integer"
+     },
+     "framerateNumerator": {
+      "type": "integer"
+     },
+     "gopClosedCadence": {
+      "type": "integer"
+     },
+     "gopNumBFrames": {
+      "type": "integer"
+     },
+     "gopSize": {
+      "type": "number"
+     },
+     "gopSizeUnits": {
+      "enum": [
+       "FRAMES",
+       "SECONDS"
+      ],
+      "type": "string"
+     },
+     "scanType": {
+      "enum": [
+       "INTERLACED",
+       "PROGRESSIVE"
+      ],
+      "type": "string"
+     },
+     "subgopLength": {
+      "enum": [
+       "DYNAMIC",
+       "FIXED"
+      ],
+      "type": "string"
+     },
+     "timecodeBurninSettings": {
+      "$ref": "#/components/schemas/TimecodeBurninSettings"
+     },
+     "timecodeInsertion": {
+      "enum": [
+       "DISABLED",
+       "GOP_TIMECODE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "framerateNumerator",
+     "framerateDenominator"
+    ],
+    "type": "object"
+   },
+   "MsSmoothGroupSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "acquisitionPointId": {
+      "type": "string"
+     },
+     "audioOnlyTimecodeControl": {
+      "enum": [
+       "PASSTHROUGH",
+       "USE_CONFIGURED_CLOCK"
+      ],
+      "type": "string"
+     },
+     "certificateMode": {
+      "enum": [
+       "SELF_SIGNED",
+       "VERIFY_AUTHENTICITY"
+      ],
+      "type": "string"
+     },
+     "connectionRetryInterval": {
+      "type": "integer"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/OutputLocationRef"
+     },
+     "eventId": {
+      "type": "string"
+     },
+     "eventIdMode": {
+      "enum": [
+       "NO_EVENT_ID",
+       "USE_CONFIGURED",
+       "USE_TIMESTAMP"
+      ],
+      "type": "string"
+     },
+     "eventStopBehavior": {
+      "enum": [
+       "NONE",
+       "SEND_EOS"
+      ],
+      "type": "string"
+     },
+     "filecacheDuration": {
+      "type": "integer"
+     },
+     "fragmentLength": {
+      "type": "integer"
+     },
+     "inputLossAction": {
+      "enum": [
+       "EMIT_OUTPUT",
+       "PAUSE_OUTPUT"
+      ],
+      "type": "string"
+     },
+     "numRetries": {
+      "type": "integer"
+     },
+     "restartDelay": {
+      "type": "integer"
+     },
+     "segmentationMode": {
+      "enum": [
+       "USE_INPUT_SEGMENTATION",
+       "USE_SEGMENT_DURATION"
+      ],
+      "type": "string"
+     },
+     "sendDelayMs": {
+      "type": "integer"
+     },
+     "sparseTrackType": {
+      "enum": [
+       "NONE",
+       "SCTE_35",
+       "SCTE_35_WITHOUT_SEGMENTATION"
+      ],
+      "type": "string"
+     },
+     "streamManifestBehavior": {
+      "enum": [
+       "DO_NOT_SEND",
+       "SEND"
+      ],
+      "type": "string"
+     },
+     "timestampOffset": {
+      "type": "string"
+     },
+     "timestampOffsetMode": {
+      "enum": [
+       "USE_CONFIGURED_OFFSET",
+       "USE_EVENT_START_DATE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "destination"
+    ],
+    "type": "object"
+   },
+   "MsSmoothOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "h265PackagingType": {
+      "enum": [
+       "HEV1",
+       "HVC1"
+      ],
+      "type": "string"
+     },
+     "nameModifier": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MulticastInputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "sourceIpAddress": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MultiplexContainerSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "multiplexM2tsSettings": {
+      "$ref": "#/components/schemas/MultiplexM2tsSettings"
+     }
+    },
+    "type": "object"
+   },
+   "MultiplexGroupSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "MultiplexM2tsSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "absentInputAudioBehavior": {
+      "enum": [
+       "DROP",
+       "ENCODE_SILENCE"
+      ],
+      "type": "string"
+     },
+     "arib": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "audioBufferModel": {
+      "enum": [
+       "ATSC",
+       "DVB"
+      ],
+      "type": "string"
+     },
+     "audioFramesPerPes": {
+      "type": "integer"
+     },
+     "audioStreamType": {
+      "enum": [
+       "ATSC",
+       "DVB"
+      ],
+      "type": "string"
+     },
+     "ccDescriptor": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "ebif": {
+      "enum": [
+       "NONE",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "esRateInPes": {
+      "enum": [
+       "EXCLUDE",
+       "INCLUDE"
+      ],
+      "type": "string"
+     },
+     "klv": {
+      "enum": [
+       "NONE",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "nielsenId3Behavior": {
+      "enum": [
+       "NO_PASSTHROUGH",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "pcrControl": {
+      "enum": [
+       "CONFIGURED_PCR_PERIOD",
+       "PCR_EVERY_PES_PACKET"
+      ],
+      "type": "string"
+     },
+     "pcrPeriod": {
+      "type": "integer"
+     },
+     "scte35Control": {
+      "enum": [
+       "NONE",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     },
+     "scte35PrerollPullupMilliseconds": {
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "MultiplexOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "containerSettings": {
+      "$ref": "#/components/schemas/MultiplexContainerSettings"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/OutputLocationRef"
+     }
+    },
+    "required": [
+     "destination"
+    ],
+    "type": "object"
+   },
+   "MultiplexProgramChannelDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "multiplexId": {
+      "type": "string"
+     },
+     "programName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkInputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "hlsInputSettings": {
+      "$ref": "#/components/schemas/HlsInputSettings"
+     },
+     "multicastInputSettings": {
+      "$ref": "#/components/schemas/MulticastInputSettings"
+     },
+     "serverValidation": {
+      "enum": [
+       "CHECK_CRYPTOGRAPHY_AND_VALIDATE_NAME",
+       "CHECK_CRYPTOGRAPHY_ONLY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NielsenCBET": {
+    "additionalProperties": false,
+    "properties": {
+     "cbetCheckDigitString": {
+      "type": "string"
+     },
+     "cbetStepaside": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "csid": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "cbetCheckDigitString",
+     "cbetStepaside",
+     "csid"
+    ],
+    "type": "object"
+   },
+   "NielsenConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "distributorId": {
+      "type": "string"
+     },
+     "nielsenPcmToId3Tagging": {
+      "enum": [
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NielsenNaesIiNw": {
+    "additionalProperties": false,
+    "properties": {
+     "checkDigitString": {
+      "type": "string"
+     },
+     "sid": {
+      "type": "number"
+     },
+     "timezone": {
+      "enum": [
+       "AMERICA_PUERTO_RICO",
+       "US_ALASKA",
+       "US_ARIZONA",
+       "US_CENTRAL",
+       "US_EASTERN",
+       "US_HAWAII",
+       "US_MOUNTAIN",
+       "US_PACIFIC",
+       "US_SAMOA",
+       "UTC"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "checkDigitString",
+     "sid"
+    ],
+    "type": "object"
+   },
+   "NielsenWatermarksSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "nielsenCbetSettings": {
+      "$ref": "#/components/schemas/NielsenCBET"
+     },
+     "nielsenDistributionType": {
+      "enum": [
+       "FINAL_DISTRIBUTOR",
+       "PROGRAM_CONTENT"
+      ],
+      "type": "string"
+     },
+     "nielsenNaesIiNwSettings": {
+      "$ref": "#/components/schemas/NielsenNaesIiNw"
+     }
+    },
+    "type": "object"
+   },
+   "Output": {
+    "additionalProperties": false,
+    "properties": {
+     "audioDescriptionNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "captionDescriptionNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "outputName": {
+      "type": "string"
+     },
+     "outputSettings": {
+      "$ref": "#/components/schemas/OutputSettings"
+     },
+     "videoDescriptionName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "outputSettings"
+    ],
+    "type": "object"
+   },
+   "OutputDestination": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "logicalInterfaceNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "mediaPackageSettings": {
+      "items": {
+       "$ref": "#/components/schemas/MediaPackageOutputDestinationSettings"
+      },
+      "type": "array"
+     },
+     "multiplexSettings": {
+      "$ref": "#/components/schemas/MultiplexProgramChannelDestinationSettings"
+     },
+     "settings": {
+      "items": {
+       "$ref": "#/components/schemas/OutputDestinationSettings"
+      },
+      "type": "array"
+     },
+     "srtSettings": {
+      "items": {
+       "$ref": "#/components/schemas/SrtOutputDestinationSettings"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "OutputDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "passwordParam": {
+      "type": "string"
+     },
+     "streamName": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OutputGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "outputGroupSettings": {
+      "$ref": "#/components/schemas/OutputGroupSettings"
+     },
+     "outputs": {
+      "items": {
+       "$ref": "#/components/schemas/Output"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "outputs",
+     "outputGroupSettings"
+    ],
+    "type": "object"
+   },
+   "OutputGroupSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "archiveGroupSettings": {
+      "$ref": "#/components/schemas/ArchiveGroupSettings"
+     },
+     "cmafIngestGroupSettings": {
+      "$ref": "#/components/schemas/CmafIngestGroupSettings"
+     },
+     "frameCaptureGroupSettings": {
+      "$ref": "#/components/schemas/FrameCaptureGroupSettings"
+     },
+     "hlsGroupSettings": {
+      "$ref": "#/components/schemas/HlsGroupSettings"
+     },
+     "mediaPackageGroupSettings": {
+      "$ref": "#/components/schemas/MediaPackageGroupSettings"
+     },
+     "msSmoothGroupSettings": {
+      "$ref": "#/components/schemas/MsSmoothGroupSettings"
+     },
+     "multiplexGroupSettings": {
+      "$ref": "#/components/schemas/MultiplexGroupSettings"
+     },
+     "rtmpGroupSettings": {
+      "$ref": "#/components/schemas/RtmpGroupSettings"
+     },
+     "srtGroupSettings": {
+      "$ref": "#/components/schemas/SrtGroupSettings"
+     },
+     "udpGroupSettings": {
+      "$ref": "#/components/schemas/UdpGroupSettings"
+     }
+    },
+    "type": "object"
+   },
+   "OutputLocationRef": {
+    "additionalProperties": false,
+    "properties": {
+     "destinationRefId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OutputLockingSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "epochLockingSettings": {
+      "$ref": "#/components/schemas/EpochLockingSettings"
+     },
+     "pipelineLockingSettings": {
+      "$ref": "#/components/schemas/PipelineLockingSettings"
+     }
+    },
+    "type": "object"
+   },
+   "OutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "archiveOutputSettings": {
+      "$ref": "#/components/schemas/ArchiveOutputSettings"
+     },
+     "cmafIngestOutputSettings": {
+      "$ref": "#/components/schemas/CmafIngestOutputSettings"
+     },
+     "frameCaptureOutputSettings": {
+      "$ref": "#/components/schemas/FrameCaptureOutputSettings"
+     },
+     "hlsOutputSettings": {
+      "$ref": "#/components/schemas/HlsOutputSettings"
+     },
+     "mediaPackageOutputSettings": {
+      "$ref": "#/components/schemas/MediaPackageOutputSettings"
+     },
+     "msSmoothOutputSettings": {
+      "$ref": "#/components/schemas/MsSmoothOutputSettings"
+     },
+     "multiplexOutputSettings": {
+      "$ref": "#/components/schemas/MultiplexOutputSettings"
+     },
+     "rtmpOutputSettings": {
+      "$ref": "#/components/schemas/RtmpOutputSettings"
+     },
+     "srtOutputSettings": {
+      "$ref": "#/components/schemas/SrtOutputSettings"
+     },
+     "udpOutputSettings": {
+      "$ref": "#/components/schemas/UdpOutputSettings"
+     }
+    },
+    "type": "object"
+   },
+   "PassThroughSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "PipelineDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "activeInputAttachmentName": {
+      "type": "string"
+     },
+     "activeInputSwitchActionName": {
+      "type": "string"
+     },
+     "activeMotionGraphicsActionName": {
+      "type": "string"
+     },
+     "activeMotionGraphicsUri": {
+      "type": "string"
+     },
+     "channelEngineVersion": {
+      "$ref": "#/components/schemas/ChannelEngineVersionResponse"
+     },
+     "pipelineId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PipelineLockingSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "RawSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Rec601Settings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Rec709Settings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "RemixSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "channelMappings": {
+      "items": {
+       "$ref": "#/components/schemas/AudioChannelMapping"
+      },
+      "type": "array"
+     },
+     "channelsIn": {
+      "type": "integer"
+     },
+     "channelsOut": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "channelMappings"
+    ],
+    "type": "object"
+   },
+   "Route": {
+    "additionalProperties": false,
+    "properties": {
+     "cidr": {
+      "type": "string"
+     },
+     "gateway": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RouteCreateRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "cidr": {
+      "type": "string"
+     },
+     "gateway": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RouteUpdateRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "cidr": {
+      "type": "string"
+     },
+     "gateway": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RtmpCaptionInfoDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "RtmpGroupSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "adMarkers": {
+      "items": {
+       "enum": [
+        "ON_CUE_POINT_SCTE35"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "authenticationScheme": {
+      "enum": [
+       "AKAMAI",
+       "COMMON"
+      ],
+      "type": "string"
+     },
+     "cacheFullBehavior": {
+      "enum": [
+       "DISCONNECT_IMMEDIATELY",
+       "WAIT_FOR_SERVER"
+      ],
+      "type": "string"
+     },
+     "cacheLength": {
+      "type": "integer"
+     },
+     "captionData": {
+      "enum": [
+       "ALL",
+       "FIELD1_608",
+       "FIELD1_AND_FIELD2_608"
+      ],
+      "type": "string"
+     },
+     "includeFillerNalUnits": {
+      "enum": [
+       "AUTO",
+       "DROP",
+       "INCLUDE"
+      ],
+      "type": "string"
+     },
+     "inputLossAction": {
+      "enum": [
+       "EMIT_OUTPUT",
+       "PAUSE_OUTPUT"
+      ],
+      "type": "string"
+     },
+     "restartDelay": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "RtmpOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateMode": {
+      "enum": [
+       "SELF_SIGNED",
+       "VERIFY_AUTHENTICITY"
+      ],
+      "type": "string"
+     },
+     "connectionRetryInterval": {
+      "type": "integer"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/OutputLocationRef"
+     },
+     "numRetries": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "destination"
+    ],
+    "type": "object"
+   },
+   "Scte20PlusEmbeddedDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Scte20SourceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "convert608To708": {
+      "enum": [
+       "DISABLED",
+       "UPCONVERT"
+      ],
+      "type": "string"
+     },
+     "source608ChannelNumber": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Scte27DestinationSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Scte27SourceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "ocrLanguage": {
+      "enum": [
+       "DEU",
+       "ENG",
+       "FRA",
+       "NLD",
+       "POR",
+       "SPA"
+      ],
+      "type": "string"
+     },
+     "pid": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Scte35SpliceInsert": {
+    "additionalProperties": false,
+    "properties": {
+     "adAvailOffset": {
+      "type": "integer"
+     },
+     "noRegionalBlackoutFlag": {
+      "enum": [
+       "FOLLOW",
+       "IGNORE"
+      ],
+      "type": "string"
+     },
+     "webDeliveryAllowedFlag": {
+      "enum": [
+       "FOLLOW",
+       "IGNORE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Scte35TimeSignalApos": {
+    "additionalProperties": false,
+    "properties": {
+     "adAvailOffset": {
+      "type": "integer"
+     },
+     "noRegionalBlackoutFlag": {
+      "enum": [
+       "FOLLOW",
+       "IGNORE"
+      ],
+      "type": "string"
+     },
+     "webDeliveryAllowedFlag": {
+      "enum": [
+       "FOLLOW",
+       "IGNORE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SdiSource": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "inputs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "mode": {
+      "enum": [
+       "QUADRANT",
+       "INTERLEAVE"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "IDLE",
+       "IN_USE",
+       "DELETED"
+      ],
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "SINGLE",
+       "QUAD"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SdiSourceSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "inputs": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "mode": {
+      "enum": [
+       "QUADRANT",
+       "INTERLEAVE"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "IDLE",
+       "IN_USE",
+       "DELETED"
+      ],
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "SINGLE",
+       "QUAD"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SmpteTtDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "SrtGroupSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "inputLossAction": {
+      "enum": [
+       "DROP_PROGRAM",
+       "DROP_TS",
+       "EMIT_PROGRAM"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SrtOutputDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionPassphraseSecretArn": {
+      "type": "string"
+     },
+     "streamId": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SrtOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "bufferMsec": {
+      "type": "integer"
+     },
+     "containerSettings": {
+      "$ref": "#/components/schemas/UdpContainerSettings"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/OutputLocationRef"
+     },
+     "encryptionType": {
+      "enum": [
+       "AES128",
+       "AES192",
+       "AES256"
+      ],
+      "type": "string"
+     },
+     "latency": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "destination",
+     "containerSettings"
+    ],
+    "type": "object"
+   },
+   "StandardHlsSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "audioRenditionSets": {
+      "type": "string"
+     },
+     "m3u8Settings": {
+      "$ref": "#/components/schemas/M3u8Settings"
+     }
+    },
+    "required": [
+     "m3u8Settings"
+    ],
+    "type": "object"
+   },
+   "StaticKeySettings": {
+    "additionalProperties": false,
+    "properties": {
+     "keyProviderServer": {
+      "$ref": "#/components/schemas/InputLocation"
+     },
+     "staticKeyValue": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "staticKeyValue"
+    ],
+    "type": "object"
+   },
+   "TeletextDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "TeletextSourceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "outputRectangle": {
+      "$ref": "#/components/schemas/CaptionRectangle"
+     },
+     "pageNumber": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TemporalFilterSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "postFilterSharpening": {
+      "enum": [
+       "AUTO",
+       "DISABLED",
+       "ENABLED"
+      ],
+      "type": "string"
+     },
+     "strength": {
+      "enum": [
+       "AUTO",
+       "STRENGTH_1",
+       "STRENGTH_2",
+       "STRENGTH_3",
+       "STRENGTH_4",
+       "STRENGTH_5",
+       "STRENGTH_6",
+       "STRENGTH_7",
+       "STRENGTH_8",
+       "STRENGTH_9",
+       "STRENGTH_10",
+       "STRENGTH_11",
+       "STRENGTH_12",
+       "STRENGTH_13",
+       "STRENGTH_14",
+       "STRENGTH_15",
+       "STRENGTH_16"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ThumbnailConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "state": {
+      "enum": [
+       "AUTO",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "state"
+    ],
+    "type": "object"
+   },
+   "TimecodeBurninSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "fontSize": {
+      "enum": [
+       "EXTRA_SMALL_10",
+       "LARGE_48",
+       "MEDIUM_32",
+       "SMALL_16"
+      ],
+      "type": "string"
+     },
+     "position": {
+      "enum": [
+       "BOTTOM_CENTER",
+       "BOTTOM_LEFT",
+       "BOTTOM_RIGHT",
+       "MIDDLE_CENTER",
+       "MIDDLE_LEFT",
+       "MIDDLE_RIGHT",
+       "TOP_CENTER",
+       "TOP_LEFT",
+       "TOP_RIGHT"
+      ],
+      "type": "string"
+     },
+     "prefix": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "position",
+     "fontSize"
+    ],
+    "type": "object"
+   },
+   "TimecodeConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "source": {
+      "enum": [
+       "EMBEDDED",
+       "SYSTEMCLOCK",
+       "ZEROBASED"
+      ],
+      "type": "string"
+     },
+     "syncThreshold": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "source"
+    ],
+    "type": "object"
+   },
+   "TtmlDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "styleControl": {
+      "enum": [
+       "PASSTHROUGH",
+       "USE_CONFIGURED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UdpContainerSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "m2tsSettings": {
+      "$ref": "#/components/schemas/M2tsSettings"
+     }
+    },
+    "type": "object"
+   },
+   "UdpGroupSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "inputLossAction": {
+      "enum": [
+       "DROP_PROGRAM",
+       "DROP_TS",
+       "EMIT_PROGRAM"
+      ],
+      "type": "string"
+     },
+     "timedMetadataId3Frame": {
+      "enum": [
+       "NONE",
+       "PRIV",
+       "TDRL"
+      ],
+      "type": "string"
+     },
+     "timedMetadataId3Period": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "UdpOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "bufferMsec": {
+      "type": "integer"
+     },
+     "containerSettings": {
+      "$ref": "#/components/schemas/UdpContainerSettings"
+     },
+     "destination": {
+      "$ref": "#/components/schemas/OutputLocationRef"
+     },
+     "fecOutputSettings": {
+      "$ref": "#/components/schemas/FecOutputSettings"
+     }
+    },
+    "required": [
+     "destination",
+     "containerSettings"
+    ],
+    "type": "object"
+   },
+   "VideoBlackFailoverSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "blackDetectThreshold": {
+      "type": "number"
+     },
+     "videoBlackThresholdMsec": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "VideoCodecSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "av1Settings": {
+      "$ref": "#/components/schemas/Av1Settings"
+     },
+     "frameCaptureSettings": {
+      "$ref": "#/components/schemas/FrameCaptureSettings"
+     },
+     "h264Settings": {
+      "$ref": "#/components/schemas/H264Settings"
+     },
+     "h265Settings": {
+      "$ref": "#/components/schemas/H265Settings"
+     },
+     "mpeg2Settings": {
+      "$ref": "#/components/schemas/Mpeg2Settings"
+     }
+    },
+    "type": "object"
+   },
+   "VideoDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "codecSettings": {
+      "$ref": "#/components/schemas/VideoCodecSettings"
+     },
+     "height": {
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "respondToAfd": {
+      "enum": [
+       "NONE",
+       "PASSTHROUGH",
+       "RESPOND"
+      ],
+      "type": "string"
+     },
+     "scalingBehavior": {
+      "enum": [
+       "DEFAULT",
+       "STRETCH_TO_OUTPUT"
+      ],
+      "type": "string"
+     },
+     "sharpness": {
+      "type": "integer"
+     },
+     "width": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "VideoSelector": {
+    "additionalProperties": false,
+    "properties": {
+     "colorSpace": {
+      "enum": [
+       "FOLLOW",
+       "HDR10",
+       "HLG_2020",
+       "REC_601",
+       "REC_709"
+      ],
+      "type": "string"
+     },
+     "colorSpaceSettings": {
+      "$ref": "#/components/schemas/VideoSelectorColorSpaceSettings"
+     },
+     "colorSpaceUsage": {
+      "enum": [
+       "FALLBACK",
+       "FORCE"
+      ],
+      "type": "string"
+     },
+     "selectorSettings": {
+      "$ref": "#/components/schemas/VideoSelectorSettings"
+     }
+    },
+    "type": "object"
+   },
+   "VideoSelectorColorSpaceSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "hdr10Settings": {
+      "$ref": "#/components/schemas/Hdr10Settings"
+     }
+    },
+    "type": "object"
+   },
+   "VideoSelectorPid": {
+    "additionalProperties": false,
+    "properties": {
+     "pid": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "VideoSelectorProgramId": {
+    "additionalProperties": false,
+    "properties": {
+     "programId": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "VideoSelectorSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "videoSelectorPid": {
+      "$ref": "#/components/schemas/VideoSelectorPid"
+     },
+     "videoSelectorProgramId": {
+      "$ref": "#/components/schemas/VideoSelectorProgramId"
+     }
+    },
+    "type": "object"
+   },
+   "VpcOutputSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "publicAddressAllocationIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "securityGroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "subnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "subnetIds"
+    ],
+    "type": "object"
+   },
+   "VpcOutputSettingsDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "availabilityZones": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "networkInterfaceIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "securityGroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "subnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "WavSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "bitDepth": {
+      "type": "number"
+     },
+     "codingMode": {
+      "enum": [
+       "CODING_MODE_1_0",
+       "CODING_MODE_2_0",
+       "CODING_MODE_4_0",
+       "CODING_MODE_8_0"
+      ],
+      "type": "string"
+     },
+     "sampleRate": {
+      "type": "number"
+     }
+    },
+    "type": "object"
+   },
+   "WebvttDestinationSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "styleControl": {
+      "enum": [
+       "NO_STYLE_DATA",
+       "PASSTHROUGH"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Elemental MediaLive API (2017-10-14). Every other official operation returns HTTP 501 UnknownOperationException. Input security groups, networks, SDI sources and channels are stored records: a channel stays IDLE with no pipeline, encoder, egress endpoint or output, and no input, device, cluster or multiplex exists. StartChannel, StopChannel, RestartChannelPipelines, UpdateChannelClass, schedule actions, inputs and partner inputs (their push destinations and pull credentials), input devices, clusters, nodes, channel placement groups, multiplexes, signal maps, the CloudWatch alarm and EventBridge rule templates and groups (whose group template counts the catalog cannot maintain), offerings and reservations (purchases), thumbnails, alerts, account configuration and ListVersions return UnknownOperationException with HTTP 501. Channels cannot attach inputs, so InputAttachments, Vpc, AnywhereSettings, Reserved and DryRun true are refused. Any stream name, user name or password parameter anywhere in Destinations or EncoderSettings is refused because the catalog stores no stream key or credential reference; the official model requires none of the channel members, so a channel with no encoder settings is accepted where AWS demands them. Role ARNs and S3 or RTMP destination URLs are stored without being resolved or contacted. Input security groups are IDLE with no inputs and accept IPv4 CIDR whitelist rules; UpdateInputSecurityGroup changes the rules and refuses Tags (use CreateTags and DeleteTags). Networks are IDLE with no associated clusters, and their CIDRs must be IPv4 ranges. Update operations replace the supplied members whole. Limits per Region are simulator limits, not AWS quotas.",
+  "title": "AWS Elemental MediaLive (simulator catalog)",
+  "version": "2017-10-14"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/prod/channels": {
+   "get": {
+    "operationId": "medialiveListChannels",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "channels": {
+           "items": {
+            "$ref": "#/components/schemas/ChannelSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListChannels",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "post": {
+    "operationId": "medialiveCreateChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "anywhereSettings": {
+          "$ref": "#/components/schemas/AnywhereSettings"
+         },
+         "cdiInputSpecification": {
+          "$ref": "#/components/schemas/CdiInputSpecification"
+         },
+         "channelClass": {
+          "enum": [
+           "STANDARD",
+           "SINGLE_PIPELINE"
+          ],
+          "type": "string"
+         },
+         "channelEngineVersion": {
+          "$ref": "#/components/schemas/ChannelEngineVersionRequest"
+         },
+         "destinations": {
+          "items": {
+           "$ref": "#/components/schemas/OutputDestination"
+          },
+          "type": "array"
+         },
+         "dryRun": {
+          "type": "boolean"
+         },
+         "encoderSettings": {
+          "$ref": "#/components/schemas/EncoderSettings"
+         },
+         "inputAttachments": {
+          "items": {
+           "$ref": "#/components/schemas/InputAttachment"
+          },
+          "type": "array"
+         },
+         "inputSpecification": {
+          "$ref": "#/components/schemas/InputSpecification"
+         },
+         "logLevel": {
+          "enum": [
+           "ERROR",
+           "WARNING",
+           "INFO",
+           "DEBUG",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "maintenance": {
+          "$ref": "#/components/schemas/MaintenanceCreateSettings"
+         },
+         "name": {
+          "type": "string"
+         },
+         "requestId": {
+          "type": "string"
+         },
+         "reserved": {
+          "type": "string"
+         },
+         "roleArn": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "vpc": {
+          "$ref": "#/components/schemas/VpcOutputSettings"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "channel": {
+           "$ref": "#/components/schemas/Channel"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateChannel",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   }
+  },
+  "/prod/channels/{channelId}": {
+   "delete": {
+    "operationId": "medialiveDeleteChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "channelId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "anywhereSettings": {
+           "$ref": "#/components/schemas/DescribeAnywhereSettings"
+          },
+          "arn": {
+           "type": "string"
+          },
+          "cdiInputSpecification": {
+           "$ref": "#/components/schemas/CdiInputSpecification"
+          },
+          "channelClass": {
+           "enum": [
+            "STANDARD",
+            "SINGLE_PIPELINE"
+           ],
+           "type": "string"
+          },
+          "channelEngineVersion": {
+           "$ref": "#/components/schemas/ChannelEngineVersionResponse"
+          },
+          "destinations": {
+           "items": {
+            "$ref": "#/components/schemas/OutputDestination"
+           },
+           "type": "array"
+          },
+          "egressEndpoints": {
+           "items": {
+            "$ref": "#/components/schemas/ChannelEgressEndpoint"
+           },
+           "type": "array"
+          },
+          "encoderSettings": {
+           "$ref": "#/components/schemas/EncoderSettings"
+          },
+          "id": {
+           "type": "string"
+          },
+          "inputAttachments": {
+           "items": {
+            "$ref": "#/components/schemas/InputAttachment"
+           },
+           "type": "array"
+          },
+          "inputSpecification": {
+           "$ref": "#/components/schemas/InputSpecification"
+          },
+          "logLevel": {
+           "enum": [
+            "ERROR",
+            "WARNING",
+            "INFO",
+            "DEBUG",
+            "DISABLED"
+           ],
+           "type": "string"
+          },
+          "maintenance": {
+           "$ref": "#/components/schemas/MaintenanceStatus"
+          },
+          "name": {
+           "type": "string"
+          },
+          "pipelineDetails": {
+           "items": {
+            "$ref": "#/components/schemas/PipelineDetail"
+           },
+           "type": "array"
+          },
+          "pipelinesRunningCount": {
+           "type": "integer"
+          },
+          "roleArn": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "CREATING",
+            "CREATE_FAILED",
+            "IDLE",
+            "STARTING",
+            "RUNNING",
+            "RECOVERING",
+            "STOPPING",
+            "DELETING",
+            "DELETED",
+            "UPDATING",
+            "UPDATE_FAILED"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "vpc": {
+           "$ref": "#/components/schemas/VpcOutputSettingsDescription"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteChannel",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "get": {
+    "operationId": "medialiveDescribeChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "channelId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "anywhereSettings": {
+           "$ref": "#/components/schemas/DescribeAnywhereSettings"
+          },
+          "arn": {
+           "type": "string"
+          },
+          "cdiInputSpecification": {
+           "$ref": "#/components/schemas/CdiInputSpecification"
+          },
+          "channelClass": {
+           "enum": [
+            "STANDARD",
+            "SINGLE_PIPELINE"
+           ],
+           "type": "string"
+          },
+          "channelEngineVersion": {
+           "$ref": "#/components/schemas/ChannelEngineVersionResponse"
+          },
+          "destinations": {
+           "items": {
+            "$ref": "#/components/schemas/OutputDestination"
+           },
+           "type": "array"
+          },
+          "egressEndpoints": {
+           "items": {
+            "$ref": "#/components/schemas/ChannelEgressEndpoint"
+           },
+           "type": "array"
+          },
+          "encoderSettings": {
+           "$ref": "#/components/schemas/EncoderSettings"
+          },
+          "id": {
+           "type": "string"
+          },
+          "inputAttachments": {
+           "items": {
+            "$ref": "#/components/schemas/InputAttachment"
+           },
+           "type": "array"
+          },
+          "inputSpecification": {
+           "$ref": "#/components/schemas/InputSpecification"
+          },
+          "logLevel": {
+           "enum": [
+            "ERROR",
+            "WARNING",
+            "INFO",
+            "DEBUG",
+            "DISABLED"
+           ],
+           "type": "string"
+          },
+          "maintenance": {
+           "$ref": "#/components/schemas/MaintenanceStatus"
+          },
+          "name": {
+           "type": "string"
+          },
+          "pipelineDetails": {
+           "items": {
+            "$ref": "#/components/schemas/PipelineDetail"
+           },
+           "type": "array"
+          },
+          "pipelinesRunningCount": {
+           "type": "integer"
+          },
+          "roleArn": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "CREATING",
+            "CREATE_FAILED",
+            "IDLE",
+            "STARTING",
+            "RUNNING",
+            "RECOVERING",
+            "STOPPING",
+            "DELETING",
+            "DELETED",
+            "UPDATING",
+            "UPDATE_FAILED"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "vpc": {
+           "$ref": "#/components/schemas/VpcOutputSettingsDescription"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeChannel",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "put": {
+    "operationId": "medialiveUpdateChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "channelId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "anywhereSettings": {
+          "$ref": "#/components/schemas/AnywhereSettings"
+         },
+         "cdiInputSpecification": {
+          "$ref": "#/components/schemas/CdiInputSpecification"
+         },
+         "channelEngineVersion": {
+          "$ref": "#/components/schemas/ChannelEngineVersionRequest"
+         },
+         "destinations": {
+          "items": {
+           "$ref": "#/components/schemas/OutputDestination"
+          },
+          "type": "array"
+         },
+         "dryRun": {
+          "type": "boolean"
+         },
+         "encoderSettings": {
+          "$ref": "#/components/schemas/EncoderSettings"
+         },
+         "inputAttachments": {
+          "items": {
+           "$ref": "#/components/schemas/InputAttachment"
+          },
+          "type": "array"
+         },
+         "inputSpecification": {
+          "$ref": "#/components/schemas/InputSpecification"
+         },
+         "logLevel": {
+          "enum": [
+           "ERROR",
+           "WARNING",
+           "INFO",
+           "DEBUG",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "maintenance": {
+          "$ref": "#/components/schemas/MaintenanceUpdateSettings"
+         },
+         "name": {
+          "type": "string"
+         },
+         "roleArn": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "channel": {
+           "$ref": "#/components/schemas/Channel"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateChannel",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   }
+  },
+  "/prod/inputSecurityGroups": {
+   "get": {
+    "operationId": "medialiveListInputSecurityGroups",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "inputSecurityGroups": {
+           "items": {
+            "$ref": "#/components/schemas/InputSecurityGroup"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListInputSecurityGroups",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "post": {
+    "operationId": "medialiveCreateInputSecurityGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "whitelistRules": {
+          "items": {
+           "$ref": "#/components/schemas/InputWhitelistRuleCidr"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "securityGroup": {
+           "$ref": "#/components/schemas/InputSecurityGroup"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateInputSecurityGroup",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   }
+  },
+  "/prod/inputSecurityGroups/{inputSecurityGroupId}": {
+   "delete": {
+    "operationId": "medialiveDeleteInputSecurityGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "inputSecurityGroupId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteInputSecurityGroup",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "get": {
+    "operationId": "medialiveDescribeInputSecurityGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "inputSecurityGroupId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "inputs": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "state": {
+           "enum": [
+            "IDLE",
+            "IN_USE",
+            "UPDATING",
+            "DELETED"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "whitelistRules": {
+           "items": {
+            "$ref": "#/components/schemas/InputWhitelistRule"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeInputSecurityGroup",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "put": {
+    "operationId": "medialiveUpdateInputSecurityGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "inputSecurityGroupId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "whitelistRules": {
+          "items": {
+           "$ref": "#/components/schemas/InputWhitelistRuleCidr"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "securityGroup": {
+           "$ref": "#/components/schemas/InputSecurityGroup"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateInputSecurityGroup",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   }
+  },
+  "/prod/networks": {
+   "get": {
+    "operationId": "medialiveListNetworks",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "networks": {
+           "items": {
+            "$ref": "#/components/schemas/DescribeNetworkSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListNetworks",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "post": {
+    "operationId": "medialiveCreateNetwork",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ipPools": {
+          "items": {
+           "$ref": "#/components/schemas/IpPoolCreateRequest"
+          },
+          "type": "array"
+         },
+         "name": {
+          "type": "string"
+         },
+         "requestId": {
+          "type": "string"
+         },
+         "routes": {
+          "items": {
+           "$ref": "#/components/schemas/RouteCreateRequest"
+          },
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "associatedClusterIds": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "id": {
+           "type": "string"
+          },
+          "ipPools": {
+           "items": {
+            "$ref": "#/components/schemas/IpPool"
+           },
+           "type": "array"
+          },
+          "name": {
+           "type": "string"
+          },
+          "routes": {
+           "items": {
+            "$ref": "#/components/schemas/Route"
+           },
+           "type": "array"
+          },
+          "state": {
+           "enum": [
+            "CREATING",
+            "CREATE_FAILED",
+            "ACTIVE",
+            "DELETING",
+            "IDLE",
+            "IN_USE",
+            "UPDATING",
+            "DELETE_FAILED",
+            "DELETED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateNetwork",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   }
+  },
+  "/prod/networks/{networkId}": {
+   "delete": {
+    "operationId": "medialiveDeleteNetwork",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "networkId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "associatedClusterIds": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "id": {
+           "type": "string"
+          },
+          "ipPools": {
+           "items": {
+            "$ref": "#/components/schemas/IpPool"
+           },
+           "type": "array"
+          },
+          "name": {
+           "type": "string"
+          },
+          "routes": {
+           "items": {
+            "$ref": "#/components/schemas/Route"
+           },
+           "type": "array"
+          },
+          "state": {
+           "enum": [
+            "CREATING",
+            "CREATE_FAILED",
+            "ACTIVE",
+            "DELETING",
+            "IDLE",
+            "IN_USE",
+            "UPDATING",
+            "DELETE_FAILED",
+            "DELETED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteNetwork",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "get": {
+    "operationId": "medialiveDescribeNetwork",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "networkId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "associatedClusterIds": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "id": {
+           "type": "string"
+          },
+          "ipPools": {
+           "items": {
+            "$ref": "#/components/schemas/IpPool"
+           },
+           "type": "array"
+          },
+          "name": {
+           "type": "string"
+          },
+          "routes": {
+           "items": {
+            "$ref": "#/components/schemas/Route"
+           },
+           "type": "array"
+          },
+          "state": {
+           "enum": [
+            "CREATING",
+            "CREATE_FAILED",
+            "ACTIVE",
+            "DELETING",
+            "IDLE",
+            "IN_USE",
+            "UPDATING",
+            "DELETE_FAILED",
+            "DELETED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeNetwork",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "put": {
+    "operationId": "medialiveUpdateNetwork",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "networkId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ipPools": {
+          "items": {
+           "$ref": "#/components/schemas/IpPoolUpdateRequest"
+          },
+          "type": "array"
+         },
+         "name": {
+          "type": "string"
+         },
+         "routes": {
+          "items": {
+           "$ref": "#/components/schemas/RouteUpdateRequest"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "associatedClusterIds": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "id": {
+           "type": "string"
+          },
+          "ipPools": {
+           "items": {
+            "$ref": "#/components/schemas/IpPool"
+           },
+           "type": "array"
+          },
+          "name": {
+           "type": "string"
+          },
+          "routes": {
+           "items": {
+            "$ref": "#/components/schemas/Route"
+           },
+           "type": "array"
+          },
+          "state": {
+           "enum": [
+            "CREATING",
+            "CREATE_FAILED",
+            "ACTIVE",
+            "DELETING",
+            "IDLE",
+            "IN_USE",
+            "UPDATING",
+            "DELETE_FAILED",
+            "DELETED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateNetwork",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   }
+  },
+  "/prod/sdiSources": {
+   "get": {
+    "operationId": "medialiveListSdiSources",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "sdiSources": {
+           "items": {
+            "$ref": "#/components/schemas/SdiSourceSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSdiSources",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "post": {
+    "operationId": "medialiveCreateSdiSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "mode": {
+          "enum": [
+           "QUADRANT",
+           "INTERLEAVE"
+          ],
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         },
+         "requestId": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "type": {
+          "enum": [
+           "SINGLE",
+           "QUAD"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "sdiSource": {
+           "$ref": "#/components/schemas/SdiSource"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSdiSource",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   }
+  },
+  "/prod/sdiSources/{sdiSourceId}": {
+   "delete": {
+    "operationId": "medialiveDeleteSdiSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sdiSourceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "sdiSource": {
+           "$ref": "#/components/schemas/SdiSource"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSdiSource",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "get": {
+    "operationId": "medialiveDescribeSdiSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sdiSourceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "sdiSource": {
+           "$ref": "#/components/schemas/SdiSource"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeSdiSource",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "put": {
+    "operationId": "medialiveUpdateSdiSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sdiSourceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "mode": {
+          "enum": [
+           "QUADRANT",
+           "INTERLEAVE"
+          ],
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         },
+         "type": {
+          "enum": [
+           "SINGLE",
+           "QUAD"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "sdiSource": {
+           "$ref": "#/components/schemas/SdiSource"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSdiSource",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   }
+  },
+  "/prod/tags/{resource-arn}": {
+   "delete": {
+    "operationId": "medialiveDeleteTags",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteTags",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "get": {
+    "operationId": "medialiveListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   },
+   "post": {
+    "operationId": "medialiveCreateTags",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "medialive"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateTags",
+    "tags": [
+     "AWS Elemental MediaLive"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Elemental MediaLive API (2017-10-14). Every other official operation returns HTTP 501 UnknownOperationException. Input security groups, networks, SDI sources and channels are stored records: a channel stays IDLE with no pipeline, encoder, egress endpoint or output, and no input, device, cluster or multiplex exists. StartChannel, StopChannel, RestartChannelPipelines, UpdateChannelClass, schedule actions, inputs and partner inputs (their push destinations and pull credentials), input devices, clusters, nodes, channel placement groups, multiplexes, signal maps, the CloudWatch alarm and EventBridge rule templates and groups (whose group template counts the catalog cannot maintain), offerings and reservations (purchases), thumbnails, alerts, account configuration and ListVersions return UnknownOperationException with HTTP 501. Channels cannot attach inputs, so InputAttachments, Vpc, AnywhereSettings, Reserved and DryRun true are refused. Any stream name, user name or password parameter anywhere in Destinations or EncoderSettings is refused because the catalog stores no stream key or credential reference; the official model requires none of the channel members, so a channel with no encoder settings is accepted where AWS demands them. Role ARNs and S3 or RTMP destination URLs are stored without being resolved or contacted. Input security groups are IDLE with no inputs and accept IPv4 CIDR whitelist rules; UpdateInputSecurityGroup changes the rules and refuses Tags (use CreateTags and DeleteTags). Networks are IDLE with no associated clusters, and their CIDRs must be IPv4 ranges. Update operations replace the supplied members whole. Limits per Region are simulator limits, not AWS quotas.",
+   "name": "AWS Elemental MediaLive"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/medialive/2017-10-14/service-2.json",
+  "sha256": "656bca66b13fa14b44e33ad5760b072c25e3a3690aff3614a6031b9627851f3d",
+  "license": "Apache-2.0"
+ }
+}

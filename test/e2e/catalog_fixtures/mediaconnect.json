@@ -1,0 +1,34 @@
+{
+ "client": "mediaconnect",
+ "steps": [
+  {"op": "create_gateway", "args": {"Name": "fixture-gateway", "EgressCidrBlocks": ["10.0.0.0/24"], "Networks": [{"CidrBlock": "10.1.0.0/24", "Name": "lan"}]}, "save": {"gateway": "Gateway.GatewayArn"}, "expect": {"Gateway.GatewayState": "ACTIVE", "Gateway.Name": "fixture-gateway"}},
+  {"op": "describe_gateway", "args": {"GatewayArn": "${gateway}"}, "expect": {"Gateway.Networks[0].Name": "lan"}},
+  {"op": "list_gateways", "args": {}, "expect": {"Gateways#count": 1, "Gateways[0].GatewayArn": "${gateway}"}},
+  {"op": "create_router_network_interface", "args": {"Name": "fixture-edge", "Configuration": {"Public": {"AllowRules": [{"Cidr": "10.0.0.0/8"}]}}, "Tags": {"team": "a"}}, "save": {"nic": "RouterNetworkInterface.Arn"}, "expect": {"RouterNetworkInterface.NetworkInterfaceType": "PUBLIC", "RouterNetworkInterface.State": "ACTIVE", "RouterNetworkInterface.Tags": {"team": "a"}}},
+  {"op": "get_router_network_interface", "args": {"Arn": "${nic}"}, "expect": {"RouterNetworkInterface.Name": "fixture-edge"}},
+  {"op": "list_router_network_interfaces", "args": {}, "expect": {"RouterNetworkInterfaces#count": 1}},
+  {"op": "update_router_network_interface", "args": {"Arn": "${nic}", "Name": "fixture-edge-2"}, "expect": {"RouterNetworkInterface.Name": "fixture-edge-2"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${nic}", "Tags": {"k": "v"}}},
+  {"op": "tag_global_resource", "args": {"ResourceArn": "${nic}", "Tags": {"g": "v"}}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${nic}"}, "expect": {"Tags": {"team": "a", "k": "v", "g": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${nic}", "TagKeys": ["k"]}},
+  {"op": "untag_global_resource", "args": {"ResourceArn": "${nic}", "TagKeys": ["g"]}},
+  {"op": "list_tags_for_global_resource", "args": {"ResourceArn": "${nic}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "create_gateway", "args": {"Name": "bad", "EgressCidrBlocks": ["office"], "Networks": []}, "error": "BadRequestException"},
+  {"op": "create_router_network_interface", "args": {"Name": "bad", "Configuration": {"Public": {"AllowRules": [{"Cidr": "anywhere"}]}}}, "error": "BadRequestException"},
+  {"op": "describe_gateway", "args": {"GatewayArn": "arn:aws:mediaconnect:us-east-1:000000000000:gateway:none:none"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_gateways", "args": {}, "expect": {"Gateways#count": 0}},
+  {"op": "list_router_network_interfaces", "args": {}, "expect": {"RouterNetworkInterfaces#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_gateway", "args": {"GatewayArn": "${gateway}"}, "expect": {"Gateway.Name": "fixture-gateway"}},
+  {"op": "get_router_network_interface", "args": {"Arn": "${nic}"}, "expect": {"RouterNetworkInterface.Name": "fixture-edge-2"}}
+ ],
+ "cleanup": [
+  {"op": "delete_router_network_interface", "args": {"Arn": "${nic}"}, "expect": {"State": "ACTIVE"}},
+  {"op": "delete_gateway", "args": {"GatewayArn": "${gateway}"}, "expect": {"GatewayArn": "${gateway}"}},
+  {"op": "list_gateways", "args": {}, "expect": {"Gateways#count": 0}}
+ ]
+}

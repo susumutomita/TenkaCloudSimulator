@@ -1,0 +1,24 @@
+{
+ "client": "ivs",
+ "steps": [
+  {"op": "create_playback_restriction_policy", "args": {"name": "fixture-jp", "allowedCountries": ["JP"], "allowedOrigins": ["https://example.com"], "tags": {"team": "a"}}, "save": {"policy": "playbackRestrictionPolicy.arn"}, "expect": {"playbackRestrictionPolicy.enableStrictOriginEnforcement": false, "playbackRestrictionPolicy.tags": {"team": "a"}}},
+  {"op": "get_playback_restriction_policy", "args": {"arn": "${policy}"}, "expect": {"playbackRestrictionPolicy.name": "fixture-jp"}},
+  {"op": "list_playback_restriction_policies", "args": {}, "expect": {"playbackRestrictionPolicies#count": 1}},
+  {"op": "update_playback_restriction_policy", "args": {"arn": "${policy}", "allowedCountries": ["JP", "US"], "enableStrictOriginEnforcement": true}, "expect": {"playbackRestrictionPolicy.allowedCountries#count": 2, "playbackRestrictionPolicy.enableStrictOriginEnforcement": true}},
+  {"op": "create_recording_configuration", "args": {"name": "fixture-archive", "destinationConfiguration": {"s3": {"bucketName": "fixture-archive"}}}, "save": {"recording": "recordingConfiguration.arn"}, "expect": {"recordingConfiguration.state": "ACTIVE"}},
+  {"op": "get_recording_configuration", "args": {"arn": "${recording}"}, "expect": {"recordingConfiguration.name": "fixture-archive"}},
+  {"op": "list_recording_configurations", "args": {}, "expect": {"recordingConfigurations#count": 1}},
+  {"op": "get_playback_restriction_policy", "args": {"arn": "arn:aws:ivs:us-east-1:000000000000:playback-restriction-policy/missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_playback_restriction_policies", "args": {}, "expect": {"playbackRestrictionPolicies#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_playback_restriction_policy", "args": {"arn": "${policy}"}, "expect": {"playbackRestrictionPolicy.enableStrictOriginEnforcement": true}}
+ ],
+ "cleanup": [
+  {"op": "delete_recording_configuration", "args": {"arn": "${recording}"}},
+  {"op": "delete_playback_restriction_policy", "args": {"arn": "${policy}"}},
+  {"op": "list_playback_restriction_policies", "args": {}, "expect": {"playbackRestrictionPolicies#count": 0}}
+ ]
+}

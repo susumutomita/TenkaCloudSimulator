@@ -1,0 +1,26 @@
+{
+ "client": "ivschat",
+ "steps": [
+  {"op": "create_logging_configuration", "args": {"name": "fixture-audit", "destinationConfiguration": {"cloudWatchLogs": {"logGroupName": "/chat/audit"}}}, "save": {"logging": "arn"}, "expect": {"state": "ACTIVE"}},
+  {"op": "get_logging_configuration", "args": {"identifier": "${logging}"}, "expect": {"name": "fixture-audit"}},
+  {"op": "list_logging_configurations", "args": {}, "expect": {"loggingConfigurations#count": 1}},
+  {"op": "update_logging_configuration", "args": {"identifier": "${logging}", "name": "fixture-audit-2", "destinationConfiguration": {"s3": {"bucketName": "chat-logs"}}}, "expect": {"name": "fixture-audit-2"}},
+  {"op": "create_room", "args": {"name": "fixture-lobby", "maximumMessageLength": 200, "loggingConfigurationIdentifiers": ["${logging}"], "tags": {"team": "a"}}, "save": {"room": "arn"}, "expect": {"maximumMessageLength": 200, "tags": {"team": "a"}}},
+  {"op": "get_room", "args": {"identifier": "${room}"}, "expect": {"name": "fixture-lobby"}},
+  {"op": "list_rooms", "args": {"name": "fixture-lobby"}, "expect": {"rooms#count": 1}},
+  {"op": "list_rooms", "args": {"name": "other"}, "expect": {"rooms#count": 0}},
+  {"op": "update_room", "args": {"identifier": "${room}", "maximumMessageLength": 300}, "expect": {"maximumMessageLength": 300, "name": "fixture-lobby"}},
+  {"op": "get_room", "args": {"identifier": "arn:aws:ivschat:us-east-1:000000000000:room/missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_rooms", "args": {}, "expect": {"rooms#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_room", "args": {"identifier": "${room}"}, "expect": {"maximumMessageLength": 300}}
+ ],
+ "cleanup": [
+  {"op": "delete_room", "args": {"identifier": "${room}"}},
+  {"op": "delete_logging_configuration", "args": {"identifier": "${logging}"}},
+  {"op": "list_rooms", "args": {}, "expect": {"rooms#count": 0}}
+ ]
+}

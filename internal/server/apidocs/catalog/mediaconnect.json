@@ -1,0 +1,1369 @@
+{
+ "components": {
+  "schemas": {
+   "Gateway": {
+    "additionalProperties": false,
+    "properties": {
+     "egressCidrBlocks": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "gatewayArn": {
+      "type": "string"
+     },
+     "gatewayMessages": {
+      "items": {
+       "$ref": "#/components/schemas/MessageDetail"
+      },
+      "type": "array"
+     },
+     "gatewayState": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "ERROR",
+       "DELETING",
+       "DELETED"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "networks": {
+      "items": {
+       "$ref": "#/components/schemas/GatewayNetwork"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "egressCidrBlocks",
+     "gatewayArn",
+     "name",
+     "networks"
+    ],
+    "type": "object"
+   },
+   "GatewayNetwork": {
+    "additionalProperties": false,
+    "properties": {
+     "cidrBlock": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "cidrBlock",
+     "name"
+    ],
+    "type": "object"
+   },
+   "ListedGateway": {
+    "additionalProperties": false,
+    "properties": {
+     "gatewayArn": {
+      "type": "string"
+     },
+     "gatewayState": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "ERROR",
+       "DELETING",
+       "DELETED"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "gatewayArn",
+     "gatewayState",
+     "name"
+    ],
+    "type": "object"
+   },
+   "ListedRouterNetworkInterface": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "associatedInputCount": {
+      "type": "integer"
+     },
+     "associatedOutputCount": {
+      "type": "integer"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "networkInterfaceType": {
+      "enum": [
+       "PUBLIC",
+       "VPC"
+      ],
+      "type": "string"
+     },
+     "regionName": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "ERROR",
+       "RECOVERING"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "name",
+     "arn",
+     "id",
+     "networkInterfaceType",
+     "associatedOutputCount",
+     "associatedInputCount",
+     "state",
+     "regionName",
+     "createdAt",
+     "updatedAt"
+    ],
+    "type": "object"
+   },
+   "MessageDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     },
+     "resourceName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "code",
+     "message"
+    ],
+    "type": "object"
+   },
+   "PublicRouterNetworkInterfaceConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "allowRules": {
+      "items": {
+       "$ref": "#/components/schemas/PublicRouterNetworkInterfaceRule"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "allowRules"
+    ],
+    "type": "object"
+   },
+   "PublicRouterNetworkInterfaceRule": {
+    "additionalProperties": false,
+    "properties": {
+     "cidr": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "cidr"
+    ],
+    "type": "object"
+   },
+   "RouterNetworkInterface": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "associatedInputCount": {
+      "type": "integer"
+     },
+     "associatedOutputCount": {
+      "type": "integer"
+     },
+     "configuration": {
+      "$ref": "#/components/schemas/RouterNetworkInterfaceConfiguration"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "networkInterfaceType": {
+      "enum": [
+       "PUBLIC",
+       "VPC"
+      ],
+      "type": "string"
+     },
+     "regionName": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "ERROR",
+       "RECOVERING"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "name",
+     "arn",
+     "id",
+     "state",
+     "networkInterfaceType",
+     "configuration",
+     "associatedOutputCount",
+     "associatedInputCount",
+     "regionName",
+     "createdAt",
+     "updatedAt",
+     "tags"
+    ],
+    "type": "object"
+   },
+   "RouterNetworkInterfaceConfiguration": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "public": {
+      "$ref": "#/components/schemas/PublicRouterNetworkInterfaceConfiguration"
+     },
+     "vpc": {
+      "$ref": "#/components/schemas/VpcRouterNetworkInterfaceConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "RouterNetworkInterfaceFilter": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "nameContains": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "networkInterfaceTypes": {
+      "items": {
+       "enum": [
+        "PUBLIC",
+        "VPC"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "regionNames": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "VpcRouterNetworkInterfaceConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "securityGroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "subnetId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "securityGroupIds",
+     "subnetId"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS MediaConnect API (2018-11-14). Every other official operation returns HTTP 501 UnknownOperationException. Gateways and router network interfaces are stored records: no flow, bridge, gateway instance, router input or router output exists, nothing is ingested or delivered, and no endpoint, IP address or thumbnail is generated. Gateways are ACTIVE and router network interfaces ACTIVE at once; nothing registers an on-premises instance with a gateway. Flows, bridges, router inputs and router outputs, the Add*, Remove*, Grant*, Revoke* and Update*Entitlement/MediaStream/Source/Output operations, Start*, Stop*, Restart*, Take*, source metadata and thumbnail reads, gateway instances, offerings and reservations (purchases) all return UnknownOperationException with HTTP 501. A flow cannot be stored honestly because its required source carries an AWS-generated source ARN and ingest address, a bridge list entry needs a BridgeType value the model does not enumerate, and router inputs and outputs are themselves ingest and delivery endpoints, so none of these kinds is bound. Gateway networks and egress CIDR blocks must be IPv4 CIDR ranges and are not contacted; gateways have no update operation and are not checked against bridges because bridges are not stored. RouterNetworkInterface NetworkInterfaceType is derived from the configuration (public or vpc); VPC subnets and security groups are stored without being resolved, and RegionName must be the request Region. TagResource and TagGlobalResource, and their Untag and ListTags counterparts, address the same stored tags. Limits per Region are simulator limits, not AWS quotas.",
+  "title": "AWS Elemental MediaConnect (simulator catalog)",
+  "version": "2018-11-14"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/tags/global/{ResourceArn}": {
+   "delete": {
+    "operationId": "mediaconnectUntagGlobalResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagGlobalResource",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   },
+   "get": {
+    "operationId": "mediaconnectListTagsForGlobalResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForGlobalResource",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   },
+   "post": {
+    "operationId": "mediaconnectTagGlobalResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagGlobalResource",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   }
+  },
+  "/tags/{ResourceArn}": {
+   "delete": {
+    "operationId": "mediaconnectUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   },
+   "get": {
+    "operationId": "mediaconnectListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   },
+   "post": {
+    "operationId": "mediaconnectTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   }
+  },
+  "/v1/gateways": {
+   "get": {
+    "operationId": "mediaconnectListGateways",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gateways": {
+           "items": {
+            "$ref": "#/components/schemas/ListedGateway"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListGateways",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   },
+   "post": {
+    "operationId": "mediaconnectCreateGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "egressCidrBlocks": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "name": {
+          "type": "string"
+         },
+         "networks": {
+          "items": {
+           "$ref": "#/components/schemas/GatewayNetwork"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "egressCidrBlocks",
+         "name",
+         "networks"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gateway": {
+           "$ref": "#/components/schemas/Gateway"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateGateway",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   }
+  },
+  "/v1/gateways/{GatewayArn}": {
+   "delete": {
+    "operationId": "mediaconnectDeleteGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "GatewayArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gatewayArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteGateway",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   },
+   "get": {
+    "operationId": "mediaconnectDescribeGateway",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "GatewayArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "gateway": {
+           "$ref": "#/components/schemas/Gateway"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeGateway",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   }
+  },
+  "/v1/routerNetworkInterface": {
+   "post": {
+    "operationId": "mediaconnectCreateRouterNetworkInterface",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "type": "string"
+         },
+         "configuration": {
+          "$ref": "#/components/schemas/RouterNetworkInterfaceConfiguration"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "regionName": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "configuration",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "routerNetworkInterface": {
+           "$ref": "#/components/schemas/RouterNetworkInterface"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateRouterNetworkInterface",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   }
+  },
+  "/v1/routerNetworkInterface/{Arn}": {
+   "delete": {
+    "operationId": "mediaconnectDeleteRouterNetworkInterface",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "DELETING",
+            "ERROR",
+            "RECOVERING"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteRouterNetworkInterface",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   },
+   "get": {
+    "operationId": "mediaconnectGetRouterNetworkInterface",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "routerNetworkInterface": {
+           "$ref": "#/components/schemas/RouterNetworkInterface"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetRouterNetworkInterface",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   },
+   "put": {
+    "operationId": "mediaconnectUpdateRouterNetworkInterface",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "configuration": {
+          "$ref": "#/components/schemas/RouterNetworkInterfaceConfiguration"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "routerNetworkInterface": {
+           "$ref": "#/components/schemas/RouterNetworkInterface"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateRouterNetworkInterface",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   }
+  },
+  "/v1/routerNetworkInterfaces": {
+   "post": {
+    "operationId": "mediaconnectListRouterNetworkInterfaces",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediaconnect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "filters": {
+          "items": {
+           "$ref": "#/components/schemas/RouterNetworkInterfaceFilter"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "routerNetworkInterfaces": {
+           "items": {
+            "$ref": "#/components/schemas/ListedRouterNetworkInterface"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListRouterNetworkInterfaces",
+    "tags": [
+     "AWS Elemental MediaConnect"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS MediaConnect API (2018-11-14). Every other official operation returns HTTP 501 UnknownOperationException. Gateways and router network interfaces are stored records: no flow, bridge, gateway instance, router input or router output exists, nothing is ingested or delivered, and no endpoint, IP address or thumbnail is generated. Gateways are ACTIVE and router network interfaces ACTIVE at once; nothing registers an on-premises instance with a gateway. Flows, bridges, router inputs and router outputs, the Add*, Remove*, Grant*, Revoke* and Update*Entitlement/MediaStream/Source/Output operations, Start*, Stop*, Restart*, Take*, source metadata and thumbnail reads, gateway instances, offerings and reservations (purchases) all return UnknownOperationException with HTTP 501. A flow cannot be stored honestly because its required source carries an AWS-generated source ARN and ingest address, a bridge list entry needs a BridgeType value the model does not enumerate, and router inputs and outputs are themselves ingest and delivery endpoints, so none of these kinds is bound. Gateway networks and egress CIDR blocks must be IPv4 CIDR ranges and are not contacted; gateways have no update operation and are not checked against bridges because bridges are not stored. RouterNetworkInterface NetworkInterfaceType is derived from the configuration (public or vpc); VPC subnets and security groups are stored without being resolved, and RegionName must be the request Region. TagResource and TagGlobalResource, and their Untag and ListTags counterparts, address the same stored tags. Limits per Region are simulator limits, not AWS quotas.",
+   "name": "AWS Elemental MediaConnect"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/mediaconnect/2018-11-14/service-2.json",
+  "sha256": "9f02aef25501304a794cab1912d68e7e5ba2bc0abb5aa8d2f83936a82ff7301f",
+  "license": "Apache-2.0"
+ }
+}
