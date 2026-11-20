@@ -334,3 +334,147 @@ func TestDataZoneDomainsAndProjectsAreStoredRecords(t *testing.T) {
 	expect(t, h.rest("datazone", "GET", "/v2/domains/"+id, nil), 404, "ResourceNotFoundException")
 	expect(t, h.rest("datazone", "POST", "/v2/domains/"+id+"/glossaries", map[string]any{"name": "g", "owningProjectIdentifier": pid}), 501, "UnknownOperationException")
 }
+
+func TestEMRStoresSecurityConfigurationsAndBlockPublicAccess(t *testing.T) {
+	h := newHarness(t, emr)
+	doc := `{"EncryptionConfiguration":{"EnableInTransitEncryption":false,"EnableAtRestEncryption":false}}`
+	created := h.json1("emr", "CreateSecurityConfiguration", map[string]any{"Name": "plain", "SecurityConfiguration": doc})
+	expect(t, created, 200, "")
+	if created.body["Name"] != "plain" || created.body["CreationDateTime"] == nil {
+		t.Fatalf("created %v", created.body)
+	}
+	expect(t, h.json1("emr", "CreateSecurityConfiguration", map[string]any{"Name": "plain", "SecurityConfiguration": doc}), 400, "InvalidRequestException")
+	expect(t, h.json1("emr", "CreateSecurityConfiguration", map[string]any{"Name": "bad", "SecurityConfiguration": "not json"}), 400, "InvalidRequestException")
+	expect(t, h.json1("emr", "CreateSecurityConfiguration", map[string]any{"Name": "null", "SecurityConfiguration": "null"}), 400, "InvalidRequestException")
+	described := h.json1("emr", "DescribeSecurityConfiguration", map[string]any{"Name": "plain"})
+	if described.body["SecurityConfiguration"] != doc {
+		t.Fatalf("described %v", described.body)
+	}
+	listed := h.json1("emr", "ListSecurityConfigurations", map[string]any{}).body["SecurityConfigurations"].([]any)
+	if len(listed) != 1 || listed[0].(map[string]any)["Name"] != "plain" {
+		t.Fatalf("listed %v", listed)
+	}
+	expect(t, h.json1("emr", "DeleteSecurityConfiguration", map[string]any{"Name": "plain"}), 200, "")
+	expect(t, h.json1("emr", "DescribeSecurityConfiguration", map[string]any{"Name": "plain"}), 400, "InvalidRequestException")
+
+	defaults := h.json1("emr", "GetBlockPublicAccessConfiguration", map[string]any{})
+	expect(t, defaults, 200, "")
+	config := defaults.body["BlockPublicAccessConfiguration"].(map[string]any)
+	if config["BlockPublicSecurityGroupRules"] != true || len(config["PermittedPublicSecurityGroupRuleRanges"].([]any)) != 1 {
+		t.Fatalf("defaults %v", defaults.body)
+	}
+	put := map[string]any{"BlockPublicSecurityGroupRules": true, "PermittedPublicSecurityGroupRuleRanges": []any{
+		map[string]any{"MinRange": 22, "MaxRange": 22}, map[string]any{"MinRange": 443}}}
+	expect(t, h.json1("emr", "PutBlockPublicAccessConfiguration", map[string]any{"BlockPublicAccessConfiguration": put}), 200, "")
+	stored := h.json1("emr", "GetBlockPublicAccessConfiguration", map[string]any{})
+	changed, _ := Number(stored.body["BlockPublicAccessConfigurationMetadata"].(map[string]any)["CreationDateTime"])
+	if len(stored.body["BlockPublicAccessConfiguration"].(map[string]any)["PermittedPublicSecurityGroupRuleRanges"].([]any)) != 2 || changed < 1 {
+		t.Fatalf("stored %v", stored.body)
+	}
+	for _, ranges := range [][]any{
+		{map[string]any{"MinRange": 30, "MaxRange": 20}},
+		{map[string]any{"MinRange": 22}, map[string]any{"MinRange": 22}},
+	} {
+		bad := map[string]any{"BlockPublicSecurityGroupRules": true, "PermittedPublicSecurityGroupRuleRanges": ranges}
+		expect(t, h.json1("emr", "PutBlockPublicAccessConfiguration", map[string]any{"BlockPublicAccessConfiguration": bad}), 400, "InvalidRequestException")
+	}
+	expect(t, h.json1("emr", "RunJobFlow", map[string]any{"Name": "c"}), 501, "UnknownOperationException")
+	expect(t, h.json1("emr", "CreateStudio", map[string]any{"Name": "s"}), 501, "UnknownOperationException")
+}
+
+func TestEMRServerlessApplicationsAreStoredRecords(t *testing.T) {
+	h := newHarness(t, emrServerless)
+	created := h.rest("emr-serverless", "POST", "/applications", map[string]any{"name": "etl", "releaseLabel": "emr-7.5.0", "type": "SPARK",
+		"clientToken": "t-1", "tags": map[string]any{"team": "a"}})
+	expect(t, created, 200, "")
+	id := str(created.body["applicationId"])
+	arn := str(created.body["arn"])
+	if arn != "arn:aws:emr-serverless:us-east-1:000000000000:/applications/"+id || created.body["name"] != "etl" {
+		t.Fatalf("created %v", created.body)
+	}
+	got := h.rest("emr-serverless", "GET", "/applications/"+id, nil).body["application"].(map[string]any)
+	if got["state"] != "CREATED" || got["releaseLabel"] != "emr-7.5.0" || got["tags"].(map[string]any)["team"] != "a" || got["stateDetails"] != nil {
+		t.Fatalf("read %v", got)
+	}
+	listed := h.rest("emr-serverless", "GET", "/applications", nil).body["applications"].([]any)
+	if len(listed) != 1 || listed[0].(map[string]any)["id"] != id || listed[0].(map[string]any)["state"] != "CREATED" {
+		t.Fatalf("listed %v", listed)
+	}
+	updated := h.rest("emr-serverless", "PATCH", "/applications/"+id, map[string]any{"clientToken": "t-2", "architecture": "ARM64",
+		"autoStopConfiguration": map[string]any{"enabled": true, "idleTimeoutMinutes": 5}})
+	expect(t, updated, 200, "")
+	after := updated.body["application"].(map[string]any)
+	if after["architecture"] != "ARM64" || after["name"] != "etl" || after["releaseLabel"] != "emr-7.5.0" {
+		t.Fatalf("updated %v", after)
+	}
+	path := "/tags/" + url.PathEscape(arn)
+	expect(t, h.rest("emr-serverless", "POST", path, map[string]any{"tags": map[string]any{"k": "v"}}), 200, "")
+	expect(t, h.rest("emr-serverless", "DELETE", path+"?tagKeys=team", nil), 200, "")
+	if tags := h.rest("emr-serverless", "GET", path, nil).body["tags"].(map[string]any); len(tags) != 1 || tags["k"] != "v" {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, h.rest("emr-serverless", "DELETE", "/applications/"+id, nil), 200, "")
+	expect(t, h.rest("emr-serverless", "GET", "/applications/"+id, nil), 404, "ResourceNotFoundException")
+	expect(t, h.rest("emr-serverless", "POST", "/applications/"+id+"/start", nil), 501, "UnknownOperationException")
+	expect(t, h.rest("emr-serverless", "POST", "/applications/"+id+"/jobruns", map[string]any{}), 501, "UnknownOperationException")
+}
+
+func TestEMRContainersStoresVirtualClustersAndTemplates(t *testing.T) {
+	h := newHarness(t, emrContainers)
+	cluster := h.rest("emr-containers", "POST", "/virtualclusters", map[string]any{"name": "analytics", "clientToken": "t-1",
+		"containerProvider": map[string]any{"type": "EKS", "id": "my-eks", "info": map[string]any{"eksInfo": map[string]any{"namespace": "spark"}}},
+		"tags":              map[string]any{"team": "a"}})
+	expect(t, cluster, 200, "")
+	id := str(cluster.body["id"])
+	arn := str(cluster.body["arn"])
+	if arn != "arn:aws:emr-containers:us-east-1:000000000000:/virtualclusters/"+id {
+		t.Fatalf("cluster %v", cluster.body)
+	}
+	got := h.rest("emr-containers", "GET", "/virtualclusters/"+id, nil).body["virtualCluster"].(map[string]any)
+	if got["state"] != "RUNNING" || got["containerProvider"].(map[string]any)["id"] != "my-eks" || got["tags"].(map[string]any)["team"] != "a" {
+		t.Fatalf("read %v", got)
+	}
+	expect(t, h.rest("emr-containers", "POST", "/virtualclusters", map[string]any{"name": "bad", "clientToken": "t-2",
+		"containerProvider": map[string]any{"type": "ECS", "id": "x"}}), 400, "ValidationException")
+	listed := h.rest("emr-containers", "GET", "/virtualclusters", nil).body["virtualClusters"].([]any)
+	if len(listed) != 1 {
+		t.Fatalf("listed %v", listed)
+	}
+	if filtered := h.rest("emr-containers", "GET", "/virtualclusters?containerProviderId=other", nil).body["virtualClusters"].([]any); len(filtered) != 0 {
+		t.Fatalf("filtered %v", filtered)
+	}
+
+	template := h.rest("emr-containers", "POST", "/jobtemplates", map[string]any{"name": "nightly", "clientToken": "t-3",
+		"jobTemplateData": map[string]any{"executionRoleArn": "arn:aws:iam::000000000000:role/emr", "releaseLabel": "emr-6.9.0-latest",
+			"jobDriver": map[string]any{"sparkSubmitJobDriver": map[string]any{"entryPoint": "s3://code/job.py"}}}})
+	expect(t, template, 200, "")
+	templateID := str(template.body["id"])
+	if template.body["createdAt"] == nil {
+		t.Fatalf("template %v", template.body)
+	}
+	expect(t, h.rest("emr-containers", "GET", "/jobtemplates/"+templateID, nil), 200, "")
+	if templates := h.rest("emr-containers", "GET", "/jobtemplates", nil).body["templates"].([]any); len(templates) != 1 {
+		t.Fatalf("templates %v", templates)
+	}
+	expect(t, h.rest("emr-containers", "DELETE", "/jobtemplates/"+templateID, nil), 200, "")
+	expect(t, h.rest("emr-containers", "GET", "/jobtemplates/"+templateID, nil), 400, "ResourceNotFoundException")
+
+	security := h.rest("emr-containers", "POST", "/securityconfigurations", map[string]any{"name": "lf", "clientToken": "t-4",
+		"securityConfigurationData": map[string]any{"authorizationConfiguration": map[string]any{"lakeFormationConfiguration": map[string]any{"queryEngineRoleArn": "arn:aws:iam::000000000000:role/q"}}}})
+	expect(t, security, 200, "")
+	securityID := str(security.body["id"])
+	expect(t, h.rest("emr-containers", "GET", "/securityconfigurations/"+securityID, nil), 200, "")
+	if all := h.rest("emr-containers", "GET", "/securityconfigurations", nil).body["securityConfigurations"].([]any); len(all) != 1 {
+		t.Fatalf("security %v", all)
+	}
+
+	path := "/tags/" + url.PathEscape(arn)
+	expect(t, h.rest("emr-containers", "POST", path, map[string]any{"tags": map[string]any{"k": "v"}}), 200, "")
+	expect(t, h.rest("emr-containers", "DELETE", path+"?tagKeys=team", nil), 200, "")
+	if tags := h.rest("emr-containers", "GET", path, nil).body["tags"].(map[string]any); len(tags) != 1 {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, h.rest("emr-containers", "DELETE", "/virtualclusters/"+id, nil), 200, "")
+	expect(t, h.rest("emr-containers", "GET", "/virtualclusters/"+id, nil), 400, "ResourceNotFoundException")
+	expect(t, h.rest("emr-containers", "POST", "/virtualclusters/"+id+"/jobruns", map[string]any{}), 501, "UnknownOperationException")
+}

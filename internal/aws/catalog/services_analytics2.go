@@ -1,5 +1,10 @@
 package catalog
 
+import (
+	"encoding/json"
+	"time"
+)
+
 // Reviewed bounded specifications for analytics services whose bound
 // resources are stored configuration only: Amazon AppFlow, AWS Clean Rooms,
 // Amazon CloudSearch, Amazon DataZone, Amazon EMR, AWS Lake Formation and
@@ -241,4 +246,137 @@ func dataZoneProject(input map[string]any) error {
 		}
 	}
 	return nil
+}
+
+// emr serves security configurations and the account's block public access
+// setting. No cluster, step or notebook is bound.
+var emr = &Service{
+	Model: "emr", Title: "Amazon EMR", IAMPrefix: "elasticmapreduce", Issues: []int{68},
+	Resources: []*Resource{
+		{Kind: "securityConfiguration", Shape: "DescribeSecurityConfigurationOutput", Summary: "SecurityConfigurationSummary", ID: "name",
+			ARN:        "arn:{partition}:elasticmapreduce:{region}:{account}:securityconfiguration/{name}",
+			NameMember: "Name", Unique: true, Limit: 100,
+			Generate: map[string]any{"CreationDateTime": "$now"}},
+		{Kind: "blockPublicAccess", Shape: "GetBlockPublicAccessConfigurationOutput", Singleton: true, ID: "name",
+			ARN: "arn:{partition}:elasticmapreduce:{region}:{account}:blockpublicaccessconfiguration", NameMember: "BlockPublicAccessConfiguration",
+			Generate: map[string]any{
+				"BlockPublicAccessConfiguration": map[string]any{"BlockPublicSecurityGroupRules": true,
+					"PermittedPublicSecurityGroupRuleRanges": []any{map[string]any{"MinRange": 22, "MaxRange": 22}}},
+				"BlockPublicAccessConfigurationMetadata": map[string]any{"CreationDateTime": "1970-01-01T00:00:00Z", "CreatedByArn": "arn:aws:iam::000000000000:root"}}},
+	},
+	Ops: []Op{
+		{Name: "CreateSecurityConfiguration", Kind: Create, Resource: "securityConfiguration", Check: emrSecurityConfiguration},
+		{Name: "DescribeSecurityConfiguration", Kind: Read, Resource: "securityConfiguration", Lookup: "Name"},
+		{Name: "ListSecurityConfigurations", Kind: List, Resource: "securityConfiguration"},
+		{Name: "DeleteSecurityConfiguration", Kind: Delete, Resource: "securityConfiguration", Lookup: "Name"},
+		{Name: "PutBlockPublicAccessConfiguration", Kind: Put, Resource: "blockPublicAccess", Check: emrBlockPublicAccess},
+		{Name: "GetBlockPublicAccessConfiguration", Kind: Read, Resource: "blockPublicAccess"},
+	},
+	Bounds: []string{
+		"Security configurations and the Regional block public access setting are stored records: no cluster, instance group, step, notebook, studio or session exists, nothing is launched and no security group rule is checked or changed. RunJobFlow and every other official operation return UnknownOperationException with HTTP 501, including Studio operations because a Studio returns a web address.",
+		"A security configuration is a JSON document that must parse as an object; its contents are stored without being checked against EMR's encryption, authentication and authorization schema, and no certificate, key or role it names is resolved. It cannot be updated and has no tags, and its ARN is a simulator form used only for authorization, because AWS gives security configurations none.",
+		"The block public access setting defaults to blocking public security group rules with port 22 permitted, as AWS does. After PutBlockPublicAccessConfiguration, the metadata reports the time of the change and the account root ARN as the creator because the simulator does not authenticate callers, and the default reports a creation time of 0. Port ranges must have MinRange not above MaxRange and must not repeat. The limit of 100 security configurations per Region is local.",
+	},
+}
+
+// emrSecurityConfiguration requires the document to be a JSON object.
+func emrSecurityConfiguration(input map[string]any) error {
+	document, _ := input["SecurityConfiguration"].(string)
+	var parsed map[string]any
+	if err := json.Unmarshal([]byte(document), &parsed); err != nil || parsed == nil {
+		return Failure("InvalidRequestException", "SecurityConfiguration must be a JSON object.")
+	}
+	return nil
+}
+
+// emrBlockPublicAccess validates the permitted port ranges and records the
+// change in the metadata AWS reports.
+func emrBlockPublicAccess(input map[string]any) error {
+	config, _ := input["BlockPublicAccessConfiguration"].(map[string]any)
+	ranges, _ := config["PermittedPublicSecurityGroupRuleRanges"].([]any)
+	seen := map[[2]int64]bool{}
+	for _, value := range ranges {
+		entry, _ := value.(map[string]any)
+		low, _ := entry["MinRange"].(int64)
+		high := low
+		if upper, ok := entry["MaxRange"].(int64); ok {
+			high = upper
+		}
+		if low > high || seen[[2]int64{low, high}] {
+			return Failure("InvalidRequestException", "Port ranges need MinRange not above MaxRange and must not repeat.")
+		}
+		seen[[2]int64{low, high}] = true
+	}
+	input["BlockPublicAccessConfigurationMetadata"] = map[string]any{
+		"CreationDateTime": time.Now().UTC().Format(time.RFC3339Nano), "CreatedByArn": "arn:aws:iam::000000000000:root"}
+	return nil
+}
+
+// emrServerless serves applications as stored configuration.
+var emrServerless = &Service{
+	Model: "emr-serverless", Title: "Amazon EMR Serverless", IAMPrefix: "emr-serverless", Issues: []int{68},
+	Resources: []*Resource{
+		{Kind: "application", Shape: "Application", Summary: "ApplicationSummary", ID: "alnum:16",
+			ARN:       "arn:{partition}:emr-serverless:{region}:{account}:/applications/{id}",
+			ARNMember: "arn", NameMember: "name", IDMember: "applicationId", Limit: 50,
+			Generate: map[string]any{"id": "$id", "state": "CREATED", "createdAt": "$now", "updatedAt": "$now"}},
+	},
+	Ops: []Op{
+		{Name: "CreateApplication", Kind: Create, Resource: "application"},
+		{Name: "GetApplication", Kind: Read, Resource: "application", Lookup: "applicationId"},
+		{Name: "ListApplications", Kind: List, Resource: "application"},
+		{Name: "UpdateApplication", Kind: Update, Resource: "application", Lookup: "applicationId", Touch: []string{"updatedAt"}, Accept: []string{"clientToken"},
+			Fields: []string{"initialCapacity", "maximumCapacity", "autoStartConfiguration", "autoStopConfiguration", "networkConfiguration", "architecture",
+				"imageConfiguration", "workerTypeSpecifications", "interactiveConfiguration", "releaseLabel", "runtimeConfiguration", "monitoringConfiguration",
+				"schedulerConfiguration", "identityCenterConfiguration"}},
+		{Name: "DeleteApplication", Kind: Delete, Resource: "application", Lookup: "applicationId"},
+		{Name: "TagResource", Kind: Tag, Lookup: "resourceArn"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "resourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "resourceArn"},
+	},
+	Bounds: []string{
+		"Applications are stored records: no capacity is provisioned, no Spark or Hive driver exists and no job runs. An application stays CREATED, never starts or stops, and has no stateDetails. StartApplication, StopApplication, StartJobRun, CancelJobRun, job run listings, GetDashboardForJobRun and every other official operation return UnknownOperationException with HTTP 501.",
+		"The release label, network configuration, image, runtime configuration, monitoring settings, KMS key and IAM Identity Center application are stored without being resolved or checked, and the application type is stored as given. UpdateApplication replaces the supplied members and keeps the rest, and an application is deleted in any state. The limit of 50 applications per Region is local, and tags are stored from CreateApplication and by TagResource on the ARN.",
+	},
+}
+
+// emrContainers serves virtual clusters, job templates and security
+// configurations as stored records.
+var emrContainers = &Service{
+	Model: "emr-containers", Title: "Amazon EMR on EKS", IAMPrefix: "emr-containers", Issues: []int{68},
+	Resources: []*Resource{
+		{Kind: "virtualCluster", Shape: "VirtualCluster", ID: "alnum:25",
+			ARN:       "arn:{partition}:emr-containers:{region}:{account}:/virtualclusters/{id}",
+			ARNMember: "arn", NameMember: "name", IDMember: "id", Limit: 50,
+			Generate: map[string]any{"state": "RUNNING", "createdAt": "$now"}},
+		{Kind: "jobTemplate", Shape: "JobTemplate", ID: "alnum:25",
+			ARN:       "arn:{partition}:emr-containers:{region}:{account}:/jobtemplates/{id}",
+			ARNMember: "arn", NameMember: "name", IDMember: "id", Limit: 100,
+			Generate: map[string]any{"createdAt": "$now"}},
+		{Kind: "securityConfiguration", Shape: "SecurityConfiguration", ID: "alnum:25",
+			ARN:       "arn:{partition}:emr-containers:{region}:{account}:/securityconfigurations/{id}",
+			ARNMember: "arn", NameMember: "name", IDMember: "id", Limit: 50,
+			Generate: map[string]any{"createdAt": "$now"}},
+	},
+	Ops: []Op{
+		{Name: "CreateVirtualCluster", Kind: Create, Resource: "virtualCluster"},
+		{Name: "DescribeVirtualCluster", Kind: Read, Resource: "virtualCluster", Lookup: "id"},
+		{Name: "ListVirtualClusters", Kind: List, Resource: "virtualCluster", Filters: map[string]string{"containerProviderId": "containerProvider.id", "containerProviderType": "containerProvider.type"}},
+		{Name: "DeleteVirtualCluster", Kind: Delete, Resource: "virtualCluster", Lookup: "id"},
+		{Name: "CreateJobTemplate", Kind: Create, Resource: "jobTemplate"},
+		{Name: "DescribeJobTemplate", Kind: Read, Resource: "jobTemplate", Lookup: "id"},
+		{Name: "ListJobTemplates", Kind: List, Resource: "jobTemplate"},
+		{Name: "DeleteJobTemplate", Kind: Delete, Resource: "jobTemplate", Lookup: "id"},
+		{Name: "CreateSecurityConfiguration", Kind: Create, Resource: "securityConfiguration"},
+		{Name: "DescribeSecurityConfiguration", Kind: Read, Resource: "securityConfiguration", Lookup: "id"},
+		{Name: "ListSecurityConfigurations", Kind: List, Resource: "securityConfiguration"},
+		{Name: "TagResource", Kind: Tag, Lookup: "resourceArn"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "resourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "resourceArn"},
+	},
+	Bounds: []string{
+		"Virtual clusters, job templates and security configurations are stored records: the EKS cluster and namespace a virtual cluster names are not contacted or checked, no job runs, and no managed endpoint exists. StartJobRun, CancelJobRun, DescribeJobRun, ListJobRuns, managed endpoint operations, GetManagedEndpointSessionCredentials and every other official operation return UnknownOperationException with HTTP 501.",
+		"A virtual cluster is RUNNING at once and DeleteVirtualCluster removes it, whereas AWS keeps it listed as TERMINATED; ListVirtualClusters supports the containerProviderId and containerProviderType filters only. securityConfigurationId on a virtual cluster, the execution role, KMS key and everything inside jobTemplateData and securityConfigurationData are stored without being resolved, so a virtual cluster may name a missing security configuration, and createdBy and decryptionError are never reported.",
+		"The service offers no operation to delete a security configuration, so one lasts until the Region's records are reset, and a job template is deleted whether or not a job uses it. The limits of 50 virtual clusters, 100 job templates and 50 security configurations per Region are local, and tags are stored from the create operations and by TagResource on the ARN.",
+	},
 }

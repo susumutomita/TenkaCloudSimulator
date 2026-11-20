@@ -1,0 +1,1694 @@
+{
+ "components": {
+  "schemas": {
+   "AuthorizationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionConfiguration": {
+      "$ref": "#/components/schemas/EncryptionConfiguration"
+     },
+     "lakeFormationConfiguration": {
+      "$ref": "#/components/schemas/LakeFormationConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "Configuration": {
+    "additionalProperties": false,
+    "properties": {
+     "classification": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "configurations": {
+      "items": {
+       "$ref": "#/components/schemas/Configuration"
+      },
+      "maxItems": 100,
+      "type": "array"
+     },
+     "properties": {
+      "additionalProperties": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxProperties": 100,
+      "type": "object"
+     }
+    },
+    "required": [
+     "classification"
+    ],
+    "type": "object"
+   },
+   "ContainerInfo": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "eksInfo": {
+      "$ref": "#/components/schemas/EksInfo"
+     }
+    },
+    "type": "object"
+   },
+   "ContainerProvider": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "info": {
+      "$ref": "#/components/schemas/ContainerInfo"
+     },
+     "type": {
+      "enum": [
+       "EKS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "id"
+    ],
+    "type": "object"
+   },
+   "EksInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "namespace": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     },
+     "nodeLabel": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "inTransitEncryptionConfiguration": {
+      "$ref": "#/components/schemas/InTransitEncryptionConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "InTransitEncryptionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "tlsCertificateConfiguration": {
+      "$ref": "#/components/schemas/TLSCertificateConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "JobDriver": {
+    "additionalProperties": false,
+    "properties": {
+     "sparkSqlJobDriver": {
+      "$ref": "#/components/schemas/SparkSqlJobDriver"
+     },
+     "sparkSubmitJobDriver": {
+      "$ref": "#/components/schemas/SparkSubmitJobDriver"
+     }
+    },
+    "type": "object"
+   },
+   "JobTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 1024,
+      "minLength": 60,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBy": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "decryptionError": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "jobTemplateData": {
+      "$ref": "#/components/schemas/JobTemplateData"
+     },
+     "kmsKeyArn": {
+      "maxLength": 2048,
+      "minLength": 3,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "jobTemplateData"
+    ],
+    "type": "object"
+   },
+   "JobTemplateData": {
+    "additionalProperties": false,
+    "properties": {
+     "configurationOverrides": {
+      "$ref": "#/components/schemas/ParametricConfigurationOverrides"
+     },
+     "executionRoleArn": {
+      "maxLength": 2048,
+      "minLength": 4,
+      "type": "string"
+     },
+     "jobDriver": {
+      "$ref": "#/components/schemas/JobDriver"
+     },
+     "jobTags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "parameterConfiguration": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/TemplateParameterConfiguration"
+      },
+      "maxProperties": 100,
+      "type": "object"
+     },
+     "releaseLabel": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "executionRoleArn",
+     "releaseLabel",
+     "jobDriver"
+    ],
+    "type": "object"
+   },
+   "LakeFormationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "authorizedSessionTagValue": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "queryEngineRoleArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "secureNamespaceInfo": {
+      "$ref": "#/components/schemas/SecureNamespaceInfo"
+     }
+    },
+    "type": "object"
+   },
+   "ParametricCloudWatchMonitoringConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "logGroupName": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "logStreamNamePrefix": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ParametricConfigurationOverrides": {
+    "additionalProperties": false,
+    "properties": {
+     "applicationConfiguration": {
+      "items": {
+       "$ref": "#/components/schemas/Configuration"
+      },
+      "maxItems": 100,
+      "type": "array"
+     },
+     "monitoringConfiguration": {
+      "$ref": "#/components/schemas/ParametricMonitoringConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "ParametricMonitoringConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchMonitoringConfiguration": {
+      "$ref": "#/components/schemas/ParametricCloudWatchMonitoringConfiguration"
+     },
+     "persistentAppUI": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "s3MonitoringConfiguration": {
+      "$ref": "#/components/schemas/ParametricS3MonitoringConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "ParametricS3MonitoringConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "logUri": {
+      "maxLength": 10280,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SecureNamespaceInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterId": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "namespace": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SecurityConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 1024,
+      "minLength": 60,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBy": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "securityConfigurationData": {
+      "$ref": "#/components/schemas/SecurityConfigurationData"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "SecurityConfigurationData": {
+    "additionalProperties": false,
+    "properties": {
+     "authorizationConfiguration": {
+      "$ref": "#/components/schemas/AuthorizationConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "SparkSqlJobDriver": {
+    "additionalProperties": false,
+    "properties": {
+     "entryPoint": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "sparkSqlParameters": {
+      "maxLength": 102400,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SparkSubmitJobDriver": {
+    "additionalProperties": false,
+    "properties": {
+     "entryPoint": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "entryPointArguments": {
+      "items": {
+       "maxLength": 10280,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "sparkSubmitParameters": {
+      "maxLength": 102400,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "entryPoint"
+    ],
+    "type": "object"
+   },
+   "TLSCertificateConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "certificateProviderType": {
+      "enum": [
+       "PEM"
+      ],
+      "type": "string"
+     },
+     "privateCertificateSecretArn": {
+      "maxLength": 2048,
+      "minLength": 3,
+      "type": "string"
+     },
+     "publicCertificateSecretArn": {
+      "maxLength": 2048,
+      "minLength": 3,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TemplateParameterConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "defaultValue": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "NUMBER",
+       "STRING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VirtualCluster": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 1024,
+      "minLength": 60,
+      "type": "string"
+     },
+     "containerProvider": {
+      "$ref": "#/components/schemas/ContainerProvider"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "securityConfigurationId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "RUNNING",
+       "TERMINATING",
+       "TERMINATED",
+       "ARRESTED"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon EMR Containers API (2020-10-01). Every other official operation returns HTTP 501 UnknownOperationException. Virtual clusters, job templates and security configurations are stored records: the EKS cluster and namespace a virtual cluster names are not contacted or checked, no job runs, and no managed endpoint exists. StartJobRun, CancelJobRun, DescribeJobRun, ListJobRuns, managed endpoint operations, GetManagedEndpointSessionCredentials and every other official operation return UnknownOperationException with HTTP 501. A virtual cluster is RUNNING at once and DeleteVirtualCluster removes it, whereas AWS keeps it listed as TERMINATED; ListVirtualClusters supports the containerProviderId and containerProviderType filters only. securityConfigurationId on a virtual cluster, the execution role, KMS key and everything inside jobTemplateData and securityConfigurationData are stored without being resolved, so a virtual cluster may name a missing security configuration, and createdBy and decryptionError are never reported. The service offers no operation to delete a security configuration, so one lasts until the Region's records are reset, and a job template is deleted whether or not a job uses it. The limits of 50 virtual clusters, 100 job templates and 50 security configurations per Region are local, and tags are stored from the create operations and by TagResource on the ARN.",
+  "title": "Amazon EMR on EKS (simulator catalog)",
+  "version": "2020-10-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/jobtemplates": {
+   "get": {
+    "operationId": "emr-containersListJobTemplates",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "createdAfter",
+      "schema": {
+       "description": "Epoch seconds in JSON protocols",
+       "type": [
+        "number",
+        "string"
+       ]
+      }
+     },
+     {
+      "in": "query",
+      "name": "createdBefore",
+      "schema": {
+       "description": "Epoch seconds in JSON protocols",
+       "type": [
+        "number",
+        "string"
+       ]
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "templates": {
+           "items": {
+            "$ref": "#/components/schemas/JobTemplate"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListJobTemplates",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   },
+   "post": {
+    "operationId": "emr-containersCreateJobTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "jobTemplateData": {
+          "$ref": "#/components/schemas/JobTemplateData"
+         },
+         "kmsKeyArn": {
+          "maxLength": 2048,
+          "minLength": 3,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "clientToken",
+         "jobTemplateData",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 1024,
+           "minLength": 60,
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "id": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateJobTemplate",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   }
+  },
+  "/jobtemplates/{templateId}": {
+   "delete": {
+    "operationId": "emr-containersDeleteJobTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "templateId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "id": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteJobTemplate",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   },
+   "get": {
+    "operationId": "emr-containersDescribeJobTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "templateId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "jobTemplate": {
+           "$ref": "#/components/schemas/JobTemplate"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeJobTemplate",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   }
+  },
+  "/securityconfigurations": {
+   "get": {
+    "operationId": "emr-containersListSecurityConfigurations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "createdAfter",
+      "schema": {
+       "description": "Epoch seconds in JSON protocols",
+       "type": [
+        "number",
+        "string"
+       ]
+      }
+     },
+     {
+      "in": "query",
+      "name": "createdBefore",
+      "schema": {
+       "description": "Epoch seconds in JSON protocols",
+       "type": [
+        "number",
+        "string"
+       ]
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "securityConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/SecurityConfiguration"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSecurityConfigurations",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   },
+   "post": {
+    "operationId": "emr-containersCreateSecurityConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "containerProvider": {
+          "$ref": "#/components/schemas/ContainerProvider"
+         },
+         "name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "securityConfigurationData": {
+          "$ref": "#/components/schemas/SecurityConfigurationData"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "clientToken",
+         "name",
+         "securityConfigurationData"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 1024,
+           "minLength": 60,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSecurityConfiguration",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   }
+  },
+  "/securityconfigurations/{securityConfigurationId}": {
+   "get": {
+    "operationId": "emr-containersDescribeSecurityConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "securityConfigurationId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "securityConfiguration": {
+           "$ref": "#/components/schemas/SecurityConfiguration"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeSecurityConfiguration",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "emr-containersUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 500,
+       "minLength": 60,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   },
+   "get": {
+    "operationId": "emr-containersListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 500,
+       "minLength": 60,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   },
+   "post": {
+    "operationId": "emr-containersTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 500,
+       "minLength": 60,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   }
+  },
+  "/virtualclusters": {
+   "get": {
+    "operationId": "emr-containersListVirtualClusters",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "containerProviderId",
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "containerProviderType",
+      "schema": {
+       "enum": [
+        "EKS"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "createdAfter",
+      "schema": {
+       "description": "Epoch seconds in JSON protocols",
+       "type": [
+        "number",
+        "string"
+       ]
+      }
+     },
+     {
+      "in": "query",
+      "name": "createdBefore",
+      "schema": {
+       "description": "Epoch seconds in JSON protocols",
+       "type": [
+        "number",
+        "string"
+       ]
+      }
+     },
+     {
+      "in": "query",
+      "name": "eksAccessEntryIntegrated",
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "states",
+      "schema": {
+       "items": {
+        "enum": [
+         "RUNNING",
+         "TERMINATING",
+         "TERMINATED",
+         "ARRESTED"
+        ],
+        "type": "string"
+       },
+       "maxItems": 10,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          },
+          "virtualClusters": {
+           "items": {
+            "$ref": "#/components/schemas/VirtualCluster"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListVirtualClusters",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   },
+   "post": {
+    "operationId": "emr-containersCreateVirtualCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "containerProvider": {
+          "$ref": "#/components/schemas/ContainerProvider"
+         },
+         "name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "securityConfigurationId": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "clientToken",
+         "containerProvider",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 1024,
+           "minLength": 60,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateVirtualCluster",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   }
+  },
+  "/virtualclusters/{virtualClusterId}": {
+   "delete": {
+    "operationId": "emr-containersDeleteVirtualCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualClusterId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "id": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteVirtualCluster",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   },
+   "get": {
+    "operationId": "emr-containersDescribeVirtualCluster",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-containers"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "virtualClusterId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "virtualCluster": {
+           "$ref": "#/components/schemas/VirtualCluster"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeVirtualCluster",
+    "tags": [
+     "Amazon EMR on EKS"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon EMR Containers API (2020-10-01). Every other official operation returns HTTP 501 UnknownOperationException. Virtual clusters, job templates and security configurations are stored records: the EKS cluster and namespace a virtual cluster names are not contacted or checked, no job runs, and no managed endpoint exists. StartJobRun, CancelJobRun, DescribeJobRun, ListJobRuns, managed endpoint operations, GetManagedEndpointSessionCredentials and every other official operation return UnknownOperationException with HTTP 501. A virtual cluster is RUNNING at once and DeleteVirtualCluster removes it, whereas AWS keeps it listed as TERMINATED; ListVirtualClusters supports the containerProviderId and containerProviderType filters only. securityConfigurationId on a virtual cluster, the execution role, KMS key and everything inside jobTemplateData and securityConfigurationData are stored without being resolved, so a virtual cluster may name a missing security configuration, and createdBy and decryptionError are never reported. The service offers no operation to delete a security configuration, so one lasts until the Region's records are reset, and a job template is deleted whether or not a job uses it. The limits of 50 virtual clusters, 100 job templates and 50 security configurations per Region are local, and tags are stored from the create operations and by TagResource on the ARN.",
+   "name": "Amazon EMR on EKS"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/emr-containers/2020-10-01/service-2.json",
+  "sha256": "d5893829c56de4099e4903bcdf31cc6e5434c2ccb059a5d37265e2e74c41a946",
+  "license": "Apache-2.0"
+ }
+}
