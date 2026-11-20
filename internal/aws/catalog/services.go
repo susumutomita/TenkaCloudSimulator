@@ -33,5 +33,6 @@ func Services() []*Service {
 		directConnect, groundStation, kinesisVideo, forecast, fraudDetector, personalize, codeGuruProfiler,
 		mainframeModernization, migrationHub, transferFamily, applicationMigration, elasticDisasterRecovery,
 		mediaConvert, mediaPackage, mediaPackageV2, mediaPackageVOD, mediaTailor,
+		mediaConnect, mediaLive, ivs, ivsChat, ivsRealtime,
 	}
 }
