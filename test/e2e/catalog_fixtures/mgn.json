@@ -1,0 +1,44 @@
+{
+ "client": "mgn",
+ "steps": [
+  {"op": "create_application", "args": {"name": "shop", "description": "storefront", "tags": {"team": "a"}}, "save": {"app": "applicationID"}},
+  {"op": "update_application", "args": {"applicationID": "${app}", "name": "shop2", "description": "renamed"}, "expect": {"name": "shop2"}},
+  {"op": "archive_application", "args": {"applicationID": "${app}"}, "expect": {"isArchived": true}},
+  {"op": "list_applications", "args": {}, "expect": {"items#count": 1, "items[0].isArchived": true}},
+  {"op": "unarchive_application", "args": {"applicationID": "${app}"}, "expect": {"isArchived": false}},
+  {"op": "create_wave", "args": {"name": "wave one", "description": "first"}, "save": {"wave": "waveID", "arn": "arn"}},
+  {"op": "update_wave", "args": {"waveID": "${wave}", "name": "wave 1"}, "expect": {"name": "wave 1"}},
+  {"op": "archive_wave", "args": {"waveID": "${wave}"}, "expect": {"isArchived": true}},
+  {"op": "unarchive_wave", "args": {"waveID": "${wave}"}, "expect": {"isArchived": false}},
+  {"op": "list_waves", "args": {}, "expect": {"items#count": 1, "items[0].name": "wave 1"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${arn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${arn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${arn}"}, "expect": {"tags": {}}},
+  {"op": "create_connector", "args": {"name": "ssm-link", "ssmInstanceID": "i-0123456789abcdef0", "ssmCommandConfig": {"cloudWatchOutputEnabled": true, "s3OutputEnabled": false, "cloudWatchLogGroupName": "mgn-fixture"}}, "save": {"connector": "connectorID"}},
+  {"op": "update_connector", "args": {"connectorID": "${connector}", "name": "renamed-link"}, "expect": {"name": "renamed-link"}},
+  {"op": "list_connectors", "args": {}, "expect": {"items#count": 1, "items[0].name": "renamed-link"}},
+  {"op": "create_launch_configuration_template", "args": {"launchDisposition": "STOPPED", "bootMode": "UEFI", "copyTags": true, "tags": {"team": "a"}}, "save": {"launch": "launchConfigurationTemplateID"}},
+  {"op": "update_launch_configuration_template", "args": {"launchConfigurationTemplateID": "${launch}", "launchDisposition": "STARTED"}, "expect": {"launchDisposition": "STARTED"}},
+  {"op": "describe_launch_configuration_templates", "args": {"launchConfigurationTemplateIDs": ["${launch}"]}, "expect": {"items#count": 1, "items[0].bootMode": "UEFI"}},
+  {"op": "create_replication_configuration_template", "args": {"associateDefaultSecurityGroup": true, "bandwidthThrottling": 0, "createPublicIP": false, "dataPlaneRouting": "PRIVATE_IP", "defaultLargeStagingDiskType": "GP3", "ebsEncryption": "DEFAULT", "replicationServerInstanceType": "t3.small", "replicationServersSecurityGroupsIDs": ["sg-0123456789abcdef0"], "stagingAreaSubnetId": "subnet-0a1b2c3d4e5f60718", "stagingAreaTags": {"purpose": "staging"}, "useDedicatedReplicationServer": false}, "save": {"replication": "replicationConfigurationTemplateID"}},
+  {"op": "update_replication_configuration_template", "args": {"replicationConfigurationTemplateID": "${replication}", "bandwidthThrottling": 50}, "expect": {"bandwidthThrottling": 50}},
+  {"op": "describe_replication_configuration_templates", "args": {}, "expect": {"items#count": 1, "items[0].stagingAreaSubnetId": "subnet-0a1b2c3d4e5f60718"}},
+  {"op": "describe_launch_configuration_templates", "args": {"launchConfigurationTemplateIDs": ["lct-00000000000000000"]}, "error": "ResourceNotFoundException", "status": 404},
+  {"op": "update_wave", "args": {"waveID": "wave-00000000000000000", "name": "missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_applications", "args": {}, "expect": {"items#count": 0}},
+  {"op": "describe_replication_configuration_templates", "args": {}, "expect": {"items#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "list_waves", "args": {}, "expect": {"items#count": 1, "items[0].name": "wave 1"}}
+ ],
+ "cleanup": [
+  {"op": "delete_replication_configuration_template", "args": {"replicationConfigurationTemplateID": "${replication}"}},
+  {"op": "delete_launch_configuration_template", "args": {"launchConfigurationTemplateID": "${launch}"}},
+  {"op": "delete_connector", "args": {"connectorID": "${connector}"}},
+  {"op": "delete_wave", "args": {"waveID": "${wave}"}},
+  {"op": "delete_application", "args": {"applicationID": "${app}"}},
+  {"op": "list_applications", "args": {}, "expect": {"items#count": 0}}
+ ]
+}

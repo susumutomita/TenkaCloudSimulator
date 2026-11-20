@@ -1,0 +1,43 @@
+{
+ "client": "transfer",
+ "steps": [
+  {"op": "create_workflow", "args": {"Description": "archive uploads", "Steps": [{"Type": "COPY", "CopyStepDetails": {"Name": "archive", "DestinationFileLocation": {"S3FileLocation": {"Bucket": "fixture-archive", "Key": "in/"}}}}], "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"workflow": "WorkflowId"}},
+  {"op": "describe_workflow", "args": {"WorkflowId": "${workflow}"}, "expect": {"Workflow.Description": "archive uploads", "Workflow.Steps#count": 1}},
+  {"op": "list_workflows", "args": {}, "expect": {"Workflows#count": 1, "Workflows[0].WorkflowId": "${workflow}"}},
+  {"op": "create_workflow", "args": {"Steps": [{"Type": "COPY"}]}, "error": "InvalidRequestException"},
+  {"op": "create_profile", "args": {"As2Id": "LOCALPARTY", "ProfileType": "LOCAL", "CertificateIds": ["cert-0123456789abcdef0"]}, "save": {"profile": "ProfileId"}},
+  {"op": "create_profile", "args": {"As2Id": "PARTNERID", "ProfileType": "PARTNER"}},
+  {"op": "update_profile", "args": {"ProfileId": "${profile}", "CertificateIds": ["cert-0123456789abcdef1", "cert-0123456789abcdef2"]}},
+  {"op": "describe_profile", "args": {"ProfileId": "${profile}"}, "expect": {"Profile.As2Id": "LOCALPARTY", "Profile.CertificateIds#count": 2}},
+  {"op": "list_profiles", "args": {"ProfileType": "PARTNER"}, "expect": {"Profiles#count": 1}},
+  {"op": "create_profile", "args": {"As2Id": "has space", "ProfileType": "LOCAL"}, "error": "InvalidRequestException"},
+  {"op": "create_connector", "args": {"Url": "sftp://partner.example.com", "AccessRole": "arn:aws:iam::000000000000:role/migration-fixture", "SftpConfig": {"UserSecretId": "fixture-secret", "MaxConcurrentConnections": 2}}, "save": {"connector": "ConnectorId"}},
+  {"op": "describe_connector", "args": {"ConnectorId": "${connector}"}, "expect": {"Connector.Status": "ACTIVE", "Connector.EgressType": "SERVICE_MANAGED", "Connector.Url": "sftp://partner.example.com"}},
+  {"op": "update_connector", "args": {"ConnectorId": "${connector}", "Url": "sftp://other.example.com"}},
+  {"op": "list_connectors", "args": {}, "expect": {"Connectors#count": 1, "Connectors[0].Url": "sftp://other.example.com"}},
+  {"op": "create_server", "args": {"LoggingRole": "arn:aws:iam::000000000000:role/migration-fixture", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"server": "ServerId"}},
+  {"op": "describe_server", "args": {"ServerId": "${server}"}, "save": {"arn": "Server.Arn"}, "expect": {"Server.State": "OFFLINE", "Server.EndpointType": "PUBLIC", "Server.Domain": "S3", "Server.IdentityProviderType": "SERVICE_MANAGED"}},
+  {"op": "list_servers", "args": {}, "expect": {"Servers#count": 1, "Servers[0].State": "OFFLINE"}},
+  {"op": "update_server", "args": {"ServerId": "${server}", "PreAuthenticationLoginBanner": "authorized users only"}},
+  {"op": "describe_server", "args": {"ServerId": "${server}"}, "expect": {"Server.PreAuthenticationLoginBanner": "authorized users only"}},
+  {"op": "tag_resource", "args": {"Arn": "${arn}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"Arn": "${arn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"Arn": "${arn}"}, "expect": {"Tags#count": 1}},
+  {"op": "create_server", "args": {"Protocols": ["FTP"]}, "error": "InvalidRequestException"},
+  {"op": "describe_server", "args": {"ServerId": "s-00000000000000000"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_servers", "args": {}, "expect": {"Servers#count": 0}},
+  {"op": "list_workflows", "args": {}, "expect": {"Workflows#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_server", "args": {"ServerId": "${server}"}, "expect": {"Server.PreAuthenticationLoginBanner": "authorized users only", "Server.State": "OFFLINE"}}
+ ],
+ "cleanup": [
+  {"op": "delete_server", "args": {"ServerId": "${server}"}},
+  {"op": "delete_connector", "args": {"ConnectorId": "${connector}"}},
+  {"op": "delete_profile", "args": {"ProfileId": "${profile}"}},
+  {"op": "delete_workflow", "args": {"WorkflowId": "${workflow}"}},
+  {"op": "list_servers", "args": {}, "expect": {"Servers#count": 0}}
+ ]
+}

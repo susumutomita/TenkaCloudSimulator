@@ -1,0 +1,2159 @@
+{
+ "components": {
+  "schemas": {
+   "As2ConnectorConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "BasicAuthSecretId": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Compression": {
+      "enum": [
+       "ZLIB",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "EncryptionAlgorithm": {
+      "enum": [
+       "AES128_CBC",
+       "AES192_CBC",
+       "AES256_CBC",
+       "DES_EDE3_CBC",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "LocalProfileId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     },
+     "MdnResponse": {
+      "enum": [
+       "SYNC",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "MdnSigningAlgorithm": {
+      "enum": [
+       "SHA256",
+       "SHA384",
+       "SHA512",
+       "SHA1",
+       "NONE",
+       "DEFAULT"
+      ],
+      "type": "string"
+     },
+     "MessageSubject": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "PartnerProfileId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     },
+     "PreserveContentType": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "SigningAlgorithm": {
+      "enum": [
+       "SHA256",
+       "SHA384",
+       "SHA512",
+       "SHA1",
+       "NONE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectorEgressConfig": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "VpcLattice": {
+      "$ref": "#/components/schemas/ConnectorVpcLatticeEgressConfig"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectorVpcLatticeEgressConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "PortNumber": {
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ResourceConfigurationArn": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceConfigurationArn"
+    ],
+    "type": "object"
+   },
+   "CopyStepDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "DestinationFileLocation": {
+      "$ref": "#/components/schemas/InputFileLocation"
+     },
+     "Name": {
+      "maxLength": 30,
+      "minLength": 0,
+      "type": "string"
+     },
+     "OverwriteExisting": {
+      "enum": [
+       "TRUE",
+       "FALSE"
+      ],
+      "type": "string"
+     },
+     "SourceFileLocation": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateConnectorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessRole": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "As2Config": {
+      "$ref": "#/components/schemas/As2ConnectorConfig"
+     },
+     "EgressConfig": {
+      "$ref": "#/components/schemas/ConnectorEgressConfig"
+     },
+     "LoggingRole": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "SecurityPolicyName": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SftpConfig": {
+      "$ref": "#/components/schemas/SftpConnectorConfig"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Url": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "AccessRole"
+    ],
+    "type": "object"
+   },
+   "CreateConnectorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectorId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConnectorId"
+    ],
+    "type": "object"
+   },
+   "CreateProfileRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "As2Id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CertificateIds": {
+      "items": {
+       "maxLength": 22,
+       "minLength": 22,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ProfileType": {
+      "enum": [
+       "LOCAL",
+       "PARTNER"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "As2Id",
+     "ProfileType"
+    ],
+    "type": "object"
+   },
+   "CreateProfileResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ProfileId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ProfileId"
+    ],
+    "type": "object"
+   },
+   "CreateServerRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Certificate": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Domain": {
+      "enum": [
+       "S3",
+       "EFS"
+      ],
+      "type": "string"
+     },
+     "EndpointDetails": {
+      "$ref": "#/components/schemas/EndpointDetails"
+     },
+     "EndpointType": {
+      "enum": [
+       "PUBLIC",
+       "VPC",
+       "VPC_ENDPOINT"
+      ],
+      "type": "string"
+     },
+     "HostKey": {
+      "maxLength": 4096,
+      "minLength": 0,
+      "type": "string"
+     },
+     "IdentityProviderDetails": {
+      "$ref": "#/components/schemas/IdentityProviderDetails"
+     },
+     "IdentityProviderType": {
+      "enum": [
+       "SERVICE_MANAGED",
+       "API_GATEWAY",
+       "AWS_DIRECTORY_SERVICE",
+       "AWS_LAMBDA"
+      ],
+      "type": "string"
+     },
+     "IpAddressType": {
+      "enum": [
+       "IPV4",
+       "DUALSTACK"
+      ],
+      "type": "string"
+     },
+     "LoggingRole": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PostAuthenticationLoginBanner": {
+      "maxLength": 4096,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PreAuthenticationLoginBanner": {
+      "maxLength": 4096,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ProtocolDetails": {
+      "$ref": "#/components/schemas/ProtocolDetails"
+     },
+     "Protocols": {
+      "items": {
+       "enum": [
+        "SFTP",
+        "FTP",
+        "FTPS",
+        "AS2"
+       ],
+       "type": "string"
+      },
+      "maxItems": 4,
+      "minItems": 1,
+      "type": "array"
+     },
+     "S3StorageOptions": {
+      "$ref": "#/components/schemas/S3StorageOptions"
+     },
+     "SecurityPolicyName": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "StructuredLogDestinations": {
+      "items": {
+       "maxLength": 1600,
+       "minLength": 20,
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     },
+     "WorkflowDetails": {
+      "$ref": "#/components/schemas/WorkflowDetails"
+     }
+    },
+    "type": "object"
+   },
+   "CreateServerResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ServerId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ServerId"
+    ],
+    "type": "object"
+   },
+   "CreateWorkflowRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "OnExceptionSteps": {
+      "items": {
+       "$ref": "#/components/schemas/WorkflowStep"
+      },
+      "maxItems": 8,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Steps": {
+      "items": {
+       "$ref": "#/components/schemas/WorkflowStep"
+      },
+      "maxItems": 8,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Steps"
+    ],
+    "type": "object"
+   },
+   "CreateWorkflowResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "WorkflowId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "WorkflowId"
+    ],
+    "type": "object"
+   },
+   "CustomStepDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 30,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SourceFileLocation": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Target": {
+      "maxLength": 170,
+      "minLength": 0,
+      "type": "string"
+     },
+     "TimeoutSeconds": {
+      "maximum": 1800,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DecryptStepDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "DestinationFileLocation": {
+      "$ref": "#/components/schemas/InputFileLocation"
+     },
+     "Name": {
+      "maxLength": 30,
+      "minLength": 0,
+      "type": "string"
+     },
+     "OverwriteExisting": {
+      "enum": [
+       "TRUE",
+       "FALSE"
+      ],
+      "type": "string"
+     },
+     "SourceFileLocation": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "PGP"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Type",
+     "DestinationFileLocation"
+    ],
+    "type": "object"
+   },
+   "DeleteConnectorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectorId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConnectorId"
+    ],
+    "type": "object"
+   },
+   "DeleteProfileRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ProfileId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ProfileId"
+    ],
+    "type": "object"
+   },
+   "DeleteServerRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ServerId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ServerId"
+    ],
+    "type": "object"
+   },
+   "DeleteStepDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 30,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SourceFileLocation": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteWorkflowRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "WorkflowId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "WorkflowId"
+    ],
+    "type": "object"
+   },
+   "DescribeConnectorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectorId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConnectorId"
+    ],
+    "type": "object"
+   },
+   "DescribeConnectorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Connector": {
+      "$ref": "#/components/schemas/DescribedConnector"
+     }
+    },
+    "required": [
+     "Connector"
+    ],
+    "type": "object"
+   },
+   "DescribeProfileRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ProfileId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ProfileId"
+    ],
+    "type": "object"
+   },
+   "DescribeProfileResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Profile": {
+      "$ref": "#/components/schemas/DescribedProfile"
+     }
+    },
+    "required": [
+     "Profile"
+    ],
+    "type": "object"
+   },
+   "DescribeServerRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ServerId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ServerId"
+    ],
+    "type": "object"
+   },
+   "DescribeServerResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Server": {
+      "$ref": "#/components/schemas/DescribedServer"
+     }
+    },
+    "required": [
+     "Server"
+    ],
+    "type": "object"
+   },
+   "DescribeWorkflowRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "WorkflowId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "WorkflowId"
+    ],
+    "type": "object"
+   },
+   "DescribeWorkflowResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Workflow": {
+      "$ref": "#/components/schemas/DescribedWorkflow"
+     }
+    },
+    "required": [
+     "Workflow"
+    ],
+    "type": "object"
+   },
+   "DescribedConnector": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessRole": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "As2Config": {
+      "$ref": "#/components/schemas/As2ConnectorConfig"
+     },
+     "ConnectorId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     },
+     "EgressConfig": {
+      "$ref": "#/components/schemas/DescribedConnectorEgressConfig"
+     },
+     "EgressType": {
+      "enum": [
+       "SERVICE_MANAGED",
+       "VPC_LATTICE"
+      ],
+      "type": "string"
+     },
+     "ErrorMessage": {
+      "type": "string"
+     },
+     "LoggingRole": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "SecurityPolicyName": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ServiceManagedEgressIpAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SftpConfig": {
+      "$ref": "#/components/schemas/SftpConnectorConfig"
+     },
+     "Status": {
+      "enum": [
+       "ACTIVE",
+       "ERRORED",
+       "PENDING"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Url": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Arn",
+     "EgressType",
+     "Status"
+    ],
+    "type": "object"
+   },
+   "DescribedConnectorEgressConfig": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "VpcLattice": {
+      "$ref": "#/components/schemas/DescribedConnectorVpcLatticeEgressConfig"
+     }
+    },
+    "type": "object"
+   },
+   "DescribedConnectorVpcLatticeEgressConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "PortNumber": {
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ResourceConfigurationArn": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceConfigurationArn"
+    ],
+    "type": "object"
+   },
+   "DescribedProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "As2Id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CertificateIds": {
+      "items": {
+       "maxLength": 22,
+       "minLength": 22,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ProfileId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     },
+     "ProfileType": {
+      "enum": [
+       "LOCAL",
+       "PARTNER"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Arn"
+    ],
+    "type": "object"
+   },
+   "DescribedServer": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "As2ServiceManagedEgressIpAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Certificate": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Domain": {
+      "enum": [
+       "S3",
+       "EFS"
+      ],
+      "type": "string"
+     },
+     "EndpointDetails": {
+      "$ref": "#/components/schemas/EndpointDetails"
+     },
+     "EndpointType": {
+      "enum": [
+       "PUBLIC",
+       "VPC",
+       "VPC_ENDPOINT"
+      ],
+      "type": "string"
+     },
+     "HostKeyFingerprint": {
+      "type": "string"
+     },
+     "IdentityProviderDetails": {
+      "$ref": "#/components/schemas/IdentityProviderDetails"
+     },
+     "IdentityProviderType": {
+      "enum": [
+       "SERVICE_MANAGED",
+       "API_GATEWAY",
+       "AWS_DIRECTORY_SERVICE",
+       "AWS_LAMBDA"
+      ],
+      "type": "string"
+     },
+     "IpAddressType": {
+      "enum": [
+       "IPV4",
+       "DUALSTACK"
+      ],
+      "type": "string"
+     },
+     "LoggingRole": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PostAuthenticationLoginBanner": {
+      "maxLength": 4096,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PreAuthenticationLoginBanner": {
+      "maxLength": 4096,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ProtocolDetails": {
+      "$ref": "#/components/schemas/ProtocolDetails"
+     },
+     "Protocols": {
+      "items": {
+       "enum": [
+        "SFTP",
+        "FTP",
+        "FTPS",
+        "AS2"
+       ],
+       "type": "string"
+      },
+      "maxItems": 4,
+      "minItems": 1,
+      "type": "array"
+     },
+     "S3StorageOptions": {
+      "$ref": "#/components/schemas/S3StorageOptions"
+     },
+     "SecurityPolicyName": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ServerId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "OFFLINE",
+       "ONLINE",
+       "STARTING",
+       "STOPPING",
+       "START_FAILED",
+       "STOP_FAILED"
+      ],
+      "type": "string"
+     },
+     "StructuredLogDestinations": {
+      "items": {
+       "maxLength": 1600,
+       "minLength": 20,
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     },
+     "UserCount": {
+      "type": "integer"
+     },
+     "WorkflowDetails": {
+      "$ref": "#/components/schemas/WorkflowDetails"
+     }
+    },
+    "required": [
+     "Arn"
+    ],
+    "type": "object"
+   },
+   "DescribedWorkflow": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "OnExceptionSteps": {
+      "items": {
+       "$ref": "#/components/schemas/WorkflowStep"
+      },
+      "maxItems": 8,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Steps": {
+      "items": {
+       "$ref": "#/components/schemas/WorkflowStep"
+      },
+      "maxItems": 8,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     },
+     "WorkflowId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Arn"
+    ],
+    "type": "object"
+   },
+   "EfsFileLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "FileSystemId": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Path": {
+      "maxLength": 65536,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EndpointDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "AddressAllocationIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SecurityGroupIds": {
+      "items": {
+       "maxLength": 20,
+       "minLength": 11,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SubnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "VpcEndpointId": {
+      "maxLength": 22,
+      "minLength": 22,
+      "type": "string"
+     },
+     "VpcId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IdentityProviderDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "DirectoryId": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "Function": {
+      "maxLength": 170,
+      "minLength": 1,
+      "type": "string"
+     },
+     "InvocationRole": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "SftpAuthenticationMethods": {
+      "enum": [
+       "PASSWORD",
+       "PUBLIC_KEY",
+       "PUBLIC_KEY_OR_PASSWORD",
+       "PUBLIC_KEY_AND_PASSWORD"
+      ],
+      "type": "string"
+     },
+     "Url": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InputFileLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "EfsFileLocation": {
+      "$ref": "#/components/schemas/EfsFileLocation"
+     },
+     "S3FileLocation": {
+      "$ref": "#/components/schemas/S3InputFileLocation"
+     }
+    },
+    "type": "object"
+   },
+   "ListConnectorsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 6144,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListConnectorsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Connectors": {
+      "items": {
+       "$ref": "#/components/schemas/ListedConnector"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 6144,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Connectors"
+    ],
+    "type": "object"
+   },
+   "ListProfilesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 6144,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProfileType": {
+      "enum": [
+       "LOCAL",
+       "PARTNER"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListProfilesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 6144,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Profiles": {
+      "items": {
+       "$ref": "#/components/schemas/ListedProfile"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Profiles"
+    ],
+    "type": "object"
+   },
+   "ListServersRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 6144,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListServersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 6144,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Servers": {
+      "items": {
+       "$ref": "#/components/schemas/ListedServer"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Servers"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "MaxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 6144,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Arn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "NextToken": {
+      "maxLength": 6144,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListWorkflowsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 6144,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListWorkflowsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 6144,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Workflows": {
+      "items": {
+       "$ref": "#/components/schemas/ListedWorkflow"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Workflows"
+    ],
+    "type": "object"
+   },
+   "ListedConnector": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "ConnectorId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     },
+     "Url": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListedProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "As2Id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ProfileId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     },
+     "ProfileType": {
+      "enum": [
+       "LOCAL",
+       "PARTNER"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListedServer": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Domain": {
+      "enum": [
+       "S3",
+       "EFS"
+      ],
+      "type": "string"
+     },
+     "EndpointType": {
+      "enum": [
+       "PUBLIC",
+       "VPC",
+       "VPC_ENDPOINT"
+      ],
+      "type": "string"
+     },
+     "IdentityProviderType": {
+      "enum": [
+       "SERVICE_MANAGED",
+       "API_GATEWAY",
+       "AWS_DIRECTORY_SERVICE",
+       "AWS_LAMBDA"
+      ],
+      "type": "string"
+     },
+     "LoggingRole": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "ServerId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "OFFLINE",
+       "ONLINE",
+       "STARTING",
+       "STOPPING",
+       "START_FAILED",
+       "STOP_FAILED"
+      ],
+      "type": "string"
+     },
+     "UserCount": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Arn"
+    ],
+    "type": "object"
+   },
+   "ListedWorkflow": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "WorkflowId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ProtocolDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "As2Transports": {
+      "items": {
+       "enum": [
+        "HTTP"
+       ],
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "PassiveIp": {
+      "maxLength": 15,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SetStatOption": {
+      "enum": [
+       "DEFAULT",
+       "ENABLE_NO_OP"
+      ],
+      "type": "string"
+     },
+     "TlsSessionResumptionMode": {
+      "enum": [
+       "DISABLED",
+       "ENABLED",
+       "ENFORCED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3InputFileLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "Bucket": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "Key": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3StorageOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "DirectoryListingOptimization": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "SftpConnectorConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxConcurrentConnections": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "TrustedHostKeys": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "UserSecretId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Arn",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagStepDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 30,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SourceFileLocation": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/S3Tag"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "maxLength": 1600,
+      "minLength": 20,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Arn",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UpdateConnectorEgressConfig": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "VpcLattice": {
+      "$ref": "#/components/schemas/UpdateConnectorVpcLatticeEgressConfig"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateConnectorRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessRole": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "As2Config": {
+      "$ref": "#/components/schemas/As2ConnectorConfig"
+     },
+     "ConnectorId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     },
+     "EgressConfig": {
+      "$ref": "#/components/schemas/UpdateConnectorEgressConfig"
+     },
+     "LoggingRole": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "SecurityPolicyName": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SftpConfig": {
+      "$ref": "#/components/schemas/SftpConnectorConfig"
+     },
+     "Url": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConnectorId"
+    ],
+    "type": "object"
+   },
+   "UpdateConnectorResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ConnectorId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ConnectorId"
+    ],
+    "type": "object"
+   },
+   "UpdateConnectorVpcLatticeEgressConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "PortNumber": {
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ResourceConfigurationArn": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateProfileRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateIds": {
+      "items": {
+       "maxLength": 22,
+       "minLength": 22,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ProfileId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ProfileId"
+    ],
+    "type": "object"
+   },
+   "UpdateProfileResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ProfileId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ProfileId"
+    ],
+    "type": "object"
+   },
+   "UpdateServerRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Certificate": {
+      "maxLength": 1600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "EndpointDetails": {
+      "$ref": "#/components/schemas/EndpointDetails"
+     },
+     "EndpointType": {
+      "enum": [
+       "PUBLIC",
+       "VPC",
+       "VPC_ENDPOINT"
+      ],
+      "type": "string"
+     },
+     "HostKey": {
+      "maxLength": 4096,
+      "minLength": 0,
+      "type": "string"
+     },
+     "IdentityProviderDetails": {
+      "$ref": "#/components/schemas/IdentityProviderDetails"
+     },
+     "IdentityProviderType": {
+      "enum": [
+       "SERVICE_MANAGED",
+       "API_GATEWAY",
+       "AWS_DIRECTORY_SERVICE",
+       "AWS_LAMBDA"
+      ],
+      "type": "string"
+     },
+     "IpAddressType": {
+      "enum": [
+       "IPV4",
+       "DUALSTACK"
+      ],
+      "type": "string"
+     },
+     "LoggingRole": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PostAuthenticationLoginBanner": {
+      "maxLength": 4096,
+      "minLength": 0,
+      "type": "string"
+     },
+     "PreAuthenticationLoginBanner": {
+      "maxLength": 4096,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ProtocolDetails": {
+      "$ref": "#/components/schemas/ProtocolDetails"
+     },
+     "Protocols": {
+      "items": {
+       "enum": [
+        "SFTP",
+        "FTP",
+        "FTPS",
+        "AS2"
+       ],
+       "type": "string"
+      },
+      "maxItems": 4,
+      "minItems": 1,
+      "type": "array"
+     },
+     "S3StorageOptions": {
+      "$ref": "#/components/schemas/S3StorageOptions"
+     },
+     "SecurityPolicyName": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ServerId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     },
+     "StructuredLogDestinations": {
+      "items": {
+       "maxLength": 1600,
+       "minLength": 20,
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 0,
+      "type": "array"
+     },
+     "WorkflowDetails": {
+      "$ref": "#/components/schemas/WorkflowDetails"
+     }
+    },
+    "required": [
+     "ServerId"
+    ],
+    "type": "object"
+   },
+   "UpdateServerResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ServerId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ServerId"
+    ],
+    "type": "object"
+   },
+   "WorkflowDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "ExecutionRole": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "WorkflowId": {
+      "maxLength": 19,
+      "minLength": 19,
+      "type": "string"
+     }
+    },
+    "required": [
+     "WorkflowId",
+     "ExecutionRole"
+    ],
+    "type": "object"
+   },
+   "WorkflowDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "OnPartialUpload": {
+      "items": {
+       "$ref": "#/components/schemas/WorkflowDetail"
+      },
+      "maxItems": 1,
+      "minItems": 0,
+      "type": "array"
+     },
+     "OnUpload": {
+      "items": {
+       "$ref": "#/components/schemas/WorkflowDetail"
+      },
+      "maxItems": 1,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "WorkflowStep": {
+    "additionalProperties": false,
+    "properties": {
+     "CopyStepDetails": {
+      "$ref": "#/components/schemas/CopyStepDetails"
+     },
+     "CustomStepDetails": {
+      "$ref": "#/components/schemas/CustomStepDetails"
+     },
+     "DecryptStepDetails": {
+      "$ref": "#/components/schemas/DecryptStepDetails"
+     },
+     "DeleteStepDetails": {
+      "$ref": "#/components/schemas/DeleteStepDetails"
+     },
+     "TagStepDetails": {
+      "$ref": "#/components/schemas/TagStepDetails"
+     },
+     "Type": {
+      "enum": [
+       "COPY",
+       "CUSTOM",
+       "TAG",
+       "DELETE",
+       "DECRYPT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Transfer Family API (2018-11-05). Every other official operation returns HTTP 501 UnknownOperationException. Workflows, AS2 profiles, connectors and servers are stored configuration. A server is a stored record that stays OFFLINE: no endpoint, address, hostname, host key, listener or file store exists, nothing can connect, and StartServer, StopServer, StartFileTransfer, StartDirectoryListing, StartRemoteDelete, StartRemoteMove, TestConnection, TestIdentityProvider, workflow executions and every other official operation return UnknownOperationException with HTTP 501. No workflow step runs. Key material is never accepted: ImportCertificate, ImportHostKey, ImportSshPublicKey and the user, host key, access, agreement and web app operations are not implemented, and the HostKey member and SshPublicKeyBody are refused, so certificates, host keys, SSH public keys and private keys are neither stored nor returned. ListUsers, ListAccesses, ListAgreements and ListHostKeys also need their ServerId echoed in the output, which the catalog list projection cannot express. Profile CertificateIds and server Certificate are stored as given and not resolved, as are connector profile IDs, secret IDs, IAM roles, workflow IDs, VPC settings and Lambda functions. Connectors are ACTIVE service-managed connectors with the URL as given: EgressConfig (VPC Lattice) is refused and no egress IP address is reported. Servers default to the documented S3 domain, PUBLIC endpoint type, SERVICE_MANAGED identity provider and SFTP protocol, and report UserCount 0 and no HostKeyFingerprint or security policy default. FTP and FTPS need a VPC endpoint type and a directory, Lambda or API Gateway identity provider, FTPS needs a certificate, and each identity provider type needs its documented details; VPC_ENDPOINT servers cannot be created. At most 20 servers, 50 workflows, 100 profiles and 100 connectors exist per Region as local limits.",
+  "title": "AWS Transfer Family (simulator catalog)",
+  "version": "2018-11-05"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "transferJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "TransferService.CreateConnector",
+        "TransferService.CreateProfile",
+        "TransferService.CreateServer",
+        "TransferService.CreateWorkflow",
+        "TransferService.DeleteConnector",
+        "TransferService.DeleteProfile",
+        "TransferService.DeleteServer",
+        "TransferService.DeleteWorkflow",
+        "TransferService.DescribeConnector",
+        "TransferService.DescribeProfile",
+        "TransferService.DescribeServer",
+        "TransferService.DescribeWorkflow",
+        "TransferService.ListConnectors",
+        "TransferService.ListProfiles",
+        "TransferService.ListServers",
+        "TransferService.ListTagsForResource",
+        "TransferService.ListWorkflows",
+        "TransferService.TagResource",
+        "TransferService.UntagResource",
+        "TransferService.UpdateConnector",
+        "TransferService.UpdateProfile",
+        "TransferService.UpdateServer"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateConnector": {
+         "summary": "X-Amz-Target: TransferService.CreateConnector",
+         "value": {}
+        },
+        "CreateProfile": {
+         "summary": "X-Amz-Target: TransferService.CreateProfile",
+         "value": {}
+        },
+        "CreateServer": {
+         "summary": "X-Amz-Target: TransferService.CreateServer",
+         "value": {}
+        },
+        "CreateWorkflow": {
+         "summary": "X-Amz-Target: TransferService.CreateWorkflow",
+         "value": {}
+        },
+        "DeleteConnector": {
+         "summary": "X-Amz-Target: TransferService.DeleteConnector",
+         "value": {}
+        },
+        "DeleteProfile": {
+         "summary": "X-Amz-Target: TransferService.DeleteProfile",
+         "value": {}
+        },
+        "DeleteServer": {
+         "summary": "X-Amz-Target: TransferService.DeleteServer",
+         "value": {}
+        },
+        "DeleteWorkflow": {
+         "summary": "X-Amz-Target: TransferService.DeleteWorkflow",
+         "value": {}
+        },
+        "DescribeConnector": {
+         "summary": "X-Amz-Target: TransferService.DescribeConnector",
+         "value": {}
+        },
+        "DescribeProfile": {
+         "summary": "X-Amz-Target: TransferService.DescribeProfile",
+         "value": {}
+        },
+        "DescribeServer": {
+         "summary": "X-Amz-Target: TransferService.DescribeServer",
+         "value": {}
+        },
+        "DescribeWorkflow": {
+         "summary": "X-Amz-Target: TransferService.DescribeWorkflow",
+         "value": {}
+        },
+        "ListConnectors": {
+         "summary": "X-Amz-Target: TransferService.ListConnectors",
+         "value": {}
+        },
+        "ListProfiles": {
+         "summary": "X-Amz-Target: TransferService.ListProfiles",
+         "value": {}
+        },
+        "ListServers": {
+         "summary": "X-Amz-Target: TransferService.ListServers",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: TransferService.ListTagsForResource",
+         "value": {}
+        },
+        "ListWorkflows": {
+         "summary": "X-Amz-Target: TransferService.ListWorkflows",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: TransferService.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: TransferService.UntagResource",
+         "value": {}
+        },
+        "UpdateConnector": {
+         "summary": "X-Amz-Target: TransferService.UpdateConnector",
+         "value": {}
+        },
+        "UpdateProfile": {
+         "summary": "X-Amz-Target: TransferService.UpdateProfile",
+         "value": {}
+        },
+        "UpdateServer": {
+         "summary": "X-Amz-Target: TransferService.UpdateServer",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS Transfer Family JSON 1.1 operations",
+    "tags": [
+     "AWS Transfer Family"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Transfer Family API (2018-11-05). Every other official operation returns HTTP 501 UnknownOperationException. Workflows, AS2 profiles, connectors and servers are stored configuration. A server is a stored record that stays OFFLINE: no endpoint, address, hostname, host key, listener or file store exists, nothing can connect, and StartServer, StopServer, StartFileTransfer, StartDirectoryListing, StartRemoteDelete, StartRemoteMove, TestConnection, TestIdentityProvider, workflow executions and every other official operation return UnknownOperationException with HTTP 501. No workflow step runs. Key material is never accepted: ImportCertificate, ImportHostKey, ImportSshPublicKey and the user, host key, access, agreement and web app operations are not implemented, and the HostKey member and SshPublicKeyBody are refused, so certificates, host keys, SSH public keys and private keys are neither stored nor returned. ListUsers, ListAccesses, ListAgreements and ListHostKeys also need their ServerId echoed in the output, which the catalog list projection cannot express. Profile CertificateIds and server Certificate are stored as given and not resolved, as are connector profile IDs, secret IDs, IAM roles, workflow IDs, VPC settings and Lambda functions. Connectors are ACTIVE service-managed connectors with the URL as given: EgressConfig (VPC Lattice) is refused and no egress IP address is reported. Servers default to the documented S3 domain, PUBLIC endpoint type, SERVICE_MANAGED identity provider and SFTP protocol, and report UserCount 0 and no HostKeyFingerprint or security policy default. FTP and FTPS need a VPC endpoint type and a directory, Lambda or API Gateway identity provider, FTPS needs a certificate, and each identity provider type needs its documented details; VPC_ENDPOINT servers cannot be created. At most 20 servers, 50 workflows, 100 profiles and 100 connectors exist per Region as local limits.",
+   "name": "AWS Transfer Family"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/transfer/2018-11-05/service-2.json",
+  "sha256": "31631824fc7e9a993c9892b08e9abce2727dd960357c0ae0dafc4bfb149200b1",
+  "license": "Apache-2.0"
+ }
+}
