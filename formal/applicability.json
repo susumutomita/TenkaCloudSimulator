@@ -1,32 +1,68 @@
 {
   "version": 1,
-  "base_sha": "e1c83bc1ffe8062b6c15f2a1b941f49d1ec81433",
+  "base_sha": "2bd05417a13bdfc5d947b5ced09306a826e8f93a",
   "changes": [
     {
-      "path": "formal/ConsoleHandoff.tla",
-      "sha256": "a9073b64aa6391ac593a68a47fb110c35598d52b5eef3c8756fff87135de02b5",
+      "path": "cmd/simulator/battle_runtime_loader_unix_test.go",
+      "sha256": "3b3e559662800082db78e79ab43c502183a7a0de6bfb1217b66d5bd495e00e42",
+      "disposition": "test-support",
+      "reason": "Runs the real loader with an inert pinned bundle to check exact chosen deadlines and monotonic time representation.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/battle_runtime_unix.go",
+      "sha256": "deca5a18661a6d51349c4d4c0076cc5422ac53dd0f192582d4fc08a66bd7728f",
       "disposition": "modeled",
-      "reason": "Canonicalizes only rejected observations; accepted observations, guarded invariants, and all control anchors remain.",
+      "reason": "Changes only the selected deadline representation and the choice between a validated configured deadline and an earlier parent deadline.",
       "models": [
         {
-          "id": "ConsoleHandoff",
+          "id": "BattleLoaderDeadline",
           "properties": [
-            "TypeOK",
-            "OperatorRefused",
-            "ParentLifetimeBound",
-            "OneTimeRedemption",
-            "AttemptConsumesCode",
-            "RedeemRequiresFreshParent",
-            "UseRequiresFreshAuthority",
-            "ExactDestination",
-            "TerminalRequiresRelay",
-            "LogoutRejectsReplay",
-            "UnrelatedSessionsPreserved",
-            "SDKAuthorityPreserved"
+            "DeadlineIsMonotonic",
+            "ExactDeadlineInstant"
           ],
-          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+          "limits": "Finite single-sample deadline selection with abstract wall and monotonic labels only. Assumes one coherent time sample and representable inputs. No claims about Go refinement, clock jumps, numeric overflow, timer firing, parent cancellation, VM execution, or liveness."
         }
       ]
+    },
+    {
+      "path": "formal/BattleLoaderDeadline.cfg",
+      "sha256": "5e6d82098737d9fc7d9537bf451bfe51e1ba1563207bccf1b3c356d60c6aec83",
+      "disposition": "modeled",
+      "reason": "Enables both deadline properties and TypeOK for the bounded model.",
+      "models": [
+        {
+          "id": "BattleLoaderDeadline",
+          "properties": [
+            "DeadlineIsMonotonic",
+            "ExactDeadlineInstant"
+          ],
+          "limits": "Finite single-sample deadline selection with abstract wall and monotonic labels only. Assumes one coherent time sample and representable inputs. No claims about Go refinement, clock jumps, numeric overflow, timer firing, parent cancellation, VM execution, or liveness."
+        }
+      ]
+    },
+    {
+      "path": "formal/BattleLoaderDeadline.tla",
+      "sha256": "2f418a190a7e456ced8aa76eda46ea5d5d2273f8020aa33390ea47897890dd54",
+      "disposition": "modeled",
+      "reason": "Specifies the abstract deadline selection and separately checks the result representation and exact minimum.",
+      "models": [
+        {
+          "id": "BattleLoaderDeadline",
+          "properties": [
+            "DeadlineIsMonotonic",
+            "ExactDeadlineInstant"
+          ],
+          "limits": "Finite single-sample deadline selection with abstract wall and monotonic labels only. Assumes one coherent time sample and representable inputs. No claims about Go refinement, clock jumps, numeric overflow, timer firing, parent cancellation, VM execution, or liveness."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "b1a9fa8d88ab37a73eabf8bf262db024191fbcb4914804c2b3f77a77950edcde",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the scoped finite model and positive/negative calibration without changing existing models.",
+      "models": []
     }
   ]
 }

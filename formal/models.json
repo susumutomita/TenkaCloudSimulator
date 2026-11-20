@@ -18817,6 +18817,45 @@
      "expect_invariant": "PublicationFollowsAdmission"
     }
    ]
+  },
+  {
+   "id": "BattleLoaderDeadline",
+   "model": "formal/BattleLoaderDeadline.tla",
+   "config": "formal/BattleLoaderDeadline.cfg",
+   "bounds": "Two sample ticks, two future configured intervals, absent or one parent with two time origins and five relative ticks, exactly one selection.",
+   "properties": [
+    "TypeOK",
+    "DeadlineIsMonotonic",
+    "ExactDeadlineInstant"
+   ],
+   "limits": "Finite single-sample deadline selection with abstract wall and monotonic labels only. Assumes one coherent time sample and representable inputs. No claims about Go refinement, clock jumps, numeric overflow, timer firing, parent cancellation, VM execution, or liveness.",
+   "source_scope": [
+    "cmd/simulator/battle_runtime_unix.go"
+   ],
+   "mutants": [
+    {
+     "id": "WallOnly",
+     "edits": [
+      {
+       "old": "IN outcome' = [kind |-> \"Monotonic\", tick |-> selected]",
+       "new": "IN outcome' = [kind |-> \"Wall\", tick |-> selected]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeadlineIsMonotonic"
+    },
+    {
+     "id": "IgnoreEarlierParent",
+     "edits": [
+      {
+       "old": "THEN parent.tick ELSE configured",
+       "new": "THEN configured ELSE configured",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactDeadlineInstant"
+    }
+   ]
   }
  ]
 }

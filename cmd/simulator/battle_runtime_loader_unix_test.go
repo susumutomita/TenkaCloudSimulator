@@ -348,3 +348,53 @@ func TestStrictRuntimeJSONBoundsNestingAndArrays(t *testing.T) {
 		}
 	}
 }
+
+func TestBattleLoaderRetainsMonotonicLifetime(t *testing.T) {
+	for _, name := range []string{"configured", "earlier-monotonic-parent", "earlier-wall-parent", "later-parent"} {
+		t.Run(name, func(t *testing.T) {
+			b := newInertBattleBundle(t)
+			expected := time.UnixMilli(b.cfg.LifetimeUntilMs)
+			ctx := context.Background()
+			now := time.Now()
+			var parentDeadline time.Time
+			switch name {
+			case "earlier-monotonic-parent":
+				parentDeadline = now.Add(time.Minute)
+			case "earlier-wall-parent":
+				parentDeadline = now.Add(time.Minute).Round(0)
+			case "later-parent":
+				parentDeadline = now.Add(90 * time.Minute)
+			}
+			if !parentDeadline.IsZero() {
+				var cancel context.CancelFunc
+				ctx, cancel = context.WithDeadline(ctx, parentDeadline)
+				defer cancel()
+				if parentDeadline.Before(expected) {
+					expected = parentDeadline
+				}
+			}
+			called := false
+			create := func(_ string, _ server.ProviderConfig, _ string, _ guesttcp.HTTPProbeCommandClock, c aws.EC2InstanceRuntimeConfig) (http.Handler, func() error, error) {
+				called = true
+				deadline, ok := c.Lifetime.Deadline()
+				if !ok || !deadline.Equal(expected) {
+					t.Errorf("runtime deadline %v (present: %v); want %v", deadline, ok, expected)
+				}
+				if deadline == deadline.Round(0) {
+					t.Errorf("runtime deadline %v lost its monotonic reading", deadline)
+				}
+				return http.NewServeMux(), func() error { return nil }, nil
+			}
+			_, closeState, err := loadBattleServer(ctx, b.configPath, "http://127.0.0.1:4566", ":memory:", server.DefaultProviderConfig(), create)
+			if err != nil {
+				t.Fatalf("real bundle loader: %v", err)
+			}
+			if err := closeState(); err != nil {
+				t.Errorf("runtime cleanup: %v", err)
+			}
+			if !called || len(b.extractedEntries(t)) != 0 {
+				t.Error("bundle was not loaded and retired")
+			}
+		})
+	}
+}

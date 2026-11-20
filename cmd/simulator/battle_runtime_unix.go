@@ -44,7 +44,8 @@ func loadBattleServer(ctx context.Context, path, origin, state string, options s
 	if !battlePlatformSupported() {
 		return nil, nil, errBattlePlatform
 	}
-	cfg, e := readBattleRuntimeFile(path, time.Now())
+	now := time.Now()
+	cfg, e := readBattleRuntimeFile(path, now)
 	if e != nil {
 		return nil, nil, e
 	}
@@ -73,7 +74,14 @@ func loadBattleServer(ctx context.Context, path, origin, state string, options s
 		_ = archive.Close()
 		return nil, nil, errors.New("archive changed")
 	}
-	lifetime, cancel := context.WithDeadline(ctx, time.UnixMilli(cfg.LifetimeUntilMs))
+	// Convert the validated wall deadline on the same sample's monotonic
+	// timeline. Never extend an earlier parent deadline, even if that parent
+	// supplied wall time only.
+	deadline := now.Add(time.UnixMilli(cfg.LifetimeUntilMs).Sub(now))
+	if parentDeadline, ok := ctx.Deadline(); ok && parentDeadline.Before(deadline) {
+		deadline = now.Add(parentDeadline.Sub(now))
+	}
+	lifetime, cancel := context.WithDeadline(ctx, deadline)
 	bundle, e := guestbundle.Extract(lifetime, cfg.RuntimeDirectory, archive, manifest)
 	closeErr := archive.Close()
 	if e != nil || closeErr != nil {
