@@ -200,6 +200,104 @@
     "Filters": [],
     "ResourceName": "arn:aws:rds:us-east-1:000000000000:subgrp:app"
    }
+  },
+  {
+   "body": "Action=CreateUser&Version=2015-02-02&UserId=app&UserName=app&Engine=valkey&AccessString=on+~%2A+%2B%40all&AuthenticationMode.Type=iam&Tags.Tag.1.Key=team&Tags.Tag.1.Value=a",
+   "model": "elasticache",
+   "name": "elasticache CreateUser",
+   "operation": "CreateUser",
+   "params": {
+    "AccessString": "on ~* +@all",
+    "AuthenticationMode": {
+     "Type": "iam"
+    },
+    "Engine": "valkey",
+    "Tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     }
+    ],
+    "UserId": "app",
+    "UserName": "app"
+   }
+  },
+  {
+   "body": "Action=ModifyCacheSubnetGroup&Version=2015-02-02&CacheSubnetGroupName=app&SubnetIds.SubnetIdentifier.1=subnet-0a1b2c3d",
+   "model": "elasticache",
+   "name": "elasticache ModifyCacheSubnetGroup",
+   "operation": "ModifyCacheSubnetGroup",
+   "params": {
+    "CacheSubnetGroupName": "app",
+    "SubnetIds": [
+     "subnet-0a1b2c3d"
+    ]
+   }
+  },
+  {
+   "body": "Action=AddTagsToResource&Version=2015-02-02&ResourceName=arn%3Aaws%3Aelasticache%3Aus-east-1%3A000000000000%3Auser%3Aapp&Tags.Tag.1.Key=k&Tags.Tag.1.Value=v",
+   "model": "elasticache",
+   "name": "elasticache AddTagsToResource",
+   "operation": "AddTagsToResource",
+   "params": {
+    "ResourceName": "arn:aws:elasticache:us-east-1:000000000000:user:app",
+    "Tags": [
+     {
+      "Key": "k",
+      "Value": "v"
+     }
+    ]
+   }
+  },
+  {
+   "body": "Action=CreateClusterSubnetGroup&Version=2012-12-01&ClusterSubnetGroupName=app&Description=d&SubnetIds.SubnetIdentifier.1=subnet-0a1b2c3d&Tags.Tag.1.Key=team&Tags.Tag.1.Value=a&Tags.Tag.2.Key=empty&Tags.Tag.2.Value=",
+   "model": "redshift",
+   "name": "redshift CreateClusterSubnetGroup",
+   "operation": "CreateClusterSubnetGroup",
+   "params": {
+    "ClusterSubnetGroupName": "app",
+    "Description": "d",
+    "SubnetIds": [
+     "subnet-0a1b2c3d"
+    ],
+    "Tags": [
+     {
+      "Key": "team",
+      "Value": "a"
+     },
+     {
+      "Key": "empty",
+      "Value": ""
+     }
+    ]
+   }
+  },
+  {
+   "body": "Action=CreateTags&Version=2012-12-01&ResourceName=arn%3Aaws%3Aredshift%3Aus-east-1%3A000000000000%3Asubnetgroup%3Aapp&Tags.Tag.1.Key=k&Tags.Tag.1.Value=v",
+   "model": "redshift",
+   "name": "redshift CreateTags",
+   "operation": "CreateTags",
+   "params": {
+    "ResourceName": "arn:aws:redshift:us-east-1:000000000000:subnetgroup:app",
+    "Tags": [
+     {
+      "Key": "k",
+      "Value": "v"
+     }
+    ]
+   }
+  },
+  {
+   "body": "Action=DeleteTags&Version=2012-12-01&ResourceName=arn%3Aaws%3Aredshift%3Aus-east-1%3A000000000000%3Asubnetgroup%3Aapp&TagKeys.TagKey.1=k",
+   "model": "redshift",
+   "name": "redshift DeleteTags",
+   "operation": "DeleteTags",
+   "params": {
+    "ResourceName": "arn:aws:redshift:us-east-1:000000000000:subnetgroup:app",
+    "TagKeys": [
+     "k"
+    ]
+   }
   }
  ],
  "generator": "tools/awsmodels/query_vectors.py",

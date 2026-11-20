@@ -302,12 +302,167 @@ def run():
                     databases.add_tags_to_resource(ResourceName=created[0][arn_key], Tags=[{'Key': 'kind', 'Value': kind}])
                     page.get_by_role('link', name=name).click()
                     expect(page.get_by_text(created[0][arn_key], exact=True).first).to_be_visible()
-                    expect(page.get_by_text('"' + kind + '"', exact=False).first).to_be_visible()
+                    expect(page.get_by_role('cell', name=kind, exact=True)).to_be_visible()
                     page.get_by_role('button', name='Back to list').click()
                     page.get_by_role('button', name='Delete ' + name).click()
                     page.get_by_role('dialog').get_by_role('button', name='Delete').click()
                     expect(page.get_by_text('Resource deleted.')).to_be_visible()
                     assert describe() == [], kind
+                # Generic edit, tag and complex-create controls. Each write is
+                # the service's native request; boto3 reads the result back.
+                create_form = page.locator('form').filter(has=page.get_by_role('button', name='Create', exact=True))
+                edit_form = page.locator('form').filter(has=page.get_by_role('button', name='Save changes', exact=True))
+
+                def create(values):
+                    for label, value in values.items():
+                        create_form.get_by_label(label, exact=True).fill(value)
+                    create_form.get_by_role('button', name='Create', exact=True).click()
+
+                def edit(values):
+                    page.get_by_role('button', name='Edit', exact=True).click()
+                    for label, value in values.items():
+                        edit_form.get_by_label(label, exact=True).fill(value)
+
+                def save():
+                    edit_form.get_by_role('button', name='Save changes', exact=True).click()
+                    expect(page.get_by_text('Resource updated.')).to_be_visible()
+
+                def add_tag(key, value):
+                    page.get_by_label('Tag key', exact=True).fill(key)
+                    page.get_by_label('Tag value (optional)', exact=True).fill(value)
+                    page.get_by_role('button', name='Add tag', exact=True).click()
+                    expect(page.get_by_text('Tag added.')).to_be_visible()
+
+                def remove_tag(key):
+                    page.get_by_role('button', name='Remove tag ' + key, exact=True).click()
+                    expect(page.get_by_text('Tag removed.')).to_be_visible()
+
+                def delete(name):
+                    page.get_by_role('button', name='Back to list').click()
+                    page.get_by_role('button', name='Delete ' + name).click()
+                    page.get_by_role('dialog').get_by_role('button', name='Delete').click()
+                    expect(page.get_by_text('Resource deleted.')).to_be_visible()
+
+                shots = Path(SHOTS) if SHOTS else None
+                # RDS (Query): Tags at creation, ModifyDBSubnetGroup, AddTagsToResource and RemoveTagsFromResource.
+                page.get_by_role('tab', name='dbSubnetGroup', exact=True).click()
+                create({'DBSubnetGroupName': 'edit-subnets', 'DBSubnetGroupDescription': 'before', 'SubnetIds': 'subnet-0a1b2c3d, subnet-4e5f6a7b',
+                        'Tags (optional)': 'team=console\nstage=dev'})
+                expect(page.get_by_role('link', name='edit-subnets')).to_be_visible()
+                arn = databases.describe_db_subnet_groups(DBSubnetGroupName='edit-subnets')['DBSubnetGroups'][0]['DBSubnetGroupArn']
+                assert databases.list_tags_for_resource(ResourceName=arn)['TagList'] == [{'Key': 'stage', 'Value': 'dev'}, {'Key': 'team', 'Value': 'console'}]
+                page.get_by_role('link', name='edit-subnets').click()
+                expect(page.get_by_role('button', name='Remove tag team')).to_be_visible()
+                edit({})
+                expect(edit_form.get_by_label('DBSubnetGroupDescription (optional)', exact=True)).to_have_value('before')
+                # A required member left empty is refused before any request.
+                edit_form.get_by_role('button', name='Save changes', exact=True).click()
+                expect(page.get_by_text('SubnetIds is required.')).to_be_visible()
+                edit_form.get_by_label('DBSubnetGroupDescription (optional)', exact=True).fill('after')
+                edit_form.get_by_label('SubnetIds', exact=True).fill('subnet-0a1b2c3d, subnet-4e5f6a7b, subnet-0123456789abcdef0')
+                audit('rds-edit')
+                if shots:
+                    page.screenshot(path=str(shots / 'console-update.png'), animations='disabled')
+                save()
+                group = databases.describe_db_subnet_groups(DBSubnetGroupName='edit-subnets')['DBSubnetGroups'][0]
+                assert group['DBSubnetGroupDescription'] == 'after' and len(group['Subnets']) == 3, group
+                add_tag('owner', 'ui')
+                remove_tag('stage')
+                assert databases.list_tags_for_resource(ResourceName=arn)['TagList'] == [{'Key': 'owner', 'Value': 'ui'}, {'Key': 'team', 'Value': 'console'}]
+                expect(page.get_by_role('button', name='Remove tag owner')).to_be_visible()
+                expect(page.get_by_role('button', name='Remove tag stage')).to_have_count(0)
+                audit('rds-tags')
+                if shots:
+                    page.get_by_role('button', name='Add tag', exact=True).scroll_into_view_if_needed()
+                    page.screenshot(path=str(shots / 'console-tags.png'), animations='disabled')
+                delete('edit-subnets')
+                assert databases.describe_db_subnet_groups()['DBSubnetGroups'] == []
+                # ElastiCache (Query): a user needs the AuthenticationMode structure.
+                caches = team.client('elasticache')
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^Amazon ElastiCache')).click()
+                page.get_by_role('tab', name='user', exact=True).click()
+                user = {'UserId': 'console-user', 'UserName': 'console-user', 'Engine': 'valkey', 'AccessString': 'on ~app:* +@read',
+                        'AuthenticationMode (optional)': '{"Type": "cert"}', 'Tags (optional)': 'team=cache'}
+                create(user)
+                expect(page.get_by_text('AuthenticationMode.Type: must be one of password, no-password-required, iam.')).to_be_visible()
+                assert caches.describe_users()['Users'] == [], 'an invalid value was sent'
+                create({'AuthenticationMode (optional)': '{"Type": "iam"}'})
+                expect(page.get_by_role('link', name='console-user')).to_be_visible()
+                made = caches.describe_users(UserId='console-user')['Users'][0]
+                assert made['Authentication']['Type'] == 'iam' and made['AccessString'] == 'on ~app:* +@read', made
+                assert caches.list_tags_for_resource(ResourceName=made['ARN'])['TagList'] == [{'Key': 'team', 'Value': 'cache'}]
+                if shots:
+                    page.screenshot(path=str(shots / 'console-elasticache-user.png'), animations='disabled')
+                page.get_by_role('link', name='console-user').click()
+                expect(page.get_by_role('button', name='Remove tag team')).to_be_visible()
+                edit({'AccessString (optional)': 'on ~* +@all'})
+                save()
+                assert caches.describe_users(UserId='console-user')['Users'][0]['AccessString'] == 'on ~* +@all'
+                delete('console-user')
+                assert caches.describe_users()['Users'] == []
+                page.get_by_role('tab', name='cacheSubnetGroup', exact=True).click()
+                create({'CacheSubnetGroupName': 'console-cache', 'CacheSubnetGroupDescription': 'before', 'SubnetIds': 'subnet-0a1b2c3d'})
+                page.get_by_role('link', name='console-cache').click()
+                edit({'CacheSubnetGroupDescription (optional)': 'after', 'SubnetIds (optional)': 'subnet-0a1b2c3d, subnet-4e5f6a7b'})
+                save()
+                cache_group = caches.describe_cache_subnet_groups(CacheSubnetGroupName='console-cache')['CacheSubnetGroups'][0]
+                assert cache_group['CacheSubnetGroupDescription'] == 'after' and len(cache_group['Subnets']) == 2, cache_group
+                add_tag('owner', 'ui')
+                assert caches.list_tags_for_resource(ResourceName=cache_group['ARN'])['TagList'] == [{'Key': 'owner', 'Value': 'ui'}]
+                delete('console-cache')
+                assert caches.describe_cache_subnet_groups()['CacheSubnetGroups'] == []
+                # Redshift (Query): no ARN member and no list-tags operation; tags
+                # come from the description and are written through the ARN.
+                warehouse = team.client('redshift')
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^Amazon Redshift')).click()
+                page.get_by_role('tab', name='clusterSubnetGroup', exact=True).click()
+                create({'ClusterSubnetGroupName': 'console-dw', 'Description': 'before', 'SubnetIds': 'subnet-0a1b2c3d', 'Tags (optional)': 'team=dw'})
+                page.get_by_role('link', name='console-dw').click()
+                expect(page.get_by_role('button', name='Remove tag team')).to_be_visible()
+                expect(page.get_by_text('Request failed')).to_have_count(0)
+                add_tag('owner', 'ui')
+                remove_tag('team')
+                assert warehouse.describe_cluster_subnet_groups(ClusterSubnetGroupName='console-dw')['ClusterSubnetGroups'][0]['Tags'] == [{'Key': 'owner', 'Value': 'ui'}]
+                edit({'Description (optional)': 'after', 'SubnetIds': 'subnet-0a1b2c3d, subnet-4e5f6a7b'})
+                save()
+                dw = warehouse.describe_cluster_subnet_groups(ClusterSubnetGroupName='console-dw')['ClusterSubnetGroups'][0]
+                assert dw['Description'] == 'after' and len(dw['Subnets']) == 2, dw
+                delete('console-dw')
+                page.get_by_role('tab', name='clusterParameterGroup', exact=True).click()
+                create({'ParameterGroupName': 'console-params', 'ParameterGroupFamily': 'redshift-1.0', 'Description': 'dw', 'Tags (optional)': 'team=dw'})
+                page.get_by_role('link', name='console-params').click()
+                expect(page.get_by_text('redshift-1.0', exact=True).first).to_be_visible()
+                remove_tag('team')
+                assert warehouse.describe_cluster_parameter_groups()['ParameterGroups'][0]['Tags'] == []
+                delete('console-params')
+                assert warehouse.describe_cluster_parameter_groups()['ParameterGroups'] == []
+                assert warehouse.describe_cluster_subnet_groups()['ClusterSubnetGroups'] == []
+                # JSON 1.1 (ECR): a structure update and a tag through the UI.
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^Amazon Elastic Container Registry')).click()
+                create({'repositoryName': 'console/edit', 'tags (optional)': 'team=ecr'})
+                page.get_by_role('link', name='console/edit').click()
+                edit({'imageScanningConfiguration': '{"scanOnPush": true}'})
+                save()
+                repository = registry.describe_repositories(repositoryNames=['console/edit'])['repositories'][0]
+                assert repository['imageScanningConfiguration'] == {'scanOnPush': True}, repository
+                add_tag('owner', 'ui')
+                assert sorted(t['Key'] for t in registry.list_tags_for_resource(resourceArn=repository['repositoryArn'])['tags']) == ['owner', 'team']
+                delete('console/edit')
+                # REST-JSON (Amplify): an update and map tags through the UI.
+                page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                page.get_by_role('option', name=re.compile('^AWS Amplify')).click()
+                page.get_by_role('link', name='console-site').click()
+                edit({'description (optional)': 'edited in the console'})
+                save()
+                assert hosting.get_app(appId=app['appId'])['app']['description'] == 'edited in the console'
+                add_tag('owner', 'ui')
+                assert hosting.list_tags_for_resource(resourceArn=app['appArn'])['tags'] == {'owner': 'ui'}
+                remove_tag('owner')
+                assert hosting.list_tags_for_resource(resourceArn=app['appArn'])['tags'] == {}
+                page.get_by_role('button', name='Back to list').click()
                 # Japanese presentation keeps identifiers and native state.
                 page.get_by_role('combobox', name='Language', exact=True).select_option('ja')
                 expect(page.get_by_role('heading', level=1, name='AWS サービスカタログ')).to_be_visible()
@@ -361,6 +516,8 @@ def run():
             team.stop()
     assert not outside and not errors, (outside, errors)
     assert {'CreateRepository', 'DescribeRepositories', 'DeleteRepository'} <= operations, operations
+    assert {'ModifyDBSubnetGroup', 'AddTagsToResource', 'RemoveTagsFromResource', 'CreateUser', 'ModifyUser', 'ModifyCacheSubnetGroup',
+            'ModifyClusterSubnetGroup', 'CreateTags', 'DeleteTags', 'PutImageScanningConfiguration', 'TagResource'} <= operations, operations
     assert {'CreateDBSubnetGroup', 'DescribeDBSubnetGroups', 'DeleteDBSubnetGroup', 'ListTagsForResource', 'CreateDBParameterGroup', 'DeleteDBParameterGroup',
             'CreateDBClusterParameterGroup', 'DescribeDBClusterParameterGroups', 'DeleteDBClusterParameterGroup', 'CreateOptionGroup', 'DescribeOptionGroups', 'DeleteOptionGroup'} <= operations, operations
     print(json.dumps({'catalogConsole': True, 'operations': sorted(operations), 'externalRequests': 0, 'axeWidths': [1440, 390]}))

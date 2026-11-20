@@ -72,22 +72,50 @@ region (for example 25 Amplify apps). These are local limits, not AWS quotas.
 
 ## Console and API reference
 
-Choose **Services → Service catalog** in the console. The view lists, creates,
-describes and deletes resources with each service's native requests, including
-child resources such as Amplify branches. Complex official members remain
-available through SDKs and the API reference.
+Choose **Services → Service catalog** in the console. For every catalog
+service the view sends the service's own native requests and reads every
+result back from the service:
 
-For Query services (RDS, ElastiCache and Redshift) the console sends the same form bodies as botocore
-(`Action`, `Version`, `SubnetIds.SubnetIdentifier.1`, an empty list as
-`Name=`) to `/` with `X-Simulator-Service`, and decodes the XML response with
-the output shapes the descriptors publish (`xmlShapes`, `output`,
+- **List, open and delete** each resource kind, including child resources such
+  as Amplify branches. A detail opens through the read operation, a
+  `Describe*` call by name, or the listed description.
+- **Create** with every input member of the create operation: text, number and
+  boolean fields, comma-separated string lists, `Tags` as `key=value` lines,
+  and other structures, maps and lists of structures (for example ElastiCache
+  `AuthenticationMode`) as a JSON value with official member names. The
+  console checks such values against the official input shape (types,
+  required and unknown members, enums, lengths and ranges) before sending.
+- **Edit** a resource whose specification binds an update operation (for
+  example `ModifyDBSubnetGroup`, `ModifyUser`, `UpdateApp` or
+  `PutImageScanningConfiguration`). The form starts from the current
+  description, offers the operation's members except identifying, fixed and
+  account members and resource members outside the reviewed update fields,
+  and sends only changed and required members. Members the bounded model
+  still refuses (for example ElastiCache `Passwords`) are refused by the
+  service with its error.
+- **Add and remove tags** on the detail view through the bound tag and untag
+  operations. Tags are read with the list-tags operation or, without one
+  (Redshift), from the description; a resource whose shape carries no ARN is
+  tagged by the simulator ARN the descriptor's `arnTemplate` gives.
+
+The console cannot clear an optional value in an edit (an empty field is
+refused; use an SDK), does not pre-fill members the description names
+differently (RDS `SubnetIds` against `Subnets`), offers one update operation
+per resource kind (ECR repositories edit `PutImageScanningConfiguration`
+only), does not page through tags or edit list filters, and runs no
+operation the specification leaves unbound. Errors show the service's `Code`
+and `Message`.
+
+Query services (RDS, ElastiCache and Redshift) receive the same form bodies as
+botocore (`Action`, `Version`, `SubnetIds.SubnetIdentifier.1`,
+`AuthenticationMode.Type`, `Tags.Tag.1.Key`, an empty list as `Name=`) at `/`
+with `X-Simulator-Service`, and their XML responses are decoded with the
+output shapes the descriptors publish (`xmlShapes`, `output`,
 `resultWrapper`, and per-member `key`, `itemKey`, `emptyKey`, `flattened`).
-Errors show the service's `Code` and `Message`. Every RDS kind can be listed,
-created from its string, number, boolean and string-list members, opened
-(through its `Describe*` call by name, with `ListTagsForResource` tags) and
-deleted. The console does not edit tags, `Filters`, or other structure members
-such as `Tags` on create, and has no update form (for example
-`ModifyDBSubnetGroup`); use an SDK or the API reference for those.
+Descriptors of every service also publish `inputShapes` (with `shape` on each
+complex create, update, put or tag member), `editable` on update operations,
+and `arnTemplate` or `tagsWire` where a resource needs them; they are served
+at `/_simulator/v1/catalog/aws`, not in the capability document.
 
 The [catalog API reference](/_simulator/docs/catalog.html) serves one OpenAPI
 document per service, generated from the same embedded official shapes. A Query

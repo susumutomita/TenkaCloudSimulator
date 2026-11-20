@@ -13,6 +13,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 	"unicode/utf8"
@@ -766,13 +767,13 @@ func TestQueryDecoderAcceptsBotocoreSerializerBytes(t *testing.T) {
 	}
 	synthetic := &Model{Name: "querysynthetic", Metadata: vectors.Synthetic.Metadata, Shapes: vectors.Synthetic.Shapes,
 		Operations: map[string]*Operation{"Echo": {Name: "Echo", Input: "EchoInput"}}}
-	official, err := loadModel("rds")
-	if err != nil {
-		t.Fatal(err)
-	}
 	for _, c := range vectors.Cases {
 		m := synthetic
-		if c.Model == "rds" {
+		if c.Model != "synthetic" {
+			official, err := loadModel(c.Model)
+			if err != nil {
+				t.Fatal(err)
+			}
 			m = official
 		}
 		form, err := url.ParseQuery(c.Body)
@@ -1006,5 +1007,93 @@ func TestQueryReferenceExamplesFillRequiredScalars(t *testing.T) {
 	}
 	if got := b.formExample("NoInput", &Operation{}); len(got) != 2 {
 		t.Fatalf("no-input example %v", got)
+	}
+}
+
+const consoleFixture = "../../../tools/console/tests/fixtures/catalog-descriptors.json"
+
+// The console unit tests run against real descriptors of one service per
+// protocol family; regenerate with CATALOG_WRITE_DOCS=1.
+func TestConsoleDescriptorFixtureIsFresh(t *testing.T) {
+	h := newHarness(t, rds, elastiCache, redshift, ecr, amplify, memoryDB)
+	data, err := json.MarshalIndent(map[string]any{"services": h.engine.Describe()}, "", " ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	data = append(data, '\n')
+	if os.Getenv("CATALOG_WRITE_DOCS") == "1" {
+		if err := os.MkdirAll("../../../tools/console/tests/fixtures", 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(consoleFixture, data, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got, err := os.ReadFile(consoleFixture)
+	if err != nil || !bytes.Equal(got, data) {
+		t.Fatal("tools/console/tests/fixtures/catalog-descriptors.json is stale; run CATALOG_WRITE_DOCS=1 go test ./internal/aws/catalog")
+	}
+}
+
+// Descriptors publish what generic edit, tag and complex-create forms need,
+// for every protocol, and only where an operation needs it.
+func TestDescriptorsPublishEditTagAndComplexInputs(t *testing.T) {
+	h := newHarness(t, rds, elastiCache, redshift, ecr, amplify, codeConnections)
+	byModel := map[string]Descriptor{}
+	for _, d := range h.engine.Describe() {
+		byModel[d.Model] = d
+	}
+	resource := func(model, kind string) ResourceDescriptor {
+		for _, r := range byModel[model].Resources {
+			if r.Kind == kind {
+				return r
+			}
+		}
+		t.Fatalf("no %s %s", model, kind)
+		return ResourceDescriptor{}
+	}
+	member := func(op OpDescriptor, name string) MemberDescriptor {
+		for _, m := range op.Members {
+			if m.Name == name {
+				return m
+			}
+		}
+		t.Fatalf("%s has no %s", op.Name, name)
+		return MemberDescriptor{}
+	}
+	if got := resource("rds", "dbSubnetGroup").Ops["update"].Editable; !reflect.DeepEqual(got, []string{"DBSubnetGroupDescription", "SubnetIds"}) {
+		t.Fatalf("rds editable %v", got)
+	}
+	if got := resource("elasticache", "user").Ops["update"].Editable; !slices.Contains(got, "AccessString") || slices.Contains(got, "UserId") {
+		t.Fatalf("elasticache user editable %v", got)
+	}
+	user := resource("elasticache", "user").Ops["create"]
+	if mode := member(user, "AuthenticationMode"); mode.Shape != "AuthenticationMode" || byModel["elasticache"].InputShapes["AuthenticationMode"].Type != "structure" {
+		t.Fatalf("authentication mode %+v", mode)
+	}
+	tags := byModel["elasticache"].InputShapes["TagList"]
+	if tags.Member == nil || tags.Member.Key != "Tag" || byModel["elasticache"].InputShapes["Tag"].Members[0].Name != "Key" {
+		t.Fatalf("query tag list %+v", tags)
+	}
+	group := resource("redshift", "clusterParameterGroup")
+	if group.ARNTemplate != "arn:{partition}:redshift:{region}:{account}:parametergroup:{name}" || group.TagsWire != "Tags" || byModel["redshift"].Tagging["list-tags"].Name != "" {
+		t.Fatalf("redshift tagging %+v", group)
+	}
+	if resource("rds", "dbSubnetGroup").ARNTemplate != "" || resource("rds", "dbSubnetGroup").TagsWire != "" {
+		t.Fatal("a resource with an ARN member and list-tags needs no template")
+	}
+	if member(resource("ecr", "repository").Ops["create"], "tags").Shape == "" || member(resource("ecr", "repository").Ops["list"], "repositoryNames").Shape != "" {
+		t.Fatal("only create, update, put and tag operations describe complex members")
+	}
+	// A REST-JSON body member whose nested keys are serialized differently
+	// publishes its wire names.
+	for _, d := range byModel {
+		for name, shape := range d.InputShapes {
+			for _, m := range shape.Members {
+				if _, ok := d.InputShapes[m.Shape]; !ok {
+					t.Fatalf("%s %s.%s references undescribed %s", d.Model, name, m.Name, m.Shape)
+				}
+			}
+		}
 	}
 }

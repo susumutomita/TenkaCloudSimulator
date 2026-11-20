@@ -1,3 +1,5 @@
+import {queryEntries} from './catalog-input.mjs';
+
 // AWS Query protocol support for the catalog console. Requests are the
 // form bodies botocore's Query serializer sends; responses are decoded from
 // the service's real XML with the descriptor's output shapes. No JSON side
@@ -14,7 +16,10 @@ export function queryBody(service, op, input) {
     if (!(member.name in input)) continue;
     const value = input[member.name];
     const key = member.key || member.name;
-    if (member.type === 'list') {
+    if (member.shape) {
+      // Structures, maps and lists of structures follow the input shapes.
+      queryEntries(form, service.inputShapes, member.shape, value, key, member.flattened, member.emptyKey || key);
+    } else if (member.type === 'list') {
       if (!Array.isArray(value)) throw Error(member.name + ' must be a list.');
       if (!value.length) { form.append(member.emptyKey || key, ''); continue; }
       const prefix = member.flattened ? key : key + '.' + (member.itemKey || 'member');

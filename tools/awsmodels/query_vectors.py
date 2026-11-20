@@ -79,6 +79,19 @@ RDS_CASES = [
     ('ListTagsForResource', {'ResourceName': 'arn:aws:rds:us-east-1:000000000000:subgrp:app', 'Filters': []}),
 ]
 
+# Complex create members and tag operations the console builds from input
+# shapes (structures and lists of structures).
+SERVICE_CASES = [
+    ('elasticache', 'CreateUser', {'UserId': 'app', 'UserName': 'app', 'Engine': 'valkey', 'AccessString': 'on ~* +@all',
+                                   'AuthenticationMode': {'Type': 'iam'}, 'Tags': [{'Key': 'team', 'Value': 'a'}]}),
+    ('elasticache', 'ModifyCacheSubnetGroup', {'CacheSubnetGroupName': 'app', 'SubnetIds': ['subnet-0a1b2c3d']}),
+    ('elasticache', 'AddTagsToResource', {'ResourceName': 'arn:aws:elasticache:us-east-1:000000000000:user:app', 'Tags': [{'Key': 'k', 'Value': 'v'}]}),
+    ('redshift', 'CreateClusterSubnetGroup', {'ClusterSubnetGroupName': 'app', 'Description': 'd', 'SubnetIds': ['subnet-0a1b2c3d'],
+                                              'Tags': [{'Key': 'team', 'Value': 'a'}, {'Key': 'empty', 'Value': ''}]}),
+    ('redshift', 'CreateTags', {'ResourceName': 'arn:aws:redshift:us-east-1:000000000000:subnetgroup:app', 'Tags': [{'Key': 'k', 'Value': 'v'}]}),
+    ('redshift', 'DeleteTags', {'ResourceName': 'arn:aws:redshift:us-east-1:000000000000:subnetgroup:app', 'TagKeys': ['k']}),
+]
+
 
 def normalize(value):
     if isinstance(value, bytes):
@@ -109,6 +122,10 @@ def main():
              for name, params in SYNTHETIC_CASES]
     cases += [{'model': 'rds', 'name': operation, 'operation': operation, 'body': wire(rds, operation, params), 'params': normalize(params)}
               for operation, params in RDS_CASES]
+    session = botocore.session.get_session()
+    cases += [{'model': service, 'name': service + ' ' + operation, 'operation': operation,
+               'body': wire(session.get_service_model(service), operation, params), 'params': normalize(params)}
+              for service, operation, params in SERVICE_CASES]
     data = {'generator': 'tools/awsmodels/query_vectors.py', 'botocore': botocore.__version__, 'synthetic': SYNTHETIC, 'cases': cases}
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(data, indent=1, sort_keys=True, ensure_ascii=False) + '\n')
