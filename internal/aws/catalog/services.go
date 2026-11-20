@@ -10,7 +10,7 @@ func Services() []*Service {
 		// Application integration and messaging.
 		appFabric, eventBridge, managedBlockchain, mwaa, pinpoint, sesV2, smsVoice,
 		// Compute, containers and developer tools.
-		appRunner, codeArtifact, codeBuild, codeCommit, codeDeploy, codePipeline, ecs, eks, imageBuilder,
+		appRunner, autoScaling, codeArtifact, codeBuild, codeCommit, codeDeploy, codePipeline, ecs, eks, elasticBeanstalk, imageBuilder,
 		// Management and governance.
 		appConfig, awsConfig, cloudTrail, dataLifecycleManager, managedPrometheus, resourceGroups, serviceCatalog,
 		// Security, identity and compliance.

@@ -351,7 +351,7 @@ func TestQueryRequestFramingErrors(t *testing.T) {
 func TestQueryRoutingNeverClaimsNativeQueryServices(t *testing.T) {
 	h := newHarness(t)
 	body := "Action=ListRoles&Version=2010-05-08"
-	for _, service := range []string{"iam", "sts", "sns", "elasticloadbalancing", "cloudformation", "ec2", "sqs", "monitoring", "autoscaling", "s3"} {
+	for _, service := range []string{"iam", "sts", "sns", "elasticloadbalancing", "cloudformation", "ec2", "sqs", "monitoring", "autoscaling-plans", "s3"} {
 		for _, header := range []string{"signed", "hinted"} {
 			req := httptest.NewRequest("POST", "/", strings.NewReader(body))
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")

@@ -1,0 +1,38 @@
+{
+ "client": "neptune",
+ "model": "rds",
+ "denied": "AccessDenied",
+ "steps": [
+  {"op": "create_db_subnet_group", "args": {"DBSubnetGroupName": "Fixture-nep-Subnets", "DBSubnetGroupDescription": "fixture", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b"], "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"subnets": "DBSubnetGroup.DBSubnetGroupArn"}, "expect": {"DBSubnetGroup.DBSubnetGroupName": "fixture-nep-subnets", "DBSubnetGroup.Subnets#count": 2}},
+  {"op": "describe_db_subnet_groups", "args": {"DBSubnetGroupName": "fixture-nep-subnets"}, "expect": {"DBSubnetGroups#count": 1, "DBSubnetGroups[0].DBSubnetGroupDescription": "fixture"}},
+  {"op": "modify_db_subnet_group", "args": {"DBSubnetGroupName": "fixture-nep-subnets", "DBSubnetGroupDescription": "three", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b", "subnet-0123456789abcdef0"]}, "expect": {"DBSubnetGroup.Subnets#count": 3, "DBSubnetGroup.DBSubnetGroupDescription": "three"}},
+  {"op": "create_db_cluster_parameter_group", "args": {"DBClusterParameterGroupName": "Fixture-nep-Cluster", "DBParameterGroupFamily": "neptune1.3", "Description": "fixture"}, "save": {"cluster": "DBClusterParameterGroup.DBClusterParameterGroupArn"}, "expect": {"DBClusterParameterGroup.DBClusterParameterGroupName": "fixture-nep-cluster", "DBClusterParameterGroup.DBParameterGroupFamily": "neptune1.3", "DBClusterParameterGroup.DBClusterParameterGroupArn": "arn:aws:rds:us-east-1:000000000000:cluster-pg:fixture-nep-cluster"}},
+  {"op": "describe_db_cluster_parameter_groups", "args": {"DBClusterParameterGroupName": "fixture-nep-cluster"}, "expect": {"DBClusterParameterGroups#count": 1}},
+  {"op": "create_db_parameter_group", "args": {"DBParameterGroupName": "fixture-nep-params", "DBParameterGroupFamily": "neptune1.3", "Description": "fixture"}, "expect": {"DBParameterGroup.DBParameterGroupFamily": "neptune1.3"}},
+  {"op": "describe_db_parameter_groups", "args": {"DBParameterGroupName": "fixture-nep-params"}, "expect": {"DBParameterGroups#count": 1}},
+  {"op": "add_tags_to_resource", "args": {"ResourceName": "${cluster}", "Tags": [{"Key": "stage", "Value": "dev"}, {"Key": "drop", "Value": "me"}]}},
+  {"op": "remove_tags_from_resource", "args": {"ResourceName": "${cluster}", "TagKeys": ["drop"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${cluster}"}, "expect": {"TagList": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${subnets}"}, "expect": {"TagList[0].Key": "team"}},
+  {"op": "create_db_subnet_group", "args": {"DBSubnetGroupName": "fixture-nep-subnets", "DBSubnetGroupDescription": "again", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b"]}, "error": "DBSubnetGroupAlreadyExists", "status": 400},
+  {"op": "describe_db_subnet_groups", "args": {"DBSubnetGroupName": "fixture-missing"}, "error": "DBSubnetGroupNotFoundFault", "status": 404},
+  {"op": "describe_db_cluster_parameter_groups", "args": {"DBClusterParameterGroupName": "fixture-missing"}, "error": "DBParameterGroupNotFound", "status": 404},
+  {"op": "describe_db_subnet_groups", "args": {"Filters": [{"Name": "engine", "Values": ["nep"]}]}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "create_db_cluster", "args": {"DBClusterIdentifier": "fixture-nep", "Engine": "neptune"}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "describe_db_subnet_groups", "args": {}, "expect": {"DBSubnetGroups#count": 0}},
+  {"op": "describe_db_cluster_parameter_groups", "args": {}, "expect": {"DBClusterParameterGroups#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_db_subnet_groups", "args": {"DBSubnetGroupName": "fixture-nep-subnets"}, "expect": {"DBSubnetGroups[0].Subnets#count": 3}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${cluster}"}, "expect": {"TagList": [{"Key": "stage", "Value": "dev"}]}}
+ ],
+ "cleanup": [
+  {"op": "delete_db_subnet_group", "args": {"DBSubnetGroupName": "fixture-nep-subnets"}},
+  {"op": "delete_db_cluster_parameter_group", "args": {"DBClusterParameterGroupName": "fixture-nep-cluster"}},
+  {"op": "delete_db_parameter_group", "args": {"DBParameterGroupName": "fixture-nep-params"}},
+  {"op": "describe_db_subnet_groups", "args": {"DBSubnetGroupName": "fixture-nep-subnets"}, "error": "DBSubnetGroupNotFoundFault", "status": 404},
+  {"op": "describe_db_cluster_parameter_groups", "args": {"DBClusterParameterGroupName": "fixture-nep-cluster"}, "error": "DBParameterGroupNotFound", "status": 404}
+ ]
+}

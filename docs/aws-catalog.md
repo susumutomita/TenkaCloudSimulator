@@ -13,7 +13,7 @@ network, OAuth or real AWS call is executed or simulated.
 
 ## Services
 
-The catalog serves 115 services. The [generated service table](aws-catalog-services.md)
+The catalog serves 117 services. The [generated service table](aws-catalog-services.md)
 lists each service's Issues, protocol, implemented operations and bounds; it is
 checked against the reviewed specifications by `go test ./internal/aws/catalog`.
 The capability document lists the same services under `services.catalog`,
@@ -26,9 +26,26 @@ Apache Flink, AWS Data Pipeline, Amazon SWF, AWS Batch, CodeStar
 Notifications, Amazon Managed Grafana, AWS Organizations, Service Quotas,
 Application Auto Scaling, Amazon Cognito, AWS Network Firewall, AWS Control
 Tower, AWS Launch Wizard, Amazon Keyspaces and Amazon Comprehend Medical.
-Amazon RDS, Amazon ElastiCache and Amazon Redshift are served over the Query
-protocol. Services that use the EC2 or REST-XML protocols are not served by the
-catalog yet.
+Amazon RDS, Amazon ElastiCache, Amazon Redshift, Amazon EC2 Auto Scaling and
+AWS Elastic Beanstalk are served over the Query protocol. Services that use the
+EC2 or REST-XML protocols are not served by the catalog yet.
+
+Aurora, Neptune and DocumentDB are managed through the RDS API, and the boto3
+`neptune`, `docdb` and `rds` clients send the same Actions signed as `rds`
+(Version `2014-10-31`). What they can use is the RDS catalog's configuration
+only: DB subnet groups, DB cluster parameter groups, DB parameter groups
+(Aurora and Neptune; DocumentDB has none), tags and, for the `rds` client,
+option groups for non-Aurora engines. The `neptune` client can use 13 of the 16
+bound operations and the `docdb` client 10, since neither model has option
+groups and DocumentDB has no DB parameter groups. No cluster, instance,
+snapshot, global cluster or data plane exists for any of the three products
+(those operations return 501 `UnknownOperationException`), the RDS refusals
+apply (a non-empty `Filters`, subnet group names that do not start with a
+letter), and parameter group families such as `aurora-mysql8.0`, `neptune1.3`
+and `docdb5.0` are stored without being checked. The RDS entry in the
+[generated service table](aws-catalog-services.md) lists Issues #122, #124 and
+#128 for this configuration surface only; their proposed cluster, instance and
+snapshot scope is not served.
 Products assessed as not servable at all, with evidence, are listed in the
 [coverage assessment](coverage-assessment.md).
 
@@ -39,8 +56,12 @@ Products assessed as not servable at all, with evidence, are listed in the
   service. Unsigned first-party console and API-reference requests use
   `X-Simulator-Service` instead. Signatures are never verified; use dummy
   `TCSIM` credentials. The catalog claims a Query form POST only when that
-  service is a catalog Query service (`rds`, `elasticache`, `redshift`), so IAM, STS, SNS, Elastic Load
-  Balancing, CloudFormation and EC2 requests keep their native handlers.
+  service is a catalog Query service (`rds`, `elasticache`, `redshift`,
+  `autoscaling`, `elasticbeanstalk`), so IAM, STS, SNS, Elastic Load Balancing,
+  CloudFormation and EC2 requests keep their native handlers. Auto Scaling Plans
+  (`autoscaling-plans`, JSON 1.1) is a separate native handler consulted first:
+  an `autoscaling` Query request reaches the catalog and an `autoscaling-plans`
+  request, whatever its protocol, reaches the native handler.
 - Query requests are form-encoded POSTs to `/` with `Action` and the model's
   `Version`, flattened as botocore serializes them (`Tags.Tag.1.Key`,
   `TagKeys.member.1`, `entry.N.key`, an empty value for an empty list). Every
@@ -106,7 +127,7 @@ only), does not page through tags or edit list filters, and runs no
 operation the specification leaves unbound. Errors show the service's `Code`
 and `Message`.
 
-Query services (RDS, ElastiCache and Redshift) receive the same form bodies as
+Query services (RDS, ElastiCache, Redshift, Auto Scaling and Elastic Beanstalk) receive the same form bodies as
 botocore (`Action`, `Version`, `SubnetIds.SubnetIdentifier.1`,
 `AuthenticationMode.Type`, `Tags.Tag.1.Key`, an empty list as `Name=`) at `/`
 with `X-Simulator-Service`, and their XML responses are decoded with the
@@ -136,7 +157,9 @@ response.
   persistence and cleanup.
 - `test/e2e/aws_catalog_fixtures.py` runs a reviewed native lifecycle for every
   other service from `test/e2e/catalog_fixtures/`: each bound operation must
-  succeed at least once, an unpermitted participant is refused before any
+  succeed at least once (a fixture with a `model` key, such as `neptune` and
+  `docdb` against `rds`, runs in its own binaries, may call only operations that
+  model binds and is exempt from the every-operation rule), an unpermitted participant is refused before any
   change (with the fixture's `denied` code, `AccessDenied` for Query services
   and `AccessDeniedException` by default), a second team stays empty, state
   survives restart and cleanup leaves nothing behind.
