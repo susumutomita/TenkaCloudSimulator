@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "status": "proposal only; no registration/claim",
+  "provider": "aws",
+  "service_key": "aws|Amazon SimpleDB",
+  "issue_url": "https://github.com/susumutomita/TenkaCloudSimulator/issues/300",
+  "executor_owner": "Azure #502 / shared integration owner",
+  "base_sha": "a53131cd61030c8d238823478ec96917b19e95ef",
+  "operations": [
+    "CreateDomain",
+    "ListDomains",
+    "DeleteDomain",
+    "PutAttributes",
+    "GetAttributes"
+  ],
+  "oracle_manifest": "test/factory/testdata/simpledb/files.sha256.json",
+  "suites": [
+    {
+      "key": "simpledb-first-oracle",
+      "surface": "pure test input/harness integrity only; cannot satisfy product acceptance",
+      "argv": [
+        "go",
+        "test",
+        "-json",
+        "-count=1",
+        "./test/factory/testdata/simpledb/oracle"
+      ],
+      "package": "github.com/susumutomita/TenkaCloudSimulator/test/factory/testdata/simpledb/oracle",
+      "required_tests": [
+        "TestSimpleDBFirstOracle"
+      ]
+    },
+    {
+      "key": "simpledb-first-native",
+      "surface": "native HTTP/SQLite; no SDK/CLI",
+      "argv": [
+        "go",
+        "test",
+        "-p=1",
+        "-json",
+        "-count=1",
+        "-timeout=60s",
+        "./test/factory/testdata/simpledb/native"
+      ],
+      "package": "github.com/susumutomita/TenkaCloudSimulator/test/factory/testdata/simpledb/native",
+      "required_tests": [
+        "TestSimpleDBFirstHarnessReadiness",
+        "TestSimpleDBFirstDomainItems",
+        "TestSimpleDBFirstRestartDeletion",
+        "TestSimpleDBFirstListPagination",
+        "TestSimpleDBFirstValidation",
+        "TestSimpleDBFirstDefaultPageBoundary"
+      ],
+      "required_negative_subtests": [
+        "TestSimpleDBFirstValidation/create-missing-name",
+        "TestSimpleDBFirstValidation/create-short-name",
+        "TestSimpleDBFirstValidation/create-space-name",
+        "TestSimpleDBFirstValidation/list-zero",
+        "TestSimpleDBFirstValidation/list-over-limit",
+        "TestSimpleDBFirstValidation/list-invalid-token",
+        "TestSimpleDBFirstValidation/put-missing-item",
+        "TestSimpleDBFirstValidation/put-missing-value",
+        "TestSimpleDBFirstValidation/put-empty-attribute",
+        "TestSimpleDBFirstValidation/get-missing-domain",
+        "TestSimpleDBFirstValidation/get-invalid-consistency",
+        "TestSimpleDBFirstValidation/put-partial-valid-then-missing"
+      ]
+    },
+    {
+      "key": "simpledb-first-sdk-wire",
+      "surface": "fixed Python SDK / actual owned CLI / numeric loopback; distinct required result",
+      "fixed_script": "test/factory/testdata/simpledb/sdk_wire.py",
+      "required_case_ids": [
+        "sdk-domain-items",
+        "sdk-restart-cascade",
+        "sdk-list-pages",
+        "sdk-negative-cases"
+      ],
+      "dependencies": {
+        "boto3": "1.42.0",
+        "botocore": "1.41.6"
+      },
+      "bind_before_execution": [
+        "reviewed absolute interpreter and CLI paths",
+        "actual binary SHA256 and source revision/build provenance",
+        "owner-controlled local report path",
+        "exact script/helper/oracle bytes"
+      ],
+      "pass_requires": "exit0, status PASS, exact ordered required_case_ids, no preflight-only, timeout/cleanup/transport/parser failure or missing case"
+    },
+    {
+      "key": "simpledb-first-sdk-harness-controls",
+      "surface": "pure detector controls only; cannot satisfy SDK/product acceptance",
+      "argv": [
+        "python3",
+        "test/factory/testdata/simpledb/test_sdk_harness.py"
+      ],
+      "required_tests": [
+        "test_missing_attribute_fields_are_product_failure",
+        "test_cleanup_failure_preserves_primary_product_failure",
+        "test_sdk_origin_guard_rejects_any_other_origin"
+      ]
+    }
+  ],
+  "planned_runtime_owned_paths": [
+    "internal/aws/simpledb/ (exact files to enumerate in a future implementation finding; no current claim)"
+  ],
+  "planned_shared_integration_paths": [
+    "internal/aws/simpledb_gateway.go",
+    "internal/aws/s3.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go"
+  ],
+  "path_rule": "Future individual finding must enumerate exact owned files. No wildcard permission for internal/aws or shared registration. Existing runtime/auth paths are not edited by this draft.",
+  "registration_blockers": [
+    "executor at this base supports one required Go identity and SQS-only rules; current shared union must be inspected by its owner before adding SimpleDB",
+    "service-specific immutable source/path binding and required identity/subtest validation needed",
+    "SDK interpreter/dependencies and command/report verification require shared owner review",
+    "local snapshot commit alone is not a registered acceptance receipt; native RED and unavailable SDK cannot pass"
+  ],
+  "no_skip_or_gate_bypass": true,
+  "shared_registry_preservation": "Additive proposal only. Preserve the complete existing SQS/Azure/GCP union, oracle bindings, test identities and path restrictions. No shared file is edited here.",
+  "test_writer_owned_paths": [
+    "test/factory/testdata/simpledb/README.md",
+    "test/factory/testdata/simpledb/files.sha256.json",
+    "test/factory/testdata/simpledb/native/acceptance_test.go",
+    "test/factory/testdata/simpledb/oracle/fixture_test.go",
+    "test/factory/testdata/simpledb/oracle/fixtures.json",
+    "test/factory/testdata/simpledb/oracle/oracle.json",
+    "test/factory/testdata/simpledb/registration-proposal.json",
+    "test/factory/testdata/simpledb/sdk_wire.py",
+    "test/factory/testdata/simpledb/test_sdk_harness.py"
+  ]
+}

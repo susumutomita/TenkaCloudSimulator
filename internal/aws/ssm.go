@@ -100,6 +100,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveLambda(w, r)
 		return
 	}
+	if r.Header.Get("X-Simulator-Service") == "sdb" && r.Header.Get("X-Amz-Target") == "" {
+		g.serveSimpleDB(w, r)
+		return
+	}
 	if r.Method == "POST" && strings.HasPrefix(r.Header.Get("Content-Type"), "application/x-www-form-urlencoded") {
 		g.serveCFN(w, r)
 		return

@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "status": "test-writer-only local snapshot; not registered, not claimed, not accepted",
+  "base_sha": "a53131cd61030c8d238823478ec96917b19e95ef",
+  "operations": [
+    "CreateDomain",
+    "ListDomains",
+    "DeleteDomain",
+    "PutAttributes",
+    "GetAttributes"
+  ],
+  "first_acceptance": [
+    "domain lifecycle and idempotence",
+    "Put/Get multivalue union, duplicate elimination, replace and filter",
+    "restart persistence",
+    "domain deletion removes item state across restart/recreate",
+    "ListDomains limit 1, 100, omitted default and invalid boundaries",
+    "validation failures preserve existing attributes"
+  ],
+  "later_separate_acceptance": [
+    "DomainMetadata",
+    "DeleteAttributes",
+    "Select",
+    "conditional Put/Delete atomicity"
+  ],
+  "official_sources": [
+    {
+      "operation": "CreateDomain",
+      "url": "https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/SDB_API_CreateDomain.html",
+      "retrieved_at_utc": "2026-11-18T22:44:24.623840+00:00",
+      "sha256": "20454566ddf2fd0e68ef1ac7670bfee0bef1968ee02e6209142519952b977fbe",
+      "bytes": 17038
+    },
+    {
+      "operation": "ListDomains",
+      "url": "https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/SDB_API_ListDomains.html",
+      "retrieved_at_utc": "2026-11-18T22:44:24.834938+00:00",
+      "sha256": "c87081d8795df8934ff9cd0157c32db6e544c16f047a676907f585c813c803c4",
+      "bytes": 17257
+    },
+    {
+      "operation": "DeleteDomain",
+      "url": "https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/SDB_API_DeleteDomain.html",
+      "retrieved_at_utc": "2026-11-18T22:44:25.045948+00:00",
+      "sha256": "430092a03e4ad0e04651709ee4bd35865af10ae8dee950f09ee4cc88fdf4f6bb",
+      "bytes": 16528
+    },
+    {
+      "operation": "PutAttributes",
+      "url": "https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/SDB_API_PutAttributes.html",
+      "retrieved_at_utc": "2026-11-18T22:44:25.248413+00:00",
+      "sha256": "216aeec38f59c920961b65045bcd08222f2ea04753ea2a2212b4028fc3672316",
+      "bytes": 31566
+    },
+    {
+      "operation": "GetAttributes",
+      "url": "https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/SDB_API_GetAttributes.html",
+      "retrieved_at_utc": "2026-11-18T22:44:25.448241+00:00",
+      "sha256": "3b6daca85a2e571fc637765bad2fe135a623a57b948d27e5ee3dedec4de6b3ac",
+      "bytes": 21048
+    }
+  ],
+  "source_qualification": "Official documented contracts, not real-AWS observations. Full HTML snapshots remain outside repository. No upstream test code copied.",
+  "surfaces": {
+    "pure": "Fixture integrity and semantic assertions, no server or SDK",
+    "native": "Real composed HTTP handler/NewAccess + SQLite, httptest without socket",
+    "sdk_wire": "Separate Python pinned boto3/botocore and real CLI on numeric loopback, existing token/header path; no signature authority expansion",
+    "uncovered": [
+      "Cloudscape",
+      "Scalar/API reference",
+      "Select",
+      "conditional writes",
+      "real AWS",
+      "release binaries/platforms"
+    ]
+  },
+  "not_registered_reason": "Shared executor/ledger initial expansion belongs to Azure #502; no shared registry edits authorized."
+}

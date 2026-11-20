@@ -1,0 +1,48 @@
+{
+  "status": "proposal only; no shared registry edit or claim",
+  "service_key": "aws|Amazon SimpleDB",
+  "new_leaf_key": "simpledb-leaf-store-contract-v1",
+  "required_cases": [
+    "domain-lifecycle",
+    "item-workflow",
+    "restart-cascade",
+    "list-boundaries",
+    "rejected-write-atomicity",
+    "scope-isolation",
+    "cancelled-write"
+  ],
+  "fixed_product_driver": "test/factory/testdata/simpledb-leaf/runner.py",
+  "fixed_go_package": "./test/factory/testdata/simpledb-leaf/binding",
+  "required_parent": "TestSimpleDBLeafProductionContract",
+  "constructor": "internal/aws/simpledb.NewStore(*sql.DB), concrete type structurally implements contract.Store",
+  "manifest": "test/factory/testdata/simpledb-leaf/files.sha256.json",
+  "scope": "component evidence only; no independent leaf claim admitted by this proposal",
+  "implementation_paths": [
+    "internal/aws/simpledb/store.go",
+    "internal/aws/simpledb/domain.go",
+    "internal/aws/simpledb/item.go",
+    "internal/aws/simpledb/query.go",
+    "internal/aws/simpledb/validation.go",
+    "internal/aws/simpledb/pagination.go",
+    "internal/aws/simpledb/store_test.go",
+    "internal/aws/simpledb/domain_test.go",
+    "internal/aws/simpledb/item_test.go",
+    "internal/aws/simpledb/query_test.go",
+    "internal/aws/simpledb/validation_test.go",
+    "internal/aws/simpledb/pagination_test.go"
+  ],
+  "root_reserved_paths": [
+    "internal/aws/simpledb_gateway.go",
+    "internal/aws/s3.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go"
+  ],
+  "root_handoff": [
+    "Add immutable source/test/helper binding and required parent/case identities",
+    "Keep existing native/SDK four-surface service acceptance mandatory",
+    "Explicit root-integration scope, ownership and composed regression suite required",
+    "Update exact-blob formal declaration for these new test-support files",
+    "No source expectation/fixture edits by runtime Fixer without independent review",
+    "No component PASS substituted for server/CLI/IAM acceptance"
+  ]
+}
