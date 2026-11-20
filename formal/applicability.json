@@ -1,32 +1,178 @@
 {
   "version": 1,
-  "base_sha": "e1c83bc1ffe8062b6c15f2a1b941f49d1ec81433",
+  "base_sha": "2bd05417a13bdfc5d947b5ced09306a826e8f93a",
   "changes": [
     {
-      "path": "formal/ConsoleHandoff.tla",
-      "sha256": "a9073b64aa6391ac593a68a47fb110c35598d52b5eef3c8756fff87135de02b5",
+      "path": "docs/formal-sakura-server.md",
+      "sha256": "54e8a9f6d094b1f693bf78eff428e238053d637e3cf3ec277704e861447bb8e6",
+      "disposition": "documentation",
+      "reason": "Describes exact abstract bounds and separately measured and pending model checks.",
+      "models": []
+    },
+    {
+      "path": "formal/SakuraServerMetadata.cfg",
+      "sha256": "6224a10280768312f3f812d532ba04f7f4da49e432272638245360507c207e58",
       "disposition": "modeled",
-      "reason": "Canonicalizes only rejected observations; accepted observations, guarded invariants, and all control anchors remain.",
+      "reason": "Finite Server metadata reference and configuration for the listed invariant and sensitivity obligations.",
       "models": [
         {
-          "id": "ConsoleHandoff",
+          "id": "SakuraServerMetadata",
           "properties": [
             "TypeOK",
-            "OperatorRefused",
-            "ParentLifetimeBound",
-            "OneTimeRedemption",
-            "AttemptConsumesCode",
-            "RedeemRequiresFreshParent",
-            "UseRequiresFreshAuthority",
-            "ExactDestination",
-            "TerminalRequiresRelay",
-            "LogoutRejectsReplay",
-            "UnrelatedSessionsPreserved",
-            "SDKAuthorityPreserved"
+            "FrozenScope",
+            "OnlyOwnerRealmLookup",
+            "ReopenBinding",
+            "FailureFrame",
+            "PeerFrame",
+            "ReadAndReopenSnapshot",
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CommitExact",
+            "StoredIDsAndQuota"
           ],
-          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes."
+          "limits": "Abstract trusted-leaf metadata admission and atomic stores only. Realm equality is opaque; mount comparison is separate from HTTP marker. Not HTTP dispatch/parsing, host authentication, actual SQL/locking/crash or Go refinement, generation randomness, combined patches, collection list/query, SDK, Terraform, or real VM behavior."
         }
       ]
+    },
+    {
+      "path": "formal/SakuraServerMetadata.tla",
+      "sha256": "211a15e9bb81c10d57829974e5ca405f0d57b3a8793dce580b9609076da1b0cd",
+      "disposition": "modeled",
+      "reason": "Finite Server metadata reference and configuration for the listed invariant and sensitivity obligations.",
+      "models": [
+        {
+          "id": "SakuraServerMetadata",
+          "properties": [
+            "TypeOK",
+            "FrozenScope",
+            "OnlyOwnerRealmLookup",
+            "ReopenBinding",
+            "FailureFrame",
+            "PeerFrame",
+            "ReadAndReopenSnapshot",
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CommitExact",
+            "StoredIDsAndQuota"
+          ],
+          "limits": "Abstract trusted-leaf metadata admission and atomic stores only. Realm equality is opaque; mount comparison is separate from HTTP marker. Not HTTP dispatch/parsing, host authentication, actual SQL/locking/crash or Go refinement, generation randomness, combined patches, collection list/query, SDK, Terraform, or real VM behavior."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "bed9bae4a8eb9fb41322fdd3f808f7103196f7bd8bdf9309d607e314fb587506",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds one Server-only registry entry and two modeled failed-control checks; all prior entries and pins are preserved.",
+      "models": []
+    },
+    {
+      "path": "internal/sakura/iaas/server_contract_regression_test.go",
+      "sha256": "d247092e3c16eb63f5fefb3f857957c65c8e494ae82d692a98e1abb3c5b3b9ab",
+      "disposition": "test-support",
+      "reason": "In-process Server metadata wire and durable-store contract regressions only; no simulator runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/sakura/iaas/server_http.go",
+      "sha256": "2b67534a26721d5da42f1db3330d1fbee12a163da7701047d1594ebd6e5575ff",
+      "disposition": "modeled",
+      "reason": "Trusted subject/realm and local marker before handling modeled metadata operations; rejection and peer frames.",
+      "models": [
+        {
+          "id": "SakuraServerMetadata",
+          "properties": [
+            "OnlyOwnerRealmLookup",
+            "FailureFrame",
+            "PeerFrame",
+            "ReadAndReopenSnapshot"
+          ],
+          "limits": "Models only the trusted leaf tuple/marker decision and allowed metadata action frames. Does not verify actual HTTP parsing or shared provider routing."
+        }
+      ]
+    },
+    {
+      "path": "internal/sakura/iaas/server_http_test.go",
+      "sha256": "fc956f65b5ac80eeb4a95d020002b46c0ef5de7b49188ddcba370cbe55980f14",
+      "disposition": "test-support",
+      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
+      "models": []
+    },
+    {
+      "path": "internal/sakura/iaas/server_store.go",
+      "sha256": "38cc26c7020adb5bd17fef024ce27493c0b57a67e6eb0f93396b23071e6c7552",
+      "disposition": "modeled",
+      "reason": "Separate persisted binding, read/reopen observation, exact atomic operation and bounds, allocation retained across delete.",
+      "models": [
+        {
+          "id": "SakuraServerMetadata",
+          "properties": [
+            "FrozenScope",
+            "ReopenBinding",
+            "FailureFrame",
+            "PeerFrame",
+            "ReadAndReopenSnapshot",
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CommitExact",
+            "StoredIDsAndQuota"
+          ],
+          "limits": "The model covers admitted metadata action snapshots and finite abstract state, not actual SQL, HTTP parsing, list/query, auth tokens, timestamps, or VMs."
+        }
+      ]
+    },
+    {
+      "path": "internal/sakura/iaas/server_store_test.go",
+      "sha256": "c8cd4d45bd12e7e629d7a62e72f92c40b395954b900ee0a7c9596cfba07b26b5",
+      "disposition": "test-support",
+      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
+      "models": []
+    },
+    {
+      "path": "internal/sakura/provider.go",
+      "sha256": "3af3432234713b73a3e32d1b5e916c4f81f567e69805db526ea991362691df50",
+      "disposition": "modeled",
+      "reason": "Existing provider Actor extraction now reused for Server and Disk. Retain the existing Disk mapping model; routing and Server mount startup require native evidence.",
+      "models": [
+        {
+          "id": "SakuraDiskAdmission",
+          "properties": [
+            "MappedSubjectUsesExerciseIdentity",
+            "MappedRealmUsesCopiedHostConfig",
+            "NoDefaultActorOnExtractionFailure",
+            "WireHeadersDoNotMapAuthority"
+          ],
+          "limits": "Existing copied host-config and exercise identity mapping only. Neither actual dispatch, Server path selection, constructor atomicity nor host authentication is proved by this binding."
+        }
+      ]
+    },
+    {
+      "path": "internal/sakura/server_metadata_acceptance_test.go",
+      "sha256": "83b23d83b80bfb5def2104d9a6eb2fb73e1edff3f1eea0db2eeee9d292915e9a",
+      "disposition": "test-support",
+      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
+      "models": []
+    },
+    {
+      "path": "scripts/factory_acceptance.py",
+      "sha256": "ad4816ed844f14901e2dace9fcaf57d5fa094a623525513221274c21c7d7d6af",
+      "disposition": "validation-tooling",
+      "reason": "Adds scoped development-only acceptance registration; no simulator behavior.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-factory-acceptance.py",
+      "sha256": "0015e44beab92b7f142d22d8f589098b15ecfa07af64e60903b4b2d6fd13c476",
+      "disposition": "test-support",
+      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
+      "models": []
+    },
+    {
+      "path": "test/sdk/sakura/server_inprocess_test.go",
+      "sha256": "e459ed4d20e554df5ae2fce31a893d7da4dd6e1c39274022fbb8a228ccadc112",
+      "disposition": "test-support",
+      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
+      "models": []
     }
   ]
 }

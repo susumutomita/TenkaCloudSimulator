@@ -67,7 +67,7 @@ func NewProvider(db *sql.DB, c Config) (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	return iaas.NewDiskHandler(store, c, func(ctx context.Context) (iaas.Actor, bool) {
+	extract := func(ctx context.Context) (iaas.Actor, bool) {
 		actor, ok := provider.ActorFromContext(ctx)
 		if !ok {
 			return iaas.Actor{}, false
@@ -76,5 +76,24 @@ func NewProvider(db *sql.DB, c Config) (http.Handler, error) {
 		// no environment/project/zone or issuer identity; do not infer those from a
 		// request, or claim this mapping alone authenticates a different team host.
 		return iaas.Actor{Subject: actor.ExerciseIdentity, Environment: c.Environment, Project: c.Project, Zone: c.Zone}, true
-	})
+	}
+	disks, err := iaas.NewDiskHandler(store, c, extract)
+	if err != nil {
+		return nil, err
+	}
+	servers, err := iaas.NewServerHandler(db, c, extract)
+	if err != nil {
+		return nil, err
+	}
+	serverPath := "/cloud/zone/" + c.Zone + "/api/cloud/1.1/server"
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Literal native paths only. Encoded paths, other zones and all existing
+		// Disk traffic retain the prior handler and its denial order.
+		path := r.URL.EscapedPath()
+		if path == r.URL.Path && (path == serverPath || strings.HasPrefix(path, serverPath+"/")) {
+			servers.ServeHTTP(w, r)
+			return
+		}
+		disks.ServeHTTP(w, r)
+	}), nil
 }

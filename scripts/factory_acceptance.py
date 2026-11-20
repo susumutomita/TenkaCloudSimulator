@@ -24,8 +24,29 @@ SUITES = {
         'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/aws',
         'scope': 'Go gateway/SQLite; not SDK, UI, VM, real AWS or whole-service compatibility',
     },
+    'sakura-server-metadata': {
+        'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestSakuraServerMetadata(AcceptanceCRUD|AcceptanceRefusals|ComparatorControls)$', './internal/sakura'],
+        'tests': ['TestSakuraServerMetadataAcceptanceCRUD',
+                  'TestSakuraServerMetadataAcceptanceRefusals',
+                  'TestSakuraServerMetadataComparatorControls'],
+        'oracle': 'internal/sakura/server_metadata_acceptance_test.go',
+        'oracle_sha256': '83b23d83b80bfb5def2104d9a6eb2fb73e1edff3f1eea0db2eeee9d292915e9a',
+        'provider': 'sakura',
+        'operations': ['CreateServer', 'ReadServer', 'FindServers', 'UpdateServer', 'DeleteServer'],
+        'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/sakura',
+        'scope': 'Opt-in in-process Server metadata oracle; simulator-only 2 CPU/4096 MB; not VM, host auth, SDK or real Sakura acceptance',
+    },
 }
 
+
+# New suites require explicit selection; preserve the original default SQS gate.
+DEFAULT_SUITES = ('sqs-lifecycle',)
+SAKURA_SERVER_PATHS = frozenset({
+    'internal/sakura/iaas/server_store.go',
+    'internal/sakura/iaas/server_store_test.go',
+    'internal/sakura/iaas/server_http.go',
+    'internal/sakura/iaas/server_http_test.go',
+})
 
 def require(ok, reason):
     if not ok:
@@ -54,7 +75,9 @@ def validate_scope(suites, provider, operation, paths):
         p = Path(path)
         covered = path in ('internal/aws/sqs.go', 'internal/aws/sqs_store.go', 'formal/applicability.json') or (
             p.parent.as_posix() == 'internal/aws' and p.name.startswith('sqs_') and p.name.endswith('_test.go'))
-        require(covered, 'SQS pilot does not cover claimed path: ' + path)
+        sqs = 'sqs-lifecycle' in suites and provider == 'aws' and operation in SUITES['sqs-lifecycle']['operations'] and covered
+        sakura = 'sakura-server-metadata' in suites and provider == 'sakura' and operation in SUITES['sakura-server-metadata']['operations'] and path in SAKURA_SERVER_PATHS
+        require(sqs or sakura, 'selected provider/operation suite does not cover claimed path: ' + path)
 
 
 def candidate_paths(base, head, root=ROOT):
@@ -88,11 +111,25 @@ def verdict(log, suite, returncode):
     events = [json.loads(line) for line in log.decode().splitlines() if line.strip()]
     require(events, 'no test events')
     require(not any(e.get('Action') in ('skip', 'fail') for e in events), 'failed or skipped tests are not acceptance')
-    package, test = SUITES[suite]['package'], SUITES[suite]['test']
-    runs = [e for e in events if e.get('Package') == package and e.get('Test') == test and e.get('Action') == 'run']
-    passes = [e for e in events if e.get('Package') == package and e.get('Test') == test and e.get('Action') == 'pass']
-    require(len(runs) == 1 and len(passes) == 1, 'required test did not execute exactly once')
+    spec = SUITES[suite]
+    package = spec['package']
+    tests = spec['tests'] if 'tests' in spec else [spec['test']]
+    for test in tests:
+        runs = [e for e in events if e.get('Package') == package and e.get('Test') == test and e.get('Action') == 'run']
+        passes = [e for e in events if e.get('Package') == package and e.get('Test') == test and e.get('Action') == 'pass']
+        require(len(runs) == 1 and len(passes) == 1, 'required test did not execute exactly once: ' + test)
     require(any(e.get('Package') == package and not e.get('Test') and e.get('Action') == 'pass' for e in events), 'package completion missing')
+
+
+def oracle_hash(root, suite):
+    spec = SUITES[suite]
+    if 'oracle' not in spec:
+        return None
+    path = root / spec['oracle']
+    require(not path.is_symlink(), 'oracle must not be a symlink')
+    value = digest(path.read_bytes())
+    require(value == spec['oracle_sha256'], 'reviewed suite oracle changed')
+    return value
 
 
 def execution_environment():
@@ -130,6 +167,7 @@ def run(root, output, suites, timeout=300):
     output.parent.mkdir(parents=True, exist_ok=True)
     try:
         for suite in suites:
+            oracle = oracle_hash(root, suite)
             command = SUITES[suite]['argv']
             effective_command = executable_command(command)
             env = execution_environment()
@@ -149,9 +187,13 @@ def run(root, output, suites, timeout=300):
             logpath.write_bytes(log); errpath.write_bytes(errors)
             entry = {'status':'failed', 'argv':command, 'executed_argv':effective_command, 'returncode':returncode, 'log':logpath.name,
                      'log_sha256':digest(log), 'scope':SUITES[suite]['scope']}
+            if oracle is not None:
+                entry['oracle_sha256'] = oracle
             report['checks'][suite] = entry
             verdict(log, suite, returncode)
             entry['status'] = 'passed'
+        for suite in suites:
+            oracle_hash(root, suite)
         require(clean_head(root) == head and source_hash(root) == pin, 'inputs changed during acceptance')
         report['status'] = 'passed'
     finally:
@@ -169,6 +211,9 @@ def verify(path, head, suites, root=ROOT):
     require(set(report.get('checks', {})) == set(suites), 'acceptance suite set differs')
     for suite in suites:
         entry = report['checks'][suite]
+        oracle = oracle_hash(root, suite)
+        if oracle is not None:
+            require(entry.get('oracle_sha256') == oracle, 'suite oracle receipt differs')
         require(entry.get('status') == 'passed' and entry.get('argv') == SUITES[suite]['argv'], 'acceptance command/status differs')
         require(entry.get('executed_argv') == executable_command(SUITES[suite]['argv']), 'acceptance toolchain command differs; rerun on reviewer executor')
         name = entry['log']
@@ -185,7 +230,7 @@ def main():
     p.add_argument('--suite', choices=sorted(SUITES), action='append')
     p.add_argument('--verify', action='store_true')
     args = p.parse_args()
-    suites = args.suite or list(SUITES)
+    suites = args.suite or list(DEFAULT_SUITES)
     if args.verify:
         verify(args.output, clean_head(ROOT), suites)
     else:
