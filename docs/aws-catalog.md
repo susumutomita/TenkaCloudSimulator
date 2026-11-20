@@ -72,39 +72,68 @@ region (for example 25 Amplify apps). These are local limits, not AWS quotas.
 
 ## Console and API reference
 
-Choose **Services → Service catalog** in the console. For every catalog
-service the view sends the service's own native requests and reads every
-result back from the service:
+Choose **Services → Service catalog** in the console. The view follows the
+resource-list, create-page and resource-page pattern that public Cloudscape
+documentation describes for AWS consoles. No authenticated AWS console was
+available as a reference, so nothing here claims visual equivalence with any
+AWS console. For every catalog service the view sends the service's own
+native requests and reads every result back from the service.
 
-- **List, open and delete** each resource kind, including child resources such
-  as Amplify branches. A detail opens through the read operation, a
-  `Describe*` call by name, or the listed description.
-- **Create** with every input member of the create operation: text, number and
-  boolean fields, comma-separated string lists, `Tags` as `key=value` lines,
-  and other structures, maps and lists of structures (for example ElastiCache
-  `AuthenticationMode`) as a JSON value with official member names. The
-  console checks such values against the official input shape (types,
-  required and unknown members, enums, lengths and ranges) before sending.
-- **Edit** a resource whose specification binds an update operation (for
-  example `ModifyDBSubnetGroup`, `ModifyUser`, `UpdateApp` or
-  `PutImageScanningConfiguration`). The form starts from the current
-  description, offers the operation's members except identifying, fixed and
-  account members and resource members outside the reviewed update fields,
-  and sends only changed and required members. Members the bounded model
-  still refuses (for example ElastiCache `Passwords`) are refused by the
+- **Names.** Resource kinds and members are shown with labels derived from
+  their official names (`DBSubnetGroupName` becomes "DB subnet group name",
+  `dbSubnetGroup` becomes "DB subnet groups"), keeping acronyms such as DB,
+  ARN, IAM, VPC, KMS and ID. There are no per-service label tables. Form
+  fields and detail values also show the official member name, and pages name
+  the operation they send.
+- **List.** Choose a service and a resource kind tab. The table has a counted
+  header with Refresh, View details, Edit, Delete and Create actions (Edit and
+  Delete act on the selected row), the name, up to three informative scalar
+  members of the listed rows and the ARN, a text filter over the loaded rows,
+  and pages that follow the service's own page tokens. Loading, empty (with a
+  Create action), no-match and error states (with Retry) are shown in the
+  table. Child resources such as Amplify branches choose their parent above
+  the table. A list whose official operation requires a selection (for
+  example Audit Manager `controlType` or RAM `resourceOwner`) offers it as a
+  selector set to the first documented value; required page sizes use their
+  maximum; other required list members are asked for before listing. Each
+  service's Bounds stay complete in the collapsed **Simulator scope** section.
+- **Create** opens its own page with Cancel and Create. It offers every input
+  member of the create operation, the resource's name first and required
+  members before optional ones marked "optional": text, number and boolean
+  fields, comma-separated string lists, `Tags` as `key=value` lines, and other
+  structures, maps and lists of structures (for example ElastiCache
+  `AuthenticationMode`) as a JSON value with official member names. Required
+  members left empty and values that do not match the official input shape
+  (types, required and unknown members, enums, lengths and ranges) are
+  reported at their fields before anything is sent; a service fault is shown
+  on the form, which keeps its values.
+- **Resource page.** Opens through the read operation, a `Describe*` call by
+  name, or the listed description, with the name in the header and Edit and
+  Delete actions. Scalar members are labelled key-value pairs; lists of flat
+  structures (such as RDS `Subnets`) are tables; flat structures are
+  key-value pairs; deeper values are shown as JSON.
+- **Edit** opens its own page for a resource whose specification binds an
+  update operation (for example `ModifyDBSubnetGroup`, `ModifyUser`,
+  `UpdateApp` or `PutImageScanningConfiguration`). The form starts from the
+  current description, offers the operation's members except identifying,
+  fixed and account members and resource members outside the reviewed update
+  fields, and sends only changed and required members. Members the bounded
+  model still refuses (for example ElastiCache `Passwords`) are refused by the
   service with its error.
-- **Add and remove tags** on the detail view through the bound tag and untag
-  operations. Tags are read with the list-tags operation or, without one
-  (Redshift), from the description; a resource whose shape carries no ARN is
-  tagged by the simulator ARN the descriptor's `arnTemplate` gives.
+- **Tags** are added and removed on the resource page through the bound tag
+  and untag operations. They are read with the list-tags operation or,
+  without one (Redshift), from the description; a resource whose shape
+  carries no ARN is tagged by the simulator ARN the descriptor's
+  `arnTemplate` gives.
 
 The console cannot clear an optional value in an edit (an empty field is
 refused; use an SDK), does not pre-fill members the description names
 differently (RDS `SubnetIds` against `Subnets`), offers one update operation
 per resource kind (ECR repositories edit `PutImageScanningConfiguration`
-only), does not page through tags or edit list filters, and runs no
-operation the specification leaves unbound. Errors show the service's `Code`
-and `Message`.
+only), filters only the rows already loaded rather than sending service-side
+filters, does not page through tags, has no column preferences or
+multi-select bulk actions, and runs no operation the specification leaves
+unbound. Errors show the service's `Code` and `Message`.
 
 Query services (RDS, ElastiCache and Redshift) receive the same form bodies as
 botocore (`Action`, `Version`, `SubnetIds.SubnetIdentifier.1`,
@@ -141,9 +170,11 @@ response.
   and `AccessDeniedException` by default), a second team stays empty, state
   survives restart and cleanup leaves nothing behind.
 - `test/e2e/aws_catalog_console.py` drives the console and reference in Chromium
-  with axe at 1440 px and 390 px, checking shared native state, including an
-  RDS lifecycle for every kind through the console and RDS reference **Send**
-  requests checked with boto3.
+  with axe at 1440 px and 390 px on the list, create, resource and edit pages,
+  checking shared native state, including an RDS lifecycle for every kind
+  through the console and RDS reference **Send** requests checked with boto3.
+  It also sweeps every catalog service and resource kind: each list opens
+  without an error state and each bound Create page renders its fields.
 - `test/fixtures/catalog-query/serializer.json` holds request bodies
   produced by botocore's own Query serializer
   (`test/fixtures/catalog-query/generate.py`); the Go decoder and the console request
