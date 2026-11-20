@@ -386,6 +386,16 @@
     "TagResource",
     "UntagResource"
   ],
+  "codeguruprofiler": [
+    "CreateProfilingGroup",
+    "DeleteProfilingGroup",
+    "DescribeProfilingGroup",
+    "ListProfilingGroups",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateProfilingGroup"
+  ],
   "codepipeline": [
     "CreatePipeline",
     "DeletePipeline",
@@ -467,6 +477,14 @@
     "UpdateTestGridProject",
     "UpdateVPCEConfiguration"
   ],
+  "directconnect": [
+    "CreateDirectConnectGateway",
+    "DeleteDirectConnectGateway",
+    "DescribeDirectConnectGateways",
+    "TagResource",
+    "UntagResource",
+    "UpdateDirectConnectGateway"
+  ],
   "dlm": [
     "CreateLifecyclePolicy",
     "DeleteLifecyclePolicy",
@@ -476,6 +494,22 @@
     "TagResource",
     "UntagResource",
     "UpdateLifecyclePolicy"
+  ],
+  "drs": [
+    "CreateLaunchConfigurationTemplate",
+    "CreateReplicationConfigurationTemplate",
+    "DeleteLaunchAction",
+    "DeleteLaunchConfigurationTemplate",
+    "DeleteReplicationConfigurationTemplate",
+    "DescribeLaunchConfigurationTemplates",
+    "DescribeReplicationConfigurationTemplates",
+    "ListLaunchActions",
+    "ListTagsForResource",
+    "PutLaunchAction",
+    "TagResource",
+    "UntagResource",
+    "UpdateLaunchConfigurationTemplate",
+    "UpdateReplicationConfigurationTemplate"
   ],
   "dsql": [
     "CreateCluster",
@@ -632,6 +666,41 @@
     "TagResource",
     "UntagResource"
   ],
+  "forecast": [
+    "CreateDataset",
+    "CreateDatasetGroup",
+    "DeleteDataset",
+    "DeleteDatasetGroup",
+    "DescribeDataset",
+    "DescribeDatasetGroup",
+    "ListDatasetGroups",
+    "ListDatasets",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource"
+  ],
+  "frauddetector": [
+    "CreateList",
+    "CreateVariable",
+    "DeleteEntityType",
+    "DeleteLabel",
+    "DeleteList",
+    "DeleteOutcome",
+    "DeleteVariable",
+    "GetEntityTypes",
+    "GetLabels",
+    "GetListsMetadata",
+    "GetOutcomes",
+    "GetVariables",
+    "ListTagsForResource",
+    "PutEntityType",
+    "PutLabel",
+    "PutOutcome",
+    "TagResource",
+    "UntagResource",
+    "UpdateList",
+    "UpdateVariable"
+  ],
   "fsx": [
     "CreateFileCache",
     "CreateFileSystem",
@@ -732,6 +801,21 @@
     "AssociateServiceRoleToAccount",
     "DisassociateServiceRoleFromAccount",
     "GetServiceRoleForAccount"
+  ],
+  "groundstation": [
+    "CreateConfig",
+    "CreateMissionProfile",
+    "DeleteConfig",
+    "DeleteMissionProfile",
+    "GetConfig",
+    "GetMissionProfile",
+    "ListConfigs",
+    "ListMissionProfiles",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateConfig",
+    "UpdateMissionProfile"
   ],
   "guardduty": [
     "CreateDetector",
@@ -899,6 +983,22 @@
     "UntagResource",
     "UpdateStreamMode"
   ],
+  "kinesisvideo": [
+    "CreateSignalingChannel",
+    "CreateStream",
+    "DeleteSignalingChannel",
+    "DeleteStream",
+    "DescribeSignalingChannel",
+    "DescribeStream",
+    "ListSignalingChannels",
+    "ListStreams",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateDataRetention",
+    "UpdateSignalingChannel",
+    "UpdateStream"
+  ],
   "lexv2-models": [
     "CreateBot",
     "CreateBotLocale",
@@ -954,6 +1054,16 @@
     "UpdateRouteCalculator",
     "UpdateTracker"
   ],
+  "m2": [
+    "CreateApplication",
+    "DeleteApplication",
+    "GetApplication",
+    "ListApplications",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateApplication"
+  ],
   "macie2": [
     "CreateAllowList",
     "CreateCustomDataIdentifier",
@@ -997,6 +1107,43 @@
     "UntagResource",
     "UpdateSubnetGroup",
     "UpdateUser"
+  ],
+  "mgh": [
+    "CreateProgressUpdateStream",
+    "DeleteProgressUpdateStream",
+    "DescribeMigrationTask",
+    "ImportMigrationTask",
+    "ListProgressUpdateStreams",
+    "NotifyMigrationTaskState"
+  ],
+  "mgn": [
+    "ArchiveApplication",
+    "ArchiveWave",
+    "CreateApplication",
+    "CreateConnector",
+    "CreateLaunchConfigurationTemplate",
+    "CreateReplicationConfigurationTemplate",
+    "CreateWave",
+    "DeleteApplication",
+    "DeleteConnector",
+    "DeleteLaunchConfigurationTemplate",
+    "DeleteReplicationConfigurationTemplate",
+    "DeleteWave",
+    "DescribeLaunchConfigurationTemplates",
+    "DescribeReplicationConfigurationTemplates",
+    "ListApplications",
+    "ListConnectors",
+    "ListTagsForResource",
+    "ListWaves",
+    "TagResource",
+    "UnarchiveApplication",
+    "UnarchiveWave",
+    "UntagResource",
+    "UpdateApplication",
+    "UpdateConnector",
+    "UpdateLaunchConfigurationTemplate",
+    "UpdateReplicationConfigurationTemplate",
+    "UpdateWave"
   ],
   "mq": [
     "CreateConfiguration",
@@ -1071,6 +1218,28 @@
     "GetAlias",
     "ListAliases",
     "UpdateAlias"
+  ],
+  "personalize": [
+    "CreateDataset",
+    "CreateDatasetGroup",
+    "CreateFilter",
+    "CreateSchema",
+    "DeleteDataset",
+    "DeleteDatasetGroup",
+    "DeleteFilter",
+    "DeleteSchema",
+    "DescribeDataset",
+    "DescribeDatasetGroup",
+    "DescribeFilter",
+    "DescribeSchema",
+    "ListDatasetGroups",
+    "ListDatasets",
+    "ListFilters",
+    "ListSchemas",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateDataset"
   ],
   "pinpoint": [
     "CreateApp",
@@ -1434,6 +1603,30 @@
     "UntagResource",
     "UpdateVocabulary",
     "UpdateVocabularyFilter"
+  ],
+  "transfer": [
+    "CreateConnector",
+    "CreateProfile",
+    "CreateServer",
+    "CreateWorkflow",
+    "DeleteConnector",
+    "DeleteProfile",
+    "DeleteServer",
+    "DeleteWorkflow",
+    "DescribeConnector",
+    "DescribeProfile",
+    "DescribeServer",
+    "DescribeWorkflow",
+    "ListConnectors",
+    "ListProfiles",
+    "ListServers",
+    "ListTagsForResource",
+    "ListWorkflows",
+    "TagResource",
+    "UntagResource",
+    "UpdateConnector",
+    "UpdateProfile",
+    "UpdateServer"
   ],
   "translate": [
     "CreateParallelData",

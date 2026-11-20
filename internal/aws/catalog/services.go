@@ -29,5 +29,8 @@ func Services() []*Service {
 		// Operations, governance, billing configuration and resilience.
 		accountManagement, billingConductor, budgets, chatbot, cloud9, costUsageReports, faultInjection, incidentManager, licenseManager,
 		proton, resilienceHub, resourceExplorer, telcoNetworkBuilder, userNotifications, wellArchitected, xray,
+		// Further services from the per-service backlog.
+		directConnect, groundStation, kinesisVideo, forecast, fraudDetector, personalize, codeGuruProfiler,
+		mainframeModernization, migrationHub, transferFamily, applicationMigration, elasticDisasterRecovery,
 	}
 }

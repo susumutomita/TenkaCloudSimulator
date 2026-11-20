@@ -11,7 +11,7 @@
   {"op": "describe_profile", "args": {"ProfileId": "${profile}"}, "expect": {"Profile.As2Id": "LOCALPARTY", "Profile.CertificateIds#count": 2}},
   {"op": "list_profiles", "args": {"ProfileType": "PARTNER"}, "expect": {"Profiles#count": 1}},
   {"op": "create_profile", "args": {"As2Id": "has space", "ProfileType": "LOCAL"}, "error": "InvalidRequestException"},
-  {"op": "create_connector", "args": {"Url": "sftp://partner.example.com", "AccessRole": "arn:aws:iam::000000000000:role/migration-fixture", "SftpConfig": {"UserSecretId": "fixture-secret", "MaxConcurrentConnections": 2}}, "save": {"connector": "ConnectorId"}},
+  {"op": "create_connector", "args": {"Url": "sftp://partner.example.com", "AccessRole": "arn:aws:iam::000000000000:role/migration-fixture", "SftpConfig": {"UserSecretId": "fixture-sftp-user", "MaxConcurrentConnections": 2}}, "save": {"connector": "ConnectorId"}},
   {"op": "describe_connector", "args": {"ConnectorId": "${connector}"}, "expect": {"Connector.Status": "ACTIVE", "Connector.EgressType": "SERVICE_MANAGED", "Connector.Url": "sftp://partner.example.com"}},
   {"op": "update_connector", "args": {"ConnectorId": "${connector}", "Url": "sftp://other.example.com"}},
   {"op": "list_connectors", "args": {}, "expect": {"Connectors#count": 1, "Connectors[0].Url": "sftp://other.example.com"}},

@@ -105,7 +105,7 @@ def run_group(fixtures):
                 first = fixture['steps'][0]
                 # Query services answer AccessDenied; JSON and REST services
                 # AccessDeniedException. A fixture names its code in "denied".
-                denied = {**first, 'error': fixture.get('denied', 'AccessDeniedException'), 'status': 403}
+                denied = {**first, 'error': fixture.get('denied', 'AccessDeniedException'), 'status': fixture.get('denied_status', 403)}
                 denied.pop('save', None)
                 denied.pop('expect', None)
                 run_steps(a, fixture, [denied], {}, set(), token=nobody)
