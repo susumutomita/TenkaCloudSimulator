@@ -1,0 +1,1563 @@
+{
+ "components": {
+  "schemas": {
+   "AntennaDownlinkConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "spectrumConfig": {
+      "$ref": "#/components/schemas/SpectrumConfig"
+     }
+    },
+    "required": [
+     "spectrumConfig"
+    ],
+    "type": "object"
+   },
+   "AntennaDownlinkDemodDecodeConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "decodeConfig": {
+      "$ref": "#/components/schemas/DecodeConfig"
+     },
+     "demodulationConfig": {
+      "$ref": "#/components/schemas/DemodulationConfig"
+     },
+     "spectrumConfig": {
+      "$ref": "#/components/schemas/SpectrumConfig"
+     }
+    },
+    "required": [
+     "spectrumConfig",
+     "demodulationConfig",
+     "decodeConfig"
+    ],
+    "type": "object"
+   },
+   "AntennaUplinkConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "spectrumConfig": {
+      "$ref": "#/components/schemas/UplinkSpectrumConfig"
+     },
+     "targetEirp": {
+      "$ref": "#/components/schemas/Eirp"
+     },
+     "transmitDisabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "spectrumConfig",
+     "targetEirp"
+    ],
+    "type": "object"
+   },
+   "ConfigListItem": {
+    "additionalProperties": false,
+    "properties": {
+     "configArn": {
+      "maxLength": 424,
+      "minLength": 82,
+      "type": "string"
+     },
+     "configId": {
+      "type": "string"
+     },
+     "configType": {
+      "enum": [
+       "antenna-downlink",
+       "antenna-downlink-demod-decode",
+       "tracking",
+       "dataflow-endpoint",
+       "antenna-uplink",
+       "uplink-echo",
+       "s3-recording"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ConfigTypeData": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "antennaDownlinkConfig": {
+      "$ref": "#/components/schemas/AntennaDownlinkConfig"
+     },
+     "antennaDownlinkDemodDecodeConfig": {
+      "$ref": "#/components/schemas/AntennaDownlinkDemodDecodeConfig"
+     },
+     "antennaUplinkConfig": {
+      "$ref": "#/components/schemas/AntennaUplinkConfig"
+     },
+     "dataflowEndpointConfig": {
+      "$ref": "#/components/schemas/DataflowEndpointConfig"
+     },
+     "s3RecordingConfig": {
+      "$ref": "#/components/schemas/S3RecordingConfig"
+     },
+     "trackingConfig": {
+      "$ref": "#/components/schemas/TrackingConfig"
+     },
+     "uplinkEchoConfig": {
+      "$ref": "#/components/schemas/UplinkEchoConfig"
+     }
+    },
+    "type": "object"
+   },
+   "DataflowEndpointConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "dataflowEndpointName": {
+      "type": "string"
+     },
+     "dataflowEndpointRegion": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "dataflowEndpointName"
+    ],
+    "type": "object"
+   },
+   "DecodeConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "unvalidatedJSON": {
+      "maxLength": 8192,
+      "minLength": 2,
+      "type": "string"
+     }
+    },
+    "required": [
+     "unvalidatedJSON"
+    ],
+    "type": "object"
+   },
+   "DemodulationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "unvalidatedJSON": {
+      "maxLength": 8192,
+      "minLength": 2,
+      "type": "string"
+     }
+    },
+    "required": [
+     "unvalidatedJSON"
+    ],
+    "type": "object"
+   },
+   "Eirp": {
+    "additionalProperties": false,
+    "properties": {
+     "units": {
+      "enum": [
+       "dBW"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "value",
+     "units"
+    ],
+    "type": "object"
+   },
+   "Frequency": {
+    "additionalProperties": false,
+    "properties": {
+     "units": {
+      "enum": [
+       "GHz",
+       "MHz",
+       "kHz"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "value",
+     "units"
+    ],
+    "type": "object"
+   },
+   "FrequencyBandwidth": {
+    "additionalProperties": false,
+    "properties": {
+     "units": {
+      "enum": [
+       "GHz",
+       "MHz",
+       "kHz"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "value",
+     "units"
+    ],
+    "type": "object"
+   },
+   "KmsKey": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "kmsAliasArn": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "kmsAliasName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "kmsKeyArn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MissionProfileListItem": {
+    "additionalProperties": false,
+    "properties": {
+     "missionProfileArn": {
+      "maxLength": 138,
+      "minLength": 89,
+      "type": "string"
+     },
+     "missionProfileId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "region": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3RecordingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketArn": {
+      "type": "string"
+     },
+     "prefix": {
+      "maxLength": 900,
+      "minLength": 1,
+      "type": "string"
+     },
+     "roleArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "bucketArn",
+     "roleArn"
+    ],
+    "type": "object"
+   },
+   "SpectrumConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bandwidth": {
+      "$ref": "#/components/schemas/FrequencyBandwidth"
+     },
+     "centerFrequency": {
+      "$ref": "#/components/schemas/Frequency"
+     },
+     "polarization": {
+      "enum": [
+       "RIGHT_HAND",
+       "LEFT_HAND",
+       "NONE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "centerFrequency",
+     "bandwidth"
+    ],
+    "type": "object"
+   },
+   "TrackingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "autotrack": {
+      "enum": [
+       "REQUIRED",
+       "PREFERRED",
+       "REMOVED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "autotrack"
+    ],
+    "type": "object"
+   },
+   "UplinkEchoConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "antennaUplinkConfigArn": {
+      "maxLength": 424,
+      "minLength": 82,
+      "type": "string"
+     },
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "enabled",
+     "antennaUplinkConfigArn"
+    ],
+    "type": "object"
+   },
+   "UplinkSpectrumConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "centerFrequency": {
+      "$ref": "#/components/schemas/Frequency"
+     },
+     "polarization": {
+      "enum": [
+       "RIGHT_HAND",
+       "LEFT_HAND",
+       "NONE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "centerFrequency"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Ground Station API (2019-05-23). Every other official operation returns HTTP 501 UnknownOperationException. Configs and mission profiles are stored records: no antenna, contact, satellite pass, data delivery or receiver endpoint exists. ReserveContact, CancelContact, DescribeContact, ListContacts, satellites, ground stations, minute usage and the agent APIs return UnknownOperationException with HTTP 501, as do dataflow endpoint groups (their records carry receiver addresses and ports) and ephemerides (their validation and use depend on AWS-owned satellite data). A config holds exactly one configData member, which sets its type; the config ARN carries that type. The configType in the request path of GetConfig and DeleteConfig is accepted but not compared with the stored type, while UpdateConfig refuses a type change. The center frequency, bandwidth and EIRP ranges documented by the API are enforced; demodulation and decode settings, S3 bucket and role ARNs, and dataflow endpoint names are stored without being resolved. A mission profile must name an existing tracking config in trackingConfigArn. The ARNs in dataflowEdges and in an uplink echo config are only checked for the documented config ARN form and type; they are not looked up, and deleting a config does not check the mission profiles that use it. The streamsKmsKey and streamsKmsRole are stored without resolving keys or roles.",
+  "title": "AWS Ground Station (simulator catalog)",
+  "version": "2019-05-23"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/config": {
+   "get": {
+    "operationId": "groundstationListConfigs",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 1000,
+       "minLength": 3,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configList": {
+           "items": {
+            "$ref": "#/components/schemas/ConfigListItem"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 1000,
+           "minLength": 3,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListConfigs",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   },
+   "post": {
+    "operationId": "groundstationCreateConfig",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "configData": {
+          "$ref": "#/components/schemas/ConfigTypeData"
+         },
+         "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "configData",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configArn": {
+           "maxLength": 424,
+           "minLength": 82,
+           "type": "string"
+          },
+          "configId": {
+           "type": "string"
+          },
+          "configType": {
+           "enum": [
+            "antenna-downlink",
+            "antenna-downlink-demod-decode",
+            "tracking",
+            "dataflow-endpoint",
+            "antenna-uplink",
+            "uplink-echo",
+            "s3-recording"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateConfig",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   }
+  },
+  "/config/{configType}/{configId}": {
+   "delete": {
+    "operationId": "groundstationDeleteConfig",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configType",
+      "required": true,
+      "schema": {
+       "enum": [
+        "antenna-downlink",
+        "antenna-downlink-demod-decode",
+        "tracking",
+        "dataflow-endpoint",
+        "antenna-uplink",
+        "uplink-echo",
+        "s3-recording"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configArn": {
+           "maxLength": 424,
+           "minLength": 82,
+           "type": "string"
+          },
+          "configId": {
+           "type": "string"
+          },
+          "configType": {
+           "enum": [
+            "antenna-downlink",
+            "antenna-downlink-demod-decode",
+            "tracking",
+            "dataflow-endpoint",
+            "antenna-uplink",
+            "uplink-echo",
+            "s3-recording"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteConfig",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   },
+   "get": {
+    "operationId": "groundstationGetConfig",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configType",
+      "required": true,
+      "schema": {
+       "enum": [
+        "antenna-downlink",
+        "antenna-downlink-demod-decode",
+        "tracking",
+        "dataflow-endpoint",
+        "antenna-uplink",
+        "uplink-echo",
+        "s3-recording"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configArn": {
+           "maxLength": 424,
+           "minLength": 82,
+           "type": "string"
+          },
+          "configData": {
+           "$ref": "#/components/schemas/ConfigTypeData"
+          },
+          "configId": {
+           "type": "string"
+          },
+          "configType": {
+           "enum": [
+            "antenna-downlink",
+            "antenna-downlink-demod-decode",
+            "tracking",
+            "dataflow-endpoint",
+            "antenna-uplink",
+            "uplink-echo",
+            "s3-recording"
+           ],
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetConfig",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   },
+   "put": {
+    "operationId": "groundstationUpdateConfig",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configType",
+      "required": true,
+      "schema": {
+       "enum": [
+        "antenna-downlink",
+        "antenna-downlink-demod-decode",
+        "tracking",
+        "dataflow-endpoint",
+        "antenna-uplink",
+        "uplink-echo",
+        "s3-recording"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "configData": {
+          "$ref": "#/components/schemas/ConfigTypeData"
+         },
+         "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "configData",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configArn": {
+           "maxLength": 424,
+           "minLength": 82,
+           "type": "string"
+          },
+          "configId": {
+           "type": "string"
+          },
+          "configType": {
+           "enum": [
+            "antenna-downlink",
+            "antenna-downlink-demod-decode",
+            "tracking",
+            "dataflow-endpoint",
+            "antenna-uplink",
+            "uplink-echo",
+            "s3-recording"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateConfig",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   }
+  },
+  "/missionprofile": {
+   "get": {
+    "operationId": "groundstationListMissionProfiles",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 1000,
+       "minLength": 3,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "missionProfileList": {
+           "items": {
+            "$ref": "#/components/schemas/MissionProfileListItem"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 1000,
+           "minLength": 3,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListMissionProfiles",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   },
+   "post": {
+    "operationId": "groundstationCreateMissionProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "contactPostPassDurationSeconds": {
+          "maximum": 21600,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "contactPrePassDurationSeconds": {
+          "maximum": 21600,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "dataflowEdges": {
+          "items": {
+           "items": {
+            "maxLength": 424,
+            "minLength": 82,
+            "type": "string"
+           },
+           "maxItems": 2,
+           "minItems": 2,
+           "type": "array"
+          },
+          "maxItems": 500,
+          "minItems": 0,
+          "type": "array"
+         },
+         "minimumViableContactDurationSeconds": {
+          "maximum": 21600,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "streamsKmsKey": {
+          "$ref": "#/components/schemas/KmsKey"
+         },
+         "streamsKmsRole": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "trackingConfigArn": {
+          "maxLength": 424,
+          "minLength": 82,
+          "type": "string"
+         }
+        },
+        "required": [
+         "dataflowEdges",
+         "minimumViableContactDurationSeconds",
+         "name",
+         "trackingConfigArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "missionProfileId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateMissionProfile",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   }
+  },
+  "/missionprofile/{missionProfileId}": {
+   "delete": {
+    "operationId": "groundstationDeleteMissionProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "missionProfileId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "missionProfileId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteMissionProfile",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   },
+   "get": {
+    "operationId": "groundstationGetMissionProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "missionProfileId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "contactPostPassDurationSeconds": {
+           "maximum": 21600,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "contactPrePassDurationSeconds": {
+           "maximum": 21600,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "dataflowEdges": {
+           "items": {
+            "items": {
+             "maxLength": 424,
+             "minLength": 82,
+             "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+           },
+           "maxItems": 500,
+           "minItems": 0,
+           "type": "array"
+          },
+          "minimumViableContactDurationSeconds": {
+           "maximum": 21600,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "missionProfileArn": {
+           "maxLength": 138,
+           "minLength": 89,
+           "type": "string"
+          },
+          "missionProfileId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "region": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "streamsKmsKey": {
+           "$ref": "#/components/schemas/KmsKey"
+          },
+          "streamsKmsRole": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "trackingConfigArn": {
+           "maxLength": 424,
+           "minLength": 82,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetMissionProfile",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   },
+   "put": {
+    "operationId": "groundstationUpdateMissionProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "missionProfileId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "contactPostPassDurationSeconds": {
+          "maximum": 21600,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "contactPrePassDurationSeconds": {
+          "maximum": 21600,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "dataflowEdges": {
+          "items": {
+           "items": {
+            "maxLength": 424,
+            "minLength": 82,
+            "type": "string"
+           },
+           "maxItems": 2,
+           "minItems": 2,
+           "type": "array"
+          },
+          "maxItems": 500,
+          "minItems": 0,
+          "type": "array"
+         },
+         "minimumViableContactDurationSeconds": {
+          "maximum": 21600,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "streamsKmsKey": {
+          "$ref": "#/components/schemas/KmsKey"
+         },
+         "streamsKmsRole": {
+          "type": "string"
+         },
+         "trackingConfigArn": {
+          "maxLength": 424,
+          "minLength": 82,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "missionProfileId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateMissionProfile",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "groundstationUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 5,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 500,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   },
+   "get": {
+    "operationId": "groundstationListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 5,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   },
+   "post": {
+    "operationId": "groundstationTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "groundstation"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 5,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Ground Station"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Ground Station API (2019-05-23). Every other official operation returns HTTP 501 UnknownOperationException. Configs and mission profiles are stored records: no antenna, contact, satellite pass, data delivery or receiver endpoint exists. ReserveContact, CancelContact, DescribeContact, ListContacts, satellites, ground stations, minute usage and the agent APIs return UnknownOperationException with HTTP 501, as do dataflow endpoint groups (their records carry receiver addresses and ports) and ephemerides (their validation and use depend on AWS-owned satellite data). A config holds exactly one configData member, which sets its type; the config ARN carries that type. The configType in the request path of GetConfig and DeleteConfig is accepted but not compared with the stored type, while UpdateConfig refuses a type change. The center frequency, bandwidth and EIRP ranges documented by the API are enforced; demodulation and decode settings, S3 bucket and role ARNs, and dataflow endpoint names are stored without being resolved. A mission profile must name an existing tracking config in trackingConfigArn. The ARNs in dataflowEdges and in an uplink echo config are only checked for the documented config ARN form and type; they are not looked up, and deleting a config does not check the mission profiles that use it. The streamsKmsKey and streamsKmsRole are stored without resolving keys or roles.",
+   "name": "AWS Ground Station"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/groundstation/2019-05-23/service-2.json",
+  "sha256": "2a38ca8c5194176e3810d7ef29f0ebeb3c9d5ceef0dbeb02e212dfe76b6a5abb",
+  "license": "Apache-2.0"
+ }
+}
