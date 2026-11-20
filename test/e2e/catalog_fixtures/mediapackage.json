@@ -1,0 +1,24 @@
+{
+ "client": "mediapackage",
+ "steps": [
+  {"op": "create_channel", "args": {"Id": "fixture-channel", "Description": "fixture news", "Tags": {"team": "a"}}, "save": {"arn": "Arn"}, "expect": {"Id": "fixture-channel", "Tags": {"team": "a"}}},
+  {"op": "describe_channel", "args": {"Id": "fixture-channel"}, "expect": {"Arn": "${arn}", "Description": "fixture news"}},
+  {"op": "list_channels", "args": {}, "expect": {"Channels#count": 1, "Channels[0].Id": "fixture-channel"}},
+  {"op": "update_channel", "args": {"Id": "fixture-channel", "Description": "fixture night"}, "expect": {"Description": "fixture night", "Tags": {"team": "a"}}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${arn}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${arn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${arn}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "create_channel", "args": {"Id": "fixture-channel"}, "error": "ConflictException", "status": 409},
+  {"op": "describe_channel", "args": {"Id": "fixture-missing"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_channels", "args": {}, "expect": {"Channels#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_channel", "args": {"Id": "fixture-channel"}, "expect": {"Description": "fixture night"}}
+ ],
+ "cleanup": [
+  {"op": "delete_channel", "args": {"Id": "fixture-channel"}},
+  {"op": "list_channels", "args": {}, "expect": {"Channels#count": 0}}
+ ]
+}
