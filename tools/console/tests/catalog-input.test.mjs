@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import {transformSync} from 'esbuild';
 import * as input from '../src/catalog-input.mjs';
 import * as query from '../src/catalog-query.mjs';
+import * as names from '../src/catalog-names.mjs';
 
 // Real descriptors (internal/aws/catalog writes this fixture and checks it
 // is fresh) and bodies botocore's own Query serializer produced.
@@ -18,8 +19,8 @@ const source = fs.readFileSync(new URL('../src/catalog.jsx', import.meta.url), '
 const compiled = transformSync(source, {loader: 'jsx', format: 'cjs', target: 'es2022'}).code;
 const view = {exports: {}};
 vm.runInNewContext(compiled, {module: view, exports: view.exports, console, URLSearchParams,
-  require: id => id === './catalog-query.mjs' ? query : id === './catalog-input.mjs' ? input : id === 'react' ? {} : id === './i18n.jsx' ? {useLocale: () => ({t: en => en})} : {}});
-const {buildCatalogRequest, formMembers, control, convertField, fieldText, resourceARN} = view.exports;
+  require: id => id === './catalog-query.mjs' ? query : id === './catalog-names.mjs' ? names : id === './catalog-input.mjs' ? input : id === 'react' ? {} : id === './i18n.jsx' ? {useLocale: () => ({t: en => en})} : {}});
+const {buildCatalogRequest, formMembers, control, convertField, fieldText, resourceARN, fieldOrder} = view.exports;
 const plain = value => JSON.parse(JSON.stringify(value));
 
 // Parameter order and the escaping of characters such as "~" and "*" differ
@@ -163,7 +164,7 @@ test('the catalog view renders, opens a detail, edits and tags through native re
   };
   const module = {exports: {}};
   vm.runInNewContext(compiled, {module, exports: module.exports, console, URLSearchParams,
-    require: id => id === './catalog-query.mjs' ? query : id === './catalog-input.mjs' ? input : id === 'react' ? react : id === './i18n.jsx' ? {useLocale: () => ({t: en => en})} : {}});
+    require: id => id === './catalog-query.mjs' ? query : id === './catalog-names.mjs' ? names : id === './catalog-input.mjs' ? input : id === 'react' ? react : id === './i18n.jsx' ? {useLocale: () => ({t: en => en})} : {}});
   const rds = service('rds');
   const sent = [];
   const xml = (action, inner) => '<' + action + 'Response><' + action + 'Result>' + inner + '</' + action + 'Result><ResponseMetadata><RequestId>r</RequestId></ResponseMetadata></' + action + 'Response>';
@@ -209,7 +210,8 @@ test('the catalog view renders, opens a detail, edits and tags through native re
   editForm.props.onSubmit({preventDefault() {}});
   await flush();
   assert.equal(sent.length, before);
-  assert.match(JSON.stringify(tree), /SubnetIds is required/);
+  // The problem is reported at the field.
+  assert.equal(find(n => n.props?.controlId === 'catalog-field-SubnetIds').props.errorText, 'Required.');
   const fieldInputs = all().filter(n => n.props?.onChange && n.props?.value !== undefined);
   fieldInputs.find(n => n.props.value === '').props.onChange({detail: {value: 'subnet-0a1b2c3d, subnet-4e5f6a7b'}});
   render();
@@ -226,4 +228,10 @@ test('the catalog view renders, opens a detail, edits and tags through native re
   await flush();
   assert.ok(sent.includes('Action=AddTagsToResource&Version=2014-10-31&ResourceName=arn%3Aaws%3Ards%3Aus-east-1%3A000000000000%3Asubgrp%3Aapp&Tags.Tag.1.Key=owner&Tags.Tag.1.Value='), sent.at(-2));
   assert.match(JSON.stringify(tree), /Tag added/);
+});
+
+test('form fields put the resource name first, then required, then optional members', () => {
+  const members = [{name: 'Tags'}, {name: 'SubnetIds', required: true}, {name: 'Description', required: true}, {name: 'Name', required: true}, {name: 'Alpha'}];
+  assert.deepEqual(plain(fieldOrder(members, {nameMember: 'Name'}).map(m => m.name)), ['Name', 'Description', 'SubnetIds', 'Alpha', 'Tags']);
+  assert.deepEqual(plain(fieldOrder(members, undefined).map(m => m.name)), ['Description', 'Name', 'SubnetIds', 'Alpha', 'Tags']);
 });

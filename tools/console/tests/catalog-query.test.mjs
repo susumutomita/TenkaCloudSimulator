@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {transformSync} from 'esbuild';
 import * as query from '../src/catalog-query.mjs';
+import * as names from '../src/catalog-names.mjs';
 import * as input from '../src/catalog-input.mjs';
 
 // The catalog view's request builder, compiled from the real source.
@@ -11,7 +12,7 @@ const source = fs.readFileSync(new URL('../src/catalog.jsx', import.meta.url), '
 const compiled = transformSync(source, {loader: 'jsx', format: 'cjs', target: 'es2022'}).code;
 const view = {exports: {}};
 vm.runInNewContext(compiled, {module: view, exports: view.exports, console, URLSearchParams,
-  require: id => id === './catalog-query.mjs' ? query : id === './catalog-input.mjs' ? input : id === 'react' ? {} : id === './i18n.jsx' ? {useLocale: () => ({t: en => en})} : {}});
+  require: id => id === './catalog-query.mjs' ? query : id === './catalog-names.mjs' ? names : id === './catalog-input.mjs' ? input : id === 'react' ? {} : id === './i18n.jsx' ? {useLocale: () => ({t: en => en})} : {}});
 const {buildCatalogRequest} = view.exports;
 
 // Bodies botocore 1.41.6's own QuerySerializer produced for these inputs

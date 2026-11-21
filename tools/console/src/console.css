@@ -150,6 +150,8 @@
 .catalog-json { margin: 0; max-height: 24rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.875rem; }
 /* Official member names and ARNs are long unbroken words; let them wrap at 390 px. */
 .catalog-key { overflow-wrap: anywhere; }
+.catalog-bounds { margin: 0; padding-inline-start: 20px; }
+.catalog-bounds li + li { margin-top: 8px; }
 
 /* Favorites are explicitly selected; discovery never grants service access. */
 .cloud-global-nav--aws { margin-left: auto; }

@@ -1,339 +1,33 @@
 {
   "version": 1,
-  "base_sha": "2bd05417a13bdfc5d947b5ced09306a826e8f93a",
+  "base_sha": "f0e2b277bc79a5d4e22e9200880a07d025a07b71",
   "changes": [
     {
-      "path": "docs/aws-catalog-services.md",
-      "sha256": "172c7ef756b981ffada850555be9518a3782b379351d0fcc7ccb7b4bface1adb",
-      "disposition": "documentation",
-      "reason": "Generated service table listing Amazon RDS, Amazon ElastiCache and Amazon Redshift with their bound operations and bounds.",
-      "models": []
-    },
-    {
       "path": "docs/aws-catalog.md",
-      "sha256": "76e3d0d9fc644614c5164d3759e8c79d7abbe12a474749e69c501d4f319dbd70",
+      "sha256": "301121b5f0f99d9b32cff0d91bbae1dcc7e4d2cc1817d4855d6bc5aba0c92331",
       "disposition": "documentation",
-      "reason": "Catalog guide: Query protocol routing, wire rules and limits, the three new services, console capabilities and verification.",
+      "reason": "Catalog guide: what the reworked console view can and cannot do, and its verification.",
       "models": []
     },
     {
-      "path": "formal/models.json",
-      "sha256": "a189232bbb1f63ca2b269dc30b4bda4efb3d16a2f9d4e7793e636671fda0b0c7",
-      "disposition": "formal-infrastructure",
-      "reason": "Adds the three Query service model files and the second database specification file to the catalog lifecycle model source scope.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/describe.go",
-      "sha256": "8aa9cd79b0144abdc83818ab89a7cdf5df8cdfaa40c745456c522f47d25d5026",
-      "disposition": "modeled",
-      "reason": "Publishes Query wire keys, output and input shapes, editable members and ARN templates for first-party clients. Descriptors are read-only projections of the reviewed specifications and change no stored state.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/engine.go",
-      "sha256": "2c2871aa06ab6f3fbc467f532308c5aadc05e65f0ff53519fd86448136de82a4",
-      "disposition": "modeled",
-      "reason": "Claims Query requests by signing scope and runs them through the execution path shared with JSON and REST requests; a refusal leaves stored state unchanged.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/faults_test.go",
-      "sha256": "280adb8b6709a63c139f09c9594d7f853fa14f365aeaf9d45ed7cfd673ad8f41",
-      "disposition": "test-support",
-      "reason": "The unsupported-protocol composition case now uses rest-xml, because query is supported; the assertion is unchanged.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/model.go",
-      "sha256": "457a0c06d484b075ed96e84d14b52e8c7849010e7214be4c01fc42c8e5e9b2ea",
-      "disposition": "modeled",
-      "reason": "Carries the Query result wrapper, shape-level element name and XML attribute flag of the official model. No lifecycle state or transition is added.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/elasticache.json",
-      "sha256": "0676abbb4e00cbf41295e4bdbb0398fb2ca0e90e01d2765ec9c72ebad8c2ba90",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 elasticache model for the reviewed operations; bound operations run through the unchanged catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/rds.json",
-      "sha256": "e9aa2be35950b27b8a26cbeb6866e823fea9e92c7e5e3397362bc8bf917b6f3d",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 rds model for the reviewed operations; bound operations run through the unchanged catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/redshift.json",
-      "sha256": "3a9c7ccbc53a4f70e7cdf16101b90cdde358170d4ca3a37112a57701a8e8a14d",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 redshift model for the reviewed operations; bound operations run through the unchanged catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/openapi.go",
-      "sha256": "c8b9895d69d06f1def4eaafea3c51d7108b88e28167b674289d867c38a20c0f9",
-      "disposition": "modeled",
-      "reason": "Generates the Query reference, one runnable entry per Action with a form request and XML responses, from the embedded official shapes. Reference generation changes no stored state.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/protocol.go",
-      "sha256": "77cce3a082e40956b744bbba9169fb106bf62a8b5bc7d2c04e8269f83e52f8e9",
-      "disposition": "modeled",
-      "reason": "Adds the Query form decoder and XML encoder. Decoded requests enter the same validated execution path as JSON and REST requests, and oversized, malformed or unrepresentable forms are refused before any state is read.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/query_test.go",
-      "sha256": "66fc4e6b77848e126bd33cb9a06cc562d322c1d76e4726d5badd5e388108a1d2",
-      "disposition": "test-support",
-      "reason": "Checks the Query decoder and encoder, allocation bounds, routing, authorization before disclosure, RDS rules, descriptors and reference structure.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/selection.json",
-      "sha256": "1adeaeaec24751ba25260e92d263ff95b2b02f1484b7b8c099c1844aa7346aea",
-      "disposition": "modeled",
-      "reason": "Selects the reviewed RDS, ElastiCache and Redshift operations for extraction; every selected operation is authorized before it reads or changes state.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/semantics.go",
-      "sha256": "0ceceba9788ef9e708a89d8d648904d6cf0fd8aac16f9445bcb746fd6d10ce7d",
-      "disposition": "modeled",
-      "reason": "A describe operation may name one resource through a string member. Authorization still precedes name resolution, and an unknown name fails with the operation not-found fault without changing state.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services.go",
-      "sha256": "74961e5c8002f70beab1ce20776f07ccc64f5be2a5bc64810ecd807f94b44c89",
-      "disposition": "modeled",
-      "reason": "Registers Amazon RDS, Amazon ElastiCache and Amazon Redshift with the catalog.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "UniqueNames",
-            "QuotaBound"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_data.go",
-      "sha256": "0fb11628b0b8ccbf715dd25c47e9cf0e685328bb8b20e82fb788d02d14229954",
-      "disposition": "modeled",
-      "reason": "Adds the Amazon RDS specification: subnet, parameter, cluster parameter and option groups and tags as stored configuration with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_data2.go",
-      "sha256": "960ee49bad0efda925c4a12fe39a14cb04151a23f2c34dc23d30af6322b091f8",
-      "disposition": "modeled",
-      "reason": "Adds the Amazon ElastiCache and Amazon Redshift specifications: parameter groups, subnet groups, IAM-authenticated cache users and tags as stored configuration with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_data2_test.go",
-      "sha256": "acc980af1a8112812a4af43fc9efecd6ec8b906ba9885d0e67ab9aa86acb0fa1",
-      "disposition": "test-support",
-      "reason": "Checks the ElastiCache and Redshift lifecycles, documented rules, faults and refusals through the catalog engine.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/spec.go",
-      "sha256": "3c01c370b1298a4dd545cb2a115cb00cd2a75f0890aa743c09f2ae21c797acdf",
-      "disposition": "modeled",
-      "reason": "Documents that the Names member of a describe operation may be a string. No behavior changes in this file.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/catalog/elasticache.json",
-      "sha256": "127721bc6f74a1593aa288fa997aee6400165289e1e3662e2d98e8f2cb8597bc",
-      "disposition": "presentation",
-      "reason": "Generated Amazon ElastiCache reference with one runnable entry per Action.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "d4ea7f6a09862572ee583d7c5145f8ed87ef8e8619f433d1b380952f5ffe8dd3",
-      "disposition": "presentation",
-      "reason": "Generated reference index listing the three Query services.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/rds.json",
-      "sha256": "ccedcfc99de71ac0067028570c3202fa8d9213b8c0e2e44d5dd2c42b5f3c51d5",
-      "disposition": "presentation",
-      "reason": "Generated Amazon RDS reference with one runnable entry per Action.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/redshift.json",
-      "sha256": "f714a9ac958fe7ab183c5e1447e01456e928bc3036d5371f6889e1eb609314f6",
-      "disposition": "presentation",
-      "reason": "Generated Amazon Redshift reference with one runnable entry per Action.",
-      "models": []
-    },
-    {
-      "path": "internal/server/aws_catalog.go",
-      "sha256": "298b237a0298aa6b4c6b56fbdfa0a72e19eb7845f7a0a4e3dfa7b06ae907e2c4",
-      "disposition": "modeled",
-      "reason": "The capability document names Query among the catalog protocols and states its routing rule. Composition of the catalog store is unchanged.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/aws_catalog_query_test.go",
-      "sha256": "3bcefa248a18ad740d19f6741100481ca223d9964e60982b0e6be37bbd4e64f6",
-      "disposition": "test-support",
-      "reason": "Composed-server regression that Query routing does not take requests from native Query services, including contradictory selectors.",
+      "path": "docs/console-fidelity.md",
+      "sha256": "4ecfd957c94965d141b83d5ef57dee7400d1b2f12969144f4b6aa6b3f514fb59",
+      "disposition": "documentation",
+      "reason": "States that the catalog view follows public Cloudscape patterns and was not compared with an authenticated AWS console.",
       "models": []
     },
     {
       "path": "internal/server/web/app.css",
-      "sha256": "58d107b2d386f37bafb0f8fda076e26b76a605562bb1ee06abe1a54d09700ebe",
+      "sha256": "2cb00e4cff0a4fa20975ed3f4a95dbdf31a355b74e4cc638a61e0b84ef40ae5a",
       "disposition": "presentation",
-      "reason": "Rebuilt console stylesheet: long member names and ARNs wrap in the catalog detail view.",
+      "reason": "Rebuilt console stylesheet for the catalog list, create and resource pages.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "e3e8aac7a882ecfa0b189e762906da9468e7573aabe1f924776908e442b4a7fe",
+      "sha256": "0c64d8b420d94b4f652c5952e2bb8af6fe4f3e6317dda45dc7d7f8b4036b07f9",
       "disposition": "modeled",
-      "reason": "Rebuilt console bundle carrying the catalog view changes; the build is byte-reproducible from the listed inputs.",
+      "reason": "Rebuilt console bundle carrying the restructured catalog view; the build is byte-reproducible from the listed inputs.",
       "models": [
         {
           "id": "CatalogConsoleEpoch",
@@ -344,107 +38,43 @@
             "ReloadOnlyAfterAck",
             "FailureVisible"
           ],
-          "limits": "Finite model of one catalog view with bounded requests and epochs. React rendering, Cloudscape components, native request serialization, XML decoding and form input validation are outside the model and are checked by console unit tests and the Chromium end-to-end test."
+          "limits": "Finite model of one catalog view with bounded requests and epochs. React rendering, Cloudscape components, page layout, native request serialization, response decoding and form input validation are outside the model and are checked by console unit tests and the Chromium end-to-end test."
         }
       ]
     },
     {
       "path": "test/e2e/aws_catalog_console.py",
-      "sha256": "5802d112e80c1ec9aec630b06e5caea09e6be5bb4f7f1839cbecd6836a87b95e",
+      "sha256": "731fdfe8f1fb4844ed020324c49f2719d507caebc8acc455101153fe63d29952",
       "disposition": "test-support",
-      "reason": "Browser test of Query console lifecycles, edit and tag flows across protocols, and reference Send requests, cross-checked with boto3.",
+      "reason": "Browser test moved to the new pages with the same lifecycles, SDK cross-checks and native-Action assertions, plus a sweep that opens every catalog service and resource kind.",
       "models": []
-    },
-    {
-      "path": "test/e2e/aws_catalog_fixtures.py",
-      "sha256": "e1fb5f42cbdce4898189b50e830d3f10a915b9ba6afc6ade906e626a326e489f",
-      "disposition": "test-support",
-      "reason": "Lets a fixture name the denial code its protocol returns; the default is unchanged.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/elasticache.json",
-      "sha256": "cff4d0a1e66b69e5ea10f4005c7ed98e1518baa189b2cc7f66449f5081ea1e05",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture covering every bound Amazon ElastiCache operation.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/rds.json",
-      "sha256": "22766b83d1ff6a0064ad12e1663c75ceb907a247b10d23c653e25579b48e27f0",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture covering every bound Amazon RDS operation.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/redshift.json",
-      "sha256": "6d334b8dd5921d4db5e25384d1868f13d73b3c24a36e8ec71e4c4096ff2d509d",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture covering every bound Amazon Redshift operation.",
-      "models": []
-    },
-    {
-      "path": "test/fixtures/catalog-query/generate.py",
-      "sha256": "2dbbe580979b28e05e34d6968578738b0ee2fc85531132f7925eca84e2960422",
-      "disposition": "test-support",
-      "reason": "Development-only generator of Query request vectors from the pinned botocore serializer.",
-      "models": []
-    },
-    {
-      "path": "test/fixtures/catalog-query/serializer.json",
-      "sha256": "72fe72d6b24c35c06b8a937ebb7a319f8774b120edb43390fe2741d2db337fbf",
-      "disposition": "test-support",
-      "reason": "Request bodies produced by botocore for the Go decoder and console request-builder tests.",
-      "models": []
-    },
-    {
-      "path": "tools/awsmodels/extract.py",
-      "sha256": "3d6a5e9e5b58624cd992e4a25162fa4d5ba6994b52d473f18488471d54583cde",
-      "disposition": "modeled",
-      "reason": "Also extracts the Query result wrapper of each operation. Re-running the extractor leaves every existing model file byte-identical.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Query form decoding, XML encoding, botocore wire compatibility, descriptor projection and OpenAPI generation are outside the model and are checked by native tests and the boto3 and browser end-to-end flows."
-        }
-      ]
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "c52c9ec0a149a40917c75904a19596227cb7d4e1818c55b7fce49aa3e3445e10",
+      "sha256": "a96e5a12adf74f465fa881897787458fbcdc563cfc4456f1c3df6f07a901219a",
       "disposition": "presentation",
       "reason": "Digests of the rebuilt console bundle.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "a6339821817eeac190ae98d1d35a7b1b4bddfff80f48b0e39f01cf9fe6bb4f7f",
+      "sha256": "7b42148bc61e89c4552bdc3669f152e29c45d6c71fd333190373b38dcc7bb4bf",
       "disposition": "presentation",
-      "reason": "Input list of the rebuilt console bundle, including the two new catalog modules.",
+      "reason": "Input list of the rebuilt console bundle, including the new label module.",
       "models": []
     },
     {
-      "path": "tools/console/src/catalog-input.mjs",
-      "sha256": "94ab64482825949cd95b52b62b504d9c76b01eca95631ea4540d879126ee7bdf",
+      "path": "tools/console/src/catalog-names.mjs",
+      "sha256": "1999ec5577debbb106991a12b945d2ed9fbd843d1ecc6ae9d7d1a07d86e24474",
       "disposition": "presentation",
-      "reason": "Pure helpers that validate and convert catalog form input against the published input shapes; they send no request and hold no view state.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/catalog-query.mjs",
-      "sha256": "f72a05416324da5a6742448286dac9ce45791b1f1b02ec63fb616ceff4d3b28d",
-      "disposition": "presentation",
-      "reason": "Pure Query form serializer and XML response decoder for the catalog view; they send no request and hold no view state.",
+      "reason": "Pure helpers that derive readable labels, plurals and table columns from official names; they send no request and hold no view state.",
       "models": []
     },
     {
       "path": "tools/console/src/catalog.jsx",
-      "sha256": "1407d834429758a784b60c47c8f875449de25f8ebff449d382c6438414f9cf17",
+      "sha256": "2382125c68a87fcc98cd17c3123eacc2f87faf8833759b862fc688b76006aaf6",
       "disposition": "modeled",
-      "reason": "Sends Query requests and adds the edit, tag and complex-create forms. Each new write takes a fresh epoch, sends one native request, reloads the detail only after acknowledgement and keeps a failure visible without retrying.",
+      "reason": "Restructures the catalog view into list, create, resource and edit pages. The write functions are unchanged: each takes a fresh epoch, sends one native request, reloads only after acknowledgement and keeps a failure visible. New code adds client-side validation before a write and reads for paging, filtering and required list inputs.",
       "models": [
         {
           "id": "CatalogConsoleEpoch",
@@ -455,36 +85,36 @@
             "ReloadOnlyAfterAck",
             "FailureVisible"
           ],
-          "limits": "Finite model of one catalog view with bounded requests and epochs. React rendering, Cloudscape components, native request serialization, XML decoding and form input validation are outside the model and are checked by console unit tests and the Chromium end-to-end test."
+          "limits": "Finite model of one catalog view with bounded requests and epochs. React rendering, Cloudscape components, page layout, native request serialization, response decoding and form input validation are outside the model and are checked by console unit tests and the Chromium end-to-end test."
         }
       ]
     },
     {
       "path": "tools/console/src/console.css",
-      "sha256": "7745f358aa69a6fe572eeac9fb697bfc9eb695a0049ab846a58a7bd016a8330e",
+      "sha256": "907bccf17790ca9044838df09057230ff15b7e47e1045e9b58c3c76a028e8515",
       "disposition": "presentation",
-      "reason": "Wraps long keys and ARNs in the catalog detail view.",
+      "reason": "Styles for the catalog list, create and resource pages.",
       "models": []
     },
     {
       "path": "tools/console/tests/catalog-input.test.mjs",
-      "sha256": "1f8a1438a5e0713c476f8aebc06c001c8bfe0ff89a84b62a0f59c28d03a8a62b",
+      "sha256": "c02064d340a200b483c67e2a58955d1ed5b3f6796d32d16b2ab071f479a7bd91",
       "disposition": "presentation",
-      "reason": "Unit and render tests for catalog form input, update pre-fill, tags and the single-write behavior of the edit form.",
+      "reason": "Render test updated to the list, create, resource and edit pages, with a field-order test.",
+      "models": []
+    },
+    {
+      "path": "tools/console/tests/catalog-names.test.mjs",
+      "sha256": "2fd6628436bf499f04f26ca3d0bbdcfa9be5a601b6ba8f248a7e55b4f9baa34d",
+      "disposition": "presentation",
+      "reason": "Unit tests for label derivation, acronyms, plurals, column ranking and filtering.",
       "models": []
     },
     {
       "path": "tools/console/tests/catalog-query.test.mjs",
-      "sha256": "dfd22f3b9fe57b7dd822d1dd4f40175c7ff1b032b915f419b22d3795ad62043a",
+      "sha256": "a9f8db68a3f3aebe63ee45ccb31022dc890c7612b9d65dfa2d181621797a0936",
       "disposition": "presentation",
-      "reason": "Unit tests comparing the console Query request builder and XML decoder with botocore vectors.",
-      "models": []
-    },
-    {
-      "path": "tools/console/tests/fixtures/catalog-descriptors.json",
-      "sha256": "3d4346a94e87619aed83593a2f034db74b832e0ac8e911b4297826752c34d5e8",
-      "disposition": "presentation",
-      "reason": "Descriptor fixture generated and freshness-checked by the Go catalog tests for the console unit tests.",
+      "reason": "Module stub for the new label helper; the assertions are unchanged.",
       "models": []
     }
   ]
