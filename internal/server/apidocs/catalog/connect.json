@@ -1,0 +1,3048 @@
+{
+ "components": {
+  "schemas": {
+   "AgentStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "AgentStatusARN": {
+      "type": "string"
+     },
+     "AgentStatusId": {
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 250,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DisplayOrder": {
+      "maximum": 50,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "LastModifiedRegion": {
+      "type": "string"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "State": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "Type": {
+      "enum": [
+       "ROUTABLE",
+       "CUSTOM",
+       "OFFLINE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AgentStatusSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "Id": {
+      "type": "string"
+     },
+     "LastModifiedRegion": {
+      "type": "string"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "ROUTABLE",
+       "CUSTOM",
+       "OFFLINE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FlowQuickConnectConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "ContactFlowId": {
+      "maxLength": 500,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ContactFlowId"
+    ],
+    "type": "object"
+   },
+   "HoursOfOperation": {
+    "additionalProperties": false,
+    "properties": {
+     "Config": {
+      "items": {
+       "$ref": "#/components/schemas/HoursOfOperationConfig"
+      },
+      "maxItems": 100,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Description": {
+      "maxLength": 250,
+      "minLength": 1,
+      "type": "string"
+     },
+     "HoursOfOperationArn": {
+      "type": "string"
+     },
+     "HoursOfOperationId": {
+      "type": "string"
+     },
+     "LastModifiedRegion": {
+      "type": "string"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "TimeZone": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HoursOfOperationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "Day": {
+      "enum": [
+       "SUNDAY",
+       "MONDAY",
+       "TUESDAY",
+       "WEDNESDAY",
+       "THURSDAY",
+       "FRIDAY",
+       "SATURDAY"
+      ],
+      "type": "string"
+     },
+     "EndTime": {
+      "$ref": "#/components/schemas/HoursOfOperationTimeSlice"
+     },
+     "StartTime": {
+      "$ref": "#/components/schemas/HoursOfOperationTimeSlice"
+     }
+    },
+    "required": [
+     "Day",
+     "StartTime",
+     "EndTime"
+    ],
+    "type": "object"
+   },
+   "HoursOfOperationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "Id": {
+      "type": "string"
+     },
+     "LastModifiedRegion": {
+      "type": "string"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HoursOfOperationTimeSlice": {
+    "additionalProperties": false,
+    "properties": {
+     "Hours": {
+      "maximum": 23,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Minutes": {
+      "maximum": 59,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Hours",
+     "Minutes"
+    ],
+    "type": "object"
+   },
+   "Instance": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IdentityManagementType": {
+      "enum": [
+       "SAML",
+       "CONNECT_MANAGED",
+       "EXISTING_DIRECTORY"
+      ],
+      "type": "string"
+     },
+     "InboundCallsEnabled": {
+      "type": "boolean"
+     },
+     "InstanceAccessUrl": {
+      "type": "string"
+     },
+     "InstanceAlias": {
+      "maxLength": 45,
+      "minLength": 1,
+      "type": "string"
+     },
+     "InstanceStatus": {
+      "enum": [
+       "CREATION_IN_PROGRESS",
+       "ACTIVE",
+       "CREATION_FAILED"
+      ],
+      "type": "string"
+     },
+     "OutboundCallsEnabled": {
+      "type": "boolean"
+     },
+     "ServiceRole": {
+      "type": "string"
+     },
+     "StatusReason": {
+      "$ref": "#/components/schemas/InstanceStatusReason"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceStatusReason": {
+    "additionalProperties": false,
+    "properties": {
+     "Message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Id": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "IdentityManagementType": {
+      "enum": [
+       "SAML",
+       "CONNECT_MANAGED",
+       "EXISTING_DIRECTORY"
+      ],
+      "type": "string"
+     },
+     "InboundCallsEnabled": {
+      "type": "boolean"
+     },
+     "InstanceAccessUrl": {
+      "type": "string"
+     },
+     "InstanceAlias": {
+      "maxLength": 45,
+      "minLength": 1,
+      "type": "string"
+     },
+     "InstanceStatus": {
+      "enum": [
+       "CREATION_IN_PROGRESS",
+       "ACTIVE",
+       "CREATION_FAILED"
+      ],
+      "type": "string"
+     },
+     "OutboundCallsEnabled": {
+      "type": "boolean"
+     },
+     "ServiceRole": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OutboundCallerConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "OutboundCallerIdName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OutboundCallerIdNumberId": {
+      "type": "string"
+     },
+     "OutboundFlowId": {
+      "maxLength": 500,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OutboundEmailConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "OutboundEmailAddressId": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PhoneNumberQuickConnectConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "PhoneNumber": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "PhoneNumber"
+    ],
+    "type": "object"
+   },
+   "Queue": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 250,
+      "minLength": 1,
+      "type": "string"
+     },
+     "HoursOfOperationId": {
+      "type": "string"
+     },
+     "LastModifiedRegion": {
+      "type": "string"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "MaxContacts": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "Name": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OutboundCallerConfig": {
+      "$ref": "#/components/schemas/OutboundCallerConfig"
+     },
+     "OutboundEmailConfig": {
+      "$ref": "#/components/schemas/OutboundEmailConfig"
+     },
+     "QueueArn": {
+      "type": "string"
+     },
+     "QueueId": {
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "QueueQuickConnectConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "ContactFlowId": {
+      "maxLength": 500,
+      "type": "string"
+     },
+     "QueueId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "QueueId",
+     "ContactFlowId"
+    ],
+    "type": "object"
+   },
+   "QueueSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "Id": {
+      "type": "string"
+     },
+     "LastModifiedRegion": {
+      "type": "string"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "QueueType": {
+      "enum": [
+       "STANDARD",
+       "AGENT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "QuickConnect": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 250,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LastModifiedRegion": {
+      "type": "string"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "QuickConnectARN": {
+      "type": "string"
+     },
+     "QuickConnectConfig": {
+      "$ref": "#/components/schemas/QuickConnectConfig"
+     },
+     "QuickConnectId": {
+      "type": "string"
+     },
+     "Tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "QuickConnectConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "FlowConfig": {
+      "$ref": "#/components/schemas/FlowQuickConnectConfig"
+     },
+     "PhoneConfig": {
+      "$ref": "#/components/schemas/PhoneNumberQuickConnectConfig"
+     },
+     "QueueConfig": {
+      "$ref": "#/components/schemas/QueueQuickConnectConfig"
+     },
+     "QuickConnectType": {
+      "enum": [
+       "USER",
+       "QUEUE",
+       "PHONE_NUMBER",
+       "FLOW"
+      ],
+      "type": "string"
+     },
+     "UserConfig": {
+      "$ref": "#/components/schemas/UserQuickConnectConfig"
+     }
+    },
+    "required": [
+     "QuickConnectType"
+    ],
+    "type": "object"
+   },
+   "QuickConnectSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "Id": {
+      "type": "string"
+     },
+     "LastModifiedRegion": {
+      "type": "string"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "QuickConnectType": {
+      "enum": [
+       "USER",
+       "QUEUE",
+       "PHONE_NUMBER",
+       "FLOW"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ReplicationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "GlobalSignInEndpoint": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ReplicationStatusSummaryList": {
+      "items": {
+       "$ref": "#/components/schemas/ReplicationStatusSummary"
+      },
+      "maxItems": 11,
+      "minItems": 0,
+      "type": "array"
+     },
+     "SourceRegion": {
+      "maxLength": 31,
+      "minLength": 8,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ReplicationStatusSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "Region": {
+      "maxLength": 31,
+      "minLength": 8,
+      "type": "string"
+     },
+     "ReplicationStatus": {
+      "enum": [
+       "INSTANCE_REPLICATION_COMPLETE",
+       "INSTANCE_REPLICATION_IN_PROGRESS",
+       "INSTANCE_REPLICATION_FAILED",
+       "INSTANCE_REPLICA_DELETING",
+       "INSTANCE_REPLICATION_DELETION_FAILED",
+       "RESOURCE_REPLICATION_NOT_STARTED"
+      ],
+      "type": "string"
+     },
+     "ReplicationStatusReason": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UserQuickConnectConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "ContactFlowId": {
+      "maxLength": 500,
+      "type": "string"
+     },
+     "UserId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "UserId",
+     "ContactFlowId"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Connect Service API (2017-08-08). Every other official operation returns HTTP 501 UnknownOperationException. Instances, hours of operation, queues, quick connects and agent statuses are stored records: no contact center runs, so nothing is answered, routed, dialed, recorded or transcribed, and no access URL, service role, storage, Lambda or Lex association exists. Users, routing profiles, security profiles, contact flows, prompts, rules, phone numbers, contacts, metrics and every other official operation return UnknownOperationException with HTTP 501. Instances must use identityManagementType CONNECT_MANAGED, because SAML and existing directories need an external identity system, and DirectoryId is refused. An instance stays in status CREATION_IN_PROGRESS, as the other provisioned records of this catalog do, and reports no InstanceAccessUrl or ServiceRole. The instance alias must be unique within the Region (a simulator rule), and at most 5 instances exist per Region as a simulator limit. Deleting an instance deletes everything it owns, a cascade the official operation does not document. Hours of operation, queue, quick connect and agent status names are unique within an instance as the DuplicateResourceException documents; 100 hours of operation, queues and quick connects and 50 agent statuses per instance are simulator limits. The time zone, the hours of operation of a queue and the queue and flow IDs of a quick connect are stored without being resolved, so a queue may name hours of operation that do not exist. Queues refuse an outbound caller ID number (OutboundCallerIdNumberId), an outbound email configuration and QuickConnectIds, because no phone number or email address can be claimed and no queue-to-quick-connect association is stored; the other queue members are stored. Quick connects must be of type QUEUE with a QueueConfig, since USER, PHONE_NUMBER and FLOW destinations need users, a dialed number or a flow. Agent statuses are always of type CUSTOM and no preset status is created. List operations refuse the QueueTypes, QuickConnectTypes and AgentStatusTypes filters. Tags apply to the instance and the four child kinds by ARN (arn:aws:connect:region:account:instance/id and instance/id/queue/id, operating-hours/id, transfer-destination/id and agent-state/id).",
+  "title": "Amazon Connect (simulator catalog)",
+  "version": "2017-08-08"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/agent-status/{InstanceId}": {
+   "get": {
+    "operationId": "connectListAgentStatuses",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "AgentStatusTypes",
+      "schema": {
+       "items": {
+        "enum": [
+         "ROUTABLE",
+         "CUSTOM",
+         "OFFLINE"
+        ],
+        "type": "string"
+       },
+       "maxItems": 3,
+       "type": "array"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AgentStatusSummaryList": {
+           "items": {
+            "$ref": "#/components/schemas/AgentStatusSummary"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListAgentStatuses",
+    "tags": [
+     "Amazon Connect"
+    ]
+   },
+   "put": {
+    "operationId": "connectCreateAgentStatus",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 250,
+          "minLength": 1,
+          "type": "string"
+         },
+         "DisplayOrder": {
+          "maximum": 50,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "Name": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "State": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Name",
+         "State"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AgentStatusARN": {
+           "type": "string"
+          },
+          "AgentStatusId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateAgentStatus",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/agent-status/{InstanceId}/{AgentStatusId}": {
+   "get": {
+    "operationId": "connectDescribeAgentStatus",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AgentStatusId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AgentStatus": {
+           "$ref": "#/components/schemas/AgentStatus"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeAgentStatus",
+    "tags": [
+     "Amazon Connect"
+    ]
+   },
+   "post": {
+    "operationId": "connectUpdateAgentStatus",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AgentStatusId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 250,
+          "minLength": 0,
+          "type": "string"
+         },
+         "DisplayOrder": {
+          "maximum": 50,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "Name": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ResetOrderNumber": {
+          "type": "boolean"
+         },
+         "State": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateAgentStatus",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/hours-of-operations-summary/{InstanceId}": {
+   "get": {
+    "operationId": "connectListHoursOfOperations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "HoursOfOperationSummaryList": {
+           "items": {
+            "$ref": "#/components/schemas/HoursOfOperationSummary"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListHoursOfOperations",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/hours-of-operations/{InstanceId}": {
+   "put": {
+    "operationId": "connectCreateHoursOfOperation",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Config": {
+          "items": {
+           "$ref": "#/components/schemas/HoursOfOperationConfig"
+          },
+          "maxItems": 100,
+          "minItems": 0,
+          "type": "array"
+         },
+         "Description": {
+          "maxLength": 250,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         },
+         "TimeZone": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "Config",
+         "Name",
+         "TimeZone"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "HoursOfOperationArn": {
+           "type": "string"
+          },
+          "HoursOfOperationId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateHoursOfOperation",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/hours-of-operations/{InstanceId}/{HoursOfOperationId}": {
+   "delete": {
+    "operationId": "connectDeleteHoursOfOperation",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "HoursOfOperationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteHoursOfOperation",
+    "tags": [
+     "Amazon Connect"
+    ]
+   },
+   "get": {
+    "operationId": "connectDescribeHoursOfOperation",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "HoursOfOperationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "HoursOfOperation": {
+           "$ref": "#/components/schemas/HoursOfOperation"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeHoursOfOperation",
+    "tags": [
+     "Amazon Connect"
+    ]
+   },
+   "post": {
+    "operationId": "connectUpdateHoursOfOperation",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "HoursOfOperationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Config": {
+          "items": {
+           "$ref": "#/components/schemas/HoursOfOperationConfig"
+          },
+          "maxItems": 100,
+          "minItems": 0,
+          "type": "array"
+         },
+         "Description": {
+          "maxLength": 250,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "TimeZone": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateHoursOfOperation",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/instance": {
+   "get": {
+    "operationId": "connectListInstances",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 10,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "InstanceSummaryList": {
+           "items": {
+            "$ref": "#/components/schemas/InstanceSummary"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListInstances",
+    "tags": [
+     "Amazon Connect"
+    ]
+   },
+   "put": {
+    "operationId": "connectCreateInstance",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ClientToken": {
+          "maxLength": 500,
+          "type": "string"
+         },
+         "DirectoryId": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "IdentityManagementType": {
+          "enum": [
+           "SAML",
+           "CONNECT_MANAGED",
+           "EXISTING_DIRECTORY"
+          ],
+          "type": "string"
+         },
+         "InboundCallsEnabled": {
+          "type": "boolean"
+         },
+         "InstanceAlias": {
+          "maxLength": 45,
+          "minLength": 1,
+          "type": "string"
+         },
+         "OutboundCallsEnabled": {
+          "type": "boolean"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "IdentityManagementType",
+         "InboundCallsEnabled",
+         "OutboundCallsEnabled"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Id": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateInstance",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/instance/{InstanceId}": {
+   "delete": {
+    "operationId": "connectDeleteInstance",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clientToken",
+      "schema": {
+       "maxLength": 500,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteInstance",
+    "tags": [
+     "Amazon Connect"
+    ]
+   },
+   "get": {
+    "operationId": "connectDescribeInstance",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Instance": {
+           "$ref": "#/components/schemas/Instance"
+          },
+          "ReplicationConfiguration": {
+           "$ref": "#/components/schemas/ReplicationConfiguration"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeInstance",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/queues-summary/{InstanceId}": {
+   "get": {
+    "operationId": "connectListQueues",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "queueTypes",
+      "schema": {
+       "items": {
+        "enum": [
+         "STANDARD",
+         "AGENT"
+        ],
+        "type": "string"
+       },
+       "maxItems": 2,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "QueueSummaryList": {
+           "items": {
+            "$ref": "#/components/schemas/QueueSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListQueues",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/queues/{InstanceId}": {
+   "put": {
+    "operationId": "connectCreateQueue",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 250,
+          "minLength": 1,
+          "type": "string"
+         },
+         "HoursOfOperationId": {
+          "type": "string"
+         },
+         "MaxContacts": {
+          "minimum": 0,
+          "type": "integer"
+         },
+         "Name": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "OutboundCallerConfig": {
+          "$ref": "#/components/schemas/OutboundCallerConfig"
+         },
+         "OutboundEmailConfig": {
+          "$ref": "#/components/schemas/OutboundEmailConfig"
+         },
+         "QuickConnectIds": {
+          "items": {
+           "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "type": "array"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "HoursOfOperationId",
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "QueueArn": {
+           "type": "string"
+          },
+          "QueueId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateQueue",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/queues/{InstanceId}/{QueueId}": {
+   "delete": {
+    "operationId": "connectDeleteQueue",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "QueueId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteQueue",
+    "tags": [
+     "Amazon Connect"
+    ]
+   },
+   "get": {
+    "operationId": "connectDescribeQueue",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "QueueId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Queue": {
+           "$ref": "#/components/schemas/Queue"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeQueue",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/queues/{InstanceId}/{QueueId}/hours-of-operation": {
+   "post": {
+    "operationId": "connectUpdateQueueHoursOfOperation",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "QueueId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "HoursOfOperationId": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "HoursOfOperationId"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateQueueHoursOfOperation",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/queues/{InstanceId}/{QueueId}/max-contacts": {
+   "post": {
+    "operationId": "connectUpdateQueueMaxContacts",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "QueueId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxContacts": {
+          "minimum": 0,
+          "type": "integer"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateQueueMaxContacts",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/queues/{InstanceId}/{QueueId}/name": {
+   "post": {
+    "operationId": "connectUpdateQueueName",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "QueueId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 250,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateQueueName",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/queues/{InstanceId}/{QueueId}/status": {
+   "post": {
+    "operationId": "connectUpdateQueueStatus",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "QueueId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Status": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "Status"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateQueueStatus",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/quick-connects/{InstanceId}": {
+   "get": {
+    "operationId": "connectListQuickConnects",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "QuickConnectTypes",
+      "schema": {
+       "items": {
+        "enum": [
+         "USER",
+         "QUEUE",
+         "PHONE_NUMBER",
+         "FLOW"
+        ],
+        "type": "string"
+       },
+       "maxItems": 4,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "QuickConnectSummaryList": {
+           "items": {
+            "$ref": "#/components/schemas/QuickConnectSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListQuickConnects",
+    "tags": [
+     "Amazon Connect"
+    ]
+   },
+   "put": {
+    "operationId": "connectCreateQuickConnect",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 250,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "QuickConnectConfig": {
+          "$ref": "#/components/schemas/QuickConnectConfig"
+         },
+         "Tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "Name",
+         "QuickConnectConfig"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "QuickConnectARN": {
+           "type": "string"
+          },
+          "QuickConnectId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateQuickConnect",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/quick-connects/{InstanceId}/{QuickConnectId}": {
+   "delete": {
+    "operationId": "connectDeleteQuickConnect",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "QuickConnectId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteQuickConnect",
+    "tags": [
+     "Amazon Connect"
+    ]
+   },
+   "get": {
+    "operationId": "connectDescribeQuickConnect",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "QuickConnectId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "QuickConnect": {
+           "$ref": "#/components/schemas/QuickConnect"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeQuickConnect",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/quick-connects/{InstanceId}/{QuickConnectId}/config": {
+   "post": {
+    "operationId": "connectUpdateQuickConnectConfig",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "QuickConnectId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "QuickConnectConfig": {
+          "$ref": "#/components/schemas/QuickConnectConfig"
+         }
+        },
+        "required": [
+         "QuickConnectConfig"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateQuickConnectConfig",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/quick-connects/{InstanceId}/{QuickConnectId}/name": {
+   "post": {
+    "operationId": "connectUpdateQuickConnectName",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "InstanceId",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "QuickConnectId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Description": {
+          "maxLength": 250,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateQuickConnectName",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "connectUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Connect"
+    ]
+   },
+   "get": {
+    "operationId": "connectListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 1,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Connect"
+    ]
+   },
+   "post": {
+    "operationId": "connectTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "connect"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 1,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Connect"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Connect Service API (2017-08-08). Every other official operation returns HTTP 501 UnknownOperationException. Instances, hours of operation, queues, quick connects and agent statuses are stored records: no contact center runs, so nothing is answered, routed, dialed, recorded or transcribed, and no access URL, service role, storage, Lambda or Lex association exists. Users, routing profiles, security profiles, contact flows, prompts, rules, phone numbers, contacts, metrics and every other official operation return UnknownOperationException with HTTP 501. Instances must use identityManagementType CONNECT_MANAGED, because SAML and existing directories need an external identity system, and DirectoryId is refused. An instance stays in status CREATION_IN_PROGRESS, as the other provisioned records of this catalog do, and reports no InstanceAccessUrl or ServiceRole. The instance alias must be unique within the Region (a simulator rule), and at most 5 instances exist per Region as a simulator limit. Deleting an instance deletes everything it owns, a cascade the official operation does not document. Hours of operation, queue, quick connect and agent status names are unique within an instance as the DuplicateResourceException documents; 100 hours of operation, queues and quick connects and 50 agent statuses per instance are simulator limits. The time zone, the hours of operation of a queue and the queue and flow IDs of a quick connect are stored without being resolved, so a queue may name hours of operation that do not exist. Queues refuse an outbound caller ID number (OutboundCallerIdNumberId), an outbound email configuration and QuickConnectIds, because no phone number or email address can be claimed and no queue-to-quick-connect association is stored; the other queue members are stored. Quick connects must be of type QUEUE with a QueueConfig, since USER, PHONE_NUMBER and FLOW destinations need users, a dialed number or a flow. Agent statuses are always of type CUSTOM and no preset status is created. List operations refuse the QueueTypes, QuickConnectTypes and AgentStatusTypes filters. Tags apply to the instance and the four child kinds by ARN (arn:aws:connect:region:account:instance/id and instance/id/queue/id, operating-hours/id, transfer-destination/id and agent-state/id).",
+   "name": "Amazon Connect"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/connect/2017-08-08/service-2.json",
+  "sha256": "bb5f9f56f3026681897464619d4add905aef27dcad8a483dd440541ef1212569",
+  "license": "Apache-2.0"
+ }
+}

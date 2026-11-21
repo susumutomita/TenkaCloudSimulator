@@ -1,0 +1,27 @@
+{
+ "client": "outposts",
+ "steps": [
+  {"op": "create_site", "args": {"Name": "fixture site", "Description": "fixture lab", "Tags": {"team": "a"}, "RackPhysicalProperties": {"PowerDrawKva": "POWER_10_KVA"}}, "save": {"site": "Site.SiteId", "siteArn": "Site.SiteArn"}},
+  {"op": "get_site", "args": {"SiteId": "${site}"}, "expect": {"Site.Name": "fixture site", "Site.Tags": {"team": "a"}, "Site.RackPhysicalProperties.PowerDrawKva": "POWER_10_KVA"}},
+  {"op": "update_site", "args": {"SiteId": "${site}", "Name": "fixture site renamed", "Notes": "fixture notes"}},
+  {"op": "create_site", "args": {"Name": "fixture address", "OperatingAddress": {"ContactName": "Fixture", "ContactPhoneNumber": "0", "AddressLine1": "1", "City": "Tokyo", "StateOrRegion": "Tokyo", "PostalCode": "1", "CountryCode": "JP"}}, "error": "ValidationException", "status": 400},
+  {"op": "create_outpost", "args": {"Name": "fixture outpost", "SiteId": "${site}", "AvailabilityZoneId": "use1-az1", "SupportedHardwareType": "RACK", "Tags": {"a": "b"}}, "save": {"outpost": "Outpost.OutpostId", "outpostArn": "Outpost.OutpostArn"}},
+  {"op": "get_outpost", "args": {"OutpostId": "${outpost}"}, "expect": {"Outpost.LifeCycleStatus": "REQUESTED", "Outpost.SiteId": "${site}"}},
+  {"op": "update_outpost", "args": {"OutpostId": "${outpost}", "Description": "fixture outpost described"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${outpostArn}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${outpostArn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${outpostArn}"}, "expect": {"Tags": {"a": "b"}}},
+  {"op": "get_site", "args": {"SiteId": "os-00000000000000000"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "get_site", "args": {"SiteId": "os-00000000000000000"}, "error": "NotFoundException", "status": 404}
+ ],
+ "after_restart": [
+  {"op": "get_site", "args": {"SiteId": "${site}"}, "expect": {"Site.Name": "fixture site renamed", "Site.Notes": "fixture notes"}},
+  {"op": "get_outpost", "args": {"OutpostId": "${outpost}"}, "expect": {"Outpost.Description": "fixture outpost described"}}
+ ],
+ "cleanup": [
+  {"op": "delete_outpost", "args": {"OutpostId": "${outpost}"}},
+  {"op": "delete_site", "args": {"SiteId": "${site}"}}
+ ]
+}

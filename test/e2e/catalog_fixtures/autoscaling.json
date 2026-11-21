@@ -1,0 +1,29 @@
+{
+ "client": "autoscaling",
+ "denied": "AccessDenied",
+ "steps": [
+  {"op": "create_launch_configuration", "args": {"LaunchConfigurationName": "fixture-web", "ImageId": "ami-0123456789abcdef0", "InstanceType": "t3.micro", "KeyName": "ops", "SecurityGroups": ["sg-0a1b2c3d", "sg-4e5f6a7b"], "IamInstanceProfile": "fixture-profile", "InstanceMonitoring": {"Enabled": false}, "EbsOptimized": true, "PlacementTenancy": "dedicated", "SpotPrice": "0.05", "UserData": "#!/bin/sh\necho hello\n", "MetadataOptions": {"HttpTokens": "required", "HttpPutResponseHopLimit": 2, "HttpEndpoint": "enabled"}, "BlockDeviceMappings": [{"DeviceName": "/dev/sda1", "Ebs": {"VolumeSize": 30, "VolumeType": "gp3", "Iops": 3000, "Throughput": 125, "DeleteOnTermination": true}}, {"DeviceName": "/dev/sdb", "VirtualName": "ephemeral0"}, {"DeviceName": "/dev/sdc", "NoDevice": true}]}},
+  {"op": "create_launch_configuration", "args": {"LaunchConfigurationName": "fixture-plain", "ImageId": "ami-0123456789abcdef0", "InstanceType": "t3.small"}},
+  {"op": "describe_launch_configurations", "args": {"LaunchConfigurationNames": ["fixture-web"]}, "expect": {"LaunchConfigurations#count": 1, "LaunchConfigurations[0].LaunchConfigurationName": "fixture-web", "LaunchConfigurations[0].InstanceType": "t3.micro", "LaunchConfigurations[0].SecurityGroups#count": 2, "LaunchConfigurations[0].BlockDeviceMappings#count": 3, "LaunchConfigurations[0].InstanceMonitoring.Enabled": false, "LaunchConfigurations[0].MetadataOptions.HttpTokens": "required", "LaunchConfigurations[0].PlacementTenancy": "dedicated"}},
+  {"op": "describe_launch_configurations", "args": {}, "expect": {"LaunchConfigurations#count": 2, "LaunchConfigurations[1].InstanceMonitoring.Enabled": true, "LaunchConfigurations[1].EbsOptimized": false}},
+  {"op": "describe_launch_configurations", "args": {"MaxRecords": 1}, "expect": {"LaunchConfigurations#count": 1}},
+  {"op": "create_launch_configuration", "args": {"LaunchConfigurationName": "fixture-web", "ImageId": "ami-0123456789abcdef0", "InstanceType": "t3.micro"}, "error": "AlreadyExists", "status": 400},
+  {"op": "create_launch_configuration", "args": {"LaunchConfigurationName": "fixture-bad", "ImageId": "ami-0123456789abcdef0", "InstanceType": "t3.micro", "PlacementTenancy": "host"}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "create_launch_configuration", "args": {"LaunchConfigurationName": "fixture-bad", "InstanceId": "i-0123456789abcdef0"}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "create_launch_configuration", "args": {"LaunchConfigurationName": "fixture-bad", "ImageId": "ami-0123456789abcdef0", "InstanceType": "t3.micro", "BlockDeviceMappings": [{"DeviceName": "/dev/sdb", "Ebs": {"VolumeSize": 8, "VolumeType": "io1"}}]}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "describe_launch_configurations", "args": {"LaunchConfigurationNames": ["fixture-missing"]}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "delete_launch_configuration", "args": {"LaunchConfigurationName": "fixture-missing"}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "create_auto_scaling_group", "args": {"AutoScalingGroupName": "fixture-group", "LaunchConfigurationName": "fixture-web", "MinSize": 0, "MaxSize": 1, "AvailabilityZones": ["us-east-1a"]}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "describe_launch_configurations", "args": {}, "expect": {"LaunchConfigurations#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_launch_configurations", "args": {"LaunchConfigurationNames": ["fixture-web"]}, "expect": {"LaunchConfigurations[0].ImageId": "ami-0123456789abcdef0", "LaunchConfigurations[0].BlockDeviceMappings[0].Ebs.Iops": 3000, "LaunchConfigurations[0].UserData": "IyEvYmluL3NoCmVjaG8gaGVsbG8K"}}
+ ],
+ "cleanup": [
+  {"op": "delete_launch_configuration", "args": {"LaunchConfigurationName": "fixture-web"}},
+  {"op": "delete_launch_configuration", "args": {"LaunchConfigurationName": "fixture-plain"}},
+  {"op": "describe_launch_configurations", "args": {}, "expect": {"LaunchConfigurations#count": 0}}
+ ]
+}

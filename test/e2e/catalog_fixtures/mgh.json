@@ -1,0 +1,24 @@
+{
+ "client": "mgh",
+ "steps": [
+  {"op": "create_progress_update_stream", "args": {"ProgressUpdateStreamName": "fixture-tool"}},
+  {"op": "list_progress_update_streams", "args": {}, "expect": {"ProgressUpdateStreamSummaryList#count": 1, "ProgressUpdateStreamSummaryList[0].ProgressUpdateStreamName": "fixture-tool"}},
+  {"op": "import_migration_task", "args": {"ProgressUpdateStream": "fixture-tool", "MigrationTaskName": "web-1"}},
+  {"op": "describe_migration_task", "args": {"ProgressUpdateStream": "fixture-tool", "MigrationTaskName": "web-1"}, "expect": {"MigrationTask.MigrationTaskName": "web-1", "MigrationTask.ProgressUpdateStream": "fixture-tool"}},
+  {"op": "notify_migration_task_state", "args": {"ProgressUpdateStream": "fixture-tool", "MigrationTaskName": "web-1", "UpdateDateTime": 1790000000, "NextUpdateSeconds": 60, "Task": {"Status": "IN_PROGRESS", "ProgressPercent": 40, "StatusDetail": "copying"}}},
+  {"op": "describe_migration_task", "args": {"ProgressUpdateStream": "fixture-tool", "MigrationTaskName": "web-1"}, "expect": {"MigrationTask.Task.Status": "IN_PROGRESS", "MigrationTask.Task.StatusDetail": "copying"}},
+  {"op": "create_progress_update_stream", "args": {"ProgressUpdateStreamName": "fixture-tool"}, "error": "InvalidInputException"},
+  {"op": "import_migration_task", "args": {"ProgressUpdateStream": "missing-stream", "MigrationTaskName": "web-1"}, "error": "ResourceNotFoundException"},
+  {"op": "describe_migration_task", "args": {"ProgressUpdateStream": "fixture-tool", "MigrationTaskName": "missing"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_progress_update_streams", "args": {}, "expect": {"ProgressUpdateStreamSummaryList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_migration_task", "args": {"ProgressUpdateStream": "fixture-tool", "MigrationTaskName": "web-1"}, "expect": {"MigrationTask.Task.Status": "IN_PROGRESS"}}
+ ],
+ "cleanup": [
+  {"op": "delete_progress_update_stream", "args": {"ProgressUpdateStreamName": "fixture-tool"}},
+  {"op": "list_progress_update_streams", "args": {}, "expect": {"ProgressUpdateStreamSummaryList#count": 0}}
+ ]
+}

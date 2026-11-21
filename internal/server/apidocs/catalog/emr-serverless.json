@@ -1,0 +1,1317 @@
+{
+ "components": {
+  "schemas": {
+   "Application": {
+    "additionalProperties": false,
+    "properties": {
+     "applicationId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "architecture": {
+      "enum": [
+       "ARM64",
+       "X86_64"
+      ],
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 1024,
+      "minLength": 60,
+      "type": "string"
+     },
+     "autoStartConfiguration": {
+      "$ref": "#/components/schemas/AutoStartConfig"
+     },
+     "autoStopConfiguration": {
+      "$ref": "#/components/schemas/AutoStopConfig"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "identityCenterConfiguration": {
+      "$ref": "#/components/schemas/IdentityCenterConfiguration"
+     },
+     "imageConfiguration": {
+      "$ref": "#/components/schemas/ImageConfiguration"
+     },
+     "initialCapacity": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/InitialCapacityConfig"
+      },
+      "maxProperties": 10,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "interactiveConfiguration": {
+      "$ref": "#/components/schemas/InteractiveConfiguration"
+     },
+     "maximumCapacity": {
+      "$ref": "#/components/schemas/MaximumAllowedResources"
+     },
+     "monitoringConfiguration": {
+      "$ref": "#/components/schemas/MonitoringConfiguration"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "networkConfiguration": {
+      "$ref": "#/components/schemas/NetworkConfiguration"
+     },
+     "releaseLabel": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "runtimeConfiguration": {
+      "items": {
+       "$ref": "#/components/schemas/Configuration"
+      },
+      "maxItems": 100,
+      "minItems": 0,
+      "type": "array"
+     },
+     "schedulerConfiguration": {
+      "$ref": "#/components/schemas/SchedulerConfiguration"
+     },
+     "state": {
+      "enum": [
+       "CREATING",
+       "CREATED",
+       "STARTING",
+       "STARTED",
+       "STOPPING",
+       "STOPPED",
+       "TERMINATED"
+      ],
+      "type": "string"
+     },
+     "stateDetails": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "type": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "workerTypeSpecifications": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/WorkerTypeSpecification"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "applicationId",
+     "arn",
+     "releaseLabel",
+     "type",
+     "state",
+     "createdAt",
+     "updatedAt"
+    ],
+    "type": "object"
+   },
+   "ApplicationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "architecture": {
+      "enum": [
+       "ARM64",
+       "X86_64"
+      ],
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 1024,
+      "minLength": 60,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "releaseLabel": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "CREATING",
+       "CREATED",
+       "STARTING",
+       "STARTED",
+       "STOPPING",
+       "STOPPED",
+       "TERMINATED"
+      ],
+      "type": "string"
+     },
+     "stateDetails": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "id",
+     "arn",
+     "releaseLabel",
+     "type",
+     "state",
+     "createdAt",
+     "updatedAt"
+    ],
+    "type": "object"
+   },
+   "AutoStartConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "AutoStopConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "idleTimeoutMinutes": {
+      "maximum": 10080,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "CloudWatchLoggingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "encryptionKeyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "logGroupName": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "logStreamNamePrefix": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "logTypes": {
+      "additionalProperties": {
+       "items": {
+        "maxLength": 50,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 5,
+       "minItems": 1,
+       "type": "array"
+      },
+      "maxProperties": 4,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "enabled"
+    ],
+    "type": "object"
+   },
+   "Configuration": {
+    "additionalProperties": false,
+    "properties": {
+     "classification": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "configurations": {
+      "items": {
+       "$ref": "#/components/schemas/Configuration"
+      },
+      "maxItems": 100,
+      "minItems": 0,
+      "type": "array"
+     },
+     "properties": {
+      "additionalProperties": {
+       "maxLength": 1024,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 100,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "classification"
+    ],
+    "type": "object"
+   },
+   "IdentityCenterConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "identityCenterApplicationArn": {
+      "type": "string"
+     },
+     "identityCenterInstanceArn": {
+      "maxLength": 1024,
+      "minLength": 10,
+      "type": "string"
+     },
+     "userBackgroundSessionsEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "IdentityCenterConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "identityCenterInstanceArn": {
+      "maxLength": 1024,
+      "minLength": 10,
+      "type": "string"
+     },
+     "userBackgroundSessionsEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ImageConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "imageUri": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "resolvedImageDigest": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "imageUri"
+    ],
+    "type": "object"
+   },
+   "ImageConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "imageUri": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InitialCapacityConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "workerConfiguration": {
+      "$ref": "#/components/schemas/WorkerResourceConfig"
+     },
+     "workerCount": {
+      "maximum": 1000000,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "workerCount"
+    ],
+    "type": "object"
+   },
+   "InteractiveConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "livyEndpointEnabled": {
+      "type": "boolean"
+     },
+     "studioEnabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ManagedPersistenceMonitoringConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "encryptionKeyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MaximumAllowedResources": {
+    "additionalProperties": false,
+    "properties": {
+     "cpu": {
+      "maxLength": 15,
+      "minLength": 1,
+      "type": "string"
+     },
+     "disk": {
+      "maxLength": 15,
+      "minLength": 1,
+      "type": "string"
+     },
+     "memory": {
+      "maxLength": 15,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "cpu",
+     "memory"
+    ],
+    "type": "object"
+   },
+   "MonitoringConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchLoggingConfiguration": {
+      "$ref": "#/components/schemas/CloudWatchLoggingConfiguration"
+     },
+     "managedPersistenceMonitoringConfiguration": {
+      "$ref": "#/components/schemas/ManagedPersistenceMonitoringConfiguration"
+     },
+     "prometheusMonitoringConfiguration": {
+      "$ref": "#/components/schemas/PrometheusMonitoringConfiguration"
+     },
+     "s3MonitoringConfiguration": {
+      "$ref": "#/components/schemas/S3MonitoringConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "securityGroupIds": {
+      "items": {
+       "maxLength": 32,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 0,
+      "type": "array"
+     },
+     "subnetIds": {
+      "items": {
+       "maxLength": 32,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 16,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PrometheusMonitoringConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "remoteWriteUrl": {
+      "maxLength": 10280,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3MonitoringConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "encryptionKeyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "logUri": {
+      "maxLength": 10280,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SchedulerConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "maxConcurrentRuns": {
+      "type": "integer"
+     },
+     "queueTimeoutMinutes": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "WorkerResourceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "cpu": {
+      "maxLength": 15,
+      "minLength": 1,
+      "type": "string"
+     },
+     "disk": {
+      "maxLength": 15,
+      "minLength": 1,
+      "type": "string"
+     },
+     "diskType": {
+      "type": "string"
+     },
+     "memory": {
+      "maxLength": 15,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "cpu",
+     "memory"
+    ],
+    "type": "object"
+   },
+   "WorkerTypeSpecification": {
+    "additionalProperties": false,
+    "properties": {
+     "imageConfiguration": {
+      "$ref": "#/components/schemas/ImageConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "WorkerTypeSpecificationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "imageConfiguration": {
+      "$ref": "#/components/schemas/ImageConfigurationInput"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official EMR Serverless API (2021-07-13). Every other official operation returns HTTP 501 UnknownOperationException. Applications are stored records: no capacity is provisioned, no Spark or Hive driver exists and no job runs. An application stays CREATED, never starts or stops, and has no stateDetails. StartApplication, StopApplication, StartJobRun, CancelJobRun, job run listings, GetDashboardForJobRun and every other official operation return UnknownOperationException with HTTP 501. The release label, network configuration, image, runtime configuration, monitoring settings, KMS key and IAM Identity Center application are stored without being resolved or checked, and the application type is stored as given. UpdateApplication replaces the supplied members and keeps the rest, and an application is deleted in any state. The limit of 50 applications per Region is local, and tags are stored from CreateApplication and by TagResource on the ARN.",
+  "title": "Amazon EMR Serverless (simulator catalog)",
+  "version": "2021-07-13"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/applications": {
+   "get": {
+    "operationId": "emr-serverlessListApplications",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-serverless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "states",
+      "schema": {
+       "items": {
+        "enum": [
+         "CREATING",
+         "CREATED",
+         "STARTING",
+         "STARTED",
+         "STOPPING",
+         "STOPPED",
+         "TERMINATED"
+        ],
+        "type": "string"
+       },
+       "maxItems": 7,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applications": {
+           "items": {
+            "$ref": "#/components/schemas/ApplicationSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListApplications",
+    "tags": [
+     "Amazon EMR Serverless"
+    ]
+   },
+   "post": {
+    "operationId": "emr-serverlessCreateApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-serverless"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "architecture": {
+          "enum": [
+           "ARM64",
+           "X86_64"
+          ],
+          "type": "string"
+         },
+         "autoStartConfiguration": {
+          "$ref": "#/components/schemas/AutoStartConfig"
+         },
+         "autoStopConfiguration": {
+          "$ref": "#/components/schemas/AutoStopConfig"
+         },
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "identityCenterConfiguration": {
+          "$ref": "#/components/schemas/IdentityCenterConfigurationInput"
+         },
+         "imageConfiguration": {
+          "$ref": "#/components/schemas/ImageConfigurationInput"
+         },
+         "initialCapacity": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/InitialCapacityConfig"
+          },
+          "maxProperties": 10,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "interactiveConfiguration": {
+          "$ref": "#/components/schemas/InteractiveConfiguration"
+         },
+         "maximumCapacity": {
+          "$ref": "#/components/schemas/MaximumAllowedResources"
+         },
+         "monitoringConfiguration": {
+          "$ref": "#/components/schemas/MonitoringConfiguration"
+         },
+         "name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "networkConfiguration": {
+          "$ref": "#/components/schemas/NetworkConfiguration"
+         },
+         "releaseLabel": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "runtimeConfiguration": {
+          "items": {
+           "$ref": "#/components/schemas/Configuration"
+          },
+          "maxItems": 100,
+          "minItems": 0,
+          "type": "array"
+         },
+         "schedulerConfiguration": {
+          "$ref": "#/components/schemas/SchedulerConfiguration"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "type": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "workerTypeSpecifications": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/WorkerTypeSpecificationInput"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "clientToken",
+         "releaseLabel",
+         "type"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applicationId": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "arn": {
+           "maxLength": 1024,
+           "minLength": 60,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateApplication",
+    "tags": [
+     "Amazon EMR Serverless"
+    ]
+   }
+  },
+  "/applications/{applicationId}": {
+   "delete": {
+    "operationId": "emr-serverlessDeleteApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-serverless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteApplication",
+    "tags": [
+     "Amazon EMR Serverless"
+    ]
+   },
+   "get": {
+    "operationId": "emr-serverlessGetApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-serverless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "application": {
+           "$ref": "#/components/schemas/Application"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetApplication",
+    "tags": [
+     "Amazon EMR Serverless"
+    ]
+   },
+   "patch": {
+    "operationId": "emr-serverlessUpdateApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-serverless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "architecture": {
+          "enum": [
+           "ARM64",
+           "X86_64"
+          ],
+          "type": "string"
+         },
+         "autoStartConfiguration": {
+          "$ref": "#/components/schemas/AutoStartConfig"
+         },
+         "autoStopConfiguration": {
+          "$ref": "#/components/schemas/AutoStopConfig"
+         },
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "identityCenterConfiguration": {
+          "$ref": "#/components/schemas/IdentityCenterConfigurationInput"
+         },
+         "imageConfiguration": {
+          "$ref": "#/components/schemas/ImageConfigurationInput"
+         },
+         "initialCapacity": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/InitialCapacityConfig"
+          },
+          "maxProperties": 10,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "interactiveConfiguration": {
+          "$ref": "#/components/schemas/InteractiveConfiguration"
+         },
+         "maximumCapacity": {
+          "$ref": "#/components/schemas/MaximumAllowedResources"
+         },
+         "monitoringConfiguration": {
+          "$ref": "#/components/schemas/MonitoringConfiguration"
+         },
+         "networkConfiguration": {
+          "$ref": "#/components/schemas/NetworkConfiguration"
+         },
+         "releaseLabel": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "runtimeConfiguration": {
+          "items": {
+           "$ref": "#/components/schemas/Configuration"
+          },
+          "maxItems": 100,
+          "minItems": 0,
+          "type": "array"
+         },
+         "schedulerConfiguration": {
+          "$ref": "#/components/schemas/SchedulerConfiguration"
+         },
+         "workerTypeSpecifications": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/WorkerTypeSpecificationInput"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "clientToken"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "application": {
+           "$ref": "#/components/schemas/Application"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateApplication",
+    "tags": [
+     "Amazon EMR Serverless"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "emr-serverlessUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-serverless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 60,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon EMR Serverless"
+    ]
+   },
+   "get": {
+    "operationId": "emr-serverlessListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-serverless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 60,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon EMR Serverless"
+    ]
+   },
+   "post": {
+    "operationId": "emr-serverlessTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "emr-serverless"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 60,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon EMR Serverless"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official EMR Serverless API (2021-07-13). Every other official operation returns HTTP 501 UnknownOperationException. Applications are stored records: no capacity is provisioned, no Spark or Hive driver exists and no job runs. An application stays CREATED, never starts or stops, and has no stateDetails. StartApplication, StopApplication, StartJobRun, CancelJobRun, job run listings, GetDashboardForJobRun and every other official operation return UnknownOperationException with HTTP 501. The release label, network configuration, image, runtime configuration, monitoring settings, KMS key and IAM Identity Center application are stored without being resolved or checked, and the application type is stored as given. UpdateApplication replaces the supplied members and keeps the rest, and an application is deleted in any state. The limit of 50 applications per Region is local, and tags are stored from CreateApplication and by TagResource on the ARN.",
+   "name": "Amazon EMR Serverless"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/emr-serverless/2021-07-13/service-2.json",
+  "sha256": "eaffcdab645ac378a54a3fe2f148fa8e76bf308d4d6f902b06d5f28778f5616d",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,34 @@
+{
+ "client": "chime-sdk-voice",
+ "steps": [
+  {"op": "create_voice_connector", "args": {"Name": "fixture-connector", "RequireEncryption": true, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"connector": "VoiceConnector.VoiceConnectorId", "connector_arn": "VoiceConnector.VoiceConnectorArn"}, "expect": {"VoiceConnector.AwsRegion": "us-east-1"}},
+  {"op": "get_voice_connector", "args": {"VoiceConnectorId": "${connector}"}, "expect": {"VoiceConnector.Name": "fixture-connector", "VoiceConnector.RequireEncryption": true}},
+  {"op": "update_voice_connector", "args": {"VoiceConnectorId": "${connector}", "Name": "fixture-connector-2", "RequireEncryption": false}, "expect": {"VoiceConnector.Name": "fixture-connector-2"}},
+  {"op": "list_voice_connectors", "args": {}, "expect": {"VoiceConnectors#count": 1}},
+  {"op": "create_voice_connector_group", "args": {"Name": "fixture-group", "VoiceConnectorItems": [{"VoiceConnectorId": "${connector}", "Priority": 1}]}, "save": {"group": "VoiceConnectorGroup.VoiceConnectorGroupId"}},
+  {"op": "get_voice_connector_group", "args": {"VoiceConnectorGroupId": "${group}"}, "expect": {"VoiceConnectorGroup.Name": "fixture-group"}},
+  {"op": "update_voice_connector_group", "args": {"VoiceConnectorGroupId": "${group}", "Name": "fixture-group-2", "VoiceConnectorItems": []}, "expect": {"VoiceConnectorGroup.Name": "fixture-group-2"}},
+  {"op": "list_voice_connector_groups", "args": {}, "expect": {"VoiceConnectorGroups#count": 1}},
+  {"op": "create_sip_media_application", "args": {"AwsRegion": "us-east-1", "Name": "fixture-sma", "Endpoints": [{"LambdaArn": "arn:aws:lambda:us-east-1:000000000000:function:fixture-handler"}]}, "save": {"sma": "SipMediaApplication.SipMediaApplicationId", "sma_arn": "SipMediaApplication.SipMediaApplicationArn"}},
+  {"op": "get_sip_media_application", "args": {"SipMediaApplicationId": "${sma}"}, "expect": {"SipMediaApplication.Name": "fixture-sma"}},
+  {"op": "update_sip_media_application", "args": {"SipMediaApplicationId": "${sma}", "Name": "fixture-sma-2"}, "expect": {"SipMediaApplication.Name": "fixture-sma-2"}},
+  {"op": "list_sip_media_applications", "args": {}, "expect": {"SipMediaApplications#count": 1}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${sma_arn}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${sma_arn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${connector_arn}"}, "expect": {"Tags#count": 1}},
+  {"op": "create_voice_connector", "args": {"Name": "fixture-bad", "RequireEncryption": true, "AwsRegion": "mars-1"}, "error": "BadRequestException"},
+  {"op": "get_voice_connector", "args": {"VoiceConnectorId": "missing"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_voice_connectors", "args": {}, "expect": {"VoiceConnectors#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_voice_connector_group", "args": {"VoiceConnectorGroupId": "${group}"}, "expect": {"VoiceConnectorGroup.Name": "fixture-group-2"}}
+ ],
+ "cleanup": [
+  {"op": "delete_sip_media_application", "args": {"SipMediaApplicationId": "${sma}"}},
+  {"op": "delete_voice_connector_group", "args": {"VoiceConnectorGroupId": "${group}"}},
+  {"op": "delete_voice_connector", "args": {"VoiceConnectorId": "${connector}"}},
+  {"op": "list_voice_connectors", "args": {}, "expect": {"VoiceConnectors#count": 0}}
+ ]
+}

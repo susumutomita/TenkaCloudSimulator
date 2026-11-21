@@ -1,0 +1,28 @@
+{
+ "client": "m2",
+ "steps": [
+  {"op": "create_application", "args": {"name": "payroll", "engineType": "bluage", "description": "fixture application", "roleArn": "arn:aws:iam::000000000000:role/migration-fixture", "definition": {"content": "{\"template-version\":\"2.0\"}"}, "tags": {"team": "a"}}, "save": {"app": "applicationId", "arn": "applicationArn"}},
+  {"op": "get_application", "args": {"applicationId": "${app}"}, "expect": {"name": "payroll", "status": "Created", "engineType": "bluage", "latestVersion.applicationVersion": 1, "tags": {"team": "a"}}},
+  {"op": "list_applications", "args": {}, "expect": {"applications#count": 1, "applications[0].applicationId": "${app}"}},
+  {"op": "list_applications", "args": {"environmentId": "fixture-env"}, "expect": {"applications#count": 0}},
+  {"op": "update_application", "args": {"applicationId": "${app}", "currentApplicationVersion": 1, "description": "second version", "definition": {"s3Location": "s3://fixture-bucket/definition.json"}}, "expect": {"applicationVersion": 2}},
+  {"op": "get_application", "args": {"applicationId": "${app}"}, "expect": {"description": "second version", "latestVersion.applicationVersion": 2}},
+  {"op": "update_application", "args": {"applicationId": "${app}", "currentApplicationVersion": 1, "description": "stale"}, "error": "ConflictException", "status": 409},
+  {"op": "tag_resource", "args": {"resourceArn": "${arn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${arn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${arn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "create_application", "args": {"name": "payroll", "engineType": "bluage", "definition": {"content": "{}"}}, "error": "ConflictException", "status": 409},
+  {"op": "create_application", "args": {"name": "both", "engineType": "bluage", "definition": {"content": "[1]"}}, "error": "ValidationException"},
+  {"op": "get_application", "args": {"applicationId": "missing01"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_applications", "args": {}, "expect": {"applications#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_application", "args": {"applicationId": "${app}"}, "expect": {"description": "second version", "latestVersion.applicationVersion": 2}}
+ ],
+ "cleanup": [
+  {"op": "delete_application", "args": {"applicationId": "${app}"}},
+  {"op": "list_applications", "args": {}, "expect": {"applications#count": 0}}
+ ]
+}

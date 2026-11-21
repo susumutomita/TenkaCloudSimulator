@@ -1,0 +1,39 @@
+{
+ "client": "workmail",
+ "steps": [
+  {"op": "create_organization", "args": {"Alias": "fixture-org", "EnableInteroperability": false}, "save": {"org": "OrganizationId"}},
+  {"op": "describe_organization", "args": {"OrganizationId": "${org}"}, "save": {"org_arn": "ARN"}, "expect": {"Alias": "fixture-org", "State": "Creating"}},
+  {"op": "list_organizations", "args": {}, "expect": {"OrganizationSummaries#count": 1}},
+  {"op": "create_impersonation_role", "args": {"OrganizationId": "${org}", "Name": "audit", "Type": "READ_ONLY", "Rules": [{"ImpersonationRuleId": "all", "Effect": "ALLOW"}]}, "save": {"role": "ImpersonationRoleId"}},
+  {"op": "get_impersonation_role", "args": {"OrganizationId": "${org}", "ImpersonationRoleId": "${role}"}, "expect": {"Name": "audit", "Type": "READ_ONLY"}},
+  {"op": "update_impersonation_role", "args": {"OrganizationId": "${org}", "ImpersonationRoleId": "${role}", "Name": "audit-2", "Type": "READ_ONLY", "Rules": []}},
+  {"op": "list_impersonation_roles", "args": {"OrganizationId": "${org}"}, "expect": {"Roles#count": 1}},
+  {"op": "create_mobile_device_access_rule", "args": {"OrganizationId": "${org}", "Name": "block-old", "Effect": "DENY", "DeviceTypes": ["iPhone"]}, "save": {"mobile": "MobileDeviceAccessRuleId"}},
+  {"op": "update_mobile_device_access_rule", "args": {"OrganizationId": "${org}", "MobileDeviceAccessRuleId": "${mobile}", "Name": "block-old-2", "Effect": "DENY"}},
+  {"op": "list_mobile_device_access_rules", "args": {"OrganizationId": "${org}"}, "expect": {"Rules#count": 1, "Rules[0].Name": "block-old-2"}},
+  {"op": "put_access_control_rule", "args": {"OrganizationId": "${org}", "Name": "office", "Effect": "ALLOW", "Description": "office only", "IpRanges": ["192.0.2.0/24"], "Actions": ["IMAP"]}},
+  {"op": "list_access_control_rules", "args": {"OrganizationId": "${org}"}, "expect": {"Rules#count": 1, "Rules[0].Name": "office"}},
+  {"op": "create_availability_configuration", "args": {"OrganizationId": "${org}", "DomainName": "example.com", "LambdaProvider": {"LambdaArn": "arn:aws:lambda:us-east-1:000000000000:function:fixture-availability"}}},
+  {"op": "update_availability_configuration", "args": {"OrganizationId": "${org}", "DomainName": "example.com", "LambdaProvider": {"LambdaArn": "arn:aws:lambda:us-east-1:000000000000:function:fixture-availability-2"}}},
+  {"op": "list_availability_configurations", "args": {"OrganizationId": "${org}"}, "expect": {"AvailabilityConfigurations#count": 1, "AvailabilityConfigurations[0].ProviderType": "LAMBDA"}},
+  {"op": "tag_resource", "args": {"ResourceARN": "${org_arn}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceARN": "${org_arn}", "TagKeys": ["x"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceARN": "${org_arn}"}, "expect": {"Tags#count": 1}},
+  {"op": "put_access_control_rule", "args": {"OrganizationId": "${org}", "Name": "bad", "Effect": "ALLOW", "Description": "bad range", "IpRanges": ["192.0.2.1"]}, "error": "InvalidParameterException"},
+  {"op": "describe_organization", "args": {"OrganizationId": "m-00000000000000000000000000000000"}, "error": "OrganizationNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_organizations", "args": {}, "expect": {"OrganizationSummaries#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "list_access_control_rules", "args": {"OrganizationId": "${org}"}, "expect": {"Rules#count": 1}}
+ ],
+ "cleanup": [
+  {"op": "delete_access_control_rule", "args": {"OrganizationId": "${org}", "Name": "office"}},
+  {"op": "delete_availability_configuration", "args": {"OrganizationId": "${org}", "DomainName": "example.com"}},
+  {"op": "delete_mobile_device_access_rule", "args": {"OrganizationId": "${org}", "MobileDeviceAccessRuleId": "${mobile}"}},
+  {"op": "delete_impersonation_role", "args": {"OrganizationId": "${org}", "ImpersonationRoleId": "${role}"}},
+  {"op": "delete_organization", "args": {"OrganizationId": "${org}", "DeleteDirectory": true}, "expect": {"State": "Deleted"}},
+  {"op": "list_organizations", "args": {}, "expect": {"OrganizationSummaries#count": 0}}
+ ]
+}

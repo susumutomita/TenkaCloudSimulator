@@ -1,0 +1,38 @@
+{
+ "client": "dms",
+ "steps": [
+  {"op": "create_replication_subnet_group", "args": {"ReplicationSubnetGroupIdentifier": "Fixture-Group", "ReplicationSubnetGroupDescription": "fixture", "SubnetIds": ["subnet-aaaa1111", "subnet-bbbb2222"]}, "expect": {"ReplicationSubnetGroup.ReplicationSubnetGroupIdentifier": "fixture-group", "ReplicationSubnetGroup.SubnetGroupStatus": "Complete"}},
+  {"op": "modify_replication_subnet_group", "args": {"ReplicationSubnetGroupIdentifier": "fixture-group", "ReplicationSubnetGroupDescription": "fixture2", "SubnetIds": ["subnet-aaaa1111", "subnet-bbbb2222", "subnet-cccc3333"]}},
+  {"op": "describe_replication_subnet_groups", "args": {}, "expect": {"ReplicationSubnetGroups#count": 1, "ReplicationSubnetGroups[0].ReplicationSubnetGroupDescription": "fixture2"}},
+  {"op": "create_event_subscription", "args": {"SubscriptionName": "fixture-sub", "SnsTopicArn": "arn:aws:sns:us-east-1:000000000000:fixture-events", "SourceType": "replication-task", "EventCategories": ["failure"]}, "expect": {"EventSubscription.Status": "active"}},
+  {"op": "modify_event_subscription", "args": {"SubscriptionName": "fixture-sub", "Enabled": false}},
+  {"op": "describe_event_subscriptions", "args": {"SubscriptionName": "fixture-sub"}, "expect": {"EventSubscriptionsList#count": 1, "EventSubscriptionsList[0].Enabled": false}},
+  {"op": "describe_event_subscriptions", "args": {"Filters": [{"Name": "x", "Values": ["y"]}]}, "error": "ValidationException"},
+  {"op": "create_data_provider", "args": {"DataProviderName": "fixture-source", "Engine": "postgres", "Settings": {"PostgreSqlSettings": {"ServerName": "db.example.invalid", "Port": 5432, "DatabaseName": "app", "SslMode": "none"}}}, "save": {"provider": "DataProvider.DataProviderArn"}},
+  {"op": "modify_data_provider", "args": {"DataProviderIdentifier": "fixture-source", "Description": "fixture source", "Settings": {"PostgreSqlSettings": {"ServerName": "db.example.invalid", "Port": 5432, "DatabaseName": "app", "SslMode": "none"}}, "ExactSettings": true}},
+  {"op": "describe_data_providers", "args": {}, "expect": {"DataProviders#count": 1, "DataProviders[0].Description": "fixture source"}},
+  {"op": "create_instance_profile", "args": {"InstanceProfileName": "fixture-profile", "SubnetGroupIdentifier": "fixture-group"}, "save": {"profile": "InstanceProfile.InstanceProfileArn"}, "expect": {"InstanceProfile.PubliclyAccessible": true}},
+  {"op": "modify_instance_profile", "args": {"InstanceProfileIdentifier": "fixture-profile", "PubliclyAccessible": false}},
+  {"op": "describe_instance_profiles", "args": {}, "expect": {"InstanceProfiles#count": 1, "InstanceProfiles[0].PubliclyAccessible": false}},
+  {"op": "create_migration_project", "args": {"MigrationProjectName": "fixture-project", "SourceDataProviderDescriptors": [{"DataProviderIdentifier": "${provider}"}], "TargetDataProviderDescriptors": [{"DataProviderIdentifier": "${provider}"}], "InstanceProfileIdentifier": "${profile}"}},
+  {"op": "modify_migration_project", "args": {"MigrationProjectIdentifier": "fixture-project", "Description": "fixture project"}},
+  {"op": "describe_migration_projects", "args": {}, "expect": {"MigrationProjects#count": 1, "MigrationProjects[0].Description": "fixture project", "MigrationProjects[0].InstanceProfileArn": "${profile}"}},
+  {"op": "create_data_provider", "args": {"DataProviderName": "bad", "Engine": "nope", "Settings": {"PostgreSqlSettings": {"ServerName": "db.example.invalid", "Port": 5432, "DatabaseName": "app", "SslMode": "none"}}}, "error": "ValidationException"},
+  {"op": "create_migration_project", "args": {"MigrationProjectName": "bad", "SourceDataProviderDescriptors": [{"DataProviderIdentifier": "fixture-source"}], "TargetDataProviderDescriptors": [{"DataProviderIdentifier": "${provider}"}], "InstanceProfileIdentifier": "${profile}"}, "error": "ValidationException"},
+  {"op": "delete_replication_subnet_group", "args": {"ReplicationSubnetGroupIdentifier": "missing-group"}, "error": "ResourceNotFoundFault"}
+ ],
+ "isolation": [
+  {"op": "describe_data_providers", "args": {}, "expect": {"DataProviders#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_migration_projects", "args": {}, "expect": {"MigrationProjects[0].Description": "fixture project"}}
+ ],
+ "cleanup": [
+  {"op": "delete_migration_project", "args": {"MigrationProjectIdentifier": "fixture-project"}},
+  {"op": "delete_instance_profile", "args": {"InstanceProfileIdentifier": "fixture-profile"}},
+  {"op": "delete_data_provider", "args": {"DataProviderIdentifier": "fixture-source"}},
+  {"op": "delete_event_subscription", "args": {"SubscriptionName": "fixture-sub"}},
+  {"op": "delete_replication_subnet_group", "args": {"ReplicationSubnetGroupIdentifier": "fixture-group"}},
+  {"op": "describe_data_providers", "args": {}, "expect": {"DataProviders#count": 0}}
+ ]
+}

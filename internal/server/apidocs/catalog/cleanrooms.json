@@ -1,0 +1,1919 @@
+{
+ "components": {
+  "schemas": {
+   "AthenaTableReference": {
+    "additionalProperties": false,
+    "properties": {
+     "databaseName": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "outputLocation": {
+      "maxLength": 1024,
+      "minLength": 8,
+      "type": "string"
+     },
+     "region": {
+      "enum": [
+       "us-west-1",
+       "us-west-2",
+       "us-east-1",
+       "us-east-2",
+       "af-south-1",
+       "ap-east-1",
+       "ap-south-2",
+       "ap-southeast-1",
+       "ap-southeast-2",
+       "ap-southeast-3",
+       "ap-southeast-5",
+       "ap-southeast-4",
+       "ap-southeast-7",
+       "ap-south-1",
+       "ap-northeast-3",
+       "ap-northeast-1",
+       "ap-northeast-2",
+       "ca-central-1",
+       "ca-west-1",
+       "eu-south-1",
+       "eu-west-3",
+       "eu-south-2",
+       "eu-central-2",
+       "eu-central-1",
+       "eu-north-1",
+       "eu-west-1",
+       "eu-west-2",
+       "me-south-1",
+       "me-central-1",
+       "il-central-1",
+       "sa-east-1",
+       "mx-central-1",
+       "ap-east-2"
+      ],
+      "type": "string"
+     },
+     "tableName": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "workGroup": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "workGroup",
+     "databaseName",
+     "tableName"
+    ],
+    "type": "object"
+   },
+   "Collaboration": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedResultRegions": {
+      "items": {
+       "enum": [
+        "us-west-1",
+        "us-west-2",
+        "us-east-1",
+        "us-east-2",
+        "af-south-1",
+        "ap-east-1",
+        "ap-east-2",
+        "ap-south-2",
+        "ap-southeast-1",
+        "ap-southeast-2",
+        "ap-southeast-3",
+        "ap-southeast-5",
+        "ap-southeast-4",
+        "ap-southeast-7",
+        "ap-south-1",
+        "ap-northeast-3",
+        "ap-northeast-1",
+        "ap-northeast-2",
+        "ca-central-1",
+        "ca-west-1",
+        "eu-south-1",
+        "eu-west-3",
+        "eu-south-2",
+        "eu-central-2",
+        "eu-central-1",
+        "eu-north-1",
+        "eu-west-1",
+        "eu-west-2",
+        "me-south-1",
+        "me-central-1",
+        "il-central-1",
+        "sa-east-1",
+        "mx-central-1"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "analyticsEngine": {
+      "enum": [
+       "SPARK",
+       "CLEAN_ROOMS_SQL"
+      ],
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "autoApprovedChangeTypes": {
+      "items": {
+       "enum": [
+        "ADD_MEMBER"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "createTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "creatorAccountId": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "creatorDisplayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "dataEncryptionMetadata": {
+      "$ref": "#/components/schemas/DataEncryptionMetadata"
+     },
+     "description": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "jobLogStatus": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "memberStatus": {
+      "enum": [
+       "INVITED",
+       "ACTIVE",
+       "LEFT",
+       "REMOVED"
+      ],
+      "type": "string"
+     },
+     "membershipArn": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "membershipId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "queryLogStatus": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "updateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "id",
+     "arn",
+     "name",
+     "creatorAccountId",
+     "creatorDisplayName",
+     "createTime",
+     "updateTime",
+     "memberStatus",
+     "queryLogStatus"
+    ],
+    "type": "object"
+   },
+   "CollaborationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "analyticsEngine": {
+      "enum": [
+       "SPARK",
+       "CLEAN_ROOMS_SQL"
+      ],
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "createTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "creatorAccountId": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "creatorDisplayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "memberStatus": {
+      "enum": [
+       "INVITED",
+       "ACTIVE",
+       "LEFT",
+       "REMOVED"
+      ],
+      "type": "string"
+     },
+     "membershipArn": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "membershipId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "updateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "id",
+     "arn",
+     "name",
+     "creatorAccountId",
+     "creatorDisplayName",
+     "createTime",
+     "updateTime",
+     "memberStatus"
+    ],
+    "type": "object"
+   },
+   "ConfiguredTable": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedColumns": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 0,
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     },
+     "analysisMethod": {
+      "enum": [
+       "DIRECT_QUERY",
+       "DIRECT_JOB",
+       "MULTIPLE"
+      ],
+      "type": "string"
+     },
+     "analysisRuleTypes": {
+      "items": {
+       "enum": [
+        "AGGREGATION",
+        "LIST",
+        "CUSTOM"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "arn": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "createTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "selectedAnalysisMethods": {
+      "items": {
+       "enum": [
+        "DIRECT_QUERY",
+        "DIRECT_JOB"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "tableReference": {
+      "$ref": "#/components/schemas/TableReference"
+     },
+     "updateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "id",
+     "arn",
+     "name",
+     "tableReference",
+     "createTime",
+     "updateTime",
+     "analysisRuleTypes",
+     "analysisMethod",
+     "allowedColumns"
+    ],
+    "type": "object"
+   },
+   "ConfiguredTableSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "analysisMethod": {
+      "enum": [
+       "DIRECT_QUERY",
+       "DIRECT_JOB",
+       "MULTIPLE"
+      ],
+      "type": "string"
+     },
+     "analysisRuleTypes": {
+      "items": {
+       "enum": [
+        "AGGREGATION",
+        "LIST",
+        "CUSTOM"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "arn": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "createTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "selectedAnalysisMethods": {
+      "items": {
+       "enum": [
+        "DIRECT_QUERY",
+        "DIRECT_JOB"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "updateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "id",
+     "arn",
+     "name",
+     "createTime",
+     "updateTime",
+     "analysisRuleTypes",
+     "analysisMethod"
+    ],
+    "type": "object"
+   },
+   "DataEncryptionMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "allowCleartext": {
+      "type": "boolean"
+     },
+     "allowDuplicates": {
+      "type": "boolean"
+     },
+     "allowJoinsOnColumnsWithDifferentNames": {
+      "type": "boolean"
+     },
+     "preserveNulls": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "allowCleartext",
+     "allowDuplicates",
+     "allowJoinsOnColumnsWithDifferentNames",
+     "preserveNulls"
+    ],
+    "type": "object"
+   },
+   "GlueTableReference": {
+    "additionalProperties": false,
+    "properties": {
+     "databaseName": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "region": {
+      "enum": [
+       "us-west-1",
+       "us-west-2",
+       "us-east-1",
+       "us-east-2",
+       "af-south-1",
+       "ap-east-1",
+       "ap-south-2",
+       "ap-southeast-1",
+       "ap-southeast-2",
+       "ap-southeast-3",
+       "ap-southeast-5",
+       "ap-southeast-4",
+       "ap-southeast-7",
+       "ap-south-1",
+       "ap-northeast-3",
+       "ap-northeast-1",
+       "ap-northeast-2",
+       "ca-central-1",
+       "ca-west-1",
+       "eu-south-1",
+       "eu-west-3",
+       "eu-south-2",
+       "eu-central-2",
+       "eu-central-1",
+       "eu-north-1",
+       "eu-west-1",
+       "eu-west-2",
+       "me-south-1",
+       "me-central-1",
+       "il-central-1",
+       "sa-east-1",
+       "mx-central-1",
+       "ap-east-2"
+      ],
+      "type": "string"
+     },
+     "tableName": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "tableName",
+     "databaseName"
+    ],
+    "type": "object"
+   },
+   "JobComputePaymentConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "isResponsible": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "isResponsible"
+    ],
+    "type": "object"
+   },
+   "MLMemberAbilities": {
+    "additionalProperties": false,
+    "properties": {
+     "customMLMemberAbilities": {
+      "items": {
+       "enum": [
+        "CAN_RECEIVE_MODEL_OUTPUT",
+        "CAN_RECEIVE_INFERENCE_OUTPUT"
+       ],
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "customMLMemberAbilities"
+    ],
+    "type": "object"
+   },
+   "MLPaymentConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "modelInference": {
+      "$ref": "#/components/schemas/ModelInferencePaymentConfig"
+     },
+     "modelTraining": {
+      "$ref": "#/components/schemas/ModelTrainingPaymentConfig"
+     },
+     "syntheticDataGeneration": {
+      "$ref": "#/components/schemas/SyntheticDataGenerationPaymentConfig"
+     }
+    },
+    "type": "object"
+   },
+   "MemberSpecification": {
+    "additionalProperties": false,
+    "properties": {
+     "accountId": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "memberAbilities": {
+      "items": {
+       "enum": [
+        "CAN_QUERY",
+        "CAN_RECEIVE_RESULTS",
+        "CAN_RUN_JOB"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "mlMemberAbilities": {
+      "$ref": "#/components/schemas/MLMemberAbilities"
+     },
+     "paymentConfiguration": {
+      "$ref": "#/components/schemas/PaymentConfiguration"
+     }
+    },
+    "required": [
+     "accountId",
+     "memberAbilities",
+     "displayName"
+    ],
+    "type": "object"
+   },
+   "ModelInferencePaymentConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "isResponsible": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "isResponsible"
+    ],
+    "type": "object"
+   },
+   "ModelTrainingPaymentConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "isResponsible": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "isResponsible"
+    ],
+    "type": "object"
+   },
+   "PaymentConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "jobCompute": {
+      "$ref": "#/components/schemas/JobComputePaymentConfig"
+     },
+     "machineLearning": {
+      "$ref": "#/components/schemas/MLPaymentConfig"
+     },
+     "queryCompute": {
+      "$ref": "#/components/schemas/QueryComputePaymentConfig"
+     }
+    },
+    "required": [
+     "queryCompute"
+    ],
+    "type": "object"
+   },
+   "QueryComputePaymentConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "isResponsible": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "isResponsible"
+    ],
+    "type": "object"
+   },
+   "SnowflakeTableReference": {
+    "additionalProperties": false,
+    "properties": {
+     "accountIdentifier": {
+      "maxLength": 256,
+      "minLength": 3,
+      "type": "string"
+     },
+     "databaseName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "schemaName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "secretArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "tableName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tableSchema": {
+      "$ref": "#/components/schemas/SnowflakeTableSchema"
+     }
+    },
+    "required": [
+     "secretArn",
+     "accountIdentifier",
+     "databaseName",
+     "tableName",
+     "schemaName",
+     "tableSchema"
+    ],
+    "type": "object"
+   },
+   "SnowflakeTableSchema": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "v1": {
+      "items": {
+       "$ref": "#/components/schemas/SnowflakeTableSchemaV1"
+      },
+      "maxItems": 250,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "SnowflakeTableSchemaV1": {
+    "additionalProperties": false,
+    "properties": {
+     "columnName": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "columnType": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "columnName",
+     "columnType"
+    ],
+    "type": "object"
+   },
+   "SyntheticDataGenerationPaymentConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "isResponsible": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "isResponsible"
+    ],
+    "type": "object"
+   },
+   "TableReference": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "athena": {
+      "$ref": "#/components/schemas/AthenaTableReference"
+     },
+     "glue": {
+      "$ref": "#/components/schemas/GlueTableReference"
+     },
+     "snowflake": {
+      "$ref": "#/components/schemas/SnowflakeTableReference"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Clean Rooms Service API (2022-02-17). Every other official operation returns HTTP 501 UnknownOperationException. Configured tables and collaborations are stored records: no data is read from the referenced table, no query or job is run, no result is produced, and no other account is invited. StartProtectedQuery, StartProtectedJob, PopulateIdMappingTable, PreviewPrivacyImpact, schemas and every other official operation return UnknownOperationException with HTTP 501. Memberships, members, analysis templates, privacy budget templates, configured table associations and analysis rules are not implemented. A membership is created by the invited account and the creator's own membership appears with the collaboration, which a one-account simulator cannot model, and an analysis rule would have to appear in the analysisRuleTypes of its table. A configured table therefore always reports an empty analysisRuleTypes list and a collaboration reports no membershipId or membershipArn. A collaboration has only its creator: members must be an empty list, so no invitation is sent and the member status is always ACTIVE. creatorMemberAbilities is validated as a list of the documented abilities and then dropped because nothing in the stored model can use it, and creatorMLMemberAbilities and creatorPaymentConfiguration are refused. A configured table points at an AWS Glue or Amazon Athena table by name; the reference is not resolved and Snowflake references are refused because they name a secret. selectedAnalysisMethods, when given, must list at least two methods as documented. Deleting a configured table does not check collaborations. Tags are stored from the create operations and by TagResource on the ARN. The limits of 100 configured tables and 50 collaborations per Region are local. GetCollaboration, UpdateCollaboration and DeleteCollaboration model no not-found exception, so an unknown collaboration fails with ValidationException.",
+  "title": "AWS Clean Rooms (simulator catalog)",
+  "version": "2022-02-17"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/collaborations": {
+   "get": {
+    "operationId": "cleanroomsListCollaborations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "memberStatus",
+      "schema": {
+       "enum": [
+        "INVITED",
+        "ACTIVE"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 10240,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "collaborationList": {
+           "items": {
+            "$ref": "#/components/schemas/CollaborationSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 10240,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListCollaborations",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   },
+   "post": {
+    "operationId": "cleanroomsCreateCollaboration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "allowedResultRegions": {
+          "items": {
+           "enum": [
+            "us-west-1",
+            "us-west-2",
+            "us-east-1",
+            "us-east-2",
+            "af-south-1",
+            "ap-east-1",
+            "ap-east-2",
+            "ap-south-2",
+            "ap-southeast-1",
+            "ap-southeast-2",
+            "ap-southeast-3",
+            "ap-southeast-5",
+            "ap-southeast-4",
+            "ap-southeast-7",
+            "ap-south-1",
+            "ap-northeast-3",
+            "ap-northeast-1",
+            "ap-northeast-2",
+            "ca-central-1",
+            "ca-west-1",
+            "eu-south-1",
+            "eu-west-3",
+            "eu-south-2",
+            "eu-central-2",
+            "eu-central-1",
+            "eu-north-1",
+            "eu-west-1",
+            "eu-west-2",
+            "me-south-1",
+            "me-central-1",
+            "il-central-1",
+            "sa-east-1",
+            "mx-central-1"
+           ],
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "analyticsEngine": {
+          "enum": [
+           "SPARK",
+           "CLEAN_ROOMS_SQL"
+          ],
+          "type": "string"
+         },
+         "autoApprovedChangeRequestTypes": {
+          "items": {
+           "enum": [
+            "ADD_MEMBER"
+           ],
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "creatorDisplayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "creatorMLMemberAbilities": {
+          "$ref": "#/components/schemas/MLMemberAbilities"
+         },
+         "creatorMemberAbilities": {
+          "items": {
+           "enum": [
+            "CAN_QUERY",
+            "CAN_RECEIVE_RESULTS",
+            "CAN_RUN_JOB"
+           ],
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "creatorPaymentConfiguration": {
+          "$ref": "#/components/schemas/PaymentConfiguration"
+         },
+         "dataEncryptionMetadata": {
+          "$ref": "#/components/schemas/DataEncryptionMetadata"
+         },
+         "description": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "jobLogStatus": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "members": {
+          "items": {
+           "$ref": "#/components/schemas/MemberSpecification"
+          },
+          "minItems": 0,
+          "type": "array"
+         },
+         "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "queryLogStatus": {
+          "enum": [
+           "ENABLED",
+           "DISABLED"
+          ],
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "creatorDisplayName",
+         "creatorMemberAbilities",
+         "description",
+         "members",
+         "name",
+         "queryLogStatus"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "collaboration": {
+           "$ref": "#/components/schemas/Collaboration"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateCollaboration",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   }
+  },
+  "/collaborations/{collaborationIdentifier}": {
+   "delete": {
+    "operationId": "cleanroomsDeleteCollaboration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "collaborationIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteCollaboration",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   },
+   "get": {
+    "operationId": "cleanroomsGetCollaboration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "collaborationIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "collaboration": {
+           "$ref": "#/components/schemas/Collaboration"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetCollaboration",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   },
+   "patch": {
+    "operationId": "cleanroomsUpdateCollaboration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "collaborationIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "analyticsEngine": {
+          "enum": [
+           "SPARK",
+           "CLEAN_ROOMS_SQL"
+          ],
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "collaboration": {
+           "$ref": "#/components/schemas/Collaboration"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateCollaboration",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   }
+  },
+  "/configuredTables": {
+   "get": {
+    "operationId": "cleanroomsListConfiguredTables",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 10240,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configuredTableSummaries": {
+           "items": {
+            "$ref": "#/components/schemas/ConfiguredTableSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 10240,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListConfiguredTables",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   },
+   "post": {
+    "operationId": "cleanroomsCreateConfiguredTable",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "allowedColumns": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 0,
+           "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+         },
+         "analysisMethod": {
+          "enum": [
+           "DIRECT_QUERY",
+           "DIRECT_JOB",
+           "MULTIPLE"
+          ],
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "selectedAnalysisMethods": {
+          "items": {
+           "enum": [
+            "DIRECT_QUERY",
+            "DIRECT_JOB"
+           ],
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "tableReference": {
+          "$ref": "#/components/schemas/TableReference"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "allowedColumns",
+         "analysisMethod",
+         "name",
+         "tableReference"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configuredTable": {
+           "$ref": "#/components/schemas/ConfiguredTable"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateConfiguredTable",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   }
+  },
+  "/configuredTables/{configuredTableIdentifier}": {
+   "delete": {
+    "operationId": "cleanroomsDeleteConfiguredTable",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configuredTableIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteConfiguredTable",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   },
+   "get": {
+    "operationId": "cleanroomsGetConfiguredTable",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configuredTableIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configuredTable": {
+           "$ref": "#/components/schemas/ConfiguredTable"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetConfiguredTable",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   },
+   "patch": {
+    "operationId": "cleanroomsUpdateConfiguredTable",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configuredTableIdentifier",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "allowedColumns": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 0,
+           "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+         },
+         "analysisMethod": {
+          "enum": [
+           "DIRECT_QUERY",
+           "DIRECT_JOB",
+           "MULTIPLE"
+          ],
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "selectedAnalysisMethods": {
+          "items": {
+           "enum": [
+            "DIRECT_QUERY",
+            "DIRECT_JOB"
+           ],
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "tableReference": {
+          "$ref": "#/components/schemas/TableReference"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configuredTable": {
+           "$ref": "#/components/schemas/ConfiguredTable"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateConfiguredTable",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "cleanroomsUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 0,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   },
+   "get": {
+    "operationId": "cleanroomsListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   },
+   "post": {
+    "operationId": "cleanroomsTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 100,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Clean Rooms"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Clean Rooms Service API (2022-02-17). Every other official operation returns HTTP 501 UnknownOperationException. Configured tables and collaborations are stored records: no data is read from the referenced table, no query or job is run, no result is produced, and no other account is invited. StartProtectedQuery, StartProtectedJob, PopulateIdMappingTable, PreviewPrivacyImpact, schemas and every other official operation return UnknownOperationException with HTTP 501. Memberships, members, analysis templates, privacy budget templates, configured table associations and analysis rules are not implemented. A membership is created by the invited account and the creator's own membership appears with the collaboration, which a one-account simulator cannot model, and an analysis rule would have to appear in the analysisRuleTypes of its table. A configured table therefore always reports an empty analysisRuleTypes list and a collaboration reports no membershipId or membershipArn. A collaboration has only its creator: members must be an empty list, so no invitation is sent and the member status is always ACTIVE. creatorMemberAbilities is validated as a list of the documented abilities and then dropped because nothing in the stored model can use it, and creatorMLMemberAbilities and creatorPaymentConfiguration are refused. A configured table points at an AWS Glue or Amazon Athena table by name; the reference is not resolved and Snowflake references are refused because they name a secret. selectedAnalysisMethods, when given, must list at least two methods as documented. Deleting a configured table does not check collaborations. Tags are stored from the create operations and by TagResource on the ARN. The limits of 100 configured tables and 50 collaborations per Region are local. GetCollaboration, UpdateCollaboration and DeleteCollaboration model no not-found exception, so an unknown collaboration fails with ValidationException.",
+   "name": "AWS Clean Rooms"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/cleanrooms/2022-02-17/service-2.json",
+  "sha256": "2208053088eddd8b10e77ac9d7afd231e538ccdcdfd6b6da35e9a1688e8ea46c",
+  "license": "Apache-2.0"
+ }
+}

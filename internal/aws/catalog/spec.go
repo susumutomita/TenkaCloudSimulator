@@ -80,6 +80,15 @@ type Op struct {
 	IdempotentDelete bool
 	// HasMore names a boolean output member that reports a further page.
 	HasMore string
+	// Token names the input member of an update, put or delete that carries
+	// the resource's Token. When supplied it must equal the stored token,
+	// or the request fails as stale and changes nothing; the official shape
+	// decides whether it is required.
+	Token string
+	// Match lists input members that, when supplied, must equal the stored
+	// member of the same name, or the resource is not found (for example a
+	// Type sent beside the name).
+	Match []string
 }
 
 // Failure returns a semantic validation error with a modeled exception code
@@ -97,6 +106,9 @@ type Resource struct {
 	Summary string
 	// ARN is a template with {partition}, {region}, {account}, {id}, {name}
 	// and {parent} placeholders. Global resources omit {region} content.
+	// {member:X} and {lower:X} insert the request's string member X as
+	// given or lowercased (for example a type that names the ARN path), and
+	// * when the request does not carry it.
 	ARN string
 	// ARNMember, NameMember and IDMember name stored members holding identity.
 	ARNMember  string
@@ -124,11 +136,31 @@ type Resource struct {
 	Cascade bool
 	// Refs maps stored members holding ARNs to the resource kind they must
 	// reference; creation and update fail when the referenced one is missing.
+	// A key may be a dotted path into structures, with [] after a segment
+	// for each element of a list (Policy.RuleGroupReferences[].ResourceArn,
+	// DatasetArns[]).
 	Refs map[string]string
+	// InUse refuses deleting this resource while a Refs member of another
+	// live resource of the service names it; the value is the official
+	// exception code reported (the dependents family when the operation
+	// does not model it).
+	InUse string
 	// Singleton resources have exactly one instance per region (account
 	// settings). Reads without a stored instance return the Generate
 	// defaults; Put and Update store it.
 	Singleton bool
+	// Token names the stored member holding an optimistic concurrency
+	// token (for example UpdateToken or Version). It is generated at
+	// creation and replaced after every successful update or put; TokenID
+	// selects the generator: an identifier generator (uuid when empty) or
+	// counter, an integer that starts at 1 and grows by one per change.
+	Token   string
+	TokenID string
+	// Beside lists input members stored with the resource outside its
+	// official shape (for example a FirewallPolicy body beside the
+	// FirewallPolicyResponse metadata); an output returns one in its
+	// top-level member of the same name.
+	Beside []string
 }
 
 // Service is a reviewed bounded specification of one official AWS service.

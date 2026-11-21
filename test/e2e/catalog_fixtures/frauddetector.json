@@ -1,0 +1,41 @@
+{
+ "client": "frauddetector",
+ "steps": [
+  {"op": "put_entity_type", "args": {"name": "fixture_customer", "description": "who acts", "tags": [{"key": "team", "value": "a"}]}},
+  {"op": "get_entity_types", "args": {"name": "fixture_customer"}, "save": {"entity": "entityTypes[0].arn"}, "expect": {"entityTypes#count": 1, "entityTypes[0].description": "who acts"}},
+  {"op": "put_entity_type", "args": {"name": "fixture_customer", "description": "who acts again"}},
+  {"op": "get_entity_types", "args": {}, "expect": {"entityTypes#count": 1, "entityTypes[0].description": "who acts again"}},
+  {"op": "put_label", "args": {"name": "fixture_fraud", "description": "bad"}},
+  {"op": "get_labels", "args": {}, "expect": {"labels#count": 1, "labels[0].name": "fixture_fraud"}},
+  {"op": "put_outcome", "args": {"name": "fixture_review", "description": "manual review"}},
+  {"op": "get_outcomes", "args": {}, "expect": {"outcomes#count": 1, "outcomes[0].name": "fixture_review"}},
+  {"op": "create_variable", "args": {"name": "fixture_email", "dataType": "STRING", "dataSource": "EVENT", "defaultValue": "unknown", "variableType": "EMAIL_ADDRESS"}},
+  {"op": "update_variable", "args": {"name": "fixture_email", "defaultValue": "none", "description": "mail address"}},
+  {"op": "get_variables", "args": {"name": "fixture_email"}, "save": {"variable": "variables[0].arn"}, "expect": {"variables#count": 1, "variables[0].defaultValue": "none", "variables[0].dataSource": "EVENT"}},
+  {"op": "create_list", "args": {"name": "fixture_blocked", "description": "blocked", "variableType": "IP_ADDRESS"}},
+  {"op": "update_list", "args": {"name": "fixture_blocked", "description": "blocked addresses"}},
+  {"op": "get_lists_metadata", "args": {"name": "fixture_blocked"}, "save": {"list": "lists[0].arn"}, "expect": {"lists#count": 1, "lists[0].description": "blocked addresses"}},
+  {"op": "tag_resource", "args": {"resourceARN": "${list}", "tags": [{"key": "env", "value": "dev"}]}},
+  {"op": "untag_resource", "args": {"resourceARN": "${list}", "tagKeys": ["env"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceARN": "${entity}"}, "expect": {"tags#count": 1}},
+  {"op": "create_variable", "args": {"name": "fixture_score", "dataType": "FLOAT", "dataSource": "MODEL_SCORE", "defaultValue": "0"}, "error": "ValidationException"},
+  {"op": "create_list", "args": {"name": "fixture_elements", "elements": ["10.0.0.1"]}, "error": "ValidationException"},
+  {"op": "get_labels", "args": {"name": "fixture_missing"}, "error": "ResourceNotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "get_entity_types", "args": {}, "expect": {"entityTypes#count": 0}},
+  {"op": "get_variables", "args": {}, "expect": {"variables#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_entity_types", "args": {"name": "fixture_customer"}, "expect": {"entityTypes[0].description": "who acts again"}},
+  {"op": "get_variables", "args": {"name": "fixture_email"}, "expect": {"variables[0].defaultValue": "none"}}
+ ],
+ "cleanup": [
+  {"op": "delete_list", "args": {"name": "fixture_blocked"}},
+  {"op": "delete_variable", "args": {"name": "fixture_email"}},
+  {"op": "delete_outcome", "args": {"name": "fixture_review"}},
+  {"op": "delete_label", "args": {"name": "fixture_fraud"}},
+  {"op": "delete_entity_type", "args": {"name": "fixture_customer"}},
+  {"op": "get_entity_types", "args": {}, "expect": {"entityTypes#count": 0}}
+ ]
+}

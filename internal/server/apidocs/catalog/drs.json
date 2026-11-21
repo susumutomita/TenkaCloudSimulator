@@ -1,0 +1,1899 @@
+{
+ "components": {
+  "schemas": {
+   "LaunchAction": {
+    "additionalProperties": false,
+    "properties": {
+     "actionCode": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "actionId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "actionVersion": {
+      "maxLength": 10,
+      "minLength": 1,
+      "type": "string"
+     },
+     "active": {
+      "type": "boolean"
+     },
+     "category": {
+      "enum": [
+       "MONITORING",
+       "VALIDATION",
+       "CONFIGURATION",
+       "SECURITY",
+       "OTHER"
+      ],
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "optional": {
+      "type": "boolean"
+     },
+     "order": {
+      "maximum": 10000,
+      "minimum": 2,
+      "type": "integer"
+     },
+     "parameters": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/LaunchActionParameter"
+      },
+      "maxProperties": 20,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "type": {
+      "enum": [
+       "SSM_AUTOMATION",
+       "SSM_COMMAND"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LaunchActionParameter": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "SSM_STORE",
+       "DYNAMIC"
+      ],
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LaunchActionsRequestFilters": {
+    "additionalProperties": false,
+    "properties": {
+     "actionIds": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LaunchConfigurationTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "copyPrivateIp": {
+      "type": "boolean"
+     },
+     "copyTags": {
+      "type": "boolean"
+     },
+     "exportBucketArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "launchConfigurationTemplateID": {
+      "maxLength": 21,
+      "minLength": 21,
+      "type": "string"
+     },
+     "launchDisposition": {
+      "enum": [
+       "STOPPED",
+       "STARTED"
+      ],
+      "type": "string"
+     },
+     "launchIntoSourceInstance": {
+      "type": "boolean"
+     },
+     "licensing": {
+      "$ref": "#/components/schemas/Licensing"
+     },
+     "postLaunchEnabled": {
+      "type": "boolean"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "targetInstanceTypeRightSizingMethod": {
+      "enum": [
+       "NONE",
+       "BASIC",
+       "IN_AWS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Licensing": {
+    "additionalProperties": false,
+    "properties": {
+     "osByol": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "PITPolicyRule": {
+    "additionalProperties": false,
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "interval": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "retentionDuration": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "ruleID": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "units": {
+      "enum": [
+       "MINUTE",
+       "HOUR",
+       "DAY"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "interval",
+     "retentionDuration",
+     "units"
+    ],
+    "type": "object"
+   },
+   "ReplicationConfigurationTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "associateDefaultSecurityGroup": {
+      "type": "boolean"
+     },
+     "autoReplicateNewDisks": {
+      "type": "boolean"
+     },
+     "bandwidthThrottling": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "createPublicIP": {
+      "type": "boolean"
+     },
+     "dataPlaneRouting": {
+      "enum": [
+       "PRIVATE_IP",
+       "PUBLIC_IP"
+      ],
+      "type": "string"
+     },
+     "defaultLargeStagingDiskType": {
+      "enum": [
+       "GP2",
+       "GP3",
+       "ST1",
+       "AUTO"
+      ],
+      "type": "string"
+     },
+     "ebsEncryption": {
+      "enum": [
+       "DEFAULT",
+       "CUSTOM",
+       "NONE"
+      ],
+      "type": "string"
+     },
+     "ebsEncryptionKeyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "pitPolicy": {
+      "items": {
+       "$ref": "#/components/schemas/PITPolicyRule"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "replicationConfigurationTemplateID": {
+      "maxLength": 21,
+      "minLength": 21,
+      "type": "string"
+     },
+     "replicationServerInstanceType": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "replicationServersSecurityGroupsIDs": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxItems": 32,
+      "minItems": 0,
+      "type": "array"
+     },
+     "stagingAreaSubnetId": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "stagingAreaTags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "useDedicatedReplicationServer": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "replicationConfigurationTemplateID"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Elastic Disaster Recovery Service API (2020-02-26). Every other official operation returns HTTP 501 UnknownOperationException. Launch and replication configuration templates and the launch actions of launch templates are stored configuration: no source server, replication agent, staging area, replication server, recovery instance, drill, recovery or failback job exists, nothing replicates, and every source server, recovery instance, job, source network and extensible source server operation, StartRecovery, StartReplication, ReverseReplication, InitializeService and the other official operations return UnknownOperationException with HTTP 501. UninitializedAccountException is never returned because no service-linked role is needed. PutLaunchAction accepts only a launch configuration template ID as resourceId; a source server ID does not exist and fails with ResourceNotFoundException. The action type member is never reported because the service derives it from the SSM document, which is not resolved, and the filters member of ListLaunchActions is refused instead of being ignored. Deleting a launch configuration template deletes its launch actions. Template members that are not supplied are not defaulted, and subnet, security group, KMS key, S3 bucket and SSM document references are stored as given and never resolved. The ARN forms launch-configuration-template/{id}, replication-configuration-template/{id} and launch-configuration-template/{id}/launch-action/{actionId} are the simulator's reading of the authorization reference. At most 20 templates of each kind and 50 launch actions per template exist per Region as local limits.",
+  "title": "AWS Elastic Disaster Recovery (simulator catalog)",
+  "version": "2020-02-26"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/CreateLaunchConfigurationTemplate": {
+   "post": {
+    "operationId": "drsCreateLaunchConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "copyPrivateIp": {
+          "type": "boolean"
+         },
+         "copyTags": {
+          "type": "boolean"
+         },
+         "exportBucketArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "launchDisposition": {
+          "enum": [
+           "STOPPED",
+           "STARTED"
+          ],
+          "type": "string"
+         },
+         "launchIntoSourceInstance": {
+          "type": "boolean"
+         },
+         "licensing": {
+          "$ref": "#/components/schemas/Licensing"
+         },
+         "postLaunchEnabled": {
+          "type": "boolean"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "targetInstanceTypeRightSizingMethod": {
+          "enum": [
+           "NONE",
+           "BASIC",
+           "IN_AWS"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "launchConfigurationTemplate": {
+           "$ref": "#/components/schemas/LaunchConfigurationTemplate"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateLaunchConfigurationTemplate",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  },
+  "/CreateReplicationConfigurationTemplate": {
+   "post": {
+    "operationId": "drsCreateReplicationConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "associateDefaultSecurityGroup": {
+          "type": "boolean"
+         },
+         "autoReplicateNewDisks": {
+          "type": "boolean"
+         },
+         "bandwidthThrottling": {
+          "minimum": 0,
+          "type": "integer"
+         },
+         "createPublicIP": {
+          "type": "boolean"
+         },
+         "dataPlaneRouting": {
+          "enum": [
+           "PRIVATE_IP",
+           "PUBLIC_IP"
+          ],
+          "type": "string"
+         },
+         "defaultLargeStagingDiskType": {
+          "enum": [
+           "GP2",
+           "GP3",
+           "ST1",
+           "AUTO"
+          ],
+          "type": "string"
+         },
+         "ebsEncryption": {
+          "enum": [
+           "DEFAULT",
+           "CUSTOM",
+           "NONE"
+          ],
+          "type": "string"
+         },
+         "ebsEncryptionKeyArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "pitPolicy": {
+          "items": {
+           "$ref": "#/components/schemas/PITPolicyRule"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "type": "array"
+         },
+         "replicationServerInstanceType": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "replicationServersSecurityGroupsIDs": {
+          "items": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "type": "array"
+         },
+         "stagingAreaSubnetId": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "stagingAreaTags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "useDedicatedReplicationServer": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "associateDefaultSecurityGroup",
+         "bandwidthThrottling",
+         "createPublicIP",
+         "dataPlaneRouting",
+         "defaultLargeStagingDiskType",
+         "ebsEncryption",
+         "pitPolicy",
+         "replicationServerInstanceType",
+         "replicationServersSecurityGroupsIDs",
+         "stagingAreaSubnetId",
+         "stagingAreaTags",
+         "useDedicatedReplicationServer"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "associateDefaultSecurityGroup": {
+           "type": "boolean"
+          },
+          "autoReplicateNewDisks": {
+           "type": "boolean"
+          },
+          "bandwidthThrottling": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "createPublicIP": {
+           "type": "boolean"
+          },
+          "dataPlaneRouting": {
+           "enum": [
+            "PRIVATE_IP",
+            "PUBLIC_IP"
+           ],
+           "type": "string"
+          },
+          "defaultLargeStagingDiskType": {
+           "enum": [
+            "GP2",
+            "GP3",
+            "ST1",
+            "AUTO"
+           ],
+           "type": "string"
+          },
+          "ebsEncryption": {
+           "enum": [
+            "DEFAULT",
+            "CUSTOM",
+            "NONE"
+           ],
+           "type": "string"
+          },
+          "ebsEncryptionKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "pitPolicy": {
+           "items": {
+            "$ref": "#/components/schemas/PITPolicyRule"
+           },
+           "maxItems": 10,
+           "minItems": 1,
+           "type": "array"
+          },
+          "replicationConfigurationTemplateID": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "replicationServerInstanceType": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "replicationServersSecurityGroupsIDs": {
+           "items": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxItems": 32,
+           "minItems": 0,
+           "type": "array"
+          },
+          "stagingAreaSubnetId": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "stagingAreaTags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "useDedicatedReplicationServer": {
+           "type": "boolean"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateReplicationConfigurationTemplate",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  },
+  "/DeleteLaunchAction": {
+   "post": {
+    "operationId": "drsDeleteLaunchAction",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "actionId": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "resourceId": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "actionId",
+         "resourceId"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteLaunchAction",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  },
+  "/DeleteLaunchConfigurationTemplate": {
+   "post": {
+    "operationId": "drsDeleteLaunchConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "launchConfigurationTemplateID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         }
+        },
+        "required": [
+         "launchConfigurationTemplateID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteLaunchConfigurationTemplate",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  },
+  "/DeleteReplicationConfigurationTemplate": {
+   "post": {
+    "operationId": "drsDeleteReplicationConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "replicationConfigurationTemplateID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         }
+        },
+        "required": [
+         "replicationConfigurationTemplateID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteReplicationConfigurationTemplate",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  },
+  "/DescribeLaunchConfigurationTemplates": {
+   "post": {
+    "operationId": "drsDescribeLaunchConfigurationTemplates",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "launchConfigurationTemplateIDs": {
+          "items": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "maxItems": 1,
+          "minItems": 0,
+          "type": "array"
+         },
+         "maxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/LaunchConfigurationTemplate"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeLaunchConfigurationTemplates",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  },
+  "/DescribeReplicationConfigurationTemplates": {
+   "post": {
+    "operationId": "drsDescribeReplicationConfigurationTemplates",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "replicationConfigurationTemplateIDs": {
+          "items": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/ReplicationConfigurationTemplate"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeReplicationConfigurationTemplates",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  },
+  "/ListLaunchActions": {
+   "post": {
+    "operationId": "drsListLaunchActions",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "filters": {
+          "$ref": "#/components/schemas/LaunchActionsRequestFilters"
+         },
+         "maxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "resourceId": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "resourceId"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/LaunchAction"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListLaunchActions",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  },
+  "/PutLaunchAction": {
+   "post": {
+    "operationId": "drsPutLaunchAction",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "actionCode": {
+          "maxLength": 1011,
+          "minLength": 1,
+          "type": "string"
+         },
+         "actionId": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "actionVersion": {
+          "maxLength": 10,
+          "minLength": 1,
+          "type": "string"
+         },
+         "active": {
+          "type": "boolean"
+         },
+         "category": {
+          "enum": [
+           "MONITORING",
+           "VALIDATION",
+           "CONFIGURATION",
+           "SECURITY",
+           "OTHER"
+          ],
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "optional": {
+          "type": "boolean"
+         },
+         "order": {
+          "maximum": 10000,
+          "minimum": 2,
+          "type": "integer"
+         },
+         "parameters": {
+          "additionalProperties": {
+           "$ref": "#/components/schemas/LaunchActionParameter"
+          },
+          "maxProperties": 20,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "resourceId": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "actionCode",
+         "actionId",
+         "actionVersion",
+         "active",
+         "category",
+         "description",
+         "name",
+         "optional",
+         "order",
+         "resourceId"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "actionCode": {
+           "maxLength": 1011,
+           "minLength": 1,
+           "type": "string"
+          },
+          "actionId": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "actionVersion": {
+           "maxLength": 10,
+           "minLength": 1,
+           "type": "string"
+          },
+          "active": {
+           "type": "boolean"
+          },
+          "category": {
+           "enum": [
+            "MONITORING",
+            "VALIDATION",
+            "CONFIGURATION",
+            "SECURITY",
+            "OTHER"
+           ],
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "optional": {
+           "type": "boolean"
+          },
+          "order": {
+           "maximum": 10000,
+           "minimum": 2,
+           "type": "integer"
+          },
+          "parameters": {
+           "additionalProperties": {
+            "$ref": "#/components/schemas/LaunchActionParameter"
+           },
+           "maxProperties": 20,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "resourceId": {
+           "type": "string"
+          },
+          "type": {
+           "enum": [
+            "SSM_AUTOMATION",
+            "SSM_COMMAND"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "PutLaunchAction",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  },
+  "/UpdateLaunchConfigurationTemplate": {
+   "post": {
+    "operationId": "drsUpdateLaunchConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "copyPrivateIp": {
+          "type": "boolean"
+         },
+         "copyTags": {
+          "type": "boolean"
+         },
+         "exportBucketArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "launchConfigurationTemplateID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         },
+         "launchDisposition": {
+          "enum": [
+           "STOPPED",
+           "STARTED"
+          ],
+          "type": "string"
+         },
+         "launchIntoSourceInstance": {
+          "type": "boolean"
+         },
+         "licensing": {
+          "$ref": "#/components/schemas/Licensing"
+         },
+         "postLaunchEnabled": {
+          "type": "boolean"
+         },
+         "targetInstanceTypeRightSizingMethod": {
+          "enum": [
+           "NONE",
+           "BASIC",
+           "IN_AWS"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "launchConfigurationTemplateID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "launchConfigurationTemplate": {
+           "$ref": "#/components/schemas/LaunchConfigurationTemplate"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateLaunchConfigurationTemplate",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  },
+  "/UpdateReplicationConfigurationTemplate": {
+   "post": {
+    "operationId": "drsUpdateReplicationConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "associateDefaultSecurityGroup": {
+          "type": "boolean"
+         },
+         "autoReplicateNewDisks": {
+          "type": "boolean"
+         },
+         "bandwidthThrottling": {
+          "minimum": 0,
+          "type": "integer"
+         },
+         "createPublicIP": {
+          "type": "boolean"
+         },
+         "dataPlaneRouting": {
+          "enum": [
+           "PRIVATE_IP",
+           "PUBLIC_IP"
+          ],
+          "type": "string"
+         },
+         "defaultLargeStagingDiskType": {
+          "enum": [
+           "GP2",
+           "GP3",
+           "ST1",
+           "AUTO"
+          ],
+          "type": "string"
+         },
+         "ebsEncryption": {
+          "enum": [
+           "DEFAULT",
+           "CUSTOM",
+           "NONE"
+          ],
+          "type": "string"
+         },
+         "ebsEncryptionKeyArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "pitPolicy": {
+          "items": {
+           "$ref": "#/components/schemas/PITPolicyRule"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "type": "array"
+         },
+         "replicationConfigurationTemplateID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         },
+         "replicationServerInstanceType": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "replicationServersSecurityGroupsIDs": {
+          "items": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "type": "array"
+         },
+         "stagingAreaSubnetId": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "stagingAreaTags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "useDedicatedReplicationServer": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "replicationConfigurationTemplateID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "associateDefaultSecurityGroup": {
+           "type": "boolean"
+          },
+          "autoReplicateNewDisks": {
+           "type": "boolean"
+          },
+          "bandwidthThrottling": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "createPublicIP": {
+           "type": "boolean"
+          },
+          "dataPlaneRouting": {
+           "enum": [
+            "PRIVATE_IP",
+            "PUBLIC_IP"
+           ],
+           "type": "string"
+          },
+          "defaultLargeStagingDiskType": {
+           "enum": [
+            "GP2",
+            "GP3",
+            "ST1",
+            "AUTO"
+           ],
+           "type": "string"
+          },
+          "ebsEncryption": {
+           "enum": [
+            "DEFAULT",
+            "CUSTOM",
+            "NONE"
+           ],
+           "type": "string"
+          },
+          "ebsEncryptionKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "pitPolicy": {
+           "items": {
+            "$ref": "#/components/schemas/PITPolicyRule"
+           },
+           "maxItems": 10,
+           "minItems": 1,
+           "type": "array"
+          },
+          "replicationConfigurationTemplateID": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "replicationServerInstanceType": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "replicationServersSecurityGroupsIDs": {
+           "items": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxItems": 32,
+           "minItems": 0,
+           "type": "array"
+          },
+          "stagingAreaSubnetId": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "stagingAreaTags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "useDedicatedReplicationServer": {
+           "type": "boolean"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateReplicationConfigurationTemplate",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "drsUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 256,
+        "minLength": 0,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   },
+   "get": {
+    "operationId": "drsListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   },
+   "post": {
+    "operationId": "drsTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "drs"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Elastic Disaster Recovery"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Elastic Disaster Recovery Service API (2020-02-26). Every other official operation returns HTTP 501 UnknownOperationException. Launch and replication configuration templates and the launch actions of launch templates are stored configuration: no source server, replication agent, staging area, replication server, recovery instance, drill, recovery or failback job exists, nothing replicates, and every source server, recovery instance, job, source network and extensible source server operation, StartRecovery, StartReplication, ReverseReplication, InitializeService and the other official operations return UnknownOperationException with HTTP 501. UninitializedAccountException is never returned because no service-linked role is needed. PutLaunchAction accepts only a launch configuration template ID as resourceId; a source server ID does not exist and fails with ResourceNotFoundException. The action type member is never reported because the service derives it from the SSM document, which is not resolved, and the filters member of ListLaunchActions is refused instead of being ignored. Deleting a launch configuration template deletes its launch actions. Template members that are not supplied are not defaulted, and subnet, security group, KMS key, S3 bucket and SSM document references are stored as given and never resolved. The ARN forms launch-configuration-template/{id}, replication-configuration-template/{id} and launch-configuration-template/{id}/launch-action/{actionId} are the simulator's reading of the authorization reference. At most 20 templates of each kind and 50 launch actions per template exist per Region as local limits.",
+   "name": "AWS Elastic Disaster Recovery"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/drs/2020-02-26/service-2.json",
+  "sha256": "8a191476164e14fbece545135c312041fad46bdbe146bc8700604ecf4dec9b33",
+  "license": "Apache-2.0"
+ }
+}

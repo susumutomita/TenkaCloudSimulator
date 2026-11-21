@@ -1,0 +1,44 @@
+{
+ "client": "batch",
+ "steps": [
+  {"op": "create_scheduling_policy", "args": {"name": "fixture-fair", "fairsharePolicy": {"shareDecaySeconds": 3600, "computeReservation": 10}, "tags": {"team": "a"}}, "save": {"policy": "arn"}},
+  {"op": "describe_scheduling_policies", "args": {"arns": ["${policy}"]}, "expect": {"schedulingPolicies#count": 1, "schedulingPolicies[0].fairsharePolicy.computeReservation": 10, "schedulingPolicies[0].tags": {"team": "a"}}},
+  {"op": "list_scheduling_policies", "args": {}, "expect": {"schedulingPolicies#count": 1, "schedulingPolicies[0].arn": "${policy}"}},
+  {"op": "update_scheduling_policy", "args": {"arn": "${policy}", "fairsharePolicy": {"computeReservation": 20}}},
+  {"op": "create_scheduling_policy", "args": {"name": "fixture-fair"}, "error": "ClientException", "status": 400},
+  {"op": "create_scheduling_policy", "args": {"name": "fixture-bad", "fairsharePolicy": {"computeReservation": 100}}, "error": "ClientException"},
+  {"op": "create_consumable_resource", "args": {"consumableResourceName": "fixture-licenses", "totalQuantity": 8}, "save": {"resource": "consumableResourceArn"}},
+  {"op": "describe_consumable_resource", "args": {"consumableResource": "fixture-licenses"}, "expect": {"resourceType": "REPLENISHABLE", "availableQuantity": 8, "inUseQuantity": 0}},
+  {"op": "list_consumable_resources", "args": {}, "expect": {"consumableResources#count": 1, "consumableResources[0].consumableResourceName": "fixture-licenses"}},
+  {"op": "create_compute_environment", "args": {"computeEnvironmentName": "fixture-ce", "type": "MANAGED", "computeResources": {"type": "EC2", "maxvCpus": 16, "subnets": ["subnet-0a1b2c3d"], "instanceTypes": ["optimal"]}}, "save": {"ce": "computeEnvironmentArn"}},
+  {"op": "describe_compute_environments", "args": {"computeEnvironments": ["fixture-ce"]}, "expect": {"computeEnvironments[0].status": "CREATING", "computeEnvironments[0].state": "ENABLED", "computeEnvironments[0].containerOrchestrationType": "ECS"}},
+  {"op": "update_compute_environment", "args": {"computeEnvironment": "fixture-ce", "state": "DISABLED"}},
+  {"op": "create_compute_environment", "args": {"computeEnvironmentName": "fixture-managed", "type": "MANAGED"}, "error": "ClientException"},
+  {"op": "create_job_queue", "args": {"jobQueueName": "fixture-queue", "priority": 5, "schedulingPolicyArn": "${policy}", "computeEnvironmentOrder": [{"order": 1, "computeEnvironment": "${ce}"}]}, "save": {"queue": "jobQueueArn"}},
+  {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-queue"]}, "expect": {"jobQueues[0].status": "VALID", "jobQueues[0].priority": 5}},
+  {"op": "update_job_queue", "args": {"jobQueue": "fixture-queue", "state": "DISABLED", "priority": 9}},
+  {"op": "create_job_queue", "args": {"jobQueueName": "fixture-missing-policy", "priority": 1, "schedulingPolicyArn": "arn:aws:batch:us-east-1:000000000000:scheduling-policy/missing"}, "error": "ClientException"},
+  {"op": "create_service_environment", "args": {"serviceEnvironmentName": "fixture-service", "serviceEnvironmentType": "SAGEMAKER_TRAINING", "capacityLimits": [{"maxCapacity": 50, "capacityUnit": "NUM_INSTANCES"}]}},
+  {"op": "describe_service_environments", "args": {"serviceEnvironments": ["fixture-service"]}, "expect": {"serviceEnvironments[0].status": "VALID"}},
+  {"op": "update_service_environment", "args": {"serviceEnvironment": "fixture-service", "state": "DISABLED"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${queue}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${queue}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${policy}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "describe_job_queues", "args": {"jobQueues": ["missing-queue"]}, "error": "ClientException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "describe_compute_environments", "args": {}, "expect": {"computeEnvironments#count": 0}},
+  {"op": "list_scheduling_policies", "args": {}, "expect": {"schedulingPolicies#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-queue"]}, "expect": {"jobQueues[0].state": "DISABLED", "jobQueues[0].priority": 9}}
+ ],
+ "cleanup": [
+  {"op": "delete_job_queue", "args": {"jobQueue": "fixture-queue"}},
+  {"op": "delete_compute_environment", "args": {"computeEnvironment": "fixture-ce"}},
+  {"op": "delete_service_environment", "args": {"serviceEnvironment": "fixture-service"}},
+  {"op": "delete_consumable_resource", "args": {"consumableResource": "fixture-licenses"}},
+  {"op": "delete_scheduling_policy", "args": {"arn": "${policy}"}},
+  {"op": "describe_compute_environments", "args": {}, "expect": {"computeEnvironments#count": 0}}
+ ]
+}

@@ -1,0 +1,42 @@
+{
+ "client": "personalize",
+ "steps": [
+  {"op": "create_schema", "args": {"name": "fixture-interactions", "schema": "{\"type\":\"record\",\"name\":\"Interactions\",\"namespace\":\"com.amazonaws.personalize.schema\",\"fields\":[{\"name\":\"USER_ID\",\"type\":\"string\"},{\"name\":\"ITEM_ID\",\"type\":\"string\"},{\"name\":\"TIMESTAMP\",\"type\":\"long\"}],\"version\":\"1.0\"}"}, "save": {"schema": "schemaArn"}},
+  {"op": "create_schema", "args": {"name": "fixture-replacement", "schema": "{\"type\":\"record\",\"name\":\"Interactions\",\"namespace\":\"com.amazonaws.personalize.schema\",\"fields\":[{\"name\":\"USER_ID\",\"type\":\"string\"},{\"name\":\"ITEM_ID\",\"type\":\"string\"},{\"name\":\"TIMESTAMP\",\"type\":\"long\"},{\"name\":\"EVENT_TYPE\",\"type\":\"string\"}],\"version\":\"1.0\"}"}, "save": {"replacement": "schemaArn"}},
+  {"op": "describe_schema", "args": {"schemaArn": "${schema}"}, "expect": {"schema.name": "fixture-interactions"}},
+  {"op": "list_schemas", "args": {}, "expect": {"schemas#count": 2}},
+  {"op": "create_dataset_group", "args": {"name": "fixture-shop", "tags": [{"tagKey": "team", "tagValue": "a"}]}, "save": {"group": "datasetGroupArn"}},
+  {"op": "describe_dataset_group", "args": {"datasetGroupArn": "${group}"}, "expect": {"datasetGroup.status": "ACTIVE", "datasetGroup.name": "fixture-shop"}},
+  {"op": "list_dataset_groups", "args": {}, "expect": {"datasetGroups#count": 1}},
+  {"op": "create_dataset", "args": {"name": "fixture-events", "schemaArn": "${schema}", "datasetGroupArn": "${group}", "datasetType": "Interactions"}, "save": {"dataset": "datasetArn"}},
+  {"op": "describe_dataset", "args": {"datasetArn": "${dataset}"}, "expect": {"dataset.status": "ACTIVE", "dataset.schemaArn": "${schema}"}},
+  {"op": "list_datasets", "args": {"datasetGroupArn": "${group}"}, "expect": {"datasets#count": 1}},
+  {"op": "update_dataset", "args": {"datasetArn": "${dataset}", "schemaArn": "${replacement}"}},
+  {"op": "describe_dataset", "args": {"datasetArn": "${dataset}"}, "expect": {"dataset.schemaArn": "${replacement}"}},
+  {"op": "create_filter", "args": {"name": "fixture-unseen", "datasetGroupArn": "${group}", "filterExpression": "EXCLUDE ItemID WHERE Interactions.EVENT_TYPE IN (\"watch\")"}, "save": {"filter": "filterArn"}},
+  {"op": "describe_filter", "args": {"filterArn": "${filter}"}, "expect": {"filter.status": "ACTIVE"}},
+  {"op": "list_filters", "args": {"datasetGroupArn": "${group}"}, "expect": {"Filters#count": 1}},
+  {"op": "tag_resource", "args": {"resourceArn": "${dataset}", "tags": [{"tagKey": "env", "tagValue": "dev"}]}},
+  {"op": "untag_resource", "args": {"resourceArn": "${dataset}", "tagKeys": ["env"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${group}"}, "expect": {"tags#count": 1}},
+  {"op": "create_schema", "args": {"name": "fixture-bad", "schema": "{\"type\":\"enum\"}"}, "error": "InvalidInputException"},
+  {"op": "create_dataset", "args": {"name": "fixture-lost", "schemaArn": "arn:aws:personalize:us-east-1:000000000000:schema/missing", "datasetGroupArn": "${group}", "datasetType": "Items"}, "error": "ResourceNotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "list_schemas", "args": {}, "expect": {"schemas#count": 0}},
+  {"op": "list_dataset_groups", "args": {}, "expect": {"datasetGroups#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_dataset", "args": {"datasetArn": "${dataset}"}, "expect": {"dataset.schemaArn": "${replacement}"}},
+  {"op": "describe_filter", "args": {"filterArn": "${filter}"}, "expect": {"filter.name": "fixture-unseen"}}
+ ],
+ "cleanup": [
+  {"op": "delete_dataset_group", "args": {"datasetGroupArn": "${group}"}, "error": "ResourceInUseException", "status": 400},
+  {"op": "delete_filter", "args": {"filterArn": "${filter}"}},
+  {"op": "delete_dataset", "args": {"datasetArn": "${dataset}"}},
+  {"op": "delete_dataset_group", "args": {"datasetGroupArn": "${group}"}},
+  {"op": "delete_schema", "args": {"schemaArn": "${schema}"}},
+  {"op": "delete_schema", "args": {"schemaArn": "${replacement}"}},
+  {"op": "list_schemas", "args": {}, "expect": {"schemas#count": 0}}
+ ]
+}

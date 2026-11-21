@@ -1,0 +1,31 @@
+{
+ "client": "quicksight",
+ "denied_status": 401,
+ "steps": [
+  {"op": "create_folder", "args": {"AwsAccountId": "000000000000", "FolderId": "fixture-sales", "Name": "Fixture Sales", "SharingModel": "ACCOUNT", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"arn": "Arn"}, "expect": {"FolderId": "fixture-sales"}},
+  {"op": "describe_folder", "args": {"AwsAccountId": "000000000000", "FolderId": "fixture-sales"}, "expect": {"Folder.Name": "Fixture Sales", "Folder.FolderType": "SHARED"}},
+  {"op": "list_folders", "args": {"AwsAccountId": "000000000000"}, "expect": {"FolderSummaryList#count": 1, "FolderSummaryList[0].FolderId": "fixture-sales"}},
+  {"op": "update_folder", "args": {"AwsAccountId": "000000000000", "FolderId": "fixture-sales", "Name": "Fixture Revenue"}},
+  {"op": "describe_folder", "args": {"AwsAccountId": "000000000000", "FolderId": "fixture-sales"}, "expect": {"Folder.Name": "Fixture Revenue"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${arn}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${arn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${arn}"}, "expect": {"Tags#count": 1}},
+  {"op": "create_namespace", "args": {"AwsAccountId": "000000000000", "Namespace": "fixture-finance", "IdentityStore": "QUICKSIGHT"}, "expect": {"Name": "fixture-finance", "CreationStatus": "CREATED"}},
+  {"op": "describe_namespace", "args": {"AwsAccountId": "000000000000", "Namespace": "fixture-finance"}, "expect": {"Namespace.IdentityStore": "QUICKSIGHT"}},
+  {"op": "list_namespaces", "args": {"AwsAccountId": "000000000000"}, "expect": {"Namespaces#count": 1}},
+  {"op": "create_folder", "args": {"AwsAccountId": "000000000000", "FolderId": "fixture-sales", "Name": "Again"}, "error": "ConflictException", "status": 409},
+  {"op": "create_folder", "args": {"AwsAccountId": "000000000000", "FolderId": "fixture-nested", "Name": "Nested", "ParentFolderArn": "${arn}"}, "error": "InvalidParameterValueException"},
+  {"op": "describe_folder", "args": {"AwsAccountId": "000000000000", "FolderId": "fixture-missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_folders", "args": {"AwsAccountId": "000000000000"}, "expect": {"FolderSummaryList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_folder", "args": {"AwsAccountId": "000000000000", "FolderId": "fixture-sales"}, "expect": {"Folder.Name": "Fixture Revenue"}}
+ ],
+ "cleanup": [
+  {"op": "delete_namespace", "args": {"AwsAccountId": "000000000000", "Namespace": "fixture-finance"}},
+  {"op": "delete_folder", "args": {"AwsAccountId": "000000000000", "FolderId": "fixture-sales"}},
+  {"op": "list_folders", "args": {"AwsAccountId": "000000000000"}, "expect": {"FolderSummaryList#count": 0}}
+ ]
+}
