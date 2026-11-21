@@ -38,5 +38,6 @@ func Services() []*Service {
 		deadlineCloud, databaseMigration, costExplorer, bcmDataExports, braket, artifact, aiopsGroup,
 		batch, outposts, pcs, serverlessRepo,
 		healthImaging, healthLake, omics, keyspaces, grafana,
+		b2bi, qBusiness, connect, chimeVoice, chimeIdentity, chimeMediaPipelines, workMail, rePostPrivate,
 	}
 }

@@ -126,7 +126,7 @@ func TestB2BILifecycleOfEveryResource(t *testing.T) {
 	expect(t, call("GetProfile", map[string]any{"profileId": profileID}), 400, "ResourceNotFoundException")
 }
 
-func escapeARN(arn string) string { return strings.NewReplacer(":", "%3A", "/", "%2F").Replace(arn) }
+func bizEscapeARN(arn string) string { return strings.NewReplacer(":", "%3A", "/", "%2F").Replace(arn) }
 
 func TestQBusinessCheckHooksApplyDocumentedRules(t *testing.T) {
 	cases := []struct {
@@ -210,12 +210,12 @@ func TestQBusinessLifecycleOfEveryResource(t *testing.T) {
 		t.Fatalf("retrievers %v", list)
 	}
 
-	expect(t, call("POST", "/v1/tags/"+escapeARN(appARN), map[string]any{"tags": []any{map[string]any{"key": "k", "value": "v"}}}), 200, "")
-	if tags := items(t, call("GET", "/v1/tags/"+escapeARN(appARN), nil), "tags"); len(tags) != 2 {
+	expect(t, call("POST", "/v1/tags/"+bizEscapeARN(appARN), map[string]any{"tags": []any{map[string]any{"key": "k", "value": "v"}}}), 200, "")
+	if tags := items(t, call("GET", "/v1/tags/"+bizEscapeARN(appARN), nil), "tags"); len(tags) != 2 {
 		t.Fatalf("tags %v", tags)
 	}
-	expect(t, call("DELETE", "/v1/tags/"+escapeARN(appARN)+"?tagKeys=k", nil), 200, "")
-	expect(t, call("GET", "/v1/tags/"+escapeARN(appARN+"x"), nil), 404, "ResourceNotFoundException")
+	expect(t, call("DELETE", "/v1/tags/"+bizEscapeARN(appARN)+"?tagKeys=k", nil), 200, "")
+	expect(t, call("GET", "/v1/tags/"+bizEscapeARN(appARN+"x"), nil), 404, "ResourceNotFoundException")
 
 	for _, path := range []string{"/applications/" + appID + "/chatresponseconfigurations", "/applications/" + appID + "/chatcontrols", "/applications/" + appID + "/dataaccessors", "/applications/" + appID + "/plugins", "/applications/" + appID + "/indices/" + indexID + "/datasources"} {
 		expect(t, call("GET", path, nil), 501, "UnknownOperationException")
@@ -346,12 +346,12 @@ func TestConnectLifecycleOfEveryResource(t *testing.T) {
 	}
 
 	arn := str(queue.body["QueueArn"])
-	expect(t, call("POST", "/tags/"+escapeARN(arn), map[string]any{"tags": map[string]any{"k": "v"}}), 200, "")
-	if tags := call("GET", "/tags/"+escapeARN(arn), nil).body["tags"].(map[string]any); tags["k"] != "v" {
+	expect(t, call("POST", "/tags/"+bizEscapeARN(arn), map[string]any{"tags": map[string]any{"k": "v"}}), 200, "")
+	if tags := call("GET", "/tags/"+bizEscapeARN(arn), nil).body["tags"].(map[string]any); tags["k"] != "v" {
 		t.Fatalf("tags %v", tags)
 	}
-	expect(t, call("DELETE", "/tags/"+escapeARN(arn)+"?tagKeys=k", nil), 200, "")
-	if tags := call("GET", "/tags/"+escapeARN(instanceARN), nil).body["tags"].(map[string]any); tags["team"] != "a" {
+	expect(t, call("DELETE", "/tags/"+bizEscapeARN(arn)+"?tagKeys=k", nil), 200, "")
+	if tags := call("GET", "/tags/"+bizEscapeARN(instanceARN), nil).body["tags"].(map[string]any); tags["team"] != "a" {
 		t.Fatalf("instance tags %v", tags)
 	}
 
@@ -441,8 +441,8 @@ func TestChimeSDKModelsShareTheSigningNameAndTheTagRoutes(t *testing.T) {
 		t.Fatalf("replay %v", replay.body)
 	}
 	expect(t, identity("POST", "/app-instances", map[string]any{"Name": "tagged", "ClientRequestToken": "token-2", "Tags": []any{map[string]any{"Key": "k", "Value": "v"}}}), 400, "BadRequestException")
-	okay(t, identity("PUT", "/app-instances/"+escapeARN(appARN), map[string]any{"Name": "chat-2", "Metadata": "m2"}))
-	if got := identity("GET", "/app-instances/"+escapeARN(appARN), nil).body["AppInstance"].(map[string]any); got["Name"] != "chat-2" || got["Metadata"] != "m2" {
+	okay(t, identity("PUT", "/app-instances/"+bizEscapeARN(appARN), map[string]any{"Name": "chat-2", "Metadata": "m2"}))
+	if got := identity("GET", "/app-instances/"+bizEscapeARN(appARN), nil).body["AppInstance"].(map[string]any); got["Name"] != "chat-2" || got["Metadata"] != "m2" {
 		t.Fatalf("describe %v", got)
 	}
 	if list := items(t, identity("GET", "/app-instances", nil), "AppInstances"); len(list) != 1 {
@@ -469,22 +469,22 @@ func TestChimeSDKModelsShareTheSigningNameAndTheTagRoutes(t *testing.T) {
 	// The shared tag routes reach the voice model whichever model the SDK targets.
 	arn := str(connector["VoiceConnectorArn"])
 	okay(t, identity("POST", "/tags?operation=tag-resource", map[string]any{"ResourceARN": arn, "Tags": []any{map[string]any{"Key": "env", "Value": "dev"}}}))
-	if tags := items(t, media("GET", "/tags?arn="+escapeARN(arn), nil), "Tags"); len(tags) != 2 {
+	if tags := items(t, media("GET", "/tags?arn="+bizEscapeARN(arn), nil), "Tags"); len(tags) != 2 {
 		t.Fatalf("tags %v", tags)
 	}
 	okay(t, media("POST", "/tags?operation=untag-resource", map[string]any{"ResourceARN": arn, "TagKeys": []any{"env"}}))
-	if tags := items(t, voice("GET", "/tags?arn="+escapeARN(arn), nil), "Tags"); len(tags) != 1 {
+	if tags := items(t, voice("GET", "/tags?arn="+bizEscapeARN(arn), nil), "Tags"); len(tags) != 1 {
 		t.Fatalf("untag %v", tags)
 	}
-	expect(t, voice("GET", "/tags?arn="+escapeARN(appARN), nil), 404, "NotFoundException")
+	expect(t, voice("GET", "/tags?arn="+bizEscapeARN(appARN), nil), 404, "NotFoundException")
 
-	for _, path := range []string{"/phone-numbers", "/sip-rules", "/voice-profile-domains", "/app-instance-users?app-instance-arn=" + escapeARN(appARN)} {
+	for _, path := range []string{"/phone-numbers", "/sip-rules", "/voice-profile-domains", "/app-instance-users?app-instance-arn=" + bizEscapeARN(appARN)} {
 		expect(t, voice("GET", path, nil), 501, "UnknownOperationException")
 	}
 	okay(t, voice("DELETE", "/sip-media-applications/"+sipID, nil))
 	okay(t, voice("DELETE", "/voice-connector-groups/"+groupID, nil))
 	okay(t, voice("DELETE", "/voice-connectors/"+id, nil))
-	okay(t, identity("DELETE", "/app-instances/"+escapeARN(appARN), nil))
+	okay(t, identity("DELETE", "/app-instances/"+bizEscapeARN(appARN), nil))
 	okay(t, media("DELETE", "/media-insights-pipeline-configurations/calls", nil))
 	expect(t, voice("GET", "/voice-connectors/"+id, nil), 404, "NotFoundException")
 }
@@ -668,12 +668,12 @@ func TestRePostPrivateLifecycleOfEveryResource(t *testing.T) {
 	expect(t, call("POST", "/spaces/missing/channels", map[string]any{"channelName": "x"}), 404, "ResourceNotFoundException")
 
 	arn := str(got.body["arn"])
-	okay(t, call("POST", "/tags/"+escapeARN(arn), map[string]any{"tags": map[string]any{"k": "v"}}))
-	if tags := call("GET", "/tags/"+escapeARN(arn), nil).body["tags"].(map[string]any); len(tags) != 2 {
+	okay(t, call("POST", "/tags/"+bizEscapeARN(arn), map[string]any{"tags": map[string]any{"k": "v"}}))
+	if tags := call("GET", "/tags/"+bizEscapeARN(arn), nil).body["tags"].(map[string]any); len(tags) != 2 {
 		t.Fatalf("tags %v", tags)
 	}
-	okay(t, call("DELETE", "/tags/"+escapeARN(arn)+"?tagKeys=k", nil))
-	expect(t, call("GET", "/tags/"+escapeARN(arn+"/channel/"+channelID), nil), 400, "ValidationException")
+	okay(t, call("DELETE", "/tags/"+bizEscapeARN(arn)+"?tagKeys=k", nil))
+	expect(t, call("GET", "/tags/"+bizEscapeARN(arn+"/channel/"+channelID), nil), 400, "ValidationException")
 
 	for _, path := range []string{"/spaces/" + spaceID + "/admins/x", "/spaces/" + spaceID + "/invite"} {
 		expect(t, call("POST", path, map[string]any{}), 501, "UnknownOperationException")
