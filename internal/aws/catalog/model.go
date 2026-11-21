@@ -35,6 +35,7 @@ type Member struct {
 	Streaming      bool   `json:"streaming"`
 	HostLabel      bool   `json:"hostLabel"`
 	EventPayload   bool   `json:"eventpayload"`
+	XMLAttribute   bool   `json:"xmlAttribute"`
 }
 
 // ErrorTrait carries the documented HTTP status of a modeled exception.
@@ -66,6 +67,9 @@ type Shape struct {
 	Event        bool              `json:"eventstream"`
 	TimestampFmt string            `json:"timestampFormat"`
 	Flattened    bool              `json:"flattened"`
+	// LocationName is a shape-level serialized name; a member reference's
+	// own locationName overrides it (Query protocol element and key names).
+	LocationName string `json:"locationName"`
 }
 
 // HTTP is the official REST binding of an operation.
@@ -96,6 +100,8 @@ type Operation struct {
 	Output    string     `json:"output"`
 	Errors    []string   `json:"errors"`
 	Paginator *Paginator `json:"paginator"`
+	// ResultWrapper is the Query protocol element that holds the output.
+	ResultWrapper string `json:"resultWrapper"`
 }
 
 // Metadata is the official service metadata used for routing and signing.
