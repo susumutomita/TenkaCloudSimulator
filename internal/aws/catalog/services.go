@@ -34,5 +34,6 @@ func Services() []*Service {
 		mainframeModernization, migrationHub, transferFamily, applicationMigration, elasticDisasterRecovery,
 		mediaConvert, mediaPackage, mediaPackageV2, mediaPackageVOD, mediaTailor,
 		mediaConnect, mediaLive, ivs, ivsChat, ivsRealtime,
+		appFlow, cleanRooms, cleanRoomsML, cloudSearch, dataZone, emr, emrServerless, emrContainers, lakeFormation, quickSight,
 	}
 }

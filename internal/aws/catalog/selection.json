@@ -91,6 +91,16 @@
     "TagResource",
     "UntagResource"
   ],
+  "appflow": [
+    "CreateFlow",
+    "DeleteFlow",
+    "DescribeFlow",
+    "ListFlows",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateFlow"
+  ],
   "appmesh": [
     "CreateMesh",
     "CreateVirtualGateway",
@@ -295,6 +305,34 @@
     "UpdateChimeWebhookConfiguration",
     "UpdateCustomAction"
   ],
+  "cleanrooms": [
+    "CreateCollaboration",
+    "CreateConfiguredTable",
+    "DeleteCollaboration",
+    "DeleteConfiguredTable",
+    "GetCollaboration",
+    "GetConfiguredTable",
+    "ListCollaborations",
+    "ListConfiguredTables",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateCollaboration",
+    "UpdateConfiguredTable"
+  ],
+  "cleanroomsml": [
+    "CreateConfiguredModelAlgorithm",
+    "CreateTrainingDataset",
+    "DeleteConfiguredModelAlgorithm",
+    "DeleteTrainingDataset",
+    "GetConfiguredModelAlgorithm",
+    "GetTrainingDataset",
+    "ListConfiguredModelAlgorithms",
+    "ListTagsForResource",
+    "ListTrainingDatasets",
+    "TagResource",
+    "UntagResource"
+  ],
   "cloud9": [
     "CreateEnvironmentEC2",
     "DeleteEnvironment",
@@ -314,6 +352,11 @@
     "ListDevelopmentSchemaArns",
     "ListFacetNames",
     "UpdateFacet"
+  ],
+  "cloudsearch": [
+    "CreateDomain",
+    "DeleteDomain",
+    "DescribeDomains"
   ],
   "cloudtrail": [
     "CreateTrail",
@@ -443,6 +486,21 @@
     "ListDataSets",
     "UpdateDataSet",
     "UpdateRevision"
+  ],
+  "datazone": [
+    "CreateDomain",
+    "CreateProject",
+    "DeleteDomain",
+    "DeleteProject",
+    "GetDomain",
+    "GetProject",
+    "ListDomains",
+    "ListProjects",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateDomain",
+    "UpdateProject"
   ],
   "detective": [
     "CreateGraph",
@@ -594,6 +652,40 @@
     "UpdateApplication",
     "UpdateApplicationResourceLifecycle",
     "UpdateApplicationVersion"
+  ],
+  "emr": [
+    "CreateSecurityConfiguration",
+    "DeleteSecurityConfiguration",
+    "DescribeSecurityConfiguration",
+    "GetBlockPublicAccessConfiguration",
+    "ListSecurityConfigurations",
+    "PutBlockPublicAccessConfiguration"
+  ],
+  "emr-containers": [
+    "CreateJobTemplate",
+    "CreateSecurityConfiguration",
+    "CreateVirtualCluster",
+    "DeleteJobTemplate",
+    "DeleteVirtualCluster",
+    "DescribeJobTemplate",
+    "DescribeSecurityConfiguration",
+    "DescribeVirtualCluster",
+    "ListJobTemplates",
+    "ListSecurityConfigurations",
+    "ListTagsForResource",
+    "ListVirtualClusters",
+    "TagResource",
+    "UntagResource"
+  ],
+  "emr-serverless": [
+    "CreateApplication",
+    "DeleteApplication",
+    "GetApplication",
+    "ListApplications",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateApplication"
   ],
   "entityresolution": [
     "CreateSchemaMapping",
@@ -1037,6 +1129,24 @@
     "UpdateSignalingChannel",
     "UpdateStream"
   ],
+  "lakeformation": [
+    "CreateLFTag",
+    "CreateLFTagExpression",
+    "DeleteLFTag",
+    "DeleteLFTagExpression",
+    "DeregisterResource",
+    "DescribeResource",
+    "GetDataLakeSettings",
+    "GetLFTag",
+    "GetLFTagExpression",
+    "ListLFTagExpressions",
+    "ListLFTags",
+    "ListResources",
+    "PutDataLakeSettings",
+    "RegisterResource",
+    "UpdateLFTagExpression",
+    "UpdateResource"
+  ],
   "lexv2-models": [
     "CreateBot",
     "CreateBotLocale",
@@ -1445,6 +1555,20 @@
     "UntagResource",
     "UpdateEnvironmentTemplate",
     "UpdateServiceTemplate"
+  ],
+  "quicksight": [
+    "CreateFolder",
+    "CreateNamespace",
+    "DeleteFolder",
+    "DeleteNamespace",
+    "DescribeFolder",
+    "DescribeNamespace",
+    "ListFolders",
+    "ListNamespaces",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateFolder"
   ],
   "ram": [
     "CreateResourceShare",
