@@ -499,3 +499,137 @@ func keyspacesCreateType(input map[string]any) error {
 	}
 	return nil
 }
+
+// grafana serves Amazon Managed Grafana workspaces as configuration records.
+var grafana = &Service{
+	Model: "grafana", Title: "Amazon Managed Grafana", IAMPrefix: "grafana", Issues: []int{201},
+	Resources: []*Resource{
+		{Kind: "workspace", Shape: "WorkspaceDescription", Summary: "WorkspaceSummary", ID: "hex:10:g-", IDMember: "id", Limit: 10,
+			ARN: "arn:{partition}:grafana:{region}:{account}:/workspaces/{id}", ARNMember: "",
+			Aliases: map[string]string{"workspaceName": "name", "workspaceDescription": "description", "workspaceDataSources": "dataSources",
+				"workspaceNotificationDestinations": "notificationDestinations", "workspaceOrganizationalUnits": "organizationalUnits",
+				"removeVpcConfiguration": "vpcConfiguration", "removeNetworkAccessConfiguration": "networkAccessControl"},
+			Generate: map[string]any{"status": "ACTIVE", "created": "$now", "modified": "$now", "grafanaVersion": grafanaDefaultVersion, "dataSources": []any{}}},
+	},
+	Ops: []Op{
+		{Name: "CreateWorkspace", Kind: Create, Resource: "workspace", Check: grafanaCreate},
+		{Name: "DescribeWorkspace", Kind: Read, Resource: "workspace", Lookup: "workspaceId"},
+		{Name: "ListWorkspaces", Kind: List, Resource: "workspace"},
+		{Name: "UpdateWorkspace", Kind: Update, Resource: "workspace", Lookup: "workspaceId", Touch: []string{"modified"}, Check: grafanaUpdate, Merged: grafanaMerged,
+			Fields: []string{"accountAccessType", "networkAccessControl", "organizationRoleName", "permissionType", "removeNetworkAccessConfiguration",
+				"removeVpcConfiguration", "stackSetName", "vpcConfiguration", "workspaceDataSources", "workspaceDescription", "workspaceName",
+				"workspaceNotificationDestinations", "workspaceOrganizationalUnits", "workspaceRoleArn"}},
+		{Name: "DeleteWorkspace", Kind: Delete, Resource: "workspace", Lookup: "workspaceId", Set: map[string]any{"status": "DELETING"}},
+		{Name: "TagResource", Kind: Tag, Lookup: "resourceArn"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "resourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "resourceArn"},
+	},
+	Bounds: []string{
+		"Workspaces are stored configuration records that are ACTIVE at once: no Grafana server, workspace URL, dashboard, data source connection, notification channel or license exists, endpoint is never returned, and the Grafana API, console and every other official operation return UnknownOperationException with HTTP 501. No VPC endpoint, network interface or IAM role is created or checked.",
+		"Workspace authentication, configuration and permissions are not implemented: DescribeWorkspaceAuthentication, UpdateWorkspaceAuthentication, DescribeWorkspaceConfiguration, UpdateWorkspaceConfiguration, ListPermissions, UpdatePermissions, ListVersions and the license operations return HTTP 501, and the configuration member of CreateWorkspace is refused. API keys, service accounts and their tokens are secrets that Amazon Managed Grafana generates, so CreateWorkspaceApiKey, DeleteWorkspaceApiKey and the service account and token operations return HTTP 501 and no key or token is ever stored or returned.",
+		"CreateWorkspace stores authenticationProviders as the authentication summary, with samlConfigurationStatus NOT_CONFIGURED when SAML is listed because SAML cannot be configured. Only CUSTOMER_MANAGED permissions are accepted, as the documentation prescribes for the API, and they need a workspaceRoleArn (an IAM role ARN stored without checking that the role exists); ORGANIZATION account access needs workspaceOrganizationalUnits. grafanaVersion is stored as given when it looks like 10.4 and defaults to 10.4, the example the documentation gives for the latest version; it is never upgraded and no version list is served.",
+		"networkAccessControl prefix list IDs must look like pl-1a2b3c4d and VPC configurations need 2 to 6 distinct subnet IDs and 1 to 5 distinct security group IDs, none of which are resolved. UpdateWorkspace keeps omitted settings, removeVpcConfiguration and removeNetworkAccessConfiguration clear a stored setting and are refused together with a replacement, and the merged workspace must still satisfy the rules above. Workspace names need not be unique, ARNs are arn:aws:grafana:region:account:/workspaces/id, and 10 workspaces per Region is a local limit. Deleting a workspace removes the record and returns it with status DELETING.",
+	},
+}
+
+// grafanaDefaultVersion is the example the documentation gives for the
+// latest Grafana version, used when CreateWorkspace names none.
+const grafanaDefaultVersion = "10.4"
+
+var (
+	grafanaVersion = regexp.MustCompile(`^[0-9]+\.[0-9]+(\.[0-9]+)?$`)
+	grafanaPrefix  = regexp.MustCompile(`^pl-[0-9a-f]{8}([0-9a-f]{9})?$`)
+)
+
+// grafanaDistinct requires the identifiers of a list member to differ.
+func grafanaDistinct(config map[string]any, member string) error {
+	seen := map[string]bool{}
+	ids, _ := config[member].([]any)
+	for _, id := range ids {
+		text, _ := id.(string)
+		if seen[text] {
+			return Failure("ValidationException", member+" must not contain duplicates.")
+		}
+		seen[text] = true
+	}
+	return nil
+}
+
+// grafanaSettings applies the documented rules of the network, VPC, role and permission members.
+func grafanaSettings(input map[string]any) error {
+	if access, ok := input["networkAccessControl"].(map[string]any); ok {
+		ids, _ := access["prefixListIds"].([]any)
+		for _, id := range ids {
+			if text, _ := id.(string); !grafanaPrefix.MatchString(text) {
+				return Failure("ValidationException", "Prefix list IDs look like pl-1a2b3c4d.")
+			}
+		}
+	}
+	if vpc, ok := input["vpcConfiguration"].(map[string]any); ok {
+		for _, member := range []string{"subnetIds", "securityGroupIds"} {
+			if err := grafanaDistinct(vpc, member); err != nil {
+				return err
+			}
+		}
+	}
+	if arn, ok := input["workspaceRoleArn"].(string); ok && !iamRoleARN.MatchString(arn) {
+		return Failure("ValidationException", "workspaceRoleArn must be an IAM role ARN.")
+	}
+	if kind, ok := input["permissionType"].(string); ok && kind != "CUSTOMER_MANAGED" {
+		return Failure("ValidationException", "Only the CUSTOMER_MANAGED permission type is supported: the simulator creates no IAM roles.")
+	}
+	return nil
+}
+
+func grafanaCreate(input map[string]any) error {
+	if err := grafanaSettings(input); err != nil {
+		return err
+	}
+	if version, ok := input["grafanaVersion"].(string); ok && !grafanaVersion.MatchString(version) {
+		return Failure("ValidationException", "grafanaVersion looks like 10.4.")
+	}
+	if _, ok := input["workspaceRoleArn"]; !ok {
+		return Failure("ValidationException", "CUSTOMER_MANAGED permissions require workspaceRoleArn.")
+	}
+	if units, _ := input["workspaceOrganizationalUnits"].([]any); input["accountAccessType"] == "ORGANIZATION" && len(units) == 0 {
+		return Failure("ValidationException", "ORGANIZATION account access requires workspaceOrganizationalUnits.")
+	}
+	providers, _ := input["authenticationProviders"].([]any)
+	summary := map[string]any{"providers": providers}
+	if slices.Contains(providers, any("SAML")) {
+		summary["samlConfigurationStatus"] = "NOT_CONFIGURED"
+	}
+	delete(input, "authenticationProviders")
+	input["authentication"] = summary
+	return nil
+}
+
+// grafanaUpdate drops the removal flags set to false and refuses a flag
+// combined with the replacement it removes.
+func grafanaUpdate(input map[string]any) error {
+	for flag, member := range map[string]string{"removeVpcConfiguration": "vpcConfiguration", "removeNetworkAccessConfiguration": "networkAccessControl"} {
+		switch value, present := input[flag]; {
+		case !present:
+		case value != true:
+			delete(input, flag)
+		case input[member] != nil:
+			return Failure("ValidationException", flag+" cannot be combined with "+member+".")
+		}
+	}
+	return grafanaSettings(input)
+}
+
+// grafanaMerged clears the settings the removal flags name and requires the
+// merged workspace to keep a role for customer managed permissions and
+// organizational units for organization access.
+func grafanaMerged(document, supplied map[string]any) error {
+	for flag, member := range map[string]string{"removeVpcConfiguration": "vpcConfiguration", "removeNetworkAccessConfiguration": "networkAccessControl"} {
+		if supplied[flag] == true {
+			delete(document, member)
+		}
+	}
+	if units, _ := document["organizationalUnits"].([]any); document["accountAccessType"] == "ORGANIZATION" && len(units) == 0 {
+		return Failure("ValidationException", "ORGANIZATION account access requires workspaceOrganizationalUnits.")
+	}
+	return nil
+}

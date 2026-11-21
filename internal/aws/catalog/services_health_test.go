@@ -10,7 +10,7 @@ import (
 )
 
 func healthHarness(t *testing.T) *harness {
-	return newHarness(t, healthImaging, healthLake, omics, keyspaces)
+	return newHarness(t, healthImaging, healthLake, omics, keyspaces, grafana)
 }
 
 func TestHealthImagingDatastoreLifecycle(t *testing.T) {
@@ -768,6 +768,199 @@ func TestKeyspacesLimitsAndUnboundOperations(t *testing.T) {
 	expect(t, call("CreateKeyspace", map[string]any{"keyspaceName": "over"}), 400, "ServiceQuotaExceededException")
 	for _, op := range []string{"UpdateKeyspace", "UntagResource", "RestoreTable", "GetTableAutoScalingSettings"} {
 		expect(t, call(op, map[string]any{"keyspaceName": "ksa"}), 501, "UnknownOperationException")
+	}
+}
+
+func TestGrafanaCheckHooksApplyDocumentedRules(t *testing.T) {
+	role := "arn:aws:iam::000000000000:role/grafana"
+	create := func(mutate func(map[string]any)) map[string]any {
+		input := map[string]any{"accountAccessType": "CURRENT_ACCOUNT", "authenticationProviders": []any{"AWS_SSO"}, "permissionType": "CUSTOMER_MANAGED", "workspaceRoleArn": role}
+		if mutate != nil {
+			mutate(input)
+		}
+		return input
+	}
+	cases := []struct {
+		name  string
+		input map[string]any
+		ok    bool
+	}{
+		{"valid", create(nil), true},
+		{"version", create(func(m map[string]any) { m["grafanaVersion"] = "10.4" }), true},
+		{"patch version", create(func(m map[string]any) { m["grafanaVersion"] = "9.4.7" }), true},
+		{"bad version", create(func(m map[string]any) { m["grafanaVersion"] = "latest" }), false},
+		{"service managed", create(func(m map[string]any) { m["permissionType"] = "SERVICE_MANAGED" }), false},
+		{"no role", create(func(m map[string]any) { delete(m, "workspaceRoleArn") }), false},
+		{"user as role", create(func(m map[string]any) { m["workspaceRoleArn"] = "arn:aws:iam::000000000000:user/u" }), false},
+		{"organization without units", create(func(m map[string]any) { m["accountAccessType"] = "ORGANIZATION" }), false},
+		{"organization", create(func(m map[string]any) {
+			m["accountAccessType"] = "ORGANIZATION"
+			m["workspaceOrganizationalUnits"] = []any{"ou-1234-abcdefgh"}
+		}), true},
+		{"prefix list", create(func(m map[string]any) {
+			m["networkAccessControl"] = map[string]any{"prefixListIds": []any{"pl-1a2b3c4d", "pl-0123456789abcdef0"}, "vpceIds": []any{}}
+		}), true},
+		{"bad prefix list", create(func(m map[string]any) { m["networkAccessControl"] = map[string]any{"prefixListIds": []any{"cidr"}} }), false},
+		{"vpc", create(func(m map[string]any) {
+			m["vpcConfiguration"] = map[string]any{"subnetIds": []any{"subnet-1", "subnet-2"}, "securityGroupIds": []any{"sg-1"}}
+		}), true},
+		{"duplicate subnets", create(func(m map[string]any) {
+			m["vpcConfiguration"] = map[string]any{"subnetIds": []any{"subnet-1", "subnet-1"}, "securityGroupIds": []any{"sg-1"}}
+		}), false},
+		{"duplicate security groups", create(func(m map[string]any) {
+			m["vpcConfiguration"] = map[string]any{"subnetIds": []any{"subnet-1", "subnet-2"}, "securityGroupIds": []any{"sg-1", "sg-1"}}
+		}), false},
+	}
+	for _, c := range cases {
+		err := grafanaCreate(c.input)
+		var f *fault
+		if c.ok && err != nil || !c.ok && (!errors.As(err, &f) || f.code != "ValidationException") {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+	}
+	both := create(func(m map[string]any) { m["authenticationProviders"] = []any{"AWS_SSO", "SAML"} })
+	if err := grafanaCreate(both); err != nil || both["authenticationProviders"] != nil {
+		t.Fatalf("%v %v", both, err)
+	} else if auth := both["authentication"].(map[string]any); auth["samlConfigurationStatus"] != "NOT_CONFIGURED" || len(auth["providers"].([]any)) != 2 {
+		t.Fatalf("authentication %v", auth)
+	}
+	single := create(nil)
+	if err := grafanaCreate(single); err != nil || single["authentication"].(map[string]any)["samlConfigurationStatus"] != nil {
+		t.Fatalf("%v %v", single, err)
+	}
+	flags := map[string]any{"removeVpcConfiguration": false, "removeNetworkAccessConfiguration": true}
+	if err := grafanaUpdate(flags); err != nil || flags["removeVpcConfiguration"] != nil || flags["removeNetworkAccessConfiguration"] != true {
+		t.Fatalf("flags %v %v", flags, err)
+	}
+	var f *fault
+	if err := grafanaUpdate(map[string]any{"removeVpcConfiguration": true, "vpcConfiguration": map[string]any{}}); !errors.As(err, &f) || f.code != "ValidationException" {
+		t.Fatalf("combined flag: %v", err)
+	}
+	if err := grafanaUpdate(map[string]any{"permissionType": "SERVICE_MANAGED"}); !errors.As(err, &f) {
+		t.Fatalf("service managed update: %v", err)
+	}
+	document := map[string]any{"vpcConfiguration": true, "networkAccessControl": map[string]any{}, "accountAccessType": "CURRENT_ACCOUNT"}
+	if err := grafanaMerged(document, map[string]any{"removeVpcConfiguration": true, "removeNetworkAccessConfiguration": false}); err != nil || document["vpcConfiguration"] != nil || document["networkAccessControl"] == nil {
+		t.Fatalf("merged %v %v", document, err)
+	}
+	if err := grafanaMerged(map[string]any{"accountAccessType": "ORGANIZATION"}, map[string]any{}); !errors.As(err, &f) {
+		t.Fatalf("organization without units: %v", err)
+	}
+	if err := grafanaMerged(map[string]any{"accountAccessType": "ORGANIZATION", "organizationalUnits": []any{"ou"}}, map[string]any{}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGrafanaWorkspaceLifecycle(t *testing.T) {
+	h := healthHarness(t)
+	role := "arn:aws:iam::000000000000:role/grafana"
+	body := map[string]any{"accountAccessType": "CURRENT_ACCOUNT", "authenticationProviders": []any{"AWS_SSO", "SAML"}, "permissionType": "CUSTOMER_MANAGED", "workspaceRoleArn": role,
+		"workspaceName": "ops", "workspaceDescription": "dashboards", "clientToken": "token-1", "tags": map[string]any{"team": "a"},
+		"workspaceDataSources": []any{"CLOUDWATCH"}, "workspaceNotificationDestinations": []any{"SNS"},
+		"vpcConfiguration":     map[string]any{"subnetIds": []any{"subnet-1", "subnet-2"}, "securityGroupIds": []any{"sg-1"}},
+		"networkAccessControl": map[string]any{"prefixListIds": []any{"pl-1a2b3c4d"}, "vpceIds": []any{"vpce-1"}}}
+	created := h.rest("grafana", "POST", "/workspaces", body)
+	expect(t, created, 202, "")
+	ws := created.body["workspace"].(map[string]any)
+	id := str(ws["id"])
+	if len(id) != 12 || !strings.HasPrefix(id, "g-") || ws["status"] != "ACTIVE" || ws["grafanaVersion"] != "10.4" || ws["name"] != "ops" || ws["description"] != "dashboards" ||
+		ws["created"] == nil || ws["tags"].(map[string]any)["team"] != "a" || ws["workspaceRoleArn"] != role {
+		t.Fatalf("created %v", ws)
+	}
+	for _, member := range []string{"endpoint", "grafanaToken", "licenseType", "freeTrialExpiration"} {
+		if _, present := ws[member]; present {
+			t.Fatalf("%s must not be reported", member)
+		}
+	}
+	auth := ws["authentication"].(map[string]any)
+	if auth["samlConfigurationStatus"] != "NOT_CONFIGURED" || len(auth["providers"].([]any)) != 2 || ws["dataSources"].([]any)[0] != "CLOUDWATCH" || ws["notificationDestinations"].([]any)[0] != "SNS" {
+		t.Fatalf("created members %v", ws)
+	}
+	if replay := h.rest("grafana", "POST", "/workspaces", body); replay.body["workspace"].(map[string]any)["id"] != id {
+		t.Fatalf("replay %v", replay.body)
+	}
+	body["workspaceName"] = "changed"
+	expect(t, h.rest("grafana", "POST", "/workspaces", body), 409, "ConflictException")
+	expect(t, h.rest("grafana", "POST", "/workspaces", map[string]any{"accountAccessType": "CURRENT_ACCOUNT", "authenticationProviders": []any{"AWS_SSO"}, "permissionType": "CUSTOMER_MANAGED", "workspaceRoleArn": role, "configuration": "{}"}), 400, "ValidationException")
+	expect(t, h.rest("grafana", "POST", "/workspaces", map[string]any{"accountAccessType": "CURRENT_ACCOUNT", "authenticationProviders": []any{"AWS_SSO"}, "permissionType": "SERVICE_MANAGED"}), 400, "ValidationException")
+	expect(t, h.rest("grafana", "POST", "/workspaces", map[string]any{"accountAccessType": "CURRENT_ACCOUNT", "authenticationProviders": []any{"AWS_SSO"}, "permissionType": "CUSTOMER_MANAGED", "workspaceRoleArn": role, "workspaceName": "bad name"}), 400, "ValidationException")
+	expect(t, h.rest("grafana", "POST", "/workspaces", map[string]any{"accountAccessType": "CURRENT_ACCOUNT", "permissionType": "CUSTOMER_MANAGED", "workspaceRoleArn": role}), 400, "ValidationException")
+	plain := h.rest("grafana", "POST", "/workspaces", map[string]any{"accountAccessType": "CURRENT_ACCOUNT", "authenticationProviders": []any{"AWS_SSO"}, "permissionType": "CUSTOMER_MANAGED", "workspaceRoleArn": role, "grafanaVersion": "9.4"})
+	expect(t, plain, 202, "")
+	plainWS := plain.body["workspace"].(map[string]any)
+	if plainWS["grafanaVersion"] != "9.4" || plainWS["dataSources"] == nil || plainWS["authentication"].(map[string]any)["samlConfigurationStatus"] != nil {
+		t.Fatalf("plain %v", plainWS)
+	}
+
+	got := h.rest("grafana", "GET", "/workspaces/"+id, nil)
+	expect(t, got, 200, "")
+	if got.body["workspace"].(map[string]any)["id"] != id || got.body["workspace"].(map[string]any)["vpcConfiguration"] == nil {
+		t.Fatalf("described %v", got.body)
+	}
+	list := h.rest("grafana", "GET", "/workspaces", nil)
+	if items := list.body["workspaces"].([]any); len(items) != 2 || items[0].(map[string]any)["id"] != id || items[0].(map[string]any)["tags"].(map[string]any)["team"] != "a" {
+		t.Fatalf("list %v", list.body)
+	}
+	paged := h.rest("grafana", "GET", "/workspaces?maxResults=1", nil)
+	if len(paged.body["workspaces"].([]any)) != 1 || str(paged.body["nextToken"]) == "" {
+		t.Fatalf("page %v", paged.body)
+	}
+
+	h.now = h.now.Add(time.Hour)
+	updated := h.rest("grafana", "PUT", "/workspaces/"+id, map[string]any{"workspaceName": "renamed", "workspaceDescription": "new", "removeVpcConfiguration": true, "removeNetworkAccessConfiguration": false,
+		"workspaceNotificationDestinations": []any{"SNS"}})
+	expect(t, updated, 202, "")
+	after := updated.body["workspace"].(map[string]any)
+	if after["name"] != "renamed" || after["description"] != "new" || after["vpcConfiguration"] != nil || after["networkAccessControl"] == nil || after["modified"] == after["created"] {
+		t.Fatalf("updated %v", after)
+	}
+	expect(t, h.rest("grafana", "PUT", "/workspaces/"+id, map[string]any{"vpcConfiguration": map[string]any{"subnetIds": []any{"subnet-1", "subnet-2"}, "securityGroupIds": []any{"sg-1"}}, "removeVpcConfiguration": true}), 400, "ValidationException")
+	expect(t, h.rest("grafana", "PUT", "/workspaces/"+id, map[string]any{"accountAccessType": "ORGANIZATION"}), 400, "ValidationException")
+	expect(t, h.rest("grafana", "PUT", "/workspaces/"+id, map[string]any{"permissionType": "SERVICE_MANAGED"}), 400, "ValidationException")
+	expect(t, h.rest("grafana", "PUT", "/workspaces/"+id, map[string]any{"grafanaVersion": "10.4"}), 400, "ValidationException")
+	expect(t, h.rest("grafana", "PUT", "/workspaces/g-0123456789", map[string]any{"workspaceName": "x"}), 404, "ResourceNotFoundException")
+	organization := h.rest("grafana", "PUT", "/workspaces/"+id, map[string]any{"accountAccessType": "ORGANIZATION", "workspaceOrganizationalUnits": []any{"ou-1234-abcdefgh"}})
+	expect(t, organization, 202, "")
+	if units := organization.body["workspace"].(map[string]any)["organizationalUnits"].([]any); len(units) != 1 {
+		t.Fatalf("organization %v", organization.body)
+	}
+
+	arn := "arn:aws:grafana:us-east-1:000000000000:/workspaces/" + id
+	tagPath := "/tags/" + url.PathEscape(arn)
+	expect(t, h.rest("grafana", "POST", tagPath, map[string]any{"tags": map[string]any{"stage": "dev"}}), 200, "")
+	if tags := h.rest("grafana", "GET", tagPath, nil).body["tags"].(map[string]any); len(tags) != 2 || tags["stage"] != "dev" {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, h.rest("grafana", "DELETE", tagPath+"?tagKeys=stage", nil), 200, "")
+	if tags := h.rest("grafana", "GET", tagPath, nil).body["tags"].(map[string]any); len(tags) != 1 {
+		t.Fatalf("tags after untag %v", tags)
+	}
+
+	deleted := h.rest("grafana", "DELETE", "/workspaces/"+id, nil)
+	expect(t, deleted, 202, "")
+	if deleted.body["workspace"].(map[string]any)["status"] != "DELETING" {
+		t.Fatalf("deleted %v", deleted.body)
+	}
+	expect(t, h.rest("grafana", "GET", "/workspaces/"+id, nil), 404, "ResourceNotFoundException")
+	expect(t, h.rest("grafana", "DELETE", "/workspaces/"+id, nil), 404, "ResourceNotFoundException")
+}
+
+func TestGrafanaLimitsAndUnboundOperations(t *testing.T) {
+	h := healthHarness(t)
+	role := "arn:aws:iam::000000000000:role/grafana"
+	for i := 0; i < 10; i++ {
+		expect(t, h.rest("grafana", "POST", "/workspaces", map[string]any{"accountAccessType": "CURRENT_ACCOUNT", "authenticationProviders": []any{"AWS_SSO"}, "permissionType": "CUSTOMER_MANAGED", "workspaceRoleArn": role}), 202, "")
+	}
+	expect(t, h.rest("grafana", "POST", "/workspaces", map[string]any{"accountAccessType": "CURRENT_ACCOUNT", "authenticationProviders": []any{"AWS_SSO"}, "permissionType": "CUSTOMER_MANAGED", "workspaceRoleArn": role}), 402, "ServiceQuotaExceededException")
+	id := "g-0123456789"
+	for _, call := range []struct{ method, path string }{
+		{"POST", "/workspaces/" + id + "/apikeys"}, {"POST", "/workspaces/" + id + "/serviceaccounts"}, {"POST", "/workspaces/" + id + "/serviceaccounts/1/tokens"},
+		{"GET", "/workspaces/" + id + "/authentication"}, {"GET", "/workspaces/" + id + "/configuration"}, {"PATCH", "/workspaces/" + id + "/permissions"},
+		{"GET", "/versions"}, {"POST", "/workspaces/" + id + "/licenses/ENTERPRISE"},
+	} {
+		if r := h.rest("grafana", call.method, call.path, map[string]any{}); r.status != 501 || r.code() != "UnknownOperationException" {
+			t.Fatalf("%s %s: %d %s", call.method, call.path, r.status, r.raw)
+		}
 	}
 }
 
