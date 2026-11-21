@@ -386,3 +386,89 @@ func TestPCSClustersNodeGroupsAndQueues(t *testing.T) {
 	expect(t, h.json1("pcs", "UpdateCluster", map[string]any{"clusterIdentifier": "hpc", "slurmConfiguration": map[string]any{"scaleDownIdleTimeInSeconds": 60}}), 501, "UnknownOperationException")
 	expect(t, h.json1("pcs", "RegisterComputeNodeGroupInstance", map[string]any{"clusterIdentifier": "hpc", "bootstrapId": "x"}), 501, "UnknownOperationException")
 }
+
+func TestServerlessRepositoryApplicationsAndPolicies(t *testing.T) {
+	h := newHarness(t, serverlessRepo)
+	app := map[string]any{"name": "hello-app", "author": "alice-dev", "description": "greets", "labels": []any{"demo", "team:a"}, "homePageUrl": "https://example.invalid/app", "spdxLicenseId": "MIT"}
+	created := h.rest("serverlessrepo", "POST", "/applications", app)
+	expect(t, created, 201, "")
+	id := str(created.body["applicationId"])
+	if id != "arn:aws:serverlessrepo:us-east-1:000000000000:applications/hello-app" || created.body["isVerifiedAuthor"] != false || created.body["version"] != nil ||
+		created.body["creationTime"] == nil || created.body["name"] != "hello-app" {
+		t.Fatalf("created %v", created.body)
+	}
+	expect(t, h.rest("serverlessrepo", "POST", "/applications", app), 409, "ConflictException")
+	for member, value := range map[string]any{"semanticVersion": "1.0.0", "templateBody": "{}", "templateUrl": "https://example.invalid/t", "sourceCodeUrl": "https://example.invalid/s",
+		"licenseBody": "text", "licenseUrl": "https://example.invalid/l", "readmeBody": "text", "readmeUrl": "https://example.invalid/r"} {
+		other := map[string]any{"name": "other", "author": "alice-dev", "description": "d", member: value}
+		expect(t, h.rest("serverlessrepo", "POST", "/applications", other), 400, "BadRequestException")
+	}
+	for name, mutate := range map[string]func(map[string]any){
+		"name":        func(m map[string]any) { m["name"] = "bad name" },
+		"author":      func(m map[string]any) { m["author"] = "Alice" },
+		"author dash": func(m map[string]any) { m["author"] = "a--b" },
+		"author edge": func(m map[string]any) { m["author"] = "-ab" },
+		"author long": func(m map[string]any) { m["author"] = strings.Repeat("a", 128) },
+		"description": func(m map[string]any) { m["description"] = "" },
+		"long text":   func(m map[string]any) { m["description"] = strings.Repeat("d", 257) },
+		"labels":      func(m map[string]any) { m["labels"] = []any{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"} },
+		"label rule":  func(m map[string]any) { m["labels"] = []any{"bad label"} },
+	} {
+		bad := map[string]any{"name": "other", "author": "alice-dev", "description": "d"}
+		mutate(bad)
+		if r := h.rest("serverlessrepo", "POST", "/applications", bad); r.status != 400 || r.code() != "BadRequestException" {
+			t.Fatalf("%s: %d %s", name, r.status, r.raw)
+		}
+	}
+	path := "/applications/" + escapeARN(id)
+	got := h.rest("serverlessrepo", "GET", path, nil)
+	expect(t, got, 200, "")
+	if got.body["applicationId"] != id || got.body["description"] != "greets" {
+		t.Fatalf("get %v", got.body)
+	}
+	expect(t, h.rest("serverlessrepo", "GET", path+"?semanticVersion=1.0.0", nil), 400, "BadRequestException")
+	expect(t, h.rest("serverlessrepo", "GET", "/applications/"+escapeARN(id+"x"), nil), 404, "NotFoundException")
+	list := h.rest("serverlessrepo", "GET", "/applications", nil)
+	expect(t, list, 200, "")
+	if items := list.body["applications"].([]any); len(items) != 1 || items[0].(map[string]any)["name"] != "hello-app" {
+		t.Fatalf("list %v", list.body)
+	}
+	updated := h.rest("serverlessrepo", "PATCH", path, map[string]any{"description": "greets everyone", "labels": []any{"demo"}})
+	expect(t, updated, 200, "")
+	if updated.body["description"] != "greets everyone" || updated.body["author"] != "alice-dev" {
+		t.Fatalf("update %v", updated.body)
+	}
+	expect(t, h.rest("serverlessrepo", "PATCH", path, map[string]any{"author": "Bob"}), 400, "BadRequestException")
+	expect(t, h.rest("serverlessrepo", "PATCH", path, map[string]any{"readmeBody": "text"}), 400, "BadRequestException")
+	expect(t, h.rest("serverlessrepo", "PATCH", "/applications/"+escapeARN(id+"x"), map[string]any{"description": "d"}), 404, "NotFoundException")
+
+	policy := map[string]any{"statements": []any{map[string]any{"actions": []any{"Deploy"}, "principals": []any{"123456789012", "*"}, "statementId": "share"}}}
+	policyPath := path + "/policy"
+	expect(t, h.rest("serverlessrepo", "GET", policyPath, nil), 404, "NotFoundException")
+	put := h.rest("serverlessrepo", "PUT", policyPath, policy)
+	expect(t, put, 200, "")
+	if statements := put.body["statements"].([]any); len(statements) != 1 || statements[0].(map[string]any)["statementId"] != "share" {
+		t.Fatalf("put %v", put.body)
+	}
+	policy["statements"] = []any{map[string]any{"actions": []any{"Deploy", "UnshareApplication"}, "principals": []any{"210987654321"}}}
+	expect(t, h.rest("serverlessrepo", "PUT", policyPath, policy), 200, "")
+	read := h.rest("serverlessrepo", "GET", policyPath, nil)
+	expect(t, read, 200, "")
+	if statements := read.body["statements"].([]any); len(statements) != 1 || len(statements[0].(map[string]any)["actions"].([]any)) != 2 {
+		t.Fatalf("policy %v", read.body)
+	}
+	expect(t, h.rest("serverlessrepo", "PUT", policyPath, map[string]any{"statements": []any{map[string]any{"actions": []any{"Deploy"}, "principals": []any{"not-an-account"}}}}), 400, "BadRequestException")
+	expect(t, h.rest("serverlessrepo", "PUT", "/applications/"+escapeARN("hello-app")+"/policy", policy), 400, "BadRequestException")
+	expect(t, h.rest("serverlessrepo", "PUT", "/applications/"+escapeARN(id+"x")+"/policy", policy), 404, "NotFoundException")
+	expect(t, h.rest("serverlessrepo", "GET", "/applications/"+escapeARN(id+"x")+"/policy", nil), 404, "NotFoundException")
+
+	// Deleting the application deletes its policy.
+	expect(t, h.rest("serverlessrepo", "DELETE", path, nil), 204, "")
+	expect(t, h.rest("serverlessrepo", "DELETE", path, nil), 404, "NotFoundException")
+	expect(t, h.rest("serverlessrepo", "GET", policyPath, nil), 404, "NotFoundException")
+
+	// Unbound operations answer 501.
+	expect(t, h.rest("serverlessrepo", "PUT", path+"/versions/1.0.0", map[string]any{"templateBody": "{}"}), 501, "UnknownOperationException")
+	expect(t, h.rest("serverlessrepo", "GET", path+"/versions", nil), 501, "UnknownOperationException")
+	expect(t, h.rest("serverlessrepo", "POST", path+"/unshare", map[string]any{"organizationId": "o-1"}), 501, "UnknownOperationException")
+}

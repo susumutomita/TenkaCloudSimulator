@@ -320,3 +320,91 @@ func pcsNodeGroupMerged(document, _ map[string]any) error {
 func pcsQueue(input map[string]any) error {
 	return pcsName(input, "queueName", 25)
 }
+
+var (
+	serverlessRepoName   = regexp.MustCompile(`^[a-zA-Z0-9-]{1,140}$`)
+	serverlessRepoAuthor = regexp.MustCompile(`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`)
+	serverlessRepoLabel  = regexp.MustCompile(`^[a-zA-Z0-9+\-_:/@]{1,127}$`)
+	awsAccountID         = regexp.MustCompile(`^[0-9]{12}$`)
+)
+
+var serverlessRepo = &Service{
+	Model: "serverlessrepo", Title: "AWS Serverless Application Repository", IAMPrefix: "serverlessrepo", Issues: []int{110},
+	Resources: []*Resource{
+		{Kind: "application", Shape: "GetApplicationResponse", Summary: "ApplicationSummary", ID: "name", Cascade: true,
+			ARN:       "arn:{partition}:serverlessrepo:{region}:{account}:applications/{name}",
+			ARNMember: "ApplicationId", NameMember: "Name", Unique: true, Limit: 50,
+			Generate: map[string]any{"CreationTime": "$now", "IsVerifiedAuthor": false}},
+		{Kind: "policy", Shape: "PutApplicationPolicyRequest", ID: "name", Parent: "application", Limit: 1,
+			ARN:        "arn:{partition}:serverlessrepo:{region}:{account}:applications/{parentName}/policy",
+			NameMember: "ApplicationId"},
+	},
+	Ops: []Op{
+		{Name: "CreateApplication", Kind: Create, Resource: "application", Check: serverlessRepoCreate},
+		{Name: "GetApplication", Kind: Read, Resource: "application", Lookup: "ApplicationId"},
+		{Name: "ListApplications", Kind: List, Resource: "application"},
+		{Name: "UpdateApplication", Kind: Update, Resource: "application", Lookup: "ApplicationId",
+			Fields: []string{"Author", "Description", "HomePageUrl", "Labels"}, Check: serverlessRepoMembers},
+		{Name: "DeleteApplication", Kind: Delete, Resource: "application", Lookup: "ApplicationId"},
+		{Name: "PutApplicationPolicy", Kind: Put, Resource: "policy", Parent: "ApplicationId", Lookup: "ApplicationId", Check: serverlessRepoPolicy},
+		{Name: "GetApplicationPolicy", Kind: Read, Resource: "policy", Parent: "ApplicationId", Lookup: "ApplicationId"},
+	},
+	Bounds: []string{
+		"Applications and their sharing policies are stored records: no SAM template, source archive, readme, license text or application version is stored, nothing is deployed, and no S3 object or CloudFormation change set exists. Application versions (CreateApplicationVersion, ListApplicationVersions), CreateCloudFormationChangeSet, CreateCloudFormationTemplate, GetCloudFormationTemplate, ListApplicationDependencies and UnshareApplication return UnknownOperationException with HTTP 501.",
+		"An application is created without a version: SemanticVersion, TemplateBody, TemplateUrl, SourceCodeUrl, SourceCodeArchiveUrl, LicenseBody, LicenseUrl, ReadmeBody and ReadmeUrl are refused (the official responses would return generated S3 URLs and parameter definitions derived from the template, which the simulator does not produce), so no application reports a Version, LicenseUrl, ReadmeUrl or VerifiedAuthorUrl and IsVerifiedAuthor is always false. UpdateApplication changes Author, Description, HomePageUrl and Labels only, and GetApplication refuses SemanticVersion.",
+		"The application ID is its ARN (arn:aws:serverlessrepo:region:account:applications/name). Names are unique per Region, 1 to 140 letters, digits or hyphens; authors are 1 to 127 lowercase letters, digits or single hyphens, not starting or ending with a hyphen; descriptions are 1 to 256 characters; at most 10 labels of 1 to 127 characters. SpdxLicenseId is stored without checking it against the SPDX list.",
+		"The application policy is stored, never evaluated: it shares nothing and does not grant any account access. PutApplicationPolicy replaces the whole statement list, principals must be 12-digit account IDs or *, and the statement actions are stored without checking them against the documented Application Permissions. GetApplicationPolicy fails with NotFoundException for an application whose policy was never put, where AWS returns an empty statement list. Deleting an application deletes its policy. At most 50 applications exist per Region (local limit); the service has no tag API.",
+	},
+}
+
+func serverlessRepoCreate(input map[string]any) error {
+	for _, member := range []string{"SemanticVersion", "TemplateBody", "TemplateUrl", "SourceCodeUrl", "SourceCodeArchiveUrl", "LicenseBody", "LicenseUrl", "ReadmeBody", "ReadmeUrl"} {
+		if _, ok := input[member]; ok {
+			return invalid("%s is not supported: the simulator stores applications without versions, templates, licenses or readmes.", member)
+		}
+	}
+	if name, ok := input["Name"].(string); ok && !serverlessRepoName.MatchString(name) {
+		return invalid("Name must be 1 to 140 letters, digits or hyphens.")
+	}
+	return serverlessRepoMembers(input)
+}
+
+// serverlessRepoMembers applies the documented author, description and label
+// rules to whichever of those members a request supplies.
+func serverlessRepoMembers(input map[string]any) error {
+	if author, ok := input["Author"].(string); ok && (len(author) > 127 || !serverlessRepoAuthor.MatchString(author) || strings.Contains(author, "--")) {
+		return invalid("Author must be 1 to 127 lowercase letters, digits or single hyphens, and must not start or end with a hyphen.")
+	}
+	if description, ok := input["Description"].(string); ok && (description == "" || len(description) > 256) {
+		return invalid("Description must be 1 to 256 characters.")
+	}
+	labels, _ := input["Labels"].([]any)
+	if len(labels) > 10 {
+		return invalid("An application has at most 10 labels.")
+	}
+	for _, item := range labels {
+		if label, _ := item.(string); !serverlessRepoLabel.MatchString(label) {
+			return invalid("Labels are 1 to 127 letters, digits or + - _ : / @.")
+		}
+	}
+	return nil
+}
+
+// serverlessRepoPolicy requires the application ARN that identifies the
+// application and account IDs or * as the principals of every statement.
+func serverlessRepoPolicy(input map[string]any) error {
+	if id, _ := input["ApplicationId"].(string); !strings.HasPrefix(id, "arn:") {
+		return invalid("ApplicationId must be the application ARN.")
+	}
+	statements, _ := input["Statements"].([]any)
+	for _, item := range statements {
+		statement, _ := item.(map[string]any)
+		principals, _ := statement["Principals"].([]any)
+		for _, principal := range principals {
+			if text, _ := principal.(string); text != "*" && !awsAccountID.MatchString(text) {
+				return invalid("Principals are 12-digit AWS account IDs or *.")
+			}
+		}
+	}
+	return nil
+}

@@ -1,0 +1,26 @@
+{
+ "client": "serverlessrepo",
+ "steps": [
+  {"op": "create_application", "args": {"Name": "fixture-app", "Author": "fixture-author", "Description": "fixture application", "Labels": ["fixture"], "SpdxLicenseId": "MIT"}, "save": {"app": "ApplicationId"}, "expect": {"IsVerifiedAuthor": false}},
+  {"op": "get_application", "args": {"ApplicationId": "${app}"}, "expect": {"Name": "fixture-app", "Author": "fixture-author", "Labels": ["fixture"]}},
+  {"op": "list_applications", "args": {}, "expect": {"Applications#count": 1, "Applications[0].Name": "fixture-app"}},
+  {"op": "update_application", "args": {"ApplicationId": "${app}", "Description": "fixture application updated", "HomePageUrl": "https://example.invalid/fixture"}, "expect": {"Description": "fixture application updated"}},
+  {"op": "create_application", "args": {"Name": "fixture-app", "Author": "fixture-author", "Description": "duplicate"}, "error": "ConflictException", "status": 409},
+  {"op": "create_application", "args": {"Name": "fixture-other", "Author": "Fixture-Author", "Description": "bad author"}, "error": "BadRequestException", "status": 400},
+  {"op": "get_application_policy", "args": {"ApplicationId": "${app}"}, "error": "NotFoundException", "status": 404},
+  {"op": "put_application_policy", "args": {"ApplicationId": "${app}", "Statements": [{"Actions": ["Deploy"], "Principals": ["123456789012"], "StatementId": "fixture-share"}]}, "expect": {"Statements[0].StatementId": "fixture-share"}},
+  {"op": "get_application_policy", "args": {"ApplicationId": "${app}"}, "expect": {"Statements#count": 1, "Statements[0].Principals": ["123456789012"]}},
+  {"op": "get_application", "args": {"ApplicationId": "arn:aws:serverlessrepo:us-east-1:000000000000:applications/missing"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_applications", "args": {}, "expect": {"Applications#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_application", "args": {"ApplicationId": "${app}"}, "expect": {"Description": "fixture application updated"}},
+  {"op": "get_application_policy", "args": {"ApplicationId": "${app}"}, "expect": {"Statements[0].Actions": ["Deploy"]}}
+ ],
+ "cleanup": [
+  {"op": "delete_application", "args": {"ApplicationId": "${app}"}},
+  {"op": "list_applications", "args": {}, "expect": {"Applications#count": 0}}
+ ]
+}
