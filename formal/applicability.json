@@ -4,14 +4,14 @@
   "changes": [
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "b79f0ed75abad249486666ee616bad4c009e9570fe2b6b99df72b087c2d6341a",
+      "sha256": "5a7e52e9834e9e0c3ad823812b21fddc4faeeb947bfbc2257ac1bdd99fba0956",
       "disposition": "documentation",
       "reason": "Generated service table listing the newly added services with their bound operations and bounds.",
       "models": []
     },
     {
       "path": "docs/aws-catalog.md",
-      "sha256": "0df9a9567af965f440e2a330af5f980dd0a0cc631efba0c90f4f46ff44cc71ad",
+      "sha256": "3fe41203bff709c070150094311b8baeb599f6d8b9bc087175e861851f9474d2",
       "disposition": "documentation",
       "reason": "Catalog guide: service count, protocols, the products served through the RDS API and fixture options.",
       "models": []
@@ -371,6 +371,22 @@
       "sha256": "b72394ec836c72d851bc99ea4ac8b459cc932c94593ca742133c5bad925d4571",
       "disposition": "modeled",
       "reason": "Documentation-free subset of the pinned botocore 1.41.6 drs model for the reviewed operations; bound operations run through the catalog store.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/models/elasticache.json",
+      "sha256": "87ceddf15d4cf1b9605fb4f33644a9559fef3396c52b2eba9c46e551b4548d9f",
+      "disposition": "modeled",
+      "reason": "Documentation-free subset of the pinned botocore 1.41.6 elasticache model for the reviewed operations; bound operations run through the catalog store.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -895,6 +911,38 @@
       ]
     },
     {
+      "path": "internal/aws/catalog/models/rds.json",
+      "sha256": "288c46b037bc8378b09e15e361aa9a78b743d8d7c067e80306bdcac872c1070e",
+      "disposition": "modeled",
+      "reason": "Documentation-free subset of the pinned botocore 1.41.6 rds model for the reviewed operations; bound operations run through the catalog store.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/models/redshift.json",
+      "sha256": "c63dbe9c9de56e9ddb0a2f96ccb7be469deb6327fb1e4b3aa00fc1cbe0ffb39a",
+      "disposition": "modeled",
+      "reason": "Documentation-free subset of the pinned botocore 1.41.6 redshift model for the reviewed operations; bound operations run through the catalog store.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
+    },
+    {
       "path": "internal/aws/catalog/models/repostspace.json",
       "sha256": "b08ab75ef3673f70fc3107733ffd6598f84cff7fcaada808366407ff6ff26aa9",
       "disposition": "modeled",
@@ -960,14 +1008,14 @@
     },
     {
       "path": "internal/aws/catalog/query_test.go",
-      "sha256": "a6f488a9ce1d51c80420a25b83a53a4f6dc9b6d2fba93ee81e6edee333e9b5ef",
+      "sha256": "aa7e80a216a8b4c29d7744fb967a10f69eadc18267dfdba1a475fac89e3e38fb",
       "disposition": "test-support",
       "reason": "Routing regression list updated for services the catalog now serves over Query.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/selection.json",
-      "sha256": "f30731b0376921f48a680274ab4b90bc9aa816f7e4cf517c3a39f30360061411",
+      "sha256": "dcf037b0f820ace0cd4ea0ddb137263657f112afe4a5bf8271382f3c75bc6104",
       "disposition": "modeled",
       "reason": "Selects the reviewed operations of the newly added services for extraction; every selected operation is authorized before it reads or changes state.",
       "models": [
@@ -1099,7 +1147,7 @@
     },
     {
       "path": "internal/aws/catalog/services_data.go",
-      "sha256": "532015b5f7899e53f899e82b84305b75b361f9388e9b6749ad73a5aa565b2baf",
+      "sha256": "7ed7053edfb3aef15cfa039acfba547f6ab91d7d1f7844866e4301d1cedd0a9f",
       "disposition": "modeled",
       "reason": "Amazon RDS specification: bounds, issue list and bound resources updated; stored resources keep unique names and per-Region limits.",
       "models": [
@@ -1114,6 +1162,31 @@
           "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
         }
       ]
+    },
+    {
+      "path": "internal/aws/catalog/services_data2.go",
+      "sha256": "ff22a7a26dccf4a16bb20cdcb3d831bd762821a307fc23811f1d21e3b2d9dd69",
+      "disposition": "modeled",
+      "reason": "Amazon ElastiCache and Amazon Redshift specifications: bounds and bound resources updated; stored resources keep unique names and per-Region limits.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "QuotaBound",
+            "UniqueNames"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_data2_test.go",
+      "sha256": "787173cc1133a927228c8776549b826f8c5e31e7078df35ee30722fa7f8df4d3",
+      "disposition": "test-support",
+      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
+      "models": []
     },
     {
       "path": "internal/aws/catalog/services_health.go",
@@ -1291,6 +1364,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/catalog/services_records_test.go",
+      "sha256": "e2e2d4653d728371408533fb4d0b75b05d740a3a5bdeddb64da2f42b568a36c7",
+      "disposition": "test-support",
+      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
+      "models": []
+    },
+    {
       "path": "internal/server/apidocs/catalog/aiops.json",
       "sha256": "584301ff2e6b56a839b0835977c954746c24255251021107cb24186a48339b57",
       "disposition": "presentation",
@@ -1445,6 +1525,13 @@
       "models": []
     },
     {
+      "path": "internal/server/apidocs/catalog/elasticache.json",
+      "sha256": "b0e9cd1fb624a72d4933e9dd9d200cc97cd96f3ef2b11b229c26c3d17013bd24",
+      "disposition": "presentation",
+      "reason": "Generated elasticache reference.",
+      "models": []
+    },
+    {
       "path": "internal/server/apidocs/catalog/elasticbeanstalk.json",
       "sha256": "ecba85239fd96f2561a8207c25db7d3298ec5b9c4fe28ef7de40a83b891869a8",
       "disposition": "presentation",
@@ -1509,7 +1596,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "b01f6d124e6d718ccff5e2d388de7a55d8f5ffc63b0d9de86864e5ade3ae28a5",
+      "sha256": "7810278949da94e5453409fc5ffc23202356af2afeef4b94663ad956e4a11d4b",
       "disposition": "presentation",
       "reason": "Generated reference index listing the newly added services.",
       "models": []
@@ -1677,9 +1764,16 @@
     },
     {
       "path": "internal/server/apidocs/catalog/rds.json",
-      "sha256": "581a77dfce732fe402df90932ab228cf4e5482fea64b68e1e91e15d764df382b",
+      "sha256": "feb41706b018e7e27692e0828d71c092c37d1cc9ea28699daf1bac75436ae531",
       "disposition": "presentation",
       "reason": "Generated rds reference.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/redshift.json",
+      "sha256": "e32dfa30ee56113dd9da2db4e5fee90e3322699244522ea514e22daafd5d68eb",
+      "disposition": "presentation",
+      "reason": "Generated redshift reference.",
       "models": []
     },
     {
@@ -1873,7 +1967,7 @@
     },
     {
       "path": "test/e2e/catalog_fixtures/docdb.json",
-      "sha256": "31e42b39e412656409cb24ee664e15aa7c103b283fb414ab54cb4ffa51138375",
+      "sha256": "9516fb3bbd78691ed60b50170dd0763ec3440ee7ec8cd573ca1a69b7c6720c55",
       "disposition": "test-support",
       "reason": "boto3 lifecycle fixture for docdb.",
       "models": []
@@ -1883,6 +1977,13 @@
       "sha256": "350c732df46a30434bb9f72559144d151c43ac9d285ba9c083bca97ffed15356",
       "disposition": "test-support",
       "reason": "boto3 lifecycle fixture for drs.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/catalog_fixtures/elasticache.json",
+      "sha256": "17f58c8b3c0b81af3e83fbaaf8a47ae8d631e6a54d1b36122888431a78d6cc90",
+      "disposition": "test-support",
+      "reason": "boto3 lifecycle fixture for elasticache.",
       "models": []
     },
     {
@@ -2069,7 +2170,7 @@
     },
     {
       "path": "test/e2e/catalog_fixtures/neptune.json",
-      "sha256": "892f9edde57cb9bdfba86cb745f98c2714cb7611a4ebeccf3645a1a5e943cf54",
+      "sha256": "916bd041cccbec2ef4aa06e0457e2d73fbfb2e59db833c0fe5a4c38bce1db547",
       "disposition": "test-support",
       "reason": "boto3 lifecycle fixture for neptune.",
       "models": []
@@ -2117,6 +2218,20 @@
       "models": []
     },
     {
+      "path": "test/e2e/catalog_fixtures/rds.json",
+      "sha256": "7110328d92b426c97478ef9a6208227b18ba40b5a3d7040fabd8d152b39663e1",
+      "disposition": "test-support",
+      "reason": "boto3 lifecycle fixture for rds.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/catalog_fixtures/redshift.json",
+      "sha256": "a000d8c10e6f50c649abab6bed973d55128cd2cae4f561341153d0041ba5fd3a",
+      "disposition": "test-support",
+      "reason": "boto3 lifecycle fixture for redshift.",
+      "models": []
+    },
+    {
       "path": "test/e2e/catalog_fixtures/repostspace.json",
       "sha256": "0a05ddd20f6fa207ebe2c4660a8e515423d062b554018a193841785f7940984d",
       "disposition": "test-support",
@@ -2153,7 +2268,7 @@
     },
     {
       "path": "tools/console/tests/fixtures/catalog-descriptors.json",
-      "sha256": "0876273503c0fb698cc5a6eca56c34b4580487230c96fa0b38e3d64375f7ee74",
+      "sha256": "5d5b14711d8c3ac8f0e1c75cdc690b4cd76315f9cfbd4146dda6fabbf2b6256f",
       "disposition": "presentation",
       "reason": "Descriptor fixture regenerated by the Go catalog tests after specification changes.",
       "models": []
