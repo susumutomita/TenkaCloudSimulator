@@ -80,6 +80,11 @@ type Op struct {
 	IdempotentDelete bool
 	// HasMore names a boolean output member that reports a further page.
 	HasMore string
+	// Token names the input member of an update, put or delete that carries
+	// the resource's Token. When supplied it must equal the stored token,
+	// or the request fails as stale and changes nothing; the official shape
+	// decides whether it is required.
+	Token string
 }
 
 // Failure returns a semantic validation error with a modeled exception code
@@ -129,6 +134,18 @@ type Resource struct {
 	// settings). Reads without a stored instance return the Generate
 	// defaults; Put and Update store it.
 	Singleton bool
+	// Token names the stored member holding an optimistic concurrency
+	// token (for example UpdateToken or Version). It is generated at
+	// creation and replaced after every successful update or put; TokenID
+	// selects the generator: an identifier generator (uuid when empty) or
+	// counter, an integer that starts at 1 and grows by one per change.
+	Token   string
+	TokenID string
+	// Beside lists input members stored with the resource outside its
+	// official shape (for example a FirewallPolicy body beside the
+	// FirewallPolicyResponse metadata); an output returns one in its
+	// top-level member of the same name.
+	Beside []string
 }
 
 // Service is a reviewed bounded specification of one official AWS service.

@@ -21,6 +21,7 @@
   {"op": "update_signaling_channel", "args": {"ChannelARN": "${channel}", "CurrentVersion": "${channelVersion}", "SingleMasterConfiguration": {"MessageTtlSeconds": 90}}},
   {"op": "describe_signaling_channel", "args": {"ChannelARN": "${channel}"}, "expect": {"ChannelInfo.SingleMasterConfiguration.MessageTtlSeconds": 90}},
   {"op": "update_signaling_channel", "args": {"ChannelARN": "${channel}", "CurrentVersion": "${channelVersion}", "SingleMasterConfiguration": {"MessageTtlSeconds": 30}}, "error": "VersionMismatchException", "status": 400},
+  {"op": "delete_signaling_channel", "args": {"ChannelARN": "${channel}", "CurrentVersion": "${channelVersion}"}, "error": "VersionMismatchException", "status": 400},
   {"op": "get_data_endpoint", "args": {"StreamName": "fixture-camera", "APIName": "PUT_MEDIA"}, "error": "UnknownOperationException", "status": 501},
   {"op": "describe_stream", "args": {"StreamName": "missing-camera"}, "error": "ResourceNotFoundException", "status": 404}
  ],

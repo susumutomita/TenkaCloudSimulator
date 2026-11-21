@@ -106,6 +106,9 @@ func (q *request) put() (map[string]any, error) {
 	if err := q.authorize(found.ARN); err != nil {
 		return nil, err
 	}
+	if err := q.checkToken(res, found); err != nil {
+		return nil, err
+	}
 	resourceShape := q.b.model.shape(res.Shape)
 	tagsMember := q.tagMember(q.official.Input)
 	for key, value := range q.members() {
@@ -116,7 +119,7 @@ func (q *request) put() (map[string]any, error) {
 		if alias, ok := res.Aliases[key]; ok {
 			target = alias
 		}
-		if _, ok := resourceShape.Members[target]; !ok {
+		if !res.storable(resourceShape, target) {
 			return nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}
 		}
 		found.Document[target] = stored(value)
@@ -134,6 +137,9 @@ func (q *request) put() (map[string]any, error) {
 	}
 	for key, value := range q.op.Set {
 		found.Document[key] = q.generated(value, found, parent)
+	}
+	if err := q.rotateToken(res, found.Document); err != nil {
+		return nil, err
 	}
 	if err := q.checkRefs(res, found.Document); err != nil {
 		return nil, err
@@ -162,7 +168,7 @@ func (q *request) members() map[string]any {
 
 // passive reports input members that carry no state change of their own.
 func (q *request) passive(key string) bool {
-	if key == q.op.Lookup || key == q.op.Parent || key == q.op.Names || key == strings.Split(q.op.Lookup, ".")[0] {
+	if key == q.op.Lookup || key == q.op.Parent || key == q.op.Names || key == q.op.Token || key == strings.Split(q.op.Lookup, ".")[0] {
 		return true
 	}
 	for _, member := range q.op.LookupAlt {
@@ -549,7 +555,7 @@ func (q *request) prepareCreate(ecsRevision int) (row, *row, error) {
 		if alias, ok := res.Aliases[key]; ok {
 			target = alias
 		}
-		if _, ok := resourceShape.Members[target]; !ok {
+		if !res.storable(resourceShape, target) {
 			return row{}, nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}
 		}
 		document[target] = stored(value)
@@ -614,6 +620,9 @@ func (q *request) prepareCreate(ecsRevision int) (row, *row, error) {
 	}
 	for key, value := range q.op.Set {
 		document[key] = q.generated(value, r, parent)
+	}
+	if err := q.rotateToken(res, document); err != nil {
+		return row{}, nil, err
 	}
 	r.Document = document
 	return r, parent, nil
@@ -735,6 +744,9 @@ func (q *request) update() (map[string]any, error) {
 		return nil, err
 	}
 	res := q.resource()
+	if err := q.checkToken(res, r); err != nil {
+		return nil, err
+	}
 	resourceShape := q.b.model.shape(res.Shape)
 	allowed := map[string]bool{}
 	for _, f := range q.op.Fields {
@@ -749,7 +761,7 @@ func (q *request) update() (map[string]any, error) {
 		if alias, ok := res.Aliases[key]; ok {
 			target = alias
 		}
-		if _, ok := resourceShape.Members[target]; !ok || !allowed[key] {
+		if !res.storable(resourceShape, target) || !allowed[key] {
 			return nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}
 		}
 		r.Document[target] = stored(value)
@@ -764,6 +776,9 @@ func (q *request) update() (map[string]any, error) {
 		if err := q.op.Merged(r.Document, members); err != nil {
 			return nil, err
 		}
+	}
+	if err := q.rotateToken(res, r.Document); err != nil {
+		return nil, err
 	}
 	if err := q.checkRefs(res, r.Document); err != nil {
 		return nil, err
@@ -831,6 +846,9 @@ func (q *request) remove() (map[string]any, error) {
 		return nil, &fault{kind: "notfound", message: fmt.Sprintf("The %s has no stored configuration.", q.resource().Kind)}
 	}
 	res := q.resource()
+	if err := q.checkToken(res, r); err != nil {
+		return nil, err
+	}
 	kinds := q.children(res)
 	err = q.commit(func(tx *sql.Tx) error {
 		if len(kinds) > 0 {
@@ -1226,4 +1244,53 @@ func (q *request) listTags() (map[string]any, error) {
 		}
 	}
 	return out, nil
+}
+
+// storable reports whether a member is stored with the resource: a member
+// of its official shape or one the specification keeps beside it.
+func (res *Resource) storable(shape *Shape, member string) bool {
+	_, ok := shape.Members[member]
+	return ok || slices.Contains(res.Beside, member)
+}
+
+// checkToken refuses an operation whose supplied concurrency token differs
+// from the stored one. It runs after authorization, and the generation
+// guard of the following write keeps the comparison atomic.
+func (q *request) checkToken(res *Resource, r row) error {
+	supplied, ok := q.input[q.op.Token]
+	if q.op.Token == "" || !ok {
+		return nil
+	}
+	current := r.Document[res.Token]
+	if a, isNumber := Number(supplied); isNumber {
+		if b, stored := Number(current); stored && a == b {
+			return nil
+		}
+	} else if text, isText := supplied.(string); isText && current == text {
+		return nil
+	}
+	return &fault{kind: "stale", message: fmt.Sprintf("The %s %s does not match the current version of the %s; read it again before retrying.", q.op.Token, fmt.Sprint(supplied), res.Kind)}
+}
+
+// rotateToken gives a created or changed resource its next concurrency
+// token: a fresh identifier, or the next value of a counter.
+func (q *request) rotateToken(res *Resource, document map[string]any) error {
+	if res.Token == "" {
+		return nil
+	}
+	if res.TokenID == "counter" {
+		current, _ := Number(document[res.Token])
+		document[res.Token] = int64(current) + 1
+		return nil
+	}
+	generator := res.TokenID
+	if generator == "" {
+		generator = "uuid"
+	}
+	token, err := newID(generator, "")
+	if err != nil {
+		return err
+	}
+	document[res.Token] = token
+	return nil
 }

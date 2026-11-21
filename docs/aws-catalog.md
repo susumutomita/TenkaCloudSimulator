@@ -24,7 +24,7 @@ Services whose official API needs behavior the engine cannot express truthfully
 remain unimplemented rather than approximated, for example Managed Service for
 Apache Flink, AWS Data Pipeline, Amazon SWF, AWS Batch, CodeStar
 Notifications, Amazon Managed Grafana, AWS Organizations, Service Quotas,
-Application Auto Scaling, Amazon Cognito, AWS Network Firewall, AWS Control
+Application Auto Scaling, Amazon Cognito, AWS Control
 Tower, AWS Launch Wizard, Amazon Keyspaces and Amazon Comprehend Medical.
 Amazon RDS, Amazon ElastiCache, Amazon Redshift, Amazon EC2 Auto Scaling and
 AWS Elastic Beanstalk are served over the Query protocol. Services that use the

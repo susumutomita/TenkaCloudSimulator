@@ -133,6 +133,9 @@ type OpDescriptor struct {
 	// resource, fixed and account members, and resource members the bounded
 	// operation refuses (outside its reviewed fields).
 	Editable []string `json:"editable,omitempty"`
+	// Token is the input member that must carry the resource's current
+	// concurrency token (ResourceDescriptor.TokenWire).
+	Token string `json:"token,omitempty"`
 }
 
 // ResourceDescriptor describes one reviewed resource kind. The *Member
@@ -156,6 +159,10 @@ type ResourceDescriptor struct {
 	// TagsWire is the resource shape's tag member when the service binds no
 	// list-tags operation, so clients read tags from the description.
 	TagsWire string `json:"tagsWire,omitempty"`
+	// TokenWire is the serialized key of the resource's concurrency token:
+	// a resource member, or a top-level member of read outputs when the
+	// token is kept beside the resource shape.
+	TokenWire string `json:"tokenWire,omitempty"`
 }
 
 // Descriptor is the capability entry of one catalog service.
@@ -229,6 +236,9 @@ func (b *binding) describe() Descriptor {
 		if rd.Limit == 0 {
 			rd.Limit = defaultKindLimit
 		}
+		if res.Token != "" {
+			rd.TokenWire = b.resourceWire(res, res.Token)
+		}
 		if res.ARNMember == "" && (tagging[Tag] || tagging[Untag] || tagging[ListTags]) {
 			rd.ARNTemplate = res.ARN
 		}
@@ -279,7 +289,7 @@ func (b *binding) describeOp(op *Op, res *Resource, inputs map[string]InputShape
 	if b.model.Metadata.Protocol == "json" {
 		method, uri = "POST", "/"
 	}
-	od := OpDescriptor{Name: op.Name, Method: method, URI: uri, Lookup: op.Lookup, Parent: op.Parent, LookupKey: lookupKey(op.Lookup, res), Fixed: op.Fixed}
+	od := OpDescriptor{Name: op.Name, Method: method, URI: uri, Lookup: op.Lookup, Parent: op.Parent, LookupKey: lookupKey(op.Lookup, res), Fixed: op.Fixed, Token: op.Token}
 	if input := b.model.Shapes[official.Input]; input != nil {
 		for _, name := range input.sortedMembers() {
 			member := input.Members[name]

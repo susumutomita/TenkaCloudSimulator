@@ -139,6 +139,9 @@ func bindModel(spec *Service, model *Model) (*binding, error) {
 		if _, err := newID(res.ID, "name"); err != nil {
 			return nil, fmt.Errorf("catalog %s resource %s: %w", spec.Model, res.Kind, err)
 		}
+		if err := bindStorage(model, res); err != nil {
+			return nil, fmt.Errorf("catalog %s resource %s: %w", spec.Model, res.Kind, err)
+		}
 		kinds[res.Kind] = true
 	}
 	for i := range spec.Ops {
@@ -168,6 +171,9 @@ func bindModel(spec *Service, model *Model) (*binding, error) {
 		singleton := spec.resource(op.Resource) != nil && spec.resource(op.Resource).Singleton
 		if (op.Kind == Read || op.Kind == Update || op.Kind == Delete || op.Kind == Put || op.Kind == Tag || op.Kind == Untag || op.Kind == ListTags) && op.Lookup == "" && !singleton {
 			return nil, fmt.Errorf("catalog %s operation %s needs an identifying input member", spec.Model, op.Name)
+		}
+		if err := bindToken(spec, op, input); err != nil {
+			return nil, fmt.Errorf("catalog %s operation %s: %w", spec.Model, op.Name, err)
 		}
 		if op.HasMore != "" && (model.Shapes[official.Output] == nil || model.shape(official.Output).Members[op.HasMore].Shape == "") {
 			return nil, fmt.Errorf("catalog %s operation %s reports more pages in a missing output member", spec.Model, op.Name)
@@ -436,6 +442,7 @@ var errorFamilies = map[string][]string{
 	"limit":         {"ServiceQuotaExceededException", "LimitExceededException", "QuotaExceeded", "LimitExceeded"},
 	"tags":          {"TooManyTagsException", "TagsLimitExceededException", "TagLimitExceededException", "TooManyTags", "TagLimit", "TagsLimit", "LimitExceededException"},
 	"mismatch":      {"IdempotentParameterMismatchException", "IdempotentParameterMismatch", "Idempotency"},
+	"stale":         {"InvalidTokenException", "VersionMismatchException", "ConcurrentModificationException", "InvalidRevisionException", "PreconditionFailed", "VersionConflict"},
 	"denied":        {"AccessDeniedException"},
 	"internal":      {"InternalServerException", "InternalFailure", "InternalServiceError", "InternalServerError", "ServiceException", "ServerException"},
 	"serialization": {"SerializationException"},
@@ -445,12 +452,12 @@ var errorFamilies = map[string][]string{
 // genericFamilies are tried only after every specific candidate failed.
 var genericFamilies = map[string][]string{
 	"conflict": {"ConflictException", "Conflict"}, "dependents": {"ConflictException", "Conflict"},
-	"mismatch": {"ConflictException"},
+	"mismatch": {"ConflictException"}, "stale": {"ConflictException", "Conflict"},
 }
 
 // fallbackToValidation lists families whose unmodeled failures use the
 // operation's own validation exception rather than an invented name.
-var fallbackToValidation = map[string]bool{"conflict": true, "dependents": true, "mismatch": true, "token": true, "notfound": true, "limit": true, "tags": true}
+var fallbackToValidation = map[string]bool{"stale": true, "conflict": true, "dependents": true, "mismatch": true, "token": true, "notfound": true, "limit": true, "tags": true}
 
 var familyDefaults = map[string][2]any{
 	"validation": {"ValidationException", 400}, "unsupported": {"ValidationException", 400},
@@ -458,6 +465,7 @@ var familyDefaults = map[string][2]any{
 	"dependents": {"ConflictException", 409},
 	"limit":      {"LimitExceededException", 400}, "tags": {"LimitExceededException", 400},
 	"mismatch": {"IdempotentParameterMismatchException", 400},
+	"stale":    {"ConflictException", 409},
 	"denied":   {"AccessDeniedException", 403}, "internal": {"InternalFailure", 500},
 	"serialization": {"SerializationException", 400},
 	"token":         {"ValidationException", 400},
@@ -470,7 +478,7 @@ var queryDefaults = map[string][2]any{
 	"token": {"InvalidParameterValue", 400}, "notfound": {"InvalidParameterValue", 400},
 	"conflict": {"InvalidParameterValue", 400}, "dependents": {"InvalidParameterValue", 400},
 	"limit": {"InvalidParameterValue", 400}, "tags": {"InvalidParameterValue", 400},
-	"mismatch": {"InvalidParameterValue", 400}, "denied": {"AccessDenied", 403},
+	"mismatch": {"InvalidParameterValue", 400}, "stale": {"InvalidParameterValue", 400}, "denied": {"AccessDenied", 403},
 	"internal": {"InternalFailure", 500}, "serialization": {"MalformedQueryString", 400},
 }
 
@@ -536,4 +544,44 @@ func (b *binding) status(code, kind string) int {
 		return 400
 	}
 	return familyDefaults[kind][1].(int)
+}
+
+// bindStorage checks the concurrency token and the members kept beside
+// the official resource shape.
+func bindStorage(model *Model, res *Resource) error {
+	shape := model.shape(res.Shape)
+	for _, member := range res.Beside {
+		if _, ok := shape.Members[member]; ok || member == "" {
+			return fmt.Errorf("beside member %q is empty or already in the resource shape", member)
+		}
+	}
+	if res.Token == "" && res.TokenID != "" {
+		return errors.New("a token generator needs a token member")
+	}
+	if res.Token != "" && res.TokenID != "counter" {
+		generator := res.TokenID
+		if generator == "" {
+			generator = "uuid"
+		}
+		if _, err := newID(generator, ""); err != nil || generator == "name" {
+			return fmt.Errorf("token generator %q is not an identifier generator", res.TokenID)
+		}
+	}
+	return nil
+}
+
+// bindToken checks that an operation's token member exists and that its
+// resource keeps a token to compare.
+func bindToken(spec *Service, op *Op, input *Shape) error {
+	if op.Token == "" {
+		return nil
+	}
+	res := spec.resource(op.Resource)
+	if op.Kind != Update && op.Kind != Delete && op.Kind != Put || res == nil || res.Token == "" {
+		return errors.New("a token member needs an update, put or delete of a resource with a token")
+	}
+	if input == nil || input.Members[op.Token].Shape == "" {
+		return fmt.Errorf("token member %s is not an input member", op.Token)
+	}
+	return nil
 }

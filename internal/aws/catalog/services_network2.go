@@ -1,7 +1,6 @@
 package catalog
 
 import (
-	"crypto/rand"
 	"strings"
 )
 
@@ -203,43 +202,42 @@ var kinesisVideo = &Service{
 	Resources: []*Resource{
 		{Kind: "stream", Shape: "StreamInfo", ID: "name",
 			ARN:       "arn:{partition}:kinesisvideo:{region}:{account}:stream/{name}/1",
-			ARNMember: "StreamARN", NameMember: "StreamName", Unique: true, Limit: 50,
-			Generate: map[string]any{"Status": "CREATING", "CreationTime": "$now", "DataRetentionInHours": 0, "KmsKeyId": "alias/aws/kinesisvideo"}},
+			ARNMember: "StreamARN", NameMember: "StreamName", Unique: true, Limit: 50, Token: "Version", TokenID: "alnum:20",
+			Generate: map[string]any{"Status": "ACTIVE", "CreationTime": "$now", "DataRetentionInHours": 0, "KmsKeyId": "alias/aws/kinesisvideo"}},
 		{Kind: "channel", Shape: "ChannelInfo", ID: "name",
 			ARN:       "arn:{partition}:kinesisvideo:{region}:{account}:channel/{name}/1",
-			ARNMember: "ChannelARN", NameMember: "ChannelName", Unique: true, Limit: 50,
-			Generate: map[string]any{"ChannelStatus": "CREATING", "ChannelType": "SINGLE_MASTER", "CreationTime": "$now",
+			ARNMember: "ChannelARN", NameMember: "ChannelName", Unique: true, Limit: 50, Token: "Version", TokenID: "alnum:20",
+			Generate: map[string]any{"ChannelStatus": "ACTIVE", "ChannelType": "SINGLE_MASTER", "CreationTime": "$now",
 				"SingleMasterConfiguration": map[string]any{"MessageTtlSeconds": 60}}},
 	},
 	Ops: []Op{
 		{Name: "CreateStream", Kind: Create, Resource: "stream", Check: kinesisVideoStream},
 		{Name: "DescribeStream", Kind: Read, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}},
 		{Name: "ListStreams", Kind: List, Resource: "stream"},
-		{Name: "UpdateStream", Kind: Update, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}, Accept: []string{"CurrentVersion"},
-			Fields: []string{"DeviceName", "MediaType"}, Merged: kinesisVideoVersion},
-		{Name: "UpdateDataRetention", Kind: Update, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"},
-			Accept: []string{"CurrentVersion", "Operation", "DataRetentionChangeInHours"}, Merged: kinesisVideoRetention},
-		{Name: "DeleteStream", Kind: Delete, Resource: "stream", Lookup: "StreamARN"},
+		{Name: "UpdateStream", Kind: Update, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}, Token: "CurrentVersion",
+			Fields: []string{"DeviceName", "MediaType"}},
+		{Name: "UpdateDataRetention", Kind: Update, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}, Token: "CurrentVersion",
+			Accept: []string{"Operation", "DataRetentionChangeInHours"}, Merged: kinesisVideoRetention},
+		{Name: "DeleteStream", Kind: Delete, Resource: "stream", Lookup: "StreamARN", Token: "CurrentVersion"},
 		{Name: "CreateSignalingChannel", Kind: Create, Resource: "channel", Check: kinesisVideoChannel},
 		{Name: "DescribeSignalingChannel", Kind: Read, Resource: "channel", Lookup: "ChannelName", LookupAlt: []string{"ChannelARN"}},
 		{Name: "ListSignalingChannels", Kind: List, Resource: "channel"},
-		{Name: "UpdateSignalingChannel", Kind: Update, Resource: "channel", Lookup: "ChannelARN", Accept: []string{"CurrentVersion"},
-			Fields: []string{"SingleMasterConfiguration"}, Merged: kinesisVideoVersion},
-		{Name: "DeleteSignalingChannel", Kind: Delete, Resource: "channel", Lookup: "ChannelARN"},
+		{Name: "UpdateSignalingChannel", Kind: Update, Resource: "channel", Lookup: "ChannelARN", Token: "CurrentVersion",
+			Fields: []string{"SingleMasterConfiguration"}},
+		{Name: "DeleteSignalingChannel", Kind: Delete, Resource: "channel", Lookup: "ChannelARN", Token: "CurrentVersion"},
 		{Name: "TagResource", Kind: Tag, Lookup: "ResourceARN"},
 		{Name: "UntagResource", Kind: Untag, Lookup: "ResourceARN"},
 		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceARN"},
 	},
 	Bounds: []string{
-		"Streams and signaling channels are stored records that stay CREATING and never become ACTIVE, because nothing is provisioned: no media is ingested, stored or played, and no WebRTC signaling, relay or ICE server exists. GetDataEndpoint, GetSignalingChannelEndpoint, the edge agent, media storage, image generation, notification, stream storage and mapped resource configuration APIs return UnknownOperationException with HTTP 501, so no endpoint is ever returned.",
-		"The ARN ends in the fixed number 1 instead of the creation timestamp AWS uses, so a deleted and recreated name has the same ARN. A stream created without a KmsKeyId reports the alias alias/aws/kinesisvideo instead of the ARN of that managed key; the key is not resolved. StreamStorageConfiguration is refused.",
-		"Updates require CurrentVersion, which must equal the stored Version or the request fails with VersionMismatchException; every successful update gives the resource a new Version. UpdateDataRetention adds or subtracts the change from the retention in hours, which must stay from 0 to 87600. DeleteStream and DeleteSignalingChannel do not accept CurrentVersion and always delete the latest version; ListStreams and ListSignalingChannels refuse the name condition. Only SINGLE_MASTER channels can be created.",
+		"Streams and signaling channels are stored records: no media is ingested, stored or played, and no WebRTC signaling, relay or ICE server exists. GetDataEndpoint, GetSignalingChannelEndpoint, the edge agent, media storage, image generation, notification, stream storage and mapped resource configuration APIs return UnknownOperationException with HTTP 501, so no endpoint is ever returned.",
+		"Streams and channels are ACTIVE at once. The ARN ends in the fixed number 1 instead of the creation timestamp AWS uses, so a deleted and recreated name has the same ARN. A stream created without a KmsKeyId reports the alias alias/aws/kinesisvideo instead of the ARN of that managed key; the key is not resolved. StreamStorageConfiguration is refused.",
+		"Updates require CurrentVersion, which must equal the stored Version or the request fails with VersionMismatchException; every successful update gives the resource a new Version. UpdateDataRetention adds or subtracts the change from the retention in hours, which must stay from 0 to 87600. DeleteStream and DeleteSignalingChannel delete the latest version, or refuse with VersionMismatchException a CurrentVersion that is not the stored Version; ListStreams and ListSignalingChannels refuse the name condition. Only SINGLE_MASTER channels can be created.",
 		"Tags are read and changed through TagResource, UntagResource and ListTagsForResource by ARN; TagStream, UntagStream and ListTagsForStream are not bound. A tag count above 50 reached through TagResource fails with ClientLimitExceededException and a channel count above the simulator limit fails the same way, because the engine cannot name the more specific modeled exceptions.",
 	},
 }
 
-// kinesisVideoStream gives a new stream its first version and applies the
-// documented retention range.
+// kinesisVideoStream applies the documented retention range.
 func kinesisVideoStream(input map[string]any) error {
 	if hours, ok := Number(input["DataRetentionInHours"]); ok && hours > 87600 {
 		return Failure("InvalidArgumentException", "DataRetentionInHours must be from 0 to 87600.")
@@ -247,47 +245,21 @@ func kinesisVideoStream(input map[string]any) error {
 	if _, ok := input["StreamStorageConfiguration"]; ok {
 		return Failure("InvalidArgumentException", "StreamStorageConfiguration is not supported by the simulator.")
 	}
-	input["Version"] = kinesisVideoNewVersion()
 	return nil
 }
 
-// kinesisVideoChannel gives a new channel its first version; SINGLE_MASTER is
-// the only channel type the API documents as supported.
+// kinesisVideoChannel accepts SINGLE_MASTER, the only channel type the API
+// documents as supported.
 func kinesisVideoChannel(input map[string]any) error {
 	if kind, ok := input["ChannelType"].(string); ok && kind != "SINGLE_MASTER" {
 		return Failure("InvalidArgumentException", "SINGLE_MASTER is the only supported channel type.")
 	}
-	input["Version"] = kinesisVideoNewVersion()
-	return nil
-}
-
-// kinesisVideoNewVersion returns a random alphanumeric version.
-func kinesisVideoNewVersion() string {
-	const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, 20)
-	_, _ = rand.Read(b)
-	for i := range b {
-		b[i] = alphabet[int(b[i])%len(alphabet)]
-	}
-	return string(b)
-}
-
-// kinesisVideoVersion requires the supplied CurrentVersion to equal the
-// stored one and gives the resource a new version.
-func kinesisVideoVersion(document, supplied map[string]any) error {
-	if supplied["CurrentVersion"] != document["Version"] {
-		return Failure("VersionMismatchException", "The version you specified is not the latest version.")
-	}
-	document["Version"] = kinesisVideoNewVersion()
 	return nil
 }
 
 // kinesisVideoRetention applies an increase or decrease of the retention
-// period after the version check.
+// period; the engine has already compared CurrentVersion.
 func kinesisVideoRetention(document, supplied map[string]any) error {
-	if err := kinesisVideoVersion(document, supplied); err != nil {
-		return err
-	}
 	current, _ := Number(document["DataRetentionInHours"])
 	change, _ := Number(supplied["DataRetentionChangeInHours"])
 	switch supplied["Operation"] {

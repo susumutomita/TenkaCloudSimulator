@@ -85,21 +85,10 @@ func TestNetwork2CheckHooksApplyDocumentedRules(t *testing.T) {
 			t.Fatalf("%s: want %q, got %v", c.name, c.code, err)
 		}
 	}
-	input := map[string]any{}
-	if err := kinesisVideoStream(input); err != nil || len(str(input["Version"])) != 20 {
-		t.Fatalf("first version %v %v", input, err)
-	}
 }
 
 func TestKinesisVideoVersionAndRetentionRules(t *testing.T) {
-	document := map[string]any{"Version": "v1", "DataRetentionInHours": json.Number("10")}
 	var f *fault
-	if err := kinesisVideoVersion(document, map[string]any{"CurrentVersion": "old"}); !errors.As(err, &f) || f.code != "VersionMismatchException" || document["Version"] != "v1" {
-		t.Fatalf("stale version %v %v", err, document)
-	}
-	if err := kinesisVideoVersion(document, map[string]any{"CurrentVersion": "v1"}); err != nil || document["Version"] == "v1" {
-		t.Fatalf("rotation %v %v", err, document)
-	}
 	for _, c := range []struct {
 		operation string
 		change    int64
@@ -116,10 +105,6 @@ func TestKinesisVideoVersionAndRetentionRules(t *testing.T) {
 		if c.code == "" && (err != nil || doc["DataRetentionInHours"] != c.want) || c.code != "" && (!errors.As(err, &f) || f.code != c.code) {
 			t.Fatalf("%s %d: %v %v", c.operation, c.change, err, doc)
 		}
-	}
-	doc := map[string]any{"Version": "v1"}
-	if err := kinesisVideoRetention(doc, map[string]any{"CurrentVersion": "other"}); !errors.As(err, &f) || f.code != "VersionMismatchException" {
-		t.Fatalf("retention version %v", err)
 	}
 }
 
@@ -333,7 +318,10 @@ func TestKinesisVideoStreamLifecycle(t *testing.T) {
 
 	expect(t, h.rest("kinesisvideo", "POST", "/createStream", map[string]any{"StreamName": "front-door"}), 400, "ResourceInUseException")
 	expect(t, h.rest("kinesisvideo", "POST", "/listStreams", map[string]any{"StreamNameCondition": map[string]any{"ComparisonOperator": "BEGINS_WITH", "ComparisonValue": "front"}}), 400, "InvalidArgumentException")
-	expect(t, h.rest("kinesisvideo", "POST", "/deleteStream", map[string]any{"StreamARN": arn, "CurrentVersion": "x"}), 400, "InvalidArgumentException")
+	expect(t, h.rest("kinesisvideo", "POST", "/deleteStream", map[string]any{"StreamARN": arn, "CurrentVersion": "x"}), 400, "VersionMismatchException")
+	if h.rest("kinesisvideo", "POST", "/describeStream", map[string]any{"StreamARN": arn}).status != 200 {
+		t.Fatal("a stale delete removed the stream")
+	}
 	expect(t, h.rest("kinesisvideo", "POST", "/deleteStream", map[string]any{"StreamARN": arn}), 200, "")
 	expect(t, h.rest("kinesisvideo", "POST", "/describeStream", map[string]any{"StreamName": "front-door"}), 404, "ResourceNotFoundException")
 	expect(t, h.rest("kinesisvideo", "POST", "/deleteStream", map[string]any{"StreamARN": arn}), 404, "ResourceNotFoundException")
@@ -375,7 +363,12 @@ func TestKinesisVideoSignalingChannelLifecycle(t *testing.T) {
 	expect(t, h.rest("kinesisvideo", "POST", "/createSignalingChannel", map[string]any{"ChannelName": "doorbell"}), 400, "ResourceInUseException")
 	expect(t, h.rest("kinesisvideo", "POST", "/createSignalingChannel", map[string]any{"ChannelName": "mesh", "ChannelType": "FULL_MESH"}), 400, "InvalidArgumentException")
 	expect(t, h.rest("kinesisvideo", "POST", "/createSignalingChannel", map[string]any{"ChannelName": "bad name"}), 400, "InvalidArgumentException")
-	expect(t, h.rest("kinesisvideo", "POST", "/deleteSignalingChannel", map[string]any{"ChannelARN": arn, "CurrentVersion": version}), 400, "InvalidArgumentException")
+	expect(t, h.rest("kinesisvideo", "POST", "/deleteSignalingChannel", map[string]any{"ChannelARN": arn, "CurrentVersion": version}), 400, "VersionMismatchException")
+	current := str(h.rest("kinesisvideo", "POST", "/describeSignalingChannel", map[string]any{"ChannelARN": arn}).body["ChannelInfo"].(map[string]any)["Version"])
+	expect(t, h.rest("kinesisvideo", "POST", "/describeSignalingChannel", map[string]any{"ChannelARN": arn}), 200, "")
+	expect(t, h.rest("kinesisvideo", "POST", "/deleteSignalingChannel", map[string]any{"ChannelARN": arn, "CurrentVersion": current}), 200, "")
+	expect(t, h.rest("kinesisvideo", "POST", "/createSignalingChannel", map[string]any{"ChannelName": "doorbell"}), 200, "")
+	arn = str(h.rest("kinesisvideo", "POST", "/describeSignalingChannel", map[string]any{"ChannelName": "doorbell"}).body["ChannelInfo"].(map[string]any)["ChannelARN"])
 	expect(t, h.rest("kinesisvideo", "POST", "/deleteSignalingChannel", map[string]any{"ChannelARN": arn}), 200, "")
 	expect(t, h.rest("kinesisvideo", "POST", "/describeSignalingChannel", map[string]any{"ChannelName": "doorbell"}), 404, "ResourceNotFoundException")
 	for i := 0; i < 50; i++ {

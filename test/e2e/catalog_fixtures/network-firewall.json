@@ -1,0 +1,34 @@
+{
+ "client": "network-firewall",
+ "steps": [
+  {"op": "create_firewall_policy", "args": {"FirewallPolicyName": "fixture-policy", "Description": "first", "FirewallPolicy": {"StatelessDefaultActions": ["aws:forward_to_sfe"], "StatelessFragmentDefaultActions": ["aws:drop"]}, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"policy": "FirewallPolicyResponse.FirewallPolicyArn", "token": "UpdateToken"}, "expect": {"FirewallPolicyResponse.FirewallPolicyStatus": "ACTIVE"}},
+  {"op": "describe_firewall_policy", "args": {"FirewallPolicyName": "fixture-policy"}, "expect": {"UpdateToken": "${token}", "FirewallPolicy.StatelessFragmentDefaultActions": ["aws:drop"], "FirewallPolicyResponse.Description": "first"}},
+  {"op": "list_firewall_policies", "args": {}, "expect": {"FirewallPolicies#count": 1, "FirewallPolicies[0].Arn": "${policy}"}},
+  {"op": "update_firewall_policy", "args": {"FirewallPolicyArn": "${policy}", "UpdateToken": "00000000-0000-4000-8000-000000000000", "FirewallPolicy": {"StatelessDefaultActions": ["aws:pass"], "StatelessFragmentDefaultActions": ["aws:pass"]}}, "error": "InvalidTokenException", "status": 400},
+  {"op": "update_firewall_policy", "args": {"FirewallPolicyArn": "${policy}", "UpdateToken": "${token}", "Description": "second", "FirewallPolicy": {"StatelessDefaultActions": ["aws:pass"], "StatelessFragmentDefaultActions": ["aws:pass"]}}, "save": {"token2": "UpdateToken"}},
+  {"op": "describe_firewall_policy", "args": {"FirewallPolicyArn": "${policy}"}, "expect": {"UpdateToken": "${token2}", "FirewallPolicy.StatelessDefaultActions": ["aws:pass"], "FirewallPolicyResponse.Description": "second"}},
+  {"op": "update_firewall_policy", "args": {"FirewallPolicyArn": "${policy}", "UpdateToken": "${token}", "FirewallPolicy": {"StatelessDefaultActions": ["aws:drop"], "StatelessFragmentDefaultActions": ["aws:drop"]}}, "error": "InvalidTokenException", "status": 400},
+  {"op": "create_firewall_policy", "args": {"FirewallPolicyName": "fixture-dry", "DryRun": true, "FirewallPolicy": {"StatelessDefaultActions": ["aws:pass"], "StatelessFragmentDefaultActions": ["aws:pass"]}}, "error": "InvalidRequestException", "status": 400},
+  {"op": "create_tls_inspection_configuration", "args": {"TLSInspectionConfigurationName": "fixture-tls", "TLSInspectionConfiguration": {"ServerCertificateConfigurations": [{"ServerCertificates": [{"ResourceArn": "arn:aws:acm:us-east-1:000000000000:certificate/0f1e2d3c-aaaa-4bbb-8ccc-111122223333"}]}]}}, "save": {"tls": "TLSInspectionConfigurationResponse.TLSInspectionConfigurationArn", "tlsToken": "UpdateToken"}},
+  {"op": "describe_tls_inspection_configuration", "args": {"TLSInspectionConfigurationArn": "${tls}"}, "expect": {"UpdateToken": "${tlsToken}", "TLSInspectionConfigurationResponse.TLSInspectionConfigurationStatus": "ACTIVE"}},
+  {"op": "list_tls_inspection_configurations", "args": {}, "expect": {"TLSInspectionConfigurations#count": 1}},
+  {"op": "update_tls_inspection_configuration", "args": {"TLSInspectionConfigurationName": "fixture-tls", "UpdateToken": "${tlsToken}", "Description": "updated", "TLSInspectionConfiguration": {}}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${policy}", "Tags": [{"Key": "k", "Value": "v"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${policy}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${policy}"}, "expect": {"Tags#count": 1}},
+  {"op": "create_firewall_policy", "args": {"FirewallPolicyName": "fixture-policy", "FirewallPolicy": {"StatelessDefaultActions": ["aws:pass"], "StatelessFragmentDefaultActions": ["aws:pass"]}}, "error": "InvalidRequestException", "status": 400},
+  {"op": "describe_firewall_policy", "args": {"FirewallPolicyName": "fixture-missing"}, "error": "ResourceNotFoundException", "status": 400},
+  {"op": "describe_firewall", "args": {"FirewallName": "fixture-firewall"}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "list_firewall_policies", "args": {}, "expect": {"FirewallPolicies#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_firewall_policy", "args": {"FirewallPolicyArn": "${policy}"}, "expect": {"UpdateToken": "${token2}"}}
+ ],
+ "cleanup": [
+  {"op": "delete_firewall_policy", "args": {"FirewallPolicyArn": "${policy}"}, "expect": {"FirewallPolicyResponse.FirewallPolicyStatus": "DELETING"}},
+  {"op": "delete_tls_inspection_configuration", "args": {"TLSInspectionConfigurationArn": "${tls}"}},
+  {"op": "list_firewall_policies", "args": {}, "expect": {"FirewallPolicies#count": 0}}
+ ]
+}
