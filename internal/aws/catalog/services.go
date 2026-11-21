@@ -36,5 +36,6 @@ func Services() []*Service {
 		mediaConnect, mediaLive, ivs, ivsChat, ivsRealtime,
 		appFlow, cleanRooms, cleanRoomsML, cloudSearch, dataZone, emr, emrServerless, emrContainers, lakeFormation, quickSight,
 		deadlineCloud, databaseMigration, costExplorer, bcmDataExports, braket, artifact, aiopsGroup,
+		batch, outposts, pcs, serverlessRepo,
 	}
 }
