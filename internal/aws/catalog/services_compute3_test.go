@@ -266,3 +266,123 @@ func TestOutpostsSitesAndOutpostsAreStoredRecords(t *testing.T) {
 	expect(t, h.rest("outposts", "GET", "/sites/"+siteID+"/address?AddressType=SHIPPING_ADDRESS", nil), 501, "UnknownOperationException")
 	expect(t, h.rest("outposts", "POST", "/orders", map[string]any{"OutpostIdentifier": opID, "LineItems": []any{}}), 501, "UnknownOperationException")
 }
+
+func TestPCSClustersNodeGroupsAndQueues(t *testing.T) {
+	h := newHarness(t, pcs)
+	cluster := map[string]any{"clusterName": "hpc", "scheduler": map[string]any{"type": "SLURM", "version": "24.11"}, "size": "SMALL",
+		"networking": map[string]any{"subnetIds": []any{"subnet-0a1b2c3d"}}, "tags": map[string]any{"team": "a"}}
+	created := h.json1("pcs", "CreateCluster", cluster)
+	expect(t, created, 200, "")
+	c := created.body["cluster"].(map[string]any)
+	id := str(c["id"])
+	if !strings.HasPrefix(id, "pcs_") || c["name"] != "hpc" || c["status"] != "CREATING" || c["arn"] != "arn:aws:pcs:us-east-1:000000000000:cluster/"+id ||
+		c["endpoints"] != nil || c["createdAt"] == nil {
+		t.Fatalf("cluster %v", c)
+	}
+	expect(t, h.json1("pcs", "CreateCluster", cluster), 400, "ConflictException")
+	for _, name := range []string{"ab", "9hpc", "pcs_hpc", "has space", strings.Repeat("a", 41)} {
+		bad := map[string]any{"clusterName": name, "scheduler": cluster["scheduler"], "size": "SMALL", "networking": cluster["networking"]}
+		expect(t, h.json1("pcs", "CreateCluster", bad), 400, "ValidationException")
+	}
+	for _, key := range []string{"hpc", id} {
+		got := h.json1("pcs", "GetCluster", map[string]any{"clusterIdentifier": key})
+		expect(t, got, 200, "")
+		if got.body["cluster"].(map[string]any)["id"] != id {
+			t.Fatalf("get %v", got.body)
+		}
+	}
+	expect(t, h.json1("pcs", "GetCluster", map[string]any{"clusterIdentifier": "missing"}), 400, "ResourceNotFoundException")
+	listed := h.json1("pcs", "ListClusters", map[string]any{})
+	if list, _ := listed.body["clusters"].([]any); len(list) != 1 {
+		t.Fatalf("clusters %v", list)
+	}
+
+	group := map[string]any{"clusterIdentifier": "hpc", "computeNodeGroupName": "compute", "subnetIds": []any{"subnet-0a1b2c3d"},
+		"customLaunchTemplate": map[string]any{"id": "lt-0123456789abcdef0", "version": "1"}, "iamInstanceProfileArn": "arn:aws:iam::000000000000:instance-profile/pcs",
+		"scalingConfiguration": map[string]any{"minInstanceCount": 0, "maxInstanceCount": 4}, "instanceConfigs": []any{map[string]any{"instanceType": "c6i.large"}}, "clientToken": "token-1234"}
+	made := h.json1("pcs", "CreateComputeNodeGroup", group)
+	expect(t, made, 200, "")
+	g := made.body["computeNodeGroup"].(map[string]any)
+	gid := str(g["id"])
+	if g["clusterId"] != id || g["status"] != "CREATING" || g["purchaseOption"] != "ONDEMAND" || g["arn"] != "arn:aws:pcs:us-east-1:000000000000:computenodegroup/"+gid {
+		t.Fatalf("group %v", g)
+	}
+	expect(t, h.json1("pcs", "CreateComputeNodeGroup", group), 200, "")
+	group["clientToken"] = "token-5678"
+	expect(t, h.json1("pcs", "CreateComputeNodeGroup", group), 400, "ConflictException")
+	for name, mutate := range map[string]func(map[string]any){
+		"short name":  func(m map[string]any) { m["computeNodeGroupName"] = "ab" },
+		"digit start": func(m map[string]any) { m["computeNodeGroupName"] = "9nodes" },
+		"scaling order": func(m map[string]any) {
+			m["scalingConfiguration"] = map[string]any{"minInstanceCount": 5, "maxInstanceCount": 4}
+		},
+		"spot options on demand": func(m map[string]any) {
+			m["spotOptions"] = map[string]any{"allocationStrategy": "lowest-price"}
+		},
+	} {
+		bad := map[string]any{}
+		for k, v := range group {
+			bad[k] = v
+		}
+		bad["computeNodeGroupName"] = "other"
+		bad["clientToken"] = "token-" + name
+		mutate(bad)
+		if r := h.json1("pcs", "CreateComputeNodeGroup", bad); r.status != 400 || r.code() != "ValidationException" {
+			t.Fatalf("%s: %d %s", name, r.status, r.raw)
+		}
+	}
+	expect(t, h.json1("pcs", "CreateComputeNodeGroup", map[string]any{"clusterIdentifier": "missing", "computeNodeGroupName": "compute", "subnetIds": []any{"s"}, "customLaunchTemplate": group["customLaunchTemplate"],
+		"iamInstanceProfileArn": group["iamInstanceProfileArn"], "scalingConfiguration": group["scalingConfiguration"], "instanceConfigs": group["instanceConfigs"]}), 400, "ResourceNotFoundException")
+	for _, key := range []string{"compute", gid} {
+		expect(t, h.json1("pcs", "GetComputeNodeGroup", map[string]any{"clusterIdentifier": id, "computeNodeGroupIdentifier": key}), 200, "")
+	}
+	expect(t, h.json1("pcs", "GetComputeNodeGroup", map[string]any{"clusterIdentifier": "hpc", "computeNodeGroupIdentifier": "absent"}), 400, "ResourceNotFoundException")
+	if list := h.json1("pcs", "ListComputeNodeGroups", map[string]any{"clusterIdentifier": "hpc"}).body["computeNodeGroups"].([]any); len(list) != 1 {
+		t.Fatalf("groups %v", list)
+	}
+	expect(t, h.json1("pcs", "UpdateComputeNodeGroup", map[string]any{"clusterIdentifier": "hpc", "computeNodeGroupIdentifier": "compute", "purchaseOption": "SPOT",
+		"spotOptions": map[string]any{"allocationStrategy": "capacity-optimized"}, "scalingConfiguration": map[string]any{"minInstanceCount": 1, "maxInstanceCount": 8}, "clientToken": "token-update"}), 200, "")
+	expect(t, h.json1("pcs", "UpdateComputeNodeGroup", map[string]any{"clusterIdentifier": "hpc", "computeNodeGroupIdentifier": "compute", "scalingConfiguration": map[string]any{"minInstanceCount": 9, "maxInstanceCount": 8}}), 400, "ValidationException")
+	expect(t, h.json1("pcs", "UpdateComputeNodeGroup", map[string]any{"clusterIdentifier": "hpc", "computeNodeGroupIdentifier": "compute", "purchaseOption": "ONDEMAND"}), 400, "ValidationException")
+	expect(t, h.json1("pcs", "UpdateComputeNodeGroup", map[string]any{"clusterIdentifier": "hpc", "computeNodeGroupIdentifier": "missing", "amiId": "ami-0123"}), 400, "ResourceNotFoundException")
+
+	queue := h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": "hpc", "queueName": "main", "computeNodeGroupConfigurations": []any{map[string]any{"computeNodeGroupId": gid}}, "tags": map[string]any{"q": "1"}})
+	expect(t, queue, 200, "")
+	q := queue.body["queue"].(map[string]any)
+	qid := str(q["id"])
+	if q["clusterId"] != id || q["status"] != "CREATING" || q["arn"] != "arn:aws:pcs:us-east-1:000000000000:queue/"+qid {
+		t.Fatalf("queue %v", q)
+	}
+	expect(t, h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": "hpc", "queueName": "main"}), 400, "ConflictException")
+	expect(t, h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": "hpc", "queueName": "1"}), 400, "ValidationException")
+	expect(t, h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": "hpc", "queueName": "9queue"}), 400, "ValidationException")
+	expect(t, h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": "hpc", "queueName": "9queue"}), 400, "ValidationException")
+	expect(t, h.json1("pcs", "GetQueue", map[string]any{"clusterIdentifier": "hpc", "queueIdentifier": qid}), 200, "")
+	expect(t, h.json1("pcs", "GetQueue", map[string]any{"clusterIdentifier": "hpc", "queueIdentifier": "absent"}), 400, "ResourceNotFoundException")
+	if list := h.json1("pcs", "ListQueues", map[string]any{"clusterIdentifier": "hpc"}).body["queues"].([]any); len(list) != 1 {
+		t.Fatalf("queues %v", list)
+	}
+	expect(t, h.json1("pcs", "UpdateQueue", map[string]any{"clusterIdentifier": "hpc", "queueIdentifier": "main", "computeNodeGroupConfigurations": []any{}}), 200, "")
+	expect(t, h.json1("pcs", "UpdateQueue", map[string]any{"clusterIdentifier": "hpc", "queueIdentifier": "missing"}), 400, "ResourceNotFoundException")
+
+	qARN := str(q["arn"])
+	expect(t, h.json1("pcs", "TagResource", map[string]any{"resourceArn": qARN, "tags": map[string]any{"k": "v"}}), 200, "")
+	expect(t, h.json1("pcs", "UntagResource", map[string]any{"resourceArn": qARN, "tagKeys": []any{"q"}}), 200, "")
+	if tags := h.json1("pcs", "ListTagsForResource", map[string]any{"resourceArn": qARN}).body["tags"].(map[string]any); len(tags) != 1 || tags["k"] != "v" {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, h.json1("pcs", "ListTagsForResource", map[string]any{"resourceArn": "arn:aws:pcs:us-east-1:000000000000:queue/pcs_missing"}), 400, "ResourceNotFoundException")
+
+	// A cluster with children cannot be deleted.
+	expect(t, h.json1("pcs", "DeleteCluster", map[string]any{"clusterIdentifier": "hpc"}), 400, "ConflictException")
+	expect(t, h.json1("pcs", "DeleteQueue", map[string]any{"clusterIdentifier": "hpc", "queueIdentifier": "main", "clientToken": "token-del"}), 200, "")
+	expect(t, h.json1("pcs", "DeleteQueue", map[string]any{"clusterIdentifier": "hpc", "queueIdentifier": "main"}), 400, "ResourceNotFoundException")
+	expect(t, h.json1("pcs", "DeleteComputeNodeGroup", map[string]any{"clusterIdentifier": "hpc", "computeNodeGroupIdentifier": "compute"}), 200, "")
+	expect(t, h.json1("pcs", "DeleteComputeNodeGroup", map[string]any{"clusterIdentifier": "hpc", "computeNodeGroupIdentifier": "compute"}), 400, "ResourceNotFoundException")
+	expect(t, h.json1("pcs", "DeleteCluster", map[string]any{"clusterIdentifier": "hpc", "clientToken": "token-del2"}), 200, "")
+	expect(t, h.json1("pcs", "DeleteCluster", map[string]any{"clusterIdentifier": "hpc"}), 400, "ResourceNotFoundException")
+
+	// Unbound operations answer 501.
+	expect(t, h.json1("pcs", "UpdateCluster", map[string]any{"clusterIdentifier": "hpc", "slurmConfiguration": map[string]any{"scaleDownIdleTimeInSeconds": 60}}), 501, "UnknownOperationException")
+	expect(t, h.json1("pcs", "RegisterComputeNodeGroupInstance", map[string]any{"clusterIdentifier": "hpc", "bootstrapId": "x"}), 501, "UnknownOperationException")
+}

@@ -232,3 +232,91 @@ func outpostsOutpost(input map[string]any) error {
 	}
 	return nil
 }
+
+// pcsNamePattern is the documented name rule of PCS resources. The official
+// pattern uses a negative lookahead the engine cannot compile, so it is
+// applied here: a letter, then letters, digits or hyphens.
+var pcsNamePattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9-]+$`)
+
+var pcs = &Service{
+	Model: "pcs", Title: "AWS Parallel Computing Service", IAMPrefix: "pcs", Issues: []int{109},
+	Resources: []*Resource{
+		{Kind: "cluster", Shape: "Cluster", Summary: "ClusterSummary", ID: "alnum:10:pcs_", ARN: "arn:{partition}:pcs:{region}:{account}:cluster/{id}",
+			ARNMember: "arn", NameMember: "name", IDMember: "id", Unique: true, Limit: 20, Aliases: map[string]string{"clusterName": "name"},
+			Generate: map[string]any{"status": "CREATING", "createdAt": "$now", "modifiedAt": "$now"}},
+		{Kind: "computeNodeGroup", Shape: "ComputeNodeGroup", Summary: "ComputeNodeGroupSummary", Parent: "cluster", ParentMember: "clusterId", ID: "alnum:10:pcs_",
+			ARN:       "arn:{partition}:pcs:{region}:{account}:computenodegroup/{id}",
+			ARNMember: "arn", NameMember: "name", IDMember: "id", Unique: true, Limit: 50, Aliases: map[string]string{"computeNodeGroupName": "name"},
+			Generate: map[string]any{"clusterId": "$parentId", "status": "CREATING", "createdAt": "$now", "modifiedAt": "$now", "purchaseOption": "ONDEMAND"}},
+		{Kind: "queue", Shape: "Queue", Summary: "QueueSummary", Parent: "cluster", ParentMember: "clusterId", ID: "alnum:10:pcs_",
+			ARN:       "arn:{partition}:pcs:{region}:{account}:queue/{id}",
+			ARNMember: "arn", NameMember: "name", IDMember: "id", Unique: true, Limit: 50, Aliases: map[string]string{"queueName": "name"},
+			Generate: map[string]any{"clusterId": "$parentId", "status": "CREATING", "createdAt": "$now", "modifiedAt": "$now"}},
+	},
+	Ops: []Op{
+		{Name: "CreateCluster", Kind: Create, Resource: "cluster", Check: pcsCluster},
+		{Name: "GetCluster", Kind: Read, Resource: "cluster", Lookup: "clusterIdentifier"},
+		{Name: "ListClusters", Kind: List, Resource: "cluster"},
+		{Name: "DeleteCluster", Kind: Delete, Resource: "cluster", Lookup: "clusterIdentifier", Accept: []string{"clientToken"}},
+		{Name: "CreateComputeNodeGroup", Kind: Create, Resource: "computeNodeGroup", Parent: "clusterIdentifier", Check: pcsNodeGroup},
+		{Name: "GetComputeNodeGroup", Kind: Read, Resource: "computeNodeGroup", Parent: "clusterIdentifier", Lookup: "computeNodeGroupIdentifier"},
+		{Name: "ListComputeNodeGroups", Kind: List, Resource: "computeNodeGroup", Parent: "clusterIdentifier"},
+		{Name: "UpdateComputeNodeGroup", Kind: Update, Resource: "computeNodeGroup", Parent: "clusterIdentifier", Lookup: "computeNodeGroupIdentifier",
+			Fields: []string{"amiId", "subnetIds", "customLaunchTemplate", "purchaseOption", "spotOptions", "scalingConfiguration", "iamInstanceProfileArn", "slurmConfiguration"},
+			Accept: []string{"clientToken"}, Touch: []string{"modifiedAt"}, Merged: pcsNodeGroupMerged},
+		{Name: "DeleteComputeNodeGroup", Kind: Delete, Resource: "computeNodeGroup", Parent: "clusterIdentifier", Lookup: "computeNodeGroupIdentifier", Accept: []string{"clientToken"}},
+		{Name: "CreateQueue", Kind: Create, Resource: "queue", Parent: "clusterIdentifier", Check: pcsQueue},
+		{Name: "GetQueue", Kind: Read, Resource: "queue", Parent: "clusterIdentifier", Lookup: "queueIdentifier"},
+		{Name: "ListQueues", Kind: List, Resource: "queue", Parent: "clusterIdentifier"},
+		{Name: "UpdateQueue", Kind: Update, Resource: "queue", Parent: "clusterIdentifier", Lookup: "queueIdentifier",
+			Fields: []string{"computeNodeGroupConfigurations", "slurmConfiguration"}, Accept: []string{"clientToken"}, Touch: []string{"modifiedAt"}},
+		{Name: "DeleteQueue", Kind: Delete, Resource: "queue", Parent: "clusterIdentifier", Lookup: "queueIdentifier", Accept: []string{"clientToken"}},
+		{Name: "TagResource", Kind: Tag, Lookup: "resourceArn"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "resourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "resourceArn"},
+	},
+	Bounds: []string{
+		"Clusters, compute node groups and queues are stored configuration records that stay CREATING: no Slurm controller, accounting database, REST endpoint, compute instance, launch or network interface exists, a cluster reports no endpoints or authKey, and no job can be submitted. RegisterComputeNodeGroupInstance, which PCS itself calls for the nodes it launches, and UpdateCluster return UnknownOperationException with HTTP 501.",
+		"UpdateCluster is not implemented because its slurmConfiguration is a partial update of nested settings (scale-down time, custom settings, accounting, Slurm REST) that the stored model would replace as a whole. Compute node group and queue updates replace each supplied member as a whole, and the cluster name or ID of a child operation may be either, as the official identifier pattern allows.",
+		"Subnets, security groups, launch templates, AMIs, instance profiles, instance types and the compute node groups a queue names are stored without being resolved: nothing checks that they exist, that subnets share a VPC with the cluster, or that a queue's compute node groups belong to its cluster. A compute node group's scaling minimum must not exceed its maximum, and a SPOT purchase option is the only one that accepts spotOptions. Deleting a cluster that still has compute node groups or queues, and deleting a compute node group that a queue names, behave as stored dependents: the first is refused with ConflictException, the second is not checked.",
+		"Names are 3 to 40 characters for clusters and 3 to 25 for compute node groups and queues, begin with a letter and hold letters, digits and hyphens; the official pattern's pcs_ exclusion is implied by that rule. The scheduler type is SLURM with a version stored as given. ARN shapes (cluster/pcs_id, computenodegroup/pcs_id, queue/pcs_id) are inferred. Resource counts per Region (20 clusters, 50 compute node groups and 50 queues per cluster) are local limits.",
+	},
+}
+
+func pcsName(input map[string]any, member string, high int) error {
+	if name, ok := input[member].(string); ok && (!pcsNamePattern.MatchString(name) || len(name) < 3 || len(name) > high) {
+		return invalid("%s must be 3 to %d letters, digits or hyphens and begin with a letter.", member, high)
+	}
+	return nil
+}
+
+func pcsCluster(input map[string]any) error {
+	return pcsName(input, "clusterName", 40)
+}
+
+func pcsNodeGroup(input map[string]any) error {
+	if err := pcsName(input, "computeNodeGroupName", 25); err != nil {
+		return err
+	}
+	return pcsNodeGroupMerged(input, input)
+}
+
+// pcsNodeGroupMerged applies the scaling and purchase rules to a whole
+// compute node group document.
+func pcsNodeGroupMerged(document, _ map[string]any) error {
+	if scaling, ok := document["scalingConfiguration"].(map[string]any); ok {
+		low, _ := Number(scaling["minInstanceCount"])
+		high, _ := Number(scaling["maxInstanceCount"])
+		if low > high {
+			return invalid("minInstanceCount must not exceed maxInstanceCount.")
+		}
+	}
+	if _, ok := document["spotOptions"]; ok && document["purchaseOption"] != "SPOT" {
+		return invalid("spotOptions applies only to the SPOT purchase option.")
+	}
+	return nil
+}
+
+func pcsQueue(input map[string]any) error {
+	return pcsName(input, "queueName", 25)
+}
