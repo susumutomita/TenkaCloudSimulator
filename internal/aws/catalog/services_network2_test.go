@@ -129,7 +129,7 @@ func TestDirectConnectGatewayLifecycle(t *testing.T) {
 	expect(t, created, 200, "")
 	gateway := created.body["directConnectGateway"].(map[string]any)
 	id := str(gateway["directConnectGatewayId"])
-	if len(id) != 36 || gateway["directConnectGatewayState"] != "available" || gateway["ownerAccount"] != "000000000000" || gateway["amazonSideAsn"] != json.Number("64600") {
+	if len(id) != 36 || gateway["directConnectGatewayState"] != "pending" || gateway["ownerAccount"] != "000000000000" || gateway["amazonSideAsn"] != json.Number("64600") {
 		t.Fatalf("gateway %v", gateway)
 	}
 	defaults := h.json1("directconnect", "CreateDirectConnectGateway", map[string]any{"directConnectGatewayName": "core"})
@@ -291,7 +291,7 @@ func TestKinesisVideoStreamLifecycle(t *testing.T) {
 	}
 	for _, request := range []map[string]any{{"StreamName": "front-door"}, {"StreamARN": arn}} {
 		info := h.rest("kinesisvideo", "POST", "/describeStream", request).body["StreamInfo"].(map[string]any)
-		if info["Status"] != "ACTIVE" || info["DataRetentionInHours"] != json.Number("24") || info["DeviceName"] != "cam-1" || info["MediaType"] != "video/h264" ||
+		if info["Status"] != "CREATING" || info["DataRetentionInHours"] != json.Number("24") || info["DeviceName"] != "cam-1" || info["MediaType"] != "video/h264" ||
 			info["KmsKeyId"] != "alias/aws/kinesisvideo" || len(str(info["Version"])) != 20 || info["StreamARN"] != arn || info["CreationTime"] == nil {
 			t.Fatalf("stream info %v", info)
 		}
@@ -353,7 +353,7 @@ func TestKinesisVideoSignalingChannelLifecycle(t *testing.T) {
 		t.Fatalf("channel ARN %q", arn)
 	}
 	info := h.rest("kinesisvideo", "POST", "/describeSignalingChannel", map[string]any{"ChannelName": "doorbell"}).body["ChannelInfo"].(map[string]any)
-	if info["ChannelType"] != "SINGLE_MASTER" || info["ChannelStatus"] != "ACTIVE" || info["SingleMasterConfiguration"].(map[string]any)["MessageTtlSeconds"] != json.Number("60") || len(str(info["Version"])) != 20 {
+	if info["ChannelType"] != "SINGLE_MASTER" || info["ChannelStatus"] != "CREATING" || info["SingleMasterConfiguration"].(map[string]any)["MessageTtlSeconds"] != json.Number("60") || len(str(info["Version"])) != 20 {
 		t.Fatalf("channel info %v", info)
 	}
 	version := str(info["Version"])

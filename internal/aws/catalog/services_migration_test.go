@@ -197,7 +197,7 @@ func TestTransferWorkflowProfileAndConnector(t *testing.T) {
 	described = h.json1("transfer", "DescribeConnector", map[string]any{"ConnectorId": connectorID})
 	expect(t, described, 200, "")
 	record := described.body["Connector"].(map[string]any)
-	if record["Status"] != "ACTIVE" || record["EgressType"] != "SERVICE_MANAGED" || record["Url"] != "sftp://partner.example.com" || record["ServiceManagedEgressIpAddresses"] != nil {
+	if record["Status"] != "PENDING" || record["EgressType"] != "SERVICE_MANAGED" || record["Url"] != "sftp://partner.example.com" || record["ServiceManagedEgressIpAddresses"] != nil {
 		t.Fatalf("connector %v", record)
 	}
 	updated := h.json1("transfer", "UpdateConnector", map[string]any{"ConnectorId": connectorID, "Url": "sftp://other.example.com", "LoggingRole": migrationRole})

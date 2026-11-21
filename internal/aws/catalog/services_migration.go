@@ -121,7 +121,7 @@ var transferFamily = &Service{
 		{Kind: "connector", Shape: "DescribedConnector", Summary: "ListedConnector", ID: "hex:17:c-",
 			ARN:       "arn:{partition}:transfer:{region}:{account}:connector/{id}",
 			ARNMember: "Arn", IDMember: "ConnectorId", Limit: 100,
-			Generate: map[string]any{"Status": "ACTIVE", "EgressType": "SERVICE_MANAGED"}},
+			Generate: map[string]any{"Status": "PENDING", "EgressType": "SERVICE_MANAGED"}},
 		{Kind: "server", Shape: "DescribedServer", Summary: "ListedServer", ID: "hex:17:s-",
 			ARN:       "arn:{partition}:transfer:{region}:{account}:server/{id}",
 			ARNMember: "Arn", IDMember: "ServerId", Limit: 20,
@@ -158,9 +158,9 @@ var transferFamily = &Service{
 		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "Arn"},
 	},
 	Bounds: []string{
-		"Workflows, AS2 profiles, connectors and servers are stored configuration. A server is a stored record that stays OFFLINE: no endpoint, address, hostname, host key, listener or file store exists, nothing can connect, and StartServer, StopServer, StartFileTransfer, StartDirectoryListing, StartRemoteDelete, StartRemoteMove, TestConnection, TestIdentityProvider, workflow executions and every other official operation return UnknownOperationException with HTTP 501. No workflow step runs.",
+		"Workflows, AS2 profiles, connectors and servers are stored configuration. A connector stays PENDING and never becomes ACTIVE, because nothing is provisioned, and a server is a stored record that stays OFFLINE: no endpoint, address, hostname, host key, listener or file store exists, nothing can connect, and StartServer, StopServer, StartFileTransfer, StartDirectoryListing, StartRemoteDelete, StartRemoteMove, TestConnection, TestIdentityProvider, workflow executions and every other official operation return UnknownOperationException with HTTP 501. No workflow step runs.",
 		"Key material is never accepted: ImportCertificate, ImportHostKey, ImportSshPublicKey and the user, host key, access, agreement and web app operations are not implemented, and the HostKey member and SshPublicKeyBody are refused, so certificates, server host keys, SSH public keys and private keys are neither stored nor returned. The public host keys of a connector's SftpConfig.TrustedHostKeys are the one exception: they are stored as given and returned. ListUsers, ListAccesses, ListAgreements and ListHostKeys also need their ServerId echoed in the output, which the catalog list projection cannot express. Profile CertificateIds and server Certificate are stored as given and not resolved, as are connector profile IDs, secret IDs, IAM roles, workflow IDs, VPC settings and Lambda functions.",
-		"Connectors need the URL and exactly one of As2Config and SftpConfig, are ACTIVE service-managed connectors with the URL as given: EgressConfig (VPC Lattice) is refused and no egress IP address is reported. Servers default to the documented S3 domain, PUBLIC endpoint type, SERVICE_MANAGED identity provider and SFTP protocol, and report UserCount 0 and no HostKeyFingerprint or security policy default. FTP and FTPS need a VPC endpoint type and a directory, Lambda or API Gateway identity provider, FTPS needs a certificate, and each identity provider type needs its documented details; VPC_ENDPOINT servers cannot be created. At most 20 servers, 50 workflows, 100 profiles and 100 connectors exist per Region as local limits.",
+		"Connectors need the URL and exactly one of As2Config and SftpConfig, are service-managed connectors with the URL as given: EgressConfig (VPC Lattice) is refused and no egress IP address is reported. Servers default to the documented S3 domain, PUBLIC endpoint type, SERVICE_MANAGED identity provider and SFTP protocol, and report UserCount 0 and no HostKeyFingerprint or security policy default. FTP and FTPS need a VPC endpoint type and a directory, Lambda or API Gateway identity provider, FTPS needs a certificate, and each identity provider type needs its documented details; VPC_ENDPOINT servers cannot be created. At most 20 servers, 50 workflows, 100 profiles and 100 connectors exist per Region as local limits.",
 	},
 }
 

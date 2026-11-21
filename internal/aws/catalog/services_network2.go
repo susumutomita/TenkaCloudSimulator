@@ -18,7 +18,7 @@ var directConnect = &Service{
 			ARN:        "arn:{partition}:directconnect::{account}:dx-gateway/{id}",
 			NameMember: "directConnectGatewayName", IDMember: "directConnectGatewayId", Limit: 50,
 			Aliases:  map[string]string{"newDirectConnectGatewayName": "directConnectGatewayName"},
-			Generate: map[string]any{"amazonSideAsn": 64512, "ownerAccount": "$account", "directConnectGatewayState": "available"}},
+			Generate: map[string]any{"amazonSideAsn": 64512, "ownerAccount": "$account", "directConnectGatewayState": "pending"}},
 	},
 	Ops: []Op{
 		{Name: "CreateDirectConnectGateway", Kind: Create, Resource: "gateway", Check: directConnectASN},
@@ -29,7 +29,7 @@ var directConnect = &Service{
 		{Name: "UntagResource", Kind: Untag, Lookup: "resourceArn"},
 	},
 	Bounds: []string{
-		"Direct Connect gateways are stored records: no connection, interconnect, link aggregation group, virtual interface, BGP session or routing exists, and a gateway forwards no traffic. Gateways are available at once and are visible from every Region, as AWS documents, and deleting one removes it at once (the delete response reports deleted). Every connection, LAG, virtual interface, hosted connection, location, letter of authorization, router configuration, test and dependent-resource API returns UnknownOperationException with HTTP 501.",
+		"Direct Connect gateways are stored records that stay pending and never become available, because nothing is provisioned: no connection, interconnect, link aggregation group, virtual interface, BGP session or routing exists, and a gateway forwards no traffic. Gateways are visible from every Region, as AWS documents, and deleting one removes it at once (the delete response reports deleted). Every connection, LAG, virtual interface, hosted connection, location, letter of authorization, router configuration, test and dependent-resource API returns UnknownOperationException with HTTP 501.",
 		"Gateway associations and association proposals are not bound: an association would claim that a virtual private gateway or transit gateway of another service is attached and ready to pass traffic, which this record store cannot check. DescribeTags is not bound because it addresses many ARNs in one request; tags are returned in the tags member of each gateway instead.",
 		"amazonSideAsn defaults to 64512 and must be 64512 to 65534 or 4200000000 to 4294967294; it cannot be changed after creation. Gateway names are not required to be unique, as in AWS. DescribeDirectConnectGateways returns an empty list for an identifier that does not exist, and a missing gateway in other operations fails with DirectConnectClientException.",
 	},
@@ -204,11 +204,11 @@ var kinesisVideo = &Service{
 		{Kind: "stream", Shape: "StreamInfo", ID: "name",
 			ARN:       "arn:{partition}:kinesisvideo:{region}:{account}:stream/{name}/1",
 			ARNMember: "StreamARN", NameMember: "StreamName", Unique: true, Limit: 50,
-			Generate: map[string]any{"Status": "ACTIVE", "CreationTime": "$now", "DataRetentionInHours": 0, "KmsKeyId": "alias/aws/kinesisvideo"}},
+			Generate: map[string]any{"Status": "CREATING", "CreationTime": "$now", "DataRetentionInHours": 0, "KmsKeyId": "alias/aws/kinesisvideo"}},
 		{Kind: "channel", Shape: "ChannelInfo", ID: "name",
 			ARN:       "arn:{partition}:kinesisvideo:{region}:{account}:channel/{name}/1",
 			ARNMember: "ChannelARN", NameMember: "ChannelName", Unique: true, Limit: 50,
-			Generate: map[string]any{"ChannelStatus": "ACTIVE", "ChannelType": "SINGLE_MASTER", "CreationTime": "$now",
+			Generate: map[string]any{"ChannelStatus": "CREATING", "ChannelType": "SINGLE_MASTER", "CreationTime": "$now",
 				"SingleMasterConfiguration": map[string]any{"MessageTtlSeconds": 60}}},
 	},
 	Ops: []Op{
@@ -231,8 +231,8 @@ var kinesisVideo = &Service{
 		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceARN"},
 	},
 	Bounds: []string{
-		"Streams and signaling channels are stored records: no media is ingested, stored or played, and no WebRTC signaling, relay or ICE server exists. GetDataEndpoint, GetSignalingChannelEndpoint, the edge agent, media storage, image generation, notification, stream storage and mapped resource configuration APIs return UnknownOperationException with HTTP 501, so no endpoint is ever returned.",
-		"Streams and channels are ACTIVE at once. The ARN ends in the fixed number 1 instead of the creation timestamp AWS uses, so a deleted and recreated name has the same ARN. A stream created without a KmsKeyId reports the alias alias/aws/kinesisvideo instead of the ARN of that managed key; the key is not resolved. StreamStorageConfiguration is refused.",
+		"Streams and signaling channels are stored records that stay CREATING and never become ACTIVE, because nothing is provisioned: no media is ingested, stored or played, and no WebRTC signaling, relay or ICE server exists. GetDataEndpoint, GetSignalingChannelEndpoint, the edge agent, media storage, image generation, notification, stream storage and mapped resource configuration APIs return UnknownOperationException with HTTP 501, so no endpoint is ever returned.",
+		"The ARN ends in the fixed number 1 instead of the creation timestamp AWS uses, so a deleted and recreated name has the same ARN. A stream created without a KmsKeyId reports the alias alias/aws/kinesisvideo instead of the ARN of that managed key; the key is not resolved. StreamStorageConfiguration is refused.",
 		"Updates require CurrentVersion, which must equal the stored Version or the request fails with VersionMismatchException; every successful update gives the resource a new Version. UpdateDataRetention adds or subtracts the change from the retention in hours, which must stay from 0 to 87600. DeleteStream and DeleteSignalingChannel do not accept CurrentVersion and always delete the latest version; ListStreams and ListSignalingChannels refuse the name condition. Only SINGLE_MASTER channels can be created.",
 		"Tags are read and changed through TagResource, UntagResource and ListTagsForResource by ARN; TagStream, UntagStream and ListTagsForStream are not bound. A tag count above 50 reached through TagResource fails with ClientLimitExceededException and a channel count above the simulator limit fails the same way, because the engine cannot name the more specific modeled exceptions.",
 	},

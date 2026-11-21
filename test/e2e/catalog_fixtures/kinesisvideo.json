@@ -3,7 +3,7 @@
  "denied_status": 401,
  "steps": [
   {"op": "create_stream", "args": {"StreamName": "fixture-camera", "DeviceName": "cam-1", "MediaType": "video/h264", "DataRetentionInHours": 24, "Tags": {"team": "a"}}, "save": {"stream": "StreamARN"}},
-  {"op": "describe_stream", "args": {"StreamName": "fixture-camera"}, "save": {"version": "StreamInfo.Version"}, "expect": {"StreamInfo.StreamARN": "${stream}", "StreamInfo.Status": "ACTIVE", "StreamInfo.DataRetentionInHours": 24, "StreamInfo.DeviceName": "cam-1"}},
+  {"op": "describe_stream", "args": {"StreamName": "fixture-camera"}, "save": {"version": "StreamInfo.Version"}, "expect": {"StreamInfo.StreamARN": "${stream}", "StreamInfo.Status": "CREATING", "StreamInfo.DataRetentionInHours": 24, "StreamInfo.DeviceName": "cam-1"}},
   {"op": "describe_stream", "args": {"StreamARN": "${stream}"}, "expect": {"StreamInfo.StreamName": "fixture-camera"}},
   {"op": "list_streams", "args": {}, "expect": {"StreamInfoList#count": 1}},
   {"op": "update_stream", "args": {"StreamName": "fixture-camera", "CurrentVersion": "stale", "MediaType": "video/h265"}, "error": "VersionMismatchException", "status": 400},
@@ -16,7 +16,7 @@
   {"op": "list_tags_for_resource", "args": {"ResourceARN": "${stream}"}, "expect": {"Tags": {"team": "a"}}},
   {"op": "create_stream", "args": {"StreamName": "fixture-camera"}, "error": "ResourceInUseException", "status": 400},
   {"op": "create_signaling_channel", "args": {"ChannelName": "fixture-channel", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"channel": "ChannelARN"}},
-  {"op": "describe_signaling_channel", "args": {"ChannelName": "fixture-channel"}, "save": {"channelVersion": "ChannelInfo.Version"}, "expect": {"ChannelInfo.ChannelARN": "${channel}", "ChannelInfo.ChannelStatus": "ACTIVE", "ChannelInfo.SingleMasterConfiguration.MessageTtlSeconds": 60}},
+  {"op": "describe_signaling_channel", "args": {"ChannelName": "fixture-channel"}, "save": {"channelVersion": "ChannelInfo.Version"}, "expect": {"ChannelInfo.ChannelARN": "${channel}", "ChannelInfo.ChannelStatus": "CREATING", "ChannelInfo.SingleMasterConfiguration.MessageTtlSeconds": 60}},
   {"op": "list_signaling_channels", "args": {}, "expect": {"ChannelInfoList#count": 1}},
   {"op": "update_signaling_channel", "args": {"ChannelARN": "${channel}", "CurrentVersion": "${channelVersion}", "SingleMasterConfiguration": {"MessageTtlSeconds": 90}}},
   {"op": "describe_signaling_channel", "args": {"ChannelARN": "${channel}"}, "expect": {"ChannelInfo.SingleMasterConfiguration.MessageTtlSeconds": 90}},

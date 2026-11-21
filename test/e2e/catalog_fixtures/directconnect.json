@@ -1,7 +1,7 @@
 {
  "client": "directconnect",
  "steps": [
-  {"op": "create_direct_connect_gateway", "args": {"directConnectGatewayName": "fixture-gateway", "amazonSideAsn": 64600, "tags": [{"key": "team", "value": "a"}]}, "save": {"gateway": "directConnectGateway.directConnectGatewayId"}, "expect": {"directConnectGateway.directConnectGatewayState": "available", "directConnectGateway.amazonSideAsn": 64600, "directConnectGateway.ownerAccount": "000000000000"}},
+  {"op": "create_direct_connect_gateway", "args": {"directConnectGatewayName": "fixture-gateway", "amazonSideAsn": 64600, "tags": [{"key": "team", "value": "a"}]}, "save": {"gateway": "directConnectGateway.directConnectGatewayId"}, "expect": {"directConnectGateway.directConnectGatewayState": "pending", "directConnectGateway.amazonSideAsn": 64600, "directConnectGateway.ownerAccount": "000000000000"}},
   {"op": "describe_direct_connect_gateways", "args": {}, "expect": {"directConnectGateways#count": 1}},
   {"op": "describe_direct_connect_gateways", "args": {"directConnectGatewayId": "${gateway}"}, "expect": {"directConnectGateways[0].directConnectGatewayName": "fixture-gateway", "directConnectGateways[0].tags[0].key": "team"}},
   {"op": "update_direct_connect_gateway", "args": {"directConnectGatewayId": "${gateway}", "newDirectConnectGatewayName": "fixture-backbone"}, "expect": {"directConnectGateway.directConnectGatewayName": "fixture-backbone"}},
