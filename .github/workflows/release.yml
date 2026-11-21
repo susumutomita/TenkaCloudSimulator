@@ -52,7 +52,7 @@ jobs:
           python3 scripts/build-release.py --ref "$SOURCE_COMMIT" --version "$RELEASE_VERSION" --output dist/release
           python3 scripts/verify-release.py dist/release --commit "$SOURCE_COMMIT" --version "$RELEASE_VERSION"
       - name: Retain candidate for native execution and publication
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: simulator-release-${{ github.event.pull_request.head.sha || github.sha }}
           path: dist/release/*

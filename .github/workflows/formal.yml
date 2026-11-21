@@ -52,7 +52,7 @@ jobs:
           TLA_JAR=/tmp/tla2tools.jar python3 scripts/check-formal.py --merge-gate --shard "$SHARD/10" --reports "reports/formal/shard-$SHARD"
       - name: Retain this shard's formal evidence
         if: always()
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: formal-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
           path: reports/formal/shard-${{ matrix.shard }}/
@@ -99,7 +99,7 @@ jobs:
         run: python3 scripts/check-formal.py --combine reports/formal/shards/*/evidence.json --reports reports/formal/combined
       - name: Retain exact formal evidence
         if: always()
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: formal-${{ github.event.pull_request.head.sha || github.sha }}
           path: reports/formal/
