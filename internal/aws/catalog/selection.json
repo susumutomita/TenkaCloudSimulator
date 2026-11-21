@@ -23,6 +23,19 @@
     "ListTags",
     "TagCertificateAuthority"
   ],
+  "aiops": [
+    "CreateInvestigationGroup",
+    "DeleteInvestigationGroup",
+    "DeleteInvestigationGroupPolicy",
+    "GetInvestigationGroup",
+    "GetInvestigationGroupPolicy",
+    "ListInvestigationGroups",
+    "ListTagsForResource",
+    "PutInvestigationGroupPolicy",
+    "TagResource",
+    "UntagResource",
+    "UpdateInvestigationGroup"
+  ],
   "amp": [
     "CreateRuleGroupsNamespace",
     "CreateWorkspace",
@@ -191,6 +204,10 @@
     "UpdateChannelNamespace",
     "UpdateGraphqlApi"
   ],
+  "artifact": [
+    "GetAccountSettings",
+    "PutAccountSettings"
+  ],
   "athena": [
     "CreateDataCatalog",
     "CreateWorkGroup",
@@ -242,6 +259,16 @@
     "UpdateFramework",
     "UpdateReportPlan"
   ],
+  "bcm-data-exports": [
+    "CreateExport",
+    "DeleteExport",
+    "GetExport",
+    "ListExports",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateExport"
+  ],
   "bedrock": [
     "CreateGuardrail",
     "CreateInferenceProfile",
@@ -279,6 +306,15 @@
     "UntagResource",
     "UpdatePricingRule"
   ],
+  "braket": [
+    "CreateSpendingLimit",
+    "DeleteSpendingLimit",
+    "ListTagsForResource",
+    "SearchSpendingLimits",
+    "TagResource",
+    "UntagResource",
+    "UpdateSpendingLimit"
+  ],
   "budgets": [
     "CreateBudget",
     "DeleteBudget",
@@ -288,6 +324,24 @@
     "TagResource",
     "UntagResource",
     "UpdateBudget"
+  ],
+  "ce": [
+    "CreateAnomalyMonitor",
+    "CreateAnomalySubscription",
+    "CreateCostCategoryDefinition",
+    "DeleteAnomalyMonitor",
+    "DeleteAnomalySubscription",
+    "DeleteCostCategoryDefinition",
+    "DescribeCostCategoryDefinition",
+    "GetAnomalyMonitors",
+    "GetAnomalySubscriptions",
+    "ListCostCategoryDefinitions",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateAnomalyMonitor",
+    "UpdateAnomalySubscription",
+    "UpdateCostCategoryDefinition"
   ],
   "chatbot": [
     "CreateChimeWebhookConfiguration",
@@ -502,6 +556,41 @@
     "UpdateDomain",
     "UpdateProject"
   ],
+  "deadline": [
+    "CreateBudget",
+    "CreateFarm",
+    "CreateFleet",
+    "CreateLimit",
+    "CreateQueue",
+    "CreateStorageProfile",
+    "DeleteBudget",
+    "DeleteFarm",
+    "DeleteFleet",
+    "DeleteLimit",
+    "DeleteQueue",
+    "DeleteStorageProfile",
+    "GetBudget",
+    "GetFarm",
+    "GetFleet",
+    "GetLimit",
+    "GetQueue",
+    "GetStorageProfile",
+    "ListBudgets",
+    "ListFarms",
+    "ListFleets",
+    "ListLimits",
+    "ListQueues",
+    "ListStorageProfiles",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateBudget",
+    "UpdateFarm",
+    "UpdateFleet",
+    "UpdateLimit",
+    "UpdateQueue",
+    "UpdateStorageProfile"
+  ],
   "detective": [
     "CreateGraph",
     "DeleteGraph",
@@ -552,6 +641,28 @@
     "TagResource",
     "UntagResource",
     "UpdateLifecyclePolicy"
+  ],
+  "dms": [
+    "CreateDataProvider",
+    "CreateEventSubscription",
+    "CreateInstanceProfile",
+    "CreateMigrationProject",
+    "CreateReplicationSubnetGroup",
+    "DeleteDataProvider",
+    "DeleteEventSubscription",
+    "DeleteInstanceProfile",
+    "DeleteMigrationProject",
+    "DeleteReplicationSubnetGroup",
+    "DescribeDataProviders",
+    "DescribeEventSubscriptions",
+    "DescribeInstanceProfiles",
+    "DescribeMigrationProjects",
+    "DescribeReplicationSubnetGroups",
+    "ModifyDataProvider",
+    "ModifyEventSubscription",
+    "ModifyInstanceProfile",
+    "ModifyMigrationProject",
+    "ModifyReplicationSubnetGroup"
   ],
   "drs": [
     "CreateLaunchConfigurationTemplate",
