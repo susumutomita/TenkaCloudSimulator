@@ -1519,17 +1519,29 @@
    ],
    "operations": [
     "AddTagsToResource",
+    "CreateCacheCluster",
     "CreateCacheParameterGroup",
     "CreateCacheSubnetGroup",
+    "CreateReplicationGroup",
+    "CreateServerlessCache",
     "CreateUser",
+    "DeleteCacheCluster",
     "DeleteCacheParameterGroup",
     "DeleteCacheSubnetGroup",
+    "DeleteReplicationGroup",
+    "DeleteServerlessCache",
     "DeleteUser",
+    "DescribeCacheClusters",
     "DescribeCacheParameterGroups",
     "DescribeCacheSubnetGroups",
+    "DescribeReplicationGroups",
+    "DescribeServerlessCaches",
     "DescribeUsers",
     "ListTagsForResource",
+    "ModifyCacheCluster",
     "ModifyCacheSubnetGroup",
+    "ModifyReplicationGroup",
+    "ModifyServerlessCache",
     "ModifyUser",
     "RemoveTagsFromResource"
    ],
@@ -2060,6 +2072,1307 @@
        ]
       }
      }
+    },
+    {
+     "kind": "cacheCluster",
+     "arnMember": "ARN",
+     "nameMember": "CacheClusterId",
+     "arnWire": "ARN",
+     "nameWire": "CacheClusterId",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateCacheCluster",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AZMode",
+         "type": "string",
+         "enum": [
+          "single-az",
+          "cross-az"
+         ],
+         "key": "AZMode"
+        },
+        {
+         "name": "AuthToken",
+         "type": "string",
+         "key": "AuthToken"
+        },
+        {
+         "name": "AutoMinorVersionUpgrade",
+         "type": "boolean",
+         "key": "AutoMinorVersionUpgrade"
+        },
+        {
+         "name": "CacheClusterId",
+         "type": "string",
+         "required": true,
+         "key": "CacheClusterId"
+        },
+        {
+         "name": "CacheNodeType",
+         "type": "string",
+         "key": "CacheNodeType"
+        },
+        {
+         "name": "CacheParameterGroupName",
+         "type": "string",
+         "key": "CacheParameterGroupName"
+        },
+        {
+         "name": "CacheSecurityGroupNames",
+         "type": "list",
+         "element": "string",
+         "key": "CacheSecurityGroupNames",
+         "itemKey": "CacheSecurityGroupName"
+        },
+        {
+         "name": "CacheSubnetGroupName",
+         "type": "string",
+         "key": "CacheSubnetGroupName"
+        },
+        {
+         "name": "Engine",
+         "type": "string",
+         "key": "Engine"
+        },
+        {
+         "name": "EngineVersion",
+         "type": "string",
+         "key": "EngineVersion"
+        },
+        {
+         "name": "IpDiscovery",
+         "type": "string",
+         "enum": [
+          "ipv4",
+          "ipv6"
+         ],
+         "key": "IpDiscovery"
+        },
+        {
+         "name": "LogDeliveryConfigurations",
+         "type": "list",
+         "element": "structure",
+         "key": "LogDeliveryConfigurations",
+         "itemKey": "LogDeliveryConfigurationRequest",
+         "shape": "LogDeliveryConfigurationRequestList"
+        },
+        {
+         "name": "NetworkType",
+         "type": "string",
+         "enum": [
+          "ipv4",
+          "ipv6",
+          "dual_stack"
+         ],
+         "key": "NetworkType"
+        },
+        {
+         "name": "NotificationTopicArn",
+         "type": "string",
+         "key": "NotificationTopicArn"
+        },
+        {
+         "name": "NumCacheNodes",
+         "type": "integer",
+         "key": "NumCacheNodes"
+        },
+        {
+         "name": "OutpostMode",
+         "type": "string",
+         "enum": [
+          "single-outpost",
+          "cross-outpost"
+         ],
+         "key": "OutpostMode"
+        },
+        {
+         "name": "Port",
+         "type": "integer",
+         "key": "Port"
+        },
+        {
+         "name": "PreferredAvailabilityZone",
+         "type": "string",
+         "key": "PreferredAvailabilityZone"
+        },
+        {
+         "name": "PreferredAvailabilityZones",
+         "type": "list",
+         "element": "string",
+         "key": "PreferredAvailabilityZones",
+         "itemKey": "PreferredAvailabilityZone"
+        },
+        {
+         "name": "PreferredMaintenanceWindow",
+         "type": "string",
+         "key": "PreferredMaintenanceWindow"
+        },
+        {
+         "name": "PreferredOutpostArn",
+         "type": "string",
+         "key": "PreferredOutpostArn"
+        },
+        {
+         "name": "PreferredOutpostArns",
+         "type": "list",
+         "element": "string",
+         "key": "PreferredOutpostArns",
+         "itemKey": "PreferredOutpostArn"
+        },
+        {
+         "name": "ReplicationGroupId",
+         "type": "string",
+         "key": "ReplicationGroupId"
+        },
+        {
+         "name": "SecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "SecurityGroupIds",
+         "itemKey": "SecurityGroupId"
+        },
+        {
+         "name": "SnapshotArns",
+         "type": "list",
+         "element": "string",
+         "key": "SnapshotArns",
+         "itemKey": "SnapshotArn"
+        },
+        {
+         "name": "SnapshotName",
+         "type": "string",
+         "key": "SnapshotName"
+        },
+        {
+         "name": "SnapshotRetentionLimit",
+         "type": "integer",
+         "key": "SnapshotRetentionLimit"
+        },
+        {
+         "name": "SnapshotWindow",
+         "type": "string",
+         "key": "SnapshotWindow"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        },
+        {
+         "name": "TransitEncryptionEnabled",
+         "type": "boolean",
+         "key": "TransitEncryptionEnabled"
+        }
+       ],
+       "wrapper": "CacheCluster",
+       "output": "CreateCacheClusterResult",
+       "resultWrapper": "CreateCacheClusterResult"
+      },
+      "delete": {
+       "name": "DeleteCacheCluster",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheClusterId",
+         "type": "string",
+         "required": true,
+         "key": "CacheClusterId"
+        },
+        {
+         "name": "FinalSnapshotIdentifier",
+         "type": "string",
+         "key": "FinalSnapshotIdentifier"
+        }
+       ],
+       "wrapper": "CacheCluster",
+       "lookup": "CacheClusterId",
+       "lookupKey": "name",
+       "output": "DeleteCacheClusterResult",
+       "resultWrapper": "DeleteCacheClusterResult"
+      },
+      "describe": {
+       "name": "DescribeCacheClusters",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheClusterId",
+         "type": "string",
+         "key": "CacheClusterId"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "ShowCacheClustersNotInReplicationGroups",
+         "type": "boolean",
+         "key": "ShowCacheClustersNotInReplicationGroups"
+        },
+        {
+         "name": "ShowCacheNodeInfo",
+         "type": "boolean",
+         "key": "ShowCacheNodeInfo"
+        }
+       ],
+       "items": "CacheClusters",
+       "itemName": "CacheClusterId",
+       "itemArn": "ARN",
+       "names": "CacheClusterId",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "CacheClusterMessage",
+       "resultWrapper": "DescribeCacheClustersResult"
+      },
+      "list": {
+       "name": "DescribeCacheClusters",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheClusterId",
+         "type": "string",
+         "key": "CacheClusterId"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "ShowCacheClustersNotInReplicationGroups",
+         "type": "boolean",
+         "key": "ShowCacheClustersNotInReplicationGroups"
+        },
+        {
+         "name": "ShowCacheNodeInfo",
+         "type": "boolean",
+         "key": "ShowCacheNodeInfo"
+        }
+       ],
+       "items": "CacheClusters",
+       "itemName": "CacheClusterId",
+       "itemArn": "ARN",
+       "names": "CacheClusterId",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "CacheClusterMessage",
+       "resultWrapper": "DescribeCacheClustersResult"
+      },
+      "update": {
+       "name": "ModifyCacheCluster",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AZMode",
+         "type": "string",
+         "enum": [
+          "single-az",
+          "cross-az"
+         ],
+         "key": "AZMode"
+        },
+        {
+         "name": "ApplyImmediately",
+         "type": "boolean",
+         "key": "ApplyImmediately"
+        },
+        {
+         "name": "AuthToken",
+         "type": "string",
+         "key": "AuthToken"
+        },
+        {
+         "name": "AuthTokenUpdateStrategy",
+         "type": "string",
+         "enum": [
+          "SET",
+          "ROTATE",
+          "DELETE"
+         ],
+         "key": "AuthTokenUpdateStrategy"
+        },
+        {
+         "name": "AutoMinorVersionUpgrade",
+         "type": "boolean",
+         "key": "AutoMinorVersionUpgrade"
+        },
+        {
+         "name": "CacheClusterId",
+         "type": "string",
+         "required": true,
+         "key": "CacheClusterId"
+        },
+        {
+         "name": "CacheNodeIdsToRemove",
+         "type": "list",
+         "element": "string",
+         "key": "CacheNodeIdsToRemove",
+         "itemKey": "CacheNodeId"
+        },
+        {
+         "name": "CacheNodeType",
+         "type": "string",
+         "key": "CacheNodeType"
+        },
+        {
+         "name": "CacheParameterGroupName",
+         "type": "string",
+         "key": "CacheParameterGroupName"
+        },
+        {
+         "name": "CacheSecurityGroupNames",
+         "type": "list",
+         "element": "string",
+         "key": "CacheSecurityGroupNames",
+         "itemKey": "CacheSecurityGroupName"
+        },
+        {
+         "name": "Engine",
+         "type": "string",
+         "key": "Engine"
+        },
+        {
+         "name": "EngineVersion",
+         "type": "string",
+         "key": "EngineVersion"
+        },
+        {
+         "name": "IpDiscovery",
+         "type": "string",
+         "enum": [
+          "ipv4",
+          "ipv6"
+         ],
+         "key": "IpDiscovery"
+        },
+        {
+         "name": "LogDeliveryConfigurations",
+         "type": "list",
+         "element": "structure",
+         "key": "LogDeliveryConfigurations",
+         "itemKey": "LogDeliveryConfigurationRequest",
+         "shape": "LogDeliveryConfigurationRequestList"
+        },
+        {
+         "name": "NewAvailabilityZones",
+         "type": "list",
+         "element": "string",
+         "key": "NewAvailabilityZones",
+         "itemKey": "PreferredAvailabilityZone"
+        },
+        {
+         "name": "NotificationTopicArn",
+         "type": "string",
+         "key": "NotificationTopicArn"
+        },
+        {
+         "name": "NotificationTopicStatus",
+         "type": "string",
+         "key": "NotificationTopicStatus"
+        },
+        {
+         "name": "NumCacheNodes",
+         "type": "integer",
+         "key": "NumCacheNodes"
+        },
+        {
+         "name": "PreferredMaintenanceWindow",
+         "type": "string",
+         "key": "PreferredMaintenanceWindow"
+        },
+        {
+         "name": "ScaleConfig",
+         "type": "structure",
+         "key": "ScaleConfig",
+         "shape": "ScaleConfig"
+        },
+        {
+         "name": "SecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "SecurityGroupIds",
+         "itemKey": "SecurityGroupId"
+        },
+        {
+         "name": "SnapshotRetentionLimit",
+         "type": "integer",
+         "key": "SnapshotRetentionLimit"
+        },
+        {
+         "name": "SnapshotWindow",
+         "type": "string",
+         "key": "SnapshotWindow"
+        }
+       ],
+       "wrapper": "CacheCluster",
+       "lookup": "CacheClusterId",
+       "lookupKey": "name",
+       "output": "ModifyCacheClusterResult",
+       "resultWrapper": "ModifyCacheClusterResult",
+       "editable": [
+        "AZMode",
+        "AuthToken",
+        "AuthTokenUpdateStrategy",
+        "AutoMinorVersionUpgrade",
+        "CacheNodeIdsToRemove",
+        "CacheNodeType",
+        "CacheParameterGroupName",
+        "CacheSecurityGroupNames",
+        "Engine",
+        "EngineVersion",
+        "IpDiscovery",
+        "NewAvailabilityZones",
+        "NotificationTopicArn",
+        "NotificationTopicStatus",
+        "NumCacheNodes",
+        "PreferredMaintenanceWindow",
+        "ScaleConfig",
+        "SecurityGroupIds",
+        "SnapshotRetentionLimit",
+        "SnapshotWindow"
+       ]
+      }
+     }
+    },
+    {
+     "kind": "replicationGroup",
+     "arnMember": "ARN",
+     "nameMember": "ReplicationGroupId",
+     "arnWire": "ARN",
+     "nameWire": "ReplicationGroupId",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateReplicationGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AtRestEncryptionEnabled",
+         "type": "boolean",
+         "key": "AtRestEncryptionEnabled"
+        },
+        {
+         "name": "AuthToken",
+         "type": "string",
+         "key": "AuthToken"
+        },
+        {
+         "name": "AutoMinorVersionUpgrade",
+         "type": "boolean",
+         "key": "AutoMinorVersionUpgrade"
+        },
+        {
+         "name": "AutomaticFailoverEnabled",
+         "type": "boolean",
+         "key": "AutomaticFailoverEnabled"
+        },
+        {
+         "name": "CacheNodeType",
+         "type": "string",
+         "key": "CacheNodeType"
+        },
+        {
+         "name": "CacheParameterGroupName",
+         "type": "string",
+         "key": "CacheParameterGroupName"
+        },
+        {
+         "name": "CacheSecurityGroupNames",
+         "type": "list",
+         "element": "string",
+         "key": "CacheSecurityGroupNames",
+         "itemKey": "CacheSecurityGroupName"
+        },
+        {
+         "name": "CacheSubnetGroupName",
+         "type": "string",
+         "key": "CacheSubnetGroupName"
+        },
+        {
+         "name": "ClusterMode",
+         "type": "string",
+         "enum": [
+          "enabled",
+          "disabled",
+          "compatible"
+         ],
+         "key": "ClusterMode"
+        },
+        {
+         "name": "DataTieringEnabled",
+         "type": "boolean",
+         "key": "DataTieringEnabled"
+        },
+        {
+         "name": "Engine",
+         "type": "string",
+         "key": "Engine"
+        },
+        {
+         "name": "EngineVersion",
+         "type": "string",
+         "key": "EngineVersion"
+        },
+        {
+         "name": "GlobalReplicationGroupId",
+         "type": "string",
+         "key": "GlobalReplicationGroupId"
+        },
+        {
+         "name": "IpDiscovery",
+         "type": "string",
+         "enum": [
+          "ipv4",
+          "ipv6"
+         ],
+         "key": "IpDiscovery"
+        },
+        {
+         "name": "KmsKeyId",
+         "type": "string",
+         "key": "KmsKeyId"
+        },
+        {
+         "name": "LogDeliveryConfigurations",
+         "type": "list",
+         "element": "structure",
+         "key": "LogDeliveryConfigurations",
+         "itemKey": "LogDeliveryConfigurationRequest",
+         "shape": "LogDeliveryConfigurationRequestList"
+        },
+        {
+         "name": "MultiAZEnabled",
+         "type": "boolean",
+         "key": "MultiAZEnabled"
+        },
+        {
+         "name": "NetworkType",
+         "type": "string",
+         "enum": [
+          "ipv4",
+          "ipv6",
+          "dual_stack"
+         ],
+         "key": "NetworkType"
+        },
+        {
+         "name": "NodeGroupConfiguration",
+         "type": "list",
+         "element": "structure",
+         "key": "NodeGroupConfiguration",
+         "itemKey": "NodeGroupConfiguration",
+         "shape": "NodeGroupConfigurationList"
+        },
+        {
+         "name": "NotificationTopicArn",
+         "type": "string",
+         "key": "NotificationTopicArn"
+        },
+        {
+         "name": "NumCacheClusters",
+         "type": "integer",
+         "key": "NumCacheClusters"
+        },
+        {
+         "name": "NumNodeGroups",
+         "type": "integer",
+         "key": "NumNodeGroups"
+        },
+        {
+         "name": "Port",
+         "type": "integer",
+         "key": "Port"
+        },
+        {
+         "name": "PreferredCacheClusterAZs",
+         "type": "list",
+         "element": "string",
+         "key": "PreferredCacheClusterAZs",
+         "itemKey": "AvailabilityZone"
+        },
+        {
+         "name": "PreferredMaintenanceWindow",
+         "type": "string",
+         "key": "PreferredMaintenanceWindow"
+        },
+        {
+         "name": "PrimaryClusterId",
+         "type": "string",
+         "key": "PrimaryClusterId"
+        },
+        {
+         "name": "ReplicasPerNodeGroup",
+         "type": "integer",
+         "key": "ReplicasPerNodeGroup"
+        },
+        {
+         "name": "ReplicationGroupDescription",
+         "type": "string",
+         "required": true,
+         "key": "ReplicationGroupDescription"
+        },
+        {
+         "name": "ReplicationGroupId",
+         "type": "string",
+         "required": true,
+         "key": "ReplicationGroupId"
+        },
+        {
+         "name": "SecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "SecurityGroupIds",
+         "itemKey": "SecurityGroupId"
+        },
+        {
+         "name": "ServerlessCacheSnapshotName",
+         "type": "string",
+         "key": "ServerlessCacheSnapshotName"
+        },
+        {
+         "name": "SnapshotArns",
+         "type": "list",
+         "element": "string",
+         "key": "SnapshotArns",
+         "itemKey": "SnapshotArn"
+        },
+        {
+         "name": "SnapshotName",
+         "type": "string",
+         "key": "SnapshotName"
+        },
+        {
+         "name": "SnapshotRetentionLimit",
+         "type": "integer",
+         "key": "SnapshotRetentionLimit"
+        },
+        {
+         "name": "SnapshotWindow",
+         "type": "string",
+         "key": "SnapshotWindow"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        },
+        {
+         "name": "TransitEncryptionEnabled",
+         "type": "boolean",
+         "key": "TransitEncryptionEnabled"
+        },
+        {
+         "name": "TransitEncryptionMode",
+         "type": "string",
+         "enum": [
+          "preferred",
+          "required"
+         ],
+         "key": "TransitEncryptionMode"
+        },
+        {
+         "name": "UserGroupIds",
+         "type": "list",
+         "element": "string",
+         "min": 1,
+         "key": "UserGroupIds",
+         "itemKey": "member"
+        }
+       ],
+       "wrapper": "ReplicationGroup",
+       "output": "CreateReplicationGroupResult",
+       "resultWrapper": "CreateReplicationGroupResult"
+      },
+      "delete": {
+       "name": "DeleteReplicationGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "FinalSnapshotIdentifier",
+         "type": "string",
+         "key": "FinalSnapshotIdentifier"
+        },
+        {
+         "name": "ReplicationGroupId",
+         "type": "string",
+         "required": true,
+         "key": "ReplicationGroupId"
+        },
+        {
+         "name": "RetainPrimaryCluster",
+         "type": "boolean",
+         "key": "RetainPrimaryCluster"
+        }
+       ],
+       "wrapper": "ReplicationGroup",
+       "lookup": "ReplicationGroupId",
+       "lookupKey": "name",
+       "output": "DeleteReplicationGroupResult",
+       "resultWrapper": "DeleteReplicationGroupResult"
+      },
+      "describe": {
+       "name": "DescribeReplicationGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "ReplicationGroupId",
+         "type": "string",
+         "key": "ReplicationGroupId"
+        }
+       ],
+       "items": "ReplicationGroups",
+       "itemName": "ReplicationGroupId",
+       "itemArn": "ARN",
+       "names": "ReplicationGroupId",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "ReplicationGroupMessage",
+       "resultWrapper": "DescribeReplicationGroupsResult"
+      },
+      "list": {
+       "name": "DescribeReplicationGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "ReplicationGroupId",
+         "type": "string",
+         "key": "ReplicationGroupId"
+        }
+       ],
+       "items": "ReplicationGroups",
+       "itemName": "ReplicationGroupId",
+       "itemArn": "ARN",
+       "names": "ReplicationGroupId",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "ReplicationGroupMessage",
+       "resultWrapper": "DescribeReplicationGroupsResult"
+      },
+      "update": {
+       "name": "ModifyReplicationGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "ApplyImmediately",
+         "type": "boolean",
+         "key": "ApplyImmediately"
+        },
+        {
+         "name": "AuthToken",
+         "type": "string",
+         "key": "AuthToken"
+        },
+        {
+         "name": "AuthTokenUpdateStrategy",
+         "type": "string",
+         "enum": [
+          "SET",
+          "ROTATE",
+          "DELETE"
+         ],
+         "key": "AuthTokenUpdateStrategy"
+        },
+        {
+         "name": "AutoMinorVersionUpgrade",
+         "type": "boolean",
+         "key": "AutoMinorVersionUpgrade"
+        },
+        {
+         "name": "AutomaticFailoverEnabled",
+         "type": "boolean",
+         "key": "AutomaticFailoverEnabled"
+        },
+        {
+         "name": "CacheNodeType",
+         "type": "string",
+         "key": "CacheNodeType"
+        },
+        {
+         "name": "CacheParameterGroupName",
+         "type": "string",
+         "key": "CacheParameterGroupName"
+        },
+        {
+         "name": "CacheSecurityGroupNames",
+         "type": "list",
+         "element": "string",
+         "key": "CacheSecurityGroupNames",
+         "itemKey": "CacheSecurityGroupName"
+        },
+        {
+         "name": "ClusterMode",
+         "type": "string",
+         "enum": [
+          "enabled",
+          "disabled",
+          "compatible"
+         ],
+         "key": "ClusterMode"
+        },
+        {
+         "name": "Engine",
+         "type": "string",
+         "key": "Engine"
+        },
+        {
+         "name": "EngineVersion",
+         "type": "string",
+         "key": "EngineVersion"
+        },
+        {
+         "name": "IpDiscovery",
+         "type": "string",
+         "enum": [
+          "ipv4",
+          "ipv6"
+         ],
+         "key": "IpDiscovery"
+        },
+        {
+         "name": "LogDeliveryConfigurations",
+         "type": "list",
+         "element": "structure",
+         "key": "LogDeliveryConfigurations",
+         "itemKey": "LogDeliveryConfigurationRequest",
+         "shape": "LogDeliveryConfigurationRequestList"
+        },
+        {
+         "name": "MultiAZEnabled",
+         "type": "boolean",
+         "key": "MultiAZEnabled"
+        },
+        {
+         "name": "NodeGroupId",
+         "type": "string",
+         "key": "NodeGroupId"
+        },
+        {
+         "name": "NotificationTopicArn",
+         "type": "string",
+         "key": "NotificationTopicArn"
+        },
+        {
+         "name": "NotificationTopicStatus",
+         "type": "string",
+         "key": "NotificationTopicStatus"
+        },
+        {
+         "name": "PreferredMaintenanceWindow",
+         "type": "string",
+         "key": "PreferredMaintenanceWindow"
+        },
+        {
+         "name": "PrimaryClusterId",
+         "type": "string",
+         "key": "PrimaryClusterId"
+        },
+        {
+         "name": "RemoveUserGroups",
+         "type": "boolean",
+         "key": "RemoveUserGroups"
+        },
+        {
+         "name": "ReplicationGroupDescription",
+         "type": "string",
+         "key": "ReplicationGroupDescription"
+        },
+        {
+         "name": "ReplicationGroupId",
+         "type": "string",
+         "required": true,
+         "key": "ReplicationGroupId"
+        },
+        {
+         "name": "SecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "SecurityGroupIds",
+         "itemKey": "SecurityGroupId"
+        },
+        {
+         "name": "SnapshotRetentionLimit",
+         "type": "integer",
+         "key": "SnapshotRetentionLimit"
+        },
+        {
+         "name": "SnapshotWindow",
+         "type": "string",
+         "key": "SnapshotWindow"
+        },
+        {
+         "name": "SnapshottingClusterId",
+         "type": "string",
+         "key": "SnapshottingClusterId"
+        },
+        {
+         "name": "TransitEncryptionEnabled",
+         "type": "boolean",
+         "key": "TransitEncryptionEnabled"
+        },
+        {
+         "name": "TransitEncryptionMode",
+         "type": "string",
+         "enum": [
+          "preferred",
+          "required"
+         ],
+         "key": "TransitEncryptionMode"
+        },
+        {
+         "name": "UserGroupIdsToAdd",
+         "type": "list",
+         "element": "string",
+         "key": "UserGroupIdsToAdd",
+         "itemKey": "member"
+        },
+        {
+         "name": "UserGroupIdsToRemove",
+         "type": "list",
+         "element": "string",
+         "key": "UserGroupIdsToRemove",
+         "itemKey": "member"
+        }
+       ],
+       "wrapper": "ReplicationGroup",
+       "lookup": "ReplicationGroupId",
+       "lookupKey": "name",
+       "output": "ModifyReplicationGroupResult",
+       "resultWrapper": "ModifyReplicationGroupResult",
+       "editable": [
+        "AuthToken",
+        "AuthTokenUpdateStrategy",
+        "AutoMinorVersionUpgrade",
+        "AutomaticFailoverEnabled",
+        "CacheNodeType",
+        "CacheParameterGroupName",
+        "CacheSecurityGroupNames",
+        "ClusterMode",
+        "Engine",
+        "EngineVersion",
+        "IpDiscovery",
+        "MultiAZEnabled",
+        "NodeGroupId",
+        "NotificationTopicArn",
+        "NotificationTopicStatus",
+        "PreferredMaintenanceWindow",
+        "PrimaryClusterId",
+        "RemoveUserGroups",
+        "ReplicationGroupDescription",
+        "SecurityGroupIds",
+        "SnapshotRetentionLimit",
+        "SnapshotWindow",
+        "TransitEncryptionEnabled",
+        "TransitEncryptionMode",
+        "UserGroupIdsToAdd",
+        "UserGroupIdsToRemove"
+       ]
+      }
+     }
+    },
+    {
+     "kind": "serverlessCache",
+     "arnMember": "ARN",
+     "nameMember": "ServerlessCacheName",
+     "arnWire": "ARN",
+     "nameWire": "ServerlessCacheName",
+     "limit": 40,
+     "operations": {
+      "create": {
+       "name": "CreateServerlessCache",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheUsageLimits",
+         "type": "structure",
+         "key": "CacheUsageLimits",
+         "shape": "CacheUsageLimits"
+        },
+        {
+         "name": "DailySnapshotTime",
+         "type": "string",
+         "key": "DailySnapshotTime"
+        },
+        {
+         "name": "Description",
+         "type": "string",
+         "key": "Description"
+        },
+        {
+         "name": "Engine",
+         "type": "string",
+         "required": true,
+         "key": "Engine"
+        },
+        {
+         "name": "KmsKeyId",
+         "type": "string",
+         "key": "KmsKeyId"
+        },
+        {
+         "name": "MajorEngineVersion",
+         "type": "string",
+         "key": "MajorEngineVersion"
+        },
+        {
+         "name": "SecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "SecurityGroupIds",
+         "itemKey": "SecurityGroupId"
+        },
+        {
+         "name": "ServerlessCacheName",
+         "type": "string",
+         "required": true,
+         "key": "ServerlessCacheName"
+        },
+        {
+         "name": "SnapshotArnsToRestore",
+         "type": "list",
+         "element": "string",
+         "key": "SnapshotArnsToRestore",
+         "itemKey": "SnapshotArn"
+        },
+        {
+         "name": "SnapshotRetentionLimit",
+         "type": "integer",
+         "key": "SnapshotRetentionLimit"
+        },
+        {
+         "name": "SubnetIds",
+         "type": "list",
+         "element": "string",
+         "key": "SubnetIds",
+         "itemKey": "SubnetId"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        },
+        {
+         "name": "UserGroupId",
+         "type": "string",
+         "key": "UserGroupId"
+        }
+       ],
+       "wrapper": "ServerlessCache",
+       "output": "CreateServerlessCacheResponse",
+       "resultWrapper": "CreateServerlessCacheResult"
+      },
+      "delete": {
+       "name": "DeleteServerlessCache",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "FinalSnapshotName",
+         "type": "string",
+         "key": "FinalSnapshotName"
+        },
+        {
+         "name": "ServerlessCacheName",
+         "type": "string",
+         "required": true,
+         "key": "ServerlessCacheName"
+        }
+       ],
+       "wrapper": "ServerlessCache",
+       "lookup": "ServerlessCacheName",
+       "lookupKey": "name",
+       "output": "DeleteServerlessCacheResponse",
+       "resultWrapper": "DeleteServerlessCacheResult"
+      },
+      "describe": {
+       "name": "DescribeServerlessCaches",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "MaxResults",
+         "type": "integer",
+         "key": "MaxResults"
+        },
+        {
+         "name": "NextToken",
+         "type": "string",
+         "key": "NextToken"
+        },
+        {
+         "name": "ServerlessCacheName",
+         "type": "string",
+         "key": "ServerlessCacheName"
+        }
+       ],
+       "items": "ServerlessCaches",
+       "itemName": "ServerlessCacheName",
+       "itemArn": "ARN",
+       "names": "ServerlessCacheName",
+       "inputToken": "NextToken",
+       "outputToken": "NextToken",
+       "output": "DescribeServerlessCachesResponse",
+       "resultWrapper": "DescribeServerlessCachesResult"
+      },
+      "list": {
+       "name": "DescribeServerlessCaches",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "MaxResults",
+         "type": "integer",
+         "key": "MaxResults"
+        },
+        {
+         "name": "NextToken",
+         "type": "string",
+         "key": "NextToken"
+        },
+        {
+         "name": "ServerlessCacheName",
+         "type": "string",
+         "key": "ServerlessCacheName"
+        }
+       ],
+       "items": "ServerlessCaches",
+       "itemName": "ServerlessCacheName",
+       "itemArn": "ARN",
+       "names": "ServerlessCacheName",
+       "inputToken": "NextToken",
+       "outputToken": "NextToken",
+       "output": "DescribeServerlessCachesResponse",
+       "resultWrapper": "DescribeServerlessCachesResult"
+      },
+      "update": {
+       "name": "ModifyServerlessCache",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheUsageLimits",
+         "type": "structure",
+         "key": "CacheUsageLimits",
+         "shape": "CacheUsageLimits"
+        },
+        {
+         "name": "DailySnapshotTime",
+         "type": "string",
+         "key": "DailySnapshotTime"
+        },
+        {
+         "name": "Description",
+         "type": "string",
+         "key": "Description"
+        },
+        {
+         "name": "Engine",
+         "type": "string",
+         "key": "Engine"
+        },
+        {
+         "name": "MajorEngineVersion",
+         "type": "string",
+         "key": "MajorEngineVersion"
+        },
+        {
+         "name": "RemoveUserGroup",
+         "type": "boolean",
+         "key": "RemoveUserGroup"
+        },
+        {
+         "name": "SecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "SecurityGroupIds",
+         "itemKey": "SecurityGroupId"
+        },
+        {
+         "name": "ServerlessCacheName",
+         "type": "string",
+         "required": true,
+         "key": "ServerlessCacheName"
+        },
+        {
+         "name": "SnapshotRetentionLimit",
+         "type": "integer",
+         "key": "SnapshotRetentionLimit"
+        },
+        {
+         "name": "UserGroupId",
+         "type": "string",
+         "key": "UserGroupId"
+        }
+       ],
+       "wrapper": "ServerlessCache",
+       "lookup": "ServerlessCacheName",
+       "lookupKey": "name",
+       "output": "ModifyServerlessCacheResponse",
+       "resultWrapper": "ModifyServerlessCacheResult",
+       "editable": [
+        "CacheUsageLimits",
+        "DailySnapshotTime",
+        "Description",
+        "Engine",
+        "MajorEngineVersion",
+        "RemoveUserGroup",
+        "SecurityGroupIds",
+        "SnapshotRetentionLimit"
+       ]
+      }
+     }
     }
    ],
    "tagging": {
@@ -2134,13 +3447,16 @@
     }
    },
    "bounds": [
-    "Cache parameter groups, cache subnet groups and IAM-authenticated users are stored configuration served over the Query protocol: no cache cluster, replication group, serverless cache, global datastore, snapshot, security group or reserved node exists, and CreateCacheCluster, CreateReplicationGroup, CreateServerlessCache, CreateSnapshot and every other official operation return UnknownOperationException with HTTP 501.",
-    "User groups are not implemented: a group references users, requires the account's default user and must drop a deleted user, none of which the stored model expresses, so CreateUserGroup, ModifyUserGroup, DescribeUserGroups and DeleteUserGroup return UnknownOperationException with HTTP 501 and users always report no UserGroupIds.",
+    "Cache clusters, replication groups and serverless caches are stored configuration records that stay in the creating state: no cache engine, node, shard, replica, endpoint, address or port exists, no endpoint, address, port, node list or node group is ever returned, and no key is stored or read. Cache parameter groups, cache subnet groups and IAM-authenticated users are stored configuration too. Operations that act on a running cache (RebootCacheCluster, IncreaseReplicaCount, DecreaseReplicaCount, TestFailover, TestMigration, StartMigration, CompleteMigration, snapshots, copies and restores, global datastores, security groups, reserved nodes, service updates) and every other official operation return UnknownOperationException with HTTP 501.",
+    "The simulator stores no credentials: AuthToken and AuthTokenUpdateStrategy are refused with InvalidParameterValue instead of being accepted and discarded, so a record is created without an auth token (and, like a user, without a password); Port is refused because no listener exists. SnapshotArns, SnapshotName and ServerlessCacheSnapshotName (restores), CacheSecurityGroupNames (EC2-Classic), UserGroupId and UserGroupIds, LogDeliveryConfigurations (the request and description shapes differ), outposts, global replication groups, a cache cluster's ReplicationGroupId and every member the official description does not hold are refused as well. A replication group description holds no engine version, maintenance window, notification topic, parameter group, subnet group, security group, node count or node group, so EngineVersion, CacheParameterGroupName, CacheSubnetGroupName, SecurityGroupIds, PreferredMaintenanceWindow, NotificationTopicArn, NumCacheClusters, NumNodeGroups, ReplicasPerNodeGroup, PreferredCacheClusterAZs and NodeGroupConfiguration are refused for replication groups, which therefore have no MemberClusters.",
+    "User groups are not implemented: a group references users by ID (a member the engine cannot check against existing users), requires the account's default user, which is not modeled, and must drop a deleted user and keep ReplicationGroups and ServerlessCaches in step, none of which the stored model expresses, so CreateUserGroup, ModifyUserGroup, DescribeUserGroups and DeleteUserGroup return UnknownOperationException with HTTP 501, users always report no UserGroupIds, and records cannot name user groups.",
+    "A record keeps exactly the settings it was given: engine versions, node types, maintenance and snapshot windows and similar settings are stored without checking them against ElastiCache offerings and no default is filled in. CacheClusterStatus and Status are creating from creation until deletion; Modify operations are accepted in any state and apply immediately (ApplyImmediately is accepted, no pending values exist), and Delete returns the record with status deleting and refuses FinalSnapshotIdentifier and FinalSnapshotName because no snapshot can be taken (RetainPrimaryCluster is accepted and has no effect because a replication group has no member clusters). Identifiers are letters, digits and hyphens that start with a letter and neither end with a hyphen nor contain two consecutive hyphens (1 to 50 characters for cache clusters, 40 for replication groups and serverless caches) and are stored in lowercase; Engine is memcached, redis or valkey (redis or valkey for replication groups); NumCacheNodes is 1 for redis and valkey and 1 to 40 for memcached; AutomaticFailoverEnabled, MultiAZEnabled and DataTieringEnabled are reported as enabled or disabled. At most 50 cache clusters, 50 replication groups and 40 serverless caches exist per Region (local limits); exceeding them answers InvalidParameterValue for cache clusters and serverless caches and NodeGroupsPerReplicationGroupQuotaExceeded, the modeled quota fault the engine selects, for replication groups.",
+    "A cache cluster reports its parameter group (status in-sync), notification topic (not checked, status active) and security groups (status active) by ID or name only, and names its cache subnet group, which, like the parameter group, need not exist and can be deleted while in use. DescribeCacheClusters refuses ShowCacheNodeInfo true because no node exists, and treats ShowCacheClustersNotInReplicationGroups as having no effect because no cluster belongs to a replication group.",
     "Users must use iam authentication and the engine valkey or redis: passwords and NoPasswordRequired are refused so no password is stored, the user name must equal the user ID (the ElastiCache rule for IAM-enabled users), and the default user is refused and not pre-created. Access strings are stored without parsing, and AppendAccessString is not implemented. MinimumEngineVersion is 6.0 for redis and 7.2 for valkey as documented; DeleteUser returns the user with status deleting.",
     "Parameter values are not modeled: ModifyCacheParameterGroup, ResetCacheParameterGroup, DescribeCacheParameters, DescribeEngineDefaultParameters and DescribeCacheEngineVersions are not implemented, and default parameter groups and the default cache subnet group are not pre-created. A parameter group family must be one of the documented values and is not checked against engine versions; names are stored as given and IsGlobal is always false.",
     "A cache subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, Outpost or supported network type, and the CacheSubnetQuotaExceededFault limit of 20 is a local limit. Cache subnet group names are 1 to 255 letters, digits or hyphens and are stored in lowercase.",
-    "Describe operations refuse Marker values that were not issued for the request, accept MaxRecords from 20 to 100 for parameter and subnet groups and fail with the operation's not-found fault for an unknown name; DescribeUsers refuses Filters and a MaxRecords below 1. Resource counts per Region (50 parameter groups, 50 subnet groups, 100 users) are local limits.",
-    "Tags apply to the three resource kinds by ARN (arn:aws:elasticache:region:account:parametergroup:name, subnetgroup:name and user:id). Tag keys are required and must not start with aws:. AddTagsToResource and RemoveTagsFromResource return an empty TagList, removing a missing key succeeds instead of failing with TagNotFound, and a well-formed ARN of an unknown resource fails with CacheClusterNotFound, the first not-found fault the official tag operations model; a malformed ARN fails with InvalidARN. More than 50 tags in one request fail with TagQuotaPerResourceExceeded, but adding tags that bring the total beyond 50 fails with InvalidParameterValue."
+    "Describe operations refuse Marker values that were not issued for the request, accept MaxRecords from 20 to 100 for parameter groups, subnet groups, cache clusters and replication groups (DescribeServerlessCaches takes the official MaxResults) and fail with the operation's not-found fault for an unknown name; DescribeUsers refuses Filters and a MaxRecords below 1. Resource counts per Region (50 parameter groups, 50 subnet groups, 100 users) are local limits.",
+    "Tags apply to the six resource kinds by ARN (arn:aws:elasticache:region:account:parametergroup:name, subnetgroup:name, user:id, cluster:id, replicationgroup:id and serverlesscache:name). Tag keys are required and must not start with aws:. AddTagsToResource and RemoveTagsFromResource return an empty TagList, removing a missing key succeeds instead of failing with TagNotFound, and a well-formed ARN of an unknown resource fails with CacheClusterNotFound, the first not-found fault the official tag operations model; a malformed ARN fails with InvalidARN. More than 50 tags in one request fail with TagQuotaPerResourceExceeded, but adding tags that bring the total beyond 50 fails with InvalidParameterValue."
    ],
    "source": {
     "package": "botocore",
@@ -2150,6 +3466,9 @@
     "license": "Apache-2.0"
    },
    "xmlShapes": {
+    "AuthTokenUpdateStatus": {
+     "type": "string"
+    },
     "Authentication": {
      "type": "structure",
      "members": [
@@ -2168,6 +3487,9 @@
     "AuthenticationType": {
      "type": "string"
     },
+    "AutomaticFailoverStatus": {
+     "type": "string"
+    },
     "AvailabilityZone": {
      "type": "structure",
      "members": [
@@ -2180,6 +3502,263 @@
     },
     "Boolean": {
      "type": "boolean"
+    },
+    "BooleanOptional": {
+     "type": "boolean"
+    },
+    "CacheCluster": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ARN",
+       "element": "ARN",
+       "shape": "String"
+      },
+      {
+       "name": "AtRestEncryptionEnabled",
+       "element": "AtRestEncryptionEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "AuthTokenEnabled",
+       "element": "AuthTokenEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "AuthTokenLastModifiedDate",
+       "element": "AuthTokenLastModifiedDate",
+       "shape": "TStamp"
+      },
+      {
+       "name": "AutoMinorVersionUpgrade",
+       "element": "AutoMinorVersionUpgrade",
+       "shape": "Boolean"
+      },
+      {
+       "name": "CacheClusterCreateTime",
+       "element": "CacheClusterCreateTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "CacheClusterId",
+       "element": "CacheClusterId",
+       "shape": "String"
+      },
+      {
+       "name": "CacheClusterStatus",
+       "element": "CacheClusterStatus",
+       "shape": "String"
+      },
+      {
+       "name": "CacheNodeType",
+       "element": "CacheNodeType",
+       "shape": "String"
+      },
+      {
+       "name": "CacheNodes",
+       "element": "CacheNodes",
+       "shape": "CacheNodeList"
+      },
+      {
+       "name": "CacheParameterGroup",
+       "element": "CacheParameterGroup",
+       "shape": "CacheParameterGroupStatus"
+      },
+      {
+       "name": "CacheSecurityGroups",
+       "element": "CacheSecurityGroups",
+       "shape": "CacheSecurityGroupMembershipList"
+      },
+      {
+       "name": "CacheSubnetGroupName",
+       "element": "CacheSubnetGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "ClientDownloadLandingPage",
+       "element": "ClientDownloadLandingPage",
+       "shape": "String"
+      },
+      {
+       "name": "ConfigurationEndpoint",
+       "element": "ConfigurationEndpoint",
+       "shape": "Endpoint"
+      },
+      {
+       "name": "Engine",
+       "element": "Engine",
+       "shape": "String"
+      },
+      {
+       "name": "EngineVersion",
+       "element": "EngineVersion",
+       "shape": "String"
+      },
+      {
+       "name": "IpDiscovery",
+       "element": "IpDiscovery",
+       "shape": "IpDiscovery"
+      },
+      {
+       "name": "LogDeliveryConfigurations",
+       "element": "LogDeliveryConfigurations",
+       "shape": "LogDeliveryConfigurationList"
+      },
+      {
+       "name": "NetworkType",
+       "element": "NetworkType",
+       "shape": "NetworkType"
+      },
+      {
+       "name": "NotificationConfiguration",
+       "element": "NotificationConfiguration",
+       "shape": "NotificationConfiguration"
+      },
+      {
+       "name": "NumCacheNodes",
+       "element": "NumCacheNodes",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "PendingModifiedValues",
+       "element": "PendingModifiedValues",
+       "shape": "PendingModifiedValues"
+      },
+      {
+       "name": "PreferredAvailabilityZone",
+       "element": "PreferredAvailabilityZone",
+       "shape": "String"
+      },
+      {
+       "name": "PreferredMaintenanceWindow",
+       "element": "PreferredMaintenanceWindow",
+       "shape": "String"
+      },
+      {
+       "name": "PreferredOutpostArn",
+       "element": "PreferredOutpostArn",
+       "shape": "String"
+      },
+      {
+       "name": "ReplicationGroupId",
+       "element": "ReplicationGroupId",
+       "shape": "String"
+      },
+      {
+       "name": "ReplicationGroupLogDeliveryEnabled",
+       "element": "ReplicationGroupLogDeliveryEnabled",
+       "shape": "Boolean"
+      },
+      {
+       "name": "SecurityGroups",
+       "element": "SecurityGroups",
+       "shape": "SecurityGroupMembershipList"
+      },
+      {
+       "name": "SnapshotRetentionLimit",
+       "element": "SnapshotRetentionLimit",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "SnapshotWindow",
+       "element": "SnapshotWindow",
+       "shape": "String"
+      },
+      {
+       "name": "TransitEncryptionEnabled",
+       "element": "TransitEncryptionEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "TransitEncryptionMode",
+       "element": "TransitEncryptionMode",
+       "shape": "TransitEncryptionMode"
+      }
+     ]
+    },
+    "CacheClusterList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "CacheCluster",
+      "shape": "CacheCluster"
+     }
+    },
+    "CacheClusterMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheClusters",
+       "element": "CacheClusters",
+       "shape": "CacheClusterList"
+      },
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      }
+     ]
+    },
+    "CacheNode": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheNodeCreateTime",
+       "element": "CacheNodeCreateTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "CacheNodeId",
+       "element": "CacheNodeId",
+       "shape": "String"
+      },
+      {
+       "name": "CacheNodeStatus",
+       "element": "CacheNodeStatus",
+       "shape": "String"
+      },
+      {
+       "name": "CustomerAvailabilityZone",
+       "element": "CustomerAvailabilityZone",
+       "shape": "String"
+      },
+      {
+       "name": "CustomerOutpostArn",
+       "element": "CustomerOutpostArn",
+       "shape": "String"
+      },
+      {
+       "name": "Endpoint",
+       "element": "Endpoint",
+       "shape": "Endpoint"
+      },
+      {
+       "name": "ParameterGroupStatus",
+       "element": "ParameterGroupStatus",
+       "shape": "String"
+      },
+      {
+       "name": "SourceCacheNodeId",
+       "element": "SourceCacheNodeId",
+       "shape": "String"
+      }
+     ]
+    },
+    "CacheNodeIdsList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "CacheNodeId",
+      "shape": "String"
+     }
+    },
+    "CacheNodeList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "CacheNode",
+      "shape": "CacheNode"
+     }
     },
     "CacheParameterGroup": {
      "type": "structure",
@@ -2219,6 +3798,26 @@
       "shape": "CacheParameterGroup"
      }
     },
+    "CacheParameterGroupStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheNodeIdsToReboot",
+       "element": "CacheNodeIdsToReboot",
+       "shape": "CacheNodeIdsList"
+      },
+      {
+       "name": "CacheParameterGroupName",
+       "element": "CacheParameterGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "ParameterApplyStatus",
+       "element": "ParameterApplyStatus",
+       "shape": "String"
+      }
+     ]
+    },
     "CacheParameterGroupsMessage": {
      "type": "structure",
      "members": [
@@ -2233,6 +3832,29 @@
        "shape": "String"
       }
      ]
+    },
+    "CacheSecurityGroupMembership": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheSecurityGroupName",
+       "element": "CacheSecurityGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "CacheSecurityGroupMembershipList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "CacheSecurityGroup",
+      "shape": "CacheSecurityGroupMembership"
+     }
     },
     "CacheSubnetGroup": {
      "type": "structure",
@@ -2292,6 +3914,52 @@
       "shape": "CacheSubnetGroup"
      }
     },
+    "CacheUsageLimits": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DataStorage",
+       "element": "DataStorage",
+       "shape": "DataStorage"
+      },
+      {
+       "name": "ECPUPerSecond",
+       "element": "ECPUPerSecond",
+       "shape": "ECPUPerSecond"
+      }
+     ]
+    },
+    "CloudWatchLogsDestinationDetails": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "LogGroup",
+       "element": "LogGroup",
+       "shape": "String"
+      }
+     ]
+    },
+    "ClusterIdList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ClusterId",
+      "shape": "String"
+     }
+    },
+    "ClusterMode": {
+     "type": "string"
+    },
+    "CreateCacheClusterResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheCluster",
+       "element": "CacheCluster",
+       "shape": "CacheCluster"
+      }
+     ]
+    },
     "CreateCacheParameterGroupResult": {
      "type": "structure",
      "members": [
@@ -2312,6 +3980,97 @@
       }
      ]
     },
+    "CreateReplicationGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ReplicationGroup",
+       "element": "ReplicationGroup",
+       "shape": "ReplicationGroup"
+      }
+     ]
+    },
+    "CreateServerlessCacheResponse": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ServerlessCache",
+       "element": "ServerlessCache",
+       "shape": "ServerlessCache"
+      }
+     ]
+    },
+    "DataStorage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Maximum",
+       "element": "Maximum",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "Minimum",
+       "element": "Minimum",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "Unit",
+       "element": "Unit",
+       "shape": "DataStorageUnit"
+      }
+     ]
+    },
+    "DataStorageUnit": {
+     "type": "string"
+    },
+    "DataTieringStatus": {
+     "type": "string"
+    },
+    "DeleteCacheClusterResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheCluster",
+       "element": "CacheCluster",
+       "shape": "CacheCluster"
+      }
+     ]
+    },
+    "DeleteReplicationGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ReplicationGroup",
+       "element": "ReplicationGroup",
+       "shape": "ReplicationGroup"
+      }
+     ]
+    },
+    "DeleteServerlessCacheResponse": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ServerlessCache",
+       "element": "ServerlessCache",
+       "shape": "ServerlessCache"
+      }
+     ]
+    },
+    "DescribeServerlessCachesResponse": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "NextToken",
+       "element": "NextToken",
+       "shape": "String"
+      },
+      {
+       "name": "ServerlessCaches",
+       "element": "ServerlessCaches",
+       "shape": "ServerlessCacheList"
+      }
+     ]
+    },
     "DescribeUsersResult": {
      "type": "structure",
      "members": [
@@ -2327,11 +4086,155 @@
       }
      ]
     },
+    "DestinationDetails": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CloudWatchLogsDetails",
+       "element": "CloudWatchLogsDetails",
+       "shape": "CloudWatchLogsDestinationDetails"
+      },
+      {
+       "name": "KinesisFirehoseDetails",
+       "element": "KinesisFirehoseDetails",
+       "shape": "KinesisFirehoseDestinationDetails"
+      }
+     ]
+    },
+    "DestinationType": {
+     "type": "string"
+    },
+    "Double": {
+     "type": "double"
+    },
+    "ECPUPerSecond": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Maximum",
+       "element": "Maximum",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "Minimum",
+       "element": "Minimum",
+       "shape": "IntegerOptional"
+      }
+     ]
+    },
+    "Endpoint": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Address",
+       "element": "Address",
+       "shape": "String"
+      },
+      {
+       "name": "Port",
+       "element": "Port",
+       "shape": "Integer"
+      }
+     ]
+    },
     "EngineType": {
      "type": "string"
     },
+    "GlobalReplicationGroupInfo": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "GlobalReplicationGroupId",
+       "element": "GlobalReplicationGroupId",
+       "shape": "String"
+      },
+      {
+       "name": "GlobalReplicationGroupMemberRole",
+       "element": "GlobalReplicationGroupMemberRole",
+       "shape": "String"
+      }
+     ]
+    },
+    "Integer": {
+     "type": "integer"
+    },
     "IntegerOptional": {
      "type": "integer"
+    },
+    "IpDiscovery": {
+     "type": "string"
+    },
+    "KinesisFirehoseDestinationDetails": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DeliveryStream",
+       "element": "DeliveryStream",
+       "shape": "String"
+      }
+     ]
+    },
+    "LogDeliveryConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DestinationDetails",
+       "element": "DestinationDetails",
+       "shape": "DestinationDetails"
+      },
+      {
+       "name": "DestinationType",
+       "element": "DestinationType",
+       "shape": "DestinationType"
+      },
+      {
+       "name": "LogFormat",
+       "element": "LogFormat",
+       "shape": "LogFormat"
+      },
+      {
+       "name": "LogType",
+       "element": "LogType",
+       "shape": "LogType"
+      },
+      {
+       "name": "Message",
+       "element": "Message",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "LogDeliveryConfigurationStatus"
+      }
+     ]
+    },
+    "LogDeliveryConfigurationList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "LogDeliveryConfiguration",
+      "shape": "LogDeliveryConfiguration"
+     }
+    },
+    "LogDeliveryConfigurationStatus": {
+     "type": "string"
+    },
+    "LogFormat": {
+     "type": "string"
+    },
+    "LogType": {
+     "type": "string"
+    },
+    "ModifyCacheClusterResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheCluster",
+       "element": "CacheCluster",
+       "shape": "CacheCluster"
+      }
+     ]
     },
     "ModifyCacheSubnetGroupResult": {
      "type": "structure",
@@ -2343,6 +4246,29 @@
       }
      ]
     },
+    "ModifyReplicationGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ReplicationGroup",
+       "element": "ReplicationGroup",
+       "shape": "ReplicationGroup"
+      }
+     ]
+    },
+    "ModifyServerlessCacheResponse": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ServerlessCache",
+       "element": "ServerlessCache",
+       "shape": "ServerlessCache"
+      }
+     ]
+    },
+    "MultiAZStatus": {
+     "type": "string"
+    },
     "NetworkType": {
      "type": "string"
     },
@@ -2353,6 +4279,603 @@
       "element": "member",
       "shape": "NetworkType"
      }
+    },
+    "NodeGroup": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "NodeGroupId",
+       "element": "NodeGroupId",
+       "shape": "String"
+      },
+      {
+       "name": "NodeGroupMembers",
+       "element": "NodeGroupMembers",
+       "shape": "NodeGroupMemberList"
+      },
+      {
+       "name": "PrimaryEndpoint",
+       "element": "PrimaryEndpoint",
+       "shape": "Endpoint"
+      },
+      {
+       "name": "ReaderEndpoint",
+       "element": "ReaderEndpoint",
+       "shape": "Endpoint"
+      },
+      {
+       "name": "Slots",
+       "element": "Slots",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "NodeGroupList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "NodeGroup",
+      "shape": "NodeGroup"
+     }
+    },
+    "NodeGroupMember": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheClusterId",
+       "element": "CacheClusterId",
+       "shape": "String"
+      },
+      {
+       "name": "CacheNodeId",
+       "element": "CacheNodeId",
+       "shape": "String"
+      },
+      {
+       "name": "CurrentRole",
+       "element": "CurrentRole",
+       "shape": "String"
+      },
+      {
+       "name": "PreferredAvailabilityZone",
+       "element": "PreferredAvailabilityZone",
+       "shape": "String"
+      },
+      {
+       "name": "PreferredOutpostArn",
+       "element": "PreferredOutpostArn",
+       "shape": "String"
+      },
+      {
+       "name": "ReadEndpoint",
+       "element": "ReadEndpoint",
+       "shape": "Endpoint"
+      }
+     ]
+    },
+    "NodeGroupMemberList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "NodeGroupMember",
+      "shape": "NodeGroupMember"
+     }
+    },
+    "NotificationConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "TopicArn",
+       "element": "TopicArn",
+       "shape": "String"
+      },
+      {
+       "name": "TopicStatus",
+       "element": "TopicStatus",
+       "shape": "String"
+      }
+     ]
+    },
+    "PendingAutomaticFailoverStatus": {
+     "type": "string"
+    },
+    "PendingLogDeliveryConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DestinationDetails",
+       "element": "DestinationDetails",
+       "shape": "DestinationDetails"
+      },
+      {
+       "name": "DestinationType",
+       "element": "DestinationType",
+       "shape": "DestinationType"
+      },
+      {
+       "name": "LogFormat",
+       "element": "LogFormat",
+       "shape": "LogFormat"
+      },
+      {
+       "name": "LogType",
+       "element": "LogType",
+       "shape": "LogType"
+      }
+     ]
+    },
+    "PendingLogDeliveryConfigurationList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "member",
+      "shape": "PendingLogDeliveryConfiguration"
+     }
+    },
+    "PendingModifiedValues": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AuthTokenStatus",
+       "element": "AuthTokenStatus",
+       "shape": "AuthTokenUpdateStatus"
+      },
+      {
+       "name": "CacheNodeIdsToRemove",
+       "element": "CacheNodeIdsToRemove",
+       "shape": "CacheNodeIdsList"
+      },
+      {
+       "name": "CacheNodeType",
+       "element": "CacheNodeType",
+       "shape": "String"
+      },
+      {
+       "name": "EngineVersion",
+       "element": "EngineVersion",
+       "shape": "String"
+      },
+      {
+       "name": "LogDeliveryConfigurations",
+       "element": "PendingLogDeliveryConfiguration",
+       "shape": "PendingLogDeliveryConfigurationList"
+      },
+      {
+       "name": "NumCacheNodes",
+       "element": "NumCacheNodes",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "ScaleConfig",
+       "element": "ScaleConfig",
+       "shape": "ScaleConfig"
+      },
+      {
+       "name": "TransitEncryptionEnabled",
+       "element": "TransitEncryptionEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "TransitEncryptionMode",
+       "element": "TransitEncryptionMode",
+       "shape": "TransitEncryptionMode"
+      }
+     ]
+    },
+    "ReplicationGroup": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ARN",
+       "element": "ARN",
+       "shape": "String"
+      },
+      {
+       "name": "AtRestEncryptionEnabled",
+       "element": "AtRestEncryptionEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "AuthTokenEnabled",
+       "element": "AuthTokenEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "AuthTokenLastModifiedDate",
+       "element": "AuthTokenLastModifiedDate",
+       "shape": "TStamp"
+      },
+      {
+       "name": "AutoMinorVersionUpgrade",
+       "element": "AutoMinorVersionUpgrade",
+       "shape": "Boolean"
+      },
+      {
+       "name": "AutomaticFailover",
+       "element": "AutomaticFailover",
+       "shape": "AutomaticFailoverStatus"
+      },
+      {
+       "name": "CacheNodeType",
+       "element": "CacheNodeType",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterEnabled",
+       "element": "ClusterEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "ClusterMode",
+       "element": "ClusterMode",
+       "shape": "ClusterMode"
+      },
+      {
+       "name": "ConfigurationEndpoint",
+       "element": "ConfigurationEndpoint",
+       "shape": "Endpoint"
+      },
+      {
+       "name": "DataTiering",
+       "element": "DataTiering",
+       "shape": "DataTieringStatus"
+      },
+      {
+       "name": "Description",
+       "element": "Description",
+       "shape": "String"
+      },
+      {
+       "name": "Engine",
+       "element": "Engine",
+       "shape": "String"
+      },
+      {
+       "name": "GlobalReplicationGroupInfo",
+       "element": "GlobalReplicationGroupInfo",
+       "shape": "GlobalReplicationGroupInfo"
+      },
+      {
+       "name": "IpDiscovery",
+       "element": "IpDiscovery",
+       "shape": "IpDiscovery"
+      },
+      {
+       "name": "KmsKeyId",
+       "element": "KmsKeyId",
+       "shape": "String"
+      },
+      {
+       "name": "LogDeliveryConfigurations",
+       "element": "LogDeliveryConfigurations",
+       "shape": "LogDeliveryConfigurationList"
+      },
+      {
+       "name": "MemberClusters",
+       "element": "MemberClusters",
+       "shape": "ClusterIdList"
+      },
+      {
+       "name": "MemberClustersOutpostArns",
+       "element": "MemberClustersOutpostArns",
+       "shape": "ReplicationGroupOutpostArnList"
+      },
+      {
+       "name": "MultiAZ",
+       "element": "MultiAZ",
+       "shape": "MultiAZStatus"
+      },
+      {
+       "name": "NetworkType",
+       "element": "NetworkType",
+       "shape": "NetworkType"
+      },
+      {
+       "name": "NodeGroups",
+       "element": "NodeGroups",
+       "shape": "NodeGroupList"
+      },
+      {
+       "name": "PendingModifiedValues",
+       "element": "PendingModifiedValues",
+       "shape": "ReplicationGroupPendingModifiedValues"
+      },
+      {
+       "name": "ReplicationGroupCreateTime",
+       "element": "ReplicationGroupCreateTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "ReplicationGroupId",
+       "element": "ReplicationGroupId",
+       "shape": "String"
+      },
+      {
+       "name": "SnapshotRetentionLimit",
+       "element": "SnapshotRetentionLimit",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "SnapshotWindow",
+       "element": "SnapshotWindow",
+       "shape": "String"
+      },
+      {
+       "name": "SnapshottingClusterId",
+       "element": "SnapshottingClusterId",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      },
+      {
+       "name": "TransitEncryptionEnabled",
+       "element": "TransitEncryptionEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "TransitEncryptionMode",
+       "element": "TransitEncryptionMode",
+       "shape": "TransitEncryptionMode"
+      },
+      {
+       "name": "UserGroupIds",
+       "element": "UserGroupIds",
+       "shape": "UserGroupIdList"
+      }
+     ]
+    },
+    "ReplicationGroupList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ReplicationGroup",
+      "shape": "ReplicationGroup"
+     }
+    },
+    "ReplicationGroupMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      },
+      {
+       "name": "ReplicationGroups",
+       "element": "ReplicationGroups",
+       "shape": "ReplicationGroupList"
+      }
+     ]
+    },
+    "ReplicationGroupOutpostArnList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ReplicationGroupOutpostArn",
+      "shape": "String"
+     }
+    },
+    "ReplicationGroupPendingModifiedValues": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AuthTokenStatus",
+       "element": "AuthTokenStatus",
+       "shape": "AuthTokenUpdateStatus"
+      },
+      {
+       "name": "AutomaticFailoverStatus",
+       "element": "AutomaticFailoverStatus",
+       "shape": "PendingAutomaticFailoverStatus"
+      },
+      {
+       "name": "ClusterMode",
+       "element": "ClusterMode",
+       "shape": "ClusterMode"
+      },
+      {
+       "name": "LogDeliveryConfigurations",
+       "element": "PendingLogDeliveryConfiguration",
+       "shape": "PendingLogDeliveryConfigurationList"
+      },
+      {
+       "name": "PrimaryClusterId",
+       "element": "PrimaryClusterId",
+       "shape": "String"
+      },
+      {
+       "name": "Resharding",
+       "element": "Resharding",
+       "shape": "ReshardingStatus"
+      },
+      {
+       "name": "TransitEncryptionEnabled",
+       "element": "TransitEncryptionEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "TransitEncryptionMode",
+       "element": "TransitEncryptionMode",
+       "shape": "TransitEncryptionMode"
+      },
+      {
+       "name": "UserGroups",
+       "element": "UserGroups",
+       "shape": "UserGroupsUpdateStatus"
+      }
+     ]
+    },
+    "ReshardingStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "SlotMigration",
+       "element": "SlotMigration",
+       "shape": "SlotMigration"
+      }
+     ]
+    },
+    "ScaleConfig": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ScaleIntervalMinutes",
+       "element": "ScaleIntervalMinutes",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "ScalePercentage",
+       "element": "ScalePercentage",
+       "shape": "IntegerOptional"
+      }
+     ]
+    },
+    "SecurityGroupIdsList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "SecurityGroupId",
+      "shape": "String"
+     }
+    },
+    "SecurityGroupMembership": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "SecurityGroupId",
+       "element": "SecurityGroupId",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "SecurityGroupMembershipList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "member",
+      "shape": "SecurityGroupMembership"
+     }
+    },
+    "ServerlessCache": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ARN",
+       "element": "ARN",
+       "shape": "String"
+      },
+      {
+       "name": "CacheUsageLimits",
+       "element": "CacheUsageLimits",
+       "shape": "CacheUsageLimits"
+      },
+      {
+       "name": "CreateTime",
+       "element": "CreateTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "DailySnapshotTime",
+       "element": "DailySnapshotTime",
+       "shape": "String"
+      },
+      {
+       "name": "Description",
+       "element": "Description",
+       "shape": "String"
+      },
+      {
+       "name": "Endpoint",
+       "element": "Endpoint",
+       "shape": "Endpoint"
+      },
+      {
+       "name": "Engine",
+       "element": "Engine",
+       "shape": "String"
+      },
+      {
+       "name": "FullEngineVersion",
+       "element": "FullEngineVersion",
+       "shape": "String"
+      },
+      {
+       "name": "KmsKeyId",
+       "element": "KmsKeyId",
+       "shape": "String"
+      },
+      {
+       "name": "MajorEngineVersion",
+       "element": "MajorEngineVersion",
+       "shape": "String"
+      },
+      {
+       "name": "ReaderEndpoint",
+       "element": "ReaderEndpoint",
+       "shape": "Endpoint"
+      },
+      {
+       "name": "SecurityGroupIds",
+       "element": "SecurityGroupIds",
+       "shape": "SecurityGroupIdsList"
+      },
+      {
+       "name": "ServerlessCacheName",
+       "element": "ServerlessCacheName",
+       "shape": "String"
+      },
+      {
+       "name": "SnapshotRetentionLimit",
+       "element": "SnapshotRetentionLimit",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      },
+      {
+       "name": "SubnetIds",
+       "element": "SubnetIds",
+       "shape": "SubnetIdsList"
+      },
+      {
+       "name": "UserGroupId",
+       "element": "UserGroupId",
+       "shape": "String"
+      }
+     ]
+    },
+    "ServerlessCacheList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "member",
+      "shape": "ServerlessCache"
+     }
+    },
+    "SlotMigration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ProgressPercentage",
+       "element": "ProgressPercentage",
+       "shape": "Double"
+      }
+     ]
     },
     "String": {
      "type": "string"
@@ -2382,6 +4905,14 @@
       }
      ]
     },
+    "SubnetIdsList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "SubnetId",
+      "shape": "String"
+     }
+    },
     "SubnetList": {
      "type": "list",
      "item": {
@@ -2399,6 +4930,9 @@
        "shape": "String"
       }
      ]
+    },
+    "TStamp": {
+     "type": "timestamp"
     },
     "Tag": {
      "type": "structure",
@@ -2432,6 +4966,9 @@
        "shape": "TagList"
       }
      ]
+    },
+    "TransitEncryptionMode": {
+     "type": "string"
     },
     "User": {
      "type": "structure",
@@ -2494,6 +5031,21 @@
       "shape": "UserGroupId"
      }
     },
+    "UserGroupsUpdateStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "UserGroupIdsToAdd",
+       "element": "UserGroupIdsToAdd",
+       "shape": "UserGroupIdList"
+      },
+      {
+       "name": "UserGroupIdsToRemove",
+       "element": "UserGroupIdsToRemove",
+       "shape": "UserGroupIdList"
+      }
+     ]
+    },
     "UserList": {
      "type": "list",
      "item": {
@@ -2504,6 +5056,11 @@
     }
    },
    "inputShapes": {
+    "AllowedNodeGroupId": {
+     "type": "string",
+     "min": 1,
+     "max": 4
+    },
     "AuthenticationMode": {
      "type": "structure",
      "members": [
@@ -2517,6 +5074,95 @@
       }
      ]
     },
+    "AvailabilityZonesList": {
+     "type": "list",
+     "member": {
+      "key": "AvailabilityZone",
+      "shape": "String"
+     }
+    },
+    "BooleanOptional": {
+     "type": "boolean"
+    },
+    "CacheUsageLimits": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DataStorage",
+       "shape": "DataStorage"
+      },
+      {
+       "name": "ECPUPerSecond",
+       "shape": "ECPUPerSecond"
+      }
+     ]
+    },
+    "CloudWatchLogsDestinationDetails": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "LogGroup",
+       "shape": "String"
+      }
+     ]
+    },
+    "DataStorage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Maximum",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "Minimum",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "Unit",
+       "shape": "DataStorageUnit",
+       "required": true
+      }
+     ]
+    },
+    "DataStorageUnit": {
+     "type": "string",
+     "enum": [
+      "GB"
+     ]
+    },
+    "DestinationDetails": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CloudWatchLogsDetails",
+       "shape": "CloudWatchLogsDestinationDetails"
+      },
+      {
+       "name": "KinesisFirehoseDetails",
+       "shape": "KinesisFirehoseDestinationDetails"
+      }
+     ]
+    },
+    "DestinationType": {
+     "type": "string",
+     "enum": [
+      "cloudwatch-logs",
+      "kinesis-firehose"
+     ]
+    },
+    "ECPUPerSecond": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Maximum",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "Minimum",
+       "shape": "IntegerOptional"
+      }
+     ]
+    },
     "InputAuthenticationType": {
      "type": "string",
      "enum": [
@@ -2525,6 +5171,111 @@
       "iam"
      ]
     },
+    "IntegerOptional": {
+     "type": "integer"
+    },
+    "KinesisFirehoseDestinationDetails": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DeliveryStream",
+       "shape": "String"
+      }
+     ]
+    },
+    "LogDeliveryConfigurationRequest": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DestinationDetails",
+       "shape": "DestinationDetails"
+      },
+      {
+       "name": "DestinationType",
+       "shape": "DestinationType"
+      },
+      {
+       "name": "Enabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "LogFormat",
+       "shape": "LogFormat"
+      },
+      {
+       "name": "LogType",
+       "shape": "LogType"
+      }
+     ]
+    },
+    "LogDeliveryConfigurationRequestList": {
+     "type": "list",
+     "member": {
+      "key": "LogDeliveryConfigurationRequest",
+      "shape": "LogDeliveryConfigurationRequest"
+     }
+    },
+    "LogFormat": {
+     "type": "string",
+     "enum": [
+      "text",
+      "json"
+     ]
+    },
+    "LogType": {
+     "type": "string",
+     "enum": [
+      "slow-log",
+      "engine-log"
+     ]
+    },
+    "NodeGroupConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "NodeGroupId",
+       "shape": "AllowedNodeGroupId"
+      },
+      {
+       "name": "PrimaryAvailabilityZone",
+       "shape": "String"
+      },
+      {
+       "name": "PrimaryOutpostArn",
+       "shape": "String"
+      },
+      {
+       "name": "ReplicaAvailabilityZones",
+       "shape": "AvailabilityZonesList"
+      },
+      {
+       "name": "ReplicaCount",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "ReplicaOutpostArns",
+       "shape": "OutpostArnsList"
+      },
+      {
+       "name": "Slots",
+       "shape": "String"
+      }
+     ]
+    },
+    "NodeGroupConfigurationList": {
+     "type": "list",
+     "member": {
+      "key": "NodeGroupConfiguration",
+      "shape": "NodeGroupConfiguration"
+     }
+    },
+    "OutpostArnsList": {
+     "type": "list",
+     "member": {
+      "key": "OutpostArn",
+      "shape": "String"
+     }
+    },
     "PasswordListInput": {
      "type": "list",
      "member": {
@@ -2532,6 +5283,19 @@
       "shape": "String"
      },
      "min": 1
+    },
+    "ScaleConfig": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ScaleIntervalMinutes",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "ScalePercentage",
+       "shape": "IntegerOptional"
+      }
+     ]
     },
     "String": {
      "type": "string"
