@@ -357,6 +357,15 @@ func TestMediaTailorConfigurationsSourcesAndChannels(t *testing.T) {
 	if items := h.rest("mediatailor", "POST", "/prefetchSchedule/ads", map[string]any{"ScheduleType": "RECURRING"}).body["Items"].([]any); len(items) != 1 {
 		t.Fatalf("recurring filter %v", items)
 	}
+	// ALL lists every schedule; schedules created without a type are SINGLE.
+	for filter, want := range map[string]int{"ALL": 2, "SINGLE": 1, "RECURRING": 1} {
+		if items := h.rest("mediatailor", "POST", "/prefetchSchedule/ads", map[string]any{"ScheduleType": filter}).body["Items"].([]any); len(items) != want {
+			t.Fatalf("%s filter %d items, want %d: %v", filter, len(items), want, items)
+		}
+	}
+	if got := h.rest("mediatailor", "GET", "/prefetchSchedule/ads/morning", nil).body["ScheduleType"]; got != "SINGLE" {
+		t.Fatalf("default schedule type %v", got)
+	}
 	if items := h.rest("mediatailor", "POST", "/prefetchSchedule/ads", map[string]any{"StreamId": "s1"}).body["Items"].([]any); len(items) != 1 {
 		t.Fatalf("stream filter %v", items)
 	}

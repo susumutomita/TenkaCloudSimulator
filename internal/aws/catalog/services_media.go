@@ -196,7 +196,7 @@ var mediaTailor = &Service{
 		{Kind: "prefetchSchedule", Shape: "PrefetchSchedule", ID: "name", Parent: "playbackConfiguration",
 			ARN:       "arn:{partition}:mediatailor:{region}:{account}:prefetchSchedule/{parentName}/{name}",
 			ARNMember: "Arn", NameMember: "Name", Unique: true, Limit: 100,
-			Generate: map[string]any{"PlaybackConfigurationName": "$parentName"}},
+			Generate: map[string]any{"PlaybackConfigurationName": "$parentName", "ScheduleType": "SINGLE"}},
 		{Kind: "sourceLocation", Shape: "SourceLocation", ID: "name", ARN: "arn:{partition}:mediatailor:{region}:{account}:sourceLocation/{name}",
 			ARNMember: "Arn", NameMember: "SourceLocationName", Unique: true, Limit: 100,
 			Generate: map[string]any{"CreationTime": "$now", "LastModifiedTime": "$now"}},
@@ -221,6 +221,7 @@ var mediaTailor = &Service{
 		{Name: "CreatePrefetchSchedule", Kind: Create, Resource: "prefetchSchedule", Parent: "PlaybackConfigurationName", Check: mediaTailorPrefetch},
 		{Name: "GetPrefetchSchedule", Kind: Read, Resource: "prefetchSchedule", Parent: "PlaybackConfigurationName", Lookup: "Name"},
 		{Name: "ListPrefetchSchedules", Kind: List, Resource: "prefetchSchedule", Parent: "PlaybackConfigurationName",
+			Check:   mediaTailorPrefetchList,
 			Filters: map[string]string{"ScheduleType": "ScheduleType", "StreamId": "StreamId"}},
 		{Name: "DeletePrefetchSchedule", Kind: Delete, Resource: "prefetchSchedule", Parent: "PlaybackConfigurationName", Lookup: "Name"},
 		{Name: "CreateSourceLocation", Kind: Create, Resource: "sourceLocation", Check: mediaTailorSourceLocation},
@@ -280,6 +281,16 @@ func mediaTailorPlayback(input map[string]any) error {
 }
 
 // mediaTailorPrefetch requires the recurring settings of recurring schedules.
+// mediaTailorPrefetchList reads ScheduleType ALL as no schedule type filter,
+// as the official enum documents; SINGLE and RECURRING filter the stored type,
+// which defaults to SINGLE.
+func mediaTailorPrefetchList(input map[string]any) error {
+	if input["ScheduleType"] == "ALL" {
+		delete(input, "ScheduleType")
+	}
+	return nil
+}
+
 func mediaTailorPrefetch(input map[string]any) error {
 	if input["ScheduleType"] == "RECURRING" && input["RecurringPrefetchConfiguration"] == nil {
 		return Failure("ValidationException", "RECURRING prefetch schedules require RecurringPrefetchConfiguration.")
