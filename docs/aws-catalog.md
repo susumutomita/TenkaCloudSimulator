@@ -13,7 +13,7 @@ network, OAuth or real AWS call is executed or simulated.
 
 ## Services
 
-The catalog serves 117 services. The [generated service table](aws-catalog-services.md)
+The catalog serves 139 services. The [generated service table](aws-catalog-services.md)
 lists each service's Issues, protocol, implemented operations and bounds; it is
 checked against the reviewed specifications by `go test ./internal/aws/catalog`.
 The capability document lists the same services under `services.catalog`,
