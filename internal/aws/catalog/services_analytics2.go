@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"encoding/json"
+	"regexp"
 	"time"
 )
 
@@ -379,4 +380,99 @@ var emrContainers = &Service{
 		"A virtual cluster is RUNNING at once and DeleteVirtualCluster removes it, whereas AWS keeps it listed as TERMINATED; ListVirtualClusters supports the containerProviderId and containerProviderType filters only. securityConfigurationId on a virtual cluster, the execution role, KMS key and everything inside jobTemplateData and securityConfigurationData are stored without being resolved, so a virtual cluster may name a missing security configuration, and createdBy and decryptionError are never reported.",
 		"The service offers no operation to delete a security configuration, so one lasts until the Region's records are reset, and a job template is deleted whether or not a job uses it. The limits of 50 virtual clusters, 100 job templates and 50 security configurations per Region are local, and tags are stored from the create operations and by TagResource on the ARN.",
 	},
+}
+
+// lakeFormation serves LF-tags, LF-tag expressions, data lake settings and
+// registered locations as stored configuration. Permissions are not
+// bound, so nothing here changes what any principal may do.
+var lakeFormation = &Service{
+	Model: "lakeformation", Title: "AWS Lake Formation", IAMPrefix: "lakeformation", Issues: []int{72},
+	AccountMembers: []string{"CatalogId"},
+	Resources: []*Resource{
+		{Kind: "lfTag", Shape: "LFTagPair", ID: "name",
+			ARN:        "arn:{partition}:lakeformation:{region}:{account}:lftag/{name}",
+			NameMember: "TagKey", Unique: true, Limit: 1000,
+			Generate: map[string]any{"CatalogId": "$account"}},
+		{Kind: "lfTagExpression", Shape: "LFTagExpression", ID: "name",
+			ARN:        "arn:{partition}:lakeformation:{region}:{account}:lftagexpression/{name}",
+			NameMember: "Name", Unique: true, Limit: 1000,
+			Generate: map[string]any{"CatalogId": "$account"}},
+		{Kind: "dataLakeSettings", Shape: "GetDataLakeSettingsResponse", Singleton: true, ID: "name",
+			ARN: "arn:{partition}:lakeformation:{region}:{account}:datalakesettings", NameMember: "DataLakeSettings",
+			Generate: map[string]any{"DataLakeSettings": map[string]any{
+				"DataLakeAdmins": []any{}, "ReadOnlyAdmins": []any{}, "TrustedResourceOwners": []any{},
+				"CreateDatabaseDefaultPermissions": []any{map[string]any{"Principal": map[string]any{"DataLakePrincipalIdentifier": "IAM_ALLOWED_PRINCIPALS"}, "Permissions": []any{"ALL"}}},
+				"CreateTableDefaultPermissions":    []any{map[string]any{"Principal": map[string]any{"DataLakePrincipalIdentifier": "IAM_ALLOWED_PRINCIPALS"}, "Permissions": []any{"ALL"}}},
+				"Parameters":                       map[string]any{"CROSS_ACCOUNT_VERSION": "4", "SET_CONTEXT": "TRUE"}}}},
+		{Kind: "registeredResource", Shape: "ResourceInfo", ID: "name",
+			ARN:        "arn:{partition}:lakeformation:{region}:{account}:registeredresource/{name}",
+			NameMember: "ResourceArn", Unique: true, Limit: 100,
+			Generate: map[string]any{"LastModified": "$now"}},
+	},
+	Ops: []Op{
+		{Name: "CreateLFTag", Kind: Create, Resource: "lfTag", Check: lakeFormationTag},
+		{Name: "GetLFTag", Kind: Read, Resource: "lfTag", Lookup: "TagKey"},
+		{Name: "ListLFTags", Kind: List, Resource: "lfTag"},
+		{Name: "DeleteLFTag", Kind: Delete, Resource: "lfTag", Lookup: "TagKey"},
+		{Name: "CreateLFTagExpression", Kind: Create, Resource: "lfTagExpression"},
+		{Name: "GetLFTagExpression", Kind: Read, Resource: "lfTagExpression", Lookup: "Name"},
+		{Name: "ListLFTagExpressions", Kind: List, Resource: "lfTagExpression"},
+		{Name: "UpdateLFTagExpression", Kind: Update, Resource: "lfTagExpression", Lookup: "Name", Fields: []string{"Description", "Expression"}},
+		{Name: "DeleteLFTagExpression", Kind: Delete, Resource: "lfTagExpression", Lookup: "Name"},
+		{Name: "GetDataLakeSettings", Kind: Read, Resource: "dataLakeSettings"},
+		{Name: "PutDataLakeSettings", Kind: Put, Resource: "dataLakeSettings", Check: lakeFormationSettings},
+		{Name: "RegisterResource", Kind: Create, Resource: "registeredResource", Check: lakeFormationRegister},
+		{Name: "DescribeResource", Kind: Read, Resource: "registeredResource", Lookup: "ResourceArn"},
+		{Name: "ListResources", Kind: List, Resource: "registeredResource"},
+		{Name: "UpdateResource", Kind: Update, Resource: "registeredResource", Lookup: "ResourceArn", Touch: []string{"LastModified"},
+			Fields: []string{"RoleArn", "WithFederation", "HybridAccessEnabled"}},
+		{Name: "DeregisterResource", Kind: Delete, Resource: "registeredResource", Lookup: "ResourceArn"},
+	},
+	Bounds: []string{
+		"LF-tags, LF-tag expressions, the Regional data lake settings and registered Amazon S3 locations are stored records, and Lake Formation permissions are not evaluated: GrantPermissions, RevokePermissions, ListPermissions, LF-tag assignment to resources, data cells filters, opt-ins, transactions, query planning, temporary credentials and every other official operation return UnknownOperationException with HTTP 501. Data lake administrators, default permissions and tags therefore change what no principal may do.",
+		"An LF-tag holds 1 to 50 values that cannot change after creation: UpdateLFTag is not implemented because the stored model cannot apply TagValuesToAdd and TagValuesToDelete to the values already held, so a tag is deleted and created again to change them. An LF-tag expression is stored without checking that the LF-tags it names exist, and ListLFTags does not support the ResourceShareType filter because no tag is shared. LF-tags and expressions have no ARN in AWS: the ARN used for authorization is a simulator form. A duplicate LF-tag or expression fails with InvalidInputException (HTTP 400) because the official operations model no already-exists exception, and the missing-resource and already-registered failures use the modeled EntityNotFoundException and AlreadyExistsException.",
+		"Data lake settings start as AWS documents them for an account that never changed them: no administrators and IAM_ALLOWED_PRINCIPALS holding ALL on new databases and tables. PutDataLakeSettings replaces the whole document, accepts at most 30 administrators and 30 read-only administrators, and stores everything else without resolving principals.",
+		"RegisterResource stores an Amazon S3 location and its IAM role without reading the location or assuming the role: ResourceArn must be an Amazon S3 ARN, and either RoleArn or UseServiceLinkedRole true must be given, the latter being stored as the Lake Formation service-linked role ARN. WithFederation, HybridAccessEnabled and WithPrivilegedAccess are stored as flags with no effect, and registering a location nested inside or around a registered one is allowed although AWS refuses it. CatalogId, when sent, must be the simulator account. The limits of 1000 LF-tags, 1000 expressions and 100 registered locations per Region are local.",
+	},
+}
+
+var lakeFormationS3 = regexp.MustCompile(`^arn:[a-z-]+:s3:::[a-z0-9][a-z0-9.-]{1,61}[a-z0-9](/.*)?$`)
+
+const lakeFormationServiceRole = "arn:aws:iam::000000000000:role/aws-service-role/lakeformation.amazonaws.com/AWSServiceRoleForLakeFormationDataAccess"
+
+// lakeFormationTag bounds the values of a new LF-tag.
+func lakeFormationTag(input map[string]any) error {
+	if values, _ := input["TagValues"].([]any); len(values) > 50 {
+		return Failure("InvalidInputException", "An LF-tag holds at most 50 values.")
+	}
+	return nil
+}
+
+// lakeFormationSettings bounds the administrator lists as documented.
+func lakeFormationSettings(input map[string]any) error {
+	settings, _ := input["DataLakeSettings"].(map[string]any)
+	for _, member := range []string{"DataLakeAdmins", "ReadOnlyAdmins"} {
+		if list, _ := settings[member].([]any); len(list) > 30 {
+			return Failure("InvalidInputException", member+" holds at most 30 principals.")
+		}
+	}
+	return nil
+}
+
+// lakeFormationRegister keeps registered locations to Amazon S3 and to a
+// role the simulator can store.
+func lakeFormationRegister(input map[string]any) error {
+	if arn, _ := input["ResourceArn"].(string); !lakeFormationS3.MatchString(arn) {
+		return Failure("InvalidInputException", "ResourceArn must be an Amazon S3 bucket or prefix ARN.")
+	}
+	linked, _ := input["UseServiceLinkedRole"].(bool)
+	_, role := input["RoleArn"]
+	if linked == role {
+		return Failure("InvalidInputException", "Specify either RoleArn or UseServiceLinkedRole true.")
+	}
+	if linked {
+		input["RoleArn"] = lakeFormationServiceRole
+	}
+	delete(input, "UseServiceLinkedRole")
+	return nil
 }

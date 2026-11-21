@@ -478,3 +478,93 @@ func TestEMRContainersStoresVirtualClustersAndTemplates(t *testing.T) {
 	expect(t, h.rest("emr-containers", "GET", "/virtualclusters/"+id, nil), 400, "ResourceNotFoundException")
 	expect(t, h.rest("emr-containers", "POST", "/virtualclusters/"+id+"/jobruns", map[string]any{}), 501, "UnknownOperationException")
 }
+
+func TestLakeFormationStoresTagsSettingsAndLocations(t *testing.T) {
+	h := newHarness(t, lakeFormation)
+	call := func(op string, input map[string]any) reply { return h.rest("lakeformation", "POST", "/"+op, input) }
+	expect(t, call("CreateLFTag", map[string]any{"TagKey": "tier", "TagValues": []any{"gold", "silver"}}), 200, "")
+	expect(t, call("CreateLFTag", map[string]any{"TagKey": "tier", "TagValues": []any{"gold"}}), 400, "InvalidInputException")
+	expect(t, call("CreateLFTagExpression", map[string]any{"Name": "dup", "Expression": []any{map[string]any{"TagKey": "tier", "TagValues": []any{"gold"}}}}), 200, "")
+	expect(t, call("CreateLFTagExpression", map[string]any{"Name": "dup", "Expression": []any{map[string]any{"TagKey": "tier", "TagValues": []any{"gold"}}}}), 400, "InvalidInputException")
+	expect(t, call("DeleteLFTagExpression", map[string]any{"Name": "dup"}), 200, "")
+	many := make([]any, 51)
+	for i := range many {
+		many[i] = "v" + strings.Repeat("x", i)
+	}
+	expect(t, call("CreateLFTag", map[string]any{"TagKey": "wide", "TagValues": many}), 400, "")
+	expect(t, call("CreateLFTag", map[string]any{"TagKey": "other", "TagValues": []any{"a"}, "CatalogId": "111111111111"}), 400, "")
+	got := call("GetLFTag", map[string]any{"TagKey": "tier", "CatalogId": "000000000000"})
+	expect(t, got, 200, "")
+	if got.body["CatalogId"] != "000000000000" || len(got.body["TagValues"].([]any)) != 2 {
+		t.Fatalf("tag %v", got.body)
+	}
+	expect(t, call("UpdateLFTag", map[string]any{"TagKey": "tier", "TagValuesToAdd": []any{"bronze"}}), 501, "UnknownOperationException")
+	if tags := call("ListLFTags", map[string]any{}).body["LFTags"].([]any); len(tags) != 1 {
+		t.Fatalf("tags %v", tags)
+	}
+
+	expression := []any{map[string]any{"TagKey": "tier", "TagValues": []any{"gold"}}}
+	expect(t, call("CreateLFTagExpression", map[string]any{"Name": "golden", "Description": "gold only", "Expression": expression}), 200, "")
+	described := call("GetLFTagExpression", map[string]any{"Name": "golden"})
+	if described.body["Description"] != "gold only" || len(described.body["Expression"].([]any)) != 1 {
+		t.Fatalf("expression %v", described.body)
+	}
+	expect(t, call("UpdateLFTagExpression", map[string]any{"Name": "golden", "Description": "changed", "Expression": expression}), 200, "")
+	if call("GetLFTagExpression", map[string]any{"Name": "golden"}).body["Description"] != "changed" {
+		t.Fatal("expression not updated")
+	}
+	if listed := call("ListLFTagExpressions", map[string]any{}).body["LFTagExpressions"].([]any); len(listed) != 1 {
+		t.Fatalf("expressions %v", listed)
+	}
+	expect(t, call("DeleteLFTagExpression", map[string]any{"Name": "golden"}), 200, "")
+	expect(t, call("GetLFTagExpression", map[string]any{"Name": "golden"}), 404, "EntityNotFoundException")
+	expect(t, call("DeleteLFTag", map[string]any{"TagKey": "tier"}), 200, "")
+	expect(t, call("GetLFTag", map[string]any{"TagKey": "tier"}), 404, "EntityNotFoundException")
+
+	defaults := call("GetDataLakeSettings", map[string]any{}).body["DataLakeSettings"].(map[string]any)
+	if len(defaults["DataLakeAdmins"].([]any)) != 0 || len(defaults["CreateTableDefaultPermissions"].([]any)) != 1 {
+		t.Fatalf("defaults %v", defaults)
+	}
+	admin := func(n int) []any {
+		list := make([]any, n)
+		for i := range list {
+			list[i] = map[string]any{"DataLakePrincipalIdentifier": "arn:aws:iam::000000000000:user/u" + strings.Repeat("x", i)}
+		}
+		return list
+	}
+	expect(t, call("PutDataLakeSettings", map[string]any{"DataLakeSettings": map[string]any{"DataLakeAdmins": admin(2), "CreateTableDefaultPermissions": []any{}}}), 200, "")
+	changed := call("GetDataLakeSettings", map[string]any{}).body["DataLakeSettings"].(map[string]any)
+	if len(changed["DataLakeAdmins"].([]any)) != 2 || len(changed["CreateTableDefaultPermissions"].([]any)) != 0 {
+		t.Fatalf("settings %v", changed)
+	}
+	expect(t, call("PutDataLakeSettings", map[string]any{"DataLakeSettings": map[string]any{"DataLakeAdmins": admin(31)}}), 400, "InvalidInputException")
+	expect(t, call("PutDataLakeSettings", map[string]any{"DataLakeSettings": map[string]any{"ReadOnlyAdmins": admin(31)}}), 400, "InvalidInputException")
+
+	location := "arn:aws:s3:::lake-bucket/data"
+	role := "arn:aws:iam::000000000000:role/lake"
+	expect(t, call("RegisterResource", map[string]any{"ResourceArn": location, "RoleArn": role, "WithFederation": true}), 200, "")
+	expect(t, call("RegisterResource", map[string]any{"ResourceArn": location, "RoleArn": role}), 409, "AlreadyExistsException")
+	expect(t, call("RegisterResource", map[string]any{"ResourceArn": "arn:aws:ec2:us-east-1:000000000000:instance/i-1", "RoleArn": role}), 400, "InvalidInputException")
+	expect(t, call("RegisterResource", map[string]any{"ResourceArn": "arn:aws:s3:::other"}), 400, "InvalidInputException")
+	expect(t, call("RegisterResource", map[string]any{"ResourceArn": "arn:aws:s3:::other", "RoleArn": role, "UseServiceLinkedRole": true}), 400, "InvalidInputException")
+	expect(t, call("RegisterResource", map[string]any{"ResourceArn": "arn:aws:s3:::linked", "UseServiceLinkedRole": true}), 200, "")
+	info := call("DescribeResource", map[string]any{"ResourceArn": location}).body["ResourceInfo"].(map[string]any)
+	if info["RoleArn"] != role || info["WithFederation"] != true || info["LastModified"] == nil {
+		t.Fatalf("resource %v", info)
+	}
+	linked := call("DescribeResource", map[string]any{"ResourceArn": "arn:aws:s3:::linked"}).body["ResourceInfo"].(map[string]any)
+	if linked["RoleArn"] != lakeFormationServiceRole {
+		t.Fatalf("linked %v", linked)
+	}
+	expect(t, call("UpdateResource", map[string]any{"ResourceArn": location, "RoleArn": "arn:aws:iam::000000000000:role/other", "HybridAccessEnabled": true}), 200, "")
+	if after := call("DescribeResource", map[string]any{"ResourceArn": location}).body["ResourceInfo"].(map[string]any); after["RoleArn"] != "arn:aws:iam::000000000000:role/other" || after["HybridAccessEnabled"] != true {
+		t.Fatalf("updated %v", after)
+	}
+	if listed := call("ListResources", map[string]any{}).body["ResourceInfoList"].([]any); len(listed) != 2 {
+		t.Fatalf("resources %v", listed)
+	}
+	expect(t, call("DeregisterResource", map[string]any{"ResourceArn": location}), 200, "")
+	expect(t, call("DescribeResource", map[string]any{"ResourceArn": location}), 404, "EntityNotFoundException")
+	expect(t, call("GrantPermissions", map[string]any{}), 501, "UnknownOperationException")
+	expect(t, call("GetTemporaryGluePartitionCredentials", map[string]any{}), 501, "UnknownOperationException")
+}
