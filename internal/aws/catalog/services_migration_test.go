@@ -374,10 +374,13 @@ func TestApplicationMigrationConnectorsAndTemplates(t *testing.T) {
 		"associateDefaultSecurityGroup": true, "bandwidthThrottling": 0, "createPublicIP": false, "dataPlaneRouting": "PRIVATE_IP",
 		"defaultLargeStagingDiskType": "GP3", "ebsEncryption": "DEFAULT", "replicationServerInstanceType": "t3.small",
 		"replicationServersSecurityGroupsIDs": []any{"sg-0123456789abcdef0"}, "stagingAreaSubnetId": migrationSubnet,
-		"stagingAreaTags": map[string]any{"purpose": "staging"}, "useDedicatedReplicationServer": false})
+		"stagingAreaTags": map[string]any{"purpose": "staging"}, "useDedicatedReplicationServer": false, "tags": map[string]any{"team": "a"}})
 	expect(t, replication, 201, "")
+	assertStagingAreaTags(t, replication.body)
 	replicationID := str(replication.body["replicationConfigurationTemplateID"])
-	expect(t, h.rest("mgn", "POST", "/UpdateReplicationConfigurationTemplate", map[string]any{"replicationConfigurationTemplateID": replicationID, "bandwidthThrottling": 50}), 200, "")
+	updated := h.rest("mgn", "POST", "/UpdateReplicationConfigurationTemplate", map[string]any{"replicationConfigurationTemplateID": replicationID, "bandwidthThrottling": 50})
+	expect(t, updated, 200, "")
+	assertStagingAreaTags(t, updated.body)
 	found = h.rest("mgn", "POST", "/DescribeReplicationConfigurationTemplates", map[string]any{})
 	if items := found.body["items"].([]any); len(items) != 1 || items[0].(map[string]any)["stagingAreaSubnetId"] != migrationSubnet {
 		t.Fatalf("replication templates %v", found.body)
@@ -421,11 +424,14 @@ func TestElasticDisasterRecoveryTemplatesAndLaunchActions(t *testing.T) {
 		"associateDefaultSecurityGroup": true, "bandwidthThrottling": 0, "createPublicIP": false, "dataPlaneRouting": "PRIVATE_IP",
 		"defaultLargeStagingDiskType": "AUTO", "ebsEncryption": "DEFAULT", "replicationServerInstanceType": "t3.small",
 		"replicationServersSecurityGroupsIDs": []any{"sg-0123456789abcdef0"}, "stagingAreaSubnetId": migrationSubnet,
-		"stagingAreaTags": map[string]any{"purpose": "staging"}, "useDedicatedReplicationServer": false,
+		"stagingAreaTags": map[string]any{"purpose": "staging"}, "useDedicatedReplicationServer": false, "tags": map[string]any{"team": "a"},
 		"pitPolicy": []any{map[string]any{"enabled": true, "interval": 10, "retentionDuration": 60, "units": "MINUTE"}}})
 	expect(t, replication, 201, "")
+	assertStagingAreaTags(t, replication.body)
 	replicationID := str(replication.body["replicationConfigurationTemplateID"])
-	expect(t, h.rest("drs", "POST", "/UpdateReplicationConfigurationTemplate", map[string]any{"replicationConfigurationTemplateID": replicationID, "autoReplicateNewDisks": false}), 200, "")
+	updated = h.rest("drs", "POST", "/UpdateReplicationConfigurationTemplate", map[string]any{"replicationConfigurationTemplateID": replicationID, "autoReplicateNewDisks": false})
+	expect(t, updated, 200, "")
+	assertStagingAreaTags(t, updated.body)
 	if items := h.rest("drs", "POST", "/DescribeReplicationConfigurationTemplates", map[string]any{}).body["items"].([]any); len(items) != 1 || items[0].(map[string]any)["autoReplicateNewDisks"] != false {
 		t.Fatalf("replication templates %v", items)
 	}
@@ -474,5 +480,16 @@ func TestElasticDisasterRecoveryUnboundOperationsAnswer501(t *testing.T) {
 	h := newHarness(t, elasticDisasterRecovery)
 	for _, path := range []string{"/StartRecovery", "/StartReplication", "/DescribeSourceServers", "/InitializeService", "/CreateSourceNetwork"} {
 		expect(t, h.rest("drs", "POST", path, map[string]any{}), 501, "UnknownOperationException")
+	}
+}
+
+// assertStagingAreaTags checks that a replication template answer carries the
+// stored staging-area tags and, separately, the resource's own tags.
+func assertStagingAreaTags(t *testing.T, body map[string]any) {
+	t.Helper()
+	staging, _ := body["stagingAreaTags"].(map[string]any)
+	tags, _ := body["tags"].(map[string]any)
+	if len(staging) != 1 || staging["purpose"] != "staging" || len(tags) != 1 || tags["team"] != "a" {
+		t.Fatalf("stagingAreaTags %v tags %v", body["stagingAreaTags"], body["tags"])
 	}
 }

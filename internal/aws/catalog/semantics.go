@@ -1230,6 +1230,9 @@ func (q *request) output(r row, parent *row) map[string]any {
 	res := q.b.spec.resource(r.Kind)
 	shape := q.b.model.shape(q.official.Output)
 	enc := &encoder{model: q.b.model, protocol: q.b.model.Metadata.Protocol}
+	// Only the output's own tags member carries the resource's tags; any other
+	// tag-shaped member (for example stagingAreaTags) is a stored value.
+	tagsMember := q.tagMember(q.official.Output)
 	for _, name := range shape.sortedMembers() {
 		member := shape.Members[name]
 		if member.Location == "statusCode" {
@@ -1240,7 +1243,7 @@ func (q *request) output(r row, parent *row) map[string]any {
 		switch {
 		case member.Shape == res.Shape || member.Shape == res.Summary:
 			value, ok = enc.project(member.Shape, q.withTags(r, member.Shape), 0)
-		case q.b.model.isTagShape(member.Shape) && strings.Contains(strings.ToLower(name), "tag"):
+		case name == tagsMember:
 			value, ok = enc.project(member.Shape, q.renderTags(member.Shape, r.Tags), 0)
 		default:
 			if stored, present := r.Document[name]; present {
