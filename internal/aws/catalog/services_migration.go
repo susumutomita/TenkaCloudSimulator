@@ -138,7 +138,7 @@ var transferFamily = &Service{
 		{Name: "ListProfiles", Kind: List, Resource: "profile", Filters: map[string]string{"ProfileType": "ProfileType"}},
 		{Name: "UpdateProfile", Kind: Update, Resource: "profile", Lookup: "ProfileId", Fields: []string{"CertificateIds"}},
 		{Name: "DeleteProfile", Kind: Delete, Resource: "profile", Lookup: "ProfileId"},
-		{Name: "CreateConnector", Kind: Create, Resource: "connector", Check: transferConnector},
+		{Name: "CreateConnector", Kind: Create, Resource: "connector", Check: transferConnectorCreate},
 		{Name: "DescribeConnector", Kind: Read, Resource: "connector", Lookup: "ConnectorId"},
 		{Name: "ListConnectors", Kind: List, Resource: "connector"},
 		{Name: "UpdateConnector", Kind: Update, Resource: "connector", Lookup: "ConnectorId",
@@ -159,8 +159,8 @@ var transferFamily = &Service{
 	},
 	Bounds: []string{
 		"Workflows, AS2 profiles, connectors and servers are stored configuration. A server is a stored record that stays OFFLINE: no endpoint, address, hostname, host key, listener or file store exists, nothing can connect, and StartServer, StopServer, StartFileTransfer, StartDirectoryListing, StartRemoteDelete, StartRemoteMove, TestConnection, TestIdentityProvider, workflow executions and every other official operation return UnknownOperationException with HTTP 501. No workflow step runs.",
-		"Key material is never accepted: ImportCertificate, ImportHostKey, ImportSshPublicKey and the user, host key, access, agreement and web app operations are not implemented, and the HostKey member and SshPublicKeyBody are refused, so certificates, host keys, SSH public keys and private keys are neither stored nor returned. ListUsers, ListAccesses, ListAgreements and ListHostKeys also need their ServerId echoed in the output, which the catalog list projection cannot express. Profile CertificateIds and server Certificate are stored as given and not resolved, as are connector profile IDs, secret IDs, IAM roles, workflow IDs, VPC settings and Lambda functions.",
-		"Connectors are ACTIVE service-managed connectors with the URL as given: EgressConfig (VPC Lattice) is refused and no egress IP address is reported. Servers default to the documented S3 domain, PUBLIC endpoint type, SERVICE_MANAGED identity provider and SFTP protocol, and report UserCount 0 and no HostKeyFingerprint or security policy default. FTP and FTPS need a VPC endpoint type and a directory, Lambda or API Gateway identity provider, FTPS needs a certificate, and each identity provider type needs its documented details; VPC_ENDPOINT servers cannot be created. At most 20 servers, 50 workflows, 100 profiles and 100 connectors exist per Region as local limits.",
+		"Key material is never accepted: ImportCertificate, ImportHostKey, ImportSshPublicKey and the user, host key, access, agreement and web app operations are not implemented, and the HostKey member and SshPublicKeyBody are refused, so certificates, server host keys, SSH public keys and private keys are neither stored nor returned. The public host keys of a connector's SftpConfig.TrustedHostKeys are the one exception: they are stored as given and returned. ListUsers, ListAccesses, ListAgreements and ListHostKeys also need their ServerId echoed in the output, which the catalog list projection cannot express. Profile CertificateIds and server Certificate are stored as given and not resolved, as are connector profile IDs, secret IDs, IAM roles, workflow IDs, VPC settings and Lambda functions.",
+		"Connectors need the URL and exactly one of As2Config and SftpConfig, are ACTIVE service-managed connectors with the URL as given: EgressConfig (VPC Lattice) is refused and no egress IP address is reported. Servers default to the documented S3 domain, PUBLIC endpoint type, SERVICE_MANAGED identity provider and SFTP protocol, and report UserCount 0 and no HostKeyFingerprint or security policy default. FTP and FTPS need a VPC endpoint type and a directory, Lambda or API Gateway identity provider, FTPS needs a certificate, and each identity provider type needs its documented details; VPC_ENDPOINT servers cannot be created. At most 20 servers, 50 workflows, 100 profiles and 100 connectors exist per Region as local limits.",
 	},
 }
 
@@ -207,6 +207,23 @@ func transferConnector(input map[string]any) error {
 	}
 	if url, ok := input["Url"].(string); ok && url == "" {
 		return invalid("A service-managed connector needs the URL of the partner endpoint.")
+	}
+	return nil
+}
+
+// transferConnectorCreate adds what a new connector requires: the partner URL
+// and exactly one of the AS2 and SFTP protocol configurations.
+func transferConnectorCreate(input map[string]any) error {
+	if err := transferConnector(input); err != nil {
+		return err
+	}
+	if url, _ := input["Url"].(string); url == "" {
+		return invalid("A new connector needs the URL of the partner endpoint.")
+	}
+	_, as2 := input["As2Config"]
+	_, sftp := input["SftpConfig"]
+	if as2 == sftp {
+		return invalid("A new connector needs exactly one of As2Config and SftpConfig.")
 	}
 	return nil
 }

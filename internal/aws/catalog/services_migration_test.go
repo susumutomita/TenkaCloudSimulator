@@ -207,6 +207,20 @@ func TestTransferWorkflowProfileAndConnector(t *testing.T) {
 	}
 	expect(t, h.json1("transfer", "CreateConnector", map[string]any{"Url": "", "AccessRole": migrationRole}), 400, "InvalidRequestException")
 	expect(t, h.json1("transfer", "CreateConnector", map[string]any{"AccessRole": migrationRole, "EgressConfig": map[string]any{"VpcLattice": map[string]any{"ResourceConfigurationArn": "arn:aws:vpc-lattice:us-east-1:000000000000:resourceconfiguration/rcfg-0123456789abcdef0"}}}), 400, "InvalidRequestException")
+	expect(t, h.json1("transfer", "CreateConnector", map[string]any{"AccessRole": migrationRole}), 400, "InvalidRequestException")
+	expect(t, h.json1("transfer", "CreateConnector", map[string]any{"Url": "sftp://partner.example.com", "AccessRole": migrationRole}), 400, "InvalidRequestException")
+	expect(t, h.json1("transfer", "CreateConnector", map[string]any{"AccessRole": migrationRole, "SftpConfig": map[string]any{"UserSecretId": "secret-id"}}), 400, "InvalidRequestException")
+	expect(t, h.json1("transfer", "CreateConnector", map[string]any{"Url": "sftp://partner.example.com", "AccessRole": migrationRole,
+		"SftpConfig": map[string]any{"UserSecretId": "secret-id"}, "As2Config": map[string]any{"LocalProfileId": "p-0123456789abcdef0"}}), 400, "InvalidRequestException")
+	// A trusted host key is a public key: stored as given and returned.
+	keyed := h.json1("transfer", "CreateConnector", map[string]any{"Url": "sftp://keyed.example.com", "AccessRole": migrationRole,
+		"SftpConfig": map[string]any{"UserSecretId": "secret-id", "TrustedHostKeys": []any{"ssh-ed25519 AAAAexamplepublickey"}}})
+	expect(t, keyed, 200, "")
+	keyedRecord := h.json1("transfer", "DescribeConnector", map[string]any{"ConnectorId": str(keyed.body["ConnectorId"])}).body["Connector"].(map[string]any)
+	if keys := keyedRecord["SftpConfig"].(map[string]any)["TrustedHostKeys"].([]any); len(keys) != 1 || keys[0] != "ssh-ed25519 AAAAexamplepublickey" {
+		t.Fatalf("trusted host keys %v", keyedRecord)
+	}
+	expect(t, h.json1("transfer", "DeleteConnector", map[string]any{"ConnectorId": str(keyed.body["ConnectorId"])}), 200, "")
 	expect(t, h.json1("transfer", "UpdateConnector", map[string]any{"ConnectorId": connectorID, "Url": ""}), 400, "InvalidRequestException")
 	expect(t, h.json1("transfer", "DeleteConnector", map[string]any{"ConnectorId": connectorID}), 200, "")
 	expect(t, h.json1("transfer", "DeleteConnector", map[string]any{"ConnectorId": connectorID}), 400, "ResourceNotFoundException")
