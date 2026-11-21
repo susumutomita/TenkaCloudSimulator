@@ -44,7 +44,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
-      - uses: actions/setup-go@v6.5.0
+      - uses: actions/setup-go@v7.0.0
         with:
           go-version: '1.26.11'
           cache: true
@@ -83,7 +83,7 @@ jobs:
           ref: ${{ env.CHALLENGE_REF }}
           path: challenge
           persist-credentials: false
-      - uses: actions/setup-go@v6.5.0
+      - uses: actions/setup-go@v7.0.0
         with:
           go-version: '1.26.11'
           cache: true
