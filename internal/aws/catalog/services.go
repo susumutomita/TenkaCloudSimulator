@@ -33,7 +33,12 @@ func Services() []*Service {
 		directConnect, groundStation, kinesisVideo, forecast, fraudDetector, personalize, codeGuruProfiler,
 		mainframeModernization, migrationHub, transferFamily, applicationMigration, elasticDisasterRecovery,
 		mediaConvert, mediaPackage, mediaPackageV2, mediaPackageVOD, mediaTailor,
-		// Services that need the engine vocabulary of services_engine2.go.
+		mediaConnect, mediaLive, ivs, ivsChat, ivsRealtime,
+		appFlow, cleanRooms, cleanRoomsML, cloudSearch, dataZone, emr, emrServerless, emrContainers, lakeFormation, quickSight,
+		deadlineCloud, databaseMigration, costExplorer, bcmDataExports, braket, artifact, aiopsGroup,
+		batch, outposts, pcs, serverlessRepo,
+		healthImaging, healthLake, omics, keyspaces, grafana,
+		b2bi, qBusiness, connect, chimeVoice, chimeIdentity, chimeMediaPipelines, workMail, rePostPrivate,
 		networkFirewall,
 	}
 }
