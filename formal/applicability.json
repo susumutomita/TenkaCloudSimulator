@@ -4,14 +4,14 @@
   "changes": [
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "5a7e52e9834e9e0c3ad823812b21fddc4faeeb947bfbc2257ac1bdd99fba0956",
+      "sha256": "eddeaea7f62c1a9e5c78633151ca83d87a994cbe12ae3e0fad77645b2f700b06",
       "disposition": "documentation",
       "reason": "Generated service table listing the newly added services with their bound operations and bounds.",
       "models": []
     },
     {
       "path": "docs/aws-catalog.md",
-      "sha256": "3fe41203bff709c070150094311b8baeb599f6d8b9bc087175e861851f9474d2",
+      "sha256": "928ec3c1583f1ed292f2a26b7a4f150e885981940b102f94a19a00991b463f18",
       "disposition": "documentation",
       "reason": "Catalog guide: service count, protocols, the products served through the RDS API and fixture options.",
       "models": []
@@ -25,10 +25,44 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "eaf5dcfbf3b065f0dab694b4fe25d868838e056f5e1c827e1e122a7864fcc367",
+      "sha256": "df15bfe2681ea6cc36eb520dd349c502b84a3f65b35aa91f0549938ca9ccd01b",
       "disposition": "formal-infrastructure",
       "reason": "Adds the new specification files and service model files to the catalog lifecycle model source scope.",
       "models": []
+    },
+    {
+      "path": "internal/aws/catalog/describe.go",
+      "sha256": "bb95e6923075c11126387ae8aed26700a009729ab67a4b4f826205db1a7f6e2f",
+      "disposition": "modeled",
+      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/engine.go",
+      "sha256": "d9dafeaaee8fdf92caaf8c901965099707f9030a58677f15ea61e037ddd13996",
+      "disposition": "modeled",
+      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
     },
     {
       "path": "internal/aws/catalog/models/aiops.json",
@@ -815,6 +849,22 @@
       ]
     },
     {
+      "path": "internal/aws/catalog/models/network-firewall.json",
+      "sha256": "6dedcdd3e4ace4d307de557c55a9d8d759cf59467cbc4c3525d32d2816765d55",
+      "disposition": "modeled",
+      "reason": "Documentation-free subset of the pinned botocore 1.41.6 network-firewall model for the reviewed operations; bound operations run through the catalog store.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
+    },
+    {
       "path": "internal/aws/catalog/models/omics.json",
       "sha256": "7bedb46fdb89c4f315486e352f99c1d0fa744a3ec88723c1c89d44756966f7bd",
       "disposition": "modeled",
@@ -1015,7 +1065,7 @@
     },
     {
       "path": "internal/aws/catalog/selection.json",
-      "sha256": "dcf037b0f820ace0cd4ea0ddb137263657f112afe4a5bf8271382f3c75bc6104",
+      "sha256": "1d915555a1b85db9f0986cafac998ee10c1d39ef4bb2a5533e5d34b1d29ad486",
       "disposition": "modeled",
       "reason": "Selects the reviewed operations of the newly added services for extraction; every selected operation is authorized before it reads or changes state.",
       "models": [
@@ -1030,8 +1080,25 @@
       ]
     },
     {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "4928ef2531dc095d8cfc7e1d88693b8ead75fe052e3598d23546b920a3b29d72",
+      "disposition": "modeled",
+      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
+    },
+    {
       "path": "internal/aws/catalog/services.go",
-      "sha256": "f2f4121d0e1c4f605122394463252f8e2074841639efa1ffec637296cbad1be4",
+      "sha256": "271d3d71a91017d020cfe84cb78591fb364319bd47e27dea22ddf50cca8f9a7a",
       "disposition": "modeled",
       "reason": "Registers the newly reviewed services with the catalog.",
       "models": [
@@ -1097,7 +1164,7 @@
     },
     {
       "path": "internal/aws/catalog/services_compute2.go",
-      "sha256": "d0d194299d6c75afde8a41f380ece94c3e3a5cd7c1078912512f37a2352c098e",
+      "sha256": "51c6006184b8cebeb03c1b2f9ce71f602c8a416276c8d22e6219a5cdee51b256",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1115,7 +1182,7 @@
     },
     {
       "path": "internal/aws/catalog/services_compute2_test.go",
-      "sha256": "8483e54d3d72286bfb92fa5e3b8196fc1c644672213dd479d2b51f5871ec749b",
+      "sha256": "03ad5d65fbf383efcd566ff1d6ff21cd26de206ac93e28d66d80cbb68c2ccafa",
       "disposition": "test-support",
       "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
       "models": []
@@ -1189,6 +1256,31 @@
       "models": []
     },
     {
+      "path": "internal/aws/catalog/services_engine2.go",
+      "sha256": "d0468a82c66aba3fbf1f0b3b4a360dd75f825af0a70d14433668bf5c6421706e",
+      "disposition": "modeled",
+      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "QuotaBound",
+            "UniqueNames"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_engine2_test.go",
+      "sha256": "d91f8145a721bd5700d19cf02c0c8c7408010fe4d37fd564f68aed85ec07f747",
+      "disposition": "test-support",
+      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/services_health.go",
       "sha256": "3d11b6e268f7b624c4aef231f74b7d9c293fc3f295400fa958bf841e07c20f4c",
       "disposition": "modeled",
@@ -1215,7 +1307,7 @@
     },
     {
       "path": "internal/aws/catalog/services_media.go",
-      "sha256": "667d31377d6572a052670059105da9cf2fa1db9f2892c6108737ac28e82d17d6",
+      "sha256": "6bc214a7d80ffc7094bf8a09b785c1e67e6b53f88b3795dd50bf5cb6042e18c5",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1258,14 +1350,14 @@
     },
     {
       "path": "internal/aws/catalog/services_media_test.go",
-      "sha256": "d1769a76c195240cdd36a63bdd9d9c68df0539533bf71877d104413033bf2717",
+      "sha256": "eeeb0dbe0bd2d1e616f2df1702c71426c782665675082a68c92a84abc616c7d2",
       "disposition": "test-support",
       "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/services_migration.go",
-      "sha256": "015ce1f5e69ce8fbb3813e23d5124e7c679d30231f384c8ddc0d2b3e5724ad09",
+      "sha256": "045f58cc9f62f63b2917184fa5578e63638d04f2e83ca9666be6ef36d5487b0f",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1283,14 +1375,14 @@
     },
     {
       "path": "internal/aws/catalog/services_migration_test.go",
-      "sha256": "a979bcb8e9a5030b9026e888935bd5fce9fcb5aaa0c807cba8fc7a9c45b34fee",
+      "sha256": "648426acfd458a324d71c465d69d35b6c29ffab5ae04abb0ce9bd0b999b4359f",
       "disposition": "test-support",
       "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/services_ml2.go",
-      "sha256": "7aa4558d42ed7844c59ab66bf0bc51c1b9b8df4dd9a559104c8e5a7b98b16fad",
+      "sha256": "42a523b19eba2119ac8f547c09601e6c39625852698c986b18851c5901758322",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1308,14 +1400,14 @@
     },
     {
       "path": "internal/aws/catalog/services_ml2_test.go",
-      "sha256": "5898c10687e2f3e0e0ee658499b4cc0eeffb38ed13d76842643db6e6e7047b1a",
+      "sha256": "fc21cb1e31d73efad683e0b5189c1e2007e75df8934e00dec76d87ed54526e6d",
       "disposition": "test-support",
       "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/services_network2.go",
-      "sha256": "4a5dc2fe52d446d4b5c4fa0f5625eb875b939177f9c80fa95cbf304f20e0fb52",
+      "sha256": "be91f584c22d43b4285bac295f38f66d960f6f7e48b2cc9e89385675b133e14b",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1333,7 +1425,7 @@
     },
     {
       "path": "internal/aws/catalog/services_network2_test.go",
-      "sha256": "36c6f442d6c19dfefff7ee7ecbade9472f1f4da9a227e23106a95d70166cdce4",
+      "sha256": "2397821eef5978cf2d6e4aa6ccb255b17ff922ed293336b903126083e1aa4e65",
       "disposition": "test-support",
       "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
       "models": []
@@ -1369,6 +1461,40 @@
       "disposition": "test-support",
       "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
       "models": []
+    },
+    {
+      "path": "internal/aws/catalog/spec.go",
+      "sha256": "1fa66d21dc134a8025f3ad4789dccb30f6741194742381cdc78c08cde804ee1e",
+      "disposition": "modeled",
+      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/store.go",
+      "sha256": "20b91e0ad8d36fdcd7036bcbfde447361d6eaae8541d59c002e66bd01c8780f2",
+      "disposition": "modeled",
+      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
     },
     {
       "path": "internal/server/apidocs/catalog/aiops.json",
@@ -1505,7 +1631,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/directconnect.json",
-      "sha256": "8375af115ffd467cedb18149a3a33a1bc19b28c0bdce2fa2298615e7557d7f08",
+      "sha256": "02420ae6ba105fb6bc551b80ca00a9b502d3a8e6f00b6ec78b757811c1b51207",
       "disposition": "presentation",
       "reason": "Generated directconnect reference.",
       "models": []
@@ -1582,7 +1708,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/groundstation.json",
-      "sha256": "fb3a1d7ca11de90df905bcf7f4ba6d4bbe9b3e6d0f7a786ed0c729b5ff929e31",
+      "sha256": "5ca9d892c557c6a9e1e2f6845847f3ff8a84fd979c9fb88f9422dc16b30569bc",
       "disposition": "presentation",
       "reason": "Generated groundstation reference.",
       "models": []
@@ -1596,7 +1722,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "7810278949da94e5453409fc5ffc23202356af2afeef4b94663ad956e4a11d4b",
+      "sha256": "586bee0f2563c22587b8a4b228630acad9a881934c1dff914d3b1dc57bf644b8",
       "disposition": "presentation",
       "reason": "Generated reference index listing the newly added services.",
       "models": []
@@ -1631,7 +1757,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/kinesisvideo.json",
-      "sha256": "9959b26a940c7c191f5af0de2e5bc46ab7be4bd756560086769724a302da807b",
+      "sha256": "468d771222b141f415fedf53cf4ddd2ffd0d0da4bad1edd2371bcc8d17c28bd3",
       "disposition": "presentation",
       "reason": "Generated kinesisvideo reference.",
       "models": []
@@ -1659,7 +1785,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/mediaconvert.json",
-      "sha256": "07ab659503db5c7988359bff98f5b63446fbc995f02e56e025acdb477d343a84",
+      "sha256": "958fd9052e3aa7bc14018818dcb67ab426558a44fd01203347159456f16cd963",
       "disposition": "presentation",
       "reason": "Generated mediaconvert reference.",
       "models": []
@@ -1721,6 +1847,13 @@
       "models": []
     },
     {
+      "path": "internal/server/apidocs/catalog/network-firewall.json",
+      "sha256": "73aad9928cd721e3113165b73faa8cdf5bb29f785cfd61874f6708e4cc0643c1",
+      "disposition": "presentation",
+      "reason": "Generated network-firewall reference.",
+      "models": []
+    },
+    {
       "path": "internal/server/apidocs/catalog/omics.json",
       "sha256": "59f24443511784dcaf4f36c6e96f55f1e65b1d5724999e5ca0ff5d585a87e27f",
       "disposition": "presentation",
@@ -1743,7 +1876,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/personalize.json",
-      "sha256": "ba76ee174845434442d2f187dd50f321cc65ec2308779d4ee0ed3a1d797ecdf9",
+      "sha256": "7f2eb5439c9804b20aae200a8f1d227ae1fb020e8395f8d14d9406a08c69c6c7",
       "disposition": "presentation",
       "reason": "Generated personalize reference.",
       "models": []
@@ -1792,7 +1925,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/transfer.json",
-      "sha256": "df7637f50f992536d3d72675a4726ec8763e53b24ae6669ccd920d9fdb799d71",
+      "sha256": "3e8304a22fad7ea2eeb6c2e65554094c0a8e56c48b24ee30e6b65a1ac56027c2",
       "disposition": "presentation",
       "reason": "Generated transfer reference.",
       "models": []
@@ -1953,7 +2086,7 @@
     },
     {
       "path": "test/e2e/catalog_fixtures/directconnect.json",
-      "sha256": "77a50bcf3792a470b20fd732208a5fc75d041a44b195fbd6bb6645ce6f64e9ca",
+      "sha256": "e23be66540ef5d305ee17909bcba13e84080799f4888cc1007feea6625e9b0cb",
       "disposition": "test-support",
       "reason": "boto3 lifecycle fixture for directconnect.",
       "models": []
@@ -2037,7 +2170,7 @@
     },
     {
       "path": "test/e2e/catalog_fixtures/groundstation.json",
-      "sha256": "e81d14abb9e0270276637663243539c5d9a67dca5dd20069a61df7185d2db25c",
+      "sha256": "575092302722e7ee3a23a5adae1e536c07223f800dd750bf80851b61ef005c3f",
       "disposition": "test-support",
       "reason": "boto3 lifecycle fixture for groundstation.",
       "models": []
@@ -2079,7 +2212,7 @@
     },
     {
       "path": "test/e2e/catalog_fixtures/kinesisvideo.json",
-      "sha256": "c65ea0b354ec2b112f5ef306e2edc8e061cf5f1d7e9808fc78f0aaea0a7a6a1e",
+      "sha256": "62ad33dacc1da0c591814ec80b8cb1fc0d07bc359527a98f52fc353c3d1cb00e",
       "disposition": "test-support",
       "reason": "boto3 lifecycle fixture for kinesisvideo.",
       "models": []
@@ -2142,7 +2275,7 @@
     },
     {
       "path": "test/e2e/catalog_fixtures/mediatailor.json",
-      "sha256": "ece9442bec46f326862c0c29c1839a584a15c3ff8ea0edf65c0228d0baeefbdb",
+      "sha256": "dcd6613774fb571a14f24b08c1d70416a38940f3309709ede897a04e8307e9c5",
       "disposition": "test-support",
       "reason": "boto3 lifecycle fixture for mediatailor.",
       "models": []
@@ -2176,6 +2309,13 @@
       "models": []
     },
     {
+      "path": "test/e2e/catalog_fixtures/network-firewall.json",
+      "sha256": "f752271bdf7b4a6fa50b7382d756bd72fd9bd50499f9d5d60f6196e040109fb4",
+      "disposition": "test-support",
+      "reason": "boto3 lifecycle fixture for network-firewall.",
+      "models": []
+    },
+    {
       "path": "test/e2e/catalog_fixtures/omics.json",
       "sha256": "a44e4dc1f8afab7f3225a01ebbc1e1eb3c41d09cb0a0439e5cf38d3aae8b2571",
       "disposition": "test-support",
@@ -2198,7 +2338,7 @@
     },
     {
       "path": "test/e2e/catalog_fixtures/personalize.json",
-      "sha256": "5909396a9415ee48cb5bcb039a93705b048f9be95813a17e52858135152b8e59",
+      "sha256": "3207981c8f8dc6bf51a50d77b4b48a3f9bb9cbd0cca0029f1ae2e01f1eec5962",
       "disposition": "test-support",
       "reason": "boto3 lifecycle fixture for personalize.",
       "models": []
@@ -2247,7 +2387,7 @@
     },
     {
       "path": "test/e2e/catalog_fixtures/transfer.json",
-      "sha256": "6c784de46e1a4d2a2bb1601b20f5bf30613a57f684c5a900e0fcfa839a3d5acc",
+      "sha256": "bb4b062c6afc75b43b1681d302bc74ca2336ffa44dc99ae8c2eddd391bf151c3",
       "disposition": "test-support",
       "reason": "boto3 lifecycle fixture for transfer.",
       "models": []
