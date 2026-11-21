@@ -54,20 +54,21 @@ var groundStation = &Service{
 		// carries the documented config/{type}/{id} form.
 		{Kind: "config", Shape: "GetConfigResponse", Summary: "ConfigListItem", ID: "uuid",
 			ARN:       "arn:{partition}:groundstation:{region}:{account}:config/{name}/{id}",
-			ARNMember: "configArn", NameMember: "configType", IDMember: "configId", Limit: 100},
+			ARNMember: "configArn", NameMember: "configType", IDMember: "configId", Limit: 100, InUse: "InvalidParameterException",
+			Refs: map[string]string{"configData.uplinkEchoConfig.antennaUplinkConfigArn": "config"}},
 		{Kind: "missionProfile", Shape: "GetMissionProfileResponse", Summary: "MissionProfileListItem", ID: "uuid",
 			ARN:       "arn:{partition}:groundstation:{region}:{account}:mission-profile/{id}",
 			ARNMember: "missionProfileArn", IDMember: "missionProfileId", Limit: 50,
-			Refs:     map[string]string{"trackingConfigArn": "config"},
+			Refs:     map[string]string{"trackingConfigArn": "config", "dataflowEdges[][]": "config"},
 			Generate: map[string]any{"region": "$region"}},
 	},
 	Ops: []Op{
 		{Name: "CreateConfig", Kind: Create, Resource: "config", Check: groundStationConfig},
-		{Name: "GetConfig", Kind: Read, Resource: "config", Lookup: "configId", Accept: []string{"configType"}},
+		{Name: "GetConfig", Kind: Read, Resource: "config", Lookup: "configId", Match: []string{"configType"}},
 		{Name: "ListConfigs", Kind: List, Resource: "config"},
 		{Name: "UpdateConfig", Kind: Update, Resource: "config", Lookup: "configId", Accept: []string{"configType"}, Fields: []string{"name", "configData"},
 			Check: groundStationConfig, Merged: groundStationConfigType},
-		{Name: "DeleteConfig", Kind: Delete, Resource: "config", Lookup: "configId", Accept: []string{"configType"}},
+		{Name: "DeleteConfig", Kind: Delete, Resource: "config", Lookup: "configId", Match: []string{"configType"}},
 		{Name: "CreateMissionProfile", Kind: Create, Resource: "missionProfile", Check: groundStationMissionProfile},
 		{Name: "GetMissionProfile", Kind: Read, Resource: "missionProfile", Lookup: "missionProfileId"},
 		{Name: "ListMissionProfiles", Kind: List, Resource: "missionProfile"},
@@ -81,8 +82,8 @@ var groundStation = &Service{
 	},
 	Bounds: []string{
 		"Configs and mission profiles are stored records: no antenna, contact, satellite pass, data delivery or receiver endpoint exists. ReserveContact, CancelContact, DescribeContact, ListContacts, satellites, ground stations, minute usage and the agent APIs return UnknownOperationException with HTTP 501, as do dataflow endpoint groups (their records carry receiver addresses and ports) and ephemerides (their validation and use depend on AWS-owned satellite data).",
-		"A config holds exactly one configData member, which sets its type; the config ARN carries that type. The configType in the request path of GetConfig and DeleteConfig is accepted but not compared with the stored type, while UpdateConfig refuses a type change. The center frequency, bandwidth and EIRP ranges documented by the API are enforced; demodulation and decode settings, S3 bucket and role ARNs, and dataflow endpoint names are stored without being resolved.",
-		"A mission profile must name an existing tracking config in trackingConfigArn. The ARNs in dataflowEdges and in an uplink echo config are only checked for the documented config ARN form and type; they are not looked up, and deleting a config does not check the mission profiles that use it. The streamsKmsKey and streamsKmsRole are stored without resolving keys or roles.",
+		"A config holds exactly one configData member, which sets its type; the config ARN carries that type. A GetConfig or DeleteConfig whose path configType is not the stored type fails with ResourceNotFoundException, and UpdateConfig refuses a type change. The center frequency, bandwidth and EIRP ranges documented by the API are enforced; demodulation and decode settings, S3 bucket and role ARNs, and dataflow endpoint names are stored without being resolved.",
+		"A mission profile must name an existing tracking config in trackingConfigArn, and every ARN in dataflowEdges must name an existing config; an uplink echo config must name an existing antenna-uplink config. Deleting a config that a mission profile or an uplink echo config still names fails with InvalidParameterException (the simulator's choice of the modeled exception; DependencyException is a server fault). The streamsKmsKey and streamsKmsRole are stored without resolving keys or roles.",
 	},
 }
 

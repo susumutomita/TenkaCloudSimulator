@@ -31,6 +31,7 @@
   {"op": "describe_filter", "args": {"filterArn": "${filter}"}, "expect": {"filter.name": "fixture-unseen"}}
  ],
  "cleanup": [
+  {"op": "delete_dataset_group", "args": {"datasetGroupArn": "${group}"}, "error": "ResourceInUseException", "status": 400},
   {"op": "delete_filter", "args": {"filterArn": "${filter}"}},
   {"op": "delete_dataset", "args": {"datasetArn": "${dataset}"}},
   {"op": "delete_dataset_group", "args": {"datasetGroupArn": "${group}"}},

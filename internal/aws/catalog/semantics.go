@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"slices"
 	"sort"
 	"strconv"
@@ -144,7 +145,12 @@ func (q *request) put() (map[string]any, error) {
 	if err := q.checkRefs(res, found.Document); err != nil {
 		return nil, err
 	}
-	if err := q.commit(func(tx *sql.Tx) error { return updateRow(tx, found) }); err != nil {
+	if err := q.commit(func(tx *sql.Tx) error {
+		if err := q.checkRefsIn(tx, res, found.Document); err != nil {
+			return err
+		}
+		return updateRow(tx, found)
+	}); err != nil {
 		return nil, err
 	}
 	return q.output(found, parent), nil
@@ -181,6 +187,9 @@ func (q *request) passive(key string) bool {
 			return true
 		}
 	}
+	if slices.Contains(q.op.Match, key) {
+		return true
+	}
 	for _, member := range q.b.spec.AccountMembers {
 		if key == member {
 			return true
@@ -204,19 +213,95 @@ func (q *request) rejectUnconsumed(consumed map[string]bool) error {
 	return nil
 }
 
-// checkRefs requires every referenced ARN to name an existing resource.
+// checkRefs requires every referenced ARN to name an existing resource of
+// the declared kind. A reference path may reach into structures and lists.
 func (q *request) checkRefs(res *Resource, document map[string]any) error {
-	for member, kind := range res.Refs {
-		arn, ok := document[member].(string)
-		if !ok {
+	return q.checkRefsIn(q.e.store.db, res, document)
+}
+
+func (q *request) checkRefsIn(db querier, res *Resource, document map[string]any) error {
+	paths := make([]string, 0, len(res.Refs))
+	for path := range res.Refs {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	for _, path := range paths {
+		kind := res.Refs[path]
+		for _, arn := range refValues(document, path) {
+			found, err := findARN(db, q.b.spec.Model, arn)
+			if errors.Is(err, sql.ErrNoRows) || err == nil && found.Kind != kind {
+				return &fault{kind: "notfound", message: fmt.Sprintf("The referenced %s %s does not exist.", kind, arn)}
+			}
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// refValues returns the strings a reference path names in a document: a
+// member, a dotted path into structures, and [] after a segment for each
+// element of a list (dataflowEdges[][] reaches every string of a list of
+// lists).
+func refValues(document map[string]any, path string) []string {
+	current := []any{document}
+	for _, segment := range strings.Split(path, ".") {
+		name := strings.TrimRight(segment, "[]")
+		depth := (len(segment) - len(name)) / 2
+		next := []any{}
+		for _, value := range current {
+			if object, ok := value.(map[string]any); ok && object[name] != nil {
+				next = append(next, object[name])
+			}
+		}
+		for ; depth > 0; depth-- {
+			var items []any
+			for _, value := range next {
+				if list, ok := value.([]any); ok {
+					items = append(items, list...)
+				}
+			}
+			next = items
+		}
+		current = next
+	}
+	out := []string{}
+	for _, value := range current {
+		if text, ok := value.(string); ok {
+			out = append(out, text)
+		}
+	}
+	return out
+}
+
+// referenced refuses deleting a resource whose kind declares InUse while a
+// reference of another live resource of the service names it; it runs in
+// the deleting transaction so a concurrent reference cannot slip past.
+func (q *request) referenced(tx *sql.Tx, res *Resource, r row) error {
+	if res.InUse == "" {
+		return nil
+	}
+	for _, other := range q.b.spec.Resources {
+		var paths []string
+		for path, kind := range other.Refs {
+			if kind == res.Kind {
+				paths = append(paths, path)
+			}
+		}
+		if len(paths) == 0 {
 			continue
 		}
-		found, err := findARN(q.e.store.db, q.b.spec.Model, arn)
-		if errors.Is(err, sql.ErrNoRows) || err == nil && found.Kind != kind {
-			return &fault{kind: "notfound", message: fmt.Sprintf("The referenced %s %s does not exist.", kind, arn)}
-		}
+		rows, err := listKind(tx, r.Service, other.Kind)
 		if err != nil {
 			return err
+		}
+		for _, candidate := range rows {
+			for _, path := range paths {
+				if slices.Contains(refValues(candidate.Document, path), r.ARN) {
+					return &fault{kind: "dependents", code: res.InUse, message: fmt.Sprintf("The %s %s is still referenced by the %s %s.", res.Kind, r.Name, other.Kind, candidate.Name)}
+				}
+			}
 		}
 	}
 	return nil
@@ -257,6 +342,15 @@ func (q *request) arnRegion() string {
 
 func (q *request) formatARN(res *Resource, id, name string, parent *row) string {
 	replacer := []string{"{partition}", "aws", "{region}", q.arnRegion(), "{account}", q.e.cfg.Account, "{id}", id, "{name}", name}
+	for _, match := range arnMember.FindAllStringSubmatch(res.ARN, -1) {
+		value, ok := q.input[match[2]].(string)
+		if !ok || value == "" {
+			value = "*"
+		} else if match[1] == "lower" {
+			value = strings.ToLower(value)
+		}
+		replacer = append(replacer, match[0], value)
+	}
 	if parent != nil {
 		replacer = append(replacer, "{parent}", parent.ID, "{parentName}", parent.Name)
 	} else {
@@ -333,6 +427,11 @@ func (q *request) lookup() (row, *row, error) {
 	}
 	if err := q.authorize(found.ARN); err != nil {
 		return row{}, nil, err
+	}
+	for _, member := range q.op.Match {
+		if value, ok := q.input[member]; ok && fmt.Sprint(value) != fmt.Sprint(found.Document[member]) {
+			return row{}, nil, &fault{kind: "notfound", message: fmt.Sprintf("The %s %s does not exist with this %s.", res.Kind, identifier, member)}
+		}
 	}
 	return found, parent, nil
 }
@@ -670,6 +769,9 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 			return nil, err
 		}
 	}
+	if err := q.checkRefsIn(tx, res, r.Document); err != nil {
+		return nil, err
+	}
 	if err := insertNewResource(tx, res, &r, parent); err != nil {
 		return nil, err
 	}
@@ -784,6 +886,9 @@ func (q *request) update() (map[string]any, error) {
 		return nil, err
 	}
 	if err := q.commit(func(tx *sql.Tx) error {
+		if err := q.checkRefsIn(tx, res, r.Document); err != nil {
+			return err
+		}
 		if r.Seq == 0 {
 			// A singleton that was never stored is created by its first update.
 			seq, err := nextSeq(tx)
@@ -851,6 +956,9 @@ func (q *request) remove() (map[string]any, error) {
 	}
 	kinds := q.children(res)
 	err = q.commit(func(tx *sql.Tx) error {
+		if err := q.referenced(tx, res, r); err != nil {
+			return err
+		}
 		if len(kinds) > 0 {
 			n, err := countChildren(tx, r.Service, r.Region, r.ID, kinds)
 			if err != nil {
@@ -1294,3 +1402,7 @@ func (q *request) rotateToken(res *Resource, document map[string]any) error {
 	document[res.Token] = token
 	return nil
 }
+
+// arnMember matches the {member:Name} and {lower:Name} ARN placeholders,
+// replaced by the request's string member Name (lowercased for lower).
+var arnMember = regexp.MustCompile(`\{(member|lower):([A-Za-z0-9]+)\}`)

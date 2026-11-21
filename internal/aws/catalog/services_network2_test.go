@@ -229,6 +229,14 @@ func TestGroundStationConfigAndMissionProfileLifecycle(t *testing.T) {
 	}
 	expect(t, h.rest("groundstation", "GET", "/tags/"+url.PathEscape(profileArn+"x"), nil), 434, "ResourceNotFoundException")
 
+	// The path type must be the stored one, and configs in use cannot be deleted.
+	expect(t, h.rest("groundstation", "GET", "/config/tracking/"+id, nil), 434, "ResourceNotFoundException")
+	expect(t, h.rest("groundstation", "DELETE", "/config/tracking/"+id, nil), 434, "ResourceNotFoundException")
+	expect(t, h.rest("groundstation", "DELETE", path, nil), 431, "InvalidParameterException")
+	expect(t, h.rest("groundstation", "GET", path, nil), 200, "")
+	gone := strings.Replace(configArn, id, "0f1e2d3c-aaaa-4bbb-8ccc-111122223333", 1)
+	expect(t, h.rest("groundstation", "POST", "/missionprofile", map[string]any{"name": "dangling", "minimumViableContactDurationSeconds": 180, "trackingConfigArn": trackingArn,
+		"dataflowEdges": []any{[]any{gone, trackingArn}}}), 434, "ResourceNotFoundException")
 	expect(t, h.rest("groundstation", "DELETE", "/missionprofile/"+profileID, nil), 200, "")
 	expect(t, h.rest("groundstation", "GET", "/missionprofile/"+profileID, nil), 434, "ResourceNotFoundException")
 	expect(t, h.rest("groundstation", "DELETE", path, nil), 200, "")

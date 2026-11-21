@@ -30,6 +30,8 @@
   {"op": "get_config", "args": {"configId": "${tracking}", "configType": "tracking"}, "expect": {"configData.trackingConfig.autotrack": "REQUIRED"}}
  ],
  "cleanup": [
+  {"op": "delete_config", "args": {"configId": "${tracking}", "configType": "tracking"}, "error": "InvalidParameterException", "status": 431},
+  {"op": "get_config", "args": {"configId": "${tracking}", "configType": "antenna-downlink"}, "error": "ResourceNotFoundException", "status": 434},
   {"op": "delete_mission_profile", "args": {"missionProfileId": "${profile}"}},
   {"op": "delete_config", "args": {"configId": "${tracking}", "configType": "tracking"}},
   {"op": "delete_config", "args": {"configId": "${downlink}", "configType": "antenna-downlink"}},

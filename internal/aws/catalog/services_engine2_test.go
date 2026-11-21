@@ -193,3 +193,117 @@ func TestCounterTokensCompareNumbers(t *testing.T) {
 		t.Fatal("unknown generator")
 	}
 }
+
+func TestNetworkFirewallRuleGroupReferencesAndInUse(t *testing.T) {
+	h := newHarness(t, networkFirewall)
+	nf := func(op string, input map[string]any) reply { return h.json1("network-firewall", op, input) }
+	stateful := nf("CreateRuleGroup", map[string]any{"RuleGroupName": "block", "Type": "STATEFUL", "Capacity": 100, "RuleGroup": map[string]any{
+		"RulesSource": map[string]any{"RulesString": `drop tls $HOME_NET any -> $EXTERNAL_NET any (msg:"x"; sid:1;)`}}})
+	expect(t, stateful, 200, "")
+	statefulArn := str(stateful.body["RuleGroupResponse"].(map[string]any)["RuleGroupArn"])
+	if statefulArn != "arn:aws:network-firewall:us-east-1:000000000000:stateful-rulegroup/block" || stateful.body["RuleGroupResponse"].(map[string]any)["Type"] != "STATEFUL" {
+		t.Fatalf("stateful %v", stateful.body)
+	}
+	stateless := nf("CreateRuleGroup", map[string]any{"RuleGroupName": "pass", "Type": "STATELESS", "Capacity": 10, "RuleGroup": map[string]any{
+		"RulesSource": map[string]any{"StatelessRulesAndCustomActions": map[string]any{"StatelessRules": []any{map[string]any{"Priority": 1,
+			"RuleDefinition": map[string]any{"Actions": []any{"aws:pass"}, "MatchAttributes": map[string]any{}}}}}}}})
+	expect(t, stateless, 200, "")
+	statelessArn := str(stateless.body["RuleGroupResponse"].(map[string]any)["RuleGroupArn"])
+	if !strings.HasSuffix(statelessArn, ":stateless-rulegroup/pass") {
+		t.Fatalf("stateless arn %s", statelessArn)
+	}
+	// A Type beside the name must be the stored one; filters select by type.
+	expect(t, nf("DescribeRuleGroup", map[string]any{"RuleGroupName": "block", "Type": "STATELESS"}), 400, "ResourceNotFoundException")
+	described := nf("DescribeRuleGroup", map[string]any{"RuleGroupName": "block", "Type": "STATEFUL", "AnalyzeRuleGroup": false})
+	expect(t, described, 200, "")
+	if described.body["RuleGroup"].(map[string]any)["RulesSource"] == nil || described.body["UpdateToken"] == nil {
+		t.Fatalf("described %v", described.body)
+	}
+	if items := nf("ListRuleGroups", map[string]any{"Type": "STATELESS", "Scope": "ACCOUNT"}).body["RuleGroups"].([]any); len(items) != 1 || items[0].(map[string]any)["Arn"] != statelessArn {
+		t.Fatalf("stateless list %v", items)
+	}
+	expect(t, nf("ListRuleGroups", map[string]any{"Scope": "MANAGED"}), 400, "InvalidRequestException")
+	expect(t, nf("ListRuleGroups", map[string]any{"ManagedType": "AWS_MANAGED_DOMAIN_LISTS"}), 400, "InvalidRequestException")
+	expect(t, nf("CreateRuleGroup", map[string]any{"RuleGroupName": "flat", "Type": "STATEFUL", "Capacity": 1, "Rules": "pass ip any any -> any any (sid:2;)"}), 400, "InvalidRequestException")
+	expect(t, nf("CreateRuleGroup", map[string]any{"RuleGroupName": "empty", "Type": "STATEFUL", "Capacity": 1}), 400, "InvalidRequestException")
+	expect(t, nf("CreateRuleGroup", map[string]any{"RuleGroupName": "dry", "Type": "STATEFUL", "Capacity": 1, "AnalyzeRuleGroup": true, "RuleGroup": map[string]any{"RulesSource": map[string]any{}}}), 400, "InvalidRequestException")
+	expect(t, nf("DeleteRuleGroup", map[string]any{"RuleGroupArn": statelessArn, "Type": "STATEFUL"}), 400, "ResourceNotFoundException")
+
+	tls := nf("CreateTLSInspectionConfiguration", map[string]any{"TLSInspectionConfigurationName": "inbound", "TLSInspectionConfiguration": map[string]any{}})
+	tlsArn := str(tls.body["TLSInspectionConfigurationResponse"].(map[string]any)["TLSInspectionConfigurationArn"])
+	refs := map[string]any{
+		"StatelessRuleGroupReferences":  []any{map[string]any{"ResourceArn": statelessArn, "Priority": 1}},
+		"StatefulRuleGroupReferences":   []any{map[string]any{"ResourceArn": statefulArn}},
+		"TLSInspectionConfigurationArn": tlsArn,
+	}
+	// Unknown, mistyped and wrong-kind references are refused before storing.
+	missing := strings.Replace(statefulArn, "/block", "/gone", 1)
+	expect(t, nf("CreateFirewallPolicy", map[string]any{"FirewallPolicyName": "edge", "FirewallPolicy": nfPolicyBody(map[string]any{
+		"StatefulRuleGroupReferences": []any{map[string]any{"ResourceArn": missing}}})}), 400, "InvalidRequestException")
+	expect(t, nf("CreateFirewallPolicy", map[string]any{"FirewallPolicyName": "edge", "FirewallPolicy": nfPolicyBody(map[string]any{
+		"StatefulRuleGroupReferences": []any{map[string]any{"ResourceArn": statelessArn}}})}), 400, "InvalidRequestException")
+	expect(t, nf("CreateFirewallPolicy", map[string]any{"FirewallPolicyName": "edge", "FirewallPolicy": nfPolicyBody(map[string]any{"TLSInspectionConfigurationArn": statefulArn})}), 400, "InvalidRequestException")
+	if n := len(nf("ListFirewallPolicies", map[string]any{}).body["FirewallPolicies"].([]any)); n != 0 {
+		t.Fatalf("refused references stored %d policies", n)
+	}
+	created := nf("CreateFirewallPolicy", map[string]any{"FirewallPolicyName": "edge", "FirewallPolicy": nfPolicyBody(refs)})
+	expect(t, created, 200, "")
+	policyArn := str(created.body["FirewallPolicyResponse"].(map[string]any)["FirewallPolicyArn"])
+	for _, c := range []struct{ op, member, arn string }{
+		{"DeleteRuleGroup", "RuleGroupArn", statelessArn}, {"DeleteRuleGroup", "RuleGroupArn", statefulArn},
+		{"DeleteTLSInspectionConfiguration", "TLSInspectionConfigurationArn", tlsArn},
+	} {
+		expect(t, nf(c.op, map[string]any{c.member: c.arn}), 400, "InvalidOperationException")
+	}
+	if nf("DescribeRuleGroup", map[string]any{"RuleGroupArn": statefulArn}).status != 200 {
+		t.Fatal("a refused delete removed the rule group")
+	}
+	// Dropping a reference through an update releases that group only.
+	token := str(nf("DescribeFirewallPolicy", map[string]any{"FirewallPolicyArn": policyArn}).body["UpdateToken"])
+	expect(t, nf("UpdateFirewallPolicy", map[string]any{"FirewallPolicyArn": policyArn, "UpdateToken": token, "FirewallPolicy": nfPolicyBody(map[string]any{
+		"StatelessRuleGroupReferences": []any{map[string]any{"ResourceArn": missing, "Priority": 1}}})}), 400, "InvalidRequestException")
+	expect(t, nf("UpdateFirewallPolicy", map[string]any{"FirewallPolicyArn": policyArn, "UpdateToken": token, "FirewallPolicy": nfPolicyBody(map[string]any{
+		"StatefulRuleGroupReferences": []any{map[string]any{"ResourceArn": statefulArn}}})}), 200, "")
+	expect(t, nf("DeleteRuleGroup", map[string]any{"RuleGroupName": "pass", "Type": "STATELESS"}), 200, "")
+	expect(t, nf("DeleteTLSInspectionConfiguration", map[string]any{"TLSInspectionConfigurationArn": tlsArn}), 200, "")
+	expect(t, nf("DeleteRuleGroup", map[string]any{"RuleGroupArn": statefulArn}), 400, "InvalidOperationException")
+	ruleToken := str(nf("DescribeRuleGroup", map[string]any{"RuleGroupArn": statefulArn}).body["UpdateToken"])
+	expect(t, nf("UpdateRuleGroup", map[string]any{"RuleGroupArn": statefulArn, "Type": "STATELESS", "UpdateToken": ruleToken, "Description": "x"}), 400, "ResourceNotFoundException")
+	expect(t, nf("UpdateRuleGroup", map[string]any{"RuleGroupArn": statefulArn, "UpdateToken": ruleToken, "Description": "kept"}), 200, "")
+	expect(t, nf("DeleteFirewallPolicy", map[string]any{"FirewallPolicyName": "edge"}), 200, "")
+	expect(t, nf("DeleteRuleGroup", map[string]any{"RuleGroupArn": statefulArn}), 200, "")
+}
+
+func TestReferencePathsAndMatchVocabulary(t *testing.T) {
+	document := map[string]any{"a": map[string]any{"refs": []any{map[string]any{"arn": "x"}, map[string]any{"arn": "y"}, map[string]any{"other": "z"}, "bad"}},
+		"edges": []any{[]any{"p", "q"}, []any{"r"}, "s"}, "plain": "t", "number": json.Number("1")}
+	for path, want := range map[string]string{"a.refs[].arn": "x,y", "edges[][]": "p,q,r", "plain": "t", "number": "", "missing.deeper": "", "a.refs": ""} {
+		if got := strings.Join(refValues(document, path), ","); got != want {
+			t.Fatalf("%s: %q, want %q", path, got, want)
+		}
+	}
+	model, err := loadModel("network-firewall")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, mutate := range map[string]func(*Service){
+		"unknown kind": func(s *Service) {
+			s.Resources[0].Refs = map[string]string{"FirewallPolicy.TLSInspectionConfigurationArn": "nothing"}
+		},
+		"unstored member":  func(s *Service) { s.Resources[0].Refs = map[string]string{"Missing[].Arn": "ruleGroup"} },
+		"match on list":    func(s *Service) { s.Ops[2].Match = []string{"MaxResults"} },
+		"match not member": func(s *Service) { s.Ops[1].Match = []string{"Type"} },
+	} {
+		spec := *networkFirewall
+		spec.Resources = nil
+		for _, res := range networkFirewall.Resources {
+			copied := *res
+			spec.Resources = append(spec.Resources, &copied)
+		}
+		spec.Ops = append([]Op(nil), networkFirewall.Ops...)
+		mutate(&spec)
+		if _, err := bindModel(&spec, model); err == nil {
+			t.Fatalf("%s: composition accepted it", name)
+		}
+	}
+}

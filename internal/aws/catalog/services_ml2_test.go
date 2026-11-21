@@ -354,9 +354,17 @@ func TestPersonalizeSchemasGroupsDatasetsAndFilters(t *testing.T) {
 		expect(t, h.json1("personalize", op, map[string]any{}), 501, "UnknownOperationException")
 	}
 
+	// Referenced schemas and dataset groups cannot be deleted.
+	expect(t, h.json1("personalize", "DeleteDatasetGroup", map[string]any{"datasetGroupArn": groupArn}), 400, "ResourceInUseException")
 	expect(t, h.json1("personalize", "DeleteFilter", map[string]any{"filterArn": filterArn}), 200, "")
+	expect(t, h.json1("personalize", "DeleteDatasetGroup", map[string]any{"datasetGroupArn": groupArn}), 400, "ResourceInUseException")
 	expect(t, h.json1("personalize", "DeleteDataset", map[string]any{"datasetArn": datasetArn}), 200, "")
+	expect(t, h.json1("personalize", "DeleteSchema", map[string]any{"schemaArn": schemaArn}), 400, "ResourceInUseException")
+	expect(t, h.json1("personalize", "DescribeSchema", map[string]any{"schemaArn": schemaArn}), 200, "")
 	expect(t, h.json1("personalize", "DeleteDatasetGroup", map[string]any{"datasetGroupArn": groupArn}), 200, "")
+	for _, item := range ml2Items(t, h.json1("personalize", "ListDatasets", map[string]any{}), "datasets") {
+		expect(t, h.json1("personalize", "DeleteDataset", map[string]any{"datasetArn": item.(map[string]any)["datasetArn"]}), 200, "")
+	}
 	expect(t, h.json1("personalize", "DeleteSchema", map[string]any{"schemaArn": schemaArn}), 200, "")
 	expect(t, h.json1("personalize", "DeleteSchema", map[string]any{"schemaArn": schemaArn}), 400, "ResourceNotFoundException")
 }

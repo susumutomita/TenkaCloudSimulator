@@ -218,11 +218,11 @@ var personalize = &Service{
 	Resources: []*Resource{
 		{Kind: "schema", Shape: "DatasetSchema", Summary: "DatasetSchemaSummary", ID: "name",
 			ARN:       "arn:{partition}:personalize:{region}:{account}:schema/{name}",
-			ARNMember: "schemaArn", NameMember: "name", Unique: true, Limit: 100,
+			ARNMember: "schemaArn", NameMember: "name", Unique: true, Limit: 100, InUse: "ResourceInUseException",
 			Generate: map[string]any{"creationDateTime": "$now", "lastUpdatedDateTime": "$now"}},
 		{Kind: "datasetGroup", Shape: "DatasetGroup", Summary: "DatasetGroupSummary", ID: "name",
 			ARN:       "arn:{partition}:personalize:{region}:{account}:dataset-group/{name}",
-			ARNMember: "datasetGroupArn", NameMember: "name", Unique: true, Limit: 100,
+			ARNMember: "datasetGroupArn", NameMember: "name", Unique: true, Limit: 100, InUse: "ResourceInUseException",
 			Generate: map[string]any{"status": "ACTIVE", "creationDateTime": "$now", "lastUpdatedDateTime": "$now"}},
 		{Kind: "dataset", Shape: "Dataset", Summary: "DatasetSummary", ID: "uuid",
 			ARN:       "arn:{partition}:personalize:{region}:{account}:dataset/{id}",
@@ -262,7 +262,7 @@ var personalize = &Service{
 		"Solutions are not bound because creating one starts automatic training by default, and event trackers are not bound because their tracking ID exists only to send events to a dataset group.",
 		"A schema must be a JSON object in Avro record form with a name and a non-empty list of fields that each have a name and a type; the field names and types the dataset type requires, and the schema domain against the dataset group domain, are not checked. A dataset group may carry a role only together with a KMS key and a KMS key only together with a role; neither is used because no data is encrypted.",
 		"A dataset is stored with the dataset type as given (Interactions, Items, Users, Actions or Action_Interactions, in any letter case), and its ARN is arn:aws:personalize:region:account:dataset/id with a generated identifier, unlike the AWS form that holds the dataset group name and dataset type; a dataset group holds at most one dataset of each type in AWS, which is not enforced. A dataset and a filter must reference an existing dataset group and a dataset an existing schema; UpdateDataset replaces the schema ARN and never reports a latestDatasetUpdate or a trackingId.",
-		"Deleting a schema or a dataset group does not fail with ResourceInUseException when datasets, filters or other records still reference it, because the stored model keeps references without dependents; the referencing records then point at a missing resource. Filters keep their expression without evaluating it.",
+		"Deleting a schema that a dataset uses, or a dataset group that a dataset or filter uses, fails with ResourceInUseException and changes nothing. Filters keep their expression without evaluating it.",
 		"Schema, dataset group and filter names are unique per Region and Personalize limits are local: 100 schemas, 100 dataset groups, 500 datasets and 100 filters per Region. Tags apply to the four resource kinds by ARN and keep the official key and value shapes.",
 	},
 }

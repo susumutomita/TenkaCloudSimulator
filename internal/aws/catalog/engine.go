@@ -130,6 +130,11 @@ func bindModel(spec *Service, model *Model) (*binding, error) {
 		if res.Summary != "" && model.Shapes[res.Summary] == nil {
 			return nil, fmt.Errorf("catalog %s resource %s summary shape is missing", spec.Model, res.Kind)
 		}
+		for _, kind := range res.Refs {
+			if spec.resource(kind) == nil {
+				return nil, fmt.Errorf("catalog %s resource %s references unknown kind %s", spec.Model, res.Kind, kind)
+			}
+		}
 		if res.Parent != "" && spec.resource(res.Parent) == nil {
 			return nil, fmt.Errorf("catalog %s resource %s has an unknown parent", spec.Model, res.Kind)
 		}
@@ -171,6 +176,11 @@ func bindModel(spec *Service, model *Model) (*binding, error) {
 		singleton := spec.resource(op.Resource) != nil && spec.resource(op.Resource).Singleton
 		if (op.Kind == Read || op.Kind == Update || op.Kind == Delete || op.Kind == Put || op.Kind == Tag || op.Kind == Untag || op.Kind == ListTags) && op.Lookup == "" && !singleton {
 			return nil, fmt.Errorf("catalog %s operation %s needs an identifying input member", spec.Model, op.Name)
+		}
+		for _, member := range op.Match {
+			if input == nil || input.Members[member].Shape == "" || op.Kind != Read && op.Kind != Update && op.Kind != Delete {
+				return nil, fmt.Errorf("catalog %s operation %s matches missing input member %s", spec.Model, op.Name, member)
+			}
 		}
 		if err := bindToken(spec, op, input); err != nil {
 			return nil, fmt.Errorf("catalog %s operation %s: %w", spec.Model, op.Name, err)
@@ -550,6 +560,11 @@ func (b *binding) status(code, kind string) int {
 // the official resource shape.
 func bindStorage(model *Model, res *Resource) error {
 	shape := model.shape(res.Shape)
+	for path := range res.Refs {
+		if !res.storable(shape, strings.TrimRight(strings.Split(path, ".")[0], "[]")) {
+			return fmt.Errorf("reference %s is not a stored member", path)
+		}
+	}
 	for _, member := range res.Beside {
 		if _, ok := shape.Members[member]; ok || member == "" {
 			return fmt.Errorf("beside member %q is empty or already in the resource shape", member)
