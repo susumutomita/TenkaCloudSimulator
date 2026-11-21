@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"strings"
 	"testing"
@@ -118,6 +119,14 @@ func TestMediaConvertQueuesTemplatesPresetsAndPolicy(t *testing.T) {
 	if tpl := template.body["jobTemplate"].(map[string]any); tpl["type"] != "CUSTOM" || tpl["queue"] != arn || tpl["arn"] != "arn:aws:mediaconvert:us-east-1:000000000000:jobTemplates/hd" {
 		t.Fatalf("template %v", tpl)
 	}
+	// A static key value is stored and returned unmasked, as the Bounds say.
+	keyed := map[string]any{"outputGroups": []any{map[string]any{"outputGroupSettings": map[string]any{"type": "HLS_GROUP_SETTINGS", "hlsGroupSettings": map[string]any{
+		"encryption": map[string]any{"staticKeyProvider": map[string]any{"staticKeyValue": "00000000000000000000000000000000"}}}}}}}
+	expect(t, h.rest("mediaconvert", "POST", base+"/jobTemplates", map[string]any{"name": "keyed", "settings": keyed}), 201, "")
+	if got := h.rest("mediaconvert", "GET", base+"/jobTemplates/keyed", nil); !strings.Contains(fmt.Sprint(got.body), "00000000000000000000000000000000") {
+		t.Fatalf("static key value not returned as disclosed: %v", got.body)
+	}
+	expect(t, h.rest("mediaconvert", "DELETE", base+"/jobTemplates/keyed", nil), 202, "")
 	expect(t, h.rest("mediaconvert", "POST", base+"/jobTemplates", map[string]any{"name": "sd", "settings": settings, "category": "other"}), 201, "")
 	if got := h.rest("mediaconvert", "GET", base+"/jobTemplates?category=video", nil).body["jobTemplates"].([]any); len(got) != 1 {
 		t.Fatalf("category filter %v", got)
