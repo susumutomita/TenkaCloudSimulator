@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -226,4 +227,141 @@ func TestQBusinessLifecycleOfEveryResource(t *testing.T) {
 	expect(t, call("DELETE", "/applications/"+appID, nil), 200, "")
 	expect(t, call("GET", "/applications/"+appID+"/retrievers/"+str(retriever.body["retrieverId"]), nil), 404, "ResourceNotFoundException")
 	expect(t, call("DELETE", "/applications/"+appID, nil), 404, "ResourceNotFoundException")
+}
+
+func TestConnectCheckHooksApplyDocumentedRules(t *testing.T) {
+	queueConfig := map[string]any{"QuickConnectType": "QUEUE", "QueueConfig": map[string]any{"QueueId": "q", "ContactFlowId": "f"}}
+	cases := []struct {
+		name  string
+		hook  func(map[string]any) error
+		input map[string]any
+		ok    bool
+	}{
+		{"managed", connectInstance, map[string]any{"IdentityManagementType": "CONNECT_MANAGED"}, true},
+		{"saml", connectInstance, map[string]any{"IdentityManagementType": "SAML"}, false},
+		{"directory", connectInstance, map[string]any{"IdentityManagementType": "CONNECT_MANAGED", "DirectoryId": "d-0123456789"}, false},
+		{"plain queue", connectQueue, map[string]any{"Name": "q", "OutboundCallerConfig": map[string]any{"OutboundCallerIdName": "n"}}, true},
+		{"queue without config", connectQueue, map[string]any{}, true},
+		{"caller number", connectQueue, map[string]any{"OutboundCallerConfig": map[string]any{"OutboundCallerIdNumberId": "n"}}, false},
+		{"email", connectQueue, map[string]any{"OutboundEmailConfig": map[string]any{}}, false},
+		{"queue quick connect", connectQuickConnect, map[string]any{"QuickConnectConfig": queueConfig}, true},
+		{"no config", connectQuickConnect, map[string]any{}, true},
+		{"phone quick connect", connectQuickConnect, map[string]any{"QuickConnectConfig": map[string]any{"QuickConnectType": "PHONE_NUMBER", "PhoneConfig": map[string]any{}}}, false},
+		{"queue without config member", connectQuickConnect, map[string]any{"QuickConnectConfig": map[string]any{"QuickConnectType": "QUEUE"}}, false},
+	}
+	for _, c := range cases {
+		if err := c.hook(c.input); (err == nil) != c.ok {
+			t.Errorf("%s: %v", c.name, err)
+		}
+	}
+}
+
+func TestConnectLifecycleOfEveryResource(t *testing.T) {
+	h := businessHarness(t, connect)
+	call := func(method, path string, input any) reply { return h.rest("connect", method, path, input) }
+
+	expect(t, call("PUT", "/instance", map[string]any{"IdentityManagementType": "SAML", "InboundCallsEnabled": true, "OutboundCallsEnabled": true}), 400, "InvalidRequestException")
+	created := call("PUT", "/instance", map[string]any{"IdentityManagementType": "CONNECT_MANAGED", "InstanceAlias": "fixture-center", "InboundCallsEnabled": true, "OutboundCallsEnabled": false, "ClientToken": "t-1", "Tags": map[string]any{"team": "a"}})
+	expect(t, created, 200, "")
+	instanceID := str(created.body["Id"])
+	instanceARN := "arn:aws:connect:us-east-1:000000000000:instance/" + instanceID
+	if created.body["Arn"] != instanceARN {
+		t.Fatalf("create %v", created.body)
+	}
+	if replay := call("PUT", "/instance", map[string]any{"IdentityManagementType": "CONNECT_MANAGED", "InstanceAlias": "fixture-center", "InboundCallsEnabled": true, "OutboundCallsEnabled": false, "ClientToken": "t-1", "Tags": map[string]any{"team": "a"}}); replay.body["Id"] != instanceID {
+		t.Fatalf("replay %v", replay.body)
+	}
+	expect(t, call("PUT", "/instance", map[string]any{"IdentityManagementType": "CONNECT_MANAGED", "InstanceAlias": "fixture-center", "InboundCallsEnabled": true, "OutboundCallsEnabled": true}), 400, "")
+	described := call("GET", "/instance/"+instanceID, nil).body["Instance"].(map[string]any)
+	if described["InstanceStatus"] != "CREATION_IN_PROGRESS" || described["InstanceAccessUrl"] != nil || described["ServiceRole"] != nil || described["InstanceAlias"] != "fixture-center" {
+		t.Fatalf("instance %v", described)
+	}
+	listed := items(t, call("GET", "/instance", nil), "InstanceSummaryList")
+	if len(listed) != 1 || listed[0].(map[string]any)["Id"] != instanceID {
+		t.Fatalf("instances %v", listed)
+	}
+
+	hours := call("PUT", "/hours-of-operations/"+instanceID, map[string]any{"Name": "weekdays", "TimeZone": "Asia/Tokyo",
+		"Config": []any{map[string]any{"Day": "MONDAY", "StartTime": map[string]any{"Hours": 9, "Minutes": 0}, "EndTime": map[string]any{"Hours": 17, "Minutes": 30}}}})
+	expect(t, hours, 200, "")
+	hoursID := str(hours.body["HoursOfOperationId"])
+	if hours.body["HoursOfOperationArn"] != instanceARN+"/operating-hours/"+hoursID {
+		t.Fatalf("hours %v", hours.body)
+	}
+	expect(t, call("PUT", "/hours-of-operations/"+instanceID, map[string]any{"Name": "weekdays", "TimeZone": "Asia/Tokyo", "Config": []any{}}), 409, "DuplicateResourceException")
+	expect(t, call("POST", "/hours-of-operations/"+instanceID+"/"+hoursID, map[string]any{"Name": "weekdays-2", "Description": "updated"}), 200, "")
+	gotHours := call("GET", "/hours-of-operations/"+instanceID+"/"+hoursID, nil).body["HoursOfOperation"].(map[string]any)
+	if gotHours["Name"] != "weekdays-2" || gotHours["TimeZone"] != "Asia/Tokyo" || gotHours["LastModifiedRegion"] != "us-east-1" {
+		t.Fatalf("hours %v", gotHours)
+	}
+	if list := items(t, call("GET", "/hours-of-operations-summary/"+instanceID, nil), "HoursOfOperationSummaryList"); len(list) != 1 || list[0].(map[string]any)["Name"] != "weekdays-2" || list[0].(map[string]any)["Arn"] == nil {
+		t.Fatalf("hours list %v", list)
+	}
+	expect(t, call("PUT", "/hours-of-operations/"+strings.Repeat("0", 8)+"-0000-4000-8000-000000000000", map[string]any{"Name": "x", "TimeZone": "UTC", "Config": []any{}}), 404, "ResourceNotFoundException")
+
+	queue := call("PUT", "/queues/"+instanceID, map[string]any{"Name": "support", "HoursOfOperationId": hoursID, "MaxContacts": 10, "OutboundCallerConfig": map[string]any{"OutboundCallerIdName": "Support"}})
+	expect(t, queue, 200, "")
+	queueID := str(queue.body["QueueId"])
+	expect(t, call("PUT", "/queues/"+instanceID, map[string]any{"Name": "bad", "HoursOfOperationId": hoursID, "QuickConnectIds": []any{"q"}}), 400, "")
+	expect(t, call("PUT", "/queues/"+instanceID, map[string]any{"Name": "bad", "HoursOfOperationId": hoursID, "OutboundEmailConfig": map[string]any{"OutboundEmailAddressId": "e"}}), 400, "InvalidRequestException")
+	gotQueue := call("GET", "/queues/"+instanceID+"/"+queueID, nil).body["Queue"].(map[string]any)
+	if gotQueue["Status"] != "ENABLED" || gotQueue["QueueArn"] != queue.body["QueueArn"] || gotQueue["MaxContacts"] != json.Number("10") {
+		t.Fatalf("queue %v", gotQueue)
+	}
+	expect(t, call("POST", "/queues/"+instanceID+"/"+queueID+"/name", map[string]any{"Name": "support-2", "Description": "d"}), 200, "")
+	expect(t, call("POST", "/queues/"+instanceID+"/"+queueID+"/max-contacts", map[string]any{"MaxContacts": 20}), 200, "")
+	expect(t, call("POST", "/queues/"+instanceID+"/"+queueID+"/hours-of-operation", map[string]any{"HoursOfOperationId": hoursID}), 200, "")
+	expect(t, call("POST", "/queues/"+instanceID+"/"+queueID+"/status", map[string]any{"Status": "DISABLED"}), 200, "")
+	expect(t, call("POST", "/queues/"+instanceID+"/"+queueID+"/status", map[string]any{"Status": "PAUSED"}), 400, "")
+	if list := items(t, call("GET", "/queues-summary/"+instanceID, nil), "QueueSummaryList"); len(list) != 1 || list[0].(map[string]any)["QueueType"] != "STANDARD" || list[0].(map[string]any)["Name"] != "support-2" {
+		t.Fatalf("queue list %v", list)
+	}
+	expect(t, call("GET", "/queues-summary/"+instanceID+"?queueTypes=STANDARD", nil), 400, "")
+
+	connectConfig := map[string]any{"QuickConnectType": "QUEUE", "QueueConfig": map[string]any{"QueueId": queueID, "ContactFlowId": "flow-1"}}
+	quick := call("PUT", "/quick-connects/"+instanceID, map[string]any{"Name": "to-support", "QuickConnectConfig": connectConfig})
+	expect(t, quick, 200, "")
+	quickID := str(quick.body["QuickConnectId"])
+	expect(t, call("PUT", "/quick-connects/"+instanceID, map[string]any{"Name": "dial", "QuickConnectConfig": map[string]any{"QuickConnectType": "PHONE_NUMBER"}}), 400, "InvalidRequestException")
+	expect(t, call("POST", "/quick-connects/"+instanceID+"/"+quickID+"/config", map[string]any{"QuickConnectConfig": map[string]any{"QuickConnectType": "USER", "UserConfig": map[string]any{"UserId": "u", "ContactFlowId": "f"}}}), 400, "InvalidRequestException")
+	expect(t, call("POST", "/quick-connects/"+instanceID+"/"+quickID+"/config", map[string]any{"QuickConnectConfig": connectConfig}), 200, "")
+	expect(t, call("POST", "/quick-connects/"+instanceID+"/"+quickID+"/name", map[string]any{"Name": "to-support-2"}), 200, "")
+	if got := call("GET", "/quick-connects/"+instanceID+"/"+quickID, nil).body["QuickConnect"].(map[string]any); got["Name"] != "to-support-2" || got["QuickConnectARN"] != quick.body["QuickConnectARN"] {
+		t.Fatalf("quick connect %v", got)
+	}
+	if list := items(t, call("GET", "/quick-connects/"+instanceID, nil), "QuickConnectSummaryList"); len(list) != 1 || list[0].(map[string]any)["QuickConnectType"] != "QUEUE" {
+		t.Fatalf("quick connect list %v", list)
+	}
+
+	status := call("PUT", "/agent-status/"+instanceID, map[string]any{"Name": "lunch", "State": "ENABLED", "DisplayOrder": 3})
+	expect(t, status, 200, "")
+	statusID := str(status.body["AgentStatusId"])
+	expect(t, call("POST", "/agent-status/"+instanceID+"/"+statusID, map[string]any{"Name": "lunch-2", "State": "DISABLED", "ResetOrderNumber": true}), 400, "")
+	expect(t, call("POST", "/agent-status/"+instanceID+"/"+statusID, map[string]any{"Name": "lunch-2", "State": "DISABLED", "DisplayOrder": 4}), 200, "")
+	if got := call("GET", "/agent-status/"+instanceID+"/"+statusID, nil).body["AgentStatus"].(map[string]any); got["Type"] != "CUSTOM" || got["State"] != "DISABLED" || got["Name"] != "lunch-2" {
+		t.Fatalf("agent status %v", got)
+	}
+	if list := items(t, call("GET", "/agent-status/"+instanceID, nil), "AgentStatusSummaryList"); len(list) != 1 || list[0].(map[string]any)["Type"] != "CUSTOM" {
+		t.Fatalf("agent status list %v", list)
+	}
+
+	arn := str(queue.body["QueueArn"])
+	expect(t, call("POST", "/tags/"+escapeARN(arn), map[string]any{"tags": map[string]any{"k": "v"}}), 200, "")
+	if tags := call("GET", "/tags/"+escapeARN(arn), nil).body["tags"].(map[string]any); tags["k"] != "v" {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, call("DELETE", "/tags/"+escapeARN(arn)+"?tagKeys=k", nil), 200, "")
+	if tags := call("GET", "/tags/"+escapeARN(instanceARN), nil).body["tags"].(map[string]any); tags["team"] != "a" {
+		t.Fatalf("instance tags %v", tags)
+	}
+
+	expect(t, call("GET", "/users-summary/"+instanceID, nil), 501, "UnknownOperationException")
+	expect(t, call("PUT", "/phone-number/claim", map[string]any{}), 501, "UnknownOperationException")
+	expect(t, call("DELETE", "/agent-status/"+instanceID+"/"+statusID, nil), 404, "")
+	expect(t, call("DELETE", "/quick-connects/"+instanceID+"/"+quickID, nil), 200, "")
+	expect(t, call("DELETE", "/queues/"+instanceID+"/"+queueID, nil), 200, "")
+	expect(t, call("DELETE", "/hours-of-operations/"+instanceID+"/"+hoursID, nil), 200, "")
+	expect(t, call("DELETE", "/instance/"+instanceID, nil), 200, "")
+	expect(t, call("GET", "/instance/"+instanceID, nil), 404, "ResourceNotFoundException")
+	expect(t, call("GET", "/queues/"+instanceID+"/"+queueID, nil), 404, "ResourceNotFoundException")
 }

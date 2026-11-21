@@ -1,0 +1,46 @@
+{
+ "client": "connect",
+ "steps": [
+  {"op": "create_instance", "args": {"IdentityManagementType": "CONNECT_MANAGED", "InstanceAlias": "fixture-center", "InboundCallsEnabled": true, "OutboundCallsEnabled": false, "Tags": {"team": "a"}}, "save": {"instance": "Id", "instance_arn": "Arn"}},
+  {"op": "describe_instance", "args": {"InstanceId": "${instance}"}, "expect": {"Instance.InstanceAlias": "fixture-center", "Instance.InstanceStatus": "CREATION_IN_PROGRESS", "Instance.OutboundCallsEnabled": false}},
+  {"op": "list_instances", "args": {}, "expect": {"InstanceSummaryList#count": 1}},
+  {"op": "create_hours_of_operation", "args": {"InstanceId": "${instance}", "Name": "weekdays", "TimeZone": "Asia/Tokyo", "Config": [{"Day": "MONDAY", "StartTime": {"Hours": 9, "Minutes": 0}, "EndTime": {"Hours": 17, "Minutes": 30}}]}, "save": {"hours": "HoursOfOperationId"}},
+  {"op": "describe_hours_of_operation", "args": {"InstanceId": "${instance}", "HoursOfOperationId": "${hours}"}, "expect": {"HoursOfOperation.TimeZone": "Asia/Tokyo"}},
+  {"op": "update_hours_of_operation", "args": {"InstanceId": "${instance}", "HoursOfOperationId": "${hours}", "Description": "office hours"}},
+  {"op": "list_hours_of_operations", "args": {"InstanceId": "${instance}"}, "expect": {"HoursOfOperationSummaryList#count": 1}},
+  {"op": "create_queue", "args": {"InstanceId": "${instance}", "Name": "support", "HoursOfOperationId": "${hours}", "MaxContacts": 10}, "save": {"queue": "QueueId", "queue_arn": "QueueArn"}},
+  {"op": "describe_queue", "args": {"InstanceId": "${instance}", "QueueId": "${queue}"}, "expect": {"Queue.Status": "ENABLED", "Queue.MaxContacts": 10}},
+  {"op": "update_queue_name", "args": {"InstanceId": "${instance}", "QueueId": "${queue}", "Name": "support-2", "Description": "front line"}},
+  {"op": "update_queue_max_contacts", "args": {"InstanceId": "${instance}", "QueueId": "${queue}", "MaxContacts": 20}},
+  {"op": "update_queue_hours_of_operation", "args": {"InstanceId": "${instance}", "QueueId": "${queue}", "HoursOfOperationId": "${hours}"}},
+  {"op": "update_queue_status", "args": {"InstanceId": "${instance}", "QueueId": "${queue}", "Status": "DISABLED"}},
+  {"op": "list_queues", "args": {"InstanceId": "${instance}"}, "expect": {"QueueSummaryList#count": 1, "QueueSummaryList[0].Name": "support-2"}},
+  {"op": "create_quick_connect", "args": {"InstanceId": "${instance}", "Name": "to-support", "QuickConnectConfig": {"QuickConnectType": "QUEUE", "QueueConfig": {"QueueId": "${queue}", "ContactFlowId": "11111111-2222-4333-8444-555555555555"}}}, "save": {"quick": "QuickConnectId"}},
+  {"op": "describe_quick_connect", "args": {"InstanceId": "${instance}", "QuickConnectId": "${quick}"}, "expect": {"QuickConnect.Name": "to-support"}},
+  {"op": "update_quick_connect_name", "args": {"InstanceId": "${instance}", "QuickConnectId": "${quick}", "Name": "to-support-2"}},
+  {"op": "update_quick_connect_config", "args": {"InstanceId": "${instance}", "QuickConnectId": "${quick}", "QuickConnectConfig": {"QuickConnectType": "QUEUE", "QueueConfig": {"QueueId": "${queue}", "ContactFlowId": "11111111-2222-4333-8444-555555555555"}}}},
+  {"op": "list_quick_connects", "args": {"InstanceId": "${instance}"}, "expect": {"QuickConnectSummaryList#count": 1}},
+  {"op": "create_agent_status", "args": {"InstanceId": "${instance}", "Name": "lunch", "State": "ENABLED", "DisplayOrder": 3}, "save": {"status": "AgentStatusId"}},
+  {"op": "describe_agent_status", "args": {"InstanceId": "${instance}", "AgentStatusId": "${status}"}, "expect": {"AgentStatus.Type": "CUSTOM", "AgentStatus.DisplayOrder": 3}},
+  {"op": "update_agent_status", "args": {"InstanceId": "${instance}", "AgentStatusId": "${status}", "State": "DISABLED"}},
+  {"op": "list_agent_statuses", "args": {"InstanceId": "${instance}"}, "expect": {"AgentStatusSummaryList#count": 1}},
+  {"op": "tag_resource", "args": {"resourceArn": "${queue_arn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${queue_arn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${instance_arn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "create_instance", "args": {"IdentityManagementType": "SAML", "InboundCallsEnabled": true, "OutboundCallsEnabled": true}, "error": "InvalidRequestException"},
+  {"op": "describe_instance", "args": {"InstanceId": "00000000-0000-4000-8000-000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_instances", "args": {}, "expect": {"InstanceSummaryList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_queue", "args": {"InstanceId": "${instance}", "QueueId": "${queue}"}, "expect": {"Queue.Name": "support-2", "Queue.Status": "DISABLED"}}
+ ],
+ "cleanup": [
+  {"op": "delete_quick_connect", "args": {"InstanceId": "${instance}", "QuickConnectId": "${quick}"}},
+  {"op": "delete_queue", "args": {"InstanceId": "${instance}", "QueueId": "${queue}"}},
+  {"op": "delete_hours_of_operation", "args": {"InstanceId": "${instance}", "HoursOfOperationId": "${hours}"}},
+  {"op": "delete_instance", "args": {"InstanceId": "${instance}"}},
+  {"op": "list_instances", "args": {}, "expect": {"InstanceSummaryList#count": 0}}
+ ]
+}
