@@ -10610,14 +10610,18 @@
     77
    ],
    "operations": [
+    "CreateCluster",
     "CreateClusterParameterGroup",
     "CreateClusterSubnetGroup",
     "CreateTags",
+    "DeleteCluster",
     "DeleteClusterParameterGroup",
     "DeleteClusterSubnetGroup",
     "DeleteTags",
     "DescribeClusterParameterGroups",
     "DescribeClusterSubnetGroups",
+    "DescribeClusters",
+    "ModifyCluster",
     "ModifyClusterSubnetGroup"
    ],
    "officialOperations": 141,
@@ -10969,6 +10973,598 @@
      },
      "arnTemplate": "arn:{partition}:redshift:{region}:{account}:subnetgroup:{name}",
      "tagsWire": "Tags"
+    },
+    {
+     "kind": "cluster",
+     "nameMember": "ClusterIdentifier",
+     "nameWire": "ClusterIdentifier",
+     "limit": 20,
+     "operations": {
+      "create": {
+       "name": "CreateCluster",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AdditionalInfo",
+         "type": "string",
+         "max": 2147483647,
+         "key": "AdditionalInfo"
+        },
+        {
+         "name": "AllowVersionUpgrade",
+         "type": "boolean",
+         "key": "AllowVersionUpgrade"
+        },
+        {
+         "name": "AquaConfigurationStatus",
+         "type": "string",
+         "enum": [
+          "enabled",
+          "disabled",
+          "auto"
+         ],
+         "key": "AquaConfigurationStatus"
+        },
+        {
+         "name": "AutomatedSnapshotRetentionPeriod",
+         "type": "integer",
+         "key": "AutomatedSnapshotRetentionPeriod"
+        },
+        {
+         "name": "AvailabilityZone",
+         "type": "string",
+         "max": 2147483647,
+         "key": "AvailabilityZone"
+        },
+        {
+         "name": "AvailabilityZoneRelocation",
+         "type": "boolean",
+         "key": "AvailabilityZoneRelocation"
+        },
+        {
+         "name": "CatalogName",
+         "type": "string",
+         "min": 1,
+         "max": 64,
+         "pattern": "^[a-z0-9_-]*[a-z]+[a-z0-9_-]*$",
+         "key": "CatalogName"
+        },
+        {
+         "name": "ClusterIdentifier",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "ClusterIdentifier"
+        },
+        {
+         "name": "ClusterParameterGroupName",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ClusterParameterGroupName"
+        },
+        {
+         "name": "ClusterSecurityGroups",
+         "type": "list",
+         "element": "string",
+         "key": "ClusterSecurityGroups",
+         "itemKey": "ClusterSecurityGroupName"
+        },
+        {
+         "name": "ClusterSubnetGroupName",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ClusterSubnetGroupName"
+        },
+        {
+         "name": "ClusterType",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ClusterType"
+        },
+        {
+         "name": "ClusterVersion",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ClusterVersion"
+        },
+        {
+         "name": "DBName",
+         "type": "string",
+         "max": 2147483647,
+         "key": "DBName"
+        },
+        {
+         "name": "DefaultIamRoleArn",
+         "type": "string",
+         "max": 2147483647,
+         "key": "DefaultIamRoleArn"
+        },
+        {
+         "name": "ElasticIp",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ElasticIp"
+        },
+        {
+         "name": "Encrypted",
+         "type": "boolean",
+         "key": "Encrypted"
+        },
+        {
+         "name": "EnhancedVpcRouting",
+         "type": "boolean",
+         "key": "EnhancedVpcRouting"
+        },
+        {
+         "name": "HsmClientCertificateIdentifier",
+         "type": "string",
+         "max": 2147483647,
+         "key": "HsmClientCertificateIdentifier"
+        },
+        {
+         "name": "HsmConfigurationIdentifier",
+         "type": "string",
+         "max": 2147483647,
+         "key": "HsmConfigurationIdentifier"
+        },
+        {
+         "name": "IamRoles",
+         "type": "list",
+         "element": "string",
+         "key": "IamRoles",
+         "itemKey": "IamRoleArn"
+        },
+        {
+         "name": "IpAddressType",
+         "type": "string",
+         "max": 2147483647,
+         "key": "IpAddressType"
+        },
+        {
+         "name": "KmsKeyId",
+         "type": "string",
+         "max": 2147483647,
+         "key": "KmsKeyId"
+        },
+        {
+         "name": "LoadSampleData",
+         "type": "string",
+         "max": 2147483647,
+         "key": "LoadSampleData"
+        },
+        {
+         "name": "MaintenanceTrackName",
+         "type": "string",
+         "max": 2147483647,
+         "key": "MaintenanceTrackName"
+        },
+        {
+         "name": "ManageMasterPassword",
+         "type": "boolean",
+         "key": "ManageMasterPassword"
+        },
+        {
+         "name": "ManualSnapshotRetentionPeriod",
+         "type": "integer",
+         "key": "ManualSnapshotRetentionPeriod"
+        },
+        {
+         "name": "MasterPasswordSecretKmsKeyId",
+         "type": "string",
+         "max": 2147483647,
+         "key": "MasterPasswordSecretKmsKeyId"
+        },
+        {
+         "name": "MasterUserPassword",
+         "type": "string",
+         "key": "MasterUserPassword"
+        },
+        {
+         "name": "MasterUsername",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "MasterUsername"
+        },
+        {
+         "name": "MultiAZ",
+         "type": "boolean",
+         "key": "MultiAZ"
+        },
+        {
+         "name": "NodeType",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "NodeType"
+        },
+        {
+         "name": "NumberOfNodes",
+         "type": "integer",
+         "key": "NumberOfNodes"
+        },
+        {
+         "name": "Port",
+         "type": "integer",
+         "key": "Port"
+        },
+        {
+         "name": "PreferredMaintenanceWindow",
+         "type": "string",
+         "max": 2147483647,
+         "key": "PreferredMaintenanceWindow"
+        },
+        {
+         "name": "PubliclyAccessible",
+         "type": "boolean",
+         "key": "PubliclyAccessible"
+        },
+        {
+         "name": "RedshiftIdcApplicationArn",
+         "type": "string",
+         "max": 2147483647,
+         "key": "RedshiftIdcApplicationArn"
+        },
+        {
+         "name": "SnapshotScheduleIdentifier",
+         "type": "string",
+         "max": 2147483647,
+         "key": "SnapshotScheduleIdentifier"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        },
+        {
+         "name": "VpcSecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "VpcSecurityGroupIds",
+         "itemKey": "VpcSecurityGroupId"
+        }
+       ],
+       "wrapper": "Cluster",
+       "output": "CreateClusterResult",
+       "resultWrapper": "CreateClusterResult"
+      },
+      "delete": {
+       "name": "DeleteCluster",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "ClusterIdentifier",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "ClusterIdentifier"
+        },
+        {
+         "name": "FinalClusterSnapshotIdentifier",
+         "type": "string",
+         "max": 2147483647,
+         "key": "FinalClusterSnapshotIdentifier"
+        },
+        {
+         "name": "FinalClusterSnapshotRetentionPeriod",
+         "type": "integer",
+         "key": "FinalClusterSnapshotRetentionPeriod"
+        },
+        {
+         "name": "SkipFinalClusterSnapshot",
+         "type": "boolean",
+         "key": "SkipFinalClusterSnapshot"
+        }
+       ],
+       "wrapper": "Cluster",
+       "lookup": "ClusterIdentifier",
+       "lookupKey": "name",
+       "output": "DeleteClusterResult",
+       "resultWrapper": "DeleteClusterResult"
+      },
+      "describe": {
+       "name": "DescribeClusters",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "ClusterIdentifier",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ClusterIdentifier"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "max": 2147483647,
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "TagKeys",
+         "type": "list",
+         "element": "string",
+         "key": "TagKeys",
+         "itemKey": "TagKey"
+        },
+        {
+         "name": "TagValues",
+         "type": "list",
+         "element": "string",
+         "key": "TagValues",
+         "itemKey": "TagValue"
+        }
+       ],
+       "items": "Clusters",
+       "itemName": "ClusterIdentifier",
+       "names": "ClusterIdentifier",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "ClustersMessage",
+       "resultWrapper": "DescribeClustersResult"
+      },
+      "list": {
+       "name": "DescribeClusters",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "ClusterIdentifier",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ClusterIdentifier"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "max": 2147483647,
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "TagKeys",
+         "type": "list",
+         "element": "string",
+         "key": "TagKeys",
+         "itemKey": "TagKey"
+        },
+        {
+         "name": "TagValues",
+         "type": "list",
+         "element": "string",
+         "key": "TagValues",
+         "itemKey": "TagValue"
+        }
+       ],
+       "items": "Clusters",
+       "itemName": "ClusterIdentifier",
+       "names": "ClusterIdentifier",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "ClustersMessage",
+       "resultWrapper": "DescribeClustersResult"
+      },
+      "update": {
+       "name": "ModifyCluster",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AllowVersionUpgrade",
+         "type": "boolean",
+         "key": "AllowVersionUpgrade"
+        },
+        {
+         "name": "AutomatedSnapshotRetentionPeriod",
+         "type": "integer",
+         "key": "AutomatedSnapshotRetentionPeriod"
+        },
+        {
+         "name": "AvailabilityZone",
+         "type": "string",
+         "max": 2147483647,
+         "key": "AvailabilityZone"
+        },
+        {
+         "name": "AvailabilityZoneRelocation",
+         "type": "boolean",
+         "key": "AvailabilityZoneRelocation"
+        },
+        {
+         "name": "ClusterIdentifier",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "ClusterIdentifier"
+        },
+        {
+         "name": "ClusterParameterGroupName",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ClusterParameterGroupName"
+        },
+        {
+         "name": "ClusterSecurityGroups",
+         "type": "list",
+         "element": "string",
+         "key": "ClusterSecurityGroups",
+         "itemKey": "ClusterSecurityGroupName"
+        },
+        {
+         "name": "ClusterType",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ClusterType"
+        },
+        {
+         "name": "ClusterVersion",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ClusterVersion"
+        },
+        {
+         "name": "ElasticIp",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ElasticIp"
+        },
+        {
+         "name": "Encrypted",
+         "type": "boolean",
+         "key": "Encrypted"
+        },
+        {
+         "name": "EnhancedVpcRouting",
+         "type": "boolean",
+         "key": "EnhancedVpcRouting"
+        },
+        {
+         "name": "HsmClientCertificateIdentifier",
+         "type": "string",
+         "max": 2147483647,
+         "key": "HsmClientCertificateIdentifier"
+        },
+        {
+         "name": "HsmConfigurationIdentifier",
+         "type": "string",
+         "max": 2147483647,
+         "key": "HsmConfigurationIdentifier"
+        },
+        {
+         "name": "IpAddressType",
+         "type": "string",
+         "max": 2147483647,
+         "key": "IpAddressType"
+        },
+        {
+         "name": "KmsKeyId",
+         "type": "string",
+         "max": 2147483647,
+         "key": "KmsKeyId"
+        },
+        {
+         "name": "MaintenanceTrackName",
+         "type": "string",
+         "max": 2147483647,
+         "key": "MaintenanceTrackName"
+        },
+        {
+         "name": "ManageMasterPassword",
+         "type": "boolean",
+         "key": "ManageMasterPassword"
+        },
+        {
+         "name": "ManualSnapshotRetentionPeriod",
+         "type": "integer",
+         "key": "ManualSnapshotRetentionPeriod"
+        },
+        {
+         "name": "MasterPasswordSecretKmsKeyId",
+         "type": "string",
+         "max": 2147483647,
+         "key": "MasterPasswordSecretKmsKeyId"
+        },
+        {
+         "name": "MasterUserPassword",
+         "type": "string",
+         "key": "MasterUserPassword"
+        },
+        {
+         "name": "MultiAZ",
+         "type": "boolean",
+         "key": "MultiAZ"
+        },
+        {
+         "name": "NewClusterIdentifier",
+         "type": "string",
+         "max": 2147483647,
+         "key": "NewClusterIdentifier"
+        },
+        {
+         "name": "NodeType",
+         "type": "string",
+         "max": 2147483647,
+         "key": "NodeType"
+        },
+        {
+         "name": "NumberOfNodes",
+         "type": "integer",
+         "key": "NumberOfNodes"
+        },
+        {
+         "name": "Port",
+         "type": "integer",
+         "key": "Port"
+        },
+        {
+         "name": "PreferredMaintenanceWindow",
+         "type": "string",
+         "max": 2147483647,
+         "key": "PreferredMaintenanceWindow"
+        },
+        {
+         "name": "PubliclyAccessible",
+         "type": "boolean",
+         "key": "PubliclyAccessible"
+        },
+        {
+         "name": "VpcSecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "VpcSecurityGroupIds",
+         "itemKey": "VpcSecurityGroupId"
+        }
+       ],
+       "wrapper": "Cluster",
+       "lookup": "ClusterIdentifier",
+       "lookupKey": "name",
+       "output": "ModifyClusterResult",
+       "resultWrapper": "ModifyClusterResult",
+       "editable": [
+        "AllowVersionUpgrade",
+        "AutomatedSnapshotRetentionPeriod",
+        "AvailabilityZone",
+        "AvailabilityZoneRelocation",
+        "ClusterParameterGroupName",
+        "ClusterType",
+        "ClusterVersion",
+        "ElasticIp",
+        "Encrypted",
+        "EnhancedVpcRouting",
+        "HsmClientCertificateIdentifier",
+        "HsmConfigurationIdentifier",
+        "IpAddressType",
+        "KmsKeyId",
+        "MaintenanceTrackName",
+        "ManageMasterPassword",
+        "ManualSnapshotRetentionPeriod",
+        "MasterUserPassword",
+        "MultiAZ",
+        "NewClusterIdentifier",
+        "NodeType",
+        "NumberOfNodes",
+        "Port",
+        "PreferredMaintenanceWindow",
+        "PubliclyAccessible",
+        "VpcSecurityGroupIds"
+       ]
+      }
+     },
+     "arnTemplate": "arn:{partition}:redshift:{region}:{account}:cluster:{name}",
+     "tagsWire": "Tags"
     }
    ],
    "tagging": {
@@ -11023,12 +11619,15 @@
     }
    },
    "bounds": [
-    "Cluster parameter groups and cluster subnet groups are stored configuration served over the Query protocol: no cluster, snapshot, node, endpoint, data share, integration or warehouse exists, and CreateCluster, CreateClusterSnapshot, RestoreFromClusterSnapshot and every other official operation return UnknownOperationException with HTTP 501.",
+    "Clusters are stored configuration records that stay in the creating state: no node, database, endpoint, address, port, listener, public key or network interface exists, no endpoint, address, port or node list is ever returned, and no SQL, data share, integration or warehouse exists. Cluster parameter groups and cluster subnet groups are stored configuration too. Operations that act on a running warehouse (RebootCluster, PauseCluster, ResumeCluster, ResizeCluster, FailoverPrimaryCompute, snapshots, copies and restores, data sharing, integrations, queries) and every other official operation return UnknownOperationException with HTTP 501.",
+    "The simulator stores no credentials: MasterUserPassword, ManageMasterPassword and MasterPasswordSecretKmsKeyId are refused with InvalidParameterValue instead of being accepted and discarded, so a cluster is created with MasterUsername and no password (AWS would require a password or a managed secret). Port and ElasticIp are refused because no address or listener exists; cluster security groups, HSM certificates and configurations, snapshot schedules, AdditionalInfo, LoadSampleData, IAM Identity Center applications, catalogs, Availability Zone relocation, Aqua, renaming (NewClusterIdentifier) and every member the official cluster description does not hold are refused as well.",
+    "A cluster keeps exactly the settings it was given: node types, versions, maintenance windows, encryption keys and similar settings are stored without checking them against Redshift offerings, and the only defaults are DBName dev and one node. ClusterStatus is creating from creation until deletion; ModifyCluster is accepted in any state and applies immediately (no pending values exist), and DeleteCluster returns the cluster with status deleting. DeleteCluster needs SkipFinalClusterSnapshot true because no snapshot can be taken, so FinalClusterSnapshotIdentifier and FinalClusterSnapshotRetentionPeriod are refused. ClusterIdentifier is 1 to 63 lowercase letters, digits or hyphens that start with a letter and neither end with a hyphen nor contain two consecutive hyphens (uppercase letters are refused, as documented), MasterUsername is required and 1 to 128 lowercase letters, digits or _+.@- characters that start with a letter and are not public, DBName is 1 to 64 lowercase letters or digits, ClusterType is stored as its node count (a single-node cluster has one node, a multi-node cluster states NumberOfNodes from 1 to 100, and ModifyCluster needs NodeType with either), AutomatedSnapshotRetentionPeriod is 0 to 35, ManualSnapshotRetentionPeriod is -1 or 1 to 3653, IpAddressType is ipv4 or dualstack, and MultiAZ is reported as Enabled or Disabled. At most 20 clusters exist per Region (a local limit that answers ClusterQuotaExceeded).",
+    "A cluster reports its parameter group (status in-sync), VPC security groups (status active) and IAM roles (status in-sync) by name or ID only and names its cluster subnet group, none of which needs to exist or is protected from deletion while in use; it reports no VPC, subnets or Availability Zones of its own, and DescribeClusters refuses TagKeys and TagValues.",
     "Snapshot schedules, scheduled actions, usage limits, event subscriptions, HSM certificates and configurations, snapshot copy grants, authentication profiles and cluster security groups are not implemented: they need a cluster, a topic, a key, an IAM role or a schedule grammar the stored model cannot evaluate, so their APIs return UnknownOperationException with HTTP 501.",
     "Parameter values are not modeled: ModifyClusterParameterGroup, ResetClusterParameterGroup, DescribeClusterParameters and DescribeDefaultClusterParameters are not implemented, and default parameter groups and the default subnet group are not pre-created. A parameter group family is stored without checking that it exists. Parameter group names are 1 to 255 letters, digits or hyphens, start with a letter, contain no trailing or consecutive hyphens and are stored in lowercase.",
     "A subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, subnet status, group status or supported IP address type; the 20-subnet limit is returned as ClusterSubnetQuotaExceededFault. Subnet group names are 1 to 255 letters, digits or hyphens, are stored in lowercase and must not be Default.",
-    "Describe operations refuse TagKeys, TagValues and Marker values that were not issued for the request, accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name. Resource counts per Region (50 parameter groups and 50 subnet groups) are local limits.",
-    "CreateTags and DeleteTags apply to the two resource kinds by ARN (arn:aws:redshift:region:account:parametergroup:name and subnetgroup:name) and fail with ResourceNotFoundFault for any other ARN; tags appear on the group descriptions. Tag keys are required and must not start with aws:. Removing a missing key succeeds, and DescribeTags is not implemented."
+    "Describe operations refuse TagKeys, TagValues and Marker values that were not issued for the request, accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name. Resource counts per Region (50 parameter groups, 50 subnet groups and 20 clusters) are local limits.",
+    "CreateTags and DeleteTags apply to the three resource kinds by ARN (arn:aws:redshift:region:account:parametergroup:name, subnetgroup:name and cluster:id) and fail with ResourceNotFoundFault for any other ARN; tags appear on the group and cluster descriptions. Tag keys are required and must not start with aws:. Removing a missing key succeeds, and DescribeTags is not implemented."
    ],
    "source": {
     "package": "botocore",
@@ -11038,6 +11637,27 @@
     "license": "Apache-2.0"
    },
    "xmlShapes": {
+    "AquaConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AquaConfigurationStatus",
+       "element": "AquaConfigurationStatus",
+       "shape": "AquaConfigurationStatus"
+      },
+      {
+       "name": "AquaStatus",
+       "element": "AquaStatus",
+       "shape": "AquaStatus"
+      }
+     ]
+    },
+    "AquaConfigurationStatus": {
+     "type": "string"
+    },
+    "AquaStatus": {
+     "type": "string"
+    },
     "AvailabilityZone": {
      "type": "structure",
      "members": [
@@ -11052,6 +11672,386 @@
        "shape": "SupportedPlatformsList"
       }
      ]
+    },
+    "Boolean": {
+     "type": "boolean"
+    },
+    "BooleanOptional": {
+     "type": "boolean"
+    },
+    "Cluster": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AllowVersionUpgrade",
+       "element": "AllowVersionUpgrade",
+       "shape": "Boolean"
+      },
+      {
+       "name": "AquaConfiguration",
+       "element": "AquaConfiguration",
+       "shape": "AquaConfiguration"
+      },
+      {
+       "name": "AutomatedSnapshotRetentionPeriod",
+       "element": "AutomatedSnapshotRetentionPeriod",
+       "shape": "Integer"
+      },
+      {
+       "name": "AvailabilityZone",
+       "element": "AvailabilityZone",
+       "shape": "String"
+      },
+      {
+       "name": "AvailabilityZoneRelocationStatus",
+       "element": "AvailabilityZoneRelocationStatus",
+       "shape": "String"
+      },
+      {
+       "name": "CatalogArn",
+       "element": "CatalogArn",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterAvailabilityStatus",
+       "element": "ClusterAvailabilityStatus",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterCreateTime",
+       "element": "ClusterCreateTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "ClusterIdentifier",
+       "element": "ClusterIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterNamespaceArn",
+       "element": "ClusterNamespaceArn",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterNodes",
+       "element": "ClusterNodes",
+       "shape": "ClusterNodesList"
+      },
+      {
+       "name": "ClusterParameterGroups",
+       "element": "ClusterParameterGroups",
+       "shape": "ClusterParameterGroupStatusList"
+      },
+      {
+       "name": "ClusterPublicKey",
+       "element": "ClusterPublicKey",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterRevisionNumber",
+       "element": "ClusterRevisionNumber",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterSecurityGroups",
+       "element": "ClusterSecurityGroups",
+       "shape": "ClusterSecurityGroupMembershipList"
+      },
+      {
+       "name": "ClusterSnapshotCopyStatus",
+       "element": "ClusterSnapshotCopyStatus",
+       "shape": "ClusterSnapshotCopyStatus"
+      },
+      {
+       "name": "ClusterStatus",
+       "element": "ClusterStatus",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterSubnetGroupName",
+       "element": "ClusterSubnetGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterVersion",
+       "element": "ClusterVersion",
+       "shape": "String"
+      },
+      {
+       "name": "CustomDomainCertificateArn",
+       "element": "CustomDomainCertificateArn",
+       "shape": "String"
+      },
+      {
+       "name": "CustomDomainCertificateExpiryDate",
+       "element": "CustomDomainCertificateExpiryDate",
+       "shape": "TStamp"
+      },
+      {
+       "name": "CustomDomainName",
+       "element": "CustomDomainName",
+       "shape": "String"
+      },
+      {
+       "name": "DBName",
+       "element": "DBName",
+       "shape": "String"
+      },
+      {
+       "name": "DataTransferProgress",
+       "element": "DataTransferProgress",
+       "shape": "DataTransferProgress"
+      },
+      {
+       "name": "DefaultIamRoleArn",
+       "element": "DefaultIamRoleArn",
+       "shape": "String"
+      },
+      {
+       "name": "DeferredMaintenanceWindows",
+       "element": "DeferredMaintenanceWindows",
+       "shape": "DeferredMaintenanceWindowsList"
+      },
+      {
+       "name": "ElasticIpStatus",
+       "element": "ElasticIpStatus",
+       "shape": "ElasticIpStatus"
+      },
+      {
+       "name": "ElasticResizeNumberOfNodeOptions",
+       "element": "ElasticResizeNumberOfNodeOptions",
+       "shape": "String"
+      },
+      {
+       "name": "Encrypted",
+       "element": "Encrypted",
+       "shape": "Boolean"
+      },
+      {
+       "name": "Endpoint",
+       "element": "Endpoint",
+       "shape": "Endpoint"
+      },
+      {
+       "name": "EnhancedVpcRouting",
+       "element": "EnhancedVpcRouting",
+       "shape": "Boolean"
+      },
+      {
+       "name": "ExpectedNextSnapshotScheduleTime",
+       "element": "ExpectedNextSnapshotScheduleTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "ExpectedNextSnapshotScheduleTimeStatus",
+       "element": "ExpectedNextSnapshotScheduleTimeStatus",
+       "shape": "String"
+      },
+      {
+       "name": "HsmStatus",
+       "element": "HsmStatus",
+       "shape": "HsmStatus"
+      },
+      {
+       "name": "IamRoles",
+       "element": "IamRoles",
+       "shape": "ClusterIamRoleList"
+      },
+      {
+       "name": "IpAddressType",
+       "element": "IpAddressType",
+       "shape": "String"
+      },
+      {
+       "name": "KmsKeyId",
+       "element": "KmsKeyId",
+       "shape": "String"
+      },
+      {
+       "name": "LakehouseRegistrationStatus",
+       "element": "LakehouseRegistrationStatus",
+       "shape": "String"
+      },
+      {
+       "name": "MaintenanceTrackName",
+       "element": "MaintenanceTrackName",
+       "shape": "String"
+      },
+      {
+       "name": "ManualSnapshotRetentionPeriod",
+       "element": "ManualSnapshotRetentionPeriod",
+       "shape": "Integer"
+      },
+      {
+       "name": "MasterPasswordSecretArn",
+       "element": "MasterPasswordSecretArn",
+       "shape": "String"
+      },
+      {
+       "name": "MasterPasswordSecretKmsKeyId",
+       "element": "MasterPasswordSecretKmsKeyId",
+       "shape": "String"
+      },
+      {
+       "name": "MasterUsername",
+       "element": "MasterUsername",
+       "shape": "String"
+      },
+      {
+       "name": "ModifyStatus",
+       "element": "ModifyStatus",
+       "shape": "String"
+      },
+      {
+       "name": "MultiAZ",
+       "element": "MultiAZ",
+       "shape": "String"
+      },
+      {
+       "name": "MultiAZSecondary",
+       "element": "MultiAZSecondary",
+       "shape": "SecondaryClusterInfo"
+      },
+      {
+       "name": "NextMaintenanceWindowStartTime",
+       "element": "NextMaintenanceWindowStartTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "NodeType",
+       "element": "NodeType",
+       "shape": "String"
+      },
+      {
+       "name": "NumberOfNodes",
+       "element": "NumberOfNodes",
+       "shape": "Integer"
+      },
+      {
+       "name": "PendingActions",
+       "element": "PendingActions",
+       "shape": "PendingActionsList"
+      },
+      {
+       "name": "PendingModifiedValues",
+       "element": "PendingModifiedValues",
+       "shape": "PendingModifiedValues"
+      },
+      {
+       "name": "PreferredMaintenanceWindow",
+       "element": "PreferredMaintenanceWindow",
+       "shape": "String"
+      },
+      {
+       "name": "PubliclyAccessible",
+       "element": "PubliclyAccessible",
+       "shape": "Boolean"
+      },
+      {
+       "name": "ReservedNodeExchangeStatus",
+       "element": "ReservedNodeExchangeStatus",
+       "shape": "ReservedNodeExchangeStatus"
+      },
+      {
+       "name": "ResizeInfo",
+       "element": "ResizeInfo",
+       "shape": "ResizeInfo"
+      },
+      {
+       "name": "RestoreStatus",
+       "element": "RestoreStatus",
+       "shape": "RestoreStatus"
+      },
+      {
+       "name": "SnapshotScheduleIdentifier",
+       "element": "SnapshotScheduleIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "SnapshotScheduleState",
+       "element": "SnapshotScheduleState",
+       "shape": "ScheduleState"
+      },
+      {
+       "name": "Tags",
+       "element": "Tags",
+       "shape": "TagList"
+      },
+      {
+       "name": "TotalStorageCapacityInMegaBytes",
+       "element": "TotalStorageCapacityInMegaBytes",
+       "shape": "LongOptional"
+      },
+      {
+       "name": "VpcId",
+       "element": "VpcId",
+       "shape": "String"
+      },
+      {
+       "name": "VpcSecurityGroups",
+       "element": "VpcSecurityGroups",
+       "shape": "VpcSecurityGroupMembershipList"
+      }
+     ]
+    },
+    "ClusterIamRole": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ApplyStatus",
+       "element": "ApplyStatus",
+       "shape": "String"
+      },
+      {
+       "name": "IamRoleArn",
+       "element": "IamRoleArn",
+       "shape": "String"
+      }
+     ]
+    },
+    "ClusterIamRoleList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ClusterIamRole",
+      "shape": "ClusterIamRole"
+     }
+    },
+    "ClusterList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "Cluster",
+      "shape": "Cluster"
+     }
+    },
+    "ClusterNode": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "NodeRole",
+       "element": "NodeRole",
+       "shape": "String"
+      },
+      {
+       "name": "PrivateIPAddress",
+       "element": "PrivateIPAddress",
+       "shape": "String"
+      },
+      {
+       "name": "PublicIPAddress",
+       "element": "PublicIPAddress",
+       "shape": "String"
+      }
+     ]
+    },
+    "ClusterNodesList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "member",
+      "shape": "ClusterNode"
+     }
     },
     "ClusterParameterGroup": {
      "type": "structure",
@@ -11078,6 +12078,34 @@
       }
      ]
     },
+    "ClusterParameterGroupStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ClusterParameterStatusList",
+       "element": "ClusterParameterStatusList",
+       "shape": "ClusterParameterStatusList"
+      },
+      {
+       "name": "ParameterApplyStatus",
+       "element": "ParameterApplyStatus",
+       "shape": "String"
+      },
+      {
+       "name": "ParameterGroupName",
+       "element": "ParameterGroupName",
+       "shape": "String"
+      }
+     ]
+    },
+    "ClusterParameterGroupStatusList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ClusterParameterGroup",
+      "shape": "ClusterParameterGroupStatus"
+     }
+    },
     "ClusterParameterGroupsMessage": {
      "type": "structure",
      "members": [
@@ -11090,6 +12118,82 @@
        "name": "ParameterGroups",
        "element": "ParameterGroups",
        "shape": "ParameterGroupList"
+      }
+     ]
+    },
+    "ClusterParameterStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ParameterApplyErrorDescription",
+       "element": "ParameterApplyErrorDescription",
+       "shape": "String"
+      },
+      {
+       "name": "ParameterApplyStatus",
+       "element": "ParameterApplyStatus",
+       "shape": "String"
+      },
+      {
+       "name": "ParameterName",
+       "element": "ParameterName",
+       "shape": "String"
+      }
+     ]
+    },
+    "ClusterParameterStatusList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "member",
+      "shape": "ClusterParameterStatus"
+     }
+    },
+    "ClusterSecurityGroupMembership": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ClusterSecurityGroupName",
+       "element": "ClusterSecurityGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "ClusterSecurityGroupMembershipList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ClusterSecurityGroup",
+      "shape": "ClusterSecurityGroupMembership"
+     }
+    },
+    "ClusterSnapshotCopyStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DestinationRegion",
+       "element": "DestinationRegion",
+       "shape": "String"
+      },
+      {
+       "name": "ManualSnapshotRetentionPeriod",
+       "element": "ManualSnapshotRetentionPeriod",
+       "shape": "Integer"
+      },
+      {
+       "name": "RetentionPeriod",
+       "element": "RetentionPeriod",
+       "shape": "Long"
+      },
+      {
+       "name": "SnapshotCopyGrantName",
+       "element": "SnapshotCopyGrantName",
+       "shape": "String"
       }
      ]
     },
@@ -11156,6 +12260,21 @@
       "shape": "ClusterSubnetGroup"
      }
     },
+    "ClustersMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Clusters",
+       "element": "Clusters",
+       "shape": "ClusterList"
+      },
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      }
+     ]
+    },
     "CreateClusterParameterGroupResult": {
      "type": "structure",
      "members": [
@@ -11163,6 +12282,16 @@
        "name": "ClusterParameterGroup",
        "element": "ClusterParameterGroup",
        "shape": "ClusterParameterGroup"
+      }
+     ]
+    },
+    "CreateClusterResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Cluster",
+       "element": "Cluster",
+       "shape": "Cluster"
       }
      ]
     },
@@ -11176,6 +12305,162 @@
       }
      ]
     },
+    "DataTransferProgress": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CurrentRateInMegaBytesPerSecond",
+       "element": "CurrentRateInMegaBytesPerSecond",
+       "shape": "DoubleOptional"
+      },
+      {
+       "name": "DataTransferredInMegaBytes",
+       "element": "DataTransferredInMegaBytes",
+       "shape": "Long"
+      },
+      {
+       "name": "ElapsedTimeInSeconds",
+       "element": "ElapsedTimeInSeconds",
+       "shape": "LongOptional"
+      },
+      {
+       "name": "EstimatedTimeToCompletionInSeconds",
+       "element": "EstimatedTimeToCompletionInSeconds",
+       "shape": "LongOptional"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      },
+      {
+       "name": "TotalDataInMegaBytes",
+       "element": "TotalDataInMegaBytes",
+       "shape": "Long"
+      }
+     ]
+    },
+    "DeferredMaintenanceWindow": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DeferMaintenanceEndTime",
+       "element": "DeferMaintenanceEndTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "DeferMaintenanceIdentifier",
+       "element": "DeferMaintenanceIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "DeferMaintenanceStartTime",
+       "element": "DeferMaintenanceStartTime",
+       "shape": "TStamp"
+      }
+     ]
+    },
+    "DeferredMaintenanceWindowsList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DeferredMaintenanceWindow",
+      "shape": "DeferredMaintenanceWindow"
+     }
+    },
+    "DeleteClusterResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Cluster",
+       "element": "Cluster",
+       "shape": "Cluster"
+      }
+     ]
+    },
+    "Double": {
+     "type": "double"
+    },
+    "DoubleOptional": {
+     "type": "double"
+    },
+    "ElasticIpStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ElasticIp",
+       "element": "ElasticIp",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "Endpoint": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Address",
+       "element": "Address",
+       "shape": "String"
+      },
+      {
+       "name": "Port",
+       "element": "Port",
+       "shape": "Integer"
+      },
+      {
+       "name": "VpcEndpoints",
+       "element": "VpcEndpoints",
+       "shape": "VpcEndpointsList"
+      }
+     ]
+    },
+    "HsmStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "HsmClientCertificateIdentifier",
+       "element": "HsmClientCertificateIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "HsmConfigurationIdentifier",
+       "element": "HsmConfigurationIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "Integer": {
+     "type": "integer"
+    },
+    "IntegerOptional": {
+     "type": "integer"
+    },
+    "Long": {
+     "type": "long"
+    },
+    "LongOptional": {
+     "type": "long"
+    },
+    "ModifyClusterResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Cluster",
+       "element": "Cluster",
+       "shape": "Cluster"
+      }
+     ]
+    },
     "ModifyClusterSubnetGroupResult": {
      "type": "structure",
      "members": [
@@ -11186,6 +12471,44 @@
       }
      ]
     },
+    "NetworkInterface": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AvailabilityZone",
+       "element": "AvailabilityZone",
+       "shape": "String"
+      },
+      {
+       "name": "Ipv6Address",
+       "element": "Ipv6Address",
+       "shape": "String"
+      },
+      {
+       "name": "NetworkInterfaceId",
+       "element": "NetworkInterfaceId",
+       "shape": "String"
+      },
+      {
+       "name": "PrivateIpAddress",
+       "element": "PrivateIpAddress",
+       "shape": "String"
+      },
+      {
+       "name": "SubnetId",
+       "element": "SubnetId",
+       "shape": "String"
+      }
+     ]
+    },
+    "NetworkInterfaceList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "NetworkInterface",
+      "shape": "NetworkInterface"
+     }
+    },
     "ParameterGroupList": {
      "type": "list",
      "item": {
@@ -11193,6 +12516,198 @@
       "element": "ClusterParameterGroup",
       "shape": "ClusterParameterGroup"
      }
+    },
+    "PendingActionsList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "member",
+      "shape": "String"
+     }
+    },
+    "PendingModifiedValues": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AutomatedSnapshotRetentionPeriod",
+       "element": "AutomatedSnapshotRetentionPeriod",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "ClusterIdentifier",
+       "element": "ClusterIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterType",
+       "element": "ClusterType",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterVersion",
+       "element": "ClusterVersion",
+       "shape": "String"
+      },
+      {
+       "name": "EncryptionType",
+       "element": "EncryptionType",
+       "shape": "String"
+      },
+      {
+       "name": "EnhancedVpcRouting",
+       "element": "EnhancedVpcRouting",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "MaintenanceTrackName",
+       "element": "MaintenanceTrackName",
+       "shape": "String"
+      },
+      {
+       "name": "MasterUserPassword",
+       "element": "MasterUserPassword",
+       "shape": "SensitiveString"
+      },
+      {
+       "name": "NodeType",
+       "element": "NodeType",
+       "shape": "String"
+      },
+      {
+       "name": "NumberOfNodes",
+       "element": "NumberOfNodes",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "PubliclyAccessible",
+       "element": "PubliclyAccessible",
+       "shape": "BooleanOptional"
+      }
+     ]
+    },
+    "ReservedNodeExchangeStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "RequestTime",
+       "element": "RequestTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "ReservedNodeExchangeRequestId",
+       "element": "ReservedNodeExchangeRequestId",
+       "shape": "String"
+      },
+      {
+       "name": "SourceReservedNodeCount",
+       "element": "SourceReservedNodeCount",
+       "shape": "Integer"
+      },
+      {
+       "name": "SourceReservedNodeId",
+       "element": "SourceReservedNodeId",
+       "shape": "String"
+      },
+      {
+       "name": "SourceReservedNodeType",
+       "element": "SourceReservedNodeType",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "ReservedNodeExchangeStatusType"
+      },
+      {
+       "name": "TargetReservedNodeCount",
+       "element": "TargetReservedNodeCount",
+       "shape": "Integer"
+      },
+      {
+       "name": "TargetReservedNodeOfferingId",
+       "element": "TargetReservedNodeOfferingId",
+       "shape": "String"
+      },
+      {
+       "name": "TargetReservedNodeType",
+       "element": "TargetReservedNodeType",
+       "shape": "String"
+      }
+     ]
+    },
+    "ReservedNodeExchangeStatusType": {
+     "type": "string"
+    },
+    "ResizeInfo": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AllowCancelResize",
+       "element": "AllowCancelResize",
+       "shape": "Boolean"
+      },
+      {
+       "name": "ResizeType",
+       "element": "ResizeType",
+       "shape": "String"
+      }
+     ]
+    },
+    "RestoreStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CurrentRestoreRateInMegaBytesPerSecond",
+       "element": "CurrentRestoreRateInMegaBytesPerSecond",
+       "shape": "Double"
+      },
+      {
+       "name": "ElapsedTimeInSeconds",
+       "element": "ElapsedTimeInSeconds",
+       "shape": "Long"
+      },
+      {
+       "name": "EstimatedTimeToCompletionInSeconds",
+       "element": "EstimatedTimeToCompletionInSeconds",
+       "shape": "Long"
+      },
+      {
+       "name": "ProgressInMegaBytes",
+       "element": "ProgressInMegaBytes",
+       "shape": "Long"
+      },
+      {
+       "name": "SnapshotSizeInMegaBytes",
+       "element": "SnapshotSizeInMegaBytes",
+       "shape": "Long"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "ScheduleState": {
+     "type": "string"
+    },
+    "SecondaryClusterInfo": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AvailabilityZone",
+       "element": "AvailabilityZone",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterNodes",
+       "element": "ClusterNodes",
+       "shape": "ClusterNodesList"
+      }
+     ]
+    },
+    "SensitiveString": {
+     "type": "string"
     },
     "String": {
      "type": "string"
@@ -11243,6 +12758,9 @@
       "shape": "SupportedPlatform"
      }
     },
+    "TStamp": {
+     "type": "timestamp"
+    },
     "Tag": {
      "type": "structure",
      "members": [
@@ -11272,6 +12790,57 @@
       "name": "",
       "element": "item",
       "shape": "String"
+     }
+    },
+    "VpcEndpoint": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "NetworkInterfaces",
+       "element": "NetworkInterfaces",
+       "shape": "NetworkInterfaceList"
+      },
+      {
+       "name": "VpcEndpointId",
+       "element": "VpcEndpointId",
+       "shape": "String"
+      },
+      {
+       "name": "VpcId",
+       "element": "VpcId",
+       "shape": "String"
+      }
+     ]
+    },
+    "VpcEndpointsList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "VpcEndpoint",
+      "shape": "VpcEndpoint"
+     }
+    },
+    "VpcSecurityGroupMembership": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      },
+      {
+       "name": "VpcSecurityGroupId",
+       "element": "VpcSecurityGroupId",
+       "shape": "String"
+      }
+     ]
+    },
+    "VpcSecurityGroupMembershipList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "VpcSecurityGroup",
+      "shape": "VpcSecurityGroupMembership"
      }
     }
    },

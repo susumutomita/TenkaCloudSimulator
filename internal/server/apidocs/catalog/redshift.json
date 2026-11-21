@@ -1,6 +1,28 @@
 {
  "components": {
   "schemas": {
+   "AquaConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AquaConfigurationStatus": {
+      "enum": [
+       "enabled",
+       "disabled",
+       "auto"
+      ],
+      "type": "string"
+     },
+     "AquaStatus": {
+      "enum": [
+       "enabled",
+       "disabled",
+       "applying"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
    "AvailabilityZone": {
     "additionalProperties": false,
     "properties": {
@@ -19,6 +41,342 @@
       "xml": {
        "wrapped": true
       }
+     }
+    },
+    "type": "object"
+   },
+   "Cluster": {
+    "additionalProperties": false,
+    "properties": {
+     "AllowVersionUpgrade": {
+      "type": "boolean"
+     },
+     "AquaConfiguration": {
+      "$ref": "#/components/schemas/AquaConfiguration"
+     },
+     "AutomatedSnapshotRetentionPeriod": {
+      "type": "integer"
+     },
+     "AvailabilityZone": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "AvailabilityZoneRelocationStatus": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "CatalogArn": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterAvailabilityStatus": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterCreateTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "ClusterIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterNamespaceArn": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterNodes": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterNode",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "ClusterParameterGroups": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterParameterGroupStatus",
+       "xml": {
+        "name": "ClusterParameterGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "ClusterPublicKey": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterRevisionNumber": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterSecurityGroups": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterSecurityGroupMembership",
+       "xml": {
+        "name": "ClusterSecurityGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "ClusterSnapshotCopyStatus": {
+      "$ref": "#/components/schemas/ClusterSnapshotCopyStatus"
+     },
+     "ClusterStatus": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterSubnetGroupName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterVersion": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "CustomDomainCertificateArn": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "CustomDomainCertificateExpiryDate": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "CustomDomainName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "DBName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "DataTransferProgress": {
+      "$ref": "#/components/schemas/DataTransferProgress"
+     },
+     "DefaultIamRoleArn": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "DeferredMaintenanceWindows": {
+      "items": {
+       "$ref": "#/components/schemas/DeferredMaintenanceWindow",
+       "xml": {
+        "name": "DeferredMaintenanceWindow"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "ElasticIpStatus": {
+      "$ref": "#/components/schemas/ElasticIpStatus"
+     },
+     "ElasticResizeNumberOfNodeOptions": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "Encrypted": {
+      "type": "boolean"
+     },
+     "Endpoint": {
+      "$ref": "#/components/schemas/Endpoint"
+     },
+     "EnhancedVpcRouting": {
+      "type": "boolean"
+     },
+     "ExpectedNextSnapshotScheduleTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "ExpectedNextSnapshotScheduleTimeStatus": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "HsmStatus": {
+      "$ref": "#/components/schemas/HsmStatus"
+     },
+     "IamRoles": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterIamRole",
+       "xml": {
+        "name": "ClusterIamRole"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "IpAddressType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "LakehouseRegistrationStatus": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MaintenanceTrackName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ManualSnapshotRetentionPeriod": {
+      "type": "integer"
+     },
+     "MasterPasswordSecretArn": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MasterPasswordSecretKmsKeyId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MasterUsername": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ModifyStatus": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MultiAZ": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MultiAZSecondary": {
+      "$ref": "#/components/schemas/SecondaryClusterInfo"
+     },
+     "NextMaintenanceWindowStartTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "NodeType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "NumberOfNodes": {
+      "type": "integer"
+     },
+     "PendingActions": {
+      "items": {
+       "maxLength": 2147483647,
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "PendingModifiedValues": {
+      "$ref": "#/components/schemas/PendingModifiedValues"
+     },
+     "PreferredMaintenanceWindow": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "PubliclyAccessible": {
+      "type": "boolean"
+     },
+     "ReservedNodeExchangeStatus": {
+      "$ref": "#/components/schemas/ReservedNodeExchangeStatus"
+     },
+     "ResizeInfo": {
+      "$ref": "#/components/schemas/ResizeInfo"
+     },
+     "RestoreStatus": {
+      "$ref": "#/components/schemas/RestoreStatus"
+     },
+     "SnapshotScheduleIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "SnapshotScheduleState": {
+      "enum": [
+       "MODIFYING",
+       "ACTIVE",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag",
+       "xml": {
+        "name": "Tag"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "TotalStorageCapacityInMegaBytes": {
+      "type": "integer"
+     },
+     "VpcId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "VpcSecurityGroups": {
+      "items": {
+       "$ref": "#/components/schemas/VpcSecurityGroupMembership",
+       "xml": {
+        "name": "VpcSecurityGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "ClusterIamRole": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplyStatus": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "IamRoleArn": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ClusterNode": {
+    "additionalProperties": false,
+    "properties": {
+     "NodeRole": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "PrivateIPAddress": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "PublicIPAddress": {
+      "maxLength": 2147483647,
+      "type": "string"
      }
     },
     "type": "object"
@@ -53,6 +411,32 @@
     },
     "type": "object"
    },
+   "ClusterParameterGroupStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "ClusterParameterStatusList": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterParameterStatus",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "ParameterApplyStatus": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ParameterGroupName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
    "ClusterParameterGroupsMessage": {
     "additionalProperties": false,
     "properties": {
@@ -71,6 +455,58 @@
       "xml": {
        "wrapped": true
       }
+     }
+    },
+    "type": "object"
+   },
+   "ClusterParameterStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "ParameterApplyErrorDescription": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ParameterApplyStatus": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ParameterName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ClusterSecurityGroupMembership": {
+    "additionalProperties": false,
+    "properties": {
+     "ClusterSecurityGroupName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "Status": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ClusterSnapshotCopyStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "DestinationRegion": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ManualSnapshotRetentionPeriod": {
+      "type": "integer"
+     },
+     "RetentionPeriod": {
+      "type": "integer"
+     },
+     "SnapshotCopyGrantName": {
+      "maxLength": 2147483647,
+      "type": "string"
      }
     },
     "type": "object"
@@ -142,6 +578,28 @@
        "$ref": "#/components/schemas/ClusterSubnetGroup",
        "xml": {
         "name": "ClusterSubnetGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "Marker": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ClustersMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Clusters": {
+      "items": {
+       "$ref": "#/components/schemas/Cluster",
+       "xml": {
+        "name": "Cluster"
        }
       },
       "type": "array",
@@ -229,6 +687,235 @@
     "properties": {
      "ClusterParameterGroup": {
       "$ref": "#/components/schemas/ClusterParameterGroup"
+     }
+    },
+    "type": "object"
+   },
+   "CreateClusterRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^ClusterSecurityGroups\\.ClusterSecurityGroupName\\.[1-9][0-9]*$": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "^IamRoles\\.IamRoleArn\\.[1-9][0-9]*$": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "^VpcSecurityGroupIds\\.VpcSecurityGroupId\\.[1-9][0-9]*$": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateCluster",
+      "type": "string"
+     },
+     "AdditionalInfo": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "AllowVersionUpgrade": {
+      "type": "boolean"
+     },
+     "AquaConfigurationStatus": {
+      "enum": [
+       "enabled",
+       "disabled",
+       "auto"
+      ],
+      "type": "string"
+     },
+     "AutomatedSnapshotRetentionPeriod": {
+      "type": "integer"
+     },
+     "AvailabilityZone": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "AvailabilityZoneRelocation": {
+      "type": "boolean"
+     },
+     "CatalogName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ClusterIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterParameterGroupName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterSecurityGroups": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "ClusterSubnetGroupName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterVersion": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "DBName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "DefaultIamRoleArn": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ElasticIp": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "Encrypted": {
+      "type": "boolean"
+     },
+     "EnhancedVpcRouting": {
+      "type": "boolean"
+     },
+     "HsmClientCertificateIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "HsmConfigurationIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "IamRoles": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "IpAddressType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "LoadSampleData": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MaintenanceTrackName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ManageMasterPassword": {
+      "type": "boolean"
+     },
+     "ManualSnapshotRetentionPeriod": {
+      "type": "integer"
+     },
+     "MasterPasswordSecretKmsKeyId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MasterUserPassword": {
+      "type": "string"
+     },
+     "MasterUsername": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MultiAZ": {
+      "type": "boolean"
+     },
+     "NodeType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "NumberOfNodes": {
+      "type": "integer"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "PreferredMaintenanceWindow": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "PubliclyAccessible": {
+      "type": "boolean"
+     },
+     "RedshiftIdcApplicationArn": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "SnapshotScheduleIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2012-12-01",
+      "type": "string"
+     },
+     "VpcSecurityGroupIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ClusterIdentifier",
+     "MasterUsername",
+     "NodeType"
+    ],
+    "title": "CreateCluster",
+    "type": "object"
+   },
+   "CreateClusterResponse": {
+    "properties": {
+     "CreateClusterResult": {
+      "$ref": "#/components/schemas/CreateClusterResult",
+      "xml": {
+       "name": "CreateClusterResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateClusterResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateClusterResponse",
+     "namespace": "http://redshift.amazonaws.com/doc/2012-12-01/"
+    }
+   },
+   "CreateClusterResult": {
+    "additionalProperties": false,
+    "properties": {
+     "Cluster": {
+      "$ref": "#/components/schemas/Cluster"
      }
     },
     "type": "object"
@@ -368,6 +1055,49 @@
      "namespace": "http://redshift.amazonaws.com/doc/2012-12-01/"
     }
    },
+   "DataTransferProgress": {
+    "additionalProperties": false,
+    "properties": {
+     "CurrentRateInMegaBytesPerSecond": {
+      "type": "number"
+     },
+     "DataTransferredInMegaBytes": {
+      "type": "integer"
+     },
+     "ElapsedTimeInSeconds": {
+      "type": "integer"
+     },
+     "EstimatedTimeToCompletionInSeconds": {
+      "type": "integer"
+     },
+     "Status": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "TotalDataInMegaBytes": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DeferredMaintenanceWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "DeferMaintenanceEndTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "DeferMaintenanceIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "DeferMaintenanceStartTime": {
+      "format": "date-time",
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
    "DeleteClusterParameterGroupRequest": {
     "additionalProperties": false,
     "properties": {
@@ -404,6 +1134,68 @@
      "name": "DeleteClusterParameterGroupResponse",
      "namespace": "http://redshift.amazonaws.com/doc/2012-12-01/"
     }
+   },
+   "DeleteClusterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteCluster",
+      "type": "string"
+     },
+     "ClusterIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "FinalClusterSnapshotIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "FinalClusterSnapshotRetentionPeriod": {
+      "type": "integer"
+     },
+     "SkipFinalClusterSnapshot": {
+      "type": "boolean"
+     },
+     "Version": {
+      "const": "2012-12-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ClusterIdentifier"
+    ],
+    "title": "DeleteCluster",
+    "type": "object"
+   },
+   "DeleteClusterResponse": {
+    "properties": {
+     "DeleteClusterResult": {
+      "$ref": "#/components/schemas/DeleteClusterResult",
+      "xml": {
+       "name": "DeleteClusterResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteClusterResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteClusterResponse",
+     "namespace": "http://redshift.amazonaws.com/doc/2012-12-01/"
+    }
+   },
+   "DeleteClusterResult": {
+    "additionalProperties": false,
+    "properties": {
+     "Cluster": {
+      "$ref": "#/components/schemas/Cluster"
+     }
+    },
+    "type": "object"
    },
    "DeleteClusterSubnetGroupRequest": {
     "additionalProperties": false,
@@ -629,6 +1421,114 @@
      "namespace": "http://redshift.amazonaws.com/doc/2012-12-01/"
     }
    },
+   "DescribeClustersRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^TagKeys\\.TagKey\\.[1-9][0-9]*$": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "^TagValues\\.TagValue\\.[1-9][0-9]*$": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "DescribeClusters",
+      "type": "string"
+     },
+     "ClusterIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "Marker": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "TagKeys": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "TagValues": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2012-12-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeClusters",
+    "type": "object"
+   },
+   "DescribeClustersResponse": {
+    "properties": {
+     "DescribeClustersResult": {
+      "$ref": "#/components/schemas/ClustersMessage",
+      "xml": {
+       "name": "DescribeClustersResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeClustersResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeClustersResponse",
+     "namespace": "http://redshift.amazonaws.com/doc/2012-12-01/"
+    }
+   },
+   "ElasticIpStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "ElasticIp": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "Status": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Endpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "Address": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "VpcEndpoints": {
+      "items": {
+       "$ref": "#/components/schemas/VpcEndpoint",
+       "xml": {
+        "name": "VpcEndpoint"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
    "ErrorResponse": {
     "properties": {
      "Error": {
@@ -658,6 +1558,188 @@
      "name": "ErrorResponse",
      "namespace": "http://redshift.amazonaws.com/doc/2012-12-01/"
     }
+   },
+   "HsmStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "HsmClientCertificateIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "HsmConfigurationIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "Status": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ModifyClusterRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^ClusterSecurityGroups\\.ClusterSecurityGroupName\\.[1-9][0-9]*$": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "^VpcSecurityGroupIds\\.VpcSecurityGroupId\\.[1-9][0-9]*$": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "ModifyCluster",
+      "type": "string"
+     },
+     "AllowVersionUpgrade": {
+      "type": "boolean"
+     },
+     "AutomatedSnapshotRetentionPeriod": {
+      "type": "integer"
+     },
+     "AvailabilityZone": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "AvailabilityZoneRelocation": {
+      "type": "boolean"
+     },
+     "ClusterIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterParameterGroupName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterSecurityGroups": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "ClusterType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterVersion": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ElasticIp": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "Encrypted": {
+      "type": "boolean"
+     },
+     "EnhancedVpcRouting": {
+      "type": "boolean"
+     },
+     "HsmClientCertificateIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "HsmConfigurationIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "IpAddressType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MaintenanceTrackName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ManageMasterPassword": {
+      "type": "boolean"
+     },
+     "ManualSnapshotRetentionPeriod": {
+      "type": "integer"
+     },
+     "MasterPasswordSecretKmsKeyId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MasterUserPassword": {
+      "type": "string"
+     },
+     "MultiAZ": {
+      "type": "boolean"
+     },
+     "NewClusterIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "NodeType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "NumberOfNodes": {
+      "type": "integer"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "PreferredMaintenanceWindow": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "PubliclyAccessible": {
+      "type": "boolean"
+     },
+     "Version": {
+      "const": "2012-12-01",
+      "type": "string"
+     },
+     "VpcSecurityGroupIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ClusterIdentifier"
+    ],
+    "title": "ModifyCluster",
+    "type": "object"
+   },
+   "ModifyClusterResponse": {
+    "properties": {
+     "ModifyClusterResult": {
+      "$ref": "#/components/schemas/ModifyClusterResult",
+      "xml": {
+       "name": "ModifyClusterResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "ModifyClusterResponse",
+    "type": "object",
+    "xml": {
+     "name": "ModifyClusterResponse",
+     "namespace": "http://redshift.amazonaws.com/doc/2012-12-01/"
+    }
+   },
+   "ModifyClusterResult": {
+    "additionalProperties": false,
+    "properties": {
+     "Cluster": {
+      "$ref": "#/components/schemas/Cluster"
+     }
+    },
+    "type": "object"
    },
    "ModifyClusterSubnetGroupRequest": {
     "additionalProperties": false,
@@ -727,10 +1809,188 @@
     },
     "type": "object"
    },
+   "NetworkInterface": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailabilityZone": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "Ipv6Address": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "NetworkInterfaceId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "PrivateIpAddress": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "SubnetId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PendingModifiedValues": {
+    "additionalProperties": false,
+    "properties": {
+     "AutomatedSnapshotRetentionPeriod": {
+      "type": "integer"
+     },
+     "ClusterIdentifier": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterVersion": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "EncryptionType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "EnhancedVpcRouting": {
+      "type": "boolean"
+     },
+     "MaintenanceTrackName": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "MasterUserPassword": {
+      "type": "string"
+     },
+     "NodeType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "NumberOfNodes": {
+      "type": "integer"
+     },
+     "PubliclyAccessible": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ReservedNodeExchangeStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "RequestTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "ReservedNodeExchangeRequestId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "SourceReservedNodeCount": {
+      "type": "integer"
+     },
+     "SourceReservedNodeId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "SourceReservedNodeType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "REQUESTED",
+       "PENDING",
+       "IN_PROGRESS",
+       "RETRYING",
+       "SUCCEEDED",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "TargetReservedNodeCount": {
+      "type": "integer"
+     },
+     "TargetReservedNodeOfferingId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "TargetReservedNodeType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResizeInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "AllowCancelResize": {
+      "type": "boolean"
+     },
+     "ResizeType": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
    "ResponseMetadata": {
     "properties": {
      "RequestId": {
       "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RestoreStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "CurrentRestoreRateInMegaBytesPerSecond": {
+      "type": "number"
+     },
+     "ElapsedTimeInSeconds": {
+      "type": "integer"
+     },
+     "EstimatedTimeToCompletionInSeconds": {
+      "type": "integer"
+     },
+     "ProgressInMegaBytes": {
+      "type": "integer"
+     },
+     "SnapshotSizeInMegaBytes": {
+      "type": "integer"
+     },
+     "Status": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SecondaryClusterInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailabilityZone": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "ClusterNodes": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterNode",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
      }
     },
     "type": "object"
@@ -775,16 +2035,151 @@
      }
     },
     "type": "object"
+   },
+   "VpcEndpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "NetworkInterfaces": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkInterface",
+       "xml": {
+        "name": "NetworkInterface"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "VpcEndpointId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "VpcId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VpcSecurityGroupMembership": {
+    "additionalProperties": false,
+    "properties": {
+     "Status": {
+      "maxLength": 2147483647,
+      "type": "string"
+     },
+     "VpcSecurityGroupId": {
+      "maxLength": 2147483647,
+      "type": "string"
+     }
+    },
+    "type": "object"
    }
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official Amazon Redshift API (2012-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Cluster parameter groups and cluster subnet groups are stored configuration served over the Query protocol: no cluster, snapshot, node, endpoint, data share, integration or warehouse exists, and CreateCluster, CreateClusterSnapshot, RestoreFromClusterSnapshot and every other official operation return UnknownOperationException with HTTP 501. Snapshot schedules, scheduled actions, usage limits, event subscriptions, HSM certificates and configurations, snapshot copy grants, authentication profiles and cluster security groups are not implemented: they need a cluster, a topic, a key, an IAM role or a schedule grammar the stored model cannot evaluate, so their APIs return UnknownOperationException with HTTP 501. Parameter values are not modeled: ModifyClusterParameterGroup, ResetClusterParameterGroup, DescribeClusterParameters and DescribeDefaultClusterParameters are not implemented, and default parameter groups and the default subnet group are not pre-created. A parameter group family is stored without checking that it exists. Parameter group names are 1 to 255 letters, digits or hyphens, start with a letter, contain no trailing or consecutive hyphens and are stored in lowercase. A subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, subnet status, group status or supported IP address type; the 20-subnet limit is returned as ClusterSubnetQuotaExceededFault. Subnet group names are 1 to 255 letters, digits or hyphens, are stored in lowercase and must not be Default. Describe operations refuse TagKeys, TagValues and Marker values that were not issued for the request, accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name. Resource counts per Region (50 parameter groups and 50 subnet groups) are local limits. CreateTags and DeleteTags apply to the two resource kinds by ARN (arn:aws:redshift:region:account:parametergroup:name and subnetgroup:name) and fail with ResourceNotFoundFault for any other ARN; tags appear on the group descriptions. Tag keys are required and must not start with aws:. Removing a missing key succeeds, and DescribeTags is not implemented.",
+  "description": "Bounded simulator subset of the official Amazon Redshift API (2012-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Clusters are stored configuration records that stay in the creating state: no node, database, endpoint, address, port, listener, public key or network interface exists, no endpoint, address, port or node list is ever returned, and no SQL, data share, integration or warehouse exists. Cluster parameter groups and cluster subnet groups are stored configuration too. Operations that act on a running warehouse (RebootCluster, PauseCluster, ResumeCluster, ResizeCluster, FailoverPrimaryCompute, snapshots, copies and restores, data sharing, integrations, queries) and every other official operation return UnknownOperationException with HTTP 501. The simulator stores no credentials: MasterUserPassword, ManageMasterPassword and MasterPasswordSecretKmsKeyId are refused with InvalidParameterValue instead of being accepted and discarded, so a cluster is created with MasterUsername and no password (AWS would require a password or a managed secret). Port and ElasticIp are refused because no address or listener exists; cluster security groups, HSM certificates and configurations, snapshot schedules, AdditionalInfo, LoadSampleData, IAM Identity Center applications, catalogs, Availability Zone relocation, Aqua, renaming (NewClusterIdentifier) and every member the official cluster description does not hold are refused as well. A cluster keeps exactly the settings it was given: node types, versions, maintenance windows, encryption keys and similar settings are stored without checking them against Redshift offerings, and the only defaults are DBName dev and one node. ClusterStatus is creating from creation until deletion; ModifyCluster is accepted in any state and applies immediately (no pending values exist), and DeleteCluster returns the cluster with status deleting. DeleteCluster needs SkipFinalClusterSnapshot true because no snapshot can be taken, so FinalClusterSnapshotIdentifier and FinalClusterSnapshotRetentionPeriod are refused. ClusterIdentifier is 1 to 63 lowercase letters, digits or hyphens that start with a letter and neither end with a hyphen nor contain two consecutive hyphens (uppercase letters are refused, as documented), MasterUsername is required and 1 to 128 lowercase letters, digits or _+.@- characters that start with a letter and are not public, DBName is 1 to 64 lowercase letters or digits, ClusterType is stored as its node count (a single-node cluster has one node, a multi-node cluster states NumberOfNodes from 1 to 100, and ModifyCluster needs NodeType with either), AutomatedSnapshotRetentionPeriod is 0 to 35, ManualSnapshotRetentionPeriod is -1 or 1 to 3653, IpAddressType is ipv4 or dualstack, and MultiAZ is reported as Enabled or Disabled. At most 20 clusters exist per Region (a local limit that answers ClusterQuotaExceeded). A cluster reports its parameter group (status in-sync), VPC security groups (status active) and IAM roles (status in-sync) by name or ID only and names its cluster subnet group, none of which needs to exist or is protected from deletion while in use; it reports no VPC, subnets or Availability Zones of its own, and DescribeClusters refuses TagKeys and TagValues. Snapshot schedules, scheduled actions, usage limits, event subscriptions, HSM certificates and configurations, snapshot copy grants, authentication profiles and cluster security groups are not implemented: they need a cluster, a topic, a key, an IAM role or a schedule grammar the stored model cannot evaluate, so their APIs return UnknownOperationException with HTTP 501. Parameter values are not modeled: ModifyClusterParameterGroup, ResetClusterParameterGroup, DescribeClusterParameters and DescribeDefaultClusterParameters are not implemented, and default parameter groups and the default subnet group are not pre-created. A parameter group family is stored without checking that it exists. Parameter group names are 1 to 255 letters, digits or hyphens, start with a letter, contain no trailing or consecutive hyphens and are stored in lowercase. A subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, subnet status, group status or supported IP address type; the 20-subnet limit is returned as ClusterSubnetQuotaExceededFault. Subnet group names are 1 to 255 letters, digits or hyphens, are stored in lowercase and must not be Default. Describe operations refuse TagKeys, TagValues and Marker values that were not issued for the request, accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name. Resource counts per Region (50 parameter groups, 50 subnet groups and 20 clusters) are local limits. CreateTags and DeleteTags apply to the three resource kinds by ARN (arn:aws:redshift:region:account:parametergroup:name, subnetgroup:name and cluster:id) and fail with ResourceNotFoundFault for any other ARN; tags appear on the group and cluster descriptions. Tag keys are required and must not start with aws:. Removing a missing key succeeds, and DescribeTags is not implemented.",
   "title": "Amazon Redshift (simulator catalog)",
   "version": "2012-12-01"
  },
  "openapi": "3.1.0",
  "paths": {
+  "/#Action=CreateCluster": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateClusterResponse holding the CreateClusterResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "redshiftCreateCluster",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Redshift; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "redshift",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "redshift",
+       "enum": [
+        "redshift"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateCluster",
+        "ClusterIdentifier": "example",
+        "MasterUsername": "example",
+        "NodeType": "example",
+        "Version": "2012-12-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateClusterRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateClusterResponse"
+        }
+       }
+      },
+      "description": "XML CreateClusterResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateCluster",
+    "tags": [
+     "Amazon Redshift"
+    ]
+   }
+  },
   "/#Action=CreateClusterParameterGroup": {
    "post": {
     "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateClusterParameterGroupResponse holding the CreateClusterParameterGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
@@ -1062,6 +2457,99 @@
      }
     },
     "summary": "CreateTags",
+    "tags": [
+     "Amazon Redshift"
+    ]
+   }
+  },
+  "/#Action=DeleteCluster": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteClusterResponse holding the DeleteClusterResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "redshiftDeleteCluster",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Redshift; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "redshift",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "redshift",
+       "enum": [
+        "redshift"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteCluster",
+        "ClusterIdentifier": "example",
+        "Version": "2012-12-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteClusterRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteClusterResponse"
+        }
+       }
+      },
+      "description": "XML DeleteClusterResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteCluster",
     "tags": [
      "Amazon Redshift"
     ]
@@ -1530,6 +3018,191 @@
     ]
    }
   },
+  "/#Action=DescribeClusters": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeClustersResponse holding the DescribeClustersResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "redshiftDescribeClusters",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Redshift; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "redshift",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "redshift",
+       "enum": [
+        "redshift"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeClusters",
+        "Version": "2012-12-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeClustersRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeClustersResponse"
+        }
+       }
+      },
+      "description": "XML DescribeClustersResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeClusters",
+    "tags": [
+     "Amazon Redshift"
+    ]
+   }
+  },
+  "/#Action=ModifyCluster": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ModifyClusterResponse holding the ModifyClusterResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "redshiftModifyCluster",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Redshift; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "redshift",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "redshift",
+       "enum": [
+        "redshift"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "ModifyCluster",
+        "ClusterIdentifier": "example",
+        "Version": "2012-12-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/ModifyClusterRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ModifyClusterResponse"
+        }
+       }
+      },
+      "description": "XML ModifyClusterResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "ModifyCluster",
+    "tags": [
+     "Amazon Redshift"
+    ]
+   }
+  },
   "/#Action=ModifyClusterSubnetGroup": {
    "post": {
     "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ModifyClusterSubnetGroupResponse holding the ModifyClusterSubnetGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
@@ -1632,7 +3305,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official Amazon Redshift API (2012-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Cluster parameter groups and cluster subnet groups are stored configuration served over the Query protocol: no cluster, snapshot, node, endpoint, data share, integration or warehouse exists, and CreateCluster, CreateClusterSnapshot, RestoreFromClusterSnapshot and every other official operation return UnknownOperationException with HTTP 501. Snapshot schedules, scheduled actions, usage limits, event subscriptions, HSM certificates and configurations, snapshot copy grants, authentication profiles and cluster security groups are not implemented: they need a cluster, a topic, a key, an IAM role or a schedule grammar the stored model cannot evaluate, so their APIs return UnknownOperationException with HTTP 501. Parameter values are not modeled: ModifyClusterParameterGroup, ResetClusterParameterGroup, DescribeClusterParameters and DescribeDefaultClusterParameters are not implemented, and default parameter groups and the default subnet group are not pre-created. A parameter group family is stored without checking that it exists. Parameter group names are 1 to 255 letters, digits or hyphens, start with a letter, contain no trailing or consecutive hyphens and are stored in lowercase. A subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, subnet status, group status or supported IP address type; the 20-subnet limit is returned as ClusterSubnetQuotaExceededFault. Subnet group names are 1 to 255 letters, digits or hyphens, are stored in lowercase and must not be Default. Describe operations refuse TagKeys, TagValues and Marker values that were not issued for the request, accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name. Resource counts per Region (50 parameter groups and 50 subnet groups) are local limits. CreateTags and DeleteTags apply to the two resource kinds by ARN (arn:aws:redshift:region:account:parametergroup:name and subnetgroup:name) and fail with ResourceNotFoundFault for any other ARN; tags appear on the group descriptions. Tag keys are required and must not start with aws:. Removing a missing key succeeds, and DescribeTags is not implemented.",
+   "description": "Bounded simulator subset of the official Amazon Redshift API (2012-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Clusters are stored configuration records that stay in the creating state: no node, database, endpoint, address, port, listener, public key or network interface exists, no endpoint, address, port or node list is ever returned, and no SQL, data share, integration or warehouse exists. Cluster parameter groups and cluster subnet groups are stored configuration too. Operations that act on a running warehouse (RebootCluster, PauseCluster, ResumeCluster, ResizeCluster, FailoverPrimaryCompute, snapshots, copies and restores, data sharing, integrations, queries) and every other official operation return UnknownOperationException with HTTP 501. The simulator stores no credentials: MasterUserPassword, ManageMasterPassword and MasterPasswordSecretKmsKeyId are refused with InvalidParameterValue instead of being accepted and discarded, so a cluster is created with MasterUsername and no password (AWS would require a password or a managed secret). Port and ElasticIp are refused because no address or listener exists; cluster security groups, HSM certificates and configurations, snapshot schedules, AdditionalInfo, LoadSampleData, IAM Identity Center applications, catalogs, Availability Zone relocation, Aqua, renaming (NewClusterIdentifier) and every member the official cluster description does not hold are refused as well. A cluster keeps exactly the settings it was given: node types, versions, maintenance windows, encryption keys and similar settings are stored without checking them against Redshift offerings, and the only defaults are DBName dev and one node. ClusterStatus is creating from creation until deletion; ModifyCluster is accepted in any state and applies immediately (no pending values exist), and DeleteCluster returns the cluster with status deleting. DeleteCluster needs SkipFinalClusterSnapshot true because no snapshot can be taken, so FinalClusterSnapshotIdentifier and FinalClusterSnapshotRetentionPeriod are refused. ClusterIdentifier is 1 to 63 lowercase letters, digits or hyphens that start with a letter and neither end with a hyphen nor contain two consecutive hyphens (uppercase letters are refused, as documented), MasterUsername is required and 1 to 128 lowercase letters, digits or _+.@- characters that start with a letter and are not public, DBName is 1 to 64 lowercase letters or digits, ClusterType is stored as its node count (a single-node cluster has one node, a multi-node cluster states NumberOfNodes from 1 to 100, and ModifyCluster needs NodeType with either), AutomatedSnapshotRetentionPeriod is 0 to 35, ManualSnapshotRetentionPeriod is -1 or 1 to 3653, IpAddressType is ipv4 or dualstack, and MultiAZ is reported as Enabled or Disabled. At most 20 clusters exist per Region (a local limit that answers ClusterQuotaExceeded). A cluster reports its parameter group (status in-sync), VPC security groups (status active) and IAM roles (status in-sync) by name or ID only and names its cluster subnet group, none of which needs to exist or is protected from deletion while in use; it reports no VPC, subnets or Availability Zones of its own, and DescribeClusters refuses TagKeys and TagValues. Snapshot schedules, scheduled actions, usage limits, event subscriptions, HSM certificates and configurations, snapshot copy grants, authentication profiles and cluster security groups are not implemented: they need a cluster, a topic, a key, an IAM role or a schedule grammar the stored model cannot evaluate, so their APIs return UnknownOperationException with HTTP 501. Parameter values are not modeled: ModifyClusterParameterGroup, ResetClusterParameterGroup, DescribeClusterParameters and DescribeDefaultClusterParameters are not implemented, and default parameter groups and the default subnet group are not pre-created. A parameter group family is stored without checking that it exists. Parameter group names are 1 to 255 letters, digits or hyphens, start with a letter, contain no trailing or consecutive hyphens and are stored in lowercase. A subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, subnet status, group status or supported IP address type; the 20-subnet limit is returned as ClusterSubnetQuotaExceededFault. Subnet group names are 1 to 255 letters, digits or hyphens, are stored in lowercase and must not be Default. Describe operations refuse TagKeys, TagValues and Marker values that were not issued for the request, accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name. Resource counts per Region (50 parameter groups, 50 subnet groups and 20 clusters) are local limits. CreateTags and DeleteTags apply to the three resource kinds by ARN (arn:aws:redshift:region:account:parametergroup:name, subnetgroup:name and cluster:id) and fail with ResourceNotFoundFault for any other ARN; tags appear on the group and cluster descriptions. Tag keys are required and must not start with aws:. Removing a missing key succeeds, and DescribeTags is not implemented.",
    "name": "Amazon Redshift"
   }
  ],

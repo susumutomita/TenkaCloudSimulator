@@ -524,3 +524,128 @@ func TestElastiCacheRecordsLeaveRunningCacheOperationsUnbound(t *testing.T) {
 		expectFault(t, h.cache(action, "CacheClusterId", "c1"), 501, "UnknownOperationException")
 	}
 }
+
+func TestRedshiftClusterRecordLifecycle(t *testing.T) {
+	h := newHarness(t, redshift)
+	create := func(extra ...string) queryReply {
+		return h.warehouse("CreateCluster", append([]string{"ClusterIdentifier", "app-wh", "NodeType", "ra3.xlplus", "MasterUsername", "dbadmin", "ClusterType", "multi-node", "NumberOfNodes", "2",
+			"ClusterParameterGroupName", "App-Params", "ClusterSubnetGroupName", "App-Subnets", "VpcSecurityGroupIds.VpcSecurityGroupId.1", "sg-0a1b2c3d",
+			"IamRoles.IamRoleArn.1", "arn:aws:iam::000000000000:role/loader", "Encrypted", "true", "MultiAZ", "false", "PubliclyAccessible", "false",
+			"AutomatedSnapshotRetentionPeriod", "7", "Tags.Tag.1.Key", "team", "Tags.Tag.1.Value", "a"}, extra...)...)
+	}
+	created := create()
+	noConnection(t, created)
+	cluster := created.result(t, "CreateCluster").get("Cluster")
+	for path, want := range map[string]string{
+		"ClusterIdentifier": "app-wh", "ClusterStatus": "creating", "NodeType": "ra3.xlplus", "MasterUsername": "dbadmin", "DBName": "dev", "NumberOfNodes": "2",
+		"ClusterSubnetGroupName": "app-subnets", "Encrypted": "true", "MultiAZ": "Disabled", "AutomatedSnapshotRetentionPeriod": "7",
+	} {
+		if got := nodeText(cluster, path); got != want {
+			t.Fatalf("%s = %q, want %q: %s", path, got, want, created.raw)
+		}
+	}
+	if cluster.get("ClusterCreateTime") == nil || nodeText(cluster, "ClusterParameterGroups", "ClusterParameterGroup", "ParameterGroupName") != "app-params" ||
+		nodeText(cluster, "ClusterParameterGroups", "ClusterParameterGroup", "ParameterApplyStatus") != "in-sync" ||
+		nodeText(cluster, "VpcSecurityGroups", "VpcSecurityGroup", "Status") != "active" || nodeText(cluster, "IamRoles", "ClusterIamRole", "ApplyStatus") != "in-sync" ||
+		nodeText(cluster, "Tags", "Tag", "Key") != "team" {
+		t.Fatalf("stored settings %s", created.raw)
+	}
+	expectFault(t, create(), 400, "ClusterAlreadyExists")
+
+	described := h.warehouse("DescribeClusters", "ClusterIdentifier", "APP-WH")
+	noConnection(t, described)
+	if items := described.result(t, "DescribeClusters").get("Clusters").all("Cluster"); len(items) != 1 {
+		t.Fatalf("describe %s", described.raw)
+	}
+	expectFault(t, h.warehouse("DescribeClusters", "ClusterIdentifier", "missing"), 404, "ClusterNotFound")
+	expectFault(t, h.warehouse("DescribeClusters", "MaxRecords", "5"), 400, "InvalidParameterValue")
+
+	modified := h.warehouse("ModifyCluster", "ClusterIdentifier", "app-wh", "NodeType", "ra3.4xlarge", "ClusterType", "single-node", "MultiAZ", "true",
+		"ClusterParameterGroupName", "Other", "AutomatedSnapshotRetentionPeriod", "3", "ManualSnapshotRetentionPeriod", "-1")
+	noConnection(t, modified)
+	changed := modified.result(t, "ModifyCluster").get("Cluster")
+	if nodeText(changed, "NodeType") != "ra3.4xlarge" || nodeText(changed, "NumberOfNodes") != "1" || nodeText(changed, "MultiAZ") != "Enabled" ||
+		nodeText(changed, "ClusterParameterGroups", "ClusterParameterGroup", "ParameterGroupName") != "other" || nodeText(changed, "ClusterStatus") != "creating" {
+		t.Fatalf("modify %s", modified.raw)
+	}
+	expectFault(t, h.warehouse("ModifyCluster", "ClusterIdentifier", "missing", "NodeType", "x"), 404, "ClusterNotFound")
+	expectFault(t, h.warehouse("ModifyCluster", "ClusterIdentifier", "app-wh", "NumberOfNodes", "3"), 400, "InvalidParameterValue")
+	expectFault(t, h.warehouse("ModifyCluster", "ClusterIdentifier", "app-wh", "NodeType", "x", "ClusterType", "multi-node"), 400, "InvalidParameterValue")
+	expectFault(t, h.warehouse("ModifyCluster", "ClusterIdentifier", "app-wh", "NodeType", "x", "ClusterType", "single-node", "NumberOfNodes", "2"), 400, "InvalidParameterValue")
+	expectFault(t, h.warehouse("ModifyCluster", "ClusterIdentifier", "app-wh", "NodeType", "x", "ClusterType", "grid"), 400, "InvalidParameterValue")
+	expectFault(t, h.warehouse("ModifyCluster", "ClusterIdentifier", "app-wh", "NodeType", "x", "NumberOfNodes", "101"), 400, "InvalidParameterValue")
+	expectFault(t, h.warehouse("ModifyCluster", "ClusterIdentifier", "app-wh", "NewClusterIdentifier", "renamed"), 400, "InvalidParameterValue")
+	expectRefusal(t, h.warehouse("ModifyCluster", "ClusterIdentifier", "app-wh", "MasterUserPassword", "x"), 400, "InvalidParameterValue", "never stores")
+
+	arn := "arn:aws:redshift:us-east-1:000000000000:cluster:app-wh"
+	h.warehouse("CreateTags", "ResourceName", arn, "Tags.Tag.1.Key", "stage", "Tags.Tag.1.Value", "dev").result(t, "CreateTags")
+	if tags := h.warehouse("DescribeClusters", "ClusterIdentifier", "app-wh").result(t, "DescribeClusters").get("Clusters").get("Cluster").get("Tags").all("Tag"); len(tags) != 2 {
+		t.Fatalf("tags %v", tags)
+	}
+	h.warehouse("DeleteTags", "ResourceName", arn, "TagKeys.TagKey.1", "team").result(t, "DeleteTags")
+
+	expectFault(t, h.warehouse("DeleteCluster", "ClusterIdentifier", "app-wh"), 400, "InvalidParameterValue")
+	expectFault(t, h.warehouse("DeleteCluster", "ClusterIdentifier", "app-wh", "SkipFinalClusterSnapshot", "false", "FinalClusterSnapshotIdentifier", "final"), 400, "InvalidParameterValue")
+	expectRefusal(t, h.warehouse("DeleteCluster", "ClusterIdentifier", "app-wh", "SkipFinalClusterSnapshot", "true", "FinalClusterSnapshotRetentionPeriod", "3"), 400, "InvalidParameterValue", "snapshot")
+	deleted := h.warehouse("DeleteCluster", "ClusterIdentifier", "app-wh", "SkipFinalClusterSnapshot", "true")
+	noConnection(t, deleted)
+	if status := nodeText(deleted.result(t, "DeleteCluster").get("Cluster"), "ClusterStatus"); status != "deleting" {
+		t.Fatalf("delete %s", deleted.raw)
+	}
+	expectFault(t, h.warehouse("DescribeClusters", "ClusterIdentifier", "app-wh"), 404, "ClusterNotFound")
+}
+
+func TestRedshiftClusterRefusesWhatItCannotStoreHonestly(t *testing.T) {
+	h := newHarness(t, redshift)
+	create := func(extra ...string) queryReply {
+		return h.warehouse("CreateCluster", append([]string{"ClusterIdentifier", "wh1", "NodeType", "ra3.xlplus", "MasterUsername", "dbadmin"}, extra...)...)
+	}
+	for member, value := range map[string]string{"MasterUserPassword": "x", "ManageMasterPassword": "true", "MasterPasswordSecretKmsKeyId": "x"} {
+		expectRefusal(t, create(member, value), 400, "InvalidParameterValue", "never stores")
+	}
+	expectRefusal(t, create("Port", "5439"), 400, "InvalidParameterValue", "listener")
+	expectRefusal(t, create("ElasticIp", "x"), 400, "InvalidParameterValue", "address")
+	for member, value := range map[string]string{"ClusterSecurityGroups.ClusterSecurityGroupName.1": "x", "HsmClientCertificateIdentifier": "x", "SnapshotScheduleIdentifier": "x",
+		"AdditionalInfo": "x", "LoadSampleData": "x", "AvailabilityZoneRelocation": "true", "AquaConfigurationStatus": "enabled", "CatalogName": "x"} {
+		expectFault(t, create(member, value), 400, "InvalidParameterValue")
+	}
+	expectFault(t, create("ClusterType", "multi-node"), 400, "InvalidParameterValue")
+	expectFault(t, create("ClusterType", "single-node", "NumberOfNodes", "2"), 400, "InvalidParameterValue")
+	expectFault(t, create("ClusterType", "grid"), 400, "InvalidParameterValue")
+	expectFault(t, create("NumberOfNodes", "0"), 400, "InvalidParameterValue")
+	expectFault(t, create("DBName", "Mixed"), 400, "InvalidParameterValue")
+	expectFault(t, create("AutomatedSnapshotRetentionPeriod", "36"), 400, "InvalidParameterValue")
+	expectFault(t, create("ManualSnapshotRetentionPeriod", "0"), 400, "InvalidParameterValue")
+	expectFault(t, create("IpAddressType", "ipv6"), 400, "InvalidParameterValue")
+	expectFault(t, create("VpcSecurityGroupIds.VpcSecurityGroupId.1", "sg-1"), 400, "InvalidParameterValue")
+	expectFault(t, create("ClusterParameterGroupName", "1bad"), 400, "InvalidParameterValue")
+	expectFault(t, create("Tags.Tag.1.Value", "x"), 400, "InvalidTagFault")
+	expectFault(t, create("IamRoles.IamRoleArn.1", "role"), 400, "InvalidParameterValue")
+	var roles []string
+	for i := 0; i < 11; i++ {
+		roles = append(roles, fmt.Sprintf("IamRoles.IamRoleArn.%d", i+1), fmt.Sprintf("arn:aws:iam::000000000000:role/r%d", i))
+	}
+	expectFault(t, create(roles...), 400, "InvalidParameterValue")
+	for _, name := range []string{"Upper", "1wh", "wh-", "w--h", strings.Repeat("w", 64), "w_h"} {
+		expectFault(t, h.warehouse("CreateCluster", "ClusterIdentifier", name, "NodeType", "ra3.xlplus", "MasterUsername", "dbadmin"), 400, "InvalidParameterValue")
+	}
+	for _, user := range []string{"PUBLIC", "public", "1admin", "Admin", "ad:min"} {
+		expectFault(t, h.warehouse("CreateCluster", "ClusterIdentifier", "wh1", "NodeType", "ra3.xlplus", "MasterUsername", user), 400, "InvalidParameterValue")
+	}
+	create().result(t, "CreateCluster")
+	for i := 0; i < 19; i++ {
+		h.warehouse("CreateCluster", "ClusterIdentifier", fmt.Sprintf("many-%d", i), "NodeType", "ra3.xlplus", "MasterUsername", "dbadmin").result(t, "CreateCluster")
+	}
+	expectFault(t, h.warehouse("CreateCluster", "ClusterIdentifier", "over", "NodeType", "ra3.xlplus", "MasterUsername", "dbadmin"), 400, "ClusterQuotaExceeded")
+	h.policy.deny["redshift:DeleteCluster"] = true
+	expectFault(t, h.warehouse("DeleteCluster", "ClusterIdentifier", "wh1", "SkipFinalClusterSnapshot", "true"), 403, "AccessDenied")
+}
+
+func TestRedshiftRecordsLeaveRunningWarehouseOperationsUnbound(t *testing.T) {
+	h := newHarness(t, redshift)
+	for _, action := range []string{"RebootCluster", "PauseCluster", "ResumeCluster", "ResizeCluster", "FailoverPrimaryCompute", "CreateClusterSnapshot", "RestoreFromClusterSnapshot",
+		"RestoreTableFromClusterSnapshot", "CopyClusterSnapshot", "CreateAuthenticationProfile", "AuthorizeDataShare", "DescribeClusterVersions",
+		"DescribeOrderableClusterOptions", "GetClusterCredentials", "EnableSnapshotCopy", "ModifyClusterIamRoles", "DescribeTags"} {
+		expectFault(t, h.warehouse(action, "ClusterIdentifier", "wh1"), 501, "UnknownOperationException")
+	}
+}
