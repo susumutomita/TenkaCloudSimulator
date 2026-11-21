@@ -124,3 +124,106 @@ func TestB2BILifecycleOfEveryResource(t *testing.T) {
 	expect(t, call("DeleteProfile", map[string]any{"profileId": profileID}), 200, "")
 	expect(t, call("GetProfile", map[string]any{"profileId": profileID}), 400, "ResourceNotFoundException")
 }
+
+func escapeARN(arn string) string { return strings.NewReplacer(":", "%3A", "/", "%2F").Replace(arn) }
+
+func TestQBusinessCheckHooksApplyDocumentedRules(t *testing.T) {
+	cases := []struct {
+		name  string
+		hook  func(map[string]any) error
+		input map[string]any
+		ok    bool
+	}{
+		{"anonymous", qBusinessApplication, map[string]any{"identityType": "ANONYMOUS"}, true},
+		{"default identity", qBusinessApplication, map[string]any{}, false},
+		{"identity center", qBusinessApplication, map[string]any{"identityType": "AWS_IAM_IDC"}, false},
+		{"identity center instance", qBusinessApplication, map[string]any{"identityType": "ANONYMOUS", "identityCenterInstanceArn": "arn"}, false},
+		{"provider", qBusinessApplication, map[string]any{"identityType": "ANONYMOUS", "iamIdentityProviderArn": "arn"}, false},
+		{"oidc clients", qBusinessApplication, map[string]any{"identityType": "ANONYMOUS", "clientIdsForOIDC": []any{"c"}}, false},
+		{"quicksight", qBusinessApplication, map[string]any{"identityType": "ANONYMOUS", "quickSightConfiguration": map[string]any{}}, false},
+		{"native", qBusinessRetriever, map[string]any{"type": "NATIVE_INDEX", "configuration": map[string]any{"nativeIndexConfiguration": map[string]any{}}}, true},
+		{"kendra", qBusinessRetriever, map[string]any{"type": "KENDRA_INDEX", "configuration": map[string]any{"kendraIndexConfiguration": map[string]any{}}}, true},
+		{"mismatch", qBusinessRetriever, map[string]any{"type": "KENDRA_INDEX", "configuration": map[string]any{"nativeIndexConfiguration": map[string]any{}}}, false},
+		{"unknown type", qBusinessRetriever, map[string]any{"type": "OTHER", "configuration": map[string]any{}}, false},
+	}
+	for _, c := range cases {
+		if err := c.hook(c.input); (err == nil) != c.ok {
+			t.Errorf("%s: %v", c.name, err)
+		}
+	}
+	if bizText(1) != "" || bizText("a") != "a" {
+		t.Fatal("bizText")
+	}
+}
+
+func TestQBusinessLifecycleOfEveryResource(t *testing.T) {
+	h := businessHarness(t, qBusiness)
+	call := func(method, path string, input any) reply { return h.rest("qbusiness", method, path, input) }
+
+	expect(t, call("POST", "/applications", map[string]any{"displayName": "app", "identityType": "AWS_IAM_IDC"}), 400, "ValidationException")
+	expect(t, call("POST", "/applications", map[string]any{"displayName": "app", "identityType": "ANONYMOUS", "identityCenterInstanceArn": "arn:aws:sso:::instance/ssoins-0123456789abcdef"}), 400, "ValidationException")
+	created := call("POST", "/applications", map[string]any{"displayName": "app", "identityType": "ANONYMOUS", "description": "d", "clientToken": "tok-1", "tags": []any{map[string]any{"key": "team", "value": "a"}}})
+	expect(t, created, 200, "")
+	appID := str(created.body["applicationId"])
+	appARN := "arn:aws:qbusiness:us-east-1:000000000000:application/" + appID
+	if created.body["applicationArn"] != appARN || len(created.body) != 2 {
+		t.Fatalf("create %v", created.body)
+	}
+	if replay := call("POST", "/applications", map[string]any{"displayName": "app", "identityType": "ANONYMOUS", "description": "d", "clientToken": "tok-1", "tags": []any{map[string]any{"key": "team", "value": "a"}}}); replay.body["applicationId"] != appID {
+		t.Fatalf("replay %v", replay.body)
+	}
+	got := call("GET", "/applications/"+appID, nil)
+	if got.body["status"] != "CREATING" || got.body["identityType"] != "ANONYMOUS" || got.body["description"] != "d" {
+		t.Fatalf("get %v", got.body)
+	}
+	expect(t, call("PUT", "/applications/"+appID, map[string]any{"displayName": "app2", "autoSubscriptionConfiguration": map[string]any{"autoSubscribe": "DISABLED"}}), 200, "")
+	expect(t, call("PUT", "/applications/"+appID, map[string]any{"identityCenterInstanceArn": "arn:aws:sso:::instance/ssoins-0123456789abcdef"}), 400, "ValidationException")
+	if apps := items(t, call("GET", "/applications", nil), "applications"); len(apps) != 1 || apps[0].(map[string]any)["displayName"] != "app2" {
+		t.Fatalf("applications %v", apps)
+	}
+	expect(t, call("GET", "/applications/"+strings.Repeat("a", 36), nil), 404, "ResourceNotFoundException")
+
+	index := call("POST", "/applications/"+appID+"/indices", map[string]any{"displayName": "idx", "capacityConfiguration": map[string]any{"units": 1}})
+	expect(t, index, 200, "")
+	indexID := str(index.body["indexId"])
+	gotIndex := call("GET", "/applications/"+appID+"/indices/"+indexID, nil)
+	if gotIndex.body["type"] != "ENTERPRISE" || gotIndex.body["status"] != "CREATING" || gotIndex.body["indexArn"] != appARN+"/index/"+indexID || gotIndex.body["indexStatistics"] != nil {
+		t.Fatalf("index %v", gotIndex.body)
+	}
+	expect(t, call("PUT", "/applications/"+appID+"/indices/"+indexID, map[string]any{"displayName": "idx2", "description": "x"}), 200, "")
+	expect(t, call("PUT", "/applications/"+appID+"/indices/"+indexID, map[string]any{"type": "STARTER"}), 400, "ValidationException")
+	if list := items(t, call("GET", "/applications/"+appID+"/indices", nil), "indices"); len(list) != 1 {
+		t.Fatalf("indices %v", list)
+	}
+	expect(t, call("POST", "/applications/"+strings.Repeat("b", 36)+"/indices", map[string]any{"displayName": "idx"}), 404, "ResourceNotFoundException")
+
+	expect(t, call("POST", "/applications/"+appID+"/retrievers", map[string]any{"type": "KENDRA_INDEX", "displayName": "r", "configuration": map[string]any{"nativeIndexConfiguration": map[string]any{"indexId": indexID}}}), 400, "ValidationException")
+	retriever := call("POST", "/applications/"+appID+"/retrievers", map[string]any{"type": "NATIVE_INDEX", "displayName": "r", "configuration": map[string]any{"nativeIndexConfiguration": map[string]any{"indexId": indexID}}})
+	expect(t, retriever, 200, "")
+	retrieverID := str(retriever.body["retrieverId"])
+	if got := call("GET", "/applications/"+appID+"/retrievers/"+retrieverID, nil); got.body["status"] != "ACTIVE" || got.body["retrieverArn"] != appARN+"/retriever/"+retrieverID {
+		t.Fatalf("retriever %v", got.body)
+	}
+	expect(t, call("PUT", "/applications/"+appID+"/retrievers/"+retrieverID, map[string]any{"displayName": "r2"}), 200, "")
+	if list := items(t, call("GET", "/applications/"+appID+"/retrievers", nil), "retrievers"); len(list) != 1 {
+		t.Fatalf("retrievers %v", list)
+	}
+
+	expect(t, call("POST", "/v1/tags/"+escapeARN(appARN), map[string]any{"tags": []any{map[string]any{"key": "k", "value": "v"}}}), 200, "")
+	if tags := items(t, call("GET", "/v1/tags/"+escapeARN(appARN), nil), "tags"); len(tags) != 2 {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, call("DELETE", "/v1/tags/"+escapeARN(appARN)+"?tagKeys=k", nil), 200, "")
+	expect(t, call("GET", "/v1/tags/"+escapeARN(appARN+"x"), nil), 404, "ResourceNotFoundException")
+
+	for _, path := range []string{"/applications/" + appID + "/chatresponseconfigurations", "/applications/" + appID + "/chatcontrols", "/applications/" + appID + "/dataaccessors", "/applications/" + appID + "/plugins", "/applications/" + appID + "/indices/" + indexID + "/datasources"} {
+		expect(t, call("GET", path, nil), 501, "UnknownOperationException")
+	}
+	expect(t, call("DELETE", "/applications/"+appID+"/retrievers/"+retrieverID, nil), 200, "")
+	expect(t, call("DELETE", "/applications/"+appID+"/indices/"+indexID, nil), 200, "")
+	retriever = call("POST", "/applications/"+appID+"/retrievers", map[string]any{"type": "KENDRA_INDEX", "displayName": "r3", "configuration": map[string]any{"kendraIndexConfiguration": map[string]any{"indexId": strings.Repeat("k", 36)}}})
+	expect(t, retriever, 200, "")
+	expect(t, call("DELETE", "/applications/"+appID, nil), 200, "")
+	expect(t, call("GET", "/applications/"+appID+"/retrievers/"+str(retriever.body["retrieverId"]), nil), 404, "ResourceNotFoundException")
+	expect(t, call("DELETE", "/applications/"+appID, nil), 404, "ResourceNotFoundException")
+}

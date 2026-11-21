@@ -1,0 +1,2245 @@
+{
+ "components": {
+  "schemas": {
+   "Application": {
+    "additionalProperties": false,
+    "properties": {
+     "applicationId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "displayName": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "identityType": {
+      "enum": [
+       "AWS_IAM_IDP_SAML",
+       "AWS_IAM_IDP_OIDC",
+       "AWS_IAM_IDC",
+       "AWS_QUICKSIGHT_IDP",
+       "ANONYMOUS"
+      ],
+      "type": "string"
+     },
+     "quickSightConfiguration": {
+      "$ref": "#/components/schemas/QuickSightConfiguration"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "FAILED",
+       "UPDATING"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "AppliedAttachmentsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "attachmentsControlMode": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AttachmentsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "attachmentsControlMode": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "attachmentsControlMode"
+    ],
+    "type": "object"
+   },
+   "AutoSubscriptionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "autoSubscribe": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "defaultSubscriptionType": {
+      "enum": [
+       "Q_LITE",
+       "Q_BUSINESS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "autoSubscribe"
+    ],
+    "type": "object"
+   },
+   "DateAttributeBoostingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "boostingDurationInSeconds": {
+      "maximum": 999999999,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "boostingLevel": {
+      "enum": [
+       "NONE",
+       "LOW",
+       "MEDIUM",
+       "HIGH",
+       "VERY_HIGH",
+       "ONE",
+       "TWO"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "boostingLevel"
+    ],
+    "type": "object"
+   },
+   "DocumentAttributeBoostingConfiguration": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "dateConfiguration": {
+      "$ref": "#/components/schemas/DateAttributeBoostingConfiguration"
+     },
+     "numberConfiguration": {
+      "$ref": "#/components/schemas/NumberAttributeBoostingConfiguration"
+     },
+     "stringConfiguration": {
+      "$ref": "#/components/schemas/StringAttributeBoostingConfiguration"
+     },
+     "stringListConfiguration": {
+      "$ref": "#/components/schemas/StringListAttributeBoostingConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "DocumentAttributeConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 30,
+      "minLength": 1,
+      "type": "string"
+     },
+     "search": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "STRING",
+       "STRING_LIST",
+       "NUMBER",
+       "DATE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKeyId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ErrorDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "errorCode": {
+      "enum": [
+       "InternalError",
+       "InvalidRequest",
+       "ResourceInactive",
+       "ResourceNotFound"
+      ],
+      "type": "string"
+     },
+     "errorMessage": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Index": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "displayName": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "indexId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "FAILED",
+       "UPDATING"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "IndexCapacityConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "units": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "IndexStatistics": {
+    "additionalProperties": false,
+    "properties": {
+     "textDocumentStatistics": {
+      "$ref": "#/components/schemas/TextDocumentStatistics"
+     }
+    },
+    "type": "object"
+   },
+   "KendraIndexConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "indexId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     }
+    },
+    "required": [
+     "indexId"
+    ],
+    "type": "object"
+   },
+   "NativeIndexConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "boostingOverride": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/DocumentAttributeBoostingConfiguration"
+      },
+      "minProperties": 1,
+      "type": "object"
+     },
+     "indexId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "version": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "indexId"
+    ],
+    "type": "object"
+   },
+   "NumberAttributeBoostingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "boostingLevel": {
+      "enum": [
+       "NONE",
+       "LOW",
+       "MEDIUM",
+       "HIGH",
+       "VERY_HIGH",
+       "ONE",
+       "TWO"
+      ],
+      "type": "string"
+     },
+     "boostingType": {
+      "enum": [
+       "PRIORITIZE_LARGER_VALUES",
+       "PRIORITIZE_SMALLER_VALUES"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "boostingLevel"
+    ],
+    "type": "object"
+   },
+   "PersonalizationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "personalizationControlMode": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "personalizationControlMode"
+    ],
+    "type": "object"
+   },
+   "QAppsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "qAppsControlMode": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "qAppsControlMode"
+    ],
+    "type": "object"
+   },
+   "QuickSightConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "clientNamespace": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "clientNamespace"
+    ],
+    "type": "object"
+   },
+   "Retriever": {
+    "additionalProperties": false,
+    "properties": {
+     "applicationId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "retrieverId": {
+      "maxLength": 36,
+      "minLength": 36,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "NATIVE_INDEX",
+       "KENDRA_INDEX"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RetrieverConfiguration": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "kendraIndexConfiguration": {
+      "$ref": "#/components/schemas/KendraIndexConfiguration"
+     },
+     "nativeIndexConfiguration": {
+      "$ref": "#/components/schemas/NativeIndexConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "StringAttributeBoostingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "attributeValueBoosting": {
+      "additionalProperties": {
+       "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "VERY_HIGH",
+        "ONE",
+        "TWO",
+        "THREE",
+        "FOUR",
+        "FIVE"
+       ],
+       "type": "string"
+      },
+      "maxProperties": 10,
+      "minProperties": 1,
+      "type": "object"
+     },
+     "boostingLevel": {
+      "enum": [
+       "NONE",
+       "LOW",
+       "MEDIUM",
+       "HIGH",
+       "VERY_HIGH",
+       "ONE",
+       "TWO"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "boostingLevel"
+    ],
+    "type": "object"
+   },
+   "StringListAttributeBoostingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "boostingLevel": {
+      "enum": [
+       "NONE",
+       "LOW",
+       "MEDIUM",
+       "HIGH",
+       "VERY_HIGH",
+       "ONE",
+       "TWO"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "boostingLevel"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "value"
+    ],
+    "type": "object"
+   },
+   "TextDocumentStatistics": {
+    "additionalProperties": false,
+    "properties": {
+     "indexedTextBytes": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "indexedTextDocumentCount": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official QBusiness API (2023-11-27). Every other official operation returns HTTP 501 UnknownOperationException. Applications, indexes and retrievers are stored records: no index is built, no document is stored or searched, no question is answered and no web experience exists. Documents, data sources and sync jobs, plugins, web experiences, subscriptions, users and groups, conversations, Chat and ChatSync, SearchRelevantContent, data accessors, chat response configurations, chat controls (a stored record per application, which this engine cannot attach to its application) and the access policy operations return UnknownOperationException with HTTP 501. Applications must use identityType ANONYMOUS, because the other identity types need an IAM Identity Center instance, an OIDC or SAML provider or Amazon QuickSight, none of which exists; identityType is required here although the official shape makes it optional, and identityCenterInstanceArn, iamIdentityProviderArn, clientIdsForOIDC and quickSightConfiguration are refused. Applications and indexes stay in status CREATING, as the other provisioned records of this catalog do, and a retriever is stored as ACTIVE because there is nothing to provision for it. No service-linked role is created when roleArn is omitted. Indexes default to type ENTERPRISE and store their capacity configuration without limiting anything; they report no index statistics. A retriever's type must match its configuration (NATIVE_INDEX needs nativeIndexConfiguration, KENDRA_INDEX needs kendraIndexConfiguration), and the index IDs, role ARNs, KMS key and S3 locations they name are stored without being resolved. Deleting an application deletes its indexes and retrievers, a cascade the official operation does not document. Resource counts per Region (20 applications, 5 indexes and 5 retrievers per application) are simulator limits. Tags apply to applications, indexes and retrievers by ARN (arn:aws:qbusiness:region:account:application/id, application/id/index/id and application/id/retriever/id). clientToken replays the original resource for identical input.",
+  "title": "Amazon Q Business (simulator catalog)",
+  "version": "2023-11-27"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/applications": {
+   "get": {
+    "operationId": "qbusinessListApplications",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 800,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applications": {
+           "items": {
+            "$ref": "#/components/schemas/Application"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 800,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListApplications",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   },
+   "post": {
+    "operationId": "qbusinessCreateApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "attachmentsConfiguration": {
+          "$ref": "#/components/schemas/AttachmentsConfiguration"
+         },
+         "clientIdsForOIDC": {
+          "items": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "clientToken": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "type": "string"
+         },
+         "encryptionConfiguration": {
+          "$ref": "#/components/schemas/EncryptionConfiguration"
+         },
+         "iamIdentityProviderArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "identityCenterInstanceArn": {
+          "maxLength": 1224,
+          "minLength": 10,
+          "type": "string"
+         },
+         "identityType": {
+          "enum": [
+           "AWS_IAM_IDP_SAML",
+           "AWS_IAM_IDP_OIDC",
+           "AWS_IAM_IDC",
+           "AWS_QUICKSIGHT_IDP",
+           "ANONYMOUS"
+          ],
+          "type": "string"
+         },
+         "personalizationConfiguration": {
+          "$ref": "#/components/schemas/PersonalizationConfiguration"
+         },
+         "qAppsConfiguration": {
+          "$ref": "#/components/schemas/QAppsConfiguration"
+         },
+         "quickSightConfiguration": {
+          "$ref": "#/components/schemas/QuickSightConfiguration"
+         },
+         "roleArn": {
+          "maxLength": 1284,
+          "minLength": 0,
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "displayName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applicationArn": {
+           "maxLength": 1284,
+           "minLength": 0,
+           "type": "string"
+          },
+          "applicationId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateApplication",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   }
+  },
+  "/applications/{applicationId}": {
+   "delete": {
+    "operationId": "qbusinessDeleteApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteApplication",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   },
+   "get": {
+    "operationId": "qbusinessGetApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applicationArn": {
+           "maxLength": 1284,
+           "minLength": 0,
+           "type": "string"
+          },
+          "applicationId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          },
+          "attachmentsConfiguration": {
+           "$ref": "#/components/schemas/AppliedAttachmentsConfiguration"
+          },
+          "autoSubscriptionConfiguration": {
+           "$ref": "#/components/schemas/AutoSubscriptionConfiguration"
+          },
+          "clientIdsForOIDC": {
+           "items": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "displayName": {
+           "maxLength": 1000,
+           "minLength": 1,
+           "type": "string"
+          },
+          "encryptionConfiguration": {
+           "$ref": "#/components/schemas/EncryptionConfiguration"
+          },
+          "error": {
+           "$ref": "#/components/schemas/ErrorDetail"
+          },
+          "iamIdentityProviderArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "identityCenterApplicationArn": {
+           "maxLength": 1224,
+           "minLength": 10,
+           "type": "string"
+          },
+          "identityType": {
+           "enum": [
+            "AWS_IAM_IDP_SAML",
+            "AWS_IAM_IDP_OIDC",
+            "AWS_IAM_IDC",
+            "AWS_QUICKSIGHT_IDP",
+            "ANONYMOUS"
+           ],
+           "type": "string"
+          },
+          "personalizationConfiguration": {
+           "$ref": "#/components/schemas/PersonalizationConfiguration"
+          },
+          "qAppsConfiguration": {
+           "$ref": "#/components/schemas/QAppsConfiguration"
+          },
+          "quickSightConfiguration": {
+           "$ref": "#/components/schemas/QuickSightConfiguration"
+          },
+          "roleArn": {
+           "maxLength": 1284,
+           "minLength": 0,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "FAILED",
+            "UPDATING"
+           ],
+           "type": "string"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetApplication",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   },
+   "put": {
+    "operationId": "qbusinessUpdateApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "attachmentsConfiguration": {
+          "$ref": "#/components/schemas/AttachmentsConfiguration"
+         },
+         "autoSubscriptionConfiguration": {
+          "$ref": "#/components/schemas/AutoSubscriptionConfiguration"
+         },
+         "description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "type": "string"
+         },
+         "identityCenterInstanceArn": {
+          "maxLength": 1224,
+          "minLength": 10,
+          "type": "string"
+         },
+         "personalizationConfiguration": {
+          "$ref": "#/components/schemas/PersonalizationConfiguration"
+         },
+         "qAppsConfiguration": {
+          "$ref": "#/components/schemas/QAppsConfiguration"
+         },
+         "roleArn": {
+          "maxLength": 1284,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateApplication",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   }
+  },
+  "/applications/{applicationId}/indices": {
+   "get": {
+    "operationId": "qbusinessListIndices",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 800,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "indices": {
+           "items": {
+            "$ref": "#/components/schemas/Index"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 800,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListIndices",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   },
+   "post": {
+    "operationId": "qbusinessCreateIndex",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "capacityConfiguration": {
+          "$ref": "#/components/schemas/IndexCapacityConfiguration"
+         },
+         "clientToken": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         },
+         "type": {
+          "enum": [
+           "ENTERPRISE",
+           "STARTER"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "displayName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "indexArn": {
+           "maxLength": 1284,
+           "minLength": 0,
+           "type": "string"
+          },
+          "indexId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateIndex",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   }
+  },
+  "/applications/{applicationId}/indices/{indexId}": {
+   "delete": {
+    "operationId": "qbusinessDeleteIndex",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "indexId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteIndex",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   },
+   "get": {
+    "operationId": "qbusinessGetIndex",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "indexId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applicationId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          },
+          "capacityConfiguration": {
+           "$ref": "#/components/schemas/IndexCapacityConfiguration"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 1000,
+           "minLength": 0,
+           "type": "string"
+          },
+          "displayName": {
+           "maxLength": 1000,
+           "minLength": 1,
+           "type": "string"
+          },
+          "documentAttributeConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/DocumentAttributeConfiguration"
+           },
+           "maxItems": 500,
+           "minItems": 1,
+           "type": "array"
+          },
+          "error": {
+           "$ref": "#/components/schemas/ErrorDetail"
+          },
+          "indexArn": {
+           "maxLength": 1284,
+           "minLength": 0,
+           "type": "string"
+          },
+          "indexId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          },
+          "indexStatistics": {
+           "$ref": "#/components/schemas/IndexStatistics"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "DELETING",
+            "FAILED",
+            "UPDATING"
+           ],
+           "type": "string"
+          },
+          "type": {
+           "enum": [
+            "ENTERPRISE",
+            "STARTER"
+           ],
+           "type": "string"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetIndex",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   },
+   "put": {
+    "operationId": "qbusinessUpdateIndex",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "indexId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "capacityConfiguration": {
+          "$ref": "#/components/schemas/IndexCapacityConfiguration"
+         },
+         "description": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "type": "string"
+         },
+         "documentAttributeConfigurations": {
+          "items": {
+           "$ref": "#/components/schemas/DocumentAttributeConfiguration"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateIndex",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   }
+  },
+  "/applications/{applicationId}/retrievers": {
+   "get": {
+    "operationId": "qbusinessListRetrievers",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 800,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 800,
+           "minLength": 1,
+           "type": "string"
+          },
+          "retrievers": {
+           "items": {
+            "$ref": "#/components/schemas/Retriever"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListRetrievers",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   },
+   "post": {
+    "operationId": "qbusinessCreateRetriever",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "configuration": {
+          "$ref": "#/components/schemas/RetrieverConfiguration"
+         },
+         "displayName": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "type": "string"
+         },
+         "roleArn": {
+          "maxLength": 1284,
+          "minLength": 0,
+          "type": "string"
+         },
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         },
+         "type": {
+          "enum": [
+           "NATIVE_INDEX",
+           "KENDRA_INDEX"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "configuration",
+         "displayName",
+         "type"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "retrieverArn": {
+           "maxLength": 1284,
+           "minLength": 0,
+           "type": "string"
+          },
+          "retrieverId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateRetriever",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   }
+  },
+  "/applications/{applicationId}/retrievers/{retrieverId}": {
+   "delete": {
+    "operationId": "qbusinessDeleteRetriever",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "retrieverId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteRetriever",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   },
+   "get": {
+    "operationId": "qbusinessGetRetriever",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "retrieverId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applicationId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          },
+          "configuration": {
+           "$ref": "#/components/schemas/RetrieverConfiguration"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "displayName": {
+           "maxLength": 1000,
+           "minLength": 1,
+           "type": "string"
+          },
+          "retrieverArn": {
+           "maxLength": 1284,
+           "minLength": 0,
+           "type": "string"
+          },
+          "retrieverId": {
+           "maxLength": 36,
+           "minLength": 36,
+           "type": "string"
+          },
+          "roleArn": {
+           "maxLength": 1284,
+           "minLength": 0,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "FAILED"
+           ],
+           "type": "string"
+          },
+          "type": {
+           "enum": [
+            "NATIVE_INDEX",
+            "KENDRA_INDEX"
+           ],
+           "type": "string"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetRetriever",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   },
+   "put": {
+    "operationId": "qbusinessUpdateRetriever",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "applicationId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "retrieverId",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 36,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "configuration": {
+          "$ref": "#/components/schemas/RetrieverConfiguration"
+         },
+         "displayName": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "type": "string"
+         },
+         "roleArn": {
+          "maxLength": 1284,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateRetriever",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   }
+  },
+  "/v1/tags/{resourceARN}": {
+   "delete": {
+    "operationId": "qbusinessUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceARN",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   },
+   "get": {
+    "operationId": "qbusinessListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceARN",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   },
+   "post": {
+    "operationId": "qbusinessTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "qbusiness"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceARN",
+      "required": true,
+      "schema": {
+       "maxLength": 1011,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Q Business"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official QBusiness API (2023-11-27). Every other official operation returns HTTP 501 UnknownOperationException. Applications, indexes and retrievers are stored records: no index is built, no document is stored or searched, no question is answered and no web experience exists. Documents, data sources and sync jobs, plugins, web experiences, subscriptions, users and groups, conversations, Chat and ChatSync, SearchRelevantContent, data accessors, chat response configurations, chat controls (a stored record per application, which this engine cannot attach to its application) and the access policy operations return UnknownOperationException with HTTP 501. Applications must use identityType ANONYMOUS, because the other identity types need an IAM Identity Center instance, an OIDC or SAML provider or Amazon QuickSight, none of which exists; identityType is required here although the official shape makes it optional, and identityCenterInstanceArn, iamIdentityProviderArn, clientIdsForOIDC and quickSightConfiguration are refused. Applications and indexes stay in status CREATING, as the other provisioned records of this catalog do, and a retriever is stored as ACTIVE because there is nothing to provision for it. No service-linked role is created when roleArn is omitted. Indexes default to type ENTERPRISE and store their capacity configuration without limiting anything; they report no index statistics. A retriever's type must match its configuration (NATIVE_INDEX needs nativeIndexConfiguration, KENDRA_INDEX needs kendraIndexConfiguration), and the index IDs, role ARNs, KMS key and S3 locations they name are stored without being resolved. Deleting an application deletes its indexes and retrievers, a cascade the official operation does not document. Resource counts per Region (20 applications, 5 indexes and 5 retrievers per application) are simulator limits. Tags apply to applications, indexes and retrievers by ARN (arn:aws:qbusiness:region:account:application/id, application/id/index/id and application/id/retriever/id). clientToken replays the original resource for identical input.",
+   "name": "Amazon Q Business"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/qbusiness/2023-11-27/service-2.json",
+  "sha256": "d1b8578d827e8e4738db2845f1f807e6b30f34dfc862bfbe3321391e9cbcb7f4",
+  "license": "Apache-2.0"
+ }
+}
