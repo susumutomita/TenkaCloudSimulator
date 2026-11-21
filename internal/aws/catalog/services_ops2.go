@@ -3,6 +3,7 @@ package catalog
 import (
 	"regexp"
 	"strings"
+	"time"
 )
 
 // Reviewed bounded specifications for AWS Deadline Cloud, AWS Database
@@ -326,6 +327,219 @@ func dmsMigrationProject(input map[string]any) error {
 			converted = append(converted, out)
 		}
 		input[key] = converted
+	}
+	return nil
+}
+
+var (
+	ceStart      = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-01T00:00:00(\.000)?Z$`)
+	ceMonitorARN = regexp.MustCompile(`^arn:[a-z-]+:ce::[0-9]{12}:anomalymonitor/[0-9a-f-]{36}$`)
+)
+
+var costExplorer = &Service{
+	Model: "ce", Title: "AWS Cost Explorer", IAMPrefix: "ce", Issues: []int{101, 282}, Global: true,
+	Resources: []*Resource{
+		{Kind: "costCategory", Shape: "CostCategory", Summary: "CostCategoryReference", ID: "uuid",
+			ARN: "arn:{partition}:ce::{account}:costcategory/{id}", ARNMember: "CostCategoryArn",
+			NameMember: "Name", Unique: true, Limit: 20},
+		{Kind: "anomalyMonitor", Shape: "AnomalyMonitor", ID: "uuid",
+			ARN: "arn:{partition}:ce::{account}:anomalymonitor/{id}", ARNMember: "MonitorArn",
+			NameMember: "MonitorName", Limit: 100,
+			Generate: map[string]any{"CreationDate": "$now", "DimensionalValueCount": 0}},
+		{Kind: "anomalySubscription", Shape: "AnomalySubscription", ID: "uuid",
+			ARN: "arn:{partition}:ce::{account}:anomalysubscription/{id}", ARNMember: "SubscriptionArn",
+			NameMember: "SubscriptionName", Limit: 100,
+			Generate: map[string]any{"AccountId": "$account"}},
+	},
+	Ops: []Op{
+		{Name: "CreateCostCategoryDefinition", Kind: Create, Resource: "costCategory", Check: ceCostCategory},
+		{Name: "DescribeCostCategoryDefinition", Kind: Read, Resource: "costCategory", Lookup: "CostCategoryArn", Accept: []string{"EffectiveOn"}},
+		{Name: "ListCostCategoryDefinitions", Kind: List, Resource: "costCategory", Accept: []string{"EffectiveOn"}},
+		{Name: "UpdateCostCategoryDefinition", Kind: Update, Resource: "costCategory", Lookup: "CostCategoryArn",
+			Fields: []string{"EffectiveStart", "RuleVersion", "Rules", "DefaultValue", "SplitChargeRules"}, Check: ceCostCategory, Merged: ceCostCategoryReplace},
+		{Name: "DeleteCostCategoryDefinition", Kind: Delete, Resource: "costCategory", Lookup: "CostCategoryArn"},
+		{Name: "CreateAnomalyMonitor", Kind: Create, Resource: "anomalyMonitor", From: "AnomalyMonitor", Check: ceAnomalyMonitor},
+		{Name: "GetAnomalyMonitors", Kind: List, Resource: "anomalyMonitor", Names: "MonitorArnList"},
+		{Name: "UpdateAnomalyMonitor", Kind: Update, Resource: "anomalyMonitor", Lookup: "MonitorArn", Fields: []string{"MonitorName"}, Touch: []string{"LastUpdatedDate"}},
+		{Name: "DeleteAnomalyMonitor", Kind: Delete, Resource: "anomalyMonitor", Lookup: "MonitorArn"},
+		{Name: "CreateAnomalySubscription", Kind: Create, Resource: "anomalySubscription", From: "AnomalySubscription", Check: ceAnomalySubscription},
+		{Name: "GetAnomalySubscriptions", Kind: List, Resource: "anomalySubscription", Names: "SubscriptionArnList"},
+		{Name: "UpdateAnomalySubscription", Kind: Update, Resource: "anomalySubscription", Lookup: "SubscriptionArn",
+			Fields: []string{"Threshold", "Frequency", "MonitorArnList", "Subscribers", "SubscriptionName", "ThresholdExpression"}, Check: ceAnomalySubscription},
+		{Name: "DeleteAnomalySubscription", Kind: Delete, Resource: "anomalySubscription", Lookup: "SubscriptionArn"},
+		{Name: "TagResource", Kind: Tag, Lookup: "ResourceArn"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "ResourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceArn"},
+	},
+	Bounds: []string{
+		"Cost categories, anomaly monitors and anomaly subscriptions are stored configuration: no cost, usage, forecast, anomaly, recommendation, reservation, Savings Plans or tag-and-dimension value is read, computed or invented. Every Get cost, usage, forecast, anomaly and recommendation operation, the cost allocation tag, commitment analysis and cost comparison operations return UnknownOperationException with HTTP 501.",
+		"Cost category rules are stored without being evaluated, so nothing is categorized: the effective start defaults to the first day of the current month, no ProcessingStatus, NumberOfRules or Values are reported, the EffectiveOn filter is accepted but only the current definition exists, and updating a definition replaces its rules and drops a default value or split charge rules the request omits. Updates and deletes keep no history, so deleting a category reports no EffectiveEnd.",
+		"Anomaly monitors never evaluate: DimensionalValueCount stays 0 and LastEvaluatedDate is not reported. DIMENSIONAL monitors need a MonitorDimension, CUSTOM monitors a MonitorSpecification and no dimension. Anomaly subscriptions must name monitor ARNs in the right form, but the monitors are not looked up and a deleted monitor stays listed; subscribers are stored and never notified or confirmed, so no Status is reported. The MonitorArn filter of GetAnomalySubscriptions and the ThresholdExpression and Threshold rules of AWS are not evaluated.",
+		"The service is global with ARNs that name no Region. A missing monitor or subscription is reported with ResourceNotFoundException instead of the official UnknownMonitorException and UnknownSubscriptionException, which the catalog cannot select. Tags are stored for all three kinds; resource counts are local limits, not Service Quotas.",
+	},
+}
+
+// ceCostCategory applies the documented effective start rule (a billing
+// month start), defaults it to the current month and checks the rules list.
+func ceCostCategory(input map[string]any) error {
+	if start, ok := input["EffectiveStart"].(string); ok {
+		if !ceStart.MatchString(start) {
+			return invalid("EffectiveStart must be the first day of a month at 00:00:00 UTC.")
+		}
+	} else {
+		input["EffectiveStart"] = time.Now().UTC().Format("2006-01") + "-01T00:00:00Z"
+	}
+	if name, ok := input["Name"].(string); ok && (len(name) == 0 || len(name) > 50) {
+		return invalid("Name must be 1 to 50 characters.")
+	}
+	rules, _ := input["Rules"].([]any)
+	if len(rules) == 0 {
+		return invalid("A cost category needs at least one rule.")
+	}
+	for _, item := range rules {
+		rule, _ := item.(map[string]any)
+		if rule["Type"] == "INHERITED_VALUE" {
+			if rule["InheritedValue"] == nil || rule["Value"] != nil {
+				return invalid("An INHERITED_VALUE rule needs InheritedValue and no Value.")
+			}
+		} else if rule["Value"] == nil || rule["InheritedValue"] != nil {
+			return invalid("A REGULAR rule needs Value and no InheritedValue.")
+		}
+	}
+	return nil
+}
+
+// ceCostCategoryReplace makes an update replace the optional members the
+// request leaves out, as the official update replaces the definition.
+func ceCostCategoryReplace(document, supplied map[string]any) error {
+	for _, key := range []string{"DefaultValue", "SplitChargeRules"} {
+		if _, ok := supplied[key]; !ok {
+			delete(document, key)
+		}
+	}
+	return nil
+}
+
+// ceAnomalyMonitor pairs the monitor type with the members it documents.
+func ceAnomalyMonitor(input map[string]any) error {
+	monitor, _ := input["AnomalyMonitor"].(map[string]any)
+	switch monitor["MonitorType"] {
+	case "DIMENSIONAL":
+		if monitor["MonitorDimension"] == nil {
+			return invalid("A DIMENSIONAL monitor needs MonitorDimension.")
+		}
+	case "CUSTOM":
+		if monitor["MonitorDimension"] != nil || monitor["MonitorSpecification"] == nil {
+			return invalid("A CUSTOM monitor needs MonitorSpecification and no MonitorDimension.")
+		}
+	}
+	return nil
+}
+
+// ceAnomalySubscription checks the monitor ARNs, the subscribers and that
+// one threshold form at most is used.
+func ceAnomalySubscription(input map[string]any) error {
+	if nested, ok := input["AnomalySubscription"].(map[string]any); ok {
+		return ceSubscriptionMembers(nested)
+	}
+	return ceSubscriptionMembers(input)
+}
+
+func ceSubscriptionMembers(members map[string]any) error {
+	if monitors, ok := members["MonitorArnList"].([]any); ok {
+		if len(monitors) == 0 {
+			return invalid("A subscription needs at least one monitor.")
+		}
+		for _, monitor := range monitors {
+			if arn, _ := monitor.(string); !ceMonitorARN.MatchString(arn) {
+				return invalid("MonitorArnList must hold anomaly monitor ARNs.")
+			}
+		}
+	}
+	if subscribers, ok := members["Subscribers"].([]any); ok {
+		if len(subscribers) == 0 {
+			return invalid("A subscription needs at least one subscriber.")
+		}
+		for _, item := range subscribers {
+			subscriber, _ := item.(map[string]any)
+			address, _ := subscriber["Address"].(string)
+			switch subscriber["Type"] {
+			case "EMAIL":
+				if !strings.Contains(address, "@") {
+					return invalid("An EMAIL subscriber needs an email address.")
+				}
+			case "SNS":
+				if !strings.HasPrefix(address, "arn:") {
+					return invalid("An SNS subscriber needs a topic ARN.")
+				}
+			}
+		}
+	}
+	if members["Threshold"] != nil && members["ThresholdExpression"] != nil {
+		return invalid("Specify only one of Threshold and ThresholdExpression.")
+	}
+	return nil
+}
+
+var bcmDataExports = &Service{
+	Model: "bcm-data-exports", Title: "AWS Billing and Cost Management Data Exports", IAMPrefix: "bcm-data-exports", Issues: []int{101},
+	Resources: []*Resource{
+		{Kind: "export", Shape: "Export", Summary: "ExportReference", ID: "uuid",
+			ARN: "arn:{partition}:bcm-data-exports:{region}:{account}:export/{name}-{id}", ARNMember: "ExportArn",
+			NameMember: "Name", Limit: 50,
+			Generate: map[string]any{"ExportName": "$name"}},
+	},
+	Ops: []Op{
+		{Name: "CreateExport", Kind: Create, Resource: "export", From: "Export", Check: bcmExport},
+		{Name: "GetExport", Kind: Read, Resource: "export", Lookup: "ExportArn"},
+		{Name: "ListExports", Kind: List, Resource: "export"},
+		{Name: "UpdateExport", Kind: Update, Resource: "export", Lookup: "ExportArn", From: "Export",
+			Fields: []string{"Name", "Description", "DataQuery", "DestinationConfigurations", "RefreshCadence"}, Check: bcmExportUpdate, Merged: bcmExportReplace},
+		{Name: "DeleteExport", Kind: Delete, Resource: "export", Lookup: "ExportArn"},
+		{Name: "TagResource", Kind: Tag, Lookup: "ResourceArn"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "ResourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceArn"},
+	},
+	Bounds: []string{
+		"Exports are stored definitions: the query is kept as text and never run, no table is read, nothing is written to Amazon S3 and no file, refresh or delivery happens. The export reports no ExportStatus and no LastRefreshedAt because nothing ever runs. GetTable and ListTables return UnknownOperationException with HTTP 501 because the table schemas are AWS-owned data.",
+		"QueryStatement must be a SELECT statement but is not parsed, so unknown tables and columns are accepted; the S3 bucket, prefix and Region are stored without being checked or contacted. Export names are not unique. UpdateExport replaces the definition, so it needs the full Export and drops a Description the request omits, and an ExportArn inside Export must equal the ExportArn being updated.",
+		"Exports per Region are a local limit, not a Service Quota. The data exports service is available in us-east-1 only in AWS; the simulator serves it in every Region it serves.",
+	},
+}
+
+// bcmExport requires a SELECT query, the documented form of an export query.
+func bcmExport(input map[string]any) error {
+	export, _ := input["Export"].(map[string]any)
+	query, _ := export["DataQuery"].(map[string]any)
+	statement, _ := query["QueryStatement"].(string)
+	if !strings.HasPrefix(strings.ToLower(strings.TrimSpace(statement)), "select") {
+		return invalid("QueryStatement must be a SELECT statement.")
+	}
+	return nil
+}
+
+// bcmExportUpdate applies the same query rule and refuses an Export that
+// names another export's ARN.
+func bcmExportUpdate(input map[string]any) error {
+	if err := bcmExport(input); err != nil {
+		return err
+	}
+	export, _ := input["Export"].(map[string]any)
+	if arn, ok := export["ExportArn"]; ok {
+		if arn != input["ExportArn"] {
+			return invalid("The ExportArn of Export must equal ExportArn.")
+		}
+		delete(export, "ExportArn")
+	}
+	return nil
+}
+
+// bcmExportReplace keeps the list name current and makes an update replace
+// the optional description.
+func bcmExportReplace(document, supplied map[string]any) error {
+	document["ExportName"] = document["Name"]
+	if _, ok := supplied["Description"]; !ok {
+		delete(document, "Description")
 	}
 	return nil
 }

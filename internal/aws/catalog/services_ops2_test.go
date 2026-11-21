@@ -254,3 +254,161 @@ func TestDatabaseMigrationLifecycle(t *testing.T) {
 	}
 	expect(t, call("CreateEndpoint", map[string]any{"EndpointIdentifier": "e", "EndpointType": "source", "EngineName": "mysql"}), 501, "UnknownOperationException")
 }
+
+func TestCostExplorerLifecycle(t *testing.T) {
+	h := newHarness(t, costExplorer)
+	call := func(op string, input map[string]any) reply { return h.json1("ce", op, input) }
+	rule := func(value string) map[string]any {
+		return map[string]any{"Type": "REGULAR", "Value": value, "Rule": map[string]any{"Dimensions": map[string]any{"Key": "LINKED_ACCOUNT", "Values": []any{"000000000000"}}}}
+	}
+
+	// Cost categories.
+	base := map[string]any{"Name": "teams", "RuleVersion": "CostCategoryExpression.v1", "Rules": []any{rule("a")}, "DefaultValue": "other",
+		"ResourceTags": []any{map[string]any{"Key": "team", "Value": "a"}}}
+	expect(t, call("CreateCostCategoryDefinition", map[string]any{"Name": "teams", "RuleVersion": "CostCategoryExpression.v1", "Rules": []any{}}), 400, "")
+	expect(t, call("CreateCostCategoryDefinition", map[string]any{"Name": "teams", "RuleVersion": "CostCategoryExpression.v1", "Rules": []any{map[string]any{"Type": "INHERITED_VALUE", "Value": "x"}}}), 400, "")
+	expect(t, call("CreateCostCategoryDefinition", map[string]any{"Name": "teams", "RuleVersion": "CostCategoryExpression.v1", "Rules": []any{map[string]any{"Type": "REGULAR", "InheritedValue": map[string]any{"DimensionName": "LINKED_ACCOUNT_NAME"}}}}), 400, "")
+	expect(t, call("CreateCostCategoryDefinition", map[string]any{"Name": "teams", "RuleVersion": "CostCategoryExpression.v1", "Rules": []any{rule("a")}, "EffectiveStart": "2026-01-15T00:00:00Z"}), 400, "")
+	expect(t, call("CreateCostCategoryDefinition", map[string]any{"Name": "", "RuleVersion": "CostCategoryExpression.v1", "Rules": []any{rule("a")}}), 400, "")
+	inherited := map[string]any{"Name": "inherit", "RuleVersion": "CostCategoryExpression.v1", "EffectiveStart": "2026-01-01T00:00:00Z",
+		"Rules": []any{map[string]any{"Type": "INHERITED_VALUE", "InheritedValue": map[string]any{"DimensionName": "LINKED_ACCOUNT_NAME"}}}}
+	expect(t, call("CreateCostCategoryDefinition", inherited), 200, "")
+	created := call("CreateCostCategoryDefinition", base)
+	expect(t, created, 200, "")
+	categoryARN := str(created.body["CostCategoryArn"])
+	if !strings.HasPrefix(categoryARN, "arn:aws:ce::000000000000:costcategory/") || !strings.HasSuffix(str(created.body["EffectiveStart"]), "-01T00:00:00Z") {
+		t.Fatalf("category %v", created.body)
+	}
+	expect(t, call("CreateCostCategoryDefinition", base), 400, "")
+	got := call("DescribeCostCategoryDefinition", map[string]any{"CostCategoryArn": categoryARN, "EffectiveOn": "2026-01-01T00:00:00Z"})
+	if c := got.body["CostCategory"].(map[string]any); c["Name"] != "teams" || c["DefaultValue"] != "other" {
+		t.Fatalf("category %v", c)
+	}
+	expect(t, call("UpdateCostCategoryDefinition", map[string]any{"CostCategoryArn": categoryARN, "RuleVersion": "CostCategoryExpression.v1", "Rules": []any{rule("b")}}), 200, "")
+	if c := call("DescribeCostCategoryDefinition", map[string]any{"CostCategoryArn": categoryARN}).body["CostCategory"].(map[string]any); c["DefaultValue"] != nil || c["Rules"].([]any)[0].(map[string]any)["Value"] != "b" {
+		t.Fatalf("updated category %v", c)
+	}
+	if refs := call("ListCostCategoryDefinitions", map[string]any{"EffectiveOn": "2026-01-01T00:00:00Z"}).body["CostCategoryReferences"].([]any); len(refs) != 2 {
+		t.Fatalf("references %v", refs)
+	}
+	expect(t, call("DescribeCostCategoryDefinition", map[string]any{"CostCategoryArn": "arn:aws:ce::000000000000:costcategory/00000000-0000-4000-8000-000000000000"}), 400, "ResourceNotFoundException")
+
+	// Anomaly monitors.
+	expect(t, call("CreateAnomalyMonitor", map[string]any{"AnomalyMonitor": map[string]any{"MonitorName": "m", "MonitorType": "DIMENSIONAL"}}), 400, "")
+	expect(t, call("CreateAnomalyMonitor", map[string]any{"AnomalyMonitor": map[string]any{"MonitorName": "m", "MonitorType": "CUSTOM", "MonitorDimension": "SERVICE"}}), 400, "")
+	monitor := call("CreateAnomalyMonitor", map[string]any{"AnomalyMonitor": map[string]any{"MonitorName": "services", "MonitorType": "DIMENSIONAL", "MonitorDimension": "SERVICE"},
+		"ResourceTags": []any{map[string]any{"Key": "k", "Value": "v"}}})
+	expect(t, monitor, 200, "")
+	monitorARN := str(monitor.body["MonitorArn"])
+	custom := call("CreateAnomalyMonitor", map[string]any{"AnomalyMonitor": map[string]any{"MonitorName": "custom", "MonitorType": "CUSTOM",
+		"MonitorSpecification": map[string]any{"Dimensions": map[string]any{"Key": "SERVICE", "Values": []any{"Amazon S3"}}}}})
+	expect(t, custom, 200, "")
+	expect(t, call("UpdateAnomalyMonitor", map[string]any{"MonitorArn": monitorARN, "MonitorName": "renamed"}), 200, "")
+	list := call("GetAnomalyMonitors", map[string]any{}).body["AnomalyMonitors"].([]any)
+	if len(list) != 2 {
+		t.Fatalf("monitors %v", list)
+	}
+	one := call("GetAnomalyMonitors", map[string]any{"MonitorArnList": []any{monitorARN}}).body["AnomalyMonitors"].([]any)
+	if m := one[0].(map[string]any); len(one) != 1 || m["MonitorName"] != "renamed" || m["DimensionalValueCount"] != json.Number("0") || m["MonitorArn"] != monitorARN {
+		t.Fatalf("monitor %v", one)
+	}
+
+	// Anomaly subscriptions.
+	subscription := func(mutate func(map[string]any)) map[string]any {
+		s := map[string]any{"SubscriptionName": "alerts", "Frequency": "DAILY", "MonitorArnList": []any{monitorARN},
+			"Subscribers": []any{map[string]any{"Type": "EMAIL", "Address": "ops@example.invalid"}}, "ThresholdExpression": map[string]any{"Dimensions": map[string]any{"Key": "ANOMALY_TOTAL_IMPACT_ABSOLUTE", "Values": []any{"100"}}}}
+		if mutate != nil {
+			mutate(s)
+		}
+		return map[string]any{"AnomalySubscription": s}
+	}
+	for _, mutate := range []func(map[string]any){
+		func(s map[string]any) { s["MonitorArnList"] = []any{} },
+		func(s map[string]any) { s["MonitorArnList"] = []any{"monitor"} },
+		func(s map[string]any) { s["Subscribers"] = []any{} },
+		func(s map[string]any) { s["Subscribers"] = []any{map[string]any{"Type": "EMAIL", "Address": "nobody"}} },
+		func(s map[string]any) { s["Subscribers"] = []any{map[string]any{"Type": "SNS", "Address": "topic"}} },
+		func(s map[string]any) { s["Threshold"] = 10 },
+	} {
+		expect(t, call("CreateAnomalySubscription", subscription(mutate)), 400, "")
+	}
+	sub := call("CreateAnomalySubscription", subscription(func(s map[string]any) {
+		s["Subscribers"] = []any{map[string]any{"Type": "SNS", "Address": "arn:aws:sns:us-east-1:000000000000:alerts"}}
+	}))
+	expect(t, sub, 200, "")
+	subARN := str(sub.body["SubscriptionArn"])
+	expect(t, call("UpdateAnomalySubscription", map[string]any{"SubscriptionArn": subARN, "Frequency": "IMMEDIATE"}), 200, "")
+	expect(t, call("UpdateAnomalySubscription", map[string]any{"SubscriptionArn": subARN, "MonitorArnList": []any{}}), 400, "")
+	expect(t, call("UpdateAnomalySubscription", map[string]any{"SubscriptionArn": subARN, "Threshold": 5, "ThresholdExpression": map[string]any{}}), 400, "")
+	subs := call("GetAnomalySubscriptions", map[string]any{"SubscriptionArnList": []any{subARN}}).body["AnomalySubscriptions"].([]any)
+	if s := subs[0].(map[string]any); len(subs) != 1 || s["Frequency"] != "IMMEDIATE" || s["AccountId"] != "000000000000" {
+		t.Fatalf("subscriptions %v", subs)
+	}
+
+	// Tags.
+	expect(t, call("TagResource", map[string]any{"ResourceArn": categoryARN, "ResourceTags": []any{map[string]any{"Key": "x", "Value": "y"}}}), 200, "")
+	expect(t, call("UntagResource", map[string]any{"ResourceArn": categoryARN, "ResourceTagKeys": []any{"team"}}), 200, "")
+	if tags := call("ListTagsForResource", map[string]any{"ResourceArn": categoryARN}).body["ResourceTags"].([]any); len(tags) != 1 || tags[0].(map[string]any)["Key"] != "x" {
+		t.Fatalf("tags %v", tags)
+	}
+	if tags := call("ListTagsForResource", map[string]any{"ResourceArn": monitorARN}).body["ResourceTags"].([]any); len(tags) != 1 {
+		t.Fatalf("tags %v", tags)
+	}
+
+	// Deletion and unbound operations.
+	expect(t, call("DeleteAnomalySubscription", map[string]any{"SubscriptionArn": subARN}), 200, "")
+	expect(t, call("DeleteAnomalySubscription", map[string]any{"SubscriptionArn": subARN}), 400, "ResourceNotFoundException")
+	expect(t, call("DeleteAnomalyMonitor", map[string]any{"MonitorArn": monitorARN}), 200, "")
+	expect(t, call("DeleteAnomalyMonitor", map[string]any{"MonitorArn": monitorARN}), 400, "ResourceNotFoundException")
+	expect(t, call("DeleteCostCategoryDefinition", map[string]any{"CostCategoryArn": categoryARN}), 200, "")
+	expect(t, call("DeleteCostCategoryDefinition", map[string]any{"CostCategoryArn": categoryARN}), 400, "ResourceNotFoundException")
+	expect(t, call("GetCostAndUsage", map[string]any{}), 501, "UnknownOperationException")
+}
+
+func TestBillingDataExportsLifecycle(t *testing.T) {
+	h := newHarness(t, bcmDataExports)
+	call := func(op string, input map[string]any) reply { return h.json1("bcm-data-exports", op, input) }
+	export := func(name, query string) map[string]any {
+		return map[string]any{"Name": name, "Description": "d", "RefreshCadence": map[string]any{"Frequency": "SYNCHRONOUS"},
+			"DataQuery": map[string]any{"QueryStatement": query},
+			"DestinationConfigurations": map[string]any{"S3Destination": map[string]any{"S3Bucket": "bucket", "S3Prefix": "p", "S3Region": "us-east-1",
+				"S3OutputConfigurations": map[string]any{"Compression": "GZIP", "Format": "TEXT_OR_CSV", "OutputType": "CUSTOM", "Overwrite": "OVERWRITE_REPORT"}}}}
+	}
+	expect(t, call("CreateExport", map[string]any{"Export": export("bad", "DROP TABLE x")}), 400, "")
+	expect(t, call("CreateExport", map[string]any{"Export": export("bad name!", "SELECT 1")}), 400, "")
+	created := call("CreateExport", map[string]any{"Export": export("costs", " select identity_line_item_id from COST_AND_USAGE_REPORT"),
+		"ResourceTags": []any{map[string]any{"Key": "team", "Value": "a"}}})
+	expect(t, created, 200, "")
+	arn := str(created.body["ExportArn"])
+	if !strings.HasPrefix(arn, "arn:aws:bcm-data-exports:us-east-1:000000000000:export/costs-") {
+		t.Fatalf("arn %s", arn)
+	}
+	got := call("GetExport", map[string]any{"ExportArn": arn})
+	if e := got.body["Export"].(map[string]any); e["Name"] != "costs" || e["ExportArn"] != arn || got.body["ExportStatus"] != nil {
+		t.Fatalf("export %v", got.body)
+	}
+	replacement := export("costs2", "SELECT 2")
+	delete(replacement, "Description")
+	expect(t, call("UpdateExport", map[string]any{"ExportArn": arn, "Export": export("x", "UPDATE")}), 400, "")
+	wrong := export("costs2", "SELECT 2")
+	wrong["ExportArn"] = "arn:aws:bcm-data-exports:us-east-1:000000000000:export/other"
+	expect(t, call("UpdateExport", map[string]any{"ExportArn": arn, "Export": wrong}), 400, "")
+	same := export("costs2", "SELECT 2")
+	same["ExportArn"] = arn
+	expect(t, call("UpdateExport", map[string]any{"ExportArn": arn, "Export": same}), 200, "")
+	expect(t, call("UpdateExport", map[string]any{"ExportArn": arn, "Export": replacement}), 200, "")
+	if e := call("GetExport", map[string]any{"ExportArn": arn}).body["Export"].(map[string]any); e["Name"] != "costs2" || e["Description"] != nil {
+		t.Fatalf("updated %v", e)
+	}
+	if list := call("ListExports", map[string]any{}).body["Exports"].([]any); len(list) != 1 || list[0].(map[string]any)["ExportName"] != "costs2" {
+		t.Fatalf("exports %v", list)
+	}
+	expect(t, call("TagResource", map[string]any{"ResourceArn": arn, "ResourceTags": []any{map[string]any{"Key": "x", "Value": "y"}}}), 200, "")
+	expect(t, call("UntagResource", map[string]any{"ResourceArn": arn, "ResourceTagKeys": []any{"team"}}), 200, "")
+	if tags := call("ListTagsForResource", map[string]any{"ResourceArn": arn}).body["ResourceTags"].([]any); len(tags) != 1 || tags[0].(map[string]any)["Key"] != "x" {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, call("DeleteExport", map[string]any{"ExportArn": arn}), 200, "")
+	expect(t, call("GetExport", map[string]any{"ExportArn": arn}), 400, "ResourceNotFoundException")
+	expect(t, call("ListTables", map[string]any{}), 501, "UnknownOperationException")
+}
