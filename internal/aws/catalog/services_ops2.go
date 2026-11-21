@@ -1,7 +1,10 @@
 package catalog
 
 import (
+	"encoding/json"
+	"math"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -540,6 +543,148 @@ func bcmExportReplace(document, supplied map[string]any) error {
 	document["ExportName"] = document["Name"]
 	if _, ok := supplied["Description"]; !ok {
 		delete(document, "Description")
+	}
+	return nil
+}
+
+var braketDevice = regexp.MustCompile(`^arn:[a-z-]+:braket:[a-z0-9-]*:[0-9]{0,12}:device/(qpu|quantum-simulator)/.+$`)
+
+var braket = &Service{
+	Model: "braket", Title: "Amazon Braket", IAMPrefix: "braket", Issues: []int{250},
+	Resources: []*Resource{
+		{Kind: "spendingLimit", Shape: "SpendingLimitSummary", ID: "uuid",
+			ARN: "arn:{partition}:braket:{region}:{account}:spending-limit/{id}", ARNMember: "spendingLimitArn", Limit: 50,
+			Generate: map[string]any{"queuedSpend": "0", "totalSpend": "0", "createdAt": "$now", "updatedAt": "$now"}},
+	},
+	Ops: []Op{
+		{Name: "CreateSpendingLimit", Kind: Create, Resource: "spendingLimit", Check: braketLimit},
+		{Name: "SearchSpendingLimits", Kind: List, Resource: "spendingLimit"},
+		{Name: "UpdateSpendingLimit", Kind: Update, Resource: "spendingLimit", Lookup: "spendingLimitArn", Accept: []string{"clientToken"},
+			Fields: []string{"spendingLimit", "timePeriod"}, Check: braketLimit, Merged: braketPeriod, Touch: []string{"updatedAt"}},
+		{Name: "DeleteSpendingLimit", Kind: Delete, Resource: "spendingLimit", Lookup: "spendingLimitArn"},
+		{Name: "TagResource", Kind: Tag, Lookup: "resourceArn"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "resourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "resourceArn"},
+	},
+	Bounds: []string{
+		"Spending limits are stored records and are never enforced: no quantum task, hybrid job, device or simulator exists, nothing is run or billed, so queuedSpend and totalSpend stay 0. CreateQuantumTask, CreateJob, GetDevice, SearchDevices and every other official operation not listed here return UnknownOperationException with HTTP 501; the catalog of devices is AWS-owned data.",
+		"deviceArn must look like a Braket device ARN but is not looked up, so retired or unknown devices are accepted. spendingLimit must be a non-negative decimal number of US dollars and endAt must follow startAt. GetSpendingLimit does not exist in the official API: spending limits are read only through SearchSpendingLimits, which returns every stored limit; its filters member is refused. Create client tokens are stored with the idempotent create, update client tokens are accepted and not recorded.",
+	},
+}
+
+// braketLimit checks the documented members of a spending limit.
+func braketLimit(input map[string]any) error {
+	if arn, ok := input["deviceArn"].(string); ok && !braketDevice.MatchString(arn) {
+		return invalid("deviceArn must be the ARN of a Braket device.")
+	}
+	if amount, ok := input["spendingLimit"].(string); ok {
+		if value, err := strconv.ParseFloat(amount, 64); err != nil || value < 0 || math.IsInf(value, 0) || math.IsNaN(value) {
+			return invalid("spendingLimit must be a non-negative decimal number of US dollars.")
+		}
+	}
+	return braketPeriodOf(input["timePeriod"])
+}
+
+func braketPeriodOf(period any) error {
+	p, _ := period.(map[string]any)
+	start, startOK := braketSeconds(p["startAt"])
+	end, endOK := braketSeconds(p["endAt"])
+	if startOK && endOK && end <= start {
+		return invalid("endAt of timePeriod must be after startAt.")
+	}
+	return nil
+}
+
+// braketSeconds reads an epoch time as a request decodes it or as it is stored.
+func braketSeconds(value any) (float64, bool) {
+	switch v := value.(type) {
+	case time.Time:
+		return float64(v.UnixNano()) / 1e9, true
+	case string:
+		t, err := time.Parse(time.RFC3339Nano, v)
+		return float64(t.UnixNano()) / 1e9, err == nil
+	}
+	return Number(value)
+}
+
+// braketPeriod checks the merged period, because an update can supply only
+// one of its ends.
+func braketPeriod(document, _ map[string]any) error {
+	return braketPeriodOf(document["timePeriod"])
+}
+
+var artifact = &Service{
+	Model: "artifact", Title: "AWS Artifact", IAMPrefix: "artifact", Issues: []int{252}, Global: true,
+	Resources: []*Resource{
+		{Kind: "accountSettings", Shape: "AccountSettings", Singleton: true, ID: "name",
+			ARN: "arn:{partition}:artifact::{account}:account-settings", NameMember: "notificationSubscriptionStatus",
+			Generate: map[string]any{"notificationSubscriptionStatus": "NOT_SUBSCRIBED"}},
+	},
+	Ops: []Op{
+		{Name: "GetAccountSettings", Kind: Read, Resource: "accountSettings"},
+		{Name: "PutAccountSettings", Kind: Put, Resource: "accountSettings"},
+	},
+	Bounds: []string{
+		"Only the account notification setting is stored: no notification is ever sent to anyone and no report, agreement or term exists. GetReport, GetReportMetadata, GetTermForReport, ListReports and ListCustomerAgreements return UnknownOperationException with HTTP 501 because the compliance documents are AWS-owned.",
+		"The setting starts as NOT_SUBSCRIBED before the first Put. The service is global, so the setting is shared by every Region the simulator serves.",
+	},
+}
+
+var aiopsGroup = &Service{
+	Model: "aiops", Title: "Amazon CloudWatch investigations", IAMPrefix: "aiops", Issues: []int{294},
+	Resources: []*Resource{
+		{Kind: "investigationGroup", Shape: "GetInvestigationGroupResponse", Summary: "ListInvestigationGroupsModel", ID: "alnum:16",
+			ARN: "arn:{partition}:aiops:{region}:{account}:investigation-group/{id}", ARNMember: "arn",
+			NameMember: "name", Unique: true, Limit: 1, Cascade: true,
+			Generate: map[string]any{"retentionInDays": 90, "isCloudTrailEventHistoryEnabled": true,
+				"encryptionConfiguration": map[string]any{"type": "AWS_OWNED_KEY"}, "createdBy": "$account", "lastModifiedBy": "$account"}},
+		{Kind: "policy", Shape: "GetInvestigationGroupPolicyResponse", Singleton: true, ID: "name", Parent: "investigationGroup", ParentMember: "investigationGroupArn",
+			ARN: "arn:{partition}:aiops:{region}:{account}:investigation-group/{parent}/policy", NameMember: "policy",
+			Generate: map[string]any{"investigationGroupArn": "$parentArn"}},
+	},
+	Ops: []Op{
+		{Name: "CreateInvestigationGroup", Kind: Create, Resource: "investigationGroup", Check: aiopsGroupCheck},
+		{Name: "GetInvestigationGroup", Kind: Read, Resource: "investigationGroup", Lookup: "identifier"},
+		{Name: "ListInvestigationGroups", Kind: List, Resource: "investigationGroup"},
+		{Name: "UpdateInvestigationGroup", Kind: Update, Resource: "investigationGroup", Lookup: "identifier",
+			Fields: []string{"roleArn", "encryptionConfiguration", "tagKeyBoundaries", "chatbotNotificationChannel", "isCloudTrailEventHistoryEnabled", "crossAccountConfigurations"},
+			Check:  aiopsGroupCheck},
+		{Name: "DeleteInvestigationGroup", Kind: Delete, Resource: "investigationGroup", Lookup: "identifier"},
+		{Name: "PutInvestigationGroupPolicy", Kind: Put, Resource: "policy", Parent: "identifier", Check: aiopsPolicy},
+		{Name: "GetInvestigationGroupPolicy", Kind: Read, Resource: "policy", Parent: "identifier"},
+		{Name: "DeleteInvestigationGroupPolicy", Kind: Delete, Resource: "policy", Parent: "identifier"},
+		{Name: "TagResource", Kind: Tag, Lookup: "resourceArn"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "resourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "resourceArn"},
+	},
+	Bounds: []string{
+		"The investigation group and its resource policy are stored configuration: no investigation, investigation event or finding exists, nothing is scanned or analyzed, no role is assumed, no chat message is sent and no CloudWatch alarm can start an investigation. The policy is stored as text and is not evaluated, so it grants no access.",
+		"One investigation group is allowed per Region, as in AWS. createdAt and lastModifiedAt are not reported, createdBy and lastModifiedBy report the account ID, and the retention default of 90 days, the AWS-owned key and CloudTrail event history enabled are stored as the documented defaults. The role, the KMS key, the SNS topic, chat application configurations and cross-account roles are stored without being resolved.",
+		"UpdateInvestigationGroup cannot change the name or retention, as the official operation offers neither. A group that has no policy reports only its ARN from GetInvestigationGroupPolicy instead of failing. Deleting a group deletes its policy.",
+	},
+}
+
+// aiopsGroupCheck applies the documented notification channel and key rules.
+func aiopsGroupCheck(input map[string]any) error {
+	if channel, ok := input["chatbotNotificationChannel"].(map[string]any); ok {
+		for topic := range channel {
+			if !strings.HasPrefix(topic, "arn:") || !strings.Contains(topic, ":sns:") {
+				return invalid("The keys of chatbotNotificationChannel must be Amazon SNS topic ARNs.")
+			}
+		}
+	}
+	if encryption, ok := input["encryptionConfiguration"].(map[string]any); ok && encryption["type"] == "CUSTOMER_MANAGED_KMS_KEY" && encryption["kmsKeyId"] == nil {
+		return invalid("A customer managed key needs kmsKeyId.")
+	}
+	return nil
+}
+
+// aiopsPolicy requires the policy to be a JSON object.
+func aiopsPolicy(input map[string]any) error {
+	text, _ := input["policy"].(string)
+	var document map[string]any
+	if err := json.Unmarshal([]byte(text), &document); err != nil || document == nil {
+		return invalid("policy must be a JSON object.")
 	}
 	return nil
 }

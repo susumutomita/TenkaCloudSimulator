@@ -412,3 +412,126 @@ func TestBillingDataExportsLifecycle(t *testing.T) {
 	expect(t, call("GetExport", map[string]any{"ExportArn": arn}), 400, "ResourceNotFoundException")
 	expect(t, call("ListTables", map[string]any{}), 501, "UnknownOperationException")
 }
+
+func escape(arn string) string { return strings.NewReplacer(":", "%3A", "/", "%2F").Replace(arn) }
+
+func TestBraketSpendingLimits(t *testing.T) {
+	h := newHarness(t, braket)
+	device := "arn:aws:braket:::device/quantum-simulator/amazon/sv1"
+	body := func(mutate func(map[string]any)) map[string]any {
+		b := map[string]any{"clientToken": "token-1", "deviceArn": device, "spendingLimit": "25.50",
+			"timePeriod": map[string]any{"startAt": 1700000000, "endAt": 1800000000}, "tags": map[string]any{"team": "a"}}
+		if mutate != nil {
+			mutate(b)
+		}
+		return b
+	}
+	for i, mutate := range []func(map[string]any){
+		func(b map[string]any) { b["deviceArn"] = "device" },
+		func(b map[string]any) { b["spendingLimit"] = "-1" },
+		func(b map[string]any) { b["spendingLimit"] = "lots" },
+		func(b map[string]any) { b["timePeriod"] = map[string]any{"startAt": 5, "endAt": 4} },
+	} {
+		if r := h.rest("braket", "POST", "/spending-limit", body(mutate)); r.status != 400 {
+			t.Fatalf("case %d: %d %v", i, r.status, r.body)
+		}
+	}
+	created := h.rest("braket", "POST", "/spending-limit", body(nil))
+	expect(t, created, 201, "")
+	arn := str(created.body["spendingLimitArn"])
+	if !strings.HasPrefix(arn, "arn:aws:braket:us-east-1:000000000000:spending-limit/") {
+		t.Fatalf("arn %s", arn)
+	}
+	again := h.rest("braket", "POST", "/spending-limit", body(nil))
+	if again.body["spendingLimitArn"] != arn {
+		t.Fatalf("idempotent create %v", again.body)
+	}
+	update := func(b map[string]any) reply {
+		b["clientToken"] = "token-2"
+		return h.rest("braket", "PATCH", "/spending-limit/"+escape(arn)+"/update", b)
+	}
+	expect(t, update(map[string]any{"spendingLimit": "40"}), 200, "")
+	expect(t, update(map[string]any{"timePeriod": map[string]any{"startAt": 1700000000, "endAt": 1600000000}}), 400, "ValidationException")
+	limits := h.rest("braket", "POST", "/spending-limits", map[string]any{}).body["spendingLimits"].([]any)
+	if l := limits[0].(map[string]any); len(limits) != 1 || l["spendingLimit"] != "40" || l["totalSpend"] != "0" || l["queuedSpend"] != "0" || l["deviceArn"] != device {
+		t.Fatalf("limits %v", limits)
+	}
+	expect(t, h.rest("braket", "POST", "/spending-limits", map[string]any{"filters": []any{map[string]any{"name": "deviceArn", "values": []any{device}, "operator": "EQUAL"}}}), 400, "")
+	esc := escape(arn)
+	expect(t, h.rest("braket", "POST", "/tags/"+esc, map[string]any{"tags": map[string]any{"x": "y"}}), 200, "")
+	expect(t, h.rest("braket", "DELETE", "/tags/"+esc+"?tagKeys=team", nil), 200, "")
+	if tags := h.rest("braket", "GET", "/tags/"+esc, nil).body["tags"].(map[string]any); len(tags) != 1 || tags["x"] != "y" {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, h.rest("braket", "DELETE", "/spending-limit/"+escape(arn)+"/delete", nil), 200, "")
+	expect(t, h.rest("braket", "DELETE", "/spending-limit/"+escape(arn)+"/delete", nil), 404, "ResourceNotFoundException")
+	expect(t, h.rest("braket", "POST", "/quantum-tasks", map[string]any{}), 501, "UnknownOperationException")
+}
+
+func TestArtifactAccountSettings(t *testing.T) {
+	h := newHarness(t, artifact)
+	got := h.rest("artifact", "GET", "/v1/account-settings/get", nil)
+	expect(t, got, 200, "")
+	if s := got.body["accountSettings"].(map[string]any); s["notificationSubscriptionStatus"] != "NOT_SUBSCRIBED" {
+		t.Fatalf("default %v", got.body)
+	}
+	put := h.rest("artifact", "PUT", "/v1/account-settings/put", map[string]any{"notificationSubscriptionStatus": "SUBSCRIBED"})
+	expect(t, put, 200, "")
+	if h.rest("artifact", "GET", "/v1/account-settings/get", nil).body["accountSettings"].(map[string]any)["notificationSubscriptionStatus"] != "SUBSCRIBED" {
+		t.Fatal("setting not stored")
+	}
+	expect(t, h.rest("artifact", "PUT", "/v1/account-settings/put", map[string]any{"notificationSubscriptionStatus": "MAYBE"}), 400, "ValidationException")
+	expect(t, h.rest("artifact", "GET", "/v1/report/list", nil), 501, "UnknownOperationException")
+}
+
+func TestAIOpsInvestigationGroup(t *testing.T) {
+	h := newHarness(t, aiopsGroup)
+	role := "arn:aws:iam::000000000000:role/Investigations"
+	create := func(b map[string]any) reply { return h.rest("aiops", "POST", "/investigationGroups", b) }
+	expect(t, create(map[string]any{"name": "g", "roleArn": role, "chatbotNotificationChannel": map[string]any{"topic": []any{"arn:aws:chatbot::000000000000:chat-configuration/slack-channel/x"}}}), 400, "ValidationException")
+	expect(t, create(map[string]any{"name": "g", "roleArn": role, "encryptionConfiguration": map[string]any{"type": "CUSTOMER_MANAGED_KMS_KEY"}}), 400, "ValidationException")
+	expect(t, create(map[string]any{"name": "g", "roleArn": role, "retentionInDays": 3}), 400, "ValidationException")
+	created := create(map[string]any{"name": "group", "roleArn": role, "tags": map[string]any{"team": "a"},
+		"chatbotNotificationChannel": map[string]any{"arn:aws:sns:us-east-1:000000000000:alerts": []any{"arn:aws:chatbot::000000000000:chat-configuration/slack-channel/x"}}})
+	expect(t, created, 201, "")
+	arn := str(created.body["arn"])
+	if !strings.Contains(arn, ":aiops:us-east-1:000000000000:investigation-group/") {
+		t.Fatalf("arn %s", arn)
+	}
+	expect(t, create(map[string]any{"name": "other", "roleArn": role}), 402, "ServiceQuotaExceededException")
+	got := h.rest("aiops", "GET", "/investigationGroups/"+str(created.body["arn"])[strings.LastIndex(arn, "/")+1:], nil)
+	expect(t, got, 200, "")
+	if got.body["retentionInDays"] != json.Number("90") || got.body["isCloudTrailEventHistoryEnabled"] != true || got.body["name"] != "group" || got.body["arn"] != arn {
+		t.Fatalf("group %v", got.body)
+	}
+	id := arn[strings.LastIndex(arn, "/")+1:]
+	expect(t, h.rest("aiops", "PATCH", "/investigationGroups/"+id, map[string]any{"isCloudTrailEventHistoryEnabled": false, "tagKeyBoundaries": []any{"app"}}), 200, "")
+	expect(t, h.rest("aiops", "PATCH", "/investigationGroups/"+id, map[string]any{"retentionInDays": 10}), 400, "")
+	if l := h.rest("aiops", "GET", "/investigationGroups", nil).body["investigationGroups"].([]any); len(l) != 1 || l[0].(map[string]any)["name"] != "group" {
+		t.Fatalf("groups %v", l)
+	}
+
+	// Policy.
+	policyPath := "/investigationGroups/" + id + "/policy"
+	if p := h.rest("aiops", "GET", policyPath, nil); p.status != 200 || p.body["policy"] != nil || p.body["investigationGroupArn"] != arn {
+		t.Fatalf("empty policy %d %v", p.status, p.body)
+	}
+	expect(t, h.rest("aiops", "POST", policyPath, map[string]any{"policy": "not json"}), 400, "ValidationException")
+	expect(t, h.rest("aiops", "POST", policyPath, map[string]any{"policy": `{"Version":"2012-10-17","Statement":[]}`}), 200, "")
+	if p := h.rest("aiops", "GET", policyPath, nil); p.body["policy"] != `{"Version":"2012-10-17","Statement":[]}` {
+		t.Fatalf("policy %v", p.body)
+	}
+	expect(t, h.rest("aiops", "DELETE", policyPath, nil), 200, "")
+	expect(t, h.rest("aiops", "POST", "/investigationGroups/missing/policy", map[string]any{"policy": "{}"}), 404, "ResourceNotFoundException")
+
+	esc := strings.NewReplacer(":", "%3A", "/", "%2F").Replace(arn)
+	expect(t, h.rest("aiops", "POST", "/tags/"+esc, map[string]any{"tags": map[string]any{"x": "y"}}), 200, "")
+	expect(t, h.rest("aiops", "DELETE", "/tags/"+esc+"?tagKeys=team", nil), 200, "")
+	if tags := h.rest("aiops", "GET", "/tags/"+esc, nil).body["tags"].(map[string]any); len(tags) != 1 {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, h.rest("aiops", "POST", policyPath, map[string]any{"policy": "{}"}), 200, "")
+	expect(t, h.rest("aiops", "DELETE", "/investigationGroups/"+id, nil), 200, "")
+	expect(t, h.rest("aiops", "GET", "/investigationGroups/"+id, nil), 404, "ResourceNotFoundException")
+	expect(t, h.rest("aiops", "GET", policyPath, nil), 404, "ResourceNotFoundException")
+}
