@@ -568,3 +568,60 @@ func TestLakeFormationStoresTagsSettingsAndLocations(t *testing.T) {
 	expect(t, call("GrantPermissions", map[string]any{}), 501, "UnknownOperationException")
 	expect(t, call("GetTemporaryGluePartitionCredentials", map[string]any{}), 501, "UnknownOperationException")
 }
+
+func TestQuickSightStoresFoldersAndNamespaces(t *testing.T) {
+	h := newHarness(t, quickSight)
+	base := "/accounts/000000000000"
+	created := h.rest("quicksight", "POST", base+"/folders/sales", map[string]any{"Name": "Sales", "SharingModel": "ACCOUNT",
+		"Tags": []any{map[string]any{"Key": "team", "Value": "a"}}})
+	expect(t, created, 200, "")
+	arn := str(created.body["Arn"])
+	if arn != "arn:aws:quicksight:us-east-1:000000000000:folder/sales" || created.body["FolderId"] != "sales" {
+		t.Fatalf("created %v", created.body)
+	}
+	expect(t, h.rest("quicksight", "POST", base+"/folders/sales", map[string]any{"Name": "Again"}), 409, "ConflictException")
+	expect(t, h.rest("quicksight", "POST", base+"/folders/nested", map[string]any{"Name": "N", "ParentFolderArn": arn}), 400, "InvalidParameterValueException")
+	expect(t, h.rest("quicksight", "POST", base+"/folders/shared", map[string]any{"Name": "S", "Permissions": []any{map[string]any{"Principal": "p", "Actions": []any{"quicksight:DescribeFolder"}}}}), 400, "InvalidParameterValueException")
+	expect(t, h.rest("quicksight", "POST", "/accounts/111111111111/folders/other", map[string]any{"Name": "O"}), 400, "")
+	got := h.rest("quicksight", "GET", base+"/folders/sales", nil)
+	expect(t, got, 200, "")
+	folder := got.body["Folder"].(map[string]any)
+	if folder["Name"] != "Sales" || folder["FolderType"] != "SHARED" || folder["SharingModel"] != "ACCOUNT" {
+		t.Fatalf("folder %v", got.body)
+	}
+	if listed := h.rest("quicksight", "GET", base+"/folders", nil).body["FolderSummaryList"].([]any); len(listed) != 1 {
+		t.Fatalf("listed %v", listed)
+	}
+	expect(t, h.rest("quicksight", "PUT", base+"/folders/sales", map[string]any{"Name": "Revenue"}), 200, "")
+	if h.rest("quicksight", "GET", base+"/folders/sales", nil).body["Folder"].(map[string]any)["Name"] != "Revenue" {
+		t.Fatal("folder not renamed")
+	}
+	expect(t, h.rest("quicksight", "PUT", base+"/folders/missing", map[string]any{"Name": "x"}), 404, "ResourceNotFoundException")
+	tags := "/resources/" + url.PathEscape(arn) + "/tags"
+	expect(t, h.rest("quicksight", "POST", tags, map[string]any{"Tags": []any{map[string]any{"Key": "k", "Value": "v"}}}), 200, "")
+	expect(t, h.rest("quicksight", "DELETE", tags+"?keys=team", nil), 200, "")
+	if listed := h.rest("quicksight", "GET", tags, nil).body["Tags"].([]any); len(listed) != 1 {
+		t.Fatalf("tags %v", listed)
+	}
+	expect(t, h.rest("quicksight", "DELETE", base+"/folders/sales", nil), 200, "")
+	expect(t, h.rest("quicksight", "GET", base+"/folders/sales", nil), 404, "ResourceNotFoundException")
+
+	space := h.rest("quicksight", "POST", base, map[string]any{"Namespace": "finance", "IdentityStore": "QUICKSIGHT"})
+	expect(t, space, 200, "")
+	if space.body["Name"] != "finance" || space.body["CreationStatus"] != "CREATED" || space.body["CapacityRegion"] != "us-east-1" ||
+		space.body["Arn"] != "arn:aws:quicksight:us-east-1:000000000000:namespace/finance" {
+		t.Fatalf("namespace %v", space.body)
+	}
+	expect(t, h.rest("quicksight", "POST", base, map[string]any{"Namespace": "finance", "IdentityStore": "QUICKSIGHT"}), 409, "ConflictException")
+	described := h.rest("quicksight", "GET", base+"/namespaces/finance", nil).body["Namespace"].(map[string]any)
+	if described["IdentityStore"] != "QUICKSIGHT" {
+		t.Fatalf("described %v", described)
+	}
+	if listed := h.rest("quicksight", "GET", base+"/namespaces", nil).body["Namespaces"].([]any); len(listed) != 1 {
+		t.Fatalf("namespaces %v", listed)
+	}
+	expect(t, h.rest("quicksight", "GET", base+"/namespaces/default", nil), 404, "ResourceNotFoundException")
+	expect(t, h.rest("quicksight", "DELETE", base+"/namespaces/finance", nil), 200, "")
+	expect(t, h.rest("quicksight", "DELETE", base+"/namespaces/finance", nil), 404, "ResourceNotFoundException")
+	expect(t, h.rest("quicksight", "POST", base+"/data-sources", map[string]any{}), 501, "UnknownOperationException")
+}

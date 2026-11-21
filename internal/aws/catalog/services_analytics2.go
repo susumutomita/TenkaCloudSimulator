@@ -476,3 +476,51 @@ func lakeFormationRegister(input map[string]any) error {
 	delete(input, "UseServiceLinkedRole")
 	return nil
 }
+
+// quickSight serves folders and namespaces as stored records.
+var quickSight = &Service{
+	Model: "quicksight", Title: "Amazon Quick Sight", IAMPrefix: "quicksight", Issues: []int{76},
+	AccountMembers: []string{"AwsAccountId"},
+	Resources: []*Resource{
+		{Kind: "folder", Shape: "Folder", Summary: "FolderSummary", ID: "name",
+			ARN:       "arn:{partition}:quicksight:{region}:{account}:folder/{name}",
+			ARNMember: "Arn", NameMember: "FolderId", Unique: true, Limit: 100,
+			Generate: map[string]any{"FolderType": "SHARED", "CreatedTime": "$now", "LastUpdatedTime": "$now"}},
+		{Kind: "namespace", Shape: "NamespaceInfoV2", ID: "name",
+			ARN:       "arn:{partition}:quicksight:{region}:{account}:namespace/{name}",
+			ARNMember: "Arn", NameMember: "Name", Unique: true, Limit: 100,
+			Aliases:  map[string]string{"Namespace": "Name"},
+			Generate: map[string]any{"CapacityRegion": "$region", "CreationStatus": "CREATED"}},
+	},
+	Ops: []Op{
+		{Name: "CreateFolder", Kind: Create, Resource: "folder", Check: quickSightFolder},
+		{Name: "DescribeFolder", Kind: Read, Resource: "folder", Lookup: "FolderId"},
+		{Name: "ListFolders", Kind: List, Resource: "folder"},
+		{Name: "UpdateFolder", Kind: Update, Resource: "folder", Lookup: "FolderId", Touch: []string{"LastUpdatedTime"}, Fields: []string{"Name"}},
+		{Name: "DeleteFolder", Kind: Delete, Resource: "folder", Lookup: "FolderId"},
+		{Name: "CreateNamespace", Kind: Create, Resource: "namespace"},
+		{Name: "DescribeNamespace", Kind: Read, Resource: "namespace", Lookup: "Namespace"},
+		{Name: "ListNamespaces", Kind: List, Resource: "namespace"},
+		{Name: "DeleteNamespace", Kind: Delete, Resource: "namespace", Lookup: "Namespace"},
+		{Name: "TagResource", Kind: Tag, Lookup: "ResourceArn"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "ResourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceArn"},
+	},
+	Bounds: []string{
+		"Folders and namespaces are stored records: there is no Quick Sight account subscription, user, group, data source, data set, analysis, dashboard, template, theme, topic or embedded session, and no data is read. Every other official operation, including folder membership and permissions, returns UnknownOperationException with HTTP 501.",
+		"A folder is a flat container with a name: ParentFolderArn is refused, so FolderPath is never reported, and Permissions are refused because nothing evaluates them. FolderType is SHARED, and SharingModel is stored when sent. UpdateFolder changes only the name. The FolderId is the identity and must be new; a duplicate fails with ConflictException where AWS answers ResourceExistsException, as it does for a duplicate namespace.",
+		"A namespace is CREATED at once, with CapacityRegion set to the Region, and has no members. The account's default namespace is not pre-created, so DescribeNamespace default fails with ResourceNotFoundException and ListNamespaces shows only namespaces that were created. Deleting a namespace removes it without checking for users or groups, because none can exist.",
+		"AwsAccountId must be the simulator account. Responses carry Status and RequestId as the official shapes require. Tags are stored from the create operations and by TagResource on the ARN. The limits of 100 folders and 100 namespaces per Region are local.",
+	},
+}
+
+// quickSightFolder refuses folder nesting and permissions the stored model
+// cannot hold.
+func quickSightFolder(input map[string]any) error {
+	for _, member := range []string{"ParentFolderArn", "Permissions"} {
+		if _, ok := input[member]; ok {
+			return Failure("InvalidParameterValueException", member+" is not supported by the simulator.")
+		}
+	}
+	return nil
+}

@@ -1,0 +1,1235 @@
+{
+ "components": {
+  "schemas": {
+   "Folder": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "FolderId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "FolderPath": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "FolderType": {
+      "enum": [
+       "SHARED",
+       "RESTRICTED"
+      ],
+      "type": "string"
+     },
+     "LastUpdatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SharingModel": {
+      "enum": [
+       "ACCOUNT",
+       "NAMESPACE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "FolderSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "CreatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "FolderId": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "FolderType": {
+      "enum": [
+       "SHARED",
+       "RESTRICTED"
+      ],
+      "type": "string"
+     },
+     "LastUpdatedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SharingModel": {
+      "enum": [
+       "ACCOUNT",
+       "NAMESPACE"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NamespaceError": {
+    "additionalProperties": false,
+    "properties": {
+     "Message": {
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "PERMISSION_DENIED",
+       "INTERNAL_SERVICE_ERROR"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NamespaceInfoV2": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "CapacityRegion": {
+      "type": "string"
+     },
+     "CreationStatus": {
+      "enum": [
+       "CREATED",
+       "CREATING",
+       "DELETING",
+       "RETRYABLE_FAILURE",
+       "NON_RETRYABLE_FAILURE"
+      ],
+      "type": "string"
+     },
+     "IamIdentityCenterApplicationArn": {
+      "type": "string"
+     },
+     "IamIdentityCenterInstanceArn": {
+      "type": "string"
+     },
+     "IdentityStore": {
+      "enum": [
+       "QUICKSIGHT"
+      ],
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "NamespaceError": {
+      "$ref": "#/components/schemas/NamespaceError"
+     }
+    },
+    "type": "object"
+   },
+   "ResourcePermission": {
+    "additionalProperties": false,
+    "properties": {
+     "Actions": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Principal": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Principal",
+     "Actions"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon QuickSight API (2018-04-01). Every other official operation returns HTTP 501 UnknownOperationException. Folders and namespaces are stored records: there is no Quick Sight account subscription, user, group, data source, data set, analysis, dashboard, template, theme, topic or embedded session, and no data is read. Every other official operation, including folder membership and permissions, returns UnknownOperationException with HTTP 501. A folder is a flat container with a name: ParentFolderArn is refused, so FolderPath is never reported, and Permissions are refused because nothing evaluates them. FolderType is SHARED, and SharingModel is stored when sent. UpdateFolder changes only the name. The FolderId is the identity and must be new; a duplicate fails with ConflictException where AWS answers ResourceExistsException, as it does for a duplicate namespace. A namespace is CREATED at once, with CapacityRegion set to the Region, and has no members. The account's default namespace is not pre-created, so DescribeNamespace default fails with ResourceNotFoundException and ListNamespaces shows only namespaces that were created. Deleting a namespace removes it without checking for users or groups, because none can exist. AwsAccountId must be the simulator account. Responses carry Status and RequestId as the official shapes require. Tags are stored from the create operations and by TagResource on the ARN. The limits of 100 folders and 100 namespaces per Region are local.",
+  "title": "Amazon Quick Sight (simulator catalog)",
+  "version": "2018-04-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/accounts/{AwsAccountId}": {
+   "post": {
+    "operationId": "quicksightCreateNamespace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AwsAccountId",
+      "required": true,
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "IdentityStore": {
+          "enum": [
+           "QUICKSIGHT"
+          ],
+          "type": "string"
+         },
+         "Namespace": {
+          "maxLength": 64,
+          "type": "string"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "required": [
+         "IdentityStore",
+         "Namespace"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "CapacityRegion": {
+           "type": "string"
+          },
+          "CreationStatus": {
+           "enum": [
+            "CREATED",
+            "CREATING",
+            "DELETING",
+            "RETRYABLE_FAILURE",
+            "NON_RETRYABLE_FAILURE"
+           ],
+           "type": "string"
+          },
+          "IdentityStore": {
+           "enum": [
+            "QUICKSIGHT"
+           ],
+           "type": "string"
+          },
+          "Name": {
+           "maxLength": 64,
+           "type": "string"
+          },
+          "RequestId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateNamespace",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   }
+  },
+  "/accounts/{AwsAccountId}/folders": {
+   "get": {
+    "operationId": "quicksightListFolders",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AwsAccountId",
+      "required": true,
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max-results",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "next-token",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "FolderSummaryList": {
+           "items": {
+            "$ref": "#/components/schemas/FolderSummary"
+           },
+           "maxItems": 100,
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          },
+          "RequestId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListFolders",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   }
+  },
+  "/accounts/{AwsAccountId}/folders/{FolderId}": {
+   "delete": {
+    "operationId": "quicksightDeleteFolder",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AwsAccountId",
+      "required": true,
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "FolderId",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "FolderId": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "RequestId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteFolder",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   },
+   "get": {
+    "operationId": "quicksightDescribeFolder",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AwsAccountId",
+      "required": true,
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "FolderId",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Folder": {
+           "$ref": "#/components/schemas/Folder"
+          },
+          "RequestId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeFolder",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   },
+   "post": {
+    "operationId": "quicksightCreateFolder",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AwsAccountId",
+      "required": true,
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "FolderId",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "FolderType": {
+          "enum": [
+           "SHARED",
+           "RESTRICTED"
+          ],
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ParentFolderArn": {
+          "type": "string"
+         },
+         "Permissions": {
+          "items": {
+           "$ref": "#/components/schemas/ResourcePermission"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array"
+         },
+         "SharingModel": {
+          "enum": [
+           "ACCOUNT",
+           "NAMESPACE"
+          ],
+          "type": "string"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "FolderId": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "RequestId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateFolder",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   },
+   "put": {
+    "operationId": "quicksightUpdateFolder",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AwsAccountId",
+      "required": true,
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "FolderId",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "FolderId": {
+           "maxLength": 2048,
+           "minLength": 1,
+           "type": "string"
+          },
+          "RequestId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateFolder",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   }
+  },
+  "/accounts/{AwsAccountId}/namespaces": {
+   "get": {
+    "operationId": "quicksightListNamespaces",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AwsAccountId",
+      "required": true,
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max-results",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "next-token",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Namespaces": {
+           "items": {
+            "$ref": "#/components/schemas/NamespaceInfoV2"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          },
+          "RequestId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListNamespaces",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   }
+  },
+  "/accounts/{AwsAccountId}/namespaces/{Namespace}": {
+   "delete": {
+    "operationId": "quicksightDeleteNamespace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AwsAccountId",
+      "required": true,
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Namespace",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "RequestId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteNamespace",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   },
+   "get": {
+    "operationId": "quicksightDescribeNamespace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "AwsAccountId",
+      "required": true,
+      "schema": {
+       "maxLength": 12,
+       "minLength": 12,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Namespace",
+      "required": true,
+      "schema": {
+       "maxLength": 64,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Namespace": {
+           "$ref": "#/components/schemas/NamespaceInfoV2"
+          },
+          "RequestId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeNamespace",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   }
+  },
+  "/resources/{ResourceArn}/tags": {
+   "delete": {
+    "operationId": "quicksightUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "keys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "RequestId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   },
+   "get": {
+    "operationId": "quicksightListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "RequestId": {
+           "type": "string"
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 200,
+           "minItems": 1,
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   },
+   "post": {
+    "operationId": "quicksightTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "quicksight"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 200,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "required": [
+         "Tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "RequestId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Quick Sight"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon QuickSight API (2018-04-01). Every other official operation returns HTTP 501 UnknownOperationException. Folders and namespaces are stored records: there is no Quick Sight account subscription, user, group, data source, data set, analysis, dashboard, template, theme, topic or embedded session, and no data is read. Every other official operation, including folder membership and permissions, returns UnknownOperationException with HTTP 501. A folder is a flat container with a name: ParentFolderArn is refused, so FolderPath is never reported, and Permissions are refused because nothing evaluates them. FolderType is SHARED, and SharingModel is stored when sent. UpdateFolder changes only the name. The FolderId is the identity and must be new; a duplicate fails with ConflictException where AWS answers ResourceExistsException, as it does for a duplicate namespace. A namespace is CREATED at once, with CapacityRegion set to the Region, and has no members. The account's default namespace is not pre-created, so DescribeNamespace default fails with ResourceNotFoundException and ListNamespaces shows only namespaces that were created. Deleting a namespace removes it without checking for users or groups, because none can exist. AwsAccountId must be the simulator account. Responses carry Status and RequestId as the official shapes require. Tags are stored from the create operations and by TagResource on the ARN. The limits of 100 folders and 100 namespaces per Region are local.",
+   "name": "Amazon Quick Sight"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/quicksight/2018-04-01/service-2.json",
+  "sha256": "04f88ab7dad7648c3b6447c5f12c8098d34a3879984ae2c0ecc23c684c6134dc",
+  "license": "Apache-2.0"
+ }
+}
