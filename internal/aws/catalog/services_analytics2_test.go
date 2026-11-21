@@ -440,8 +440,8 @@ func TestEMRContainersStoresVirtualClustersAndTemplates(t *testing.T) {
 	if len(listed) != 1 {
 		t.Fatalf("listed %v", listed)
 	}
-	if filtered := h.rest("emr-containers", "GET", "/virtualclusters?containerProviderId=other", nil).body["virtualClusters"].([]any); len(filtered) != 0 {
-		t.Fatalf("filtered %v", filtered)
+	for _, query := range []string{"containerProviderId=my-eks", "containerProviderType=EKS", "containerProviderId=other"} {
+		expect(t, h.rest("emr-containers", "GET", "/virtualclusters?"+query, nil), 400, "ValidationException")
 	}
 
 	template := h.rest("emr-containers", "POST", "/jobtemplates", map[string]any{"name": "nightly", "clientToken": "t-3",

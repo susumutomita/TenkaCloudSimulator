@@ -362,7 +362,7 @@ var emrContainers = &Service{
 	Ops: []Op{
 		{Name: "CreateVirtualCluster", Kind: Create, Resource: "virtualCluster"},
 		{Name: "DescribeVirtualCluster", Kind: Read, Resource: "virtualCluster", Lookup: "id"},
-		{Name: "ListVirtualClusters", Kind: List, Resource: "virtualCluster", Filters: map[string]string{"containerProviderId": "containerProvider.id", "containerProviderType": "containerProvider.type"}},
+		{Name: "ListVirtualClusters", Kind: List, Resource: "virtualCluster"},
 		{Name: "DeleteVirtualCluster", Kind: Delete, Resource: "virtualCluster", Lookup: "id"},
 		{Name: "CreateJobTemplate", Kind: Create, Resource: "jobTemplate"},
 		{Name: "DescribeJobTemplate", Kind: Read, Resource: "jobTemplate", Lookup: "id"},
@@ -377,7 +377,7 @@ var emrContainers = &Service{
 	},
 	Bounds: []string{
 		"Virtual clusters, job templates and security configurations are stored records: the EKS cluster and namespace a virtual cluster names are not contacted or checked, no job runs, and no managed endpoint exists. StartJobRun, CancelJobRun, DescribeJobRun, ListJobRuns, managed endpoint operations, GetManagedEndpointSessionCredentials and every other official operation return UnknownOperationException with HTTP 501.",
-		"A virtual cluster is RUNNING at once and DeleteVirtualCluster removes it, whereas AWS keeps it listed as TERMINATED; ListVirtualClusters supports the containerProviderId and containerProviderType filters only. securityConfigurationId on a virtual cluster, the execution role, KMS key and everything inside jobTemplateData and securityConfigurationData are stored without being resolved, so a virtual cluster may name a missing security configuration, and createdBy and decryptionError are never reported.",
+		"A virtual cluster is RUNNING at once and DeleteVirtualCluster removes it, whereas AWS keeps it listed as TERMINATED; ListVirtualClusters offers no filters: containerProviderId, containerProviderType and the other official filters are refused with ValidationException rather than answered with an empty list, because the stored record keeps the container provider nested and the filters could not match it. securityConfigurationId on a virtual cluster, the execution role, KMS key and everything inside jobTemplateData and securityConfigurationData are stored without being resolved, so a virtual cluster may name a missing security configuration, and createdBy and decryptionError are never reported.",
 		"The service offers no operation to delete a security configuration, so one lasts until the Region's records are reset, and a job template is deleted whether or not a job uses it. The limits of 50 virtual clusters, 100 job templates and 50 security configurations per Region are local, and tags are stored from the create operations and by TagResource on the ARN.",
 	},
 }
