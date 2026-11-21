@@ -154,3 +154,178 @@ func deadlineTagTarget(input map[string]any) error {
 	}
 	return nil
 }
+
+var (
+	dmsSubnetGroupName = regexp.MustCompile(`^[A-Za-z0-9._-]{1,255}$`)
+	dmsDataProviderARN = regexp.MustCompile(`^arn:[a-z-]+:dms:[a-z0-9-]+:[0-9]{12}:data-provider:[a-z0-9]{26}$`)
+	dmsInstanceARN     = regexp.MustCompile(`^arn:[a-z-]+:dms:[a-z0-9-]+:[0-9]{12}:instance-profile:[a-z0-9]{26}$`)
+	dmsEngines         = map[string]bool{"aurora": true, "aurora-postgresql": true, "mysql": true, "oracle": true, "postgres": true, "sqlserver": true,
+		"redshift": true, "mariadb": true, "mongodb": true, "db2": true, "db2-zos": true, "docdb": true, "sybase": true}
+)
+
+var databaseMigration = &Service{
+	Model: "dms", Title: "AWS Database Migration Service", IAMPrefix: "dms", Issues: []int{228},
+	Resources: []*Resource{
+		{Kind: "replicationSubnetGroup", Shape: "ReplicationSubnetGroup", ID: "name",
+			ARN:        "arn:{partition}:dms:{region}:{account}:subgrp:{name}",
+			NameMember: "ReplicationSubnetGroupIdentifier", Unique: true, Limit: 20,
+			Generate: map[string]any{"SubnetGroupStatus": "Complete"}},
+		{Kind: "eventSubscription", Shape: "EventSubscription", ID: "name",
+			ARN:        "arn:{partition}:dms:{region}:{account}:es:{name}",
+			NameMember: "CustSubscriptionId", Unique: true, Limit: 20,
+			Aliases:  map[string]string{"SubscriptionName": "CustSubscriptionId", "EventCategories": "EventCategoriesList", "SourceIds": "SourceIdsList"},
+			Generate: map[string]any{"CustomerAwsId": "$account", "Status": "active", "SubscriptionCreationTime": "$now", "Enabled": true}},
+		{Kind: "dataProvider", Shape: "DataProvider", ID: "alnum:26",
+			ARN:        "arn:{partition}:dms:{region}:{account}:data-provider:{id}",
+			ARNMember:  "DataProviderArn",
+			NameMember: "DataProviderName", Unique: true, Limit: 30,
+			Generate: map[string]any{"DataProviderName": "$name", "DataProviderCreationTime": "$now"}},
+		{Kind: "instanceProfile", Shape: "InstanceProfile", ID: "alnum:26",
+			ARN:        "arn:{partition}:dms:{region}:{account}:instance-profile:{id}",
+			ARNMember:  "InstanceProfileArn",
+			NameMember: "InstanceProfileName", Unique: true, Limit: 30,
+			Generate: map[string]any{"InstanceProfileName": "$name", "InstanceProfileCreationTime": "$now", "PubliclyAccessible": true}},
+		{Kind: "migrationProject", Shape: "MigrationProject", ID: "alnum:26",
+			ARN:        "arn:{partition}:dms:{region}:{account}:migration-project:{id}",
+			ARNMember:  "MigrationProjectArn",
+			NameMember: "MigrationProjectName", Unique: true, Limit: 30,
+			Aliases:  map[string]string{"InstanceProfileIdentifier": "InstanceProfileArn"},
+			Refs:     map[string]string{"InstanceProfileArn": "instanceProfile"},
+			Generate: map[string]any{"MigrationProjectName": "$name", "MigrationProjectCreationTime": "$now"}},
+	},
+	Ops: []Op{
+		{Name: "CreateReplicationSubnetGroup", Kind: Create, Resource: "replicationSubnetGroup", Check: dmsSubnetGroup},
+		{Name: "DescribeReplicationSubnetGroups", Kind: List, Resource: "replicationSubnetGroup"},
+		{Name: "ModifyReplicationSubnetGroup", Kind: Update, Resource: "replicationSubnetGroup", Lookup: "ReplicationSubnetGroupIdentifier",
+			Fields: []string{"ReplicationSubnetGroupDescription", "Subnets"}, Check: dmsSubnetGroup},
+		{Name: "DeleteReplicationSubnetGroup", Kind: Delete, Resource: "replicationSubnetGroup", Lookup: "ReplicationSubnetGroupIdentifier"},
+		{Name: "CreateEventSubscription", Kind: Create, Resource: "eventSubscription", Check: dmsEventSubscription},
+		{Name: "DescribeEventSubscriptions", Kind: List, Resource: "eventSubscription", Filters: map[string]string{"SubscriptionName": "CustSubscriptionId"}},
+		{Name: "ModifyEventSubscription", Kind: Update, Resource: "eventSubscription", Lookup: "SubscriptionName",
+			Fields: []string{"SnsTopicArn", "SourceType", "EventCategories", "Enabled"}, Check: dmsEventSubscription},
+		{Name: "DeleteEventSubscription", Kind: Delete, Resource: "eventSubscription", Lookup: "SubscriptionName"},
+		{Name: "CreateDataProvider", Kind: Create, Resource: "dataProvider", Check: dmsDataProvider},
+		{Name: "DescribeDataProviders", Kind: List, Resource: "dataProvider"},
+		{Name: "ModifyDataProvider", Kind: Update, Resource: "dataProvider", Lookup: "DataProviderIdentifier", Accept: []string{"ExactSettings"},
+			Fields: []string{"DataProviderName", "Description", "Engine", "Virtual", "Settings"}, Check: dmsDataProviderUpdate},
+		{Name: "DeleteDataProvider", Kind: Delete, Resource: "dataProvider", Lookup: "DataProviderIdentifier"},
+		{Name: "CreateInstanceProfile", Kind: Create, Resource: "instanceProfile"},
+		{Name: "DescribeInstanceProfiles", Kind: List, Resource: "instanceProfile"},
+		{Name: "ModifyInstanceProfile", Kind: Update, Resource: "instanceProfile", Lookup: "InstanceProfileIdentifier",
+			Fields: []string{"AvailabilityZone", "KmsKeyArn", "PubliclyAccessible", "NetworkType", "InstanceProfileName", "Description", "SubnetGroupIdentifier", "VpcSecurityGroups"}},
+		{Name: "DeleteInstanceProfile", Kind: Delete, Resource: "instanceProfile", Lookup: "InstanceProfileIdentifier"},
+		{Name: "CreateMigrationProject", Kind: Create, Resource: "migrationProject", Check: dmsMigrationProject},
+		{Name: "DescribeMigrationProjects", Kind: List, Resource: "migrationProject"},
+		{Name: "ModifyMigrationProject", Kind: Update, Resource: "migrationProject", Lookup: "MigrationProjectIdentifier",
+			Fields: []string{"MigrationProjectName", "SourceDataProviderDescriptors", "TargetDataProviderDescriptors", "InstanceProfileArn", "TransformationRules", "Description", "SchemaConversionApplicationAttributes"},
+			Check:  dmsMigrationProject},
+		{Name: "DeleteMigrationProject", Kind: Delete, Resource: "migrationProject", Lookup: "MigrationProjectIdentifier"},
+	},
+	Bounds: []string{
+		"Replication subnet groups, event subscriptions, data providers, instance profiles and migration projects are stored configuration records: no replication instance, replication task, endpoint, connection, assessment, schema conversion or migration exists, and nothing connects to any database. Endpoints (which carry database credentials), certificates, tagging (AddTagsToResource, RemoveTagsFromResource and ListTagsForResource), replication instances and tasks, serverless replication configurations, Fleet Advisor, metadata models, recommendations and every Start, Stop, Reload, Refresh, Test and Apply operation return UnknownOperationException with HTTP 501.",
+		"The Filters member of the Describe operations is refused except DescribeEventSubscriptions SubscriptionName; Describe operations return every stored record, and an unknown SubscriptionName returns an empty list instead of a not-found fault. Event subscription categories, source identifiers and SNS topics, subnet IDs, security groups, KMS keys, roles and Availability Zones are stored without being checked, and no notification is sent.",
+		"A replication subnet group needs two or more subnet IDs and reports no VpcId; the Availability Zone coverage of the subnets is not checked. Data provider settings hold the server name, port, database name and SSL mode as supplied and are never contacted; ModifyDataProvider accepts Settings only with ExactSettings set to true, which replaces the stored settings, because the merge form is not implemented. Instance profiles report no network address.",
+		"A migration project must name its instance profile by ARN, and the profile must exist; its source and target data provider descriptors must name data providers by ARN and are not resolved, so the descriptors report DataProviderArn without DataProviderName, and the project reports InstanceProfileArn without InstanceProfileName. SecretsManagerSecretId values are stored as references and never read. Deleting an instance profile or data provider does not check the projects that use it. Tags are not stored: the official DMS tag structure carries a third ResourceArn member that the catalog tag model cannot represent, so the Tags member of the create operations is refused. Record counts are local limits, not Service Quotas.",
+	},
+}
+
+// dmsSubnetGroup applies the documented identifier rule (stored lowercase,
+// never default) and turns SubnetIds into the official Subnets list.
+func dmsSubnetGroup(input map[string]any) error {
+	if name, ok := input["ReplicationSubnetGroupIdentifier"].(string); ok {
+		if !dmsSubnetGroupName.MatchString(name) || strings.EqualFold(name, "default") {
+			return invalid("ReplicationSubnetGroupIdentifier must be 1 to 255 letters, digits, periods, underscores or hyphens and must not be default.")
+		}
+		input["ReplicationSubnetGroupIdentifier"] = strings.ToLower(name)
+	}
+	ids, ok := input["SubnetIds"].([]any)
+	if !ok {
+		return nil
+	}
+	if len(ids) < 2 {
+		return invalid("A replication subnet group needs two or more subnet IDs.")
+	}
+	subnets := make([]any, 0, len(ids))
+	for _, id := range ids {
+		subnets = append(subnets, map[string]any{"SubnetIdentifier": id, "SubnetStatus": "Active"})
+	}
+	delete(input, "SubnetIds")
+	input["Subnets"] = subnets
+	return nil
+}
+
+// dmsEventSubscription applies the documented source types and the rule that
+// source identifiers need a source type.
+func dmsEventSubscription(input map[string]any) error {
+	if name, ok := input["SubscriptionName"].(string); ok && len(name) >= 255 {
+		return invalid("SubscriptionName must be less than 255 characters.")
+	}
+	sourceType, hasType := input["SourceType"].(string)
+	if hasType && sourceType != "replication-instance" && sourceType != "replication-task" {
+		return invalid("SourceType must be replication-instance or replication-task.")
+	}
+	if ids, ok := input["SourceIds"].([]any); ok && len(ids) > 0 && !hasType {
+		return invalid("SourceIds need a SourceType.")
+	}
+	return nil
+}
+
+// dmsDataProviderSettings requires one engine member, as the settings union
+// documents, and a documented engine.
+func dmsDataProvider(input map[string]any) error {
+	if engine, ok := input["Engine"].(string); ok && !dmsEngines[engine] {
+		return invalid("Engine is not one of the documented data provider engines.")
+	}
+	if settings, ok := input["Settings"].(map[string]any); ok && len(settings) != 1 {
+		return invalid("Settings hold exactly one engine settings member.")
+	}
+	return nil
+}
+
+func dmsDataProviderUpdate(input map[string]any) error {
+	if err := dmsDataProvider(input); err != nil {
+		return err
+	}
+	if _, ok := input["Settings"]; ok && input["ExactSettings"] != true {
+		return invalid("Settings can be changed only with ExactSettings set to true.")
+	}
+	return nil
+}
+
+// dmsMigrationProject requires ARNs where the model offers a name or ARN, so
+// the stored record never reports a name as an ARN.
+func dmsMigrationProject(input map[string]any) error {
+	if id, ok := input["InstanceProfileIdentifier"].(string); ok {
+		if !dmsInstanceARN.MatchString(id) {
+			return invalid("InstanceProfileIdentifier must be the ARN of an instance profile.")
+		}
+		input["InstanceProfileArn"] = id
+		delete(input, "InstanceProfileIdentifier")
+	}
+	for _, key := range []string{"SourceDataProviderDescriptors", "TargetDataProviderDescriptors"} {
+		descriptors, ok := input[key].([]any)
+		if !ok {
+			continue
+		}
+		if len(descriptors) == 0 {
+			return invalid("%s needs one data provider.", key)
+		}
+		converted := make([]any, 0, len(descriptors))
+		for _, item := range descriptors {
+			d, _ := item.(map[string]any)
+			id, _ := d["DataProviderIdentifier"].(string)
+			if !dmsDataProviderARN.MatchString(id) {
+				return invalid("DataProviderIdentifier must be the ARN of a data provider.")
+			}
+			out := map[string]any{"DataProviderArn": id}
+			for _, member := range []string{"SecretsManagerSecretId", "SecretsManagerAccessRoleArn"} {
+				if v, ok := d[member]; ok {
+					out[member] = v
+				}
+			}
+			converted = append(converted, out)
+		}
+		input[key] = converted
+	}
+	return nil
+}

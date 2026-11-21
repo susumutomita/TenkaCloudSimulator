@@ -136,3 +136,121 @@ func TestDeadlineCloudLifecycle(t *testing.T) {
 	expect(t, h.rest("deadline", "POST", "/2023-10-12/monitors", map[string]any{"displayName": "m"}), 501, "UnknownOperationException")
 	expect(t, h.rest("deadline", "POST", base+"/"+farmID+"/queues", map[string]any{"displayName": "q"}), 404, "ResourceNotFoundException")
 }
+
+func TestDatabaseMigrationLifecycle(t *testing.T) {
+	h := newHarness(t, databaseMigration)
+	call := func(op string, input map[string]any) reply { return h.json1("dms", op, input) }
+	list := func(op, key string) []any { return call(op, map[string]any{}).body[key].([]any) }
+
+	// Replication subnet groups.
+	expect(t, call("CreateReplicationSubnetGroup", map[string]any{"ReplicationSubnetGroupIdentifier": "default", "ReplicationSubnetGroupDescription": "d", "SubnetIds": []any{"subnet-a", "subnet-b"}}), 400, "ValidationException")
+	expect(t, call("CreateReplicationSubnetGroup", map[string]any{"ReplicationSubnetGroupIdentifier": "bad name", "ReplicationSubnetGroupDescription": "d", "SubnetIds": []any{"subnet-a", "subnet-b"}}), 400, "")
+	expect(t, call("CreateReplicationSubnetGroup", map[string]any{"ReplicationSubnetGroupIdentifier": "one", "ReplicationSubnetGroupDescription": "d", "SubnetIds": []any{"subnet-a"}}), 400, "")
+	sg := call("CreateReplicationSubnetGroup", map[string]any{"ReplicationSubnetGroupIdentifier": "MyGroup", "ReplicationSubnetGroupDescription": "d",
+		"SubnetIds": []any{"subnet-a", "subnet-b"}})
+	expect(t, sg, 200, "")
+	group := sg.body["ReplicationSubnetGroup"].(map[string]any)
+	if group["ReplicationSubnetGroupIdentifier"] != "mygroup" || group["SubnetGroupStatus"] != "Complete" || len(group["Subnets"].([]any)) != 2 {
+		t.Fatalf("subnet group %v", group)
+	}
+	expect(t, call("CreateReplicationSubnetGroup", map[string]any{"ReplicationSubnetGroupIdentifier": "mygroup", "ReplicationSubnetGroupDescription": "d", "SubnetIds": []any{"subnet-a", "subnet-b"}}), 400, "ResourceAlreadyExistsFault")
+	expect(t, call("ModifyReplicationSubnetGroup", map[string]any{"ReplicationSubnetGroupIdentifier": "mygroup", "ReplicationSubnetGroupDescription": "e", "SubnetIds": []any{"subnet-c", "subnet-d", "subnet-e"}}), 200, "")
+	if groups := list("DescribeReplicationSubnetGroups", "ReplicationSubnetGroups"); len(groups) != 1 || len(groups[0].(map[string]any)["Subnets"].([]any)) != 3 {
+		t.Fatalf("groups %v", groups)
+	}
+	expect(t, call("DescribeReplicationSubnetGroups", map[string]any{"Filters": []any{map[string]any{"Name": "x", "Values": []any{"y"}}}}), 400, "")
+
+	// Event subscriptions.
+	topic := "arn:aws:sns:us-east-1:000000000000:events"
+	expect(t, call("CreateEventSubscription", map[string]any{"SubscriptionName": "s", "SnsTopicArn": topic, "SourceType": "endpoint"}), 400, "")
+	expect(t, call("CreateEventSubscription", map[string]any{"SubscriptionName": "s", "SnsTopicArn": topic, "SourceIds": []any{"task-1"}}), 400, "")
+	expect(t, call("CreateEventSubscription", map[string]any{"SubscriptionName": strings.Repeat("a", 255), "SnsTopicArn": topic}), 400, "")
+	sub := call("CreateEventSubscription", map[string]any{"SubscriptionName": "s", "SnsTopicArn": topic, "SourceType": "replication-task", "EventCategories": []any{"failure"}})
+	expect(t, sub, 200, "")
+	if s := sub.body["EventSubscription"].(map[string]any); s["Status"] != "active" || s["Enabled"] != true || s["CustomerAwsId"] != "000000000000" {
+		t.Fatalf("subscription %v", s)
+	}
+	expect(t, call("ModifyEventSubscription", map[string]any{"SubscriptionName": "s", "Enabled": false, "SourceType": "replication-instance"}), 200, "")
+	if subs := call("DescribeEventSubscriptions", map[string]any{"SubscriptionName": "s"}).body["EventSubscriptionsList"].([]any); len(subs) != 1 || subs[0].(map[string]any)["Enabled"] != false {
+		t.Fatalf("subscriptions %v", subs)
+	}
+	if subs := call("DescribeEventSubscriptions", map[string]any{"SubscriptionName": "other"}).body["EventSubscriptionsList"].([]any); len(subs) != 0 {
+		t.Fatalf("subscriptions %v", subs)
+	}
+
+	// Data providers.
+	settings := map[string]any{"PostgreSqlSettings": map[string]any{"ServerName": "db.example.invalid", "Port": 5432, "DatabaseName": "app", "SslMode": "none"}}
+	expect(t, call("CreateDataProvider", map[string]any{"Engine": "oracle2", "Settings": settings}), 400, "")
+	expect(t, call("CreateDataProvider", map[string]any{"Engine": "postgres", "Settings": map[string]any{}}), 400, "")
+	dp := call("CreateDataProvider", map[string]any{"Engine": "postgres", "DataProviderName": "source", "Settings": settings})
+	expect(t, dp, 200, "")
+	provider := dp.body["DataProvider"].(map[string]any)
+	providerARN := str(provider["DataProviderArn"])
+	if provider["DataProviderName"] != "source" || !strings.Contains(providerARN, ":dms:us-east-1:000000000000:data-provider:") {
+		t.Fatalf("provider %v", provider)
+	}
+	unnamed := call("CreateDataProvider", map[string]any{"Engine": "mysql", "Settings": map[string]any{"MySqlSettings": map[string]any{"ServerName": "db2.example.invalid"}}})
+	expect(t, unnamed, 200, "")
+	if n := str(unnamed.body["DataProvider"].(map[string]any)["DataProviderName"]); len(n) != 26 {
+		t.Fatalf("generated name %q", n)
+	}
+	expect(t, call("ModifyDataProvider", map[string]any{"DataProviderIdentifier": "source", "Settings": settings}), 400, "")
+	expect(t, call("ModifyDataProvider", map[string]any{"DataProviderIdentifier": "source", "Settings": settings, "ExactSettings": true, "Description": "d"}), 200, "")
+	expect(t, call("ModifyDataProvider", map[string]any{"DataProviderIdentifier": providerARN, "Engine": "bogus"}), 400, "")
+	if ps := list("DescribeDataProviders", "DataProviders"); len(ps) != 2 {
+		t.Fatalf("providers %v", ps)
+	}
+
+	// Instance profiles and migration projects.
+	ip := call("CreateInstanceProfile", map[string]any{"InstanceProfileName": "profile", "SubnetGroupIdentifier": "mygroup", "VpcSecurityGroups": []any{"sg-a"}})
+	expect(t, ip, 200, "")
+	profile := ip.body["InstanceProfile"].(map[string]any)
+	profileARN := str(profile["InstanceProfileArn"])
+	if profile["PubliclyAccessible"] != true {
+		t.Fatalf("profile %v", profile)
+	}
+	expect(t, call("ModifyInstanceProfile", map[string]any{"InstanceProfileIdentifier": "profile", "PubliclyAccessible": false, "Description": "x"}), 200, "")
+	if ps := list("DescribeInstanceProfiles", "InstanceProfiles"); len(ps) != 1 || ps[0].(map[string]any)["PubliclyAccessible"] != false {
+		t.Fatalf("profiles %v", ps)
+	}
+	descriptor := func(id string) []any {
+		return []any{map[string]any{"DataProviderIdentifier": id, "SecretsManagerAccessRoleArn": "arn:aws:iam::000000000000:role/dms"}}
+	}
+	project := map[string]any{"MigrationProjectName": "proj", "SourceDataProviderDescriptors": descriptor(providerARN), "TargetDataProviderDescriptors": descriptor(providerARN), "InstanceProfileIdentifier": profileARN}
+	expect(t, call("CreateMigrationProject", map[string]any{"SourceDataProviderDescriptors": descriptor("source"), "TargetDataProviderDescriptors": descriptor(providerARN), "InstanceProfileIdentifier": profileARN}), 400, "")
+	expect(t, call("CreateMigrationProject", map[string]any{"SourceDataProviderDescriptors": []any{}, "TargetDataProviderDescriptors": descriptor(providerARN), "InstanceProfileIdentifier": profileARN}), 400, "")
+	expect(t, call("CreateMigrationProject", map[string]any{"SourceDataProviderDescriptors": descriptor(providerARN), "TargetDataProviderDescriptors": descriptor(providerARN), "InstanceProfileIdentifier": "profile"}), 400, "")
+	missing := strings.Replace(profileARN, "instance-profile:", "instance-profile:z", 1)
+	missing = missing[:len(missing)-1]
+	expect(t, call("CreateMigrationProject", map[string]any{"SourceDataProviderDescriptors": descriptor(providerARN), "TargetDataProviderDescriptors": descriptor(providerARN), "InstanceProfileIdentifier": missing}), 400, "ResourceNotFoundFault")
+	created := call("CreateMigrationProject", project)
+	expect(t, created, 200, "")
+	mp := created.body["MigrationProject"].(map[string]any)
+	if mp["InstanceProfileArn"] != profileARN || mp["SourceDataProviderDescriptors"].([]any)[0].(map[string]any)["DataProviderArn"] != providerARN {
+		t.Fatalf("project %v", mp)
+	}
+	expect(t, call("ModifyMigrationProject", map[string]any{"MigrationProjectIdentifier": "proj", "Description": "d", "InstanceProfileIdentifier": profileARN}), 200, "")
+	if ps := list("DescribeMigrationProjects", "MigrationProjects"); len(ps) != 1 || ps[0].(map[string]any)["Description"] != "d" {
+		t.Fatalf("projects %v", ps)
+	}
+
+	// Tags cannot be represented and are refused.
+	expect(t, call("CreateDataProvider", map[string]any{"Engine": "postgres", "Settings": settings, "Tags": []any{map[string]any{"Key": "k", "Value": "v"}}}), 400, "")
+	expect(t, call("AddTagsToResource", map[string]any{"ResourceArn": providerARN, "Tags": []any{map[string]any{"Key": "k", "Value": "v"}}}), 501, "UnknownOperationException")
+
+	// Deletion and unbound operations.
+	for _, c := range []struct {
+		op string
+		in map[string]any
+	}{
+		{"DeleteMigrationProject", map[string]any{"MigrationProjectIdentifier": "proj"}},
+		{"DeleteInstanceProfile", map[string]any{"InstanceProfileIdentifier": profileARN}},
+		{"DeleteDataProvider", map[string]any{"DataProviderIdentifier": "source"}},
+		{"DeleteEventSubscription", map[string]any{"SubscriptionName": "s"}},
+		{"DeleteReplicationSubnetGroup", map[string]any{"ReplicationSubnetGroupIdentifier": "mygroup"}},
+	} {
+		expect(t, call(c.op, c.in), 200, "")
+		expect(t, call(c.op, c.in), 400, "ResourceNotFoundFault")
+	}
+	expect(t, call("CreateEndpoint", map[string]any{"EndpointIdentifier": "e", "EndpointType": "source", "EngineName": "mysql"}), 501, "UnknownOperationException")
+}
