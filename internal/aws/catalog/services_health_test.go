@@ -1,14 +1,16 @@
 package catalog
 
 import (
+	"encoding/json"
 	"errors"
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 )
 
 func healthHarness(t *testing.T) *harness {
-	return newHarness(t, healthImaging, healthLake)
+	return newHarness(t, healthImaging, healthLake, omics)
 }
 
 func TestHealthImagingDatastoreLifecycle(t *testing.T) {
@@ -262,6 +264,248 @@ func TestHealthLakeFaultsAndUnboundOperations(t *testing.T) {
 	expect(t, h.json1("healthlake", "CreateFHIRDatastore", map[string]any{"DatastoreTypeVersion": "R4"}), 400, "ValidationException")
 	for _, op := range []string{"StartFHIRImportJob", "DescribeFHIRImportJob", "ListFHIRImportJobs", "StartFHIRExportJob", "DescribeFHIRExportJob", "ListFHIRExportJobs"} {
 		expect(t, h.json1("healthlake", op, map[string]any{"DatastoreId": strings.Repeat("a", 32)}), 501, "UnknownOperationException")
+	}
+}
+
+func TestOmicsNumericIdentifiers(t *testing.T) {
+	digits := func(id string) bool {
+		if len(id) != 10 || id[0] == '0' {
+			return false
+		}
+		for _, c := range id {
+			if c < '0' || c > '9' {
+				return false
+			}
+		}
+		return true
+	}
+	if a, b := omicsNumericID("Op", "token"), omicsNumericID("Op", "token"); a != b || !digits(a) {
+		t.Fatalf("token identifiers %s %s", a, b)
+	}
+	if omicsNumericID("Op", "token") == omicsNumericID("Other", "token") || omicsNumericID("Op", "a") == omicsNumericID("Op", "b") {
+		t.Fatal("identifiers must differ by operation and token")
+	}
+	if a, b := omicsNumericID("Op", ""), omicsNumericID("Op", ""); !digits(a) || !digits(b) || a == b {
+		t.Fatalf("random identifiers %s %s", a, b)
+	}
+	input := map[string]any{"requestId": "r"}
+	if err := omicsIdentity("Op", "requestId")(input); err != nil || input["id"] != omicsNumericID("Op", "r") {
+		t.Fatalf("hook %v %v", input, err)
+	}
+}
+
+func TestOmicsS3Locations(t *testing.T) {
+	cases := []struct {
+		value string
+		ok    bool
+	}{{"s3://bucket", true}, {"s3://bucket/prefix/", true}, {"s3://my.bucket-1/a/b", true}, {"", true}, {"bucket", false}, {"https://bucket", false}, {"s3://B", false}, {"s3://bucket/x", true}}
+	for _, c := range cases {
+		input := map[string]any{"cacheS3Location": c.value}
+		err := omicsLocation("cacheS3Location")(input)
+		if (err == nil) != c.ok {
+			t.Fatalf("%q: %v", c.value, err)
+		}
+	}
+	if err := omicsLocation("cacheS3Location")(map[string]any{}); err != nil {
+		t.Fatal(err)
+	}
+	input := map[string]any{"clientToken": "t", "fallbackLocation": "elsewhere"}
+	if err := omicsCreate("CreateSequenceStore", "clientToken", "fallbackLocation")(input); err == nil || input["id"] != nil {
+		t.Fatalf("a bad location must stop creation: %v %v", err, input)
+	}
+	input = map[string]any{"clientToken": "t", "fallbackLocation": "s3://bucket"}
+	if err := omicsCreate("CreateSequenceStore", "clientToken", "fallbackLocation")(input); err != nil || input["id"] == nil {
+		t.Fatalf("a good location creates: %v %v", err, input)
+	}
+}
+
+func TestOmicsStoreFilters(t *testing.T) {
+	input := map[string]any{"filter": map[string]any{"name": "a", "status": "CREATING"}}
+	if err := omicsStoreFilter(true)(input); err != nil || input["name"] != "a" || input["status"] != "CREATING" || input["filter"] != nil {
+		t.Fatalf("flattened %v %v", input, err)
+	}
+	if err := omicsStoreFilter(true)(map[string]any{}); err != nil {
+		t.Fatal(err)
+	}
+	for _, member := range []string{"createdAfter", "createdBefore", "updatedAfter", "updatedBefore"} {
+		var f *fault
+		if err := omicsStoreFilter(true)(map[string]any{"filter": map[string]any{member: "t"}}); !errors.As(err, &f) || f.code != "ValidationException" {
+			t.Fatalf("%s: %v", member, err)
+		}
+	}
+	var f *fault
+	if err := omicsStoreFilter(false)(map[string]any{"filter": map[string]any{"status": "ACTIVE"}}); !errors.As(err, &f) {
+		t.Fatalf("reference stores filter by name only: %v", err)
+	}
+}
+
+func TestOmicsRunGroupAndRunCacheLifecycle(t *testing.T) {
+	h := healthHarness(t)
+	group := map[string]any{"requestId": "rg-1", "name": "batch", "maxCpus": 8, "maxRuns": 2, "maxDuration": 60, "maxGpus": 1, "tags": map[string]any{"team": "a"}}
+	created := h.rest("omics", "POST", "/runGroup", group)
+	expect(t, created, 201, "")
+	id := str(created.body["id"])
+	arn := "arn:aws:omics:us-east-1:000000000000:runGroup/" + id
+	if len(id) != 10 || created.body["arn"] != arn || created.body["tags"].(map[string]any)["team"] != "a" {
+		t.Fatalf("created %v", created.body)
+	}
+	if replay := h.rest("omics", "POST", "/runGroup", group); replay.body["id"] != id {
+		t.Fatalf("replay %v", replay.body)
+	}
+	group["maxRuns"] = 3
+	expect(t, h.rest("omics", "POST", "/runGroup", group), 409, "ConflictException")
+	expect(t, h.rest("omics", "POST", "/runGroup", map[string]any{"requestId": "rg-2", "name": "other"}), 201, "")
+
+	got := h.rest("omics", "GET", "/runGroup/"+id, nil)
+	expect(t, got, 200, "")
+	if got.body["name"] != "batch" || got.body["maxCpus"] != json.Number("8") || got.body["creationTime"] == nil || got.body["id"] != id {
+		t.Fatalf("run group %v", got.body)
+	}
+	byName := h.rest("omics", "GET", "/runGroup?name=batch", nil)
+	if items := byName.body["items"].([]any); len(items) != 1 || items[0].(map[string]any)["arn"] != arn {
+		t.Fatalf("by name %v", byName.body)
+	}
+	if items := h.rest("omics", "GET", "/runGroup", nil).body["items"].([]any); len(items) != 2 {
+		t.Fatalf("list %v", items)
+	}
+	paged := h.rest("omics", "GET", "/runGroup?maxResults=1", nil)
+	if len(paged.body["items"].([]any)) != 1 || str(paged.body["nextToken"]) == "" {
+		t.Fatalf("page %v", paged.body)
+	}
+	expect(t, h.rest("omics", "POST", "/runGroup/"+id, map[string]any{"name": "renamed", "maxRuns": 5}), 202, "")
+	if got := h.rest("omics", "GET", "/runGroup/"+id, nil).body; got["name"] != "renamed" || got["maxRuns"] != json.Number("5") {
+		t.Fatalf("updated %v", got)
+	}
+	expect(t, h.rest("omics", "POST", "/runGroup/"+id, map[string]any{"maxCpus": 0}), 400, "ValidationException")
+
+	tagPath := "/tags/" + url.PathEscape(arn)
+	expect(t, h.rest("omics", "POST", tagPath, map[string]any{"tags": map[string]any{"stage": "dev"}}), 204, "")
+	if tags := h.rest("omics", "GET", tagPath, nil).body["tags"].(map[string]any); len(tags) != 2 {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, h.rest("omics", "DELETE", tagPath+"?tagKeys=stage", nil), 204, "")
+	if tags := h.rest("omics", "GET", tagPath, nil).body["tags"].(map[string]any); len(tags) != 1 {
+		t.Fatalf("tags after untag %v", tags)
+	}
+	expect(t, h.rest("omics", "DELETE", "/runGroup/"+id, nil), 202, "")
+	expect(t, h.rest("omics", "GET", "/runGroup/"+id, nil), 404, "ResourceNotFoundException")
+	expect(t, h.rest("omics", "DELETE", "/runGroup/"+id, nil), 404, "ResourceNotFoundException")
+
+	cache := h.rest("omics", "POST", "/runCache", map[string]any{"requestId": "rc-1", "cacheS3Location": "s3://bucket/cache", "name": "cache", "description": "d", "cacheBucketOwnerId": "000000000000"})
+	expect(t, cache, 201, "")
+	cacheID := str(cache.body["id"])
+	if cache.body["status"] != "ACTIVE" || cache.body["arn"] != "arn:aws:omics:us-east-1:000000000000:runCache/"+cacheID {
+		t.Fatalf("created cache %v", cache.body)
+	}
+	described := h.rest("omics", "GET", "/runCache/"+cacheID, nil)
+	if described.body["cacheS3Uri"] != "s3://bucket/cache" || described.body["cacheBehavior"] != "CACHE_ON_FAILURE" || described.body["name"] != "cache" {
+		t.Fatalf("cache %v", described.body)
+	}
+	if items := h.rest("omics", "GET", "/runCache", nil).body["items"].([]any); len(items) != 1 || items[0].(map[string]any)["cacheS3Uri"] != "s3://bucket/cache" {
+		t.Fatalf("cache list %v", items)
+	}
+	expect(t, h.rest("omics", "POST", "/runCache/"+cacheID, map[string]any{"cacheBehavior": "CACHE_ALWAYS", "description": "changed"}), 202, "")
+	if got := h.rest("omics", "GET", "/runCache/"+cacheID, nil).body; got["cacheBehavior"] != "CACHE_ALWAYS" || got["description"] != "changed" {
+		t.Fatalf("updated cache %v", got)
+	}
+	expect(t, h.rest("omics", "POST", "/runCache/"+cacheID, map[string]any{"cacheBehavior": "NEVER"}), 400, "ValidationException")
+	expect(t, h.rest("omics", "POST", "/runCache", map[string]any{"requestId": "rc-2"}), 400, "ValidationException")
+	expect(t, h.rest("omics", "POST", "/runCache", map[string]any{"requestId": "rc-3", "cacheS3Location": "not-an-s3-uri"}), 400, "ValidationException")
+	expect(t, h.rest("omics", "DELETE", "/runCache/"+cacheID, nil), 202, "")
+	expect(t, h.rest("omics", "GET", "/runCache/"+cacheID, nil), 404, "ResourceNotFoundException")
+}
+
+func TestOmicsStoresLifecycle(t *testing.T) {
+	h := healthHarness(t)
+	create := map[string]any{"name": "reads", "description": "fixture", "clientToken": "ss-1", "sseConfig": map[string]any{"type": "KMS", "keyArn": "arn:aws:kms:us-east-1:000000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab"},
+		"fallbackLocation": "s3://bucket/fallback", "propagatedSetLevelTags": []any{"team"}, "tags": map[string]any{"team": "a"}}
+	created := h.rest("omics", "POST", "/sequencestore", create)
+	expect(t, created, 200, "")
+	id := str(created.body["id"])
+	arn := "arn:aws:omics:us-east-1:000000000000:sequenceStore/" + id
+	if len(id) != 10 || created.body["arn"] != arn || created.body["status"] != "CREATING" || created.body["eTagAlgorithmFamily"] != "MD5up" {
+		t.Fatalf("created %v", created.body)
+	}
+	if _, present := created.body["s3Access"]; present {
+		t.Fatal("no S3 access point exists")
+	}
+	if replay := h.rest("omics", "POST", "/sequencestore", create); replay.body["id"] != id {
+		t.Fatalf("replay %v", replay.body)
+	}
+	expect(t, h.rest("omics", "POST", "/sequencestore", map[string]any{"name": "access", "s3AccessConfig": map[string]any{"accessLogLocation": "s3://bucket/logs"}}), 400, "ValidationException")
+	expect(t, h.rest("omics", "POST", "/sequencestore", map[string]any{"name": "other"}), 200, "")
+	expect(t, h.rest("omics", "POST", "/sequencestore", map[string]any{}), 400, "ValidationException")
+
+	got := h.rest("omics", "GET", "/sequencestore/"+id, nil)
+	expect(t, got, 200, "")
+	if got.body["name"] != "reads" || got.body["fallbackLocation"] != "s3://bucket/fallback" || got.body["propagatedSetLevelTags"].([]any)[0] != "team" {
+		t.Fatalf("store %v", got.body)
+	}
+	h.now = h.now.Add(time.Hour)
+	updated := h.rest("omics", "PATCH", "/sequencestore/"+id, map[string]any{"description": "changed", "clientToken": "ss-2"})
+	expect(t, updated, 200, "")
+	if updated.body["description"] != "changed" || updated.body["updateTime"] == got.body["updateTime"] {
+		t.Fatalf("updated %v vs %v", updated.body, got.body)
+	}
+	expect(t, h.rest("omics", "PATCH", "/sequencestore/"+id, map[string]any{"sseConfig": map[string]any{"type": "KMS"}}), 400, "ValidationException")
+	expect(t, h.rest("omics", "PATCH", "/sequencestore/"+id, map[string]any{"fallbackLocation": "elsewhere"}), 400, "ValidationException")
+
+	list := h.rest("omics", "POST", "/sequencestores", map[string]any{})
+	expect(t, list, 200, "")
+	if items := list.body["sequenceStores"].([]any); len(items) != 2 || items[0].(map[string]any)["id"] != id {
+		t.Fatalf("list %v", list.body)
+	}
+	byName := h.rest("omics", "POST", "/sequencestores", map[string]any{"filter": map[string]any{"name": "reads", "status": "CREATING"}})
+	if items := byName.body["sequenceStores"].([]any); len(items) != 1 {
+		t.Fatalf("filter %v", byName.body)
+	}
+	if items := h.rest("omics", "POST", "/sequencestores", map[string]any{"filter": map[string]any{"status": "ACTIVE"}}).body["sequenceStores"].([]any); len(items) != 0 {
+		t.Fatalf("status filter %v", items)
+	}
+	expect(t, h.rest("omics", "POST", "/sequencestores", map[string]any{"filter": map[string]any{"createdAfter": "2026-01-01T00:00:00Z"}}), 400, "ValidationException")
+	paged := h.rest("omics", "POST", "/sequencestores?maxResults=1", map[string]any{})
+	if len(paged.body["sequenceStores"].([]any)) != 1 || str(paged.body["nextToken"]) == "" {
+		t.Fatalf("page %v", paged.body)
+	}
+	tagPath := "/tags/" + url.PathEscape(arn)
+	if tags := h.rest("omics", "GET", tagPath, nil).body["tags"].(map[string]any); tags["team"] != "a" {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, h.rest("omics", "DELETE", "/sequencestore/"+id, nil), 200, "")
+	expect(t, h.rest("omics", "GET", "/sequencestore/"+id, nil), 404, "ResourceNotFoundException")
+	expect(t, h.rest("omics", "GET", tagPath, nil), 404, "ResourceNotFoundException")
+
+	reference := h.rest("omics", "POST", "/referencestore", map[string]any{"name": "genomes", "description": "d", "clientToken": "rs-1", "sseConfig": map[string]any{"type": "KMS"}, "tags": map[string]any{"team": "a"}})
+	expect(t, reference, 200, "")
+	referenceID := str(reference.body["id"])
+	if reference.body["arn"] != "arn:aws:omics:us-east-1:000000000000:referenceStore/"+referenceID || reference.body["creationTime"] == nil {
+		t.Fatalf("reference store %v", reference.body)
+	}
+	if got := h.rest("omics", "GET", "/referencestore/"+referenceID, nil).body; got["name"] != "genomes" || got["description"] != "d" {
+		t.Fatalf("reference store %v", got)
+	}
+	listed := h.rest("omics", "POST", "/referencestores", map[string]any{"filter": map[string]any{"name": "genomes"}})
+	if items := listed.body["referenceStores"].([]any); len(items) != 1 {
+		t.Fatalf("reference list %v", listed.body)
+	}
+	if items := h.rest("omics", "POST", "/referencestores", map[string]any{"filter": map[string]any{"name": "none"}}).body["referenceStores"].([]any); len(items) != 0 {
+		t.Fatalf("reference name filter %v", items)
+	}
+	expect(t, h.rest("omics", "POST", "/referencestores", map[string]any{"filter": map[string]any{"createdBefore": "2026-01-01T00:00:00Z"}}), 400, "ValidationException")
+	expect(t, h.rest("omics", "DELETE", "/referencestore/"+referenceID, nil), 200, "")
+	expect(t, h.rest("omics", "GET", "/referencestore/"+referenceID, nil), 404, "ResourceNotFoundException")
+}
+
+func TestOmicsLimitsAndUnboundOperations(t *testing.T) {
+	h := healthHarness(t)
+	for i := 0; i < 5; i++ {
+		expect(t, h.rest("omics", "POST", "/referencestore", map[string]any{"name": "r"}), 200, "")
+	}
+	expect(t, h.rest("omics", "POST", "/referencestore", map[string]any{"name": "r"}), 402, "ServiceQuotaExceededException")
+	expect(t, h.rest("omics", "GET", "/runGroup/123", nil), 404, "ResourceNotFoundException")
+	expect(t, h.rest("omics", "GET", "/runGroup/abc", nil), 400, "ValidationException")
+	for _, call := range []struct{ method, path string }{{"POST", "/workflow"}, {"POST", "/run"}, {"POST", "/annotationStore"}, {"POST", "/variantStore"}, {"POST", "/sequencestore/1234567890/importjob"}, {"POST", "/sequencestore/1234567890/readset/batch/delete"}} {
+		expect(t, h.rest("omics", call.method, call.path, map[string]any{}), 501, "UnknownOperationException")
 	}
 }
 

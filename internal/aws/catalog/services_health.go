@@ -1,8 +1,13 @@
 package catalog
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/binary"
 	"encoding/json"
+	"regexp"
 	"slices"
+	"strconv"
 )
 
 // Health and life-science data stores and workspaces served as stored
@@ -139,4 +144,125 @@ func healthLakeList(input map[string]any) error {
 		}
 	}
 	return nil
+}
+
+// omics serves HealthOmics run groups, run caches, sequence stores and
+// reference stores as configuration records. Identifiers are numeric, as the
+// official patterns require, and come from the Check hooks below.
+var omics = &Service{
+	Model: "omics", Title: "AWS HealthOmics", IAMPrefix: "omics", Issues: []int{173},
+	Resources: []*Resource{
+		{Kind: "runGroup", Shape: "GetRunGroupResponse", Summary: "RunGroupListItem", ID: "name", NameMember: "id", IDMember: "id", Limit: 25,
+			ARN: "arn:{partition}:omics:{region}:{account}:runGroup/{id}", ARNMember: "arn", Generate: map[string]any{"creationTime": "$now"}},
+		{Kind: "runCache", Shape: "GetRunCacheResponse", Summary: "RunCacheListItem", ID: "name", NameMember: "id", IDMember: "id", Limit: 25,
+			ARN: "arn:{partition}:omics:{region}:{account}:runCache/{id}", ARNMember: "arn", Aliases: map[string]string{"cacheS3Location": "cacheS3Uri"},
+			Generate: map[string]any{"status": "ACTIVE", "cacheBehavior": "CACHE_ON_FAILURE", "creationTime": "$now"}},
+		{Kind: "sequenceStore", Shape: "GetSequenceStoreResponse", Summary: "SequenceStoreDetail", ID: "name", NameMember: "id", IDMember: "id", Limit: 15,
+			ARN: "arn:{partition}:omics:{region}:{account}:sequenceStore/{id}", ARNMember: "arn",
+			Generate: map[string]any{"status": "CREATING", "eTagAlgorithmFamily": "MD5up", "creationTime": "$now", "updateTime": "$now"}},
+		{Kind: "referenceStore", Shape: "GetReferenceStoreResponse", Summary: "ReferenceStoreDetail", ID: "name", NameMember: "id", IDMember: "id", Limit: 5,
+			ARN: "arn:{partition}:omics:{region}:{account}:referenceStore/{id}", ARNMember: "arn", Generate: map[string]any{"creationTime": "$now"}},
+	},
+	Ops: []Op{
+		{Name: "CreateRunGroup", Kind: Create, Resource: "runGroup", Check: omicsIdentity("CreateRunGroup", "requestId")},
+		{Name: "GetRunGroup", Kind: Read, Resource: "runGroup", Lookup: "id"},
+		{Name: "ListRunGroups", Kind: List, Resource: "runGroup", Filters: map[string]string{"name": "name"}},
+		{Name: "UpdateRunGroup", Kind: Update, Resource: "runGroup", Lookup: "id", Fields: []string{"name", "maxCpus", "maxRuns", "maxDuration", "maxGpus"}},
+		{Name: "DeleteRunGroup", Kind: Delete, Resource: "runGroup", Lookup: "id"},
+		{Name: "CreateRunCache", Kind: Create, Resource: "runCache", Check: omicsCreate("CreateRunCache", "requestId", "cacheS3Location")},
+		{Name: "GetRunCache", Kind: Read, Resource: "runCache", Lookup: "id"},
+		{Name: "ListRunCaches", Kind: List, Resource: "runCache"},
+		{Name: "UpdateRunCache", Kind: Update, Resource: "runCache", Lookup: "id", Fields: []string{"cacheBehavior", "description", "name"}},
+		{Name: "DeleteRunCache", Kind: Delete, Resource: "runCache", Lookup: "id"},
+		{Name: "CreateSequenceStore", Kind: Create, Resource: "sequenceStore", Check: omicsCreate("CreateSequenceStore", "clientToken", "fallbackLocation")},
+		{Name: "GetSequenceStore", Kind: Read, Resource: "sequenceStore", Lookup: "id"},
+		{Name: "ListSequenceStores", Kind: List, Resource: "sequenceStore", Check: omicsStoreFilter(true),
+			Filters: map[string]string{"name": "name", "status": "status"}},
+		{Name: "UpdateSequenceStore", Kind: Update, Resource: "sequenceStore", Lookup: "id", Accept: []string{"clientToken"}, Touch: []string{"updateTime"}, Check: omicsLocation("fallbackLocation"),
+			Fields: []string{"name", "description", "fallbackLocation", "propagatedSetLevelTags"}},
+		{Name: "DeleteSequenceStore", Kind: Delete, Resource: "sequenceStore", Lookup: "id"},
+		{Name: "CreateReferenceStore", Kind: Create, Resource: "referenceStore", Accept: []string{"clientToken"}, Check: omicsIdentity("CreateReferenceStore", "")},
+		{Name: "GetReferenceStore", Kind: Read, Resource: "referenceStore", Lookup: "id"},
+		{Name: "ListReferenceStores", Kind: List, Resource: "referenceStore", Check: omicsStoreFilter(false), Filters: map[string]string{"name": "name"}},
+		{Name: "DeleteReferenceStore", Kind: Delete, Resource: "referenceStore", Lookup: "id"},
+		{Name: "TagResource", Kind: Tag, Lookup: "resourceArn"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "resourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "resourceArn"},
+	},
+	Bounds: []string{
+		"Run groups, run caches, sequence stores and reference stores are stored configuration records: no workflow runs, no run task, cache entry, read set, reference genome or S3 access point exists, nothing is imported, exported, activated or uploaded, and every other official operation returns UnknownOperationException with HTTP 501. A sequence store stays CREATING and holds no sequence data; run caches are ACTIVE records whose S3 location is stored without being read or written.",
+		"Workflows and workflow versions are not implemented: their definitions are ZIP archives or repository references whose content the official output only returns as presigned URLs, which the simulator does not hold. Annotation stores, variant stores and their versions are not implemented: a store needs a reference genome that only an import job can create. Shares, S3 access policies, multipart read set uploads and every start, cancel and job operation are not implemented either.",
+		"Identifiers are numeric as the official patterns require (10 digits). When the request carries its idempotency token (requestId, clientToken) the identifier is derived from the token and operation, so replaying the same request returns the same record and reusing a token with different parameters fails with ConflictException; a token reused after its 24-hour replay window can recreate an identifier. CreateReferenceStore models no idempotency token: its clientToken is accepted but not recorded. Names need not be unique. Resource counts per Region (25 run groups, 25 run caches, 15 sequence stores, 5 reference stores) are local limits.",
+		"s3AccessConfig of a sequence store is refused because it would create an S3 access point. sseConfig, fallbackLocation, propagatedSetLevelTags and eTagAlgorithmFamily (MD5up when omitted, as documented) are stored without contacting KMS or S3, and S3 locations (cacheS3Location, fallbackLocation) must be s3://bucket with an optional prefix, which the official pattern states but RE2 cannot enforce. ListSequenceStores filters by name and status and ListReferenceStores by name, with the created and updated time bounds refused. Deleting a store or a run group deletes the record without a read set, reference or run check because none can exist.",
+	},
+}
+
+// omicsNumericID returns the 10 digit identifier the official patterns
+// require, derived from the idempotency token when there is one so that a
+// replayed request keeps its identity and fingerprint.
+func omicsNumericID(operation, token string) string {
+	seed := make([]byte, 8)
+	if token != "" {
+		sum := sha256.Sum256([]byte(operation + "\x00" + token))
+		copy(seed, sum[:8])
+	} else {
+		_, _ = rand.Read(seed) // never fails since Go 1.24
+	}
+	return strconv.FormatUint(binary.BigEndian.Uint64(seed)%9_000_000_000+1_000_000_000, 10)
+}
+
+// omicsIdentity assigns the numeric identifier a create operation stores.
+func omicsIdentity(operation, tokenMember string) func(map[string]any) error {
+	return func(input map[string]any) error {
+		token, _ := input[tokenMember].(string)
+		input["id"] = omicsNumericID(operation, token)
+		return nil
+	}
+}
+
+// omicsS3Location is the documented S3 location of run caches and fallback
+// locations: a bucket name, optionally followed by a prefix. The official
+// pattern repeats a count RE2 cannot compile, so the shape does not enforce it.
+var omicsS3Location = regexp.MustCompile(`^s3://[a-z0-9][a-z0-9.-]{1,61}[a-z0-9](/.*)?$`)
+
+// omicsLocation requires the named members, when supplied, to be S3 locations.
+func omicsLocation(members ...string) func(map[string]any) error {
+	return func(input map[string]any) error {
+		for _, member := range members {
+			if text, ok := input[member].(string); ok && text != "" && !omicsS3Location.MatchString(text) {
+				return Failure("ValidationException", member+" must be an S3 location such as s3://bucket/prefix.")
+			}
+		}
+		return nil
+	}
+}
+
+// omicsCreate assigns the numeric identifier and checks the S3 locations.
+func omicsCreate(operation, tokenMember string, locations ...string) func(map[string]any) error {
+	identity, check := omicsIdentity(operation, tokenMember), omicsLocation(locations...)
+	return func(input map[string]any) error {
+		if err := check(input); err != nil {
+			return err
+		}
+		return identity(input)
+	}
+}
+
+// omicsStoreFilter flattens the equality members of a store list Filter onto
+// the stored members they compare and refuses the time bounds.
+func omicsStoreFilter(withStatus bool) func(map[string]any) error {
+	return func(input map[string]any) error {
+		filter, ok := input["filter"].(map[string]any)
+		if !ok {
+			return nil
+		}
+		delete(input, "filter")
+		for member, value := range filter {
+			if member != "name" && !(withStatus && member == "status") {
+				return Failure("ValidationException", "Filter "+member+" is not supported by the simulator.")
+			}
+			input[member] = value
+		}
+		return nil
+	}
 }

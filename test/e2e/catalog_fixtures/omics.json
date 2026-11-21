@@ -1,0 +1,46 @@
+{
+ "client": "omics",
+ "inject_host_prefix": false,
+ "steps": [
+  {"op": "create_run_group", "args": {"name": "fixture-group", "maxCpus": 16, "maxRuns": 4, "maxDuration": 120, "maxGpus": 1, "tags": {"team": "a"}}, "save": {"group": "id", "group_arn": "arn"}},
+  {"op": "get_run_group", "args": {"id": "${group}"}, "expect": {"arn": "${group_arn}", "name": "fixture-group", "maxCpus": 16, "maxRuns": 4, "tags": {"team": "a"}}},
+  {"op": "list_run_groups", "args": {"name": "fixture-group"}, "expect": {"items#count": 1, "items[0].id": "${group}"}},
+  {"op": "list_run_groups", "args": {"name": "other"}, "expect": {"items#count": 0}},
+  {"op": "update_run_group", "args": {"id": "${group}", "name": "fixture-group-2", "maxRuns": 8}},
+  {"op": "create_run_cache", "args": {"cacheS3Location": "s3://fixture-cache-bucket/cache", "name": "fixture-cache", "description": "fixture cache", "cacheBehavior": "CACHE_ALWAYS"}, "save": {"cache": "id"}, "expect": {"status": "ACTIVE"}},
+  {"op": "get_run_cache", "args": {"id": "${cache}"}, "expect": {"cacheS3Uri": "s3://fixture-cache-bucket/cache", "cacheBehavior": "CACHE_ALWAYS", "name": "fixture-cache", "status": "ACTIVE"}},
+  {"op": "list_run_caches", "args": {}, "expect": {"items#count": 1, "items[0].id": "${cache}"}},
+  {"op": "update_run_cache", "args": {"id": "${cache}", "cacheBehavior": "CACHE_ON_FAILURE", "description": "changed"}},
+  {"op": "create_sequence_store", "args": {"name": "fixture-reads", "description": "fixture", "fallbackLocation": "s3://fixture-bucket/fallback", "propagatedSetLevelTags": ["team"], "tags": {"team": "a"}}, "save": {"seq": "id", "seq_arn": "arn"}, "expect": {"status": "CREATING", "eTagAlgorithmFamily": "MD5up"}},
+  {"op": "get_sequence_store", "args": {"id": "${seq}"}, "expect": {"arn": "${seq_arn}", "name": "fixture-reads", "fallbackLocation": "s3://fixture-bucket/fallback"}},
+  {"op": "list_sequence_stores", "args": {"filter": {"name": "fixture-reads", "status": "CREATING"}}, "expect": {"sequenceStores#count": 1, "sequenceStores[0].id": "${seq}"}},
+  {"op": "list_sequence_stores", "args": {"filter": {"status": "ACTIVE"}}, "expect": {"sequenceStores#count": 0}},
+  {"op": "update_sequence_store", "args": {"id": "${seq}", "description": "changed"}, "expect": {"description": "changed"}},
+  {"op": "create_reference_store", "args": {"name": "fixture-genomes", "description": "fixture"}, "save": {"ref": "id", "ref_arn": "arn"}},
+  {"op": "get_reference_store", "args": {"id": "${ref}"}, "expect": {"arn": "${ref_arn}", "name": "fixture-genomes"}},
+  {"op": "list_reference_stores", "args": {"filter": {"name": "fixture-genomes"}}, "expect": {"referenceStores#count": 1, "referenceStores[0].id": "${ref}"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${seq_arn}", "tags": {"stage": "dev"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${seq_arn}", "tagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${seq_arn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "get_run_group", "args": {"id": "9999999999"}, "error": "ResourceNotFoundException", "status": 404},
+  {"op": "create_run_cache", "args": {"cacheS3Location": "not-an-s3-uri"}, "error": "ValidationException", "status": 400},
+  {"op": "create_sequence_store", "args": {"name": "fixture-access", "s3AccessConfig": {"accessLogLocation": "s3://fixture-bucket/logs"}}, "error": "ValidationException", "status": 400},
+  {"op": "list_workflows", "args": {}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "list_run_groups", "args": {}, "expect": {"items#count": 0}},
+  {"op": "list_sequence_stores", "args": {}, "expect": {"sequenceStores#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_sequence_store", "args": {"id": "${seq}"}, "expect": {"arn": "${seq_arn}", "description": "changed"}},
+  {"op": "get_run_group", "args": {"id": "${group}"}, "expect": {"name": "fixture-group-2", "maxRuns": 8}}
+ ],
+ "cleanup": [
+  {"op": "delete_run_group", "args": {"id": "${group}"}},
+  {"op": "delete_run_cache", "args": {"id": "${cache}"}},
+  {"op": "delete_sequence_store", "args": {"id": "${seq}"}},
+  {"op": "delete_reference_store", "args": {"id": "${ref}"}},
+  {"op": "list_run_groups", "args": {}, "expect": {"items#count": 0}},
+  {"op": "list_sequence_stores", "args": {}, "expect": {"sequenceStores#count": 0}}
+ ]
+}
