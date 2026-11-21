@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"encoding/base64"
+	"math"
 	"regexp"
 	"slices"
 	"strconv"
@@ -16,6 +17,7 @@ import (
 var (
 	// autoScalingEphemeral is the documented "ephemeralX where X is a number
 	// starting from zero" instance store name.
+	autoScalingPrice     = regexp.MustCompile(`^[0-9]+(\.[0-9]+)?$`)
 	autoScalingEphemeral = regexp.MustCompile(`^ephemeral[0-9]+$`)
 	// beanstalkRole is the documented "ARN of an IAM service role".
 	beanstalkRole = regexp.MustCompile(`^arn:aws:iam::[0-9]{12}:role/.+$`)
@@ -66,7 +68,7 @@ func autoScalingCreate(input map[string]any) error {
 		return invalid("PlacementTenancy must be default or dedicated.")
 	}
 	if price, ok := input["SpotPrice"].(string); ok {
-		if value, err := strconv.ParseFloat(price, 64); err != nil || value < 0.001 {
+		if value, err := strconv.ParseFloat(price, 64); err != nil || math.IsNaN(value) || math.IsInf(value, 0) || !autoScalingPrice.MatchString(price) || value < 0.001 {
 			return invalid("SpotPrice must be a number of at least 0.001.")
 		}
 	}
@@ -117,7 +119,7 @@ func autoScalingMapping(mapping map[string]any) error {
 		}
 	}
 	iops, hasIops := ebs["Iops"].(int64)
-	if _, typed := ebs["VolumeType"]; typed && hasIops && kind != "io1" && kind != "gp3" {
+	if hasIops && kind != "io1" && kind != "gp3" {
 		return invalid("Iops is supported only for io1 and gp3 volumes.")
 	}
 	if kind == "io1" && !hasIops {

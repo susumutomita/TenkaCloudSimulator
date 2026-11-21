@@ -118,6 +118,9 @@ func TestAutoScalingRefusesWhatItCannotStoreHonestly(t *testing.T) {
 	expectFault(t, create("PlacementTenancy", "host"), 400, "InvalidParameterValue")
 	expectFault(t, create("SpotPrice", "free"), 400, "InvalidParameterValue")
 	expectFault(t, create("SpotPrice", "0.0001"), 400, "InvalidParameterValue")
+	for _, price := range []string{"NaN", "Inf", "+Inf", "0x1p10", "1e3"} {
+		expectFault(t, create("SpotPrice", price), 400, "InvalidParameterValue")
+	}
 	expectFault(t, create("UserData", "not base64!"), 400, "InvalidParameterValue")
 	expectFault(t, create("UserData", base64.StdEncoding.EncodeToString([]byte(strings.Repeat("a", 16*1024+1)))), 400, "InvalidParameterValue")
 	expectFault(t, create("Unknown", "x"), 400, "InvalidParameterValue")
@@ -136,8 +139,7 @@ func TestAutoScalingRefusesWhatItCannotStoreHonestly(t *testing.T) {
 	// Typed volumes inside the documented ranges are stored.
 	mapping("DeviceName", "/dev/sdb", "Ebs.VolumeSize", "125", "Ebs.VolumeType", "st1").result(t, "CreateLaunchConfiguration")
 	h.scaling("DeleteLaunchConfiguration", "LaunchConfigurationName", "probe").result(t, "DeleteLaunchConfiguration")
-	mapping("DeviceName", "/dev/sdb", "Ebs.VolumeSize", "8", "Ebs.Iops", "100").result(t, "CreateLaunchConfiguration")
-	h.scaling("DeleteLaunchConfiguration", "LaunchConfigurationName", "probe").result(t, "DeleteLaunchConfiguration")
+	expectFault(t, mapping("DeviceName", "/dev/sdb", "Ebs.VolumeSize", "8", "Ebs.Iops", "100"), 400, "InvalidParameterValue")
 	mapping("DeviceName", "/dev/sdb", "Ebs.VolumeSize", "8", "Ebs.VolumeType", "io1", "Ebs.Iops", "1000", "Ebs.Encrypted", "true", "Ebs.DeleteOnTermination", "false").result(t, "CreateLaunchConfiguration")
 
 	// Operations that launch or scale instances stay unbound.
