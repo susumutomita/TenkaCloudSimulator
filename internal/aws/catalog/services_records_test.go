@@ -1,0 +1,270 @@
+package catalog
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+)
+
+// Tests of the configuration records for DB instances and clusters, cache
+// clusters, replication groups, serverless caches and Redshift clusters:
+// each record holds the settings it was given, shows no endpoint or
+// address, refuses passwords and tokens instead of dropping them, and the
+// operations that would act on a running thing stay unbound.
+
+// connectionNodes are response elements that would carry an address, port,
+// hostname or node list of a running database, cache or warehouse.
+var connectionNodes = []string{"Endpoint", "ListenerEndpoint", "ReaderEndpoint", "ConfigurationEndpoint", "Address", "Port", "DbInstancePort",
+	"HostedZoneId", "CacheNodes", "NodeGroups", "ClusterNodes", "ClusterPublicKey", "CustomEndpoints", "MasterUserSecret", "ElasticIpStatus", "ClientDownloadLandingPage"}
+
+func hasNode(n *xnode, names []string) string {
+	for _, name := range names {
+		if n.name == name {
+			return name
+		}
+	}
+	for _, kid := range n.kids {
+		if found := hasNode(kid, names); found != "" {
+			return found
+		}
+	}
+	return ""
+}
+
+func noConnection(t *testing.T, r queryReply) {
+	t.Helper()
+	if found := hasNode(r.root, connectionNodes); found != "" {
+		t.Fatalf("response carries %s: %s", found, r.raw)
+	}
+}
+
+// expectRefusal checks a fault whose message names the refused member.
+func expectRefusal(t *testing.T, r queryReply, status int, code, mention string) {
+	t.Helper()
+	expectFault(t, r, status, code)
+	if message := r.root.get("Error", "Message").text; !strings.Contains(message, mention) {
+		t.Fatalf("message %q does not mention %q", message, mention)
+	}
+}
+
+func nodeText(n *xnode, path ...string) string {
+	if found := n.get(path...); found != nil {
+		return found.text
+	}
+	return ""
+}
+
+func TestRDSInstanceRecordLifecycle(t *testing.T) {
+	h := newHarness(t, rds)
+	create := func(extra ...string) queryReply {
+		return h.query("CreateDBInstance", append([]string{"DBInstanceIdentifier", "App-DB", "DBInstanceClass", "db.t3.micro", "Engine", "mysql",
+			"MasterUsername", "dbadmin", "AllocatedStorage", "20", "DBName", "appdata", "BackupRetentionPeriod", "7", "EnableIAMDatabaseAuthentication", "true",
+			"DBParameterGroupName", "Default.Mysql8.0", "DBSubnetGroupName", "App-Subnets", "OptionGroupName", "default:mysql-8-0",
+			"VpcSecurityGroupIds.VpcSecurityGroupId.1", "sg-0a1b2c3d", "EnableCloudwatchLogsExports.member.1", "error",
+			"Tags.Tag.1.Key", "team", "Tags.Tag.1.Value", "a"}, extra...)...)
+	}
+	created := create()
+	noConnection(t, created)
+	instance := created.result(t, "CreateDBInstance").get("DBInstance")
+	for path, want := range map[string]string{
+		"DBInstanceIdentifier": "app-db", "DBInstanceStatus": "creating", "Engine": "mysql", "MasterUsername": "dbadmin", "AllocatedStorage": "20", "DBName": "appdata",
+		"BackupRetentionPeriod": "7", "IAMDatabaseAuthenticationEnabled": "true", "DBInstanceArn": "arn:aws:rds:us-east-1:000000000000:db:app-db",
+	} {
+		if got := nodeText(instance, path); got != want {
+			t.Fatalf("%s = %q, want %q: %s", path, got, want, created.raw)
+		}
+	}
+	if instance.get("InstanceCreateTime") == nil || nodeText(instance, "DBParameterGroups", "DBParameterGroup", "DBParameterGroupName") != "default.mysql8.0" ||
+		nodeText(instance, "DBParameterGroups", "DBParameterGroup", "ParameterApplyStatus") != "in-sync" ||
+		nodeText(instance, "DBSubnetGroup", "DBSubnetGroupName") != "app-subnets" || nodeText(instance, "OptionGroupMemberships", "OptionGroupMembership", "Status") != "in-sync" ||
+		nodeText(instance, "VpcSecurityGroups", "VpcSecurityGroupMembership", "VpcSecurityGroupId") != "sg-0a1b2c3d" ||
+		nodeText(instance, "EnabledCloudwatchLogsExports", "member") != "error" || nodeText(instance, "TagList", "Tag", "Key") != "team" {
+		t.Fatalf("stored settings %s", created.raw)
+	}
+	arn := nodeText(instance, "DBInstanceArn")
+	expectFault(t, create(), 400, "DBInstanceAlreadyExists")
+
+	described := h.query("DescribeDBInstances", "DBInstanceIdentifier", "APP-DB")
+	noConnection(t, described)
+	if items := described.result(t, "DescribeDBInstances").get("DBInstances").all("DBInstance"); len(items) != 1 || nodeText(items[0], "DBInstanceStatus") != "creating" {
+		t.Fatalf("describe %s", described.raw)
+	}
+	expectFault(t, h.query("DescribeDBInstances", "DBInstanceIdentifier", "missing"), 404, "DBInstanceNotFound")
+	expectFault(t, h.query("DescribeDBInstances", "MaxRecords", "19"), 400, "InvalidParameterValue")
+	expectFault(t, h.query("DescribeDBInstances", "Filters.Filter.1.Name", "engine", "Filters.Filter.1.Values.Value.1", "mysql"), 400, "InvalidParameterValue")
+
+	modified := h.query("ModifyDBInstance", "DBInstanceIdentifier", "app-db", "ApplyImmediately", "true", "AllocatedStorage", "50", "MultiAZ", "true",
+		"DBParameterGroupName", "other", "VpcSecurityGroupIds.VpcSecurityGroupId.1", "sg-0123456789abcdef0", "EnablePerformanceInsights", "true", "DeletionProtection", "false")
+	noConnection(t, modified)
+	changed := modified.result(t, "ModifyDBInstance").get("DBInstance")
+	if nodeText(changed, "AllocatedStorage") != "50" || nodeText(changed, "MultiAZ") != "true" || nodeText(changed, "PerformanceInsightsEnabled") != "true" ||
+		nodeText(changed, "DBParameterGroups", "DBParameterGroup", "DBParameterGroupName") != "other" ||
+		nodeText(changed, "VpcSecurityGroups", "VpcSecurityGroupMembership", "VpcSecurityGroupId") != "sg-0123456789abcdef0" ||
+		nodeText(changed, "DBInstanceStatus") != "creating" || nodeText(changed, "Engine") != "mysql" {
+		t.Fatalf("modify %s", modified.raw)
+	}
+	expectFault(t, h.query("ModifyDBInstance", "DBInstanceIdentifier", "missing", "AllocatedStorage", "5"), 404, "DBInstanceNotFound")
+	expectFault(t, h.query("ModifyDBInstance", "DBInstanceIdentifier", "app-db", "NewDBInstanceIdentifier", "renamed"), 400, "InvalidParameterValue")
+	expectFault(t, h.query("ModifyDBInstance", "DBInstanceIdentifier", "app-db", "Engine", "postgres"), 400, "InvalidParameterValue")
+	expectFault(t, h.query("ModifyDBInstance", "DBInstanceIdentifier", "app-db", "DeletionProtection", "true"), 400, "InvalidParameterValue")
+	expectFault(t, h.query("ModifyDBInstance", "DBInstanceIdentifier", "app-db", "BackupRetentionPeriod", "36"), 400, "InvalidParameterValue")
+
+	// Tags work by ARN on the record.
+	h.query("AddTagsToResource", "ResourceName", arn, "Tags.Tag.1.Key", "stage", "Tags.Tag.1.Value", "dev").result(t, "AddTagsToResource")
+	h.query("RemoveTagsFromResource", "ResourceName", arn, "TagKeys.member.1", "team").result(t, "RemoveTagsFromResource")
+	tags := h.query("ListTagsForResource", "ResourceName", arn).result(t, "ListTagsForResource").get("TagList").all("Tag")
+	if len(tags) != 1 || nodeText(tags[0], "Key") != "stage" {
+		t.Fatalf("tags %v", tags)
+	}
+
+	// A delete cannot take the final snapshot that does not exist.
+	expectFault(t, h.query("DeleteDBInstance", "DBInstanceIdentifier", "app-db", "SkipFinalSnapshot", "false"), 400, "InvalidParameterValue")
+	expectRefusal(t, h.query("DeleteDBInstance", "DBInstanceIdentifier", "app-db", "FinalDBSnapshotIdentifier", "final"), 400, "InvalidParameterValue", "snapshot")
+	deleted := h.query("DeleteDBInstance", "DBInstanceIdentifier", "app-db", "SkipFinalSnapshot", "true", "DeleteAutomatedBackups", "true")
+	noConnection(t, deleted)
+	if status := nodeText(deleted.result(t, "DeleteDBInstance").get("DBInstance"), "DBInstanceStatus"); status != "deleting" {
+		t.Fatalf("delete %s", deleted.raw)
+	}
+	expectFault(t, h.query("DescribeDBInstances", "DBInstanceIdentifier", "app-db"), 404, "DBInstanceNotFound")
+	expectFault(t, h.query("DeleteDBInstance", "DBInstanceIdentifier", "app-db", "SkipFinalSnapshot", "true"), 404, "DBInstanceNotFound")
+}
+
+func TestRDSInstanceRefusesWhatItCannotStoreHonestly(t *testing.T) {
+	h := newHarness(t, rds)
+	create := func(extra ...string) queryReply {
+		return h.query("CreateDBInstance", append([]string{"DBInstanceIdentifier", "db1", "DBInstanceClass", "db.t3.micro", "Engine", "mysql"}, extra...)...)
+	}
+	for member, value := range map[string]string{"MasterUserPassword": "x", "TdeCredentialPassword": "x", "TdeCredentialArn": "x", "ManageMasterUserPassword": "true",
+		"MasterUserSecretKmsKeyId": "x", "DomainAuthSecretArn": "x"} {
+		expectRefusal(t, create(member, value), 400, "InvalidParameterValue", "never stores")
+	}
+	expectRefusal(t, h.query("ModifyDBInstance", "DBInstanceIdentifier", "db1", "RotateMasterUserPassword", "true"), 400, "InvalidParameterValue", "never stores")
+	expectRefusal(t, h.query("ModifyDBInstance", "DBInstanceIdentifier", "db1", "DBPortNumber", "3306"), 400, "InvalidParameterValue", "listener")
+	expectRefusal(t, create("Port", "3306"), 400, "InvalidParameterValue", "listener")
+	expectFault(t, create("Domain", "d-1"), 400, "InvalidParameterValue")
+	expectFault(t, create("DBSecurityGroups.DBSecurityGroupName.1", "classic"), 400, "InvalidParameterValue")
+	expectFault(t, create("DeletionProtection", "true"), 400, "InvalidParameterValue")
+	expectFault(t, create("Endpoint.Address", "db.example"), 400, "InvalidParameterValue")
+	expectFault(t, create("MonitoringInterval", "7"), 400, "InvalidParameterValue")
+	expectFault(t, create("PromotionTier", "16"), 400, "InvalidParameterValue")
+	expectFault(t, create("VpcSecurityGroupIds.VpcSecurityGroupId.1", "sg-1"), 400, "InvalidParameterValue")
+	expectFault(t, create("DBParameterGroupName", "1bad"), 400, "InvalidParameterValue")
+	expectFault(t, create("Tags.Tag.1.Key", "aws:x", "Tags.Tag.1.Value", "v"), 400, "InvalidParameterValue")
+	expectFault(t, h.query("CreateDBInstance", "DBInstanceIdentifier", "db1", "DBInstanceClass", "db.t3.micro", "Engine", "mongo"), 400, "InvalidParameterValue")
+	for _, name := range []string{"1db", "db-", "d--b", strings.Repeat("a", 64), "db_1"} {
+		expectFault(t, h.query("CreateDBInstance", "DBInstanceIdentifier", name, "DBInstanceClass", "db.t3.micro", "Engine", "mysql"), 400, "InvalidParameterValue")
+	}
+	expectRefusal(t, h.query("ModifyDBInstance", "DBInstanceIdentifier", "db1", "MasterUserPassword", "value-1"), 400, "InvalidParameterValue", "never stores")
+	create().result(t, "CreateDBInstance")
+	noPassword := h.query("DescribeDBInstances", "DBInstanceIdentifier", "db1")
+	if strings.Contains(noPassword.raw, "assword") {
+		t.Fatalf("a password member is reported: %s", noPassword.raw)
+	}
+	expectRefusal(t, h.query("ModifyDBInstance", "DBInstanceIdentifier", "db1", "MasterUserPassword", "value-1"), 400, "InvalidParameterValue", "never stores")
+	// The record limit is local.
+	for i := 0; i < 39; i++ {
+		h.query("CreateDBInstance", "DBInstanceIdentifier", fmt.Sprintf("many-%d", i), "DBInstanceClass", "db.t3.micro", "Engine", "mysql").result(t, "CreateDBInstance")
+	}
+	expectFault(t, h.query("CreateDBInstance", "DBInstanceIdentifier", "over", "DBInstanceClass", "db.t3.micro", "Engine", "mysql"), 400, "InstanceQuotaExceeded")
+	h.policy.deny["rds:CreateDBInstance"] = true
+	expectFault(t, create(), 403, "AccessDenied")
+}
+
+func TestRDSClusterRecordLifecycle(t *testing.T) {
+	h := newHarness(t, rds)
+	create := func(extra ...string) queryReply {
+		return h.query("CreateDBCluster", append([]string{"DBClusterIdentifier", "Aurora-One", "Engine", "aurora-mysql", "MasterUsername", "dbadmin", "DatabaseName", "appdata",
+			"DBClusterParameterGroupName", "App-Cluster-Params", "DBSubnetGroupName", "App-Subnets", "EnableIAMDatabaseAuthentication", "true", "EnableHttpEndpoint", "true",
+			"VpcSecurityGroupIds.VpcSecurityGroupId.1", "sg-0a1b2c3d", "ServerlessV2ScalingConfiguration.MinCapacity", "0.5", "ServerlessV2ScalingConfiguration.MaxCapacity", "4",
+			"AvailabilityZones.AvailabilityZone.1", "us-east-1a", "EnableCloudwatchLogsExports.member.1", "audit", "Tags.Tag.1.Key", "team", "Tags.Tag.1.Value", "a"}, extra...)...)
+	}
+	created := create()
+	noConnection(t, created)
+	cluster := created.result(t, "CreateDBCluster").get("DBCluster")
+	for path, want := range map[string]string{
+		"DBClusterIdentifier": "aurora-one", "Status": "creating", "Engine": "aurora-mysql", "MasterUsername": "dbadmin", "DatabaseName": "appdata",
+		"DBClusterParameterGroup": "app-cluster-params", "DBSubnetGroup": "app-subnets", "IAMDatabaseAuthenticationEnabled": "true", "HttpEndpointEnabled": "true",
+		"DBClusterArn": "arn:aws:rds:us-east-1:000000000000:cluster:aurora-one",
+	} {
+		if got := nodeText(cluster, path); got != want {
+			t.Fatalf("%s = %q, want %q: %s", path, got, want, created.raw)
+		}
+	}
+	if cluster.get("ClusterCreateTime") == nil || nodeText(cluster, "VpcSecurityGroups", "VpcSecurityGroupMembership", "Status") != "active" ||
+		nodeText(cluster, "ServerlessV2ScalingConfiguration", "MaxCapacity") != "4" || nodeText(cluster, "EnabledCloudwatchLogsExports", "member") != "audit" ||
+		nodeText(cluster, "AvailabilityZones", "AvailabilityZone") != "us-east-1a" || nodeText(cluster, "TagList", "Tag", "Value") != "a" {
+		t.Fatalf("stored settings %s", created.raw)
+	}
+	arn := nodeText(cluster, "DBClusterArn")
+	expectFault(t, create(), 400, "DBClusterAlreadyExistsFault")
+
+	described := h.query("DescribeDBClusters", "DBClusterIdentifier", "AURORA-ONE")
+	noConnection(t, described)
+	if items := described.result(t, "DescribeDBClusters").get("DBClusters").all("DBCluster"); len(items) != 1 {
+		t.Fatalf("describe %s", described.raw)
+	}
+	expectFault(t, h.query("DescribeDBClusters", "DBClusterIdentifier", "missing"), 404, "DBClusterNotFoundFault")
+
+	modified := h.query("ModifyDBCluster", "DBClusterIdentifier", "aurora-one", "ApplyImmediately", "true", "BackupRetentionPeriod", "5", "DeletionProtection", "false",
+		"OptionGroupName", "default:aurora", "EngineVersion", "8.0.mysql_aurora.3.05.2", "AllowMajorVersionUpgrade", "true")
+	noConnection(t, modified)
+	changed := modified.result(t, "ModifyDBCluster").get("DBCluster")
+	if nodeText(changed, "BackupRetentionPeriod") != "5" || nodeText(changed, "EngineVersion") != "8.0.mysql_aurora.3.05.2" ||
+		nodeText(changed, "DBClusterOptionGroupMemberships", "DBClusterOptionGroup", "DBClusterOptionGroupName") != "default:aurora" || nodeText(changed, "Status") != "creating" {
+		t.Fatalf("modify %s", modified.raw)
+	}
+	expectFault(t, h.query("ModifyDBCluster", "DBClusterIdentifier", "missing", "BackupRetentionPeriod", "5"), 404, "DBClusterNotFoundFault")
+	expectFault(t, h.query("ModifyDBCluster", "DBClusterIdentifier", "aurora-one", "NewDBClusterIdentifier", "renamed"), 400, "InvalidParameterValue")
+	expectFault(t, h.query("ModifyDBCluster", "DBClusterIdentifier", "aurora-one", "EngineMode", "serverless"), 400, "InvalidParameterValue")
+	expectRefusal(t, h.query("ModifyDBCluster", "DBClusterIdentifier", "aurora-one", "MasterUserPassword", "value-1"), 400, "InvalidParameterValue", "never stores")
+
+	h.query("AddTagsToResource", "ResourceName", arn, "Tags.Tag.1.Key", "stage", "Tags.Tag.1.Value", "dev").result(t, "AddTagsToResource")
+	if tags := h.query("ListTagsForResource", "ResourceName", arn).result(t, "ListTagsForResource").get("TagList").all("Tag"); len(tags) != 2 {
+		t.Fatalf("tags %v", tags)
+	}
+
+	expectFault(t, h.query("DeleteDBCluster", "DBClusterIdentifier", "aurora-one"), 400, "InvalidParameterValue")
+	expectRefusal(t, h.query("DeleteDBCluster", "DBClusterIdentifier", "aurora-one", "FinalDBSnapshotIdentifier", "final"), 400, "InvalidParameterValue", "snapshot")
+	deleted := h.query("DeleteDBCluster", "DBClusterIdentifier", "aurora-one", "SkipFinalSnapshot", "true")
+	if status := nodeText(deleted.result(t, "DeleteDBCluster").get("DBCluster"), "Status"); status != "deleting" {
+		t.Fatalf("delete %s", deleted.raw)
+	}
+	expectFault(t, h.query("DescribeDBClusters", "DBClusterIdentifier", "aurora-one"), 404, "DBClusterNotFoundFault")
+}
+
+func TestRDSClusterRefusesWhatItCannotStoreHonestly(t *testing.T) {
+	h := newHarness(t, rds)
+	create := func(extra ...string) queryReply {
+		return h.query("CreateDBCluster", append([]string{"DBClusterIdentifier", "c1", "Engine", "neptune"}, extra...)...)
+	}
+	for member, value := range map[string]string{"MasterUserPassword": "x", "ManageMasterUserPassword": "true", "MasterUserSecretKmsKeyId": "x", "PreSignedUrl": "x"} {
+		expectRefusal(t, create(member, value), 400, "InvalidParameterValue", "never stores")
+	}
+	expectRefusal(t, create("Port", "3306"), 400, "InvalidParameterValue", "listener")
+	for _, member := range []string{"ReplicationSourceIdentifier", "GlobalClusterIdentifier", "EnableGlobalWriteForwarding", "Domain"} {
+		expectFault(t, create(member, "x"), 400, "InvalidParameterValue")
+	}
+	expectFault(t, create("EngineMode", "bogus"), 400, "InvalidParameterValue")
+	expectFault(t, create("DeletionProtection", "true"), 400, "InvalidParameterValue")
+	expectFault(t, create("OptionGroupName", "9"), 400, "InvalidParameterValue")
+	expectFault(t, create("DBClusterParameterGroupName", "9"), 400, "InvalidParameterValue")
+	expectFault(t, h.query("CreateDBCluster", "DBClusterIdentifier", "c1", "Engine", "mariadb"), 400, "InvalidParameterValue")
+	expectFault(t, h.query("CreateDBCluster", "DBClusterIdentifier", "-c1", "Engine", "neptune"), 400, "InvalidParameterValue")
+	create().result(t, "CreateDBCluster")
+	for i := 0; i < 39; i++ {
+		h.query("CreateDBCluster", "DBClusterIdentifier", fmt.Sprintf("many-%d", i), "Engine", "docdb").result(t, "CreateDBCluster")
+	}
+	expectFault(t, h.query("CreateDBCluster", "DBClusterIdentifier", "over", "Engine", "docdb"), 403, "DBClusterQuotaExceededFault")
+	h.policy.deny["rds:DeleteDBCluster"] = true
+	expectFault(t, h.query("DeleteDBCluster", "DBClusterIdentifier", "c1", "SkipFinalSnapshot", "true"), 403, "AccessDenied")
+}
+
+func TestRDSRecordsLeaveRunningDatabaseOperationsUnbound(t *testing.T) {
+	h := newHarness(t, rds)
+	for _, action := range []string{"RebootDBInstance", "StartDBInstance", "StopDBInstance", "FailoverDBCluster", "RebootDBCluster", "StartDBCluster", "StopDBCluster",
+		"CreateDBSnapshot", "CreateDBClusterSnapshot", "RestoreDBInstanceFromDBSnapshot", "RestoreDBClusterFromSnapshot", "RestoreDBInstanceToPointInTime",
+		"CreateDBInstanceReadReplica", "PromoteReadReplica", "BacktrackDBCluster", "SwitchoverReadReplica", "SwitchoverGlobalCluster", "CreateGlobalCluster",
+		"CreateDBProxy", "ModifyDBParameterGroup", "DescribeDBEngineVersions", "DescribeOrderableDBInstanceOptions", "DescribeDBLogFiles"} {
+		expectFault(t, h.query(action, "DBInstanceIdentifier", "db1"), 501, "UnknownOperationException")
+	}
+}

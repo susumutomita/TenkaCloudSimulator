@@ -33,19 +33,23 @@ EC2 or REST-XML protocols are not served by the catalog yet.
 Aurora, Neptune and DocumentDB are managed through the RDS API, and the boto3
 `neptune`, `docdb` and `rds` clients send the same Actions signed as `rds`
 (Version `2014-10-31`). What they can use is the RDS catalog's configuration
-only: DB subnet groups, DB cluster parameter groups, DB parameter groups
-(Aurora and Neptune; DocumentDB has none), tags and, for the `rds` client,
-option groups for non-Aurora engines. The `neptune` client can use 13 of the 16
-bound operations and the `docdb` client 10, since neither model has option
-groups and DocumentDB has no DB parameter groups. No cluster, instance,
-snapshot, global cluster or data plane exists for any of the three products
-(those operations return 501 `UnknownOperationException`), the RDS refusals
-apply (a non-empty `Filters`, subnet group names that do not start with a
-letter), and parameter group families such as `aurora-mysql8.0`, `neptune1.3`
-and `docdb5.0` are stored without being checked. The RDS entry in the
+and records: DB subnet groups, DB cluster parameter groups, DB parameter groups
+(Aurora and Neptune; DocumentDB has none), DB instances and DB clusters, tags
+and, for the `rds` client, option groups for non-Aurora engines. DB instances
+and DB clusters are stored records that stay in the `creating` state: no
+database, endpoint, address or port exists, and no password is ever stored (a
+password, secret or port member is refused with `InvalidParameterValue`).
+The `neptune` client can use 21 of the 24 bound operations and the `docdb`
+client 18, since neither model has option groups and DocumentDB has no DB
+parameter groups. Reboot, failover, start, stop, snapshot, restore, replica,
+backtrack, switchover and data plane operations return 501
+`UnknownOperationException`, the RDS refusals apply (a non-empty `Filters`,
+subnet group names that do not start with a letter), and parameter group
+families such as `aurora-mysql8.0`, `neptune1.3` and `docdb5.0` are stored
+without being checked. The RDS entry in the
 [generated service table](aws-catalog-services.md) lists Issues #122, #124 and
-#128 for this configuration surface only; their proposed cluster, instance and
-snapshot scope is not served.
+#128 for this surface only; their proposed snapshot and runtime scope is not
+served.
 Products assessed as not servable at all, with evidence, are listed in the
 [coverage assessment](coverage-assessment.md).
 

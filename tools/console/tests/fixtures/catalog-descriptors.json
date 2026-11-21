@@ -3039,19 +3039,27 @@
    ],
    "operations": [
     "AddTagsToResource",
+    "CreateDBCluster",
     "CreateDBClusterParameterGroup",
+    "CreateDBInstance",
     "CreateDBParameterGroup",
     "CreateDBSubnetGroup",
     "CreateOptionGroup",
+    "DeleteDBCluster",
     "DeleteDBClusterParameterGroup",
+    "DeleteDBInstance",
     "DeleteDBParameterGroup",
     "DeleteDBSubnetGroup",
     "DeleteOptionGroup",
     "DescribeDBClusterParameterGroups",
+    "DescribeDBClusters",
+    "DescribeDBInstances",
     "DescribeDBParameterGroups",
     "DescribeDBSubnetGroups",
     "DescribeOptionGroups",
     "ListTagsForResource",
+    "ModifyDBCluster",
+    "ModifyDBInstance",
     "ModifyDBSubnetGroup",
     "RemoveTagsFromResource"
    ],
@@ -3659,6 +3667,1648 @@
        "resultWrapper": "DescribeOptionGroupsResult"
       }
      }
+    },
+    {
+     "kind": "dbInstance",
+     "arnMember": "DBInstanceArn",
+     "nameMember": "DBInstanceIdentifier",
+     "arnWire": "DBInstanceArn",
+     "nameWire": "DBInstanceIdentifier",
+     "limit": 40,
+     "operations": {
+      "create": {
+       "name": "CreateDBInstance",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AllocatedStorage",
+         "type": "integer",
+         "key": "AllocatedStorage"
+        },
+        {
+         "name": "AutoMinorVersionUpgrade",
+         "type": "boolean",
+         "key": "AutoMinorVersionUpgrade"
+        },
+        {
+         "name": "AvailabilityZone",
+         "type": "string",
+         "key": "AvailabilityZone"
+        },
+        {
+         "name": "BackupRetentionPeriod",
+         "type": "integer",
+         "key": "BackupRetentionPeriod"
+        },
+        {
+         "name": "BackupTarget",
+         "type": "string",
+         "key": "BackupTarget"
+        },
+        {
+         "name": "CACertificateIdentifier",
+         "type": "string",
+         "key": "CACertificateIdentifier"
+        },
+        {
+         "name": "CharacterSetName",
+         "type": "string",
+         "key": "CharacterSetName"
+        },
+        {
+         "name": "CopyTagsToSnapshot",
+         "type": "boolean",
+         "key": "CopyTagsToSnapshot"
+        },
+        {
+         "name": "CustomIamInstanceProfile",
+         "type": "string",
+         "key": "CustomIamInstanceProfile"
+        },
+        {
+         "name": "DBClusterIdentifier",
+         "type": "string",
+         "key": "DBClusterIdentifier"
+        },
+        {
+         "name": "DBInstanceClass",
+         "type": "string",
+         "required": true,
+         "key": "DBInstanceClass"
+        },
+        {
+         "name": "DBInstanceIdentifier",
+         "type": "string",
+         "required": true,
+         "key": "DBInstanceIdentifier"
+        },
+        {
+         "name": "DBName",
+         "type": "string",
+         "key": "DBName"
+        },
+        {
+         "name": "DBParameterGroupName",
+         "type": "string",
+         "key": "DBParameterGroupName"
+        },
+        {
+         "name": "DBSecurityGroups",
+         "type": "list",
+         "element": "string",
+         "key": "DBSecurityGroups",
+         "itemKey": "DBSecurityGroupName"
+        },
+        {
+         "name": "DBSubnetGroupName",
+         "type": "string",
+         "key": "DBSubnetGroupName"
+        },
+        {
+         "name": "DBSystemId",
+         "type": "string",
+         "key": "DBSystemId"
+        },
+        {
+         "name": "DatabaseInsightsMode",
+         "type": "string",
+         "enum": [
+          "standard",
+          "advanced"
+         ],
+         "key": "DatabaseInsightsMode"
+        },
+        {
+         "name": "DedicatedLogVolume",
+         "type": "boolean",
+         "key": "DedicatedLogVolume"
+        },
+        {
+         "name": "DeletionProtection",
+         "type": "boolean",
+         "key": "DeletionProtection"
+        },
+        {
+         "name": "Domain",
+         "type": "string",
+         "key": "Domain"
+        },
+        {
+         "name": "DomainAuthSecretArn",
+         "type": "string",
+         "key": "DomainAuthSecretArn"
+        },
+        {
+         "name": "DomainDnsIps",
+         "type": "list",
+         "element": "string",
+         "key": "DomainDnsIps",
+         "itemKey": "member"
+        },
+        {
+         "name": "DomainFqdn",
+         "type": "string",
+         "key": "DomainFqdn"
+        },
+        {
+         "name": "DomainIAMRoleName",
+         "type": "string",
+         "key": "DomainIAMRoleName"
+        },
+        {
+         "name": "DomainOu",
+         "type": "string",
+         "key": "DomainOu"
+        },
+        {
+         "name": "EnableCloudwatchLogsExports",
+         "type": "list",
+         "element": "string",
+         "key": "EnableCloudwatchLogsExports",
+         "itemKey": "member"
+        },
+        {
+         "name": "EnableCustomerOwnedIp",
+         "type": "boolean",
+         "key": "EnableCustomerOwnedIp"
+        },
+        {
+         "name": "EnableIAMDatabaseAuthentication",
+         "type": "boolean",
+         "key": "EnableIAMDatabaseAuthentication"
+        },
+        {
+         "name": "EnablePerformanceInsights",
+         "type": "boolean",
+         "key": "EnablePerformanceInsights"
+        },
+        {
+         "name": "Engine",
+         "type": "string",
+         "required": true,
+         "key": "Engine"
+        },
+        {
+         "name": "EngineLifecycleSupport",
+         "type": "string",
+         "key": "EngineLifecycleSupport"
+        },
+        {
+         "name": "EngineVersion",
+         "type": "string",
+         "key": "EngineVersion"
+        },
+        {
+         "name": "Iops",
+         "type": "integer",
+         "key": "Iops"
+        },
+        {
+         "name": "KmsKeyId",
+         "type": "string",
+         "key": "KmsKeyId"
+        },
+        {
+         "name": "LicenseModel",
+         "type": "string",
+         "key": "LicenseModel"
+        },
+        {
+         "name": "ManageMasterUserPassword",
+         "type": "boolean",
+         "key": "ManageMasterUserPassword"
+        },
+        {
+         "name": "MasterUserAuthenticationType",
+         "type": "string",
+         "enum": [
+          "password",
+          "iam-db-auth"
+         ],
+         "key": "MasterUserAuthenticationType"
+        },
+        {
+         "name": "MasterUserPassword",
+         "type": "string",
+         "key": "MasterUserPassword"
+        },
+        {
+         "name": "MasterUserSecretKmsKeyId",
+         "type": "string",
+         "key": "MasterUserSecretKmsKeyId"
+        },
+        {
+         "name": "MasterUsername",
+         "type": "string",
+         "key": "MasterUsername"
+        },
+        {
+         "name": "MaxAllocatedStorage",
+         "type": "integer",
+         "key": "MaxAllocatedStorage"
+        },
+        {
+         "name": "MonitoringInterval",
+         "type": "integer",
+         "key": "MonitoringInterval"
+        },
+        {
+         "name": "MonitoringRoleArn",
+         "type": "string",
+         "key": "MonitoringRoleArn"
+        },
+        {
+         "name": "MultiAZ",
+         "type": "boolean",
+         "key": "MultiAZ"
+        },
+        {
+         "name": "MultiTenant",
+         "type": "boolean",
+         "key": "MultiTenant"
+        },
+        {
+         "name": "NcharCharacterSetName",
+         "type": "string",
+         "key": "NcharCharacterSetName"
+        },
+        {
+         "name": "NetworkType",
+         "type": "string",
+         "key": "NetworkType"
+        },
+        {
+         "name": "OptionGroupName",
+         "type": "string",
+         "key": "OptionGroupName"
+        },
+        {
+         "name": "PerformanceInsightsKMSKeyId",
+         "type": "string",
+         "key": "PerformanceInsightsKMSKeyId"
+        },
+        {
+         "name": "PerformanceInsightsRetentionPeriod",
+         "type": "integer",
+         "key": "PerformanceInsightsRetentionPeriod"
+        },
+        {
+         "name": "Port",
+         "type": "integer",
+         "key": "Port"
+        },
+        {
+         "name": "PreferredBackupWindow",
+         "type": "string",
+         "key": "PreferredBackupWindow"
+        },
+        {
+         "name": "PreferredMaintenanceWindow",
+         "type": "string",
+         "key": "PreferredMaintenanceWindow"
+        },
+        {
+         "name": "ProcessorFeatures",
+         "type": "list",
+         "element": "structure",
+         "key": "ProcessorFeatures",
+         "itemKey": "ProcessorFeature",
+         "shape": "ProcessorFeatureList"
+        },
+        {
+         "name": "PromotionTier",
+         "type": "integer",
+         "key": "PromotionTier"
+        },
+        {
+         "name": "PubliclyAccessible",
+         "type": "boolean",
+         "key": "PubliclyAccessible"
+        },
+        {
+         "name": "StorageEncrypted",
+         "type": "boolean",
+         "key": "StorageEncrypted"
+        },
+        {
+         "name": "StorageThroughput",
+         "type": "integer",
+         "key": "StorageThroughput"
+        },
+        {
+         "name": "StorageType",
+         "type": "string",
+         "key": "StorageType"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        },
+        {
+         "name": "TdeCredentialArn",
+         "type": "string",
+         "key": "TdeCredentialArn"
+        },
+        {
+         "name": "TdeCredentialPassword",
+         "type": "string",
+         "key": "TdeCredentialPassword"
+        },
+        {
+         "name": "Timezone",
+         "type": "string",
+         "key": "Timezone"
+        },
+        {
+         "name": "VpcSecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "VpcSecurityGroupIds",
+         "itemKey": "VpcSecurityGroupId"
+        }
+       ],
+       "wrapper": "DBInstance",
+       "output": "CreateDBInstanceResult",
+       "resultWrapper": "CreateDBInstanceResult"
+      },
+      "delete": {
+       "name": "DeleteDBInstance",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBInstanceIdentifier",
+         "type": "string",
+         "required": true,
+         "key": "DBInstanceIdentifier"
+        },
+        {
+         "name": "DeleteAutomatedBackups",
+         "type": "boolean",
+         "key": "DeleteAutomatedBackups"
+        },
+        {
+         "name": "FinalDBSnapshotIdentifier",
+         "type": "string",
+         "key": "FinalDBSnapshotIdentifier"
+        },
+        {
+         "name": "SkipFinalSnapshot",
+         "type": "boolean",
+         "key": "SkipFinalSnapshot"
+        }
+       ],
+       "wrapper": "DBInstance",
+       "lookup": "DBInstanceIdentifier",
+       "lookupKey": "name",
+       "output": "DeleteDBInstanceResult",
+       "resultWrapper": "DeleteDBInstanceResult"
+      },
+      "describe": {
+       "name": "DescribeDBInstances",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBInstanceIdentifier",
+         "type": "string",
+         "key": "DBInstanceIdentifier"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "DBInstances",
+       "itemName": "DBInstanceIdentifier",
+       "itemArn": "DBInstanceArn",
+       "names": "DBInstanceIdentifier",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DBInstanceMessage",
+       "resultWrapper": "DescribeDBInstancesResult"
+      },
+      "list": {
+       "name": "DescribeDBInstances",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBInstanceIdentifier",
+         "type": "string",
+         "key": "DBInstanceIdentifier"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "DBInstances",
+       "itemName": "DBInstanceIdentifier",
+       "itemArn": "DBInstanceArn",
+       "names": "DBInstanceIdentifier",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DBInstanceMessage",
+       "resultWrapper": "DescribeDBInstancesResult"
+      },
+      "update": {
+       "name": "ModifyDBInstance",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AllocatedStorage",
+         "type": "integer",
+         "key": "AllocatedStorage"
+        },
+        {
+         "name": "AllowMajorVersionUpgrade",
+         "type": "boolean",
+         "key": "AllowMajorVersionUpgrade"
+        },
+        {
+         "name": "ApplyImmediately",
+         "type": "boolean",
+         "key": "ApplyImmediately"
+        },
+        {
+         "name": "AutoMinorVersionUpgrade",
+         "type": "boolean",
+         "key": "AutoMinorVersionUpgrade"
+        },
+        {
+         "name": "AutomationMode",
+         "type": "string",
+         "enum": [
+          "full",
+          "all-paused"
+         ],
+         "key": "AutomationMode"
+        },
+        {
+         "name": "AwsBackupRecoveryPointArn",
+         "type": "string",
+         "min": 43,
+         "max": 350,
+         "pattern": "^arn:aws[a-z-]*:backup:[-a-z0-9]+:[0-9]{12}:[-a-z]+:([a-z0-9\\-]+:)?[a-z][a-z0-9\\-]{0,255}$",
+         "key": "AwsBackupRecoveryPointArn"
+        },
+        {
+         "name": "BackupRetentionPeriod",
+         "type": "integer",
+         "key": "BackupRetentionPeriod"
+        },
+        {
+         "name": "CACertificateIdentifier",
+         "type": "string",
+         "key": "CACertificateIdentifier"
+        },
+        {
+         "name": "CertificateRotationRestart",
+         "type": "boolean",
+         "key": "CertificateRotationRestart"
+        },
+        {
+         "name": "CloudwatchLogsExportConfiguration",
+         "type": "structure",
+         "key": "CloudwatchLogsExportConfiguration",
+         "shape": "CloudwatchLogsExportConfiguration"
+        },
+        {
+         "name": "CopyTagsToSnapshot",
+         "type": "boolean",
+         "key": "CopyTagsToSnapshot"
+        },
+        {
+         "name": "DBInstanceClass",
+         "type": "string",
+         "key": "DBInstanceClass"
+        },
+        {
+         "name": "DBInstanceIdentifier",
+         "type": "string",
+         "required": true,
+         "key": "DBInstanceIdentifier"
+        },
+        {
+         "name": "DBParameterGroupName",
+         "type": "string",
+         "key": "DBParameterGroupName"
+        },
+        {
+         "name": "DBPortNumber",
+         "type": "integer",
+         "key": "DBPortNumber"
+        },
+        {
+         "name": "DBSecurityGroups",
+         "type": "list",
+         "element": "string",
+         "key": "DBSecurityGroups",
+         "itemKey": "DBSecurityGroupName"
+        },
+        {
+         "name": "DBSubnetGroupName",
+         "type": "string",
+         "key": "DBSubnetGroupName"
+        },
+        {
+         "name": "DatabaseInsightsMode",
+         "type": "string",
+         "enum": [
+          "standard",
+          "advanced"
+         ],
+         "key": "DatabaseInsightsMode"
+        },
+        {
+         "name": "DedicatedLogVolume",
+         "type": "boolean",
+         "key": "DedicatedLogVolume"
+        },
+        {
+         "name": "DeletionProtection",
+         "type": "boolean",
+         "key": "DeletionProtection"
+        },
+        {
+         "name": "DisableDomain",
+         "type": "boolean",
+         "key": "DisableDomain"
+        },
+        {
+         "name": "Domain",
+         "type": "string",
+         "key": "Domain"
+        },
+        {
+         "name": "DomainAuthSecretArn",
+         "type": "string",
+         "key": "DomainAuthSecretArn"
+        },
+        {
+         "name": "DomainDnsIps",
+         "type": "list",
+         "element": "string",
+         "key": "DomainDnsIps",
+         "itemKey": "member"
+        },
+        {
+         "name": "DomainFqdn",
+         "type": "string",
+         "key": "DomainFqdn"
+        },
+        {
+         "name": "DomainIAMRoleName",
+         "type": "string",
+         "key": "DomainIAMRoleName"
+        },
+        {
+         "name": "DomainOu",
+         "type": "string",
+         "key": "DomainOu"
+        },
+        {
+         "name": "EnableCustomerOwnedIp",
+         "type": "boolean",
+         "key": "EnableCustomerOwnedIp"
+        },
+        {
+         "name": "EnableIAMDatabaseAuthentication",
+         "type": "boolean",
+         "key": "EnableIAMDatabaseAuthentication"
+        },
+        {
+         "name": "EnablePerformanceInsights",
+         "type": "boolean",
+         "key": "EnablePerformanceInsights"
+        },
+        {
+         "name": "Engine",
+         "type": "string",
+         "key": "Engine"
+        },
+        {
+         "name": "EngineVersion",
+         "type": "string",
+         "key": "EngineVersion"
+        },
+        {
+         "name": "Iops",
+         "type": "integer",
+         "key": "Iops"
+        },
+        {
+         "name": "LicenseModel",
+         "type": "string",
+         "key": "LicenseModel"
+        },
+        {
+         "name": "ManageMasterUserPassword",
+         "type": "boolean",
+         "key": "ManageMasterUserPassword"
+        },
+        {
+         "name": "MasterUserAuthenticationType",
+         "type": "string",
+         "enum": [
+          "password",
+          "iam-db-auth"
+         ],
+         "key": "MasterUserAuthenticationType"
+        },
+        {
+         "name": "MasterUserPassword",
+         "type": "string",
+         "key": "MasterUserPassword"
+        },
+        {
+         "name": "MasterUserSecretKmsKeyId",
+         "type": "string",
+         "key": "MasterUserSecretKmsKeyId"
+        },
+        {
+         "name": "MaxAllocatedStorage",
+         "type": "integer",
+         "key": "MaxAllocatedStorage"
+        },
+        {
+         "name": "MonitoringInterval",
+         "type": "integer",
+         "key": "MonitoringInterval"
+        },
+        {
+         "name": "MonitoringRoleArn",
+         "type": "string",
+         "key": "MonitoringRoleArn"
+        },
+        {
+         "name": "MultiAZ",
+         "type": "boolean",
+         "key": "MultiAZ"
+        },
+        {
+         "name": "MultiTenant",
+         "type": "boolean",
+         "key": "MultiTenant"
+        },
+        {
+         "name": "NetworkType",
+         "type": "string",
+         "key": "NetworkType"
+        },
+        {
+         "name": "NewDBInstanceIdentifier",
+         "type": "string",
+         "key": "NewDBInstanceIdentifier"
+        },
+        {
+         "name": "OptionGroupName",
+         "type": "string",
+         "key": "OptionGroupName"
+        },
+        {
+         "name": "PerformanceInsightsKMSKeyId",
+         "type": "string",
+         "key": "PerformanceInsightsKMSKeyId"
+        },
+        {
+         "name": "PerformanceInsightsRetentionPeriod",
+         "type": "integer",
+         "key": "PerformanceInsightsRetentionPeriod"
+        },
+        {
+         "name": "PreferredBackupWindow",
+         "type": "string",
+         "key": "PreferredBackupWindow"
+        },
+        {
+         "name": "PreferredMaintenanceWindow",
+         "type": "string",
+         "key": "PreferredMaintenanceWindow"
+        },
+        {
+         "name": "ProcessorFeatures",
+         "type": "list",
+         "element": "structure",
+         "key": "ProcessorFeatures",
+         "itemKey": "ProcessorFeature",
+         "shape": "ProcessorFeatureList"
+        },
+        {
+         "name": "PromotionTier",
+         "type": "integer",
+         "key": "PromotionTier"
+        },
+        {
+         "name": "PubliclyAccessible",
+         "type": "boolean",
+         "key": "PubliclyAccessible"
+        },
+        {
+         "name": "ReplicaMode",
+         "type": "string",
+         "enum": [
+          "open-read-only",
+          "mounted"
+         ],
+         "key": "ReplicaMode"
+        },
+        {
+         "name": "ResumeFullAutomationModeMinutes",
+         "type": "integer",
+         "key": "ResumeFullAutomationModeMinutes"
+        },
+        {
+         "name": "RotateMasterUserPassword",
+         "type": "boolean",
+         "key": "RotateMasterUserPassword"
+        },
+        {
+         "name": "StorageThroughput",
+         "type": "integer",
+         "key": "StorageThroughput"
+        },
+        {
+         "name": "StorageType",
+         "type": "string",
+         "key": "StorageType"
+        },
+        {
+         "name": "TdeCredentialArn",
+         "type": "string",
+         "key": "TdeCredentialArn"
+        },
+        {
+         "name": "TdeCredentialPassword",
+         "type": "string",
+         "key": "TdeCredentialPassword"
+        },
+        {
+         "name": "UseDefaultProcessorFeatures",
+         "type": "boolean",
+         "key": "UseDefaultProcessorFeatures"
+        },
+        {
+         "name": "VpcSecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "VpcSecurityGroupIds",
+         "itemKey": "VpcSecurityGroupId"
+        }
+       ],
+       "wrapper": "DBInstance",
+       "lookup": "DBInstanceIdentifier",
+       "lookupKey": "name",
+       "output": "ModifyDBInstanceResult",
+       "resultWrapper": "ModifyDBInstanceResult",
+       "editable": [
+        "AllocatedStorage",
+        "AutoMinorVersionUpgrade",
+        "BackupRetentionPeriod",
+        "CACertificateIdentifier",
+        "CertificateRotationRestart",
+        "CloudwatchLogsExportConfiguration",
+        "CopyTagsToSnapshot",
+        "DBInstanceClass",
+        "DBParameterGroupName",
+        "DBPortNumber",
+        "DBSubnetGroupName",
+        "DatabaseInsightsMode",
+        "DedicatedLogVolume",
+        "DeletionProtection",
+        "DisableDomain",
+        "Domain",
+        "DomainAuthSecretArn",
+        "DomainDnsIps",
+        "DomainFqdn",
+        "DomainIAMRoleName",
+        "DomainOu",
+        "EnableCustomerOwnedIp",
+        "EnableIAMDatabaseAuthentication",
+        "EnablePerformanceInsights",
+        "EngineVersion",
+        "Iops",
+        "LicenseModel",
+        "ManageMasterUserPassword",
+        "MasterUserAuthenticationType",
+        "MasterUserPassword",
+        "MasterUserSecretKmsKeyId",
+        "MaxAllocatedStorage",
+        "MonitoringInterval",
+        "MonitoringRoleArn",
+        "MultiAZ",
+        "MultiTenant",
+        "NetworkType",
+        "NewDBInstanceIdentifier",
+        "OptionGroupName",
+        "PerformanceInsightsKMSKeyId",
+        "PerformanceInsightsRetentionPeriod",
+        "PreferredBackupWindow",
+        "PreferredMaintenanceWindow",
+        "ProcessorFeatures",
+        "PromotionTier",
+        "PubliclyAccessible",
+        "ResumeFullAutomationModeMinutes",
+        "RotateMasterUserPassword",
+        "StorageThroughput",
+        "StorageType",
+        "TdeCredentialPassword",
+        "UseDefaultProcessorFeatures",
+        "VpcSecurityGroupIds"
+       ]
+      }
+     }
+    },
+    {
+     "kind": "dbCluster",
+     "arnMember": "DBClusterArn",
+     "nameMember": "DBClusterIdentifier",
+     "arnWire": "DBClusterArn",
+     "nameWire": "DBClusterIdentifier",
+     "limit": 40,
+     "operations": {
+      "create": {
+       "name": "CreateDBCluster",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AllocatedStorage",
+         "type": "integer",
+         "key": "AllocatedStorage"
+        },
+        {
+         "name": "AutoMinorVersionUpgrade",
+         "type": "boolean",
+         "key": "AutoMinorVersionUpgrade"
+        },
+        {
+         "name": "AvailabilityZones",
+         "type": "list",
+         "element": "string",
+         "key": "AvailabilityZones",
+         "itemKey": "AvailabilityZone"
+        },
+        {
+         "name": "BacktrackWindow",
+         "type": "long",
+         "key": "BacktrackWindow"
+        },
+        {
+         "name": "BackupRetentionPeriod",
+         "type": "integer",
+         "key": "BackupRetentionPeriod"
+        },
+        {
+         "name": "CACertificateIdentifier",
+         "type": "string",
+         "key": "CACertificateIdentifier"
+        },
+        {
+         "name": "CharacterSetName",
+         "type": "string",
+         "key": "CharacterSetName"
+        },
+        {
+         "name": "ClusterScalabilityType",
+         "type": "string",
+         "enum": [
+          "standard",
+          "limitless"
+         ],
+         "key": "ClusterScalabilityType"
+        },
+        {
+         "name": "CopyTagsToSnapshot",
+         "type": "boolean",
+         "key": "CopyTagsToSnapshot"
+        },
+        {
+         "name": "DBClusterIdentifier",
+         "type": "string",
+         "required": true,
+         "key": "DBClusterIdentifier"
+        },
+        {
+         "name": "DBClusterInstanceClass",
+         "type": "string",
+         "key": "DBClusterInstanceClass"
+        },
+        {
+         "name": "DBClusterParameterGroupName",
+         "type": "string",
+         "key": "DBClusterParameterGroupName"
+        },
+        {
+         "name": "DBSubnetGroupName",
+         "type": "string",
+         "key": "DBSubnetGroupName"
+        },
+        {
+         "name": "DBSystemId",
+         "type": "string",
+         "key": "DBSystemId"
+        },
+        {
+         "name": "DatabaseInsightsMode",
+         "type": "string",
+         "enum": [
+          "standard",
+          "advanced"
+         ],
+         "key": "DatabaseInsightsMode"
+        },
+        {
+         "name": "DatabaseName",
+         "type": "string",
+         "key": "DatabaseName"
+        },
+        {
+         "name": "DeletionProtection",
+         "type": "boolean",
+         "key": "DeletionProtection"
+        },
+        {
+         "name": "Domain",
+         "type": "string",
+         "key": "Domain"
+        },
+        {
+         "name": "DomainIAMRoleName",
+         "type": "string",
+         "key": "DomainIAMRoleName"
+        },
+        {
+         "name": "EnableCloudwatchLogsExports",
+         "type": "list",
+         "element": "string",
+         "key": "EnableCloudwatchLogsExports",
+         "itemKey": "member"
+        },
+        {
+         "name": "EnableGlobalWriteForwarding",
+         "type": "boolean",
+         "key": "EnableGlobalWriteForwarding"
+        },
+        {
+         "name": "EnableHttpEndpoint",
+         "type": "boolean",
+         "key": "EnableHttpEndpoint"
+        },
+        {
+         "name": "EnableIAMDatabaseAuthentication",
+         "type": "boolean",
+         "key": "EnableIAMDatabaseAuthentication"
+        },
+        {
+         "name": "EnableLimitlessDatabase",
+         "type": "boolean",
+         "key": "EnableLimitlessDatabase"
+        },
+        {
+         "name": "EnableLocalWriteForwarding",
+         "type": "boolean",
+         "key": "EnableLocalWriteForwarding"
+        },
+        {
+         "name": "EnablePerformanceInsights",
+         "type": "boolean",
+         "key": "EnablePerformanceInsights"
+        },
+        {
+         "name": "Engine",
+         "type": "string",
+         "required": true,
+         "key": "Engine"
+        },
+        {
+         "name": "EngineLifecycleSupport",
+         "type": "string",
+         "key": "EngineLifecycleSupport"
+        },
+        {
+         "name": "EngineMode",
+         "type": "string",
+         "key": "EngineMode"
+        },
+        {
+         "name": "EngineVersion",
+         "type": "string",
+         "key": "EngineVersion"
+        },
+        {
+         "name": "GlobalClusterIdentifier",
+         "type": "string",
+         "min": 1,
+         "max": 255,
+         "pattern": "[A-Za-z][0-9A-Za-z-:._]*",
+         "key": "GlobalClusterIdentifier"
+        },
+        {
+         "name": "Iops",
+         "type": "integer",
+         "key": "Iops"
+        },
+        {
+         "name": "KmsKeyId",
+         "type": "string",
+         "key": "KmsKeyId"
+        },
+        {
+         "name": "ManageMasterUserPassword",
+         "type": "boolean",
+         "key": "ManageMasterUserPassword"
+        },
+        {
+         "name": "MasterUserAuthenticationType",
+         "type": "string",
+         "enum": [
+          "password",
+          "iam-db-auth"
+         ],
+         "key": "MasterUserAuthenticationType"
+        },
+        {
+         "name": "MasterUserPassword",
+         "type": "string",
+         "key": "MasterUserPassword"
+        },
+        {
+         "name": "MasterUserSecretKmsKeyId",
+         "type": "string",
+         "key": "MasterUserSecretKmsKeyId"
+        },
+        {
+         "name": "MasterUsername",
+         "type": "string",
+         "key": "MasterUsername"
+        },
+        {
+         "name": "MonitoringInterval",
+         "type": "integer",
+         "key": "MonitoringInterval"
+        },
+        {
+         "name": "MonitoringRoleArn",
+         "type": "string",
+         "key": "MonitoringRoleArn"
+        },
+        {
+         "name": "NetworkType",
+         "type": "string",
+         "key": "NetworkType"
+        },
+        {
+         "name": "OptionGroupName",
+         "type": "string",
+         "key": "OptionGroupName"
+        },
+        {
+         "name": "PerformanceInsightsKMSKeyId",
+         "type": "string",
+         "key": "PerformanceInsightsKMSKeyId"
+        },
+        {
+         "name": "PerformanceInsightsRetentionPeriod",
+         "type": "integer",
+         "key": "PerformanceInsightsRetentionPeriod"
+        },
+        {
+         "name": "Port",
+         "type": "integer",
+         "key": "Port"
+        },
+        {
+         "name": "PreSignedUrl",
+         "type": "string",
+         "key": "PreSignedUrl"
+        },
+        {
+         "name": "PreferredBackupWindow",
+         "type": "string",
+         "key": "PreferredBackupWindow"
+        },
+        {
+         "name": "PreferredMaintenanceWindow",
+         "type": "string",
+         "key": "PreferredMaintenanceWindow"
+        },
+        {
+         "name": "PubliclyAccessible",
+         "type": "boolean",
+         "key": "PubliclyAccessible"
+        },
+        {
+         "name": "RdsCustomClusterConfiguration",
+         "type": "structure",
+         "key": "RdsCustomClusterConfiguration",
+         "shape": "RdsCustomClusterConfiguration"
+        },
+        {
+         "name": "ReplicationSourceIdentifier",
+         "type": "string",
+         "key": "ReplicationSourceIdentifier"
+        },
+        {
+         "name": "ScalingConfiguration",
+         "type": "structure",
+         "key": "ScalingConfiguration",
+         "shape": "ScalingConfiguration"
+        },
+        {
+         "name": "ServerlessV2ScalingConfiguration",
+         "type": "structure",
+         "key": "ServerlessV2ScalingConfiguration",
+         "shape": "ServerlessV2ScalingConfiguration"
+        },
+        {
+         "name": "StorageEncrypted",
+         "type": "boolean",
+         "key": "StorageEncrypted"
+        },
+        {
+         "name": "StorageType",
+         "type": "string",
+         "key": "StorageType"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        },
+        {
+         "name": "VpcSecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "VpcSecurityGroupIds",
+         "itemKey": "VpcSecurityGroupId"
+        }
+       ],
+       "wrapper": "DBCluster",
+       "output": "CreateDBClusterResult",
+       "resultWrapper": "CreateDBClusterResult"
+      },
+      "delete": {
+       "name": "DeleteDBCluster",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBClusterIdentifier",
+         "type": "string",
+         "required": true,
+         "key": "DBClusterIdentifier"
+        },
+        {
+         "name": "DeleteAutomatedBackups",
+         "type": "boolean",
+         "key": "DeleteAutomatedBackups"
+        },
+        {
+         "name": "FinalDBSnapshotIdentifier",
+         "type": "string",
+         "key": "FinalDBSnapshotIdentifier"
+        },
+        {
+         "name": "SkipFinalSnapshot",
+         "type": "boolean",
+         "key": "SkipFinalSnapshot"
+        }
+       ],
+       "wrapper": "DBCluster",
+       "lookup": "DBClusterIdentifier",
+       "lookupKey": "name",
+       "output": "DeleteDBClusterResult",
+       "resultWrapper": "DeleteDBClusterResult"
+      },
+      "describe": {
+       "name": "DescribeDBClusters",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBClusterIdentifier",
+         "type": "string",
+         "key": "DBClusterIdentifier"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "IncludeShared",
+         "type": "boolean",
+         "key": "IncludeShared"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "DBClusters",
+       "itemName": "DBClusterIdentifier",
+       "itemArn": "DBClusterArn",
+       "names": "DBClusterIdentifier",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DBClusterMessage",
+       "resultWrapper": "DescribeDBClustersResult"
+      },
+      "list": {
+       "name": "DescribeDBClusters",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBClusterIdentifier",
+         "type": "string",
+         "key": "DBClusterIdentifier"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "IncludeShared",
+         "type": "boolean",
+         "key": "IncludeShared"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "DBClusters",
+       "itemName": "DBClusterIdentifier",
+       "itemArn": "DBClusterArn",
+       "names": "DBClusterIdentifier",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DBClusterMessage",
+       "resultWrapper": "DescribeDBClustersResult"
+      },
+      "update": {
+       "name": "ModifyDBCluster",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AllocatedStorage",
+         "type": "integer",
+         "key": "AllocatedStorage"
+        },
+        {
+         "name": "AllowEngineModeChange",
+         "type": "boolean",
+         "key": "AllowEngineModeChange"
+        },
+        {
+         "name": "AllowMajorVersionUpgrade",
+         "type": "boolean",
+         "key": "AllowMajorVersionUpgrade"
+        },
+        {
+         "name": "ApplyImmediately",
+         "type": "boolean",
+         "key": "ApplyImmediately"
+        },
+        {
+         "name": "AutoMinorVersionUpgrade",
+         "type": "boolean",
+         "key": "AutoMinorVersionUpgrade"
+        },
+        {
+         "name": "AwsBackupRecoveryPointArn",
+         "type": "string",
+         "min": 43,
+         "max": 350,
+         "pattern": "^arn:aws[a-z-]*:backup:[-a-z0-9]+:[0-9]{12}:[-a-z]+:([a-z0-9\\-]+:)?[a-z][a-z0-9\\-]{0,255}$",
+         "key": "AwsBackupRecoveryPointArn"
+        },
+        {
+         "name": "BacktrackWindow",
+         "type": "long",
+         "key": "BacktrackWindow"
+        },
+        {
+         "name": "BackupRetentionPeriod",
+         "type": "integer",
+         "key": "BackupRetentionPeriod"
+        },
+        {
+         "name": "CACertificateIdentifier",
+         "type": "string",
+         "key": "CACertificateIdentifier"
+        },
+        {
+         "name": "CloudwatchLogsExportConfiguration",
+         "type": "structure",
+         "key": "CloudwatchLogsExportConfiguration",
+         "shape": "CloudwatchLogsExportConfiguration"
+        },
+        {
+         "name": "CopyTagsToSnapshot",
+         "type": "boolean",
+         "key": "CopyTagsToSnapshot"
+        },
+        {
+         "name": "DBClusterIdentifier",
+         "type": "string",
+         "required": true,
+         "key": "DBClusterIdentifier"
+        },
+        {
+         "name": "DBClusterInstanceClass",
+         "type": "string",
+         "key": "DBClusterInstanceClass"
+        },
+        {
+         "name": "DBClusterParameterGroupName",
+         "type": "string",
+         "key": "DBClusterParameterGroupName"
+        },
+        {
+         "name": "DBInstanceParameterGroupName",
+         "type": "string",
+         "key": "DBInstanceParameterGroupName"
+        },
+        {
+         "name": "DatabaseInsightsMode",
+         "type": "string",
+         "enum": [
+          "standard",
+          "advanced"
+         ],
+         "key": "DatabaseInsightsMode"
+        },
+        {
+         "name": "DeletionProtection",
+         "type": "boolean",
+         "key": "DeletionProtection"
+        },
+        {
+         "name": "Domain",
+         "type": "string",
+         "key": "Domain"
+        },
+        {
+         "name": "DomainIAMRoleName",
+         "type": "string",
+         "key": "DomainIAMRoleName"
+        },
+        {
+         "name": "EnableGlobalWriteForwarding",
+         "type": "boolean",
+         "key": "EnableGlobalWriteForwarding"
+        },
+        {
+         "name": "EnableHttpEndpoint",
+         "type": "boolean",
+         "key": "EnableHttpEndpoint"
+        },
+        {
+         "name": "EnableIAMDatabaseAuthentication",
+         "type": "boolean",
+         "key": "EnableIAMDatabaseAuthentication"
+        },
+        {
+         "name": "EnableLimitlessDatabase",
+         "type": "boolean",
+         "key": "EnableLimitlessDatabase"
+        },
+        {
+         "name": "EnableLocalWriteForwarding",
+         "type": "boolean",
+         "key": "EnableLocalWriteForwarding"
+        },
+        {
+         "name": "EnablePerformanceInsights",
+         "type": "boolean",
+         "key": "EnablePerformanceInsights"
+        },
+        {
+         "name": "EngineMode",
+         "type": "string",
+         "key": "EngineMode"
+        },
+        {
+         "name": "EngineVersion",
+         "type": "string",
+         "key": "EngineVersion"
+        },
+        {
+         "name": "Iops",
+         "type": "integer",
+         "key": "Iops"
+        },
+        {
+         "name": "ManageMasterUserPassword",
+         "type": "boolean",
+         "key": "ManageMasterUserPassword"
+        },
+        {
+         "name": "MasterUserAuthenticationType",
+         "type": "string",
+         "enum": [
+          "password",
+          "iam-db-auth"
+         ],
+         "key": "MasterUserAuthenticationType"
+        },
+        {
+         "name": "MasterUserPassword",
+         "type": "string",
+         "key": "MasterUserPassword"
+        },
+        {
+         "name": "MasterUserSecretKmsKeyId",
+         "type": "string",
+         "key": "MasterUserSecretKmsKeyId"
+        },
+        {
+         "name": "MonitoringInterval",
+         "type": "integer",
+         "key": "MonitoringInterval"
+        },
+        {
+         "name": "MonitoringRoleArn",
+         "type": "string",
+         "key": "MonitoringRoleArn"
+        },
+        {
+         "name": "NetworkType",
+         "type": "string",
+         "key": "NetworkType"
+        },
+        {
+         "name": "NewDBClusterIdentifier",
+         "type": "string",
+         "key": "NewDBClusterIdentifier"
+        },
+        {
+         "name": "OptionGroupName",
+         "type": "string",
+         "key": "OptionGroupName"
+        },
+        {
+         "name": "PerformanceInsightsKMSKeyId",
+         "type": "string",
+         "key": "PerformanceInsightsKMSKeyId"
+        },
+        {
+         "name": "PerformanceInsightsRetentionPeriod",
+         "type": "integer",
+         "key": "PerformanceInsightsRetentionPeriod"
+        },
+        {
+         "name": "Port",
+         "type": "integer",
+         "key": "Port"
+        },
+        {
+         "name": "PreferredBackupWindow",
+         "type": "string",
+         "key": "PreferredBackupWindow"
+        },
+        {
+         "name": "PreferredMaintenanceWindow",
+         "type": "string",
+         "key": "PreferredMaintenanceWindow"
+        },
+        {
+         "name": "RotateMasterUserPassword",
+         "type": "boolean",
+         "key": "RotateMasterUserPassword"
+        },
+        {
+         "name": "ScalingConfiguration",
+         "type": "structure",
+         "key": "ScalingConfiguration",
+         "shape": "ScalingConfiguration"
+        },
+        {
+         "name": "ServerlessV2ScalingConfiguration",
+         "type": "structure",
+         "key": "ServerlessV2ScalingConfiguration",
+         "shape": "ServerlessV2ScalingConfiguration"
+        },
+        {
+         "name": "StorageType",
+         "type": "string",
+         "key": "StorageType"
+        },
+        {
+         "name": "VpcSecurityGroupIds",
+         "type": "list",
+         "element": "string",
+         "key": "VpcSecurityGroupIds",
+         "itemKey": "VpcSecurityGroupId"
+        }
+       ],
+       "wrapper": "DBCluster",
+       "lookup": "DBClusterIdentifier",
+       "lookupKey": "name",
+       "output": "ModifyDBClusterResult",
+       "resultWrapper": "ModifyDBClusterResult",
+       "editable": [
+        "AllocatedStorage",
+        "AllowEngineModeChange",
+        "AutoMinorVersionUpgrade",
+        "BacktrackWindow",
+        "BackupRetentionPeriod",
+        "CACertificateIdentifier",
+        "CloudwatchLogsExportConfiguration",
+        "CopyTagsToSnapshot",
+        "DBClusterInstanceClass",
+        "DBClusterParameterGroupName",
+        "DBInstanceParameterGroupName",
+        "DatabaseInsightsMode",
+        "DeletionProtection",
+        "Domain",
+        "DomainIAMRoleName",
+        "EnableGlobalWriteForwarding",
+        "EnableHttpEndpoint",
+        "EnableIAMDatabaseAuthentication",
+        "EnableLimitlessDatabase",
+        "EnableLocalWriteForwarding",
+        "EnablePerformanceInsights",
+        "EngineVersion",
+        "Iops",
+        "ManageMasterUserPassword",
+        "MasterUserAuthenticationType",
+        "MasterUserPassword",
+        "MasterUserSecretKmsKeyId",
+        "MonitoringInterval",
+        "MonitoringRoleArn",
+        "NetworkType",
+        "NewDBClusterIdentifier",
+        "OptionGroupName",
+        "PerformanceInsightsKMSKeyId",
+        "PerformanceInsightsRetentionPeriod",
+        "PreferredBackupWindow",
+        "PreferredMaintenanceWindow",
+        "RotateMasterUserPassword",
+        "ScalingConfiguration",
+        "ServerlessV2ScalingConfiguration",
+        "StorageType",
+        "VpcSecurityGroupIds"
+       ]
+      }
+     }
     }
    ],
    "tagging": {
@@ -3736,11 +5386,15 @@
     }
    },
    "bounds": [
-    "DB subnet groups, DB parameter groups, DB cluster parameter groups and option groups are stored configuration served over the Query protocol: no DB instance, cluster, proxy, snapshot, event subscription, network or database engine exists, and CreateDBInstance, CreateDBCluster, CreateDBSnapshot and every other official operation return UnknownOperationException with HTTP 501.",
+    "DB instances and DB clusters are stored configuration records that stay in the creating state: no database engine, storage, endpoint, address, port, listener, network interface, backup or monitoring exists, no endpoint, address or port is ever returned, and no SQL, Gremlin, SPARQL, openCypher or MongoDB data plane exists. DB subnet groups, DB parameter groups, DB cluster parameter groups and option groups are stored configuration too. Operations that act on a running database (RebootDBInstance, FailoverDBCluster, StartDBInstance, StopDBInstance, snapshots, restores, point-in-time restores, read replicas, promotion, switchover, backtrack, cluster activity streams, proxies, global clusters, blue/green deployments, event subscriptions) and every other official operation return UnknownOperationException with HTTP 501.",
+    "The simulator stores no credentials: MasterUserPassword, TdeCredentialPassword, TdeCredentialArn, ManageMasterUserPassword, RotateMasterUserPassword, MasterUserSecretKmsKeyId, DomainAuthSecretArn and PreSignedUrl are refused with InvalidParameterValue instead of being accepted and discarded, so a record is created with MasterUsername and no password (AWS would require a password or a managed secret). Port and DBPortNumber are refused because no listener exists; Active Directory (Domain*), EC2-Classic DBSecurityGroups, renaming (NewDBInstanceIdentifier, NewDBClusterIdentifier), replication sources, global clusters, CloudwatchLogsExportConfiguration (use EnableCloudwatchLogsExports at creation) and deletion protection set to true (it is not enforced) are refused, and so is every member the official DB instance or DB cluster description does not hold.",
+    "A record keeps exactly the settings it was given: the engine, version, instance class, storage, backup and maintenance windows, Availability Zone, encryption, monitoring and similar settings are stored without checking them against AWS offerings (no engine version, instance class or Region availability is validated) and no default is filled in. DBInstanceStatus and Status are creating from creation until deletion; ModifyDBInstance and ModifyDBCluster are accepted in any state and apply immediately (ApplyImmediately is accepted, no pending values exist), and Delete returns the record with status deleting. DB instance and DB cluster identifiers are 1 to 63 letters, digits or hyphens that start with a letter and neither end with a hyphen nor contain two consecutive hyphens, and are stored in lowercase; Engine must be a documented value (DB instances: aurora-mysql, aurora-postgresql, db2-ae, db2-se, docdb, mariadb, mysql, neptune, the oracle and sqlserver editions, postgres; DB clusters: aurora-mysql, aurora-postgresql, docdb, mysql, neptune, postgres); BackupRetentionPeriod is 0 to 35, PromotionTier 0 to 15 and MonitoringInterval one of 0, 1, 5, 10, 15, 30 or 60. At most 40 DB instances and 40 DB clusters exist per Region (local limits).",
+    "No snapshot can be taken, so deleting a DB instance or DB cluster refuses FinalDBSnapshotIdentifier and a SkipFinalSnapshot of false with InvalidParameterValue, and a DB cluster delete must also state SkipFinalSnapshot true. A DB instance delete may leave it out (the DocumentDB model has no such member, and AWS would otherwise demand a final snapshot name), which skips the snapshot. Neither the instances of a DB cluster nor the other direction is tracked: the records are independent, a DB instance may name a DBClusterIdentifier that does not exist, and a cluster is deletable while instances name it.",
+    "References to configuration groups are stored by name and not checked, because the engine cannot resolve a name held inside a nested member: the DB parameter group, option group, DB subnet group and VPC security group of a DB instance and the DB cluster parameter group, DB subnet group, option group and VPC security groups of a DB cluster need not exist, a group in use can be deleted, and a DB instance reports each with only its name (parameter and option groups with the status in-sync, security groups active) and no VPC, subnets or Availability Zones. DB parameter group, option group and DB subnet group names given to an instance or cluster may also contain periods, so default.mysql8.0 is accepted.",
     "Parameter and option values are not modeled: ModifyDBParameterGroup, ResetDBParameterGroup, DescribeDBParameters, the cluster equivalents, CopyDBParameterGroup, ModifyOptionGroup and DescribeOptionGroupOptions are not implemented. Default parameter, option and subnet groups are not pre-created, and parameter group families, major engine versions and subnet IDs are stored without checking that they exist.",
     "A subnet group needs 2 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs and is not checked for Availability Zone coverage; it reports no VPC, Availability Zone, Outpost, status or network type. DB subnet group and DB (cluster) parameter group names are stored in lowercase as documented, \"default\" subnet groups are refused, and option groups accept only the documented EngineName values.",
     "Describe operations and ListTagsForResource refuse a non-empty Filters list (an empty one means no filter), Describe operations accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name, and DescribeOptionGroups refuses OptionGroupName together with EngineName or MajorEngineVersion. Tag keys are 1 to 128 and values at most 256 characters of letters, digits, spaces and _.:/=+-@, and neither may start with aws: or rds:. Tag operations on an unknown ARN fail with DBInstanceNotFound, the first not-found fault the official tag operations model.",
-    "Amazon Aurora, Amazon Neptune and Amazon DocumentDB are managed through this same RDS API (Version 2014-10-31, signing name rds, rds: IAM actions, rds ARNs), and the boto3 neptune and docdb clients and the rds client with Aurora families were run against these operations. Only the configuration above is served, not the products: no Aurora, Neptune or DocumentDB cluster, instance, snapshot, global cluster or endpoint exists, so CreateDBCluster, CreateDBInstance and their Describe operations return UnknownOperationException with HTTP 501, and no SQL, Gremlin, SPARQL, openCypher or MongoDB data plane exists. The neptune client can use 13 of the 16 operations and the docdb client 10: neither model has option groups, and DocumentDB has no DB parameter groups. Parameter group families such as aurora-mysql8.0, neptune1.3 and docdb5.0 are stored without being checked. Responses omit SubnetOutpost, which the neptune and docdb models lack, and SupportedNetworkTypes, which the neptune model lacks. The RDS rules apply to every client: a non-empty Filters list is refused although those models define it, subnet group names must start with a letter although the neptune and docdb models do not say so, and tag keys and values may contain : and @, which the neptune and docdb models do not list."
+    "Amazon Aurora, Amazon Neptune and Amazon DocumentDB are managed through this same RDS API (Version 2014-10-31, signing name rds, rds: IAM actions, rds ARNs), and the boto3 neptune and docdb clients and the rds client with Aurora engines were run against these operations. Only configuration and records are served, not the products: no Aurora, Neptune or DocumentDB database, endpoint, snapshot or global cluster exists, no DB cluster or DB instance of those engines runs, and no SQL, Gremlin, SPARQL, openCypher or MongoDB data plane exists. The neptune client can use 21 of the 24 operations and the docdb client 18: neither model has option groups, and DocumentDB has no DB parameter groups. Parameter group families such as aurora-mysql8.0, neptune1.3 and docdb5.0 are stored without being checked. Responses omit SubnetOutpost, which the neptune and docdb models lack, and SupportedNetworkTypes, which the neptune model lacks. The RDS rules apply to every client: a non-empty Filters list is refused although those models define it, subnet group names must start with a letter although the neptune and docdb models do not say so, and tag keys and values may contain : and @, which the neptune and docdb models do not list."
    ],
    "source": {
     "package": "botocore",
@@ -3750,6 +5404,18 @@
     "license": "Apache-2.0"
    },
    "xmlShapes": {
+    "ActivityStreamMode": {
+     "type": "string"
+    },
+    "ActivityStreamPolicyStatus": {
+     "type": "string"
+    },
+    "ActivityStreamStatus": {
+     "type": "string"
+    },
+    "AutomationMode": {
+     "type": "string"
+    },
     "AvailabilityZone": {
      "type": "structure",
      "members": [
@@ -3760,8 +5426,97 @@
       }
      ]
     },
+    "AvailabilityZones": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "AvailabilityZone",
+      "shape": "String"
+     }
+    },
     "Boolean": {
      "type": "boolean"
+    },
+    "BooleanOptional": {
+     "type": "boolean"
+    },
+    "CertificateDetails": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CAIdentifier",
+       "element": "CAIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "ValidTill",
+       "element": "ValidTill",
+       "shape": "TStamp"
+      }
+     ]
+    },
+    "ClusterPendingModifiedValues": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AllocatedStorage",
+       "element": "AllocatedStorage",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "BackupRetentionPeriod",
+       "element": "BackupRetentionPeriod",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "CertificateDetails",
+       "element": "CertificateDetails",
+       "shape": "CertificateDetails"
+      },
+      {
+       "name": "DBClusterIdentifier",
+       "element": "DBClusterIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "EngineVersion",
+       "element": "EngineVersion",
+       "shape": "String"
+      },
+      {
+       "name": "IAMDatabaseAuthenticationEnabled",
+       "element": "IAMDatabaseAuthenticationEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "Iops",
+       "element": "Iops",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "MasterUserPassword",
+       "element": "MasterUserPassword",
+       "shape": "SensitiveString"
+      },
+      {
+       "name": "PendingCloudwatchLogsExports",
+       "element": "PendingCloudwatchLogsExports",
+       "shape": "PendingCloudwatchLogsExports"
+      },
+      {
+       "name": "RdsCustomClusterConfiguration",
+       "element": "RdsCustomClusterConfiguration",
+       "shape": "RdsCustomClusterConfiguration"
+      },
+      {
+       "name": "StorageType",
+       "element": "StorageType",
+       "shape": "String"
+      }
+     ]
+    },
+    "ClusterScalabilityType": {
+     "type": "string"
     },
     "CreateDBClusterParameterGroupResult": {
      "type": "structure",
@@ -3770,6 +5525,26 @@
        "name": "DBClusterParameterGroup",
        "element": "DBClusterParameterGroup",
        "shape": "DBClusterParameterGroup"
+      }
+     ]
+    },
+    "CreateDBClusterResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBCluster",
+       "element": "DBCluster",
+       "shape": "DBCluster"
+      }
+     ]
+    },
+    "CreateDBInstanceResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBInstance",
+       "element": "DBInstance",
+       "shape": "DBInstance"
       }
      ]
     },
@@ -3800,6 +5575,515 @@
        "name": "OptionGroup",
        "element": "OptionGroup",
        "shape": "OptionGroup"
+      }
+     ]
+    },
+    "DBCluster": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ActivityStreamKinesisStreamName",
+       "element": "ActivityStreamKinesisStreamName",
+       "shape": "String"
+      },
+      {
+       "name": "ActivityStreamKmsKeyId",
+       "element": "ActivityStreamKmsKeyId",
+       "shape": "String"
+      },
+      {
+       "name": "ActivityStreamMode",
+       "element": "ActivityStreamMode",
+       "shape": "ActivityStreamMode"
+      },
+      {
+       "name": "ActivityStreamStatus",
+       "element": "ActivityStreamStatus",
+       "shape": "ActivityStreamStatus"
+      },
+      {
+       "name": "AllocatedStorage",
+       "element": "AllocatedStorage",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "AssociatedRoles",
+       "element": "AssociatedRoles",
+       "shape": "DBClusterRoles"
+      },
+      {
+       "name": "AutoMinorVersionUpgrade",
+       "element": "AutoMinorVersionUpgrade",
+       "shape": "Boolean"
+      },
+      {
+       "name": "AutomaticRestartTime",
+       "element": "AutomaticRestartTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "AvailabilityZones",
+       "element": "AvailabilityZones",
+       "shape": "AvailabilityZones"
+      },
+      {
+       "name": "AwsBackupRecoveryPointArn",
+       "element": "AwsBackupRecoveryPointArn",
+       "shape": "String"
+      },
+      {
+       "name": "BacktrackConsumedChangeRecords",
+       "element": "BacktrackConsumedChangeRecords",
+       "shape": "LongOptional"
+      },
+      {
+       "name": "BacktrackWindow",
+       "element": "BacktrackWindow",
+       "shape": "LongOptional"
+      },
+      {
+       "name": "BackupRetentionPeriod",
+       "element": "BackupRetentionPeriod",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "Capacity",
+       "element": "Capacity",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "CertificateDetails",
+       "element": "CertificateDetails",
+       "shape": "CertificateDetails"
+      },
+      {
+       "name": "CharacterSetName",
+       "element": "CharacterSetName",
+       "shape": "String"
+      },
+      {
+       "name": "CloneGroupId",
+       "element": "CloneGroupId",
+       "shape": "String"
+      },
+      {
+       "name": "ClusterCreateTime",
+       "element": "ClusterCreateTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "ClusterScalabilityType",
+       "element": "ClusterScalabilityType",
+       "shape": "ClusterScalabilityType"
+      },
+      {
+       "name": "CopyTagsToSnapshot",
+       "element": "CopyTagsToSnapshot",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "CrossAccountClone",
+       "element": "CrossAccountClone",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "CustomEndpoints",
+       "element": "CustomEndpoints",
+       "shape": "StringList"
+      },
+      {
+       "name": "DBClusterArn",
+       "element": "DBClusterArn",
+       "shape": "String"
+      },
+      {
+       "name": "DBClusterIdentifier",
+       "element": "DBClusterIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "DBClusterInstanceClass",
+       "element": "DBClusterInstanceClass",
+       "shape": "String"
+      },
+      {
+       "name": "DBClusterMembers",
+       "element": "DBClusterMembers",
+       "shape": "DBClusterMemberList"
+      },
+      {
+       "name": "DBClusterOptionGroupMemberships",
+       "element": "DBClusterOptionGroupMemberships",
+       "shape": "DBClusterOptionGroupMemberships"
+      },
+      {
+       "name": "DBClusterParameterGroup",
+       "element": "DBClusterParameterGroup",
+       "shape": "String"
+      },
+      {
+       "name": "DBSubnetGroup",
+       "element": "DBSubnetGroup",
+       "shape": "String"
+      },
+      {
+       "name": "DBSystemId",
+       "element": "DBSystemId",
+       "shape": "String"
+      },
+      {
+       "name": "DatabaseInsightsMode",
+       "element": "DatabaseInsightsMode",
+       "shape": "DatabaseInsightsMode"
+      },
+      {
+       "name": "DatabaseName",
+       "element": "DatabaseName",
+       "shape": "String"
+      },
+      {
+       "name": "DbClusterResourceId",
+       "element": "DbClusterResourceId",
+       "shape": "String"
+      },
+      {
+       "name": "DeletionProtection",
+       "element": "DeletionProtection",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "DomainMemberships",
+       "element": "DomainMemberships",
+       "shape": "DomainMembershipList"
+      },
+      {
+       "name": "EarliestBacktrackTime",
+       "element": "EarliestBacktrackTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "EarliestRestorableTime",
+       "element": "EarliestRestorableTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "EnabledCloudwatchLogsExports",
+       "element": "EnabledCloudwatchLogsExports",
+       "shape": "LogTypeList"
+      },
+      {
+       "name": "Endpoint",
+       "element": "Endpoint",
+       "shape": "String"
+      },
+      {
+       "name": "Engine",
+       "element": "Engine",
+       "shape": "String"
+      },
+      {
+       "name": "EngineLifecycleSupport",
+       "element": "EngineLifecycleSupport",
+       "shape": "String"
+      },
+      {
+       "name": "EngineMode",
+       "element": "EngineMode",
+       "shape": "String"
+      },
+      {
+       "name": "EngineVersion",
+       "element": "EngineVersion",
+       "shape": "String"
+      },
+      {
+       "name": "GlobalClusterIdentifier",
+       "element": "GlobalClusterIdentifier",
+       "shape": "GlobalClusterIdentifier"
+      },
+      {
+       "name": "GlobalWriteForwardingRequested",
+       "element": "GlobalWriteForwardingRequested",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "GlobalWriteForwardingStatus",
+       "element": "GlobalWriteForwardingStatus",
+       "shape": "WriteForwardingStatus"
+      },
+      {
+       "name": "HostedZoneId",
+       "element": "HostedZoneId",
+       "shape": "String"
+      },
+      {
+       "name": "HttpEndpointEnabled",
+       "element": "HttpEndpointEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "IAMDatabaseAuthenticationEnabled",
+       "element": "IAMDatabaseAuthenticationEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "IOOptimizedNextAllowedModificationTime",
+       "element": "IOOptimizedNextAllowedModificationTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "Iops",
+       "element": "Iops",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "KmsKeyId",
+       "element": "KmsKeyId",
+       "shape": "String"
+      },
+      {
+       "name": "LatestRestorableTime",
+       "element": "LatestRestorableTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "LimitlessDatabase",
+       "element": "LimitlessDatabase",
+       "shape": "LimitlessDatabase"
+      },
+      {
+       "name": "LocalWriteForwardingStatus",
+       "element": "LocalWriteForwardingStatus",
+       "shape": "LocalWriteForwardingStatus"
+      },
+      {
+       "name": "MasterUserSecret",
+       "element": "MasterUserSecret",
+       "shape": "MasterUserSecret"
+      },
+      {
+       "name": "MasterUsername",
+       "element": "MasterUsername",
+       "shape": "String"
+      },
+      {
+       "name": "MonitoringInterval",
+       "element": "MonitoringInterval",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "MonitoringRoleArn",
+       "element": "MonitoringRoleArn",
+       "shape": "String"
+      },
+      {
+       "name": "MultiAZ",
+       "element": "MultiAZ",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "NetworkType",
+       "element": "NetworkType",
+       "shape": "String"
+      },
+      {
+       "name": "PendingModifiedValues",
+       "element": "PendingModifiedValues",
+       "shape": "ClusterPendingModifiedValues"
+      },
+      {
+       "name": "PercentProgress",
+       "element": "PercentProgress",
+       "shape": "String"
+      },
+      {
+       "name": "PerformanceInsightsEnabled",
+       "element": "PerformanceInsightsEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "PerformanceInsightsKMSKeyId",
+       "element": "PerformanceInsightsKMSKeyId",
+       "shape": "String"
+      },
+      {
+       "name": "PerformanceInsightsRetentionPeriod",
+       "element": "PerformanceInsightsRetentionPeriod",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "Port",
+       "element": "Port",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "PreferredBackupWindow",
+       "element": "PreferredBackupWindow",
+       "shape": "String"
+      },
+      {
+       "name": "PreferredMaintenanceWindow",
+       "element": "PreferredMaintenanceWindow",
+       "shape": "String"
+      },
+      {
+       "name": "PubliclyAccessible",
+       "element": "PubliclyAccessible",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "RdsCustomClusterConfiguration",
+       "element": "RdsCustomClusterConfiguration",
+       "shape": "RdsCustomClusterConfiguration"
+      },
+      {
+       "name": "ReadReplicaIdentifiers",
+       "element": "ReadReplicaIdentifiers",
+       "shape": "ReadReplicaIdentifierList"
+      },
+      {
+       "name": "ReaderEndpoint",
+       "element": "ReaderEndpoint",
+       "shape": "String"
+      },
+      {
+       "name": "ReplicationSourceIdentifier",
+       "element": "ReplicationSourceIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "ScalingConfigurationInfo",
+       "element": "ScalingConfigurationInfo",
+       "shape": "ScalingConfigurationInfo"
+      },
+      {
+       "name": "ServerlessV2PlatformVersion",
+       "element": "ServerlessV2PlatformVersion",
+       "shape": "String"
+      },
+      {
+       "name": "ServerlessV2ScalingConfiguration",
+       "element": "ServerlessV2ScalingConfiguration",
+       "shape": "ServerlessV2ScalingConfigurationInfo"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      },
+      {
+       "name": "StatusInfos",
+       "element": "StatusInfos",
+       "shape": "DBClusterStatusInfoList"
+      },
+      {
+       "name": "StorageEncrypted",
+       "element": "StorageEncrypted",
+       "shape": "Boolean"
+      },
+      {
+       "name": "StorageThroughput",
+       "element": "StorageThroughput",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "StorageType",
+       "element": "StorageType",
+       "shape": "String"
+      },
+      {
+       "name": "TagList",
+       "element": "TagList",
+       "shape": "TagList"
+      },
+      {
+       "name": "UpgradeRolloutOrder",
+       "element": "UpgradeRolloutOrder",
+       "shape": "UpgradeRolloutOrder"
+      },
+      {
+       "name": "VpcSecurityGroups",
+       "element": "VpcSecurityGroups",
+       "shape": "VpcSecurityGroupMembershipList"
+      }
+     ]
+    },
+    "DBClusterList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBCluster",
+      "shape": "DBCluster"
+     }
+    },
+    "DBClusterMember": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBClusterParameterGroupStatus",
+       "element": "DBClusterParameterGroupStatus",
+       "shape": "String"
+      },
+      {
+       "name": "DBInstanceIdentifier",
+       "element": "DBInstanceIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "IsClusterWriter",
+       "element": "IsClusterWriter",
+       "shape": "Boolean"
+      },
+      {
+       "name": "PromotionTier",
+       "element": "PromotionTier",
+       "shape": "IntegerOptional"
+      }
+     ]
+    },
+    "DBClusterMemberList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBClusterMember",
+      "shape": "DBClusterMember"
+     }
+    },
+    "DBClusterMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBClusters",
+       "element": "DBClusters",
+       "shape": "DBClusterList"
+      },
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBClusterOptionGroupMemberships": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBClusterOptionGroup",
+      "shape": "DBClusterOptionGroupStatus"
+     }
+    },
+    "DBClusterOptionGroupStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBClusterOptionGroupName",
+       "element": "DBClusterOptionGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
       }
      ]
     },
@@ -3851,6 +6135,614 @@
       }
      ]
     },
+    "DBClusterRole": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "FeatureName",
+       "element": "FeatureName",
+       "shape": "String"
+      },
+      {
+       "name": "RoleArn",
+       "element": "RoleArn",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBClusterRoles": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBClusterRole",
+      "shape": "DBClusterRole"
+     }
+    },
+    "DBClusterStatusInfo": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Message",
+       "element": "Message",
+       "shape": "String"
+      },
+      {
+       "name": "Normal",
+       "element": "Normal",
+       "shape": "Boolean"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      },
+      {
+       "name": "StatusType",
+       "element": "StatusType",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBClusterStatusInfoList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBClusterStatusInfo",
+      "shape": "DBClusterStatusInfo"
+     }
+    },
+    "DBInstance": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ActivityStreamEngineNativeAuditFieldsIncluded",
+       "element": "ActivityStreamEngineNativeAuditFieldsIncluded",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "ActivityStreamKinesisStreamName",
+       "element": "ActivityStreamKinesisStreamName",
+       "shape": "String"
+      },
+      {
+       "name": "ActivityStreamKmsKeyId",
+       "element": "ActivityStreamKmsKeyId",
+       "shape": "String"
+      },
+      {
+       "name": "ActivityStreamMode",
+       "element": "ActivityStreamMode",
+       "shape": "ActivityStreamMode"
+      },
+      {
+       "name": "ActivityStreamPolicyStatus",
+       "element": "ActivityStreamPolicyStatus",
+       "shape": "ActivityStreamPolicyStatus"
+      },
+      {
+       "name": "ActivityStreamStatus",
+       "element": "ActivityStreamStatus",
+       "shape": "ActivityStreamStatus"
+      },
+      {
+       "name": "AllocatedStorage",
+       "element": "AllocatedStorage",
+       "shape": "Integer"
+      },
+      {
+       "name": "AssociatedRoles",
+       "element": "AssociatedRoles",
+       "shape": "DBInstanceRoles"
+      },
+      {
+       "name": "AutoMinorVersionUpgrade",
+       "element": "AutoMinorVersionUpgrade",
+       "shape": "Boolean"
+      },
+      {
+       "name": "AutomaticRestartTime",
+       "element": "AutomaticRestartTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "AutomationMode",
+       "element": "AutomationMode",
+       "shape": "AutomationMode"
+      },
+      {
+       "name": "AvailabilityZone",
+       "element": "AvailabilityZone",
+       "shape": "String"
+      },
+      {
+       "name": "AwsBackupRecoveryPointArn",
+       "element": "AwsBackupRecoveryPointArn",
+       "shape": "String"
+      },
+      {
+       "name": "BackupRetentionPeriod",
+       "element": "BackupRetentionPeriod",
+       "shape": "Integer"
+      },
+      {
+       "name": "BackupTarget",
+       "element": "BackupTarget",
+       "shape": "String"
+      },
+      {
+       "name": "CACertificateIdentifier",
+       "element": "CACertificateIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "CertificateDetails",
+       "element": "CertificateDetails",
+       "shape": "CertificateDetails"
+      },
+      {
+       "name": "CharacterSetName",
+       "element": "CharacterSetName",
+       "shape": "String"
+      },
+      {
+       "name": "CopyTagsToSnapshot",
+       "element": "CopyTagsToSnapshot",
+       "shape": "Boolean"
+      },
+      {
+       "name": "CustomIamInstanceProfile",
+       "element": "CustomIamInstanceProfile",
+       "shape": "String"
+      },
+      {
+       "name": "CustomerOwnedIpEnabled",
+       "element": "CustomerOwnedIpEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "DBClusterIdentifier",
+       "element": "DBClusterIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "DBInstanceArn",
+       "element": "DBInstanceArn",
+       "shape": "String"
+      },
+      {
+       "name": "DBInstanceAutomatedBackupsReplications",
+       "element": "DBInstanceAutomatedBackupsReplications",
+       "shape": "DBInstanceAutomatedBackupsReplicationList"
+      },
+      {
+       "name": "DBInstanceClass",
+       "element": "DBInstanceClass",
+       "shape": "String"
+      },
+      {
+       "name": "DBInstanceIdentifier",
+       "element": "DBInstanceIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "DBInstanceStatus",
+       "element": "DBInstanceStatus",
+       "shape": "String"
+      },
+      {
+       "name": "DBName",
+       "element": "DBName",
+       "shape": "String"
+      },
+      {
+       "name": "DBParameterGroups",
+       "element": "DBParameterGroups",
+       "shape": "DBParameterGroupStatusList"
+      },
+      {
+       "name": "DBSecurityGroups",
+       "element": "DBSecurityGroups",
+       "shape": "DBSecurityGroupMembershipList"
+      },
+      {
+       "name": "DBSubnetGroup",
+       "element": "DBSubnetGroup",
+       "shape": "DBSubnetGroup"
+      },
+      {
+       "name": "DBSystemId",
+       "element": "DBSystemId",
+       "shape": "String"
+      },
+      {
+       "name": "DatabaseInsightsMode",
+       "element": "DatabaseInsightsMode",
+       "shape": "DatabaseInsightsMode"
+      },
+      {
+       "name": "DbInstancePort",
+       "element": "DbInstancePort",
+       "shape": "Integer"
+      },
+      {
+       "name": "DbiResourceId",
+       "element": "DbiResourceId",
+       "shape": "String"
+      },
+      {
+       "name": "DedicatedLogVolume",
+       "element": "DedicatedLogVolume",
+       "shape": "Boolean"
+      },
+      {
+       "name": "DeletionProtection",
+       "element": "DeletionProtection",
+       "shape": "Boolean"
+      },
+      {
+       "name": "DomainMemberships",
+       "element": "DomainMemberships",
+       "shape": "DomainMembershipList"
+      },
+      {
+       "name": "EnabledCloudwatchLogsExports",
+       "element": "EnabledCloudwatchLogsExports",
+       "shape": "LogTypeList"
+      },
+      {
+       "name": "Endpoint",
+       "element": "Endpoint",
+       "shape": "Endpoint"
+      },
+      {
+       "name": "Engine",
+       "element": "Engine",
+       "shape": "String"
+      },
+      {
+       "name": "EngineLifecycleSupport",
+       "element": "EngineLifecycleSupport",
+       "shape": "String"
+      },
+      {
+       "name": "EngineVersion",
+       "element": "EngineVersion",
+       "shape": "String"
+      },
+      {
+       "name": "EnhancedMonitoringResourceArn",
+       "element": "EnhancedMonitoringResourceArn",
+       "shape": "String"
+      },
+      {
+       "name": "IAMDatabaseAuthenticationEnabled",
+       "element": "IAMDatabaseAuthenticationEnabled",
+       "shape": "Boolean"
+      },
+      {
+       "name": "InstanceCreateTime",
+       "element": "InstanceCreateTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "Iops",
+       "element": "Iops",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "IsStorageConfigUpgradeAvailable",
+       "element": "IsStorageConfigUpgradeAvailable",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "KmsKeyId",
+       "element": "KmsKeyId",
+       "shape": "String"
+      },
+      {
+       "name": "LatestRestorableTime",
+       "element": "LatestRestorableTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "LicenseModel",
+       "element": "LicenseModel",
+       "shape": "String"
+      },
+      {
+       "name": "ListenerEndpoint",
+       "element": "ListenerEndpoint",
+       "shape": "Endpoint"
+      },
+      {
+       "name": "MasterUserSecret",
+       "element": "MasterUserSecret",
+       "shape": "MasterUserSecret"
+      },
+      {
+       "name": "MasterUsername",
+       "element": "MasterUsername",
+       "shape": "String"
+      },
+      {
+       "name": "MaxAllocatedStorage",
+       "element": "MaxAllocatedStorage",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "MonitoringInterval",
+       "element": "MonitoringInterval",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "MonitoringRoleArn",
+       "element": "MonitoringRoleArn",
+       "shape": "String"
+      },
+      {
+       "name": "MultiAZ",
+       "element": "MultiAZ",
+       "shape": "Boolean"
+      },
+      {
+       "name": "MultiTenant",
+       "element": "MultiTenant",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "NcharCharacterSetName",
+       "element": "NcharCharacterSetName",
+       "shape": "String"
+      },
+      {
+       "name": "NetworkType",
+       "element": "NetworkType",
+       "shape": "String"
+      },
+      {
+       "name": "OptionGroupMemberships",
+       "element": "OptionGroupMemberships",
+       "shape": "OptionGroupMembershipList"
+      },
+      {
+       "name": "PendingModifiedValues",
+       "element": "PendingModifiedValues",
+       "shape": "PendingModifiedValues"
+      },
+      {
+       "name": "PercentProgress",
+       "element": "PercentProgress",
+       "shape": "String"
+      },
+      {
+       "name": "PerformanceInsightsEnabled",
+       "element": "PerformanceInsightsEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "PerformanceInsightsKMSKeyId",
+       "element": "PerformanceInsightsKMSKeyId",
+       "shape": "String"
+      },
+      {
+       "name": "PerformanceInsightsRetentionPeriod",
+       "element": "PerformanceInsightsRetentionPeriod",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "PreferredBackupWindow",
+       "element": "PreferredBackupWindow",
+       "shape": "String"
+      },
+      {
+       "name": "PreferredMaintenanceWindow",
+       "element": "PreferredMaintenanceWindow",
+       "shape": "String"
+      },
+      {
+       "name": "ProcessorFeatures",
+       "element": "ProcessorFeatures",
+       "shape": "ProcessorFeatureList"
+      },
+      {
+       "name": "PromotionTier",
+       "element": "PromotionTier",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "PubliclyAccessible",
+       "element": "PubliclyAccessible",
+       "shape": "Boolean"
+      },
+      {
+       "name": "ReadReplicaDBClusterIdentifiers",
+       "element": "ReadReplicaDBClusterIdentifiers",
+       "shape": "ReadReplicaDBClusterIdentifierList"
+      },
+      {
+       "name": "ReadReplicaDBInstanceIdentifiers",
+       "element": "ReadReplicaDBInstanceIdentifiers",
+       "shape": "ReadReplicaDBInstanceIdentifierList"
+      },
+      {
+       "name": "ReadReplicaSourceDBClusterIdentifier",
+       "element": "ReadReplicaSourceDBClusterIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "ReadReplicaSourceDBInstanceIdentifier",
+       "element": "ReadReplicaSourceDBInstanceIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "ReplicaMode",
+       "element": "ReplicaMode",
+       "shape": "ReplicaMode"
+      },
+      {
+       "name": "ResumeFullAutomationModeTime",
+       "element": "ResumeFullAutomationModeTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "SecondaryAvailabilityZone",
+       "element": "SecondaryAvailabilityZone",
+       "shape": "String"
+      },
+      {
+       "name": "StatusInfos",
+       "element": "StatusInfos",
+       "shape": "DBInstanceStatusInfoList"
+      },
+      {
+       "name": "StorageEncrypted",
+       "element": "StorageEncrypted",
+       "shape": "Boolean"
+      },
+      {
+       "name": "StorageThroughput",
+       "element": "StorageThroughput",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "StorageType",
+       "element": "StorageType",
+       "shape": "String"
+      },
+      {
+       "name": "TagList",
+       "element": "TagList",
+       "shape": "TagList"
+      },
+      {
+       "name": "TdeCredentialArn",
+       "element": "TdeCredentialArn",
+       "shape": "String"
+      },
+      {
+       "name": "Timezone",
+       "element": "Timezone",
+       "shape": "String"
+      },
+      {
+       "name": "UpgradeRolloutOrder",
+       "element": "UpgradeRolloutOrder",
+       "shape": "UpgradeRolloutOrder"
+      },
+      {
+       "name": "VpcSecurityGroups",
+       "element": "VpcSecurityGroups",
+       "shape": "VpcSecurityGroupMembershipList"
+      }
+     ]
+    },
+    "DBInstanceAutomatedBackupsReplication": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBInstanceAutomatedBackupsArn",
+       "element": "DBInstanceAutomatedBackupsArn",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBInstanceAutomatedBackupsReplicationList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBInstanceAutomatedBackupsReplication",
+      "shape": "DBInstanceAutomatedBackupsReplication"
+     }
+    },
+    "DBInstanceList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBInstance",
+      "shape": "DBInstance"
+     }
+    },
+    "DBInstanceMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBInstances",
+       "element": "DBInstances",
+       "shape": "DBInstanceList"
+      },
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBInstanceRole": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "FeatureName",
+       "element": "FeatureName",
+       "shape": "String"
+      },
+      {
+       "name": "RoleArn",
+       "element": "RoleArn",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBInstanceRoles": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBInstanceRole",
+      "shape": "DBInstanceRole"
+     }
+    },
+    "DBInstanceStatusInfo": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Message",
+       "element": "Message",
+       "shape": "String"
+      },
+      {
+       "name": "Normal",
+       "element": "Normal",
+       "shape": "Boolean"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      },
+      {
+       "name": "StatusType",
+       "element": "StatusType",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBInstanceStatusInfoList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBInstanceStatusInfo",
+      "shape": "DBInstanceStatusInfo"
+     }
+    },
     "DBParameterGroup": {
      "type": "structure",
      "members": [
@@ -3882,6 +6774,29 @@
       "name": "",
       "element": "DBParameterGroup",
       "shape": "DBParameterGroup"
+     }
+    },
+    "DBParameterGroupStatus": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBParameterGroupName",
+       "element": "DBParameterGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "ParameterApplyStatus",
+       "element": "ParameterApplyStatus",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBParameterGroupStatusList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBParameterGroup",
+      "shape": "DBParameterGroupStatus"
      }
     },
     "DBParameterGroupsMessage": {
@@ -3985,8 +6900,180 @@
       "shape": "DBSubnetGroup"
      }
     },
+    "DatabaseInsightsMode": {
+     "type": "string"
+    },
+    "DeleteDBClusterResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBCluster",
+       "element": "DBCluster",
+       "shape": "DBCluster"
+      }
+     ]
+    },
+    "DeleteDBInstanceResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBInstance",
+       "element": "DBInstance",
+       "shape": "DBInstance"
+      }
+     ]
+    },
+    "DomainMembership": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AuthSecretArn",
+       "element": "AuthSecretArn",
+       "shape": "String"
+      },
+      {
+       "name": "DnsIps",
+       "element": "DnsIps",
+       "shape": "StringList"
+      },
+      {
+       "name": "Domain",
+       "element": "Domain",
+       "shape": "String"
+      },
+      {
+       "name": "FQDN",
+       "element": "FQDN",
+       "shape": "String"
+      },
+      {
+       "name": "IAMRoleName",
+       "element": "IAMRoleName",
+       "shape": "String"
+      },
+      {
+       "name": "OU",
+       "element": "OU",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "DomainMembershipList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DomainMembership",
+      "shape": "DomainMembership"
+     }
+    },
+    "DoubleOptional": {
+     "type": "double"
+    },
+    "Endpoint": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Address",
+       "element": "Address",
+       "shape": "String"
+      },
+      {
+       "name": "HostedZoneId",
+       "element": "HostedZoneId",
+       "shape": "String"
+      },
+      {
+       "name": "Port",
+       "element": "Port",
+       "shape": "Integer"
+      }
+     ]
+    },
+    "GlobalClusterIdentifier": {
+     "type": "string"
+    },
+    "Integer": {
+     "type": "integer"
+    },
     "IntegerOptional": {
      "type": "integer"
+    },
+    "LimitlessDatabase": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "MinRequiredACU",
+       "element": "MinRequiredACU",
+       "shape": "DoubleOptional"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "LimitlessDatabaseStatus"
+      }
+     ]
+    },
+    "LimitlessDatabaseStatus": {
+     "type": "string"
+    },
+    "LocalWriteForwardingStatus": {
+     "type": "string"
+    },
+    "LogTypeList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "member",
+      "shape": "String"
+     }
+    },
+    "LongOptional": {
+     "type": "long"
+    },
+    "MasterUserSecret": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "KmsKeyId",
+       "element": "KmsKeyId",
+       "shape": "String"
+      },
+      {
+       "name": "SecretArn",
+       "element": "SecretArn",
+       "shape": "String"
+      },
+      {
+       "name": "SecretStatus",
+       "element": "SecretStatus",
+       "shape": "String"
+      }
+     ]
+    },
+    "ModifyDBClusterResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBCluster",
+       "element": "DBCluster",
+       "shape": "DBCluster"
+      }
+     ]
+    },
+    "ModifyDBInstanceResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBInstance",
+       "element": "DBInstance",
+       "shape": "DBInstance"
+      }
+     ]
     },
     "ModifyDBSubnetGroupResult": {
      "type": "structure",
@@ -4108,6 +7195,29 @@
       }
      ]
     },
+    "OptionGroupMembership": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "OptionGroupName",
+       "element": "OptionGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "OptionGroupMembershipList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "OptionGroupMembership",
+      "shape": "OptionGroupMembership"
+     }
+    },
     "OptionGroups": {
      "type": "structure",
      "members": [
@@ -4207,8 +7317,266 @@
       }
      ]
     },
+    "PendingCloudwatchLogsExports": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "LogTypesToDisable",
+       "element": "LogTypesToDisable",
+       "shape": "LogTypeList"
+      },
+      {
+       "name": "LogTypesToEnable",
+       "element": "LogTypesToEnable",
+       "shape": "LogTypeList"
+      }
+     ]
+    },
+    "PendingModifiedValues": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AllocatedStorage",
+       "element": "AllocatedStorage",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "AutomationMode",
+       "element": "AutomationMode",
+       "shape": "AutomationMode"
+      },
+      {
+       "name": "BackupRetentionPeriod",
+       "element": "BackupRetentionPeriod",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "CACertificateIdentifier",
+       "element": "CACertificateIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "DBInstanceClass",
+       "element": "DBInstanceClass",
+       "shape": "String"
+      },
+      {
+       "name": "DBInstanceIdentifier",
+       "element": "DBInstanceIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "DBSubnetGroupName",
+       "element": "DBSubnetGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "DedicatedLogVolume",
+       "element": "DedicatedLogVolume",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "Engine",
+       "element": "Engine",
+       "shape": "String"
+      },
+      {
+       "name": "EngineVersion",
+       "element": "EngineVersion",
+       "shape": "String"
+      },
+      {
+       "name": "IAMDatabaseAuthenticationEnabled",
+       "element": "IAMDatabaseAuthenticationEnabled",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "Iops",
+       "element": "Iops",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "LicenseModel",
+       "element": "LicenseModel",
+       "shape": "String"
+      },
+      {
+       "name": "MasterUserPassword",
+       "element": "MasterUserPassword",
+       "shape": "SensitiveString"
+      },
+      {
+       "name": "MultiAZ",
+       "element": "MultiAZ",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "MultiTenant",
+       "element": "MultiTenant",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "PendingCloudwatchLogsExports",
+       "element": "PendingCloudwatchLogsExports",
+       "shape": "PendingCloudwatchLogsExports"
+      },
+      {
+       "name": "Port",
+       "element": "Port",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "ProcessorFeatures",
+       "element": "ProcessorFeatures",
+       "shape": "ProcessorFeatureList"
+      },
+      {
+       "name": "ResumeFullAutomationModeTime",
+       "element": "ResumeFullAutomationModeTime",
+       "shape": "TStamp"
+      },
+      {
+       "name": "StorageThroughput",
+       "element": "StorageThroughput",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "StorageType",
+       "element": "StorageType",
+       "shape": "String"
+      }
+     ]
+    },
     "PotentiallySensitiveOptionSettingValue": {
      "type": "string"
+    },
+    "ProcessorFeature": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Name",
+       "element": "Name",
+       "shape": "String"
+      },
+      {
+       "name": "Value",
+       "element": "Value",
+       "shape": "String"
+      }
+     ]
+    },
+    "ProcessorFeatureList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ProcessorFeature",
+      "shape": "ProcessorFeature"
+     }
+    },
+    "RdsCustomClusterConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "InterconnectSubnetId",
+       "element": "InterconnectSubnetId",
+       "shape": "String"
+      },
+      {
+       "name": "ReplicaMode",
+       "element": "ReplicaMode",
+       "shape": "ReplicaMode"
+      },
+      {
+       "name": "TransitGatewayMulticastDomainId",
+       "element": "TransitGatewayMulticastDomainId",
+       "shape": "String"
+      }
+     ]
+    },
+    "ReadReplicaDBClusterIdentifierList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ReadReplicaDBClusterIdentifier",
+      "shape": "String"
+     }
+    },
+    "ReadReplicaDBInstanceIdentifierList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ReadReplicaDBInstanceIdentifier",
+      "shape": "String"
+     }
+    },
+    "ReadReplicaIdentifierList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ReadReplicaIdentifier",
+      "shape": "String"
+     }
+    },
+    "ReplicaMode": {
+     "type": "string"
+    },
+    "ScalingConfigurationInfo": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AutoPause",
+       "element": "AutoPause",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "MaxCapacity",
+       "element": "MaxCapacity",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "MinCapacity",
+       "element": "MinCapacity",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "SecondsBeforeTimeout",
+       "element": "SecondsBeforeTimeout",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "SecondsUntilAutoPause",
+       "element": "SecondsUntilAutoPause",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "TimeoutAction",
+       "element": "TimeoutAction",
+       "shape": "String"
+      }
+     ]
+    },
+    "SensitiveString": {
+     "type": "string"
+    },
+    "ServerlessV2ScalingConfigurationInfo": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "MaxCapacity",
+       "element": "MaxCapacity",
+       "shape": "DoubleOptional"
+      },
+      {
+       "name": "MinCapacity",
+       "element": "MinCapacity",
+       "shape": "DoubleOptional"
+      },
+      {
+       "name": "SecondsUntilAutoPause",
+       "element": "SecondsUntilAutoPause",
+       "shape": "IntegerOptional"
+      }
+     ]
     },
     "String": {
      "type": "string"
@@ -4290,6 +7658,9 @@
       }
      ]
     },
+    "UpgradeRolloutOrder": {
+     "type": "string"
+    },
     "VpcSecurityGroupMembership": {
      "type": "structure",
      "members": [
@@ -4312,9 +7683,131 @@
       "element": "VpcSecurityGroupMembership",
       "shape": "VpcSecurityGroupMembership"
      }
+    },
+    "WriteForwardingStatus": {
+     "type": "string"
     }
    },
    "inputShapes": {
+    "BooleanOptional": {
+     "type": "boolean"
+    },
+    "CloudwatchLogsExportConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DisableLogTypes",
+       "shape": "LogTypeList"
+      },
+      {
+       "name": "EnableLogTypes",
+       "shape": "LogTypeList"
+      }
+     ]
+    },
+    "DoubleOptional": {
+     "type": "double"
+    },
+    "IntegerOptional": {
+     "type": "integer"
+    },
+    "LogTypeList": {
+     "type": "list",
+     "member": {
+      "key": "member",
+      "shape": "String"
+     }
+    },
+    "ProcessorFeature": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Name",
+       "shape": "String"
+      },
+      {
+       "name": "Value",
+       "shape": "String"
+      }
+     ]
+    },
+    "ProcessorFeatureList": {
+     "type": "list",
+     "member": {
+      "key": "ProcessorFeature",
+      "shape": "ProcessorFeature"
+     }
+    },
+    "RdsCustomClusterConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "InterconnectSubnetId",
+       "shape": "String"
+      },
+      {
+       "name": "ReplicaMode",
+       "shape": "ReplicaMode"
+      },
+      {
+       "name": "TransitGatewayMulticastDomainId",
+       "shape": "String"
+      }
+     ]
+    },
+    "ReplicaMode": {
+     "type": "string",
+     "enum": [
+      "open-read-only",
+      "mounted"
+     ]
+    },
+    "ScalingConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AutoPause",
+       "shape": "BooleanOptional"
+      },
+      {
+       "name": "MaxCapacity",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "MinCapacity",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "SecondsBeforeTimeout",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "SecondsUntilAutoPause",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "TimeoutAction",
+       "shape": "String"
+      }
+     ]
+    },
+    "ServerlessV2ScalingConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "MaxCapacity",
+       "shape": "DoubleOptional"
+      },
+      {
+       "name": "MinCapacity",
+       "shape": "DoubleOptional"
+      },
+      {
+       "name": "SecondsUntilAutoPause",
+       "shape": "IntegerOptional"
+      }
+     ]
+    },
     "String": {
      "type": "string"
     },

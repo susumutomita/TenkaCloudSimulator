@@ -324,7 +324,7 @@ func TestQueryRequestFramingErrors(t *testing.T) {
 	expectQuery(t, post("POST", "/", form, "Version=2014-10-31"), 400, "MissingAction")
 	expectQuery(t, post("POST", "/", form, "Action=DescribeDBSubnetGroups&Action=DescribeDBSubnetGroups"), 400, "MalformedQueryString")
 	expectQuery(t, post("POST", "/", form, "Action=LaunchRockets&Version=2014-10-31"), 400, "InvalidAction")
-	unbound := post("POST", "/", form, "Action=CreateDBInstance&Version=2014-10-31&DBInstanceIdentifier=db")
+	unbound := post("POST", "/", form, "Action=RebootDBInstance&Version=2014-10-31&DBInstanceIdentifier=db")
 	expectQuery(t, unbound, 501, "UnknownOperationException")
 	expectQuery(t, post("POST", "/", form, "Action=DescribeDBSubnetGroups"), 400, "MissingParameter")
 	expectQuery(t, post("POST", "/", form, "Action=DescribeDBSubnetGroups&Version=2013-01-10"), 400, "InvalidParameterValue")
