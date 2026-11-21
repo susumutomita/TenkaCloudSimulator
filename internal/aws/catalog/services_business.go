@@ -258,3 +258,111 @@ func connectQuickConnect(input map[string]any) error {
 	}
 	return nil
 }
+
+// The Amazon Chime SDK models all sign with the name chime and share the
+// routes POST /tags?operation=tag-resource, POST /tags?operation=untag-resource
+// and GET /tags, so the engine routes those three requests to whichever chime
+// model is registered first. Only chimeVoice binds the tag operations, so it
+// must be registered before chimeIdentity and chimeMediaPipelines, and the
+// other models refuse Tags instead of storing tags nothing could read.
+
+// chimeNoTags refuses creation tags in the chime models that do not own the
+// shared tag routes.
+func chimeNoTags(input map[string]any) error {
+	if _, ok := input["Tags"]; ok {
+		return Failure("BadRequestException", "Tags are not supported here: the shared Amazon Chime SDK tag operations are served by the voice model only.")
+	}
+	return nil
+}
+
+// chimeVoice serves Amazon Chime SDK Voice Connectors, Voice Connector groups
+// and SIP media applications as stored records. No call is placed or routed.
+var chimeVoice = &Service{
+	Model: "chime-sdk-voice", Title: "Amazon Chime SDK Voice", IAMPrefix: "chime", Issues: []int{90},
+	Resources: []*Resource{
+		{Kind: "voiceConnector", Shape: "VoiceConnector", ID: "alnum:22", Limit: 50,
+			ARN: "arn:{partition}:chime:{region}:{account}:vc/{id}", ARNMember: "VoiceConnectorArn", IDMember: "VoiceConnectorId",
+			Generate: map[string]any{"CreatedTimestamp": "$now", "UpdatedTimestamp": "$now", "AwsRegion": "us-east-1", "NetworkType": "IPV4_ONLY"}},
+		{Kind: "voiceConnectorGroup", Shape: "VoiceConnectorGroup", ID: "uuid", Limit: 50,
+			ARN: "arn:{partition}:chime:{region}:{account}:vcg/{id}", ARNMember: "VoiceConnectorGroupArn", IDMember: "VoiceConnectorGroupId",
+			Generate: map[string]any{"CreatedTimestamp": "$now", "UpdatedTimestamp": "$now", "VoiceConnectorItems": []any{}}},
+		{Kind: "sipMediaApplication", Shape: "SipMediaApplication", ID: "uuid", Limit: 25,
+			ARN: "arn:{partition}:chime:{region}:{account}:sma/{id}", ARNMember: "SipMediaApplicationArn", IDMember: "SipMediaApplicationId",
+			Generate: map[string]any{"CreatedTimestamp": "$now", "UpdatedTimestamp": "$now"}},
+	},
+	Ops: []Op{
+		{Name: "CreateVoiceConnector", Kind: Create, Resource: "voiceConnector"},
+		{Name: "GetVoiceConnector", Kind: Read, Resource: "voiceConnector", Lookup: "VoiceConnectorId"},
+		{Name: "ListVoiceConnectors", Kind: List, Resource: "voiceConnector"},
+		{Name: "UpdateVoiceConnector", Kind: Update, Resource: "voiceConnector", Lookup: "VoiceConnectorId", Touch: []string{"UpdatedTimestamp"},
+			Fields: []string{"Name", "RequireEncryption"}},
+		{Name: "DeleteVoiceConnector", Kind: Delete, Resource: "voiceConnector", Lookup: "VoiceConnectorId"},
+		{Name: "CreateVoiceConnectorGroup", Kind: Create, Resource: "voiceConnectorGroup"},
+		{Name: "GetVoiceConnectorGroup", Kind: Read, Resource: "voiceConnectorGroup", Lookup: "VoiceConnectorGroupId"},
+		{Name: "ListVoiceConnectorGroups", Kind: List, Resource: "voiceConnectorGroup"},
+		{Name: "UpdateVoiceConnectorGroup", Kind: Update, Resource: "voiceConnectorGroup", Lookup: "VoiceConnectorGroupId", Touch: []string{"UpdatedTimestamp"},
+			Fields: []string{"Name", "VoiceConnectorItems"}},
+		{Name: "DeleteVoiceConnectorGroup", Kind: Delete, Resource: "voiceConnectorGroup", Lookup: "VoiceConnectorGroupId"},
+		{Name: "CreateSipMediaApplication", Kind: Create, Resource: "sipMediaApplication"},
+		{Name: "GetSipMediaApplication", Kind: Read, Resource: "sipMediaApplication", Lookup: "SipMediaApplicationId"},
+		{Name: "ListSipMediaApplications", Kind: List, Resource: "sipMediaApplication"},
+		{Name: "UpdateSipMediaApplication", Kind: Update, Resource: "sipMediaApplication", Lookup: "SipMediaApplicationId", Touch: []string{"UpdatedTimestamp"},
+			Fields: []string{"Name", "Endpoints"}},
+		{Name: "DeleteSipMediaApplication", Kind: Delete, Resource: "sipMediaApplication", Lookup: "SipMediaApplicationId"},
+		{Name: "TagResource", Kind: Tag, Lookup: "ResourceARN"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "ResourceARN"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceARN"},
+	},
+	Bounds: []string{
+		"Voice Connectors, Voice Connector groups and SIP media applications are stored records: no call is placed, received or routed, no SIP signaling or media exists, and no Lambda function is invoked. A Voice Connector reports no OutboundHostName. Phone numbers and orders, SIP rules (which name a claimed number or a host name), proxy sessions, the termination, origination, streaming, logging and emergency calling settings of a Voice Connector, voice profiles and domains, speaker search and voice tone tasks, and the global settings return UnknownOperationException with HTTP 501.",
+		"A Voice Connector defaults to AwsRegion us-east-1 and NetworkType IPV4_ONLY; the Voice Connector IDs named by a group (priority 1 to 99 as modeled) and the Lambda ARN of a SIP media application endpoint (exactly one, as modeled) are stored without being resolved. Counts per Region (50 Voice Connectors, 50 groups and 25 SIP media applications) are simulator limits, and the ID and ARN forms (vc/, vcg/ and sma/) are inferred.",
+		"All Amazon Chime SDK models sign as chime and share the POST /tags?operation=tag-resource, POST /tags?operation=untag-resource and GET /tags routes, which the engine cannot tell apart by model. Only this model binds the tag operations, so it applies to Voice Connectors and SIP media applications by ARN and must be registered before the other chime models; the identity and media pipelines models refuse Tags on creation, and the messaging model is not served.",
+	},
+}
+
+// chimeIdentity serves Amazon Chime SDK Identity app instances as stored
+// records. No messaging identity can sign in, and no channel or message exists.
+var chimeIdentity = &Service{
+	Model: "chime-sdk-identity", Title: "Amazon Chime SDK Identity", IAMPrefix: "chime", Issues: []int{90},
+	Resources: []*Resource{
+		{Kind: "appInstance", Shape: "AppInstance", Summary: "AppInstanceSummary", ID: "uuid", Limit: 25,
+			ARN: "arn:{partition}:chime:{region}:{account}:app-instance/{id}", ARNMember: "AppInstanceArn",
+			Generate: map[string]any{"CreatedTimestamp": "$now", "LastUpdatedTimestamp": "$now"}},
+	},
+	Ops: []Op{
+		{Name: "CreateAppInstance", Kind: Create, Resource: "appInstance", Check: chimeNoTags},
+		{Name: "DescribeAppInstance", Kind: Read, Resource: "appInstance", Lookup: "AppInstanceArn"},
+		{Name: "ListAppInstances", Kind: List, Resource: "appInstance"},
+		{Name: "UpdateAppInstance", Kind: Update, Resource: "appInstance", Lookup: "AppInstanceArn", Touch: []string{"LastUpdatedTimestamp"},
+			Fields: []string{"Name", "Metadata"}},
+		{Name: "DeleteAppInstance", Kind: Delete, Resource: "appInstance", Lookup: "AppInstanceArn"},
+	},
+	Bounds: []string{
+		"App instances are stored records: no messaging identity can sign in and no channel, message or push endpoint exists. Admins, bots, users and their endpoints, retention settings and expiration settings return UnknownOperationException with HTTP 501, because each is keyed by an app instance ARN that the stored model cannot attach a child to.",
+		"The tag operations are not bound here: all Amazon Chime SDK models share the same tag routes and the engine serves them from the voice model only (see the chime-sdk-voice bounds), so CreateAppInstance refuses Tags. At most 25 app instances per Region exist as a simulator limit, and the ARN form app-instance/id is inferred.",
+	},
+}
+
+// chimeMediaPipelines serves Amazon Chime SDK media insights pipeline
+// configurations as stored records. No media is captured or analyzed.
+var chimeMediaPipelines = &Service{
+	Model: "chime-sdk-media-pipelines", Title: "Amazon Chime SDK Media Pipelines", IAMPrefix: "chime", Issues: []int{90},
+	Resources: []*Resource{
+		{Kind: "insightsConfiguration", Shape: "MediaInsightsPipelineConfiguration", Summary: "MediaInsightsPipelineConfigurationSummary", ID: "uuid", Unique: true, Limit: 25,
+			ARN: "arn:{partition}:chime:{region}:{account}:media-insights-pipeline-configuration/{name}", ARNMember: "MediaInsightsPipelineConfigurationArn",
+			IDMember: "MediaInsightsPipelineConfigurationId", NameMember: "MediaInsightsPipelineConfigurationName",
+			Generate: map[string]any{"CreatedTimestamp": "$now", "UpdatedTimestamp": "$now"}},
+	},
+	Ops: []Op{
+		{Name: "CreateMediaInsightsPipelineConfiguration", Kind: Create, Resource: "insightsConfiguration", Check: chimeNoTags},
+		{Name: "GetMediaInsightsPipelineConfiguration", Kind: Read, Resource: "insightsConfiguration", Lookup: "Identifier"},
+		{Name: "ListMediaInsightsPipelineConfigurations", Kind: List, Resource: "insightsConfiguration"},
+		{Name: "UpdateMediaInsightsPipelineConfiguration", Kind: Update, Resource: "insightsConfiguration", Lookup: "Identifier", Touch: []string{"UpdatedTimestamp"},
+			Fields: []string{"ResourceAccessRoleArn", "RealTimeAlertConfiguration", "Elements"}},
+		{Name: "DeleteMediaInsightsPipelineConfiguration", Kind: Delete, Resource: "insightsConfiguration", Lookup: "Identifier"},
+	},
+	Bounds: []string{
+		"Media insights pipeline configurations are stored records: no media is captured, concatenated, transcribed or analyzed, no pipeline runs, and no Kinesis Video Stream pool exists. Media pipelines of every kind, Kinesis Video Stream pools, speaker search and voice tone analysis tasks return UnknownOperationException with HTTP 501.",
+		"The elements (processors and sinks), the alert configuration and the access role ARN are stored without being evaluated or resolved. A configuration is identified by its unique name, its generated ID or its ARN (media-insights-pipeline-configuration/name, as inferred). The tag operations are not bound here: all Amazon Chime SDK models share the same tag routes and the engine serves them from the voice model only, so CreateMediaInsightsPipelineConfiguration refuses Tags. At most 25 configurations per Region exist as a simulator limit.",
+	},
+}

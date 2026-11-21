@@ -1,0 +1,21 @@
+{
+ "client": "chime-sdk-identity",
+ "steps": [
+  {"op": "create_app_instance", "args": {"Name": "fixture-app", "Metadata": "fixture", "ClientRequestToken": "fixture-token-1"}, "save": {"app": "AppInstanceArn"}},
+  {"op": "describe_app_instance", "args": {"AppInstanceArn": "${app}"}, "expect": {"AppInstance.Name": "fixture-app", "AppInstance.Metadata": "fixture"}},
+  {"op": "update_app_instance", "args": {"AppInstanceArn": "${app}", "Name": "fixture-app-2", "Metadata": "updated"}},
+  {"op": "list_app_instances", "args": {}, "expect": {"AppInstances#count": 1, "AppInstances[0].Name": "fixture-app-2"}},
+  {"op": "create_app_instance", "args": {"Name": "fixture-tagged", "ClientRequestToken": "fixture-token-2", "Tags": [{"Key": "k", "Value": "v"}]}, "error": "BadRequestException"},
+  {"op": "describe_app_instance", "args": {"AppInstanceArn": "arn:aws:chime:us-east-1:000000000000:app-instance/missing"}, "error": "BadRequestException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "list_app_instances", "args": {}, "expect": {"AppInstances#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_app_instance", "args": {"AppInstanceArn": "${app}"}, "expect": {"AppInstance.Metadata": "updated"}}
+ ],
+ "cleanup": [
+  {"op": "delete_app_instance", "args": {"AppInstanceArn": "${app}"}},
+  {"op": "list_app_instances", "args": {}, "expect": {"AppInstances#count": 0}}
+ ]
+}

@@ -365,3 +365,131 @@ func TestConnectLifecycleOfEveryResource(t *testing.T) {
 	expect(t, call("GET", "/instance/"+instanceID, nil), 404, "ResourceNotFoundException")
 	expect(t, call("GET", "/queues/"+instanceID+"/"+queueID, nil), 404, "ResourceNotFoundException")
 }
+
+func TestChimeCheckHooksApplyDocumentedRules(t *testing.T) {
+	if chimeNoTags(map[string]any{"Name": "a"}) != nil || chimeNoTags(map[string]any{"Tags": []any{}}) == nil {
+		t.Fatal("chimeNoTags")
+	}
+}
+
+// okay requires a successful reply, whichever 2xx status the operation models.
+func okay(t *testing.T, r reply) {
+	t.Helper()
+	if r.status < 200 || r.status > 299 {
+		t.Fatalf("want success, got %d %s: %s", r.status, r.code(), r.raw)
+	}
+}
+
+func TestChimeSDKModelsShareTheSigningNameAndTheTagRoutes(t *testing.T) {
+	h := businessHarness(t, chimeVoice, chimeIdentity, chimeMediaPipelines)
+	voice := func(method, path string, input any) reply { return h.rest("chime-sdk-voice", method, path, input) }
+	identity := func(method, path string, input any) reply { return h.rest("chime-sdk-identity", method, path, input) }
+	media := func(method, path string, input any) reply {
+		return h.rest("chime-sdk-media-pipelines", method, path, input)
+	}
+
+	created := voice("POST", "/voice-connectors", map[string]any{"Name": "main", "RequireEncryption": true, "Tags": []any{map[string]any{"Key": "team", "Value": "a"}}})
+	okay(t, created)
+	connector := created.body["VoiceConnector"].(map[string]any)
+	id := str(connector["VoiceConnectorId"])
+	if connector["AwsRegion"] != "us-east-1" || connector["NetworkType"] != "IPV4_ONLY" || connector["OutboundHostName"] != nil || len(id) != 22 ||
+		connector["VoiceConnectorArn"] != "arn:aws:chime:us-east-1:000000000000:vc/"+id {
+		t.Fatalf("voice connector %v", connector)
+	}
+	expect(t, voice("POST", "/voice-connectors", map[string]any{"Name": "bad", "RequireEncryption": true, "AwsRegion": "mars-1"}), 400, "BadRequestException")
+	if got := voice("GET", "/voice-connectors/"+id, nil).body["VoiceConnector"].(map[string]any); got["Name"] != "main" || got["RequireEncryption"] != true {
+		t.Fatalf("get %v", got)
+	}
+	updated := voice("PUT", "/voice-connectors/"+id, map[string]any{"Name": "renamed", "RequireEncryption": false}).body["VoiceConnector"].(map[string]any)
+	if updated["Name"] != "renamed" || updated["RequireEncryption"] != false {
+		t.Fatalf("update %v", updated)
+	}
+	if list := items(t, voice("GET", "/voice-connectors", nil), "VoiceConnectors"); len(list) != 1 {
+		t.Fatalf("list %v", list)
+	}
+
+	group := voice("POST", "/voice-connector-groups", map[string]any{"Name": "pool", "VoiceConnectorItems": []any{map[string]any{"VoiceConnectorId": id, "Priority": 1}}})
+	okay(t, group)
+	groupID := str(group.body["VoiceConnectorGroup"].(map[string]any)["VoiceConnectorGroupId"])
+	okay(t, voice("PUT", "/voice-connector-groups/"+groupID, map[string]any{"Name": "pool-2", "VoiceConnectorItems": []any{}}))
+	if got := voice("GET", "/voice-connector-groups/"+groupID, nil).body["VoiceConnectorGroup"].(map[string]any); got["Name"] != "pool-2" || len(got["VoiceConnectorItems"].([]any)) != 0 {
+		t.Fatalf("group %v", got)
+	}
+	if list := items(t, voice("GET", "/voice-connector-groups", nil), "VoiceConnectorGroups"); len(list) != 1 {
+		t.Fatalf("groups %v", list)
+	}
+
+	endpoints := []any{map[string]any{"LambdaArn": "arn:aws:lambda:us-east-1:000000000000:function:handler"}}
+	sip := voice("POST", "/sip-media-applications", map[string]any{"AwsRegion": "us-east-1", "Name": "ivr", "Endpoints": endpoints, "Tags": []any{map[string]any{"Key": "k", "Value": "v"}}})
+	okay(t, sip)
+	sipID := str(sip.body["SipMediaApplication"].(map[string]any)["SipMediaApplicationId"])
+	okay(t, voice("PUT", "/sip-media-applications/"+sipID, map[string]any{"Name": "ivr-2"}))
+	if got := voice("GET", "/sip-media-applications/"+sipID, nil).body["SipMediaApplication"].(map[string]any); got["Name"] != "ivr-2" || len(got["Endpoints"].([]any)) != 1 {
+		t.Fatalf("sip %v", got)
+	}
+	if list := items(t, voice("GET", "/sip-media-applications", nil), "SipMediaApplications"); len(list) != 1 {
+		t.Fatalf("sip list %v", list)
+	}
+
+	app := identity("POST", "/app-instances", map[string]any{"Name": "chat", "Metadata": "m", "ClientRequestToken": "token-1"})
+	okay(t, app)
+	appARN := str(app.body["AppInstanceArn"])
+	if !strings.HasPrefix(appARN, "arn:aws:chime:us-east-1:000000000000:app-instance/") {
+		t.Fatalf("app instance %v", app.body)
+	}
+	if replay := identity("POST", "/app-instances", map[string]any{"Name": "chat", "Metadata": "m", "ClientRequestToken": "token-1"}); replay.body["AppInstanceArn"] != appARN {
+		t.Fatalf("replay %v", replay.body)
+	}
+	expect(t, identity("POST", "/app-instances", map[string]any{"Name": "tagged", "ClientRequestToken": "token-2", "Tags": []any{map[string]any{"Key": "k", "Value": "v"}}}), 400, "BadRequestException")
+	okay(t, identity("PUT", "/app-instances/"+escapeARN(appARN), map[string]any{"Name": "chat-2", "Metadata": "m2"}))
+	if got := identity("GET", "/app-instances/"+escapeARN(appARN), nil).body["AppInstance"].(map[string]any); got["Name"] != "chat-2" || got["Metadata"] != "m2" {
+		t.Fatalf("describe %v", got)
+	}
+	if list := items(t, identity("GET", "/app-instances", nil), "AppInstances"); len(list) != 1 {
+		t.Fatalf("app instances %v", list)
+	}
+
+	config := media("POST", "/media-insights-pipeline-configurations", map[string]any{"MediaInsightsPipelineConfigurationName": "calls", "ResourceAccessRoleArn": "arn:aws:iam::000000000000:role/media",
+		"Elements": []any{map[string]any{"Type": "LambdaFunctionSink", "LambdaFunctionSinkConfiguration": map[string]any{"InsightsTarget": "arn:aws:lambda:us-east-1:000000000000:function:sink"}}}})
+	okay(t, config)
+	configuration := config.body["MediaInsightsPipelineConfiguration"].(map[string]any)
+	if configuration["MediaInsightsPipelineConfigurationArn"] != "arn:aws:chime:us-east-1:000000000000:media-insights-pipeline-configuration/calls" {
+		t.Fatalf("configuration %v", configuration)
+	}
+	expect(t, media("POST", "/media-insights-pipeline-configurations", map[string]any{"MediaInsightsPipelineConfigurationName": "calls", "ResourceAccessRoleArn": "arn:aws:iam::000000000000:role/media", "Elements": []any{}}), 400, "")
+	expect(t, media("POST", "/media-insights-pipeline-configurations", map[string]any{"MediaInsightsPipelineConfigurationName": "tagged", "ResourceAccessRoleArn": "arn:aws:iam::000000000000:role/media", "Elements": []any{}, "Tags": []any{map[string]any{"Key": "k", "Value": "v"}}}), 400, "BadRequestException")
+	okay(t, media("PUT", "/media-insights-pipeline-configurations/calls", map[string]any{"ResourceAccessRoleArn": "arn:aws:iam::000000000000:role/media-2", "Elements": []any{}}))
+	if got := media("GET", "/media-insights-pipeline-configurations/calls", nil).body["MediaInsightsPipelineConfiguration"].(map[string]any); got["ResourceAccessRoleArn"] != "arn:aws:iam::000000000000:role/media-2" {
+		t.Fatalf("get configuration %v", got)
+	}
+	if list := items(t, media("GET", "/media-insights-pipeline-configurations", nil), "MediaInsightsPipelineConfigurations"); len(list) != 1 {
+		t.Fatalf("configurations %v", list)
+	}
+
+	// The shared tag routes reach the voice model whichever model the SDK targets.
+	arn := str(connector["VoiceConnectorArn"])
+	okay(t, identity("POST", "/tags?operation=tag-resource", map[string]any{"ResourceARN": arn, "Tags": []any{map[string]any{"Key": "env", "Value": "dev"}}}))
+	if tags := items(t, media("GET", "/tags?arn="+escapeARN(arn), nil), "Tags"); len(tags) != 2 {
+		t.Fatalf("tags %v", tags)
+	}
+	okay(t, media("POST", "/tags?operation=untag-resource", map[string]any{"ResourceARN": arn, "TagKeys": []any{"env"}}))
+	if tags := items(t, voice("GET", "/tags?arn="+escapeARN(arn), nil), "Tags"); len(tags) != 1 {
+		t.Fatalf("untag %v", tags)
+	}
+	expect(t, voice("GET", "/tags?arn="+escapeARN(appARN), nil), 404, "NotFoundException")
+
+	for _, path := range []string{"/phone-numbers", "/sip-rules", "/voice-profile-domains", "/app-instance-users?app-instance-arn=" + escapeARN(appARN)} {
+		expect(t, voice("GET", path, nil), 501, "UnknownOperationException")
+	}
+	okay(t, voice("DELETE", "/sip-media-applications/"+sipID, nil))
+	okay(t, voice("DELETE", "/voice-connector-groups/"+groupID, nil))
+	okay(t, voice("DELETE", "/voice-connectors/"+id, nil))
+	okay(t, identity("DELETE", "/app-instances/"+escapeARN(appARN), nil))
+	okay(t, media("DELETE", "/media-insights-pipeline-configurations/calls", nil))
+	expect(t, voice("GET", "/voice-connectors/"+id, nil), 404, "NotFoundException")
+}
+
+func TestChimeTagRoutesBelongToTheFirstRegisteredModel(t *testing.T) {
+	h := businessHarness(t, chimeIdentity, chimeVoice)
+	expect(t, h.rest("chime-sdk-voice", "GET", "/tags?arn=arn", nil), 501, "UnknownOperationException")
+}
