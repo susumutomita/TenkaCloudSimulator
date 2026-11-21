@@ -649,3 +649,14 @@ func TestRedshiftRecordsLeaveRunningWarehouseOperationsUnbound(t *testing.T) {
 		expectFault(t, h.warehouse(action, "ClusterIdentifier", "wh1"), 501, "UnknownOperationException")
 	}
 }
+
+func TestElastiCacheEngineLessNodeCount(t *testing.T) {
+	h := newHarness(t, elastiCache)
+	for _, n := range []string{"1000", "-3", "0"} {
+		expectFault(t, h.cache("CreateCacheCluster", "CacheClusterId", "n1", "NumCacheNodes", n), 400, "InvalidParameterValue")
+	}
+	if r := h.cache("CreateCacheCluster", "CacheClusterId", "n2", "NumCacheNodes", "5"); r.status != 200 {
+		t.Fatalf("engine-less cluster with 5 nodes: %d %s", r.status, r.raw)
+	}
+	expectFault(t, h.cache("ModifyCacheCluster", "CacheClusterId", "n2", "NumCacheNodes", "9000"), 400, "InvalidParameterValue")
+}
