@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"slices"
 	"strconv"
+	"strings"
 )
 
 // Health and life-science data stores and workspaces served as stored
@@ -265,4 +266,236 @@ func omicsStoreFilter(withStatus bool) func(map[string]any) error {
 		}
 		return nil
 	}
+}
+
+// keyspaces serves Amazon Keyspaces keyspaces, tables and user-defined types
+// as configuration records. No Cassandra data plane exists.
+var keyspaces = &Service{
+	Model: "keyspaces", Title: "Amazon Keyspaces (for Apache Cassandra)", IAMPrefix: "cassandra", Issues: []int{126},
+	Resources: []*Resource{
+		{Kind: "keyspace", Shape: "GetKeyspaceResponse", Summary: "KeyspaceSummary", ID: "name", Unique: true, Limit: 50, Cascade: true,
+			ARN:       "arn:{partition}:cassandra:{region}:{account}:/keyspace/{name}/",
+			ARNMember: "resourceArn", NameMember: "keyspaceName", Generate: map[string]any{"replicationStrategy": "SINGLE_REGION"}},
+		{Kind: "table", Shape: "GetTableResponse", Summary: "TableSummary", Parent: "keyspace", ParentMember: "keyspaceName", ID: "name", Unique: true, Limit: 50,
+			ARN:       "arn:{partition}:cassandra:{region}:{account}:/keyspace/{parentName}/table/{name}",
+			ARNMember: "resourceArn", NameMember: "tableName",
+			Generate: map[string]any{"keyspaceName": "$parentName", "status": "ACTIVE", "creationTimestamp": "$now",
+				"capacitySpecification":   map[string]any{"throughputMode": "PAY_PER_REQUEST"},
+				"encryptionSpecification": map[string]any{"type": "AWS_OWNED_KMS_KEY"},
+				"pointInTimeRecovery":     map[string]any{"status": "DISABLED"}}},
+		{Kind: "type", Shape: "GetTypeResponse", Parent: "keyspace", ParentMember: "keyspaceName", ID: "name", Unique: true, Limit: 50,
+			ARN:        "arn:{partition}:cassandra:{region}:{account}:/keyspace/{parentName}/type/{name}",
+			NameMember: "typeName",
+			Generate: map[string]any{"keyspaceName": "$parentName", "keyspaceArn": "$parentArn", "status": "ACTIVE", "lastModifiedTimestamp": "$now",
+				"directReferringTables": []any{}, "directParentTypes": []any{}}},
+	},
+	Ops: []Op{
+		{Name: "CreateKeyspace", Kind: Create, Resource: "keyspace", Action: "Create", From: "replicationSpecification", Check: keyspacesCreateKeyspace},
+		{Name: "GetKeyspace", Kind: Read, Resource: "keyspace", Action: "Select", Lookup: "keyspaceName"},
+		{Name: "ListKeyspaces", Kind: List, Resource: "keyspace", Action: "Select"},
+		{Name: "DeleteKeyspace", Kind: Delete, Resource: "keyspace", Action: "Drop", Lookup: "keyspaceName"},
+		{Name: "CreateTable", Kind: Create, Resource: "table", Action: "Create", Parent: "keyspaceName", Check: keyspacesCreateTable},
+		{Name: "GetTable", Kind: Read, Resource: "table", Action: "Select", Parent: "keyspaceName", Lookup: "tableName"},
+		{Name: "ListTables", Kind: List, Resource: "table", Action: "Select", Parent: "keyspaceName"},
+		{Name: "UpdateTable", Kind: Update, Resource: "table", Action: "Alter", Parent: "keyspaceName", Lookup: "tableName", Check: keyspacesUpdateTable,
+			Fields: []string{"capacitySpecification", "encryptionSpecification", "pointInTimeRecovery", "ttl", "defaultTimeToLive", "clientSideTimestamps"}},
+		{Name: "DeleteTable", Kind: Delete, Resource: "table", Action: "Drop", Parent: "keyspaceName", Lookup: "tableName"},
+		{Name: "CreateType", Kind: Create, Resource: "type", Action: "Create", Parent: "keyspaceName", Check: keyspacesCreateType},
+		{Name: "GetType", Kind: Read, Resource: "type", Action: "Select", Parent: "keyspaceName", Lookup: "typeName", Check: keyspacesTypeName},
+		{Name: "ListTypes", Kind: List, Resource: "type", Action: "Select", Parent: "keyspaceName", ListValue: "typeName"},
+		{Name: "DeleteType", Kind: Delete, Resource: "type", Action: "Drop", Parent: "keyspaceName", Lookup: "typeName", Check: keyspacesTypeName},
+		{Name: "TagResource", Kind: Tag, Lookup: "resourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Action: "Select", Lookup: "resourceArn"},
+	},
+	Bounds: []string{
+		"Keyspaces, tables and user-defined types are stored configuration records: no Cassandra data plane, CQL endpoint, row, partition or capacity exists, tables are ACTIVE at once, and RestoreTable, GetTableAutoScalingSettings, UpdateKeyspace and UntagResource return UnknownOperationException with HTTP 501. The AWS-owned system keyspaces are not listed, and creating a keyspace with one of their names (system, system_schema, system_schema_mcs, system_multiregion_info) fails with ConflictException.",
+		"Only single-Region keyspaces exist: replicationSpecification must be SINGLE_REGION (the default) without a regionList, so UpdateKeyspace, which can only add a Region, is not implemented, replicaSpecifications are refused and no replication status is reported. CreateTable and UpdateTable refuse cdcSpecification and replicaSpecifications; autoScalingSpecification and addColumns are refused because their effects cannot be stored, so a table schema cannot change after creation. UntagResource is not implemented because it takes key and value pairs and the catalog removes tags by key.",
+		"Table schemas must name at least one partition key, define every column once (names compare case-insensitively), list partition, clustering and static columns among the columns without reusing a column as both a key and a static column, and use CQL types: the scalar types of the Keyspaces data type list, or list, set, map, tuple and frozen collections of them with user-defined types only inside frozen; user-defined type names are not resolved. Capacity defaults to PAY_PER_REQUEST and PROVISIONED needs readCapacityUnits and writeCapacityUnits, a customer managed key needs kmsKeyIdentifier (stored without contacting KMS), and encryption defaults to AWS_OWNED_KMS_KEY and point-in-time recovery to DISABLED; no earliest restorable time, streams or table size are reported.",
+		"User-defined type names are 1 to 48 letters, digits and underscores starting with a letter and are stored in lowercase as documented (double-quoted names are refused); fields need distinct names and CQL types, references between types are not resolved, so directReferringTables and directParentTypes stay empty and maxNestingDepth is not reported. Keyspace and table names are stored as given, are unique per Region and keyspace, and a keyspace deletes its tables and types with it. Resource counts (50 keyspaces per Region, 50 tables and 50 types per keyspace) are local limits.",
+		"Operations are authorized as the Keyspaces IAM actions cassandra:Create, Select, Alter, Drop and TagResource on the keyspace, table or type ARN (arn:aws:cassandra:region:account:/keyspace/name/table/name), without the additional Select on the system keyspace that AWS requires for the read operations. ListTagsForResource refuses nextToken and maxResults and returns all tags.",
+	},
+}
+
+// keyspacesSystem are the AWS-owned keyspaces every account has.
+var keyspacesSystem = []string{"system", "system_schema", "system_schema_mcs", "system_multiregion_info"}
+
+// keyspacesTypeNamePattern is the documented user-defined type name rule.
+var keyspacesTypeNamePattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]{0,47}$`)
+
+// keyspacesIdentifier is an unquoted CQL identifier naming a user-defined type.
+var keyspacesIdentifier = regexp.MustCompile(`^[a-z][a-z0-9_]*$`)
+
+var (
+	// keyspacesScalars are the scalar types of the Keyspaces data type list.
+	keyspacesScalars = []string{"ascii", "bigint", "blob", "boolean", "counter", "date", "decimal", "double", "float", "inet", "int", "smallint",
+		"text", "time", "timestamp", "timeuuid", "tinyint", "uuid", "varchar", "varint"}
+	keyspacesCollections = []string{"list", "set", "map", "tuple", "frozen"}
+)
+
+// keyspacesCQLType checks a CQL type: a scalar type, or a collection of
+// them where user-defined types are allowed only inside frozen.
+func keyspacesCQLType(text string, frozen bool) bool {
+	text = strings.ToLower(strings.TrimSpace(text))
+	head, rest, generic := strings.Cut(text, "<")
+	head = strings.TrimSpace(head)
+	if !generic {
+		return slices.Contains(keyspacesScalars, text) || frozen && keyspacesIdentifier.MatchString(text)
+	}
+	if !slices.Contains(keyspacesCollections, head) || !strings.HasSuffix(rest, ">") {
+		return false
+	}
+	rest = strings.TrimSuffix(rest, ">")
+	depth, start := 0, 0
+	arguments := []string{}
+	for i, c := range rest {
+		switch c {
+		case '<':
+			depth++
+		case '>':
+			depth--
+		case ',':
+			if depth == 0 {
+				arguments = append(arguments, rest[start:i])
+				start = i + 1
+			}
+		}
+	}
+	arguments = append(arguments, rest[start:])
+	if depth != 0 || head == "frozen" && len(arguments) != 1 || head == "map" && len(arguments) != 2 || (head == "list" || head == "set") && len(arguments) != 1 {
+		return false
+	}
+	for _, argument := range arguments {
+		if !keyspacesCQLType(argument, head == "frozen") {
+			return false
+		}
+	}
+	return true
+}
+
+func keyspacesCreateKeyspace(input map[string]any) error {
+	if name, _ := input["keyspaceName"].(string); slices.Contains(keyspacesSystem, strings.ToLower(name)) {
+		return Failure("ConflictException", "The keyspace "+name+" is an AWS-owned system keyspace.")
+	}
+	if spec, ok := input["replicationSpecification"].(map[string]any); ok {
+		if spec["replicationStrategy"] != "SINGLE_REGION" || spec["regionList"] != nil {
+			return Failure("ValidationException", "Only single-Region keyspaces are supported: use SINGLE_REGION without regionList.")
+		}
+	}
+	return nil
+}
+
+// keyspacesSchema applies the documented rules of a table schema.
+func keyspacesSchema(schema map[string]any) error {
+	columns := map[string]bool{}
+	all, _ := schema["allColumns"].([]any)
+	for _, item := range all {
+		column := item.(map[string]any)
+		name := strings.ToLower(column["name"].(string))
+		if columns[name] {
+			return Failure("ValidationException", "The column "+name+" is defined twice.")
+		}
+		columns[name] = true
+		if !keyspacesCQLType(column["type"].(string), false) {
+			return Failure("ValidationException", "The type of column "+name+" is not a supported CQL data type.")
+		}
+	}
+	keys := map[string]bool{}
+	for _, member := range []string{"partitionKeys", "clusteringKeys", "staticColumns"} {
+		entries, _ := schema[member].([]any)
+		if member == "partitionKeys" && len(entries) == 0 {
+			return Failure("ValidationException", "A table needs at least one partition key.")
+		}
+		for _, item := range entries {
+			name := strings.ToLower(item.(map[string]any)["name"].(string))
+			if !columns[name] {
+				return Failure("ValidationException", "The "+member+" entry "+name+" is not one of allColumns.")
+			}
+			if member != "staticColumns" && keys[name] {
+				return Failure("ValidationException", "The key column "+name+" is listed twice.")
+			}
+			if member == "staticColumns" && keys[name] {
+				return Failure("ValidationException", "The key column "+name+" cannot be static.")
+			}
+			if member != "staticColumns" {
+				keys[name] = true
+			}
+		}
+	}
+	return nil
+}
+
+// keyspacesTableOptions checks the capacity and encryption settings both
+// table operations accept, and refuses the settings that need a second Region
+// or a change stream.
+func keyspacesTableOptions(input map[string]any) error {
+	for _, member := range []string{"replicaSpecifications", "cdcSpecification"} {
+		if _, ok := input[member]; ok {
+			return Failure("ValidationException", member+" is not supported: the simulator has one Region and no change streams.")
+		}
+	}
+	if spec, ok := input["capacitySpecification"].(map[string]any); ok {
+		_, read := spec["readCapacityUnits"]
+		_, write := spec["writeCapacityUnits"]
+		switch {
+		case spec["throughputMode"] == "PROVISIONED" && !(read && write):
+			return Failure("ValidationException", "Provisioned capacity mode requires readCapacityUnits and writeCapacityUnits.")
+		case spec["throughputMode"] == "PAY_PER_REQUEST" && (read || write):
+			return Failure("ValidationException", "On-demand capacity mode takes no capacity units.")
+		}
+	}
+	if spec, ok := input["encryptionSpecification"].(map[string]any); ok {
+		_, key := spec["kmsKeyIdentifier"]
+		switch {
+		case spec["type"] == "CUSTOMER_MANAGED_KMS_KEY" && !key:
+			return Failure("ValidationException", "A customer managed key requires kmsKeyIdentifier.")
+		case spec["type"] == "AWS_OWNED_KMS_KEY" && key:
+			return Failure("ValidationException", "kmsKeyIdentifier applies only to a customer managed key.")
+		}
+	}
+	return nil
+}
+
+func keyspacesCreateTable(input map[string]any) error {
+	if err := keyspacesTableOptions(input); err != nil {
+		return err
+	}
+	schema, _ := input["schemaDefinition"].(map[string]any)
+	return keyspacesSchema(schema)
+}
+
+func keyspacesUpdateTable(input map[string]any) error {
+	if _, ok := input["addColumns"]; ok {
+		return Failure("ValidationException", "addColumns is not supported: a table schema cannot change after creation.")
+	}
+	return keyspacesTableOptions(input)
+}
+
+// keyspacesTypeName lowercases a type name, as Keyspaces does for unquoted names.
+func keyspacesTypeName(input map[string]any) error {
+	lowerMember(input, "typeName")
+	return nil
+}
+
+func keyspacesCreateType(input map[string]any) error {
+	if name, _ := input["typeName"].(string); !keyspacesTypeNamePattern.MatchString(name) {
+		return Failure("ValidationException", "Type names are 1 to 48 letters, digits and underscores starting with a letter; double-quoted names are not supported.")
+	}
+	lowerMember(input, "typeName")
+	seen := map[string]bool{}
+	fields, _ := input["fieldDefinitions"].([]any)
+	if len(fields) == 0 {
+		return Failure("ValidationException", "A type needs at least one field.")
+	}
+	for _, item := range fields {
+		field := item.(map[string]any)
+		name := strings.ToLower(field["name"].(string))
+		if seen[name] {
+			return Failure("ValidationException", "The field "+name+" is defined twice.")
+		}
+		seen[name] = true
+		if !keyspacesCQLType(field["type"].(string), false) {
+			return Failure("ValidationException", "The type of field "+name+" is not a supported CQL data type.")
+		}
+	}
+	return nil
 }

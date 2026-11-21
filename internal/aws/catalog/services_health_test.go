@@ -10,7 +10,7 @@ import (
 )
 
 func healthHarness(t *testing.T) *harness {
-	return newHarness(t, healthImaging, healthLake, omics)
+	return newHarness(t, healthImaging, healthLake, omics, keyspaces)
 }
 
 func TestHealthImagingDatastoreLifecycle(t *testing.T) {
@@ -506,6 +506,268 @@ func TestOmicsLimitsAndUnboundOperations(t *testing.T) {
 	expect(t, h.rest("omics", "GET", "/runGroup/abc", nil), 400, "ValidationException")
 	for _, call := range []struct{ method, path string }{{"POST", "/workflow"}, {"POST", "/run"}, {"POST", "/annotationStore"}, {"POST", "/variantStore"}, {"POST", "/sequencestore/1234567890/importjob"}, {"POST", "/sequencestore/1234567890/readset/batch/delete"}} {
 		expect(t, h.rest("omics", call.method, call.path, map[string]any{}), 501, "UnknownOperationException")
+	}
+}
+
+func TestKeyspacesCQLTypes(t *testing.T) {
+	cases := map[string]bool{
+		"text": true, "INT": true, " uuid ": true, "list<text>": true, "set<int>": true, "map<text, int>": true, "tuple<int, text, boolean>": true,
+		"frozen<address>": true, "list<frozen<address>>": true, "map<text, frozen<list<int>>>": true, "frozen<map<text,int>>": true,
+		"address": false, "list<address>": false, "string": false, "": false, "list<>": false, "list<text": false, "list<text>>": false,
+		"map<text>": false, "list<text,int>": false, "frozen<int,int>": false, "vector<float>": false, "list<unknown>": false,
+	}
+	for text, want := range cases {
+		if got := keyspacesCQLType(text, false); got != want {
+			t.Fatalf("%q: want %v", text, want)
+		}
+	}
+}
+
+func TestKeyspacesCheckHooksApplyDocumentedRules(t *testing.T) {
+	column := func(name, kind string) any { return map[string]any{"name": name, "type": kind} }
+	named := func(names ...string) []any {
+		out := []any{}
+		for _, name := range names {
+			out = append(out, map[string]any{"name": name})
+		}
+		return out
+	}
+	schema := func(mutate func(map[string]any)) map[string]any {
+		s := map[string]any{"allColumns": []any{column("id", "uuid"), column("Name", "text"), column("tags", "set<text>"), column("note", "text")},
+			"partitionKeys": named("id"), "clusteringKeys": named("name"), "staticColumns": named("note")}
+		if mutate != nil {
+			mutate(s)
+		}
+		return s
+	}
+	cases := []struct {
+		name   string
+		schema map[string]any
+		ok     bool
+	}{
+		{"valid", schema(nil), true},
+		{"no partition key", schema(func(s map[string]any) { s["partitionKeys"] = []any{} }), false},
+		{"duplicate column", schema(func(s map[string]any) { s["allColumns"] = append(s["allColumns"].([]any), column("ID", "int")) }), false},
+		{"bad type", schema(func(s map[string]any) { s["allColumns"] = append(s["allColumns"].([]any), column("x", "string")) }), false},
+		{"unknown partition key", schema(func(s map[string]any) { s["partitionKeys"] = named("missing") }), false},
+		{"unknown clustering key", schema(func(s map[string]any) { s["clusteringKeys"] = named("missing") }), false},
+		{"unknown static column", schema(func(s map[string]any) { s["staticColumns"] = named("missing") }), false},
+		{"key twice", schema(func(s map[string]any) { s["clusteringKeys"] = named("id") }), false},
+		{"static key", schema(func(s map[string]any) { s["staticColumns"] = named("id") }), false},
+		{"no clustering or static", schema(func(s map[string]any) { delete(s, "clusteringKeys"); delete(s, "staticColumns") }), true},
+	}
+	for _, c := range cases {
+		err := keyspacesCreateTable(map[string]any{"schemaDefinition": c.schema})
+		var f *fault
+		if c.ok && err != nil || !c.ok && (!errors.As(err, &f) || f.code != "ValidationException") {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+	}
+	options := []struct {
+		name  string
+		input map[string]any
+		ok    bool
+	}{
+		{"on demand", map[string]any{"capacitySpecification": map[string]any{"throughputMode": "PAY_PER_REQUEST"}}, true},
+		{"on demand with units", map[string]any{"capacitySpecification": map[string]any{"throughputMode": "PAY_PER_REQUEST", "readCapacityUnits": int64(1)}}, false},
+		{"on demand with write units", map[string]any{"capacitySpecification": map[string]any{"throughputMode": "PAY_PER_REQUEST", "writeCapacityUnits": int64(1)}}, false},
+		{"provisioned", map[string]any{"capacitySpecification": map[string]any{"throughputMode": "PROVISIONED", "readCapacityUnits": int64(1), "writeCapacityUnits": int64(1)}}, true},
+		{"provisioned without write", map[string]any{"capacitySpecification": map[string]any{"throughputMode": "PROVISIONED", "readCapacityUnits": int64(1)}}, false},
+		{"provisioned without units", map[string]any{"capacitySpecification": map[string]any{"throughputMode": "PROVISIONED"}}, false},
+		{"owned key", map[string]any{"encryptionSpecification": map[string]any{"type": "AWS_OWNED_KMS_KEY"}}, true},
+		{"owned key with identifier", map[string]any{"encryptionSpecification": map[string]any{"type": "AWS_OWNED_KMS_KEY", "kmsKeyIdentifier": "arn"}}, false},
+		{"customer key", map[string]any{"encryptionSpecification": map[string]any{"type": "CUSTOMER_MANAGED_KMS_KEY", "kmsKeyIdentifier": "arn"}}, true},
+		{"customer key without identifier", map[string]any{"encryptionSpecification": map[string]any{"type": "CUSTOMER_MANAGED_KMS_KEY"}}, false},
+		{"replicas", map[string]any{"replicaSpecifications": []any{}}, false},
+		{"change stream", map[string]any{"cdcSpecification": map[string]any{"status": "ENABLED"}}, false},
+		{"nothing", map[string]any{}, true},
+	}
+	for _, c := range options {
+		err := keyspacesTableOptions(c.input)
+		var f *fault
+		if c.ok && err != nil || !c.ok && (!errors.As(err, &f) || f.code != "ValidationException") {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+	}
+	if err := keyspacesCreateTable(map[string]any{"schemaDefinition": schema(nil), "cdcSpecification": map[string]any{}}); err == nil {
+		t.Fatal("create refuses change streams")
+	}
+	if err := keyspacesUpdateTable(map[string]any{"addColumns": []any{}}); err == nil {
+		t.Fatal("update refuses added columns")
+	}
+	if err := keyspacesUpdateTable(map[string]any{"ttl": map[string]any{"status": "ENABLED"}}); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"system", "System_Schema", "system_schema_mcs", "system_multiregion_info"} {
+		var f *fault
+		if err := keyspacesCreateKeyspace(map[string]any{"keyspaceName": name}); !errors.As(err, &f) || f.code != "ConflictException" {
+			t.Fatalf("%s: %v", name, err)
+		}
+	}
+	for _, spec := range []map[string]any{{"replicationStrategy": "MULTI_REGION", "regionList": []any{"us-east-1", "us-west-2"}}, {"replicationStrategy": "SINGLE_REGION", "regionList": []any{"us-east-1"}}} {
+		var f *fault
+		if err := keyspacesCreateKeyspace(map[string]any{"keyspaceName": "ks", "replicationSpecification": spec}); !errors.As(err, &f) || f.code != "ValidationException" {
+			t.Fatalf("%v: %v", spec, err)
+		}
+	}
+	if err := keyspacesCreateKeyspace(map[string]any{"keyspaceName": "ks", "replicationSpecification": map[string]any{"replicationStrategy": "SINGLE_REGION"}}); err != nil {
+		t.Fatal(err)
+	}
+	typeCases := []struct {
+		name  string
+		input map[string]any
+		ok    bool
+	}{
+		{"valid", map[string]any{"typeName": "Address", "fieldDefinitions": []any{column("Street", "text"), column("zip", "int")}}, true},
+		{"quoted", map[string]any{"typeName": `"Address"`, "fieldDefinitions": []any{column("street", "text")}}, false},
+		{"digit first", map[string]any{"typeName": "1address", "fieldDefinitions": []any{column("street", "text")}}, false},
+		{"no fields", map[string]any{"typeName": "address", "fieldDefinitions": []any{}}, false},
+		{"duplicate fields", map[string]any{"typeName": "address", "fieldDefinitions": []any{column("a", "text"), column("A", "int")}}, false},
+		{"bad field type", map[string]any{"typeName": "address", "fieldDefinitions": []any{column("a", "string")}}, false},
+	}
+	for _, c := range typeCases {
+		err := keyspacesCreateType(c.input)
+		var f *fault
+		if c.ok && err != nil || !c.ok && (!errors.As(err, &f) || f.code != "ValidationException") {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+	}
+	named2 := map[string]any{"typeName": "Mixed"}
+	if err := keyspacesTypeName(named2); err != nil || named2["typeName"] != "mixed" {
+		t.Fatalf("lowercased %v %v", named2, err)
+	}
+}
+
+func TestKeyspacesLifecycle(t *testing.T) {
+	h := healthHarness(t)
+	call := func(op string, input map[string]any) reply { return h.json1("keyspaces", op, input) }
+	ksARN := "arn:aws:cassandra:us-east-1:000000000000:/keyspace/Shop/"
+	created := call("CreateKeyspace", map[string]any{"keyspaceName": "Shop", "tags": []any{map[string]any{"key": "team", "value": "a"}}})
+	expect(t, created, 200, "")
+	if created.body["resourceArn"] != ksARN {
+		t.Fatalf("created %v", created.body)
+	}
+	expect(t, call("CreateKeyspace", map[string]any{"keyspaceName": "Shop"}), 400, "ConflictException")
+	expect(t, call("CreateKeyspace", map[string]any{"keyspaceName": "system"}), 400, "ConflictException")
+	expect(t, call("CreateKeyspace", map[string]any{"keyspaceName": "_bad"}), 400, "ValidationException")
+	expect(t, call("CreateKeyspace", map[string]any{"keyspaceName": "multi", "replicationSpecification": map[string]any{"replicationStrategy": "MULTI_REGION", "regionList": []any{"us-east-1", "eu-west-1"}}}), 400, "ValidationException")
+	expect(t, call("CreateKeyspace", map[string]any{"keyspaceName": "single", "replicationSpecification": map[string]any{"replicationStrategy": "SINGLE_REGION"}}), 200, "")
+
+	got := call("GetKeyspace", map[string]any{"keyspaceName": "Shop"})
+	expect(t, got, 200, "")
+	if got.body["keyspaceName"] != "Shop" || got.body["resourceArn"] != ksARN || got.body["replicationStrategy"] != "SINGLE_REGION" {
+		t.Fatalf("keyspace %v", got.body)
+	}
+	if _, present := got.body["replicationGroupStatuses"]; present {
+		t.Fatal("no replication status is reported")
+	}
+	list := call("ListKeyspaces", map[string]any{})
+	if items := list.body["keyspaces"].([]any); len(items) != 2 || items[0].(map[string]any)["keyspaceName"] != "Shop" || items[0].(map[string]any)["replicationStrategy"] != "SINGLE_REGION" {
+		t.Fatalf("keyspaces %v", list.body)
+	}
+	paged := call("ListKeyspaces", map[string]any{"maxResults": 1})
+	if len(paged.body["keyspaces"].([]any)) != 1 || str(paged.body["nextToken"]) == "" {
+		t.Fatalf("page %v", paged.body)
+	}
+	expect(t, call("GetKeyspace", map[string]any{"keyspaceName": "nothing"}), 400, "ResourceNotFoundException")
+
+	schema := map[string]any{"allColumns": []any{map[string]any{"name": "id", "type": "uuid"}, map[string]any{"name": "title", "type": "text"}},
+		"partitionKeys": []any{map[string]any{"name": "id"}}, "clusteringKeys": []any{map[string]any{"name": "title", "orderBy": "DESC"}}}
+	tableARN := "arn:aws:cassandra:us-east-1:000000000000:/keyspace/Shop/table/orders"
+	table := call("CreateTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders", "schemaDefinition": schema, "comment": map[string]any{"message": "orders"},
+		"tags": []any{map[string]any{"key": "stage", "value": "dev"}}, "ttl": map[string]any{"status": "ENABLED"}, "defaultTimeToLive": 3600})
+	expect(t, table, 200, "")
+	if table.body["resourceArn"] != tableARN {
+		t.Fatalf("table %v", table.body)
+	}
+	expect(t, call("CreateTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders", "schemaDefinition": schema}), 400, "ConflictException")
+	expect(t, call("CreateTable", map[string]any{"keyspaceName": "missing", "tableName": "orders", "schemaDefinition": schema}), 400, "ResourceNotFoundException")
+	expect(t, call("CreateTable", map[string]any{"keyspaceName": "Shop", "tableName": "other", "schemaDefinition": map[string]any{"allColumns": []any{}, "partitionKeys": []any{}}}), 400, "ValidationException")
+	expect(t, call("CreateTable", map[string]any{"keyspaceName": "Shop", "tableName": "auto", "schemaDefinition": schema, "autoScalingSpecification": map[string]any{}}), 400, "ValidationException")
+
+	info := call("GetTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders"})
+	expect(t, info, 200, "")
+	if info.body["status"] != "ACTIVE" || info.body["keyspaceName"] != "Shop" || info.body["resourceArn"] != tableARN || info.body["creationTimestamp"] == nil ||
+		info.body["capacitySpecification"].(map[string]any)["throughputMode"] != "PAY_PER_REQUEST" ||
+		info.body["encryptionSpecification"].(map[string]any)["type"] != "AWS_OWNED_KMS_KEY" ||
+		info.body["pointInTimeRecovery"].(map[string]any)["status"] != "DISABLED" || info.body["defaultTimeToLive"] != json.Number("3600") ||
+		info.body["schemaDefinition"].(map[string]any)["clusteringKeys"].([]any)[0].(map[string]any)["orderBy"] != "DESC" {
+		t.Fatalf("table %v", info.body)
+	}
+	tables := call("ListTables", map[string]any{"keyspaceName": "Shop"})
+	if items := tables.body["tables"].([]any); len(items) != 1 || items[0].(map[string]any)["tableName"] != "orders" || items[0].(map[string]any)["resourceArn"] != tableARN {
+		t.Fatalf("tables %v", tables.body)
+	}
+	expect(t, call("ListTables", map[string]any{"keyspaceName": "single"}), 200, "")
+	expect(t, call("ListTables", map[string]any{"keyspaceName": "missing"}), 400, "ResourceNotFoundException")
+
+	updated := call("UpdateTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders", "capacitySpecification": map[string]any{"throughputMode": "PROVISIONED", "readCapacityUnits": 5, "writeCapacityUnits": 5},
+		"pointInTimeRecovery": map[string]any{"status": "ENABLED"}, "clientSideTimestamps": map[string]any{"status": "ENABLED"}, "defaultTimeToLive": 60})
+	expect(t, updated, 200, "")
+	if updated.body["resourceArn"] != tableARN {
+		t.Fatalf("updated %v", updated.body)
+	}
+	after := call("GetTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders"}).body
+	if after["capacitySpecification"].(map[string]any)["readCapacityUnits"] != json.Number("5") || after["pointInTimeRecovery"].(map[string]any)["status"] != "ENABLED" ||
+		after["defaultTimeToLive"] != json.Number("60") || after["clientSideTimestamps"].(map[string]any)["status"] != "ENABLED" {
+		t.Fatalf("updated table %v", after)
+	}
+	expect(t, call("UpdateTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders", "addColumns": []any{map[string]any{"name": "x", "type": "int"}}}), 400, "ValidationException")
+	expect(t, call("UpdateTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders", "capacitySpecification": map[string]any{"throughputMode": "PROVISIONED"}}), 400, "ValidationException")
+	expect(t, call("UpdateTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders", "cdcSpecification": map[string]any{"status": "ENABLED"}}), 400, "ValidationException")
+	expect(t, call("UpdateTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders", "comment": map[string]any{"message": "x"}}), 400, "ValidationException")
+	expect(t, call("UpdateTable", map[string]any{"keyspaceName": "Shop", "tableName": "none", "ttl": map[string]any{"status": "ENABLED"}}), 400, "ResourceNotFoundException")
+
+	typeARN := "arn:aws:cassandra:us-east-1:000000000000:/keyspace/Shop/type/address"
+	made := call("CreateType", map[string]any{"keyspaceName": "Shop", "typeName": "Address", "fieldDefinitions": []any{map[string]any{"name": "street", "type": "text"}, map[string]any{"name": "zip", "type": "int"}}})
+	expect(t, made, 200, "")
+	if made.body["typeName"] != "address" || made.body["keyspaceArn"] != ksARN {
+		t.Fatalf("type %v", made.body)
+	}
+	expect(t, call("CreateType", map[string]any{"keyspaceName": "Shop", "typeName": "address", "fieldDefinitions": []any{map[string]any{"name": "a", "type": "text"}}}), 400, "ConflictException")
+	described := call("GetType", map[string]any{"keyspaceName": "Shop", "typeName": "ADDRESS"})
+	expect(t, described, 200, "")
+	if described.body["status"] != "ACTIVE" || described.body["keyspaceArn"] != ksARN || len(described.body["fieldDefinitions"].([]any)) != 2 || len(described.body["directReferringTables"].([]any)) != 0 {
+		t.Fatalf("type %v", described.body)
+	}
+	if types := call("ListTypes", map[string]any{"keyspaceName": "Shop"}).body["types"].([]any); len(types) != 1 || types[0] != "address" {
+		t.Fatalf("types %v", types)
+	}
+
+	expect(t, call("TagResource", map[string]any{"resourceArn": typeARN, "tags": []any{map[string]any{"key": "owner", "value": "me"}}}), 200, "")
+	tags := call("ListTagsForResource", map[string]any{"resourceArn": typeARN}).body["tags"].([]any)
+	if len(tags) != 1 || tags[0].(map[string]any)["key"] != "owner" {
+		t.Fatalf("type tags %v", tags)
+	}
+	if tags := call("ListTagsForResource", map[string]any{"resourceArn": tableARN}).body["tags"].([]any); len(tags) != 1 || tags[0].(map[string]any)["value"] != "dev" {
+		t.Fatalf("table tags %v", tags)
+	}
+	expect(t, call("ListTagsForResource", map[string]any{"resourceArn": ksARN, "maxResults": 1}), 400, "ValidationException")
+	expect(t, call("ListTagsForResource", map[string]any{"resourceArn": "arn:aws:cassandra:us-east-1:000000000000:/keyspace/Shop/table/none"}), 400, "ResourceNotFoundException")
+
+	expect(t, call("DeleteKeyspace", map[string]any{"keyspaceName": "Shop"}), 200, "")
+	expect(t, call("GetTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders"}), 400, "ResourceNotFoundException")
+	expect(t, call("GetType", map[string]any{"keyspaceName": "Shop", "typeName": "address"}), 400, "ResourceNotFoundException")
+	expect(t, call("DeleteKeyspace", map[string]any{"keyspaceName": "Shop"}), 400, "ResourceNotFoundException")
+	expect(t, call("CreateKeyspace", map[string]any{"keyspaceName": "Shop"}), 200, "")
+	expect(t, call("CreateTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders", "schemaDefinition": schema}), 200, "")
+	expect(t, call("CreateType", map[string]any{"keyspaceName": "Shop", "typeName": "Pair", "fieldDefinitions": []any{map[string]any{"name": "a", "type": "frozen<address>"}}}), 200, "")
+	expect(t, call("DeleteType", map[string]any{"keyspaceName": "Shop", "typeName": "PAIR"}), 200, "")
+	expect(t, call("DeleteType", map[string]any{"keyspaceName": "Shop", "typeName": "pair"}), 400, "ResourceNotFoundException")
+	deleted := call("DeleteTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders"})
+	expect(t, deleted, 200, "")
+	expect(t, call("DeleteTable", map[string]any{"keyspaceName": "Shop", "tableName": "orders"}), 400, "ResourceNotFoundException")
+}
+
+func TestKeyspacesLimitsAndUnboundOperations(t *testing.T) {
+	h := healthHarness(t)
+	call := func(op string, input map[string]any) reply { return h.json1("keyspaces", op, input) }
+	for i := 0; i < 50; i++ {
+		expect(t, call("CreateKeyspace", map[string]any{"keyspaceName": "ks" + strings.Repeat("a", i/26) + string(rune('a'+i%26))}), 200, "")
+	}
+	expect(t, call("CreateKeyspace", map[string]any{"keyspaceName": "over"}), 400, "ServiceQuotaExceededException")
+	for _, op := range []string{"UpdateKeyspace", "UntagResource", "RestoreTable", "GetTableAutoScalingSettings"} {
+		expect(t, call(op, map[string]any{"keyspaceName": "ksa"}), 501, "UnknownOperationException")
 	}
 }
 
