@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func escapeARN(arn string) string {
+func compute3EscapeARN(arn string) string {
 	return strings.NewReplacer(":", "%3A", "/", "%2F").Replace(arn)
 }
 
@@ -40,9 +40,9 @@ func TestBatchSchedulingPoliciesAndConsumableResources(t *testing.T) {
 	}
 
 	// Tags apply by ARN.
-	expect(t, h.rest("batch", "POST", "/v1/tags/"+escapeARN(arn), map[string]any{"tags": map[string]any{"k": "v"}}), 200, "")
-	expect(t, h.rest("batch", "DELETE", "/v1/tags/"+escapeARN(arn)+"?tagKeys=team", nil), 200, "")
-	if tags := h.rest("batch", "GET", "/v1/tags/"+escapeARN(arn), nil).body["tags"].(map[string]any); len(tags) != 1 || tags["k"] != "v" {
+	expect(t, h.rest("batch", "POST", "/v1/tags/"+compute3EscapeARN(arn), map[string]any{"tags": map[string]any{"k": "v"}}), 200, "")
+	expect(t, h.rest("batch", "DELETE", "/v1/tags/"+compute3EscapeARN(arn)+"?tagKeys=team", nil), 200, "")
+	if tags := h.rest("batch", "GET", "/v1/tags/"+compute3EscapeARN(arn), nil).body["tags"].(map[string]any); len(tags) != 1 || tags["k"] != "v" {
 		t.Fatalf("tags %v", tags)
 	}
 
@@ -123,8 +123,8 @@ func TestBatchComputeEnvironmentsQueuesAndServiceEnvironments(t *testing.T) {
 	expect(t, h.rest("batch", "POST", "/v1/updatecomputeenvironment", map[string]any{"computeEnvironment": "eks", "unmanagedvCpus": 2}), 200, "")
 	expect(t, h.rest("batch", "POST", "/v1/updatecomputeenvironment", map[string]any{"computeEnvironment": "ce", "computeResources": map[string]any{"maxvCpus": 32}}), 400, "ClientException")
 	expect(t, h.rest("batch", "POST", "/v1/updatecomputeenvironment", map[string]any{"computeEnvironment": "missing", "state": "DISABLED"}), 400, "ClientException")
-	expect(t, h.rest("batch", "POST", "/v1/tags/"+escapeARN(ceARN), map[string]any{"tags": map[string]any{"k": "v"}}), 200, "")
-	if tags := h.rest("batch", "GET", "/v1/tags/"+escapeARN(ceARN), nil).body["tags"].(map[string]any); tags["k"] != "v" {
+	expect(t, h.rest("batch", "POST", "/v1/tags/"+compute3EscapeARN(ceARN), map[string]any{"tags": map[string]any{"k": "v"}}), 200, "")
+	if tags := h.rest("batch", "GET", "/v1/tags/"+compute3EscapeARN(ceARN), nil).body["tags"].(map[string]any); tags["k"] != "v" {
 		t.Fatalf("tags %v", tags)
 	}
 
@@ -253,9 +253,9 @@ func TestOutpostsSitesAndOutpostsAreStoredRecords(t *testing.T) {
 	expect(t, h.rest("outposts", "PATCH", "/outposts/"+opID, map[string]any{"SiteId": siteID}), 400, "ValidationException")
 
 	arn := str(op["OutpostArn"])
-	expect(t, h.rest("outposts", "POST", "/tags/"+escapeARN(arn), map[string]any{"Tags": map[string]any{"c": "d"}}), 200, "")
-	expect(t, h.rest("outposts", "DELETE", "/tags/"+escapeARN(arn)+"?tagKeys=a", nil), 200, "")
-	if tags := h.rest("outposts", "GET", "/tags/"+escapeARN(arn), nil).body["Tags"].(map[string]any); len(tags) != 1 || tags["c"] != "d" {
+	expect(t, h.rest("outposts", "POST", "/tags/"+compute3EscapeARN(arn), map[string]any{"Tags": map[string]any{"c": "d"}}), 200, "")
+	expect(t, h.rest("outposts", "DELETE", "/tags/"+compute3EscapeARN(arn)+"?tagKeys=a", nil), 200, "")
+	if tags := h.rest("outposts", "GET", "/tags/"+compute3EscapeARN(arn), nil).body["Tags"].(map[string]any); len(tags) != 1 || tags["c"] != "d" {
 		t.Fatalf("tags %v", tags)
 	}
 	expect(t, h.rest("outposts", "DELETE", "/outposts/"+opID, nil), 200, "")
@@ -420,14 +420,14 @@ func TestServerlessRepositoryApplicationsAndPolicies(t *testing.T) {
 			t.Fatalf("%s: %d %s", name, r.status, r.raw)
 		}
 	}
-	path := "/applications/" + escapeARN(id)
+	path := "/applications/" + compute3EscapeARN(id)
 	got := h.rest("serverlessrepo", "GET", path, nil)
 	expect(t, got, 200, "")
 	if got.body["applicationId"] != id || got.body["description"] != "greets" {
 		t.Fatalf("get %v", got.body)
 	}
 	expect(t, h.rest("serverlessrepo", "GET", path+"?semanticVersion=1.0.0", nil), 400, "BadRequestException")
-	expect(t, h.rest("serverlessrepo", "GET", "/applications/"+escapeARN(id+"x"), nil), 404, "NotFoundException")
+	expect(t, h.rest("serverlessrepo", "GET", "/applications/"+compute3EscapeARN(id+"x"), nil), 404, "NotFoundException")
 	list := h.rest("serverlessrepo", "GET", "/applications", nil)
 	expect(t, list, 200, "")
 	if items := list.body["applications"].([]any); len(items) != 1 || items[0].(map[string]any)["name"] != "hello-app" {
@@ -440,7 +440,7 @@ func TestServerlessRepositoryApplicationsAndPolicies(t *testing.T) {
 	}
 	expect(t, h.rest("serverlessrepo", "PATCH", path, map[string]any{"author": "Bob"}), 400, "BadRequestException")
 	expect(t, h.rest("serverlessrepo", "PATCH", path, map[string]any{"readmeBody": "text"}), 400, "BadRequestException")
-	expect(t, h.rest("serverlessrepo", "PATCH", "/applications/"+escapeARN(id+"x"), map[string]any{"description": "d"}), 404, "NotFoundException")
+	expect(t, h.rest("serverlessrepo", "PATCH", "/applications/"+compute3EscapeARN(id+"x"), map[string]any{"description": "d"}), 404, "NotFoundException")
 
 	policy := map[string]any{"statements": []any{map[string]any{"actions": []any{"Deploy"}, "principals": []any{"123456789012", "*"}, "statementId": "share"}}}
 	policyPath := path + "/policy"
@@ -458,9 +458,9 @@ func TestServerlessRepositoryApplicationsAndPolicies(t *testing.T) {
 		t.Fatalf("policy %v", read.body)
 	}
 	expect(t, h.rest("serverlessrepo", "PUT", policyPath, map[string]any{"statements": []any{map[string]any{"actions": []any{"Deploy"}, "principals": []any{"not-an-account"}}}}), 400, "BadRequestException")
-	expect(t, h.rest("serverlessrepo", "PUT", "/applications/"+escapeARN("hello-app")+"/policy", policy), 400, "BadRequestException")
-	expect(t, h.rest("serverlessrepo", "PUT", "/applications/"+escapeARN(id+"x")+"/policy", policy), 404, "NotFoundException")
-	expect(t, h.rest("serverlessrepo", "GET", "/applications/"+escapeARN(id+"x")+"/policy", nil), 404, "NotFoundException")
+	expect(t, h.rest("serverlessrepo", "PUT", "/applications/"+compute3EscapeARN("hello-app")+"/policy", policy), 400, "BadRequestException")
+	expect(t, h.rest("serverlessrepo", "PUT", "/applications/"+compute3EscapeARN(id+"x")+"/policy", policy), 404, "NotFoundException")
+	expect(t, h.rest("serverlessrepo", "GET", "/applications/"+compute3EscapeARN(id+"x")+"/policy", nil), 404, "NotFoundException")
 
 	// Deleting the application deletes its policy.
 	expect(t, h.rest("serverlessrepo", "DELETE", path, nil), 204, "")

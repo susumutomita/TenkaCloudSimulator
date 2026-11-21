@@ -259,6 +259,32 @@
     "UpdateFramework",
     "UpdateReportPlan"
   ],
+  "batch": [
+    "CreateComputeEnvironment",
+    "CreateConsumableResource",
+    "CreateJobQueue",
+    "CreateSchedulingPolicy",
+    "CreateServiceEnvironment",
+    "DeleteComputeEnvironment",
+    "DeleteConsumableResource",
+    "DeleteJobQueue",
+    "DeleteSchedulingPolicy",
+    "DeleteServiceEnvironment",
+    "DescribeComputeEnvironments",
+    "DescribeConsumableResource",
+    "DescribeJobQueues",
+    "DescribeSchedulingPolicies",
+    "DescribeServiceEnvironments",
+    "ListConsumableResources",
+    "ListSchedulingPolicies",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateComputeEnvironment",
+    "UpdateJobQueue",
+    "UpdateSchedulingPolicy",
+    "UpdateServiceEnvironment"
+  ],
   "bcm-data-exports": [
     "CreateExport",
     "DeleteExport",
@@ -1000,6 +1026,16 @@
     "UpdateJob",
     "UpdateTable"
   ],
+  "grafana": [
+    "CreateWorkspace",
+    "DeleteWorkspace",
+    "DescribeWorkspace",
+    "ListTagsForResource",
+    "ListWorkspaces",
+    "TagResource",
+    "UntagResource",
+    "UpdateWorkspace"
+  ],
   "greengrassv2": [
     "AssociateServiceRoleToAccount",
     "DisassociateServiceRoleFromAccount",
@@ -1034,6 +1070,15 @@
     "UntagResource",
     "UpdateDetector",
     "UpdateFilter"
+  ],
+  "healthlake": [
+    "CreateFHIRDatastore",
+    "DeleteFHIRDatastore",
+    "DescribeFHIRDatastore",
+    "ListFHIRDatastores",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource"
   ],
   "imagebuilder": [
     "CreateDistributionConfiguration",
@@ -1209,6 +1254,23 @@
     "UntagResource",
     "UpdateDataSource",
     "UpdateIndex"
+  ],
+  "keyspaces": [
+    "CreateKeyspace",
+    "CreateTable",
+    "CreateType",
+    "DeleteKeyspace",
+    "DeleteTable",
+    "DeleteType",
+    "GetKeyspace",
+    "GetTable",
+    "GetType",
+    "ListKeyspaces",
+    "ListTables",
+    "ListTagsForResource",
+    "ListTypes",
+    "TagResource",
+    "UpdateTable"
   ],
   "kinesis": [
     "CreateStream",
@@ -1481,6 +1543,15 @@
     "UpdateSourceLocation",
     "UpdateVodSource"
   ],
+  "medical-imaging": [
+    "CreateDatastore",
+    "DeleteDatastore",
+    "GetDatastore",
+    "ListDatastores",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource"
+  ],
   "memorydb": [
     "CreateParameterGroup",
     "CreateSubnetGroup",
@@ -1595,11 +1666,48 @@
     "UpdateCloudExadataInfrastructure",
     "UpdateOdbNetwork"
   ],
+  "omics": [
+    "CreateReferenceStore",
+    "CreateRunCache",
+    "CreateRunGroup",
+    "CreateSequenceStore",
+    "DeleteReferenceStore",
+    "DeleteRunCache",
+    "DeleteRunGroup",
+    "DeleteSequenceStore",
+    "GetReferenceStore",
+    "GetRunCache",
+    "GetRunGroup",
+    "GetSequenceStore",
+    "ListReferenceStores",
+    "ListRunCaches",
+    "ListRunGroups",
+    "ListSequenceStores",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateRunCache",
+    "UpdateRunGroup",
+    "UpdateSequenceStore"
+  ],
   "opensearch": [
     "CreateDomain",
     "DeleteDomain",
     "DescribeDomain",
     "ListDomainNames"
+  ],
+  "outposts": [
+    "CreateOutpost",
+    "CreateSite",
+    "DeleteOutpost",
+    "DeleteSite",
+    "GetOutpost",
+    "GetSite",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateOutpost",
+    "UpdateSite"
   ],
   "payment-cryptography": [
     "CreateAlias",
@@ -1607,6 +1715,25 @@
     "GetAlias",
     "ListAliases",
     "UpdateAlias"
+  ],
+  "pcs": [
+    "CreateCluster",
+    "CreateComputeNodeGroup",
+    "CreateQueue",
+    "DeleteCluster",
+    "DeleteComputeNodeGroup",
+    "DeleteQueue",
+    "GetCluster",
+    "GetComputeNodeGroup",
+    "GetQueue",
+    "ListClusters",
+    "ListComputeNodeGroups",
+    "ListQueues",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateComputeNodeGroup",
+    "UpdateQueue"
   ],
   "personalize": [
     "CreateDataset",
@@ -1846,6 +1973,15 @@
     "DeleteDataLakeExceptionSubscription",
     "GetDataLakeExceptionSubscription",
     "UpdateDataLakeExceptionSubscription"
+  ],
+  "serverlessrepo": [
+    "CreateApplication",
+    "DeleteApplication",
+    "GetApplication",
+    "GetApplicationPolicy",
+    "ListApplications",
+    "PutApplicationPolicy",
+    "UpdateApplication"
   ],
   "servicecatalog": [
     "CreatePortfolio",
