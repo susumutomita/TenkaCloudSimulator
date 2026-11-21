@@ -496,3 +496,47 @@ func workMailOrganizationARN(input map[string]any) error {
 	}
 	return nil
 }
+
+// rePostPrivate serves AWS re:Post Private spaces and their channels as stored
+// records. No site, domain, identity configuration or question exists.
+var rePostPrivate = &Service{
+	Model: "repostspace", Title: "AWS re:Post Private", IAMPrefix: "repostspace", Issues: []int{121},
+	Resources: []*Resource{
+		{Kind: "space", Shape: "GetSpaceOutput", Summary: "SpaceData", ID: "uuid", Unique: true, Limit: 5, Cascade: true,
+			ARN: "arn:{partition}:repostspace:{region}:{account}:space/{id}", ARNMember: "arn", IDMember: "spaceId", NameMember: "name",
+			Aliases:  map[string]string{"roleArn": "customerRoleArn"},
+			Generate: map[string]any{"createDateTime": "$now", "status": "CREATING", "configurationStatus": "UNCONFIGURED", "userCount": 0, "contentSize": 0}},
+		{Kind: "channel", Shape: "GetChannelOutput", Summary: "ChannelData", ID: "alnum:24", Unique: true, Limit: 20, Parent: "space", ParentMember: "spaceId",
+			ARN: "arn:{partition}:repostspace:{region}:{account}:space/{parent}/channel/{id}", IDMember: "channelId", NameMember: "channelName",
+			Generate: map[string]any{"spaceId": "$parentId", "createDateTime": "$now", "channelStatus": "CREATED", "userCount": 0, "groupCount": 0}},
+	},
+	Ops: []Op{
+		{Name: "CreateSpace", Kind: Create, Resource: "space", Accept: []string{"subdomain"}},
+		{Name: "GetSpace", Kind: Read, Resource: "space", Lookup: "spaceId"},
+		{Name: "ListSpaces", Kind: List, Resource: "space"},
+		{Name: "UpdateSpace", Kind: Update, Resource: "space", Lookup: "spaceId", Fields: []string{"description", "tier", "roleArn", "supportedEmailDomains"}},
+		{Name: "DeleteSpace", Kind: Delete, Resource: "space", Lookup: "spaceId"},
+		{Name: "CreateChannel", Kind: Create, Resource: "channel", Parent: "spaceId"},
+		{Name: "GetChannel", Kind: Read, Resource: "channel", Parent: "spaceId", Lookup: "channelId"},
+		{Name: "ListChannels", Kind: List, Resource: "channel", Parent: "spaceId"},
+		{Name: "UpdateChannel", Kind: Update, Resource: "channel", Parent: "spaceId", Lookup: "channelId", Fields: []string{"channelName", "channelDescription"}},
+		{Name: "TagResource", Kind: Tag, Lookup: "resourceArn", Check: rePostSpaceARN},
+		{Name: "UntagResource", Kind: Untag, Lookup: "resourceArn", Check: rePostSpaceARN},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "resourceArn", Check: rePostSpaceARN},
+	},
+	Bounds: []string{
+		"Spaces and channels are stored records: no private re:Post site, vanity or random domain, sign-in, IAM Identity Center application, question or answer exists, and a space never leaves status CREATING with configurationStatus UNCONFIGURED, as the other provisioned records of this catalog do. A space reports no vanityDomain, randomDomain, vanityDomainStatus, clientId, identityStoreId, applicationArn, storageLimit or administrators. RegisterAdmin, DeregisterAdmin, BatchAddRole, BatchRemoveRole, BatchAddChannelRoleToAccessors, BatchRemoveChannelRoleFromAccessors and SendInvites (which sends email) return UnknownOperationException with HTTP 501.",
+		"CreateSpace validates the subdomain against the official shape but does not store it, because no domain exists to hold it; userKMSKey, the IAM role (reported as customerRoleArn) and supportedEmailDomains are stored without being resolved or used. Space names are unique per Region as the official documentation states, channel names are unique per space, and at most 5 spaces per Region and 20 channels per space exist as simulator limits. Channels report status CREATED, and there is no DeleteChannel operation, so deleting a space deletes its channels, a cascade the official operation does not document.",
+		"Tags apply to spaces only, by ARN (arn:aws:repostspace:region:account:space/id); a channel ARN is refused. Channels have an ARN of the form space/id/channel/id for IAM evaluation only, which AWS does not define.",
+	},
+}
+
+var rePostSpacePattern = regexp.MustCompile(`^arn:[a-z-]+:repostspace:[a-z0-9-]*:[0-9]{12}:space/[^/]+$`)
+
+// rePostSpaceARN limits tagging to the space ARN, the only taggable resource.
+func rePostSpaceARN(input map[string]any) error {
+	if !rePostSpacePattern.MatchString(bizText(input["resourceArn"])) {
+		return invalid("Only the ARN of a space can be tagged.")
+	}
+	return nil
+}

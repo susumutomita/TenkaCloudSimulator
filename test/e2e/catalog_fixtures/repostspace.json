@@ -1,0 +1,28 @@
+{
+ "client": "repostspace",
+ "steps": [
+  {"op": "create_space", "args": {"name": "fixture-space", "subdomain": "fixture-space", "tier": "BASIC", "description": "fixture", "tags": {"team": "a"}}, "save": {"space": "spaceId"}},
+  {"op": "get_space", "args": {"spaceId": "${space}"}, "save": {"space_arn": "arn"}, "expect": {"name": "fixture-space", "status": "CREATING", "tier": "BASIC"}},
+  {"op": "update_space", "args": {"spaceId": "${space}", "description": "updated", "tier": "STANDARD"}},
+  {"op": "list_spaces", "args": {}, "expect": {"spaces#count": 1, "spaces[0].tier": "STANDARD"}},
+  {"op": "create_channel", "args": {"spaceId": "${space}", "channelName": "general", "channelDescription": "everything"}, "save": {"channel": "channelId"}},
+  {"op": "get_channel", "args": {"spaceId": "${space}", "channelId": "${channel}"}, "expect": {"channelName": "general", "channelStatus": "CREATED"}},
+  {"op": "update_channel", "args": {"spaceId": "${space}", "channelId": "${channel}", "channelName": "general-2", "channelDescription": "renamed"}},
+  {"op": "list_channels", "args": {"spaceId": "${space}"}, "expect": {"channels#count": 1, "channels[0].channelName": "general-2"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${space_arn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${space_arn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${space_arn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "create_space", "args": {"name": "fixture-space", "subdomain": "other", "tier": "BASIC"}, "error": "ConflictException", "status": 409},
+  {"op": "get_space", "args": {"spaceId": "missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_spaces", "args": {}, "expect": {"spaces#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_channel", "args": {"spaceId": "${space}", "channelId": "${channel}"}, "expect": {"channelName": "general-2"}}
+ ],
+ "cleanup": [
+  {"op": "delete_space", "args": {"spaceId": "${space}"}},
+  {"op": "list_spaces", "args": {}, "expect": {"spaces#count": 0}}
+ ]
+}

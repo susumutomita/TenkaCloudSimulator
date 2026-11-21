@@ -621,3 +621,63 @@ func TestWorkMailLifecycleOfEveryResource(t *testing.T) {
 	}
 	expect(t, call("ListAccessControlRules", map[string]any{"OrganizationId": org}), 400, "OrganizationNotFoundException")
 }
+
+func TestRePostPrivateCheckHooksApplyDocumentedRules(t *testing.T) {
+	space := "arn:aws:repostspace:us-east-1:000000000000:space/sp1"
+	for arn, ok := range map[string]bool{space: true, space + "/channel/c1": false, "arn:aws:s3:::bucket": false, "": false} {
+		if err := rePostSpaceARN(map[string]any{"resourceArn": arn}); (err == nil) != ok {
+			t.Errorf("%q: %v", arn, err)
+		}
+	}
+}
+
+func TestRePostPrivateLifecycleOfEveryResource(t *testing.T) {
+	h := businessHarness(t, rePostPrivate)
+	call := func(method, path string, input any) reply { return h.rest("repostspace", method, path, input) }
+
+	created := call("POST", "/spaces", map[string]any{"name": "team", "subdomain": "team", "tier": "BASIC", "description": "d", "roleArn": "arn:aws:iam::000000000000:role/repost-support-role", "tags": map[string]any{"team": "a"}})
+	okay(t, created)
+	spaceID := str(created.body["spaceId"])
+	got := call("GET", "/spaces/"+spaceID, nil)
+	if got.body["status"] != "CREATING" || got.body["configurationStatus"] != "UNCONFIGURED" || got.body["tier"] != "BASIC" || got.body["vanityDomain"] != nil || got.body["randomDomain"] != nil ||
+		got.body["customerRoleArn"] != "arn:aws:iam::000000000000:role/repost-support-role" || got.body["arn"] != "arn:aws:repostspace:us-east-1:000000000000:space/"+spaceID || got.body["name"] != "team" {
+		t.Fatalf("space %v", got.body)
+	}
+	expect(t, call("POST", "/spaces", map[string]any{"name": "team", "subdomain": "other", "tier": "BASIC"}), 409, "ConflictException")
+	expect(t, call("POST", "/spaces", map[string]any{"name": "x", "subdomain": "x", "tier": "FREE"}), 400, "ValidationException")
+	okay(t, call("PUT", "/spaces/"+spaceID, map[string]any{"description": "updated", "tier": "STANDARD", "supportedEmailDomains": map[string]any{"enabled": "ENABLED", "allowedDomains": []any{"example.com"}}}))
+	if got := call("GET", "/spaces/"+spaceID, nil); got.body["tier"] != "STANDARD" || got.body["description"] != "updated" || got.body["supportedEmailDomains"] == nil {
+		t.Fatalf("updated space %v", got.body)
+	}
+	if list := items(t, call("GET", "/spaces", nil), "spaces"); len(list) != 1 || list[0].(map[string]any)["name"] != "team" {
+		t.Fatalf("spaces %v", list)
+	}
+	expect(t, call("GET", "/spaces/missing", nil), 404, "ResourceNotFoundException")
+
+	channel := call("POST", "/spaces/"+spaceID+"/channels", map[string]any{"channelName": "general", "channelDescription": "everything"})
+	okay(t, channel)
+	channelID := str(channel.body["channelId"])
+	expect(t, call("POST", "/spaces/"+spaceID+"/channels", map[string]any{"channelName": "general"}), 409, "ConflictException")
+	if got := call("GET", "/spaces/"+spaceID+"/channels/"+channelID, nil); got.body["channelStatus"] != "CREATED" || got.body["spaceId"] != spaceID || got.body["channelName"] != "general" {
+		t.Fatalf("channel %v", got.body)
+	}
+	okay(t, call("PUT", "/spaces/"+spaceID+"/channels/"+channelID, map[string]any{"channelName": "general-2", "channelDescription": "renamed"}))
+	if list := items(t, call("GET", "/spaces/"+spaceID+"/channels", nil), "channels"); len(list) != 1 || list[0].(map[string]any)["channelName"] != "general-2" || list[0].(map[string]any)["userCount"] == nil {
+		t.Fatalf("channels %v", list)
+	}
+	expect(t, call("POST", "/spaces/missing/channels", map[string]any{"channelName": "x"}), 404, "ResourceNotFoundException")
+
+	arn := str(got.body["arn"])
+	okay(t, call("POST", "/tags/"+escapeARN(arn), map[string]any{"tags": map[string]any{"k": "v"}}))
+	if tags := call("GET", "/tags/"+escapeARN(arn), nil).body["tags"].(map[string]any); len(tags) != 2 {
+		t.Fatalf("tags %v", tags)
+	}
+	okay(t, call("DELETE", "/tags/"+escapeARN(arn)+"?tagKeys=k", nil))
+	expect(t, call("GET", "/tags/"+escapeARN(arn+"/channel/"+channelID), nil), 400, "ValidationException")
+
+	for _, path := range []string{"/spaces/" + spaceID + "/admins/x", "/spaces/" + spaceID + "/invite"} {
+		expect(t, call("POST", path, map[string]any{}), 501, "UnknownOperationException")
+	}
+	okay(t, call("DELETE", "/spaces/"+spaceID, nil))
+	expect(t, call("GET", "/spaces/"+spaceID+"/channels/"+channelID, nil), 404, "ResourceNotFoundException")
+}
