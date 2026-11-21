@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"regexp"
+	"strings"
 )
 
 // Reviewed bounded specifications for AWS Batch, AWS Outposts, AWS Parallel
@@ -178,4 +179,56 @@ func batchJobQueue(input map[string]any) error {
 
 func batchServiceEnvironment(input map[string]any) error {
 	return batchName(input, "serviceEnvironmentName")
+}
+
+var outposts = &Service{
+	Model: "outposts", Title: "AWS Outposts", IAMPrefix: "outposts", Issues: []int{108},
+	Resources: []*Resource{
+		{Kind: "site", Shape: "Site", ID: "hex:17:os-",
+			ARN:       "arn:{partition}:outposts:{region}:{account}:site/{id}",
+			ARNMember: "SiteArn", NameMember: "Name", IDMember: "SiteId", Limit: 50,
+			Generate: map[string]any{"AccountId": "$account"}},
+		{Kind: "outpost", Shape: "Outpost", ID: "hex:17:op-",
+			ARN:       "arn:{partition}:outposts:{region}:{account}:outpost/{id}",
+			ARNMember: "OutpostArn", NameMember: "Name", IDMember: "OutpostId", Limit: 50,
+			Generate: map[string]any{"OwnerId": "$account", "LifeCycleStatus": "REQUESTED"}},
+	},
+	Ops: []Op{
+		{Name: "CreateSite", Kind: Create, Resource: "site", Check: outpostsSite},
+		{Name: "GetSite", Kind: Read, Resource: "site", Lookup: "SiteId"},
+		{Name: "UpdateSite", Kind: Update, Resource: "site", Lookup: "SiteId", Fields: []string{"Name", "Description", "Notes"}},
+		{Name: "DeleteSite", Kind: Delete, Resource: "site", Lookup: "SiteId"},
+		{Name: "CreateOutpost", Kind: Create, Resource: "outpost", Check: outpostsOutpost},
+		{Name: "GetOutpost", Kind: Read, Resource: "outpost", Lookup: "OutpostId"},
+		{Name: "UpdateOutpost", Kind: Update, Resource: "outpost", Lookup: "OutpostId", Fields: []string{"Name", "Description", "SupportedHardwareType"}},
+		{Name: "DeleteOutpost", Kind: Delete, Resource: "outpost", Lookup: "OutpostId"},
+		{Name: "TagResource", Kind: Tag, Lookup: "ResourceArn"},
+		{Name: "UntagResource", Kind: Untag, Lookup: "ResourceArn"},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceArn"},
+	},
+	Bounds: []string{
+		"Sites and Outposts are stored records: no Outpost hardware, rack, server, asset, order, shipment, connection or capacity exists, nothing is ordered or shipped, and an Outpost stays at LifeCycleStatus REQUESTED because no hardware is ever installed. CreateOrder, CancelOrder, GetOrder, ListOrders, the catalog item, asset, capacity task, connection, billing information, instance type and decommission operations, UpdateSiteRackPhysicalProperties, GetSiteAddress and UpdateSiteAddress return UnknownOperationException with HTTP 501.",
+		"Site addresses are not stored: OperatingAddress and ShippingAddress are refused at creation (and so no OperatingAddress country, state or city is reported) because the site address operations are not implemented. RackPhysicalProperties are stored as given without checking that the combination is orderable.",
+		"An Outpost's SiteId is stored without being resolved: the site need not exist, an ARN is reduced to its site ID, SiteArn is not reported, and deleting a site does not check the Outposts that name it. AvailabilityZone and AvailabilityZoneId are stored unchecked and neither is required. LifeCycleStatus REQUESTED is inferred, not documented by the pinned model.",
+		"ListSites and ListOutposts are not implemented: their NextToken must match ^(\\d+)##(\\S+)$, which the catalog's page tokens do not, so sites and Outposts can be read only by identifier, and both operations return UnknownOperationException with HTTP 501. Site and Outpost names need not be unique, and each Region holds at most 50 sites and 50 Outposts (local limits). Tags apply to both kinds by ARN.",
+	},
+}
+
+// outpostsSite refuses the address members whose operations are not bound.
+func outpostsSite(input map[string]any) error {
+	for _, member := range []string{"OperatingAddress", "ShippingAddress"} {
+		if _, ok := input[member]; ok {
+			return Failure("ValidationException", member+" is not stored by the simulator, which does not implement the site address operations.")
+		}
+	}
+	return nil
+}
+
+// outpostsOutpost stores the site by its identifier whether the request named
+// it by identifier or by ARN.
+func outpostsOutpost(input map[string]any) error {
+	if site, ok := input["SiteId"].(string); ok {
+		input["SiteId"] = site[strings.LastIndex(site, "/")+1:]
+	}
+	return nil
 }

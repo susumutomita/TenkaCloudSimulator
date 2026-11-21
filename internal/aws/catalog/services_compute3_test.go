@@ -197,3 +197,72 @@ func TestBatchUpdateHookRefusesUnmanagedCapacityOnManagedEnvironments(t *testing
 		t.Fatal("managed environment accepted unmanagedvCpus")
 	}
 }
+
+func TestOutpostsSitesAndOutpostsAreStoredRecords(t *testing.T) {
+	h := newHarness(t, outposts)
+	created := h.rest("outposts", "POST", "/sites", map[string]any{"Name": "tokyo lab", "Description": "lab", "Notes": "n", "Tags": map[string]any{"team": "a"},
+		"RackPhysicalProperties": map[string]any{"PowerDrawKva": "POWER_10_KVA", "UplinkCount": "UPLINK_COUNT_2"}})
+	expect(t, created, 200, "")
+	site := created.body["Site"].(map[string]any)
+	siteID := str(site["SiteId"])
+	if !strings.HasPrefix(siteID, "os-") || len(siteID) != 20 || site["SiteArn"] != "arn:aws:outposts:us-east-1:000000000000:site/"+siteID ||
+		site["AccountId"] != "000000000000" || site["Name"] != "tokyo lab" || site["Tags"].(map[string]any)["team"] != "a" ||
+		site["RackPhysicalProperties"].(map[string]any)["PowerDrawKva"] != "POWER_10_KVA" || site["OperatingAddressCity"] != nil {
+		t.Fatalf("site %v", site)
+	}
+	address := map[string]any{"ContactName": "Ops", "ContactPhoneNumber": "0", "AddressLine1": "1", "City": "Tokyo", "StateOrRegion": "Tokyo", "PostalCode": "1", "CountryCode": "JP"}
+	for _, member := range []string{"OperatingAddress", "ShippingAddress"} {
+		refused := h.rest("outposts", "POST", "/sites", map[string]any{"Name": "x", member: address})
+		expect(t, refused, 400, "ValidationException")
+		if !strings.Contains(refused.raw, member+" is not stored") {
+			t.Fatalf("refusal %s", refused.raw)
+		}
+	}
+	got := h.rest("outposts", "GET", "/sites/"+siteID, nil)
+	expect(t, got, 200, "")
+	if got.body["Site"].(map[string]any)["SiteId"] != siteID {
+		t.Fatalf("get %v", got.body)
+	}
+	expect(t, h.rest("outposts", "GET", "/sites/os-00000000000000000", nil), 404, "NotFoundException")
+	expect(t, h.rest("outposts", "GET", "/sites", nil), 501, "UnknownOperationException")
+	updated := h.rest("outposts", "PATCH", "/sites/"+siteID, map[string]any{"Name": "renamed", "Notes": "later"})
+	expect(t, updated, 200, "")
+	if updated.body["Site"].(map[string]any)["Name"] != "renamed" || updated.body["Site"].(map[string]any)["Description"] != "lab" {
+		t.Fatalf("update %v", updated.body)
+	}
+	expect(t, h.rest("outposts", "PATCH", "/sites/os-00000000000000000", map[string]any{"Name": "x"}), 404, "NotFoundException")
+
+	outpost := h.rest("outposts", "POST", "/outposts", map[string]any{"Name": "op one", "SiteId": site["SiteArn"], "AvailabilityZoneId": "use1-az1", "SupportedHardwareType": "RACK", "Tags": map[string]any{"a": "b"}})
+	expect(t, outpost, 200, "")
+	op := outpost.body["Outpost"].(map[string]any)
+	opID := str(op["OutpostId"])
+	if !strings.HasPrefix(opID, "op-") || op["OutpostArn"] != "arn:aws:outposts:us-east-1:000000000000:outpost/"+opID || op["SiteId"] != siteID ||
+		op["LifeCycleStatus"] != "REQUESTED" || op["OwnerId"] != "000000000000" || op["SiteArn"] != nil {
+		t.Fatalf("outpost %v", op)
+	}
+	plain := h.rest("outposts", "POST", "/outposts", map[string]any{"Name": "op two", "SiteId": siteID, "Description": "d"})
+	expect(t, plain, 200, "")
+	if plain.body["Outpost"].(map[string]any)["SiteId"] != siteID {
+		t.Fatalf("plain %v", plain.body)
+	}
+	expect(t, h.rest("outposts", "POST", "/outposts", map[string]any{"Name": "op", "SiteId": "bad"}), 400, "ValidationException")
+	expect(t, h.rest("outposts", "GET", "/outposts/"+opID, nil), 200, "")
+	expect(t, h.rest("outposts", "GET", "/outposts/op-00000000000000000", nil), 404, "NotFoundException")
+	expect(t, h.rest("outposts", "GET", "/outposts", nil), 501, "UnknownOperationException")
+	expect(t, h.rest("outposts", "PATCH", "/outposts/"+opID, map[string]any{"Name": "op uno", "Description": "x", "SupportedHardwareType": "SERVER"}), 200, "")
+	expect(t, h.rest("outposts", "PATCH", "/outposts/"+opID, map[string]any{"SiteId": siteID}), 400, "ValidationException")
+
+	arn := str(op["OutpostArn"])
+	expect(t, h.rest("outposts", "POST", "/tags/"+escapeARN(arn), map[string]any{"Tags": map[string]any{"c": "d"}}), 200, "")
+	expect(t, h.rest("outposts", "DELETE", "/tags/"+escapeARN(arn)+"?tagKeys=a", nil), 200, "")
+	if tags := h.rest("outposts", "GET", "/tags/"+escapeARN(arn), nil).body["Tags"].(map[string]any); len(tags) != 1 || tags["c"] != "d" {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, h.rest("outposts", "DELETE", "/outposts/"+opID, nil), 200, "")
+	expect(t, h.rest("outposts", "DELETE", "/outposts/"+opID, nil), 404, "NotFoundException")
+	expect(t, h.rest("outposts", "DELETE", "/sites/"+siteID, nil), 200, "")
+	expect(t, h.rest("outposts", "DELETE", "/sites/"+siteID, nil), 404, "NotFoundException")
+
+	expect(t, h.rest("outposts", "GET", "/sites/"+siteID+"/address?AddressType=SHIPPING_ADDRESS", nil), 501, "UnknownOperationException")
+	expect(t, h.rest("outposts", "POST", "/orders", map[string]any{"OutpostIdentifier": opID, "LineItems": []any{}}), 501, "UnknownOperationException")
+}
