@@ -1,5 +1,12 @@
 package catalog
 
+import (
+	"net/netip"
+	"regexp"
+	"slices"
+	"strings"
+)
+
 // Business applications: AWS B2B Data Interchange, Amazon Q Business, Amazon
 // Connect, Amazon Chime SDK, Amazon WorkMail and AWS re:Post Private. Every
 // bound resource is a stored configuration record; nothing that exchanges,
@@ -365,4 +372,127 @@ var chimeMediaPipelines = &Service{
 		"Media insights pipeline configurations are stored records: no media is captured, concatenated, transcribed or analyzed, no pipeline runs, and no Kinesis Video Stream pool exists. Media pipelines of every kind, Kinesis Video Stream pools, speaker search and voice tone analysis tasks return UnknownOperationException with HTTP 501.",
 		"The elements (processors and sinks), the alert configuration and the access role ARN are stored without being evaluated or resolved. A configuration is identified by its unique name, its generated ID or its ARN (media-insights-pipeline-configuration/name, as inferred). The tag operations are not bound here: all Amazon Chime SDK models share the same tag routes and the engine serves them from the voice model only, so CreateMediaInsightsPipelineConfiguration refuses Tags. At most 25 configurations per Region exist as a simulator limit.",
 	},
+}
+
+// workMail serves Amazon WorkMail organizations and the access and
+// impersonation configuration they own as stored records. No mail service
+// runs: nothing is received, stored, sent or delivered, and no mailbox, user,
+// group or resource exists.
+var workMail = &Service{
+	Model: "workmail", Title: "Amazon WorkMail", IAMPrefix: "workmail", Issues: []int{100},
+	Resources: []*Resource{
+		{Kind: "organization", Shape: "DescribeOrganizationResponse", Summary: "OrganizationSummary", ID: "hex:32:m-", Unique: true, Limit: 5, Cascade: true,
+			ARN: "arn:{partition}:workmail:{region}:{account}:organization/{id}", ARNMember: "ARN", IDMember: "OrganizationId", NameMember: "Alias",
+			Aliases:  map[string]string{"EnableInteroperability": "InteroperabilityEnabled"},
+			Generate: map[string]any{"State": "Creating", "InteroperabilityEnabled": false}},
+		{Kind: "impersonationRole", Shape: "GetImpersonationRoleResponse", Summary: "ImpersonationRole", ID: "alnum:20", Limit: 30, Parent: "organization", ParentMember: "OrganizationId",
+			ARN: "arn:{partition}:workmail:{region}:{account}:organization/{parent}/impersonation-role/{id}", IDMember: "ImpersonationRoleId",
+			Generate: map[string]any{"DateCreated": "$now", "DateModified": "$now"}},
+		{Kind: "mobileDeviceAccessRule", Shape: "MobileDeviceAccessRule", ID: "alnum:20", Limit: 10, Parent: "organization", ParentMember: "OrganizationId", Unique: true,
+			ARN: "arn:{partition}:workmail:{region}:{account}:organization/{parent}/mobile-device-access-rule/{id}", IDMember: "MobileDeviceAccessRuleId", NameMember: "Name",
+			Generate: map[string]any{"DateCreated": "$now", "DateModified": "$now"}},
+		{Kind: "accessControlRule", Shape: "AccessControlRule", ID: "name", Unique: true, Limit: 10, Parent: "organization", ParentMember: "OrganizationId",
+			ARN: "arn:{partition}:workmail:{region}:{account}:organization/{parent}/access-control-rule/{name}", NameMember: "Name",
+			Generate: map[string]any{"DateCreated": "$now", "DateModified": "$now"}},
+		{Kind: "availabilityConfiguration", Shape: "AvailabilityConfiguration", ID: "name", Unique: true, Limit: 10, Parent: "organization", ParentMember: "OrganizationId",
+			ARN: "arn:{partition}:workmail:{region}:{account}:organization/{parent}/availability-configuration/{name}", NameMember: "DomainName",
+			Generate: map[string]any{"DateCreated": "$now", "DateModified": "$now"}},
+	},
+	Ops: []Op{
+		{Name: "CreateOrganization", Kind: Create, Resource: "organization", Check: workMailOrganization},
+		{Name: "DescribeOrganization", Kind: Read, Resource: "organization", Lookup: "OrganizationId"},
+		{Name: "ListOrganizations", Kind: List, Resource: "organization"},
+		{Name: "DeleteOrganization", Kind: Delete, Resource: "organization", Lookup: "OrganizationId", Set: map[string]any{"State": "Deleted"},
+			Accept: []string{"ClientToken", "DeleteDirectory", "ForceDelete", "DeleteIdentityCenterApplication"}},
+		{Name: "CreateImpersonationRole", Kind: Create, Resource: "impersonationRole", Parent: "OrganizationId"},
+		{Name: "GetImpersonationRole", Kind: Read, Resource: "impersonationRole", Parent: "OrganizationId", Lookup: "ImpersonationRoleId"},
+		{Name: "ListImpersonationRoles", Kind: List, Resource: "impersonationRole", Parent: "OrganizationId"},
+		{Name: "UpdateImpersonationRole", Kind: Update, Resource: "impersonationRole", Parent: "OrganizationId", Lookup: "ImpersonationRoleId", Touch: []string{"DateModified"},
+			Fields: []string{"Name", "Type", "Description", "Rules"}},
+		{Name: "DeleteImpersonationRole", Kind: Delete, Resource: "impersonationRole", Parent: "OrganizationId", Lookup: "ImpersonationRoleId"},
+		{Name: "CreateMobileDeviceAccessRule", Kind: Create, Resource: "mobileDeviceAccessRule", Parent: "OrganizationId"},
+		{Name: "ListMobileDeviceAccessRules", Kind: List, Resource: "mobileDeviceAccessRule", Parent: "OrganizationId"},
+		{Name: "UpdateMobileDeviceAccessRule", Kind: Update, Resource: "mobileDeviceAccessRule", Parent: "OrganizationId", Lookup: "MobileDeviceAccessRuleId", Touch: []string{"DateModified"},
+			Fields: []string{"Name", "Description", "Effect", "DeviceTypes", "NotDeviceTypes", "DeviceModels", "NotDeviceModels", "DeviceOperatingSystems", "NotDeviceOperatingSystems",
+				"DeviceUserAgents", "NotDeviceUserAgents"}},
+		{Name: "DeleteMobileDeviceAccessRule", Kind: Delete, Resource: "mobileDeviceAccessRule", Parent: "OrganizationId", Lookup: "MobileDeviceAccessRuleId"},
+		{Name: "PutAccessControlRule", Kind: Put, Resource: "accessControlRule", Parent: "OrganizationId", Lookup: "Name", Touch: []string{"DateModified"}, Check: workMailAccessRule},
+		{Name: "ListAccessControlRules", Kind: List, Resource: "accessControlRule", Parent: "OrganizationId"},
+		{Name: "DeleteAccessControlRule", Kind: Delete, Resource: "accessControlRule", Parent: "OrganizationId", Lookup: "Name"},
+		{Name: "CreateAvailabilityConfiguration", Kind: Create, Resource: "availabilityConfiguration", Parent: "OrganizationId", Check: workMailAvailability},
+		{Name: "ListAvailabilityConfigurations", Kind: List, Resource: "availabilityConfiguration", Parent: "OrganizationId"},
+		{Name: "UpdateAvailabilityConfiguration", Kind: Update, Resource: "availabilityConfiguration", Parent: "OrganizationId", Lookup: "DomainName", Touch: []string{"DateModified"},
+			Fields: []string{"LambdaProvider", "ProviderType"}, Check: workMailAvailability},
+		{Name: "DeleteAvailabilityConfiguration", Kind: Delete, Resource: "availabilityConfiguration", Parent: "OrganizationId", Lookup: "DomainName"},
+		{Name: "TagResource", Kind: Tag, Lookup: "ResourceARN", Check: workMailOrganizationARN},
+		{Name: "UntagResource", Kind: Untag, Lookup: "ResourceARN", Check: workMailOrganizationARN},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceARN", Check: workMailOrganizationARN},
+	},
+	Bounds: []string{
+		"Organizations, impersonation roles, mobile device access rules, access control rules and availability configurations are stored records: no mail is received, stored, sent or delivered, no SMTP, IMAP, EWS or ActiveSync endpoint exists, and rules are stored without being evaluated. Users, groups, resources, aliases, mailbox permissions and exports, delegates, mail domains, retention policies, passwords and personal access tokens, identity provider and Identity Center configuration, the effect and test operations and every other official operation return UnknownOperationException with HTTP 501.",
+		"An organization stays in state Creating, as the other provisioned records of this catalog do, and reports no DirectoryId, DirectoryType, DefaultMailDomain or MigrationAdmin because no directory or mail domain exists. CreateOrganization refuses DirectoryId, Domains and KmsKeyArn, which name a directory, mail domains or a key that would have to exist; Alias is the unique organization name; EnableInteroperability is stored as InteroperabilityEnabled. DeleteOrganization returns state Deleted, accepts but ignores DeleteDirectory, ForceDelete and DeleteIdentityCenterApplication, and deletes everything the organization owns, a cascade the official operation does not document. At most 5 organizations per Region exist as a simulator limit.",
+		"Impersonation roles, mobile device access rules, access control rules and availability configurations are scoped to an organization; 30 roles, 10 mobile device access rules, 10 access control rules and 10 availability configurations per organization are simulator limits. Mobile device access rule names are unique per organization; PutAccessControlRule replaces a rule of the same name as documented. The user IDs, impersonation role IDs, Lambda ARN and domain name that rules and configurations mention are stored without being resolved.",
+		"Availability configurations accept only a LambdaProvider: the EwsProvider carries an Exchange user name and password and is refused, so no password is stored. They report ProviderType LAMBDA. The organization, role, rule and configuration ID forms (m-, 20 character IDs) are inferred, and the child ARNs used for IAM evaluation are not defined by AWS.",
+		"Tags apply to organizations only, by ARN (arn:aws:workmail:region:account:organization/id); the ARNs of the stored child records are refused.",
+	},
+}
+
+// workMailOrganization refuses the members of an organization that name a
+// directory, mail domains or a key, none of which exists.
+func workMailOrganization(input map[string]any) error {
+	for _, member := range []string{"DirectoryId", "Domains", "KmsKeyArn"} {
+		if _, ok := input[member]; ok {
+			return Failure("InvalidParameterException", member+" is not supported: no directory, mail domain or key exists in the simulator.")
+		}
+	}
+	return nil
+}
+
+// workMailAvailability keeps availability configurations to the Lambda
+// provider and records its provider type.
+func workMailAvailability(input map[string]any) error {
+	if _, ok := input["EwsProvider"]; ok {
+		return Failure("InvalidParameterException", "EwsProvider is not supported: the simulator never stores an Exchange password.")
+	}
+	if _, ok := input["LambdaProvider"]; !ok {
+		return Failure("InvalidParameterException", "The request must contain exactly one provider definition, here a LambdaProvider.")
+	}
+	input["ProviderType"] = "LAMBDA"
+	return nil
+}
+
+var (
+	workMailOrganizationPattern = regexp.MustCompile(`^arn:[a-z-]+:workmail:[a-z0-9-]*:[0-9]{12}:organization/[^/]+$`)
+	workMailActions             = []string{"ActiveSync", "AutoDiscover", "EWS", "IMAP", "SMTP", "WindowsOutlook", "WebMail"}
+)
+
+// workMailAccessRule applies the documented value rules of an access control
+// rule: IPv4 CIDR ranges and the known access protocol actions.
+func workMailAccessRule(input map[string]any) error {
+	for _, member := range []string{"IpRanges", "NotIpRanges"} {
+		ranges, _ := input[member].([]any)
+		for _, value := range ranges {
+			prefix, err := netip.ParsePrefix(bizText(value))
+			if err != nil || !prefix.Addr().Is4() {
+				return Failure("InvalidParameterException", member+" must hold IPv4 CIDR ranges such as 192.0.2.0/24.")
+			}
+		}
+	}
+	for _, member := range []string{"Actions", "NotActions"} {
+		actions, _ := input[member].([]any)
+		for _, value := range actions {
+			if !slices.Contains(workMailActions, bizText(value)) {
+				return Failure("InvalidParameterException", member+" values are "+strings.Join(workMailActions, ", ")+".")
+			}
+		}
+	}
+	return nil
+}
+
+// workMailOrganizationARN limits tagging to the organization ARN.
+func workMailOrganizationARN(input map[string]any) error {
+	if !workMailOrganizationPattern.MatchString(bizText(input["ResourceARN"])) {
+		return invalid("Only the ARN of an organization can be tagged.")
+	}
+	return nil
 }

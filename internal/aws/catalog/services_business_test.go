@@ -493,3 +493,131 @@ func TestChimeTagRoutesBelongToTheFirstRegisteredModel(t *testing.T) {
 	h := businessHarness(t, chimeIdentity, chimeVoice)
 	expect(t, h.rest("chime-sdk-voice", "GET", "/tags?arn=arn", nil), 501, "UnknownOperationException")
 }
+
+func TestWorkMailCheckHooksApplyDocumentedRules(t *testing.T) {
+	arn := "arn:aws:workmail:us-east-1:000000000000:organization/m-0123456789abcdef0123456789abcdef"
+	cases := []struct {
+		name  string
+		hook  func(map[string]any) error
+		input map[string]any
+		ok    bool
+	}{
+		{"alias only", workMailOrganization, map[string]any{"Alias": "acme"}, true},
+		{"directory", workMailOrganization, map[string]any{"DirectoryId": "d-0123456789"}, false},
+		{"domains", workMailOrganization, map[string]any{"Domains": []any{}}, false},
+		{"key", workMailOrganization, map[string]any{"KmsKeyArn": "arn"}, false},
+		{"lambda provider", workMailAvailability, map[string]any{"LambdaProvider": map[string]any{"LambdaArn": "arn"}}, true},
+		{"ews provider", workMailAvailability, map[string]any{"EwsProvider": map[string]any{}}, false},
+		{"no provider", workMailAvailability, map[string]any{}, false},
+		{"rule", workMailAccessRule, map[string]any{"IpRanges": []any{"192.0.2.0/24"}, "Actions": []any{"IMAP", "WebMail"}}, true},
+		{"empty rule", workMailAccessRule, map[string]any{}, true},
+		{"address not range", workMailAccessRule, map[string]any{"IpRanges": []any{"192.0.2.1"}}, false},
+		{"ipv6 range", workMailAccessRule, map[string]any{"NotIpRanges": []any{"2001:db8::/32"}}, false},
+		{"unknown action", workMailAccessRule, map[string]any{"NotActions": []any{"POP3"}}, false},
+		{"organization arn", workMailOrganizationARN, map[string]any{"ResourceARN": arn}, true},
+		{"role arn", workMailOrganizationARN, map[string]any{"ResourceARN": arn + "/impersonation-role/r1"}, false},
+		{"other arn", workMailOrganizationARN, map[string]any{"ResourceARN": "arn:aws:s3:::bucket"}, false},
+	}
+	for _, c := range cases {
+		if err := c.hook(c.input); (err == nil) != c.ok {
+			t.Errorf("%s: %v", c.name, err)
+		}
+	}
+	input := map[string]any{"LambdaProvider": map[string]any{}}
+	if err := workMailAvailability(input); err != nil || input["ProviderType"] != "LAMBDA" {
+		t.Fatalf("provider type %v %v", input, err)
+	}
+}
+
+func TestWorkMailLifecycleOfEveryResource(t *testing.T) {
+	h := businessHarness(t, workMail)
+	call := func(op string, input map[string]any) reply { return h.json1("workmail", op, input) }
+
+	expect(t, call("CreateOrganization", map[string]any{"Alias": "acme", "DirectoryId": "d-0123456789"}), 400, "InvalidParameterException")
+	created := call("CreateOrganization", map[string]any{"Alias": "acme", "ClientToken": "t-1", "EnableInteroperability": true})
+	expect(t, created, 200, "")
+	org := str(created.body["OrganizationId"])
+	if !strings.HasPrefix(org, "m-") || len(org) != 34 {
+		t.Fatalf("organization %v", created.body)
+	}
+	if replay := call("CreateOrganization", map[string]any{"Alias": "acme", "ClientToken": "t-1", "EnableInteroperability": true}); replay.body["OrganizationId"] != org {
+		t.Fatalf("replay %v", replay.body)
+	}
+	expect(t, call("CreateOrganization", map[string]any{"Alias": "acme"}), 400, "")
+	described := call("DescribeOrganization", map[string]any{"OrganizationId": org})
+	if described.body["State"] != "Creating" || described.body["InteroperabilityEnabled"] != true || described.body["DefaultMailDomain"] != nil || described.body["DirectoryId"] != nil ||
+		described.body["ARN"] != "arn:aws:workmail:us-east-1:000000000000:organization/"+org {
+		t.Fatalf("organization %v", described.body)
+	}
+	if list := items(t, call("ListOrganizations", map[string]any{}), "OrganizationSummaries"); len(list) != 1 || list[0].(map[string]any)["Alias"] != "acme" {
+		t.Fatalf("organizations %v", list)
+	}
+	expect(t, call("DescribeOrganization", map[string]any{"OrganizationId": "m-" + strings.Repeat("0", 32)}), 400, "OrganizationNotFoundException")
+
+	role := call("CreateImpersonationRole", map[string]any{"OrganizationId": org, "Name": "audit", "Type": "READ_ONLY", "Rules": []any{map[string]any{"ImpersonationRuleId": "r1", "Effect": "ALLOW"}}})
+	expect(t, role, 200, "")
+	roleID := str(role.body["ImpersonationRoleId"])
+	expect(t, call("CreateImpersonationRole", map[string]any{"OrganizationId": org, "Name": "audit", "Type": "OTHER", "Rules": []any{}}), 400, "InvalidParameterException")
+	got := call("GetImpersonationRole", map[string]any{"OrganizationId": org, "ImpersonationRoleId": roleID})
+	if got.body["Name"] != "audit" || got.body["Type"] != "READ_ONLY" || got.body["DateCreated"] == nil {
+		t.Fatalf("role %v", got.body)
+	}
+	expect(t, call("UpdateImpersonationRole", map[string]any{"OrganizationId": org, "ImpersonationRoleId": roleID, "Name": "audit-2", "Type": "FULL_ACCESS", "Rules": []any{}}), 200, "")
+	if got := call("GetImpersonationRole", map[string]any{"OrganizationId": org, "ImpersonationRoleId": roleID}); got.body["Name"] != "audit-2" || got.body["Type"] != "FULL_ACCESS" {
+		t.Fatalf("updated role %v", got.body)
+	}
+	if list := items(t, call("ListImpersonationRoles", map[string]any{"OrganizationId": org}), "Roles"); len(list) != 1 {
+		t.Fatalf("roles %v", list)
+	}
+
+	mobile := call("CreateMobileDeviceAccessRule", map[string]any{"OrganizationId": org, "Name": "block-old", "Effect": "DENY", "DeviceTypes": []any{"iPhone"}})
+	expect(t, mobile, 200, "")
+	mobileID := str(mobile.body["MobileDeviceAccessRuleId"])
+	expect(t, call("CreateMobileDeviceAccessRule", map[string]any{"OrganizationId": org, "Name": "block-old", "Effect": "DENY"}), 400, "")
+	expect(t, call("UpdateMobileDeviceAccessRule", map[string]any{"OrganizationId": org, "MobileDeviceAccessRuleId": mobileID, "Name": "block-old-2", "Effect": "ALLOW", "Description": "d"}), 200, "")
+	if list := items(t, call("ListMobileDeviceAccessRules", map[string]any{"OrganizationId": org}), "Rules"); len(list) != 1 || list[0].(map[string]any)["Name"] != "block-old-2" || list[0].(map[string]any)["Effect"] != "ALLOW" {
+		t.Fatalf("mobile rules %v", list)
+	}
+
+	rule := map[string]any{"OrganizationId": org, "Name": "office", "Effect": "ALLOW", "Description": "office only", "IpRanges": []any{"192.0.2.0/24"}, "Actions": []any{"IMAP"}}
+	expect(t, call("PutAccessControlRule", rule), 200, "")
+	expect(t, call("PutAccessControlRule", map[string]any{"OrganizationId": org, "Name": "bad", "Effect": "ALLOW", "Description": "d", "IpRanges": []any{"192.0.2.1"}}), 400, "InvalidParameterException")
+	rule["Effect"], rule["Description"] = "DENY", "replaced"
+	expect(t, call("PutAccessControlRule", rule), 200, "")
+	rules := items(t, call("ListAccessControlRules", map[string]any{"OrganizationId": org}), "Rules")
+	if len(rules) != 1 || rules[0].(map[string]any)["Effect"] != "DENY" || rules[0].(map[string]any)["Description"] != "replaced" || rules[0].(map[string]any)["DateModified"] == nil {
+		t.Fatalf("access rules %v", rules)
+	}
+
+	provider := map[string]any{"LambdaArn": "arn:aws:lambda:us-east-1:000000000000:function:availability"}
+	expect(t, call("CreateAvailabilityConfiguration", map[string]any{"OrganizationId": org, "DomainName": "example.com", "LambdaProvider": provider}), 200, "")
+	expect(t, call("CreateAvailabilityConfiguration", map[string]any{"OrganizationId": org, "DomainName": "example.org", "EwsProvider": map[string]any{"EwsEndpoint": "https://ews.example.org/", "EwsUsername": "svc", "EwsPassword": "x"}}), 400, "InvalidParameterException")
+	expect(t, call("UpdateAvailabilityConfiguration", map[string]any{"OrganizationId": org, "DomainName": "example.com", "LambdaProvider": map[string]any{"LambdaArn": "arn:aws:lambda:us-east-1:000000000000:function:availability-2"}}), 200, "")
+	configs := items(t, call("ListAvailabilityConfigurations", map[string]any{"OrganizationId": org}), "AvailabilityConfigurations")
+	if len(configs) != 1 || configs[0].(map[string]any)["ProviderType"] != "LAMBDA" || configs[0].(map[string]any)["LambdaProvider"].(map[string]any)["LambdaArn"] != "arn:aws:lambda:us-east-1:000000000000:function:availability-2" {
+		t.Fatalf("availability %v", configs)
+	}
+
+	arn := str(described.body["ARN"])
+	expect(t, call("TagResource", map[string]any{"ResourceARN": arn, "Tags": []any{map[string]any{"Key": "k", "Value": "v"}}}), 200, "")
+	if tags := items(t, call("ListTagsForResource", map[string]any{"ResourceARN": arn}), "Tags"); len(tags) != 1 {
+		t.Fatalf("tags %v", tags)
+	}
+	expect(t, call("UntagResource", map[string]any{"ResourceARN": arn, "TagKeys": []any{"k"}}), 200, "")
+	expect(t, call("TagResource", map[string]any{"ResourceARN": arn + "/impersonation-role/" + roleID, "Tags": []any{}}), 400, "InvalidParameterException")
+
+	for _, op := range []string{"CreateUser", "CreateGroup", "CreateResource", "ResetPassword", "RegisterToWorkMail", "StartMailboxExportJob"} {
+		expect(t, call(op, map[string]any{}), 501, "UnknownOperationException")
+	}
+	expect(t, call("DeleteAccessControlRule", map[string]any{"OrganizationId": org, "Name": "office"}), 200, "")
+	expect(t, call("DeleteAvailabilityConfiguration", map[string]any{"OrganizationId": org, "DomainName": "example.com"}), 200, "")
+	expect(t, call("DeleteMobileDeviceAccessRule", map[string]any{"OrganizationId": org, "MobileDeviceAccessRuleId": mobileID}), 200, "")
+	expect(t, call("DeleteImpersonationRole", map[string]any{"OrganizationId": org, "ImpersonationRoleId": roleID}), 200, "")
+	call("PutAccessControlRule", rule)
+	deleted := call("DeleteOrganization", map[string]any{"OrganizationId": org, "DeleteDirectory": true, "ForceDelete": true})
+	expect(t, deleted, 200, "")
+	if deleted.body["State"] != "Deleted" || deleted.body["OrganizationId"] != org {
+		t.Fatalf("delete %v", deleted.body)
+	}
+	expect(t, call("ListAccessControlRules", map[string]any{"OrganizationId": org}), 400, "OrganizationNotFoundException")
+}
