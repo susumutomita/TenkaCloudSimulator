@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -306,4 +307,44 @@ func TestReferencePathsAndMatchVocabulary(t *testing.T) {
 			t.Fatalf("%s: composition accepted it", name)
 		}
 	}
+}
+
+// A Type mismatch must not reveal a rule group the caller may not see: it is
+// authorized and answered exactly as a name that does not exist.
+func TestNetworkFirewallTypeMismatchDisclosesNothing(t *testing.T) {
+	h := newHarness(t, networkFirewall)
+	nf := func(op string, input map[string]any) reply { return h.json1("network-firewall", op, input) }
+	expect(t, nf("CreateRuleGroup", map[string]any{"RuleGroupName": "secret", "Type": "STATEFUL", "Capacity": 100, "RuleGroup": map[string]any{
+		"RulesSource": map[string]any{"RulesString": `drop tls $HOME_NET any -> $EXTERNAL_NET any (msg:"x"; sid:1;)`}}}), 200, "")
+	stateful := "arn:aws:network-firewall:us-east-1:000000000000:stateful-rulegroup/"
+	for _, op := range []string{"DescribeRuleGroup", "UpdateRuleGroup", "DeleteRuleGroup"} {
+		for _, name := range []string{"secret", "ghost"} {
+			h.policy.deny["network-firewall:"+op+" "+stateful+name] = true
+		}
+	}
+	message := func(r reply) string { return fmt.Sprint(r.body["message"], r.body["Message"]) }
+	for _, op := range []string{"DescribeRuleGroup", "UpdateRuleGroup", "DeleteRuleGroup"} {
+		input := func(name string) map[string]any {
+			in := map[string]any{"RuleGroupName": name, "Type": "STATELESS"}
+			if op == "UpdateRuleGroup" {
+				in["UpdateToken"], in["Description"] = "00000000-0000-4000-8000-000000000000", "x"
+			}
+			return in
+		}
+		hidden, ghost := nf(op, input("secret")), nf(op, input("ghost"))
+		expect(t, hidden, 400, "ResourceNotFoundException")
+		expect(t, ghost, 400, "ResourceNotFoundException")
+		if want := strings.ReplaceAll(message(ghost), "ghost", "secret"); message(hidden) != want {
+			t.Fatalf("%s mismatch %q differs from missing %q", op, message(hidden), message(ghost))
+		}
+		allowed := input("secret")
+		allowed["Type"] = "STATEFUL"
+		expect(t, nf(op, allowed), 403, "AccessDeniedException")
+	}
+	// A caller denied on the ARN they asked about is still denied.
+	h.policy.deny["network-firewall:DescribeRuleGroup arn:aws:network-firewall:us-east-1:000000000000:stateless-rulegroup/secret"] = true
+	expect(t, nf("DescribeRuleGroup", map[string]any{"RuleGroupName": "secret", "Type": "STATELESS"}), 403, "AccessDeniedException")
+	delete(h.policy.deny, "network-firewall:DeleteRuleGroup "+stateful+"secret")
+	expect(t, nf("DescribeRuleGroup", map[string]any{"RuleGroupName": "secret", "Type": "STATEFUL"}), 403, "AccessDeniedException")
+	expect(t, nf("DeleteRuleGroup", map[string]any{"RuleGroupName": "secret", "Type": "STATEFUL"}), 200, "")
 }

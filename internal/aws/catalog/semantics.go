@@ -412,6 +412,11 @@ func (q *request) lookup() (row, *row, error) {
 		}
 		return r, parent, nil
 	}
+	if err == nil && !q.matches(found) {
+		// A Match mismatch is a missing resource: answer before the stored ARN
+		// is authorized, so a denied caller cannot learn that it exists.
+		err = sql.ErrNoRows
+	}
 	if errors.Is(err, sql.ErrNoRows) {
 		guess := identifier
 		if !strings.HasPrefix(identifier, "arn:") {
@@ -428,12 +433,17 @@ func (q *request) lookup() (row, *row, error) {
 	if err := q.authorize(found.ARN); err != nil {
 		return row{}, nil, err
 	}
+	return found, parent, nil
+}
+
+// matches reports whether every supplied Match member equals the stored value.
+func (q *request) matches(found row) bool {
 	for _, member := range q.op.Match {
 		if value, ok := q.input[member]; ok && fmt.Sprint(value) != fmt.Sprint(found.Document[member]) {
-			return row{}, nil, &fault{kind: "notfound", message: fmt.Sprintf("The %s %s does not exist with this %s.", res.Kind, identifier, member)}
+			return false
 		}
 	}
-	return found, parent, nil
+	return true
 }
 
 func newID(generator, name string) (string, error) {
