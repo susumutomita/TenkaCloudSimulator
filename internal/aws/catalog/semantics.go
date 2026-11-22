@@ -908,6 +908,19 @@ func (q *request) update() (map[string]any, error) {
 			r.Seq = seq
 			return insertRow(tx, r)
 		}
+		if q.op.CheckReplacement != nil {
+			previous, err := findARN(tx, r.Service, r.ARN)
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				return err
+			}
+			// A concurrent update/delete/recreation still receives the existing
+			// CAS failure from updateRow; never validate against a new generation.
+			if err == nil && previous.Seq == r.Seq && previous.Generation == r.Generation {
+				if err := q.op.CheckReplacement(previous.Document, r.Document); err != nil {
+					return err
+				}
+			}
+		}
 		return updateRow(tx, r)
 	}); err != nil {
 		return nil, err

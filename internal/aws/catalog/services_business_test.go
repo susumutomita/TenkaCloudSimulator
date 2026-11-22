@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -227,6 +228,43 @@ func TestQBusinessLifecycleOfEveryResource(t *testing.T) {
 	expect(t, call("DELETE", "/applications/"+appID, nil), 200, "")
 	expect(t, call("GET", "/applications/"+appID+"/retrievers/"+str(retriever.body["retrieverId"]), nil), 404, "ResourceNotFoundException")
 	expect(t, call("DELETE", "/applications/"+appID, nil), 404, "ResourceNotFoundException")
+}
+
+func TestQBusinessUpdateRetrieverPreservesConfigurationType(t *testing.T) {
+	h := businessHarness(t, qBusiness)
+	call := func(method, path string, input any) reply { return h.rest("qbusiness", method, path, input) }
+	app := call("POST", "/applications", map[string]any{"displayName": "app", "identityType": "ANONYMOUS"})
+	expect(t, app, 200, "")
+	collection := "/applications/" + str(app.body["applicationId"]) + "/retrievers"
+	cases := []struct{ kind, current, other string }{
+		{"NATIVE_INDEX", "nativeIndexConfiguration", "kendraIndexConfiguration"},
+		{"KENDRA_INDEX", "kendraIndexConfiguration", "nativeIndexConfiguration"},
+	}
+	props := func(branch, value string) map[string]any {
+		return map[string]any{branch: map[string]any{"indexId": strings.Repeat(value, 36)}}
+	}
+	for _, tc := range cases {
+		t.Run(tc.kind, func(t *testing.T) {
+			made := call("POST", collection, map[string]any{"type": tc.kind, "displayName": "original", "configuration": props(tc.current, "a")})
+			expect(t, made, 200, "")
+			path := collection + "/" + str(made.body["retrieverId"])
+			before := call("GET", path, nil)
+			expect(t, before, 200, "")
+			expect(t, call("PUT", path, map[string]any{"displayName": "must-not-persist", "configuration": props(tc.other, "b")}), 400, "ValidationException")
+			after := call("GET", path, nil)
+			expect(t, after, 200, "")
+			if !reflect.DeepEqual(before.body, after.body) {
+				t.Fatalf("rejected update changed retriever: %v", after.body)
+			}
+			expect(t, call("PUT", path, map[string]any{"configuration": props(tc.current, "c")}), 200, "")
+			expect(t, call("PUT", path, map[string]any{"displayName": "renamed"}), 200, "")
+			got := call("GET", path, nil)
+			expect(t, got, 200, "")
+			if got.body["type"] != tc.kind || got.body["displayName"] != "renamed" || !reflect.DeepEqual(got.body["configuration"], props(tc.current, "c")) {
+				t.Fatalf("valid updates did not preserve configuration type: %v", got.body)
+			}
+		})
+	}
 }
 
 func TestConnectCheckHooksApplyDocumentedRules(t *testing.T) {

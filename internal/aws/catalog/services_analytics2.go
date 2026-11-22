@@ -43,7 +43,7 @@ var appFlow = &Service{
 // connector that needs no connector profile, and refuses what could not run.
 func appFlowDefinition(input map[string]any) error {
 	if source, ok := input["sourceFlowConfig"].(map[string]any); ok {
-		if err := appFlowEndpoint(source, "source"); err != nil {
+		if err := appFlowEndpoint(source, "source", "sourceConnectorProperties"); err != nil {
 			return err
 		}
 	}
@@ -52,7 +52,7 @@ func appFlowDefinition(input map[string]any) error {
 			return Failure("ValidationException", "A flow transfers data to exactly one destination.")
 		}
 		destination, _ := destinations[0].(map[string]any)
-		if err := appFlowEndpoint(destination, "destination"); err != nil {
+		if err := appFlowEndpoint(destination, "destination", "destinationConnectorProperties"); err != nil {
 			return err
 		}
 	}
@@ -62,12 +62,16 @@ func appFlowDefinition(input map[string]any) error {
 	return nil
 }
 
-func appFlowEndpoint(config map[string]any, role string) error {
+func appFlowEndpoint(config map[string]any, role, propertiesMember string) error {
 	if config["connectorType"] != "S3" {
 		return Failure("ValidationException", "The "+role+" must be an Amazon S3 location (connectorType S3): other connectors need a connector profile with credentials.")
 	}
 	if _, ok := config["connectorProfileName"]; ok {
 		return Failure("ValidationException", "Connector profiles are not supported; leave connectorProfileName out for an Amazon S3 "+role+".")
+	}
+	properties, _ := config[propertiesMember].(map[string]any)
+	if _, ok := properties["S3"].(map[string]any); len(properties) != 1 || !ok {
+		return Failure("ValidationException", "The "+role+" connector properties must contain only the S3 configuration.")
 	}
 	return nil
 }

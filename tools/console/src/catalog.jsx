@@ -51,6 +51,29 @@ export function buildCatalogRequest(service,op,input,region){
  return {path:path+(search?'?'+search:''),options:{method:op.method,headers,...(hasBody?{body:JSON.stringify(body)}:{})}};
 }
 
+// A read can return editable members beside its resource wrapper, including
+// the body of a Network Firewall policy. Keep its token separately so it is
+// never an editable field. Kinesis Video returns the version inside its wrapper.
+export function catalogReadSnapshot(read,resource,out){
+ const value=read.wrapper?out[read.wrapper]:out;
+ if(!value||!resource.tokenWire)return {value};
+ const token=value[resource.tokenWire]??out[resource.tokenWire];
+ if(!read.wrapper)return {value,token};
+ const editable=resource.operations.update?.editable||[];
+ const siblings=Object.fromEntries(editable.filter(key=>key!==resource.tokenWire&&!(key in value)&&Object.hasOwn(out,key)).map(key=>[key,out[key]]));
+ return {value:{...value,...siblings},token};
+}
+
+// Use exactly the version read when this editor opened. Never fetch a new
+// version on Save or retry with it: that would overwrite a newer change.
+export function catalogUpdateInput(op,identity,changes,token){
+ if(!op.token)return {...identity,...changes};
+ const member=op.members?.find(m=>m.name===op.token);
+ const valid=member?.type==='string'?typeof token==='string'&&token.trim()!==''
+  :['integer','long'].includes(member?.type)&&Number.isSafeInteger(token);
+ return valid?{...identity,...changes,[op.token]:token}:null;
+}
+
 // Form members: scalars, string lists, and complex members whose official
 // input shape the descriptor publishes (tags as key=value lines, other
 // structures, maps and lists of structures as validated JSON values).
@@ -214,8 +237,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
   // the details; otherwise the listed projection is the detail view.
   try{
    setLoading(true);setDetail(null);
-   let value=item;
-   if(read){const out=await call(read,{...parentInput(read),[read.lookup]:lookupValue(item,read)});if(!valid(epoch))return null;value=read.wrapper?out[read.wrapper]:out}
+   let value=item,token;
+   if(read){const out=await call(read,{...parentInput(read),[read.lookup]:lookupValue(item,read)});if(!valid(epoch))return null;({value,token}=catalogReadSnapshot(read,resource,out))}
    else{
     const describe=resource.operations.describe,list=resource.operations.list;
     // A describe operation whose names member is one string (RDS
@@ -223,7 +246,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
     if(describe&&(describe.members||[]).some(m=>m.name===describe.names&&m.type==='string')){const page=await call(describe,{...parentInput(describe),[describe.names]:identity(item)});if(!valid(epoch))return null;value=(page[describe.items]||[])[0]||item}
     else if(describe&&list?.valueItems){const page=await call(describe,{...parentInput(describe),[describe.names]:[item[list.valueMember]]});if(!valid(epoch))return null;value=(page[describe.items]||[])[0]||item}
    }
-   setDetail(value);await loadTags(epoch,value);return valid(epoch)?value:null;
+   setDetail(value);await loadTags(epoch,value);return valid(epoch)?{value,token}:null;
   }catch(e){if(valid(epoch))setError(e.message);return null}finally{if(valid(epoch))setLoading(false)}
  }
  async function loadTags(epoch,value){
@@ -281,20 +304,24 @@ export default function CatalogView({region,request,catalog,onSaving}){
   return written;
  }
  const updateOp=resource?.operations.update;
- const updateFields=updateOp?fieldOrder(formMembers(updateOp,new Set([...skipped(updateOp),updateOp.lookup,...(updateOp.lookupAlt||[])])).filter(m=>!updateOp.editable||updateOp.editable.includes(m.name)),resource):[];
- function startEdit(value=detail){
+ const updateFields=updateOp?fieldOrder(formMembers(updateOp,new Set([...skipped(updateOp),updateOp.lookup,updateOp.token,...(updateOp.lookupAlt||[])])).filter(m=>!updateOp.editable||updateOp.editable.includes(m.name)),resource):[];
+ const missingEditToken=()=>t('The service did not return the current version. Reopen Edit to read the resource again.','現在のバージョンを取得できませんでした。編集を開き直してください。');
+ function startEdit(value=detail,token){
+  if(catalogUpdateInput(updateOp,{},{},token)===null){setError(missingEditToken());return}
   const values=Object.fromEntries(updateFields.map(m=>[m.name,fieldText(service,m,value?.[m.locationName||m.name])]));
-  setNotice('');setError('');setFieldErrors({});setEditing({values,initial:values});setPage('edit');
+  setNotice('');setError('');setFieldErrors({});setEditing({values,initial:values,token});setPage('edit');
  }
  // Editing from the list reads the resource first, so the form starts from
  // its current description.
- async function editFromList(item){const value=await inspect(item);if(value&&alive.current)startEdit(value)}
+ async function editFromList(item){const snapshot=await inspect(item);if(snapshot?.value&&alive.current)startEdit(snapshot.value,snapshot.token)}
  async function saveUpdate(){
   const op=updateOp;const {input,problems,changed}=readFields(updateFields,editing.values,editing.initial);
   setFieldErrors(problems);
   if(Object.keys(problems).length){setError('');return}
   if(!changed){setError(t('Change at least one field.','少なくとも 1 つの項目を変更してください。'));return}
-  const ok=await writeDetail(op,{...parentInput(op),[op.lookup]:lookupValue(selected,op),...input},t('Resource updated.','リソースを更新しました。'));
+  const update=catalogUpdateInput(op,{...parentInput(op),[op.lookup]:lookupValue(selected,op)},input,editing.token);
+  if(update===null){setError(missingEditToken());return}
+  const ok=await writeDetail(op,update,t('Resource updated.','リソースを更新しました。'));
   if(ok&&alive.current)setEditing(null);
  }
  // Tag operations take the resource's ARN, or the identity their lookup
@@ -390,7 +417,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
   const pairs=tagPairs(tags);
   return <ContentLayout header={<SpaceBetween size="s">{crumbs(name)}<Header variant="h1" description={singular}
     actions={<SpaceBetween direction="horizontal" size="xs">
-     {updateOp&&updateFields.length>0&&<Button disabled={busy||loading||!detail} onClick={()=>startEdit()}>{t('Edit','編集')}</Button>}
+     {updateOp&&updateFields.length>0&&<Button disabled={busy||loading||!detail} onClick={()=>updateOp.token?editFromList(selected):startEdit()}>{t('Edit','編集')}</Button>}
      {resource.operations.delete&&<Button disabled={busy||loading} onClick={()=>setConfirm(selected)}>{t('Delete','削除')}</Button>}</SpaceBetween>}>{name}</Header></SpaceBetween>}>
    <SpaceBetween size="l">
     {alerts}

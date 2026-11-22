@@ -101,7 +101,7 @@ var qBusiness = &Service{
 		{Name: "CreateRetriever", Kind: Create, Resource: "retriever", Parent: "applicationId", Check: qBusinessRetriever},
 		{Name: "GetRetriever", Kind: Read, Resource: "retriever", Parent: "applicationId", Lookup: "retrieverId"},
 		{Name: "ListRetrievers", Kind: List, Resource: "retriever", Parent: "applicationId"},
-		{Name: "UpdateRetriever", Kind: Update, Resource: "retriever", Parent: "applicationId", Lookup: "retrieverId", Touch: []string{"updatedAt"},
+		{Name: "UpdateRetriever", Kind: Update, Resource: "retriever", Parent: "applicationId", Lookup: "retrieverId", Merged: qBusinessUpdateRetriever, Touch: []string{"updatedAt"},
 			Fields: []string{"configuration", "displayName", "roleArn"}},
 		{Name: "DeleteRetriever", Kind: Delete, Resource: "retriever", Parent: "applicationId", Lookup: "retrieverId"},
 		{Name: "TagResource", Kind: Tag, Lookup: "resourceARN"},
@@ -139,6 +139,15 @@ func qBusinessRetriever(input map[string]any) error {
 		return Failure("ValidationException", "The retriever configuration must hold "+want+" for type "+bizText(input["type"])+".")
 	}
 	return nil
+}
+
+// The update shape supplies no type, so validation uses the stored retriever.
+// Unrelated edits need not revalidate configuration already in the database.
+func qBusinessUpdateRetriever(document, supplied map[string]any) error {
+	if _, ok := supplied["configuration"]; !ok {
+		return nil
+	}
+	return qBusinessRetriever(document)
 }
 
 // bizText reads a string member, empty when absent or not a string.

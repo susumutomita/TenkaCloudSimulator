@@ -4,7 +4,7 @@
   "changes": [
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "e6eb0485ce14dbbfacfff7f10fad63dca367c51a72236b19b45b11cd3b79c41e",
+      "sha256": "235bd5ced4afa169590ebdd2b3253fd191bed66ab40559ccceb16bf91bc6beb9",
       "disposition": "documentation",
       "reason": "Generated service table listing the newly added services with their bound operations and bounds.",
       "models": []
@@ -1081,7 +1081,7 @@
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "da7f7c0f63ef0a4ab9b1415fc251ead9dde64056a3600e36a5b844aaf2c82b45",
+      "sha256": "f1147a07468a090fb8485d00d36ec8723353bab0b59945bda8088be88fa1a380",
       "disposition": "modeled",
       "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
       "models": [
@@ -1114,7 +1114,7 @@
     },
     {
       "path": "internal/aws/catalog/services_analytics2.go",
-      "sha256": "1f468a53a00bb815637a837abb7618c51859dd71f78a36ed0e8d117f7121031b",
+      "sha256": "15ded824e4ceace0367ce2e9fb862b212bd107db8ec6db19918a0cc5c6265879",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1132,14 +1132,14 @@
     },
     {
       "path": "internal/aws/catalog/services_analytics2_test.go",
-      "sha256": "5a57a7f2103913843219ff6c6f23f59799b3594c40ea30df4a78c57e3cfd7e78",
+      "sha256": "83d85065d90e2eceb9a7abcdea0c2b83dcf84a43c4e87f691b51416006c5fa08",
       "disposition": "test-support",
       "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/services_business.go",
-      "sha256": "927c4749ddb1a2ecffad4e8c8977c1ba94cfd5568f1c4ae97c428dbb7c61606b",
+      "sha256": "0a109e4930366bb9b2c49d8aaec40676cedb2739f271f72d364d6038cfdbc8c3",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1157,7 +1157,7 @@
     },
     {
       "path": "internal/aws/catalog/services_business_test.go",
-      "sha256": "81f882f2b176616883025c9089f50080ca130430385e67326381bee7feb451b4",
+      "sha256": "3b54d5d54145dd472a2985b85dac9747f6d36f6f6ab502ff589bd443567c512c",
       "disposition": "test-support",
       "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
       "models": []
@@ -1257,7 +1257,7 @@
     },
     {
       "path": "internal/aws/catalog/services_engine2.go",
-      "sha256": "d0468a82c66aba3fbf1f0b3b4a360dd75f825af0a70d14433668bf5c6421706e",
+      "sha256": "c3783a62df95c6e6a723674feb4ff7d283c1f7b109eeffc8b58b384079f4fe6d",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1275,7 +1275,7 @@
     },
     {
       "path": "internal/aws/catalog/services_engine2_test.go",
-      "sha256": "9f719dc7a138caa7781434f2984ad53c36bcf58034ca6e1ed63c8adb96b13442",
+      "sha256": "51847ac04299bb3e66f0025fc20e3353481f43559cdae8204f566e5b6d5a9d1f",
       "disposition": "test-support",
       "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
       "models": []
@@ -1464,7 +1464,7 @@
     },
     {
       "path": "internal/aws/catalog/spec.go",
-      "sha256": "1fa66d21dc134a8025f3ad4789dccb30f6741194742381cdc78c08cde804ee1e",
+      "sha256": "24a12f207a94d2b733b8266c0ccb841d704782849d47b4b3cb21f24eacdf3ed2",
       "disposition": "modeled",
       "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
       "models": [
@@ -1848,7 +1848,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/network-firewall.json",
-      "sha256": "73aad9928cd721e3113165b73faa8cdf5bb29f785cfd61874f6708e4cc0643c1",
+      "sha256": "e8db091fbf9bd368b2b6c4f8548509bbb3aba9f7c0b5b28cf5e99d1b7db57719",
       "disposition": "presentation",
       "reason": "Generated network-firewall reference.",
       "models": []
@@ -1942,6 +1942,30 @@
       "sha256": "902ad32551f9bd70b63400f33e8c1f07420363e814ea11db19f55a8ec25b8fc6",
       "disposition": "test-support",
       "reason": "Composed-server routing regressions for the catalog Query services and the native handlers beside them.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "e52406ccceb659e868080c948dc9882cd4facb49f264abeed50c23be404b4612",
+      "disposition": "modeled",
+      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI.",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "FailureVisible"
+          ],
+          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests)."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/aws_catalog_console.py",
+      "sha256": "d167e95a8be87524036438e1a537762da569d53c17d6794ba4a26dd5d1088d01",
+      "disposition": "test-support",
+      "reason": "Browser and Node regression evidence for the catalog Edit version and full-stack save flow.",
       "models": []
     },
     {
@@ -2404,6 +2428,44 @@
       "sha256": "a01f4f01c6dbd836e6b6ce5622b1c608e850b9c2a94e9aebbe4b43573ed44a6d",
       "disposition": "test-support",
       "reason": "Gives the catalog console test a longer timeout, because its sweep grows with the number of catalog services.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "db1c0baab690a0b8f81375c07dc32e7780fe882ad96deb30b2ff02c8adc6166b",
+      "disposition": "presentation",
+      "reason": "Generated Cloudscape bundle input and output digests for the catalog Edit source change.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "5579a63af4e1b03f7e1cf96f382c41e4b61ca636bbf858c5524be44e001026a6",
+      "disposition": "presentation",
+      "reason": "Generated Cloudscape bundle input and output digests for the catalog Edit source change.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/catalog.jsx",
+      "sha256": "d778d82a7d985d6bb7368d192fd49bcf435f661cdbdf66ea4d5ddb10ba1ca517",
+      "disposition": "modeled",
+      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI.",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "FailureVisible"
+          ],
+          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests)."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/tests/catalog-edit-token.test.mjs",
+      "sha256": "f9f70ad37b6fca323205128386720c515e7c153fdf5ba6b8da355bb93ca7f59e",
+      "disposition": "presentation",
+      "reason": "Browser and Node regression evidence for the catalog Edit version and full-stack save flow.",
       "models": []
     },
     {

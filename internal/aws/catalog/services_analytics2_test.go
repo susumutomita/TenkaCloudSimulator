@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"net/url"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -95,6 +96,49 @@ func TestAppFlowRefusesConnectorsThatNeedCredentials(t *testing.T) {
 	}
 	if !strings.Contains(appFlow.Bounds[1], "connector profile") {
 		t.Fatal("Bounds must say why connector profiles are unbound")
+	}
+}
+
+func TestAppFlowRequiresMatchingNestedS3EndpointProperties(t *testing.T) {
+	h := newHarness(t, appFlow)
+	call := func(action string, body map[string]any) reply {
+		return h.rest("appflow", "POST", "/"+action+"-flow", body)
+	}
+	const name = "copy-verified"
+	expect(t, call("create", s3Flow(name)), 200, "")
+	before := call("describe", map[string]any{"flowName": name})
+	expect(t, before, 200, "")
+	cases := []struct {
+		name        string
+		destination bool
+		props       map[string]any
+	}{
+		{"empty-source", false, map[string]any{}},
+		{"mismatched-source", false, map[string]any{"Salesforce": map[string]any{"object": "Account"}}},
+		{"mixed-source", false, map[string]any{"S3": map[string]any{"bucketName": "source-bucket"}, "Salesforce": map[string]any{"object": "Account"}}},
+		{"empty-destination", true, map[string]any{}},
+		{"mixed-destination", true, map[string]any{"S3": map[string]any{"bucketName": "target-bucket"}, "Redshift": map[string]any{"object": "target", "intermediateBucketName": "stage-bucket"}}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			invalid := s3Flow(tc.name)
+			if tc.destination {
+				invalid["destinationFlowConfigList"].([]any)[0].(map[string]any)["destinationConnectorProperties"] = tc.props
+			} else {
+				invalid["sourceFlowConfig"].(map[string]any)["sourceConnectorProperties"] = tc.props
+			}
+			expect(t, call("create", invalid), 400, "ValidationException")
+			expect(t, call("describe", map[string]any{"flowName": tc.name}), 404, "ResourceNotFoundException")
+			invalid["flowName"] = name
+			invalid["description"] = "must not persist"
+			delete(invalid, "tags")
+			expect(t, call("update", invalid), 400, "ValidationException")
+			after := call("describe", map[string]any{"flowName": name})
+			expect(t, after, 200, "")
+			if !reflect.DeepEqual(before.body, after.body) {
+				t.Fatalf("rejected update changed its stored flow: %v", after.body)
+			}
+		})
 	}
 }
 

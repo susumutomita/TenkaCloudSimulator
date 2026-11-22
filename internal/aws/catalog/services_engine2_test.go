@@ -264,14 +264,16 @@ func TestNetworkFirewallRuleGroupReferencesAndInUse(t *testing.T) {
 	expect(t, nf("UpdateFirewallPolicy", map[string]any{"FirewallPolicyArn": policyArn, "UpdateToken": token, "FirewallPolicy": nfPolicyBody(map[string]any{
 		"StatelessRuleGroupReferences": []any{map[string]any{"ResourceArn": missing, "Priority": 1}}})}), 400, "InvalidRequestException")
 	expect(t, nf("UpdateFirewallPolicy", map[string]any{"FirewallPolicyArn": policyArn, "UpdateToken": token, "FirewallPolicy": nfPolicyBody(map[string]any{
-		"StatefulRuleGroupReferences": []any{map[string]any{"ResourceArn": statefulArn}}})}), 200, "")
+		"StatefulRuleGroupReferences":   []any{map[string]any{"ResourceArn": statefulArn}},
+		"TLSInspectionConfigurationArn": tlsArn})}), 200, "")
 	expect(t, nf("DeleteRuleGroup", map[string]any{"RuleGroupName": "pass", "Type": "STATELESS"}), 200, "")
-	expect(t, nf("DeleteTLSInspectionConfiguration", map[string]any{"TLSInspectionConfigurationArn": tlsArn}), 200, "")
+	expect(t, nf("DeleteTLSInspectionConfiguration", map[string]any{"TLSInspectionConfigurationArn": tlsArn}), 400, "InvalidOperationException")
 	expect(t, nf("DeleteRuleGroup", map[string]any{"RuleGroupArn": statefulArn}), 400, "InvalidOperationException")
 	ruleToken := str(nf("DescribeRuleGroup", map[string]any{"RuleGroupArn": statefulArn}).body["UpdateToken"])
 	expect(t, nf("UpdateRuleGroup", map[string]any{"RuleGroupArn": statefulArn, "Type": "STATELESS", "UpdateToken": ruleToken, "Description": "x"}), 400, "ResourceNotFoundException")
 	expect(t, nf("UpdateRuleGroup", map[string]any{"RuleGroupArn": statefulArn, "UpdateToken": ruleToken, "Description": "kept"}), 200, "")
 	expect(t, nf("DeleteFirewallPolicy", map[string]any{"FirewallPolicyName": "edge"}), 200, "")
+	expect(t, nf("DeleteTLSInspectionConfiguration", map[string]any{"TLSInspectionConfigurationArn": tlsArn}), 200, "")
 	expect(t, nf("DeleteRuleGroup", map[string]any{"RuleGroupArn": statefulArn}), 200, "")
 }
 
@@ -347,4 +349,59 @@ func TestNetworkFirewallTypeMismatchDisclosesNothing(t *testing.T) {
 	delete(h.policy.deny, "network-firewall:DeleteRuleGroup "+stateful+"secret")
 	expect(t, nf("DescribeRuleGroup", map[string]any{"RuleGroupName": "secret", "Type": "STATEFUL"}), 403, "AccessDeniedException")
 	expect(t, nf("DeleteRuleGroup", map[string]any{"RuleGroupName": "secret", "Type": "STATEFUL"}), 200, "")
+}
+
+func TestNetworkFirewallPolicyTLSInspectionPresenceIsImmutable(t *testing.T) {
+	h := newHarness(t, networkFirewall)
+	nf := func(op string, input map[string]any) reply { return h.json1("network-firewall", op, input) }
+	createConfig := func(name string) string {
+		created := nf("CreateTLSInspectionConfiguration", map[string]any{
+			"TLSInspectionConfigurationName": name, "TLSInspectionConfiguration": map[string]any{},
+		})
+		expect(t, created, 200, "")
+		return str(created.body["TLSInspectionConfigurationResponse"].(map[string]any)["TLSInspectionConfigurationArn"])
+	}
+	first, replacement := createConfig("first"), createConfig("replacement")
+	plain, inspected := nfPolicyBody(nil), nfPolicyBody(map[string]any{"TLSInspectionConfigurationArn": first})
+	for _, tc := range []struct {
+		name                     string
+		before, refused, allowed map[string]any
+	}{
+		{"add", plain, inspected, plain},
+		{"remove", inspected, plain, nfPolicyBody(map[string]any{"TLSInspectionConfigurationArn": replacement})},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			lookup := map[string]any{"FirewallPolicyName": "edge-" + tc.name}
+			created := nf("CreateFirewallPolicy", map[string]any{"FirewallPolicyName": lookup["FirewallPolicyName"], "FirewallPolicy": tc.before, "Description": "before"})
+			expect(t, created, 200, "")
+			before := nf("DescribeFirewallPolicy", lookup)
+			expect(t, before, 200, "")
+			token := str(before.body["UpdateToken"])
+			serialize := func(r reply) string {
+				policy, err := json.Marshal([]any{r.body["FirewallPolicy"], r.body["FirewallPolicyResponse"], r.body["UpdateToken"]})
+				if err != nil {
+					t.Fatal(err)
+				}
+				return string(policy)
+			}
+			update := func(policy map[string]any, description string) reply {
+				return nf("UpdateFirewallPolicy", map[string]any{"FirewallPolicyName": lookup["FirewallPolicyName"], "UpdateToken": token, "FirewallPolicy": policy, "Description": description})
+			}
+			expect(t, update(tc.refused, "must not persist"), 400, "InvalidRequestException")
+			after := nf("DescribeFirewallPolicy", lookup)
+			expect(t, after, 200, "")
+			if serialize(after) != serialize(before) {
+				t.Fatal("refusal changed policy body, description, metadata or token")
+			}
+			updated := update(tc.allowed, "updated")
+			expect(t, updated, 200, "")
+			got := nf("DescribeFirewallPolicy", lookup)
+			expect(t, got, 200, "")
+			if got.body["UpdateToken"] == token || got.body["UpdateToken"] != updated.body["UpdateToken"] ||
+				got.body["FirewallPolicy"].(map[string]any)["TLSInspectionConfigurationArn"] != tc.allowed["TLSInspectionConfigurationArn"] ||
+				got.body["FirewallPolicyResponse"].(map[string]any)["Description"] != "updated" {
+				t.Fatalf("same-presence update not persisted: %v", got.body)
+			}
+		})
+	}
 }

@@ -32,6 +32,9 @@ type Op struct {
 	// document (for example drop settings a transition makes inapplicable)
 	// and refuses invalid combinations a Check on the request cannot see.
 	Merged func(document, supplied map[string]any) error
+	// CheckReplacement validates read-only views of the old and new stored
+	// documents in the update transaction before writing an existing row.
+	CheckReplacement func(previous, next map[string]any) error
 	// Action is the documented IAM action when it differs from the
 	// operation name (for example budgets:ModifyBudget for CreateBudget).
 	Action    string
