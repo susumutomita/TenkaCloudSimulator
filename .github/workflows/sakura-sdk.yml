@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4.3.1
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-go@v7.1.0
@@ -36,7 +36,7 @@ jobs:
           python3 -m unittest discover -s test/e2e -p test_sakura_sdk.py -v
           python3 test/e2e/sakura_sdk.py --binary dist/tenkacloud-simulator --client dist/sakura-sdk --report reports/sakura-sdk.json
       - name: Retain safe SDK evidence
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: sakura-sdk-${{ github.event.pull_request.head.sha || github.sha }}
           path: reports/sakura-sdk.json

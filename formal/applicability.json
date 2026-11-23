@@ -1,38 +1,38 @@
 {
   "version": 1,
-  "base_sha": "cca160ef6d925479da9c1de2071eb6b60f6e99f4",
+  "base_sha": "1d13f77db1ec44abcf72ee0c02609ad7cb19bf53",
   "changes": [
     {
       "path": ".github/workflows/actions.lock",
-      "sha256": "05453e20378ebf73b411c286bff89ecf085c02bc8185e75cc50c4e5c5914984f",
+      "sha256": "5c84f5271f8b55f95b910974401049bd4d5d3760bf37c6296aa2d7548716faf0",
       "disposition": "formal-infrastructure",
       "reason": "Updates the pinned setup-go action reference and commit only; no simulator or model inputs change.",
       "models": []
     },
     {
       "path": ".github/workflows/battle-hosts.yml",
-      "sha256": "ab16b470e40d193498fef20c4a080db441bcf7d92efa02a08ec9ba39e9d1ae13",
+      "sha256": "259612bdcfc5683920b1c836e9d27acba15f19d7eb12af6fb7470e74b95ece9f",
       "disposition": "formal-infrastructure",
       "reason": "Updates only the setup-go action version; the Go toolchain, Battle test commands and runner targets remain unchanged.",
       "models": []
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "85aa2b9dab303b7be642d9a2b654bd1c4344ebe609740680c4039b0cf09b9fa6",
+      "sha256": "4ce5ff0593a76985dbdf2a1bcbd70671efa773da0ac20c1e4b0c91f8f9c1d11c",
       "disposition": "formal-infrastructure",
       "reason": "Updates only the setup-go action version in existing jobs; Go version pins and validation commands do not change.",
       "models": []
     },
     {
       "path": ".github/workflows/release.yml",
-      "sha256": "e756d7c76708c773581abe27c99a7fdc1d53329306d7dd2a6396aa54140a8ee7",
+      "sha256": "ba84b62efa9c4fa22daa807e36d585e50cfa6c20147af438e74c9914d038db52",
       "disposition": "formal-infrastructure",
       "reason": "Updates only the setup-go action version; artifact build commands and release model remain unchanged.",
       "models": []
     },
     {
       "path": ".github/workflows/sakura-sdk.yml",
-      "sha256": "fb2e02ad993580b213c0f4aaf680823e1a7b2684e2d7470a5c09a31e2065118b",
+      "sha256": "4a3b422449b8fee7e5fea06be3635514216b0af328510cfe7db05fa411ab5097",
       "disposition": "formal-infrastructure",
       "reason": "Updates only the setup-go action version; the Go toolchain and Sakura SDK validation commands do not change.",
       "models": []
