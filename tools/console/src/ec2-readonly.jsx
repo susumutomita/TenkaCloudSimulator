@@ -16,7 +16,7 @@ import {parseEC2Document} from './ec2-response.mjs';
 const idCell=value=><span className="resource-identifier">{value||'—'}</span>;
 
 // Only documented read operations. Never infer live guest health from stack metadata.
-export default function EC2Readonly({kind,region,request}) {
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession}) {
   const {t}=useLocale();
   const instance=kind==='ec2';
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
@@ -46,7 +46,7 @@ export default function EC2Readonly({kind,region,request}) {
       ariaLabels={{selectionGroupLabel:t('Select a resource','リソースを選択'),itemSelectionLabel:(_,item)=>t('Select ','選択: ')+item.id}}
       loading={loading} loadingText={t('Loading resources','リソースを読み込み中')}
       items={filtered.slice((page-1)*20,page*20)} columnDefinitions={fields.slice(0,instance?5:4).map(([id,en,ja])=>({id,header:t(en,ja),cell:item=>idCell(id==='state'&&(!item[id]||item[id]==='unknown')?t('Unconfirmed','未確認'):item[id])}))}
-      header={<Header counter={'('+items.length+')'} actions={<Button iconName="refresh" loading={loading} onClick={load}>{t('Refresh','更新')}</Button>}>{instance?t('Instances','インスタンス'):t('VPCs','VPC 一覧')}</Header>}
+      header={<Header counter={'('+items.length+')'} actions={<SpaceBetween direction="horizontal" size="xs">{sessionInstance&&<Button variant="primary" disabled={selected[0]?.id!==sessionInstance} onClick={onSession}>{t('Connect with Session Manager','Session Manager で接続')}</Button>}<Button iconName="refresh" loading={loading} onClick={load}>{t('Refresh','更新')}</Button></SpaceBetween>}>{instance?t('Instances','インスタンス'):t('VPCs','VPC 一覧')}</Header>}
       filter={<TextFilter filteringText={filter} onChange={({detail})=>{setFilter(detail.filteringText);setPage(1);setSelected([]);}} filteringAriaLabel={t('Filter resources','リソースを絞り込む')} filteringPlaceholder={t('Find resources','リソースを検索')}/>}
       pagination={<Pagination currentPageIndex={page} pagesCount={Math.max(1,Math.ceil(filtered.length/20))} onChange={({detail})=>setPage(detail.currentPageIndex)} ariaLabels={{nextPageLabel:t('Next page','次のページ'),previousPageLabel:t('Previous page','前のページ'),pageLabel:n=>String(n)}}/>}
       empty={<SpaceBetween size="s"><span>{error?t('Resources are unavailable. Retry with Refresh.','リソースを取得できません。「更新」で再試行してください。'):items.length?t('No resources match your filter.','検索条件に一致するリソースがありません。'):t('No resources found in this region.','このリージョンには該当するリソースがありません。')}</span>{items.length>0&&<Button onClick={()=>{setFilter('');setPage(1);}}>{t('Clear filter','絞り込みを解除')}</Button>}</SpaceBetween>}/>

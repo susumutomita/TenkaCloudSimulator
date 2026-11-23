@@ -64,6 +64,13 @@ func NewSSMSessionStore(db *sql.DB, backend SSMSessionBackend, streamBaseURL str
 	}
 	return &SSMSessionStore{db: db, backend: backend, base: strings.TrimRight(streamBaseURL, "/"), entries: map[string]*ssmLiveSession{}}, nil
 }
+
+// Connectable reports whether the retained guest relay for the target can be
+// opened now. It never starts a session or contacts the guest.
+func (s *SSMSessionStore) Connectable(ctx context.Context, region, targetID string) bool {
+	target, err := s.backend.ResolveSessionTarget(ctx, region, targetID)
+	return err == nil && target.Region == region && target.InstanceID == targetID && target.StackID != ""
+}
 func sessionARN(region, id string) string {
 	return "arn:aws:ssm:" + region + ":000000000000:session/" + id
 }

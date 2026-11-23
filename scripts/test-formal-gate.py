@@ -550,8 +550,14 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_text()
         baseline = json.loads(original)
         entry = next(m for m in baseline['models'] if m['id'] == 'ConsoleHandoff')
-        self.assertEqual(set(entry['properties']), {'ParentLifetimeBound', 'ExactDestination', 'AttemptConsumesCode', 'OneTimeRedemption', 'RedeemRequiresFreshParent', 'OperatorRefused', 'UnrelatedSessionsPreserved', 'LogoutRejectsReplay', 'TypeOK', 'SDKAuthorityPreserved', 'UseRequiresFreshAuthority'})
-        self.assertEqual({m['id'] for m in entry['mutants']}, {'SkipParameter', 'RevokeSDK', 'SkipRedeemExpiry', 'SkipUseGeneration', 'CachePolicy', 'ExtendHandoff', 'SkipRedeemGeneration', 'SkipCookie', 'SkipRegion', 'SkipBrowserExpiry', 'ReuseCode', 'SkipAction', 'SkipRedeemParent', 'RevokePeer', 'KeepLoggedOutCookie', 'ExtendBrowser', 'IgnoreConsumedCode', 'SkipUseParent', 'GrantBrowserSDK', 'AllowOperator'})
+        self.assertEqual(set(entry['properties']), {'ParentLifetimeBound', 'ExactDestination', 'AttemptConsumesCode', 'OneTimeRedemption', 'RedeemRequiresFreshParent', 'OperatorRefused', 'UnrelatedSessionsPreserved', 'LogoutRejectsReplay', 'TypeOK', 'SDKAuthorityPreserved', 'UseRequiresFreshAuthority', 'TerminalRequiresRelay'})
+        self.assertEqual({m['id'] for m in entry['mutants']}, {
+            'AllowOperator', 'CachePolicy', 'CrossKindAction', 'ExtendBrowser',
+            'ExtendHandoff', 'GrantBrowserSDK', 'IgnoreConsumedCode', 'KeepLoggedOutCookie',
+            'ReuseCode', 'RevokePeer', 'RevokeSDK', 'SkipAction', 'SkipBrowserExpiry',
+            'SkipCookie', 'SkipParameter', 'SkipRedeemExpiry', 'SkipRedeemGeneration',
+            'SkipRedeemParent', 'SkipRegion', 'SkipRelay', 'SkipUseGeneration', 'SkipUseParent',
+        })
         model_path, config_path = self.root / entry['model'], self.root / entry['config']
         model_bytes, config_bytes = model_path.read_bytes(), config_path.read_bytes()
         removed = json.loads(original)
@@ -4146,6 +4152,7 @@ class FormalGateTests(unittest.TestCase):
                                                 'DiscardPreservesIdentity'],
                                  'source_scope': ['tools/console/src/ssm-terminal-client.mjs',
                                                   'tools/console/src/ssm-terminal.jsx',
+                                                  'tools/console/src/session-manager.jsx',
                                                   'tools/console/src/main.jsx',
                                                   'internal/server/web/app.js']}}
         registry_path = self.root / 'formal/models.json'

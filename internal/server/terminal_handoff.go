@@ -172,6 +172,11 @@ func (a *Access) terminalBrowserRequest(w http.ResponseWriter, r *http.Request) 
 	}
 	cookie, err := r.Cookie(a.cookie + "_terminal")
 	if err != nil {
+		// A console session bound to one instance reaches these routes through
+		// consoleBrowserRequest, which grants only its own target.
+		if _, hasConsole := r.Cookie(a.cookie); terminal && hasConsole == nil {
+			return false
+		}
 		if terminal {
 			http.Error(w, "Terminal handoff required", 401)
 			return true

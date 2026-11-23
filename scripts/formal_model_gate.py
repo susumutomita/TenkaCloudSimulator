@@ -1105,9 +1105,9 @@ REQUIRED_SOURCE_SCOPES['CFNParameterSnapshot'] = {'internal/aws/cloudformation.g
  'internal/aws/cloudformation_ssm_parameters.go'}
 
 BASE_MODELS.add('ConsoleHandoff')
-BASE_INVARIANTS['ConsoleHandoff'] = {'LogoutRejectsReplay', 'TypeOK', 'RedeemRequiresFreshParent', 'OperatorRefused', 'ExactDestination', 'ParentLifetimeBound', 'AttemptConsumesCode', 'UseRequiresFreshAuthority', 'SDKAuthorityPreserved', 'UnrelatedSessionsPreserved', 'OneTimeRedemption'}
-REQUIRED_MUTANTS['ConsoleHandoff'] = {'SkipParameter', 'RevokeSDK', 'SkipRedeemExpiry', 'SkipUseGeneration', 'CachePolicy', 'ExtendHandoff', 'SkipRedeemGeneration', 'SkipCookie', 'SkipRegion', 'SkipBrowserExpiry', 'ReuseCode', 'SkipAction', 'SkipRedeemParent', 'RevokePeer', 'KeepLoggedOutCookie', 'ExtendBrowser', 'IgnoreConsumedCode', 'SkipUseParent', 'GrantBrowserSDK', 'AllowOperator'}
-REQUIRED_SOURCE_SCOPES['ConsoleHandoff'] = {'internal/server/console_handoff.go', 'internal/aws/sts_credentials_test.go', 'internal/server/console_handoff_test.go', 'internal/server/access.go', 'internal/aws/sts_roles.go', 'internal/aws/sts_credentials.go', 'internal/server/server.go', 'internal/aws/ssm.go'}
+BASE_INVARIANTS['ConsoleHandoff'] = {'LogoutRejectsReplay', 'TypeOK', 'RedeemRequiresFreshParent', 'OperatorRefused', 'ExactDestination', 'ParentLifetimeBound', 'AttemptConsumesCode', 'UseRequiresFreshAuthority', 'SDKAuthorityPreserved', 'UnrelatedSessionsPreserved', 'OneTimeRedemption', 'TerminalRequiresRelay'}
+REQUIRED_MUTANTS['ConsoleHandoff'] = {'SkipParameter', 'RevokeSDK', 'SkipRedeemExpiry', 'SkipUseGeneration', 'CachePolicy', 'ExtendHandoff', 'SkipRedeemGeneration', 'SkipCookie', 'SkipRegion', 'SkipBrowserExpiry', 'ReuseCode', 'SkipAction', 'SkipRedeemParent', 'RevokePeer', 'KeepLoggedOutCookie', 'ExtendBrowser', 'IgnoreConsumedCode', 'SkipUseParent', 'GrantBrowserSDK', 'AllowOperator', 'CrossKindAction', 'SkipRelay'}
+REQUIRED_SOURCE_SCOPES['ConsoleHandoff'] = {'internal/aws/sts_terminal_binding.go', 'internal/aws/ec2_read.go', 'internal/aws/ssm_sessions.go', 'internal/server/terminal_channel.go', 'internal/server/terminal_handoff.go', 'internal/server/console_instance_handoff_test.go', 'internal/server/console_handoff.go', 'internal/aws/sts_credentials_test.go', 'internal/server/console_handoff_test.go', 'internal/server/access.go', 'internal/aws/sts_roles.go', 'internal/aws/sts_credentials.go', 'internal/server/server.go', 'internal/aws/ssm.go'}
 
 
 # Bounded opt-in Lambda response and UI request-lifetime disclosure contract.
@@ -1841,6 +1841,7 @@ BATTLE_INTEGRATION_EXPECTED = {'CanonicalVMComposition': {'bounds': 'Five disjoi
                                         'DiscardPreservesIdentity'],
                          'source_scope': ['tools/console/src/ssm-terminal-client.mjs',
                                           'tools/console/src/ssm-terminal.jsx',
+                                          'tools/console/src/session-manager.jsx',
                                           'tools/console/src/main.jsx',
                                           'internal/server/web/app.js']}}
 BATTLE_INTEGRATION_CONFIGS = {'CanonicalVMComposition': 'SPECIFICATION Spec\n'
