@@ -1,12 +1,47 @@
 {
   "version": 1,
-  "base_sha": "b4824cc071427b8ff04c16f1bc78a34910dcec9e",
+  "base_sha": "cca160ef6d925479da9c1de2071eb6b60f6e99f4",
   "changes": [
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "59f83a5f8900a6cb29ee47e48c8ba1030d6e089d0d64b10ed879ec4e2c899cbb",
+      "path": ".github/workflows/actions.lock",
+      "sha256": "82072909529f7da36839d9f409841fac83a20f1c8ca8a0192842522ab213f638",
       "disposition": "formal-infrastructure",
-      "reason": "Expands the test expectation to include two registered and required screening controls; model inputs and gate logic are unchanged.",
+      "reason": "Updates only the upload-artifact version and commit in the existing Actions lockfile; no runtime or model input changes.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/battle-hosts.yml",
+      "sha256": "a2dacb525a857117c9ff1ebef160bdb0d2d17d88fdd07a1ed72b3e189adc6ab0",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the upload-artifact action version in existing evidence retention steps; commands, inputs and permissions remain unchanged.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "52da5a3b54e3a9f0cb515d4f00173cc89d34103fd69624e2946763959672cbce",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the upload-artifact action version in existing evidence retention steps; commands, inputs and permissions remain unchanged.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/formal.yml",
+      "sha256": "d18a9e2e9748cd83ba5c0187ccafe3ec49d1d510af88eb77fdaee94f810d43cc",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the upload-artifact action version in existing evidence retention steps; commands, inputs and permissions remain unchanged.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "sha256": "18646a7c75f544e52cd2cc945a007853923bbd8096222275862f1ba9d4850307",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the upload-artifact action version in existing evidence retention steps; commands, inputs and permissions remain unchanged.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/sakura-sdk.yml",
+      "sha256": "02f63f64bc9dd9761f75765594fe75d8165deb3adda49133243d38db88b8173a",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the upload-artifact action version in existing evidence retention steps; commands, inputs and permissions remain unchanged.",
       "models": []
     }
   ]

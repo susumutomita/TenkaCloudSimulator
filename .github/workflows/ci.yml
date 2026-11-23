@@ -45,7 +45,7 @@ jobs:
         run: /tmp/simulator-tests/bin/python test/e2e/lambda_inline_editor.py
       - name: Retain focused service console evidence
         if: always()
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: service-console-focused-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
@@ -171,7 +171,7 @@ jobs:
           jq -n --arg head "$(git rev-parse HEAD)" --arg profile "coverage-$SHARD.out" --rawfile packages reports/shard/packages.txt --slurpfile part reports/shard/part.json \
             '{head: $head, profile: $profile, packages: ($packages | split("\n") | map(select(length > 0)))} + (if $part[0] == null then {} else {part: $part[0]} end)' > "reports/shard/$SHARD.json"
       - name: Retain this shard's coverage and package manifest
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: go-coverage-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
@@ -274,7 +274,7 @@ jobs:
           python3 scripts/check-coverage.py reports/coverage.out reports/coverage.xml
       - name: Retain coverage evidence
         if: always()
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: go-coverage-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
@@ -314,7 +314,7 @@ jobs:
         run: AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/simulator-tests/bin/python
       - name: Retain service console screenshots and safe audit evidence
         if: always()
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: service-console-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
