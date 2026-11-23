@@ -1,120 +1,40 @@
 {
   "version": 1,
-  "base_sha": "f0e2b277bc79a5d4e22e9200880a07d025a07b71",
+  "base_sha": "cca160ef6d925479da9c1de2071eb6b60f6e99f4",
   "changes": [
     {
-      "path": "docs/aws-catalog.md",
-      "sha256": "301121b5f0f99d9b32cff0d91bbae1dcc7e4d2cc1817d4855d6bc5aba0c92331",
-      "disposition": "documentation",
-      "reason": "Catalog guide: what the reworked console view can and cannot do, and its verification.",
+      "path": ".github/workflows/actions.lock",
+      "sha256": "05453e20378ebf73b411c286bff89ecf085c02bc8185e75cc50c4e5c5914984f",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates the pinned setup-go action reference and commit only; no simulator or model inputs change.",
       "models": []
     },
     {
-      "path": "docs/console-fidelity.md",
-      "sha256": "4ecfd957c94965d141b83d5ef57dee7400d1b2f12969144f4b6aa6b3f514fb59",
-      "disposition": "documentation",
-      "reason": "States that the catalog view follows public Cloudscape patterns and was not compared with an authenticated AWS console.",
+      "path": ".github/workflows/battle-hosts.yml",
+      "sha256": "ab16b470e40d193498fef20c4a080db441bcf7d92efa02a08ec9ba39e9d1ae13",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the setup-go action version; the Go toolchain, Battle test commands and runner targets remain unchanged.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.css",
-      "sha256": "2cb00e4cff0a4fa20975ed3f4a95dbdf31a355b74e4cc638a61e0b84ef40ae5a",
-      "disposition": "presentation",
-      "reason": "Rebuilt console stylesheet for the catalog list, create and resource pages.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "85aa2b9dab303b7be642d9a2b654bd1c4344ebe609740680c4039b0cf09b9fa6",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the setup-go action version in existing jobs; Go version pins and validation commands do not change.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "0c64d8b420d94b4f652c5952e2bb8af6fe4f3e6317dda45dc7d7f8b4036b07f9",
-      "disposition": "modeled",
-      "reason": "Rebuilt console bundle carrying the restructured catalog view; the build is byte-reproducible from the listed inputs.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "Finite model of one catalog view with bounded requests and epochs. React rendering, Cloudscape components, page layout, native request serialization, response decoding and form input validation are outside the model and are checked by console unit tests and the Chromium end-to-end test."
-        }
-      ]
-    },
-    {
-      "path": "test/e2e/aws_catalog_console.py",
-      "sha256": "731fdfe8f1fb4844ed020324c49f2719d507caebc8acc455101153fe63d29952",
-      "disposition": "test-support",
-      "reason": "Browser test moved to the new pages with the same lifecycles, SDK cross-checks and native-Action assertions, plus a sweep that opens every catalog service and resource kind.",
+      "path": ".github/workflows/release.yml",
+      "sha256": "e756d7c76708c773581abe27c99a7fdc1d53329306d7dd2a6396aa54140a8ee7",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the setup-go action version; artifact build commands and release model remain unchanged.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "a96e5a12adf74f465fa881897787458fbcdc563cfc4456f1c3df6f07a901219a",
-      "disposition": "presentation",
-      "reason": "Digests of the rebuilt console bundle.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "7b42148bc61e89c4552bdc3669f152e29c45d6c71fd333190373b38dcc7bb4bf",
-      "disposition": "presentation",
-      "reason": "Input list of the rebuilt console bundle, including the new label module.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/catalog-names.mjs",
-      "sha256": "1999ec5577debbb106991a12b945d2ed9fbd843d1ecc6ae9d7d1a07d86e24474",
-      "disposition": "presentation",
-      "reason": "Pure helpers that derive readable labels, plurals and table columns from official names; they send no request and hold no view state.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/catalog.jsx",
-      "sha256": "2382125c68a87fcc98cd17c3123eacc2f87faf8833759b862fc688b76006aaf6",
-      "disposition": "modeled",
-      "reason": "Restructures the catalog view into list, create, resource and edit pages. The write functions are unchanged: each takes a fresh epoch, sends one native request, reloads only after acknowledgement and keeps a failure visible. New code adds client-side validation before a write and reads for paging, filtering and required list inputs.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "Finite model of one catalog view with bounded requests and epochs. React rendering, Cloudscape components, page layout, native request serialization, response decoding and form input validation are outside the model and are checked by console unit tests and the Chromium end-to-end test."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/console.css",
-      "sha256": "907bccf17790ca9044838df09057230ff15b7e47e1045e9b58c3c76a028e8515",
-      "disposition": "presentation",
-      "reason": "Styles for the catalog list, create and resource pages.",
-      "models": []
-    },
-    {
-      "path": "tools/console/tests/catalog-input.test.mjs",
-      "sha256": "c02064d340a200b483c67e2a58955d1ed5b3f6796d32d16b2ab071f479a7bd91",
-      "disposition": "presentation",
-      "reason": "Render test updated to the list, create, resource and edit pages, with a field-order test.",
-      "models": []
-    },
-    {
-      "path": "tools/console/tests/catalog-names.test.mjs",
-      "sha256": "2fd6628436bf499f04f26ca3d0bbdcfa9be5a601b6ba8f248a7e55b4f9baa34d",
-      "disposition": "presentation",
-      "reason": "Unit tests for label derivation, acronyms, plurals, column ranking and filtering.",
-      "models": []
-    },
-    {
-      "path": "tools/console/tests/catalog-query.test.mjs",
-      "sha256": "a9f8db68a3f3aebe63ee45ccb31022dc890c7612b9d65dfa2d181621797a0936",
-      "disposition": "presentation",
-      "reason": "Module stub for the new label helper; the assertions are unchanged.",
+      "path": ".github/workflows/sakura-sdk.yml",
+      "sha256": "fb2e02ad993580b213c0f4aaf680823e1a7b2684e2d7470a5c09a31e2065118b",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the setup-go action version; the Go toolchain and Sakura SDK validation commands do not change.",
       "models": []
     }
   ]
