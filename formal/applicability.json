@@ -1,33 +1,54 @@
 {
   "version": 1,
-  "base_sha": "4d7883d343ee2ad4acf6af833b258d9d52d9651e",
+  "base_sha": "ca10c828f5c56bf716458cfc6df9c32b20dd21c2",
   "changes": [
     {
       "path": ".github/workflows/actions.lock",
-      "sha256": "b9c34a479ad8de917fa031d4d6de38e96c9c8db0b8f2baa4fe3c6bdc12fe8a48",
+      "sha256": "c077c041ff998d6e166a2b667edb9e131d002b8e3bcccd9a3cb8cfe7515ddb97",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the download-artifact version and commit in the existing Actions lockfile; no runtime or model input changes.",
+      "reason": "Updates only the checkout action version and commit in the existing Actions lockfile; no runtime or model input changes.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/battle-hosts.yml",
+      "sha256": "c169584bc9d021af3f63f1a400a05d9c35c3249cc18bbd2259f63489f1e55415",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
       "models": []
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "da49747edd3731bfaa2b79aaf29265462251a8714fd5969481532ff2a8c8b1d7",
+      "sha256": "967aa1e3b6ae5d97909e189dcb276836fca0586ef4f07c0cedbd90d4a65b912d",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the download-artifact action version in existing validation or packaging steps; commands, inputs and permissions remain unchanged.",
+      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
       "models": []
     },
     {
       "path": ".github/workflows/formal.yml",
-      "sha256": "f61e181786fb2afc6a89d3dfa869361a4753da4f1c92396694260e26f78811ce",
+      "sha256": "13d2bf48bdab67662afb1e1068a6b931552dfed76b895808b35c990ea0da0a5a",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the download-artifact action version in existing validation or packaging steps; commands, inputs and permissions remain unchanged.",
+      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
       "models": []
     },
     {
       "path": ".github/workflows/release.yml",
-      "sha256": "25d761d5a78dab3b890cd778175f8de59c76493e162bdb291baa1268aea0d612",
+      "sha256": "1f3a1e1d65c01340a15d4a392d1f9633820271ae7a90cf4dae59651861761fae",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the download-artifact action version in existing validation or packaging steps; commands, inputs and permissions remain unchanged.",
+      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/sakura-sdk.yml",
+      "sha256": "450c974c05cf359bbf5be2fd27601dafb23c100f6197f10ad4b1a50fca7c1a8a",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
+      "models": []
+    },
+    {
+      "path": ".github/workflows/verify-actions-lock.yml",
+      "sha256": "d805eeedfa5cb2c024003bac6a723c935d02cef3099ac2b23b0497207e6675ac",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
       "models": []
     }
   ]
