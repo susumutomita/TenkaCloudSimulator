@@ -94,6 +94,9 @@ def extract(service, operations):
             if key in op:
                 entry[key] = op[key]['shape']
                 roots.append(op[key]['shape'])
+        # The Query protocol wraps output members in this element.
+        if op.get('output', {}).get('resultWrapper'):
+            entry['resultWrapper'] = op['output']['resultWrapper']
         entry['errors'] = [e['shape'] for e in op.get('errors', [])]
         roots.extend(entry['errors'])
         if name in paginators:

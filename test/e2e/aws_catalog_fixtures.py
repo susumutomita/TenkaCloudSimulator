@@ -87,7 +87,9 @@ def main(selected=None):
                 assert model in services, f'{model} fixture has no catalog service'
                 saved, called = {}, set()
                 first = fixture['steps'][0]
-                denied = {**first, 'error': 'AccessDeniedException', 'status': 403}
+                # Query services answer AccessDenied; JSON and REST services
+                # AccessDeniedException. A fixture names its code in "denied".
+                denied = {**first, 'error': fixture.get('denied', 'AccessDeniedException'), 'status': 403}
                 denied.pop('save', None)
                 denied.pop('expect', None)
                 run_steps(a, fixture, [denied], {}, set(), token=nobody)

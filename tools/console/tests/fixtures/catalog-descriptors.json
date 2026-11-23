@@ -1,0 +1,5045 @@
+{
+ "services": [
+  {
+   "model": "amplify",
+   "title": "AWS Amplify",
+   "serviceId": "Amplify",
+   "apiVersion": "2017-07-25",
+   "protocol": "rest-json",
+   "jsonVersion": "1.1",
+   "signingName": "amplify",
+   "iamPrefix": "amplify",
+   "account": "000000000000",
+   "issues": [
+    147
+   ],
+   "operations": [
+    "CreateApp",
+    "CreateBranch",
+    "DeleteApp",
+    "DeleteBranch",
+    "GetApp",
+    "GetBranch",
+    "ListApps",
+    "ListBranches",
+    "ListTagsForResource",
+    "TagResource",
+    "UntagResource",
+    "UpdateApp",
+    "UpdateBranch"
+   ],
+   "officialOperations": 37,
+   "resources": [
+    {
+     "kind": "app",
+     "arnMember": "appArn",
+     "nameMember": "name",
+     "idMember": "appId",
+     "arnWire": "appArn",
+     "nameWire": "name",
+     "idWire": "appId",
+     "limit": 25,
+     "operations": {
+      "create": {
+       "name": "CreateApp",
+       "method": "POST",
+       "uri": "/apps",
+       "members": [
+        {
+         "name": "accessToken",
+         "type": "string",
+         "min": 1,
+         "max": 255,
+         "pattern": "(?s).+"
+        },
+        {
+         "name": "autoBranchCreationConfig",
+         "type": "structure",
+         "shape": "AutoBranchCreationConfig"
+        },
+        {
+         "name": "autoBranchCreationPatterns",
+         "type": "list",
+         "element": "string"
+        },
+        {
+         "name": "basicAuthCredentials",
+         "type": "string",
+         "max": 2000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "buildSpec",
+         "type": "string",
+         "min": 1,
+         "max": 25000,
+         "pattern": "(?s).+"
+        },
+        {
+         "name": "cacheConfig",
+         "type": "structure",
+         "shape": "CacheConfig"
+        },
+        {
+         "name": "computeRoleArn",
+         "type": "string",
+         "min": 0,
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "customHeaders",
+         "type": "string",
+         "min": 0,
+         "max": 25000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "customRules",
+         "type": "list",
+         "element": "structure",
+         "shape": "CustomRules"
+        },
+        {
+         "name": "description",
+         "type": "string",
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "enableAutoBranchCreation",
+         "type": "boolean"
+        },
+        {
+         "name": "enableBasicAuth",
+         "type": "boolean"
+        },
+        {
+         "name": "enableBranchAutoBuild",
+         "type": "boolean"
+        },
+        {
+         "name": "enableBranchAutoDeletion",
+         "type": "boolean"
+        },
+        {
+         "name": "environmentVariables",
+         "type": "map",
+         "shape": "EnvironmentVariables"
+        },
+        {
+         "name": "iamServiceRoleArn",
+         "type": "string",
+         "min": 0,
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "jobConfig",
+         "type": "structure",
+         "shape": "JobConfig"
+        },
+        {
+         "name": "name",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 255,
+         "pattern": "(?s).+"
+        },
+        {
+         "name": "oauthToken",
+         "type": "string",
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "platform",
+         "type": "string",
+         "enum": [
+          "WEB",
+          "WEB_DYNAMIC",
+          "WEB_COMPUTE"
+         ]
+        },
+        {
+         "name": "repository",
+         "type": "string",
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "tags",
+         "type": "map",
+         "min": 0,
+         "max": 50,
+         "shape": "TagMap"
+        }
+       ],
+       "wrapper": "app"
+      },
+      "delete": {
+       "name": "DeleteApp",
+       "method": "DELETE",
+       "uri": "/apps/{appId}",
+       "members": [
+        {
+         "name": "appId",
+         "location": "uri",
+         "locationName": "appId",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 20,
+         "pattern": "d[a-z0-9]+"
+        }
+       ],
+       "wrapper": "app",
+       "lookup": "appId",
+       "lookupKey": "id"
+      },
+      "list": {
+       "name": "ListApps",
+       "method": "GET",
+       "uri": "/apps",
+       "members": [
+        {
+         "name": "maxResults",
+         "location": "querystring",
+         "locationName": "maxResults",
+         "type": "integer",
+         "min": 0,
+         "max": 100
+        },
+        {
+         "name": "nextToken",
+         "location": "querystring",
+         "locationName": "nextToken",
+         "type": "string",
+         "max": 2000,
+         "pattern": "(?s).*"
+        }
+       ],
+       "items": "apps",
+       "itemName": "name",
+       "itemArn": "appArn",
+       "itemId": "appId",
+       "inputToken": "nextToken",
+       "outputToken": "nextToken"
+      },
+      "read": {
+       "name": "GetApp",
+       "method": "GET",
+       "uri": "/apps/{appId}",
+       "members": [
+        {
+         "name": "appId",
+         "location": "uri",
+         "locationName": "appId",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 20,
+         "pattern": "d[a-z0-9]+"
+        }
+       ],
+       "wrapper": "app",
+       "lookup": "appId",
+       "lookupKey": "id"
+      },
+      "update": {
+       "name": "UpdateApp",
+       "method": "POST",
+       "uri": "/apps/{appId}",
+       "members": [
+        {
+         "name": "accessToken",
+         "type": "string",
+         "min": 1,
+         "max": 255,
+         "pattern": "(?s).+"
+        },
+        {
+         "name": "appId",
+         "location": "uri",
+         "locationName": "appId",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 20,
+         "pattern": "d[a-z0-9]+"
+        },
+        {
+         "name": "autoBranchCreationConfig",
+         "type": "structure",
+         "shape": "AutoBranchCreationConfig"
+        },
+        {
+         "name": "autoBranchCreationPatterns",
+         "type": "list",
+         "element": "string"
+        },
+        {
+         "name": "basicAuthCredentials",
+         "type": "string",
+         "max": 2000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "buildSpec",
+         "type": "string",
+         "min": 1,
+         "max": 25000,
+         "pattern": "(?s).+"
+        },
+        {
+         "name": "cacheConfig",
+         "type": "structure",
+         "shape": "CacheConfig"
+        },
+        {
+         "name": "computeRoleArn",
+         "type": "string",
+         "min": 0,
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "customHeaders",
+         "type": "string",
+         "min": 0,
+         "max": 25000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "customRules",
+         "type": "list",
+         "element": "structure",
+         "shape": "CustomRules"
+        },
+        {
+         "name": "description",
+         "type": "string",
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "enableAutoBranchCreation",
+         "type": "boolean"
+        },
+        {
+         "name": "enableBasicAuth",
+         "type": "boolean"
+        },
+        {
+         "name": "enableBranchAutoBuild",
+         "type": "boolean"
+        },
+        {
+         "name": "enableBranchAutoDeletion",
+         "type": "boolean"
+        },
+        {
+         "name": "environmentVariables",
+         "type": "map",
+         "shape": "EnvironmentVariables"
+        },
+        {
+         "name": "iamServiceRoleArn",
+         "type": "string",
+         "min": 0,
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "jobConfig",
+         "type": "structure",
+         "shape": "JobConfig"
+        },
+        {
+         "name": "name",
+         "type": "string",
+         "min": 1,
+         "max": 255,
+         "pattern": "(?s).+"
+        },
+        {
+         "name": "oauthToken",
+         "type": "string",
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "platform",
+         "type": "string",
+         "enum": [
+          "WEB",
+          "WEB_DYNAMIC",
+          "WEB_COMPUTE"
+         ]
+        },
+        {
+         "name": "repository",
+         "type": "string",
+         "max": 1000,
+         "pattern": "(?s).*"
+        }
+       ],
+       "wrapper": "app",
+       "lookup": "appId",
+       "lookupKey": "id",
+       "editable": [
+        "accessToken",
+        "autoBranchCreationPatterns",
+        "buildSpec",
+        "customHeaders",
+        "customRules",
+        "description",
+        "enableAutoBranchCreation",
+        "enableBranchAutoBuild",
+        "enableBranchAutoDeletion",
+        "environmentVariables",
+        "name",
+        "oauthToken",
+        "platform"
+       ]
+      }
+     }
+    },
+    {
+     "kind": "branch",
+     "arnMember": "branchArn",
+     "nameMember": "branchName",
+     "arnWire": "branchArn",
+     "nameWire": "branchName",
+     "parent": "app",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateBranch",
+       "method": "POST",
+       "uri": "/apps/{appId}/branches",
+       "members": [
+        {
+         "name": "appId",
+         "location": "uri",
+         "locationName": "appId",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 20,
+         "pattern": "d[a-z0-9]+"
+        },
+        {
+         "name": "backend",
+         "type": "structure",
+         "shape": "Backend"
+        },
+        {
+         "name": "backendEnvironmentArn",
+         "type": "string",
+         "min": 0,
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "basicAuthCredentials",
+         "type": "string",
+         "max": 2000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "branchName",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 255,
+         "pattern": "(?s).+"
+        },
+        {
+         "name": "buildSpec",
+         "type": "string",
+         "min": 1,
+         "max": 25000,
+         "pattern": "(?s).+"
+        },
+        {
+         "name": "computeRoleArn",
+         "type": "string",
+         "min": 0,
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "description",
+         "type": "string",
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "displayName",
+         "type": "string",
+         "max": 255,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "enableAutoBuild",
+         "type": "boolean"
+        },
+        {
+         "name": "enableBasicAuth",
+         "type": "boolean"
+        },
+        {
+         "name": "enableNotification",
+         "type": "boolean"
+        },
+        {
+         "name": "enablePerformanceMode",
+         "type": "boolean"
+        },
+        {
+         "name": "enablePullRequestPreview",
+         "type": "boolean"
+        },
+        {
+         "name": "enableSkewProtection",
+         "type": "boolean"
+        },
+        {
+         "name": "environmentVariables",
+         "type": "map",
+         "shape": "EnvironmentVariables"
+        },
+        {
+         "name": "framework",
+         "type": "string",
+         "max": 255,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "pullRequestEnvironmentName",
+         "type": "string",
+         "max": 20,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "stage",
+         "type": "string",
+         "enum": [
+          "PRODUCTION",
+          "BETA",
+          "DEVELOPMENT",
+          "EXPERIMENTAL",
+          "PULL_REQUEST"
+         ]
+        },
+        {
+         "name": "tags",
+         "type": "map",
+         "min": 0,
+         "max": 50,
+         "shape": "TagMap"
+        },
+        {
+         "name": "ttl",
+         "type": "string",
+         "min": 0,
+         "max": 32,
+         "pattern": "\\d*"
+        }
+       ],
+       "wrapper": "branch",
+       "parent": "appId"
+      },
+      "delete": {
+       "name": "DeleteBranch",
+       "method": "DELETE",
+       "uri": "/apps/{appId}/branches/{branchName}",
+       "members": [
+        {
+         "name": "appId",
+         "location": "uri",
+         "locationName": "appId",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 20,
+         "pattern": "d[a-z0-9]+"
+        },
+        {
+         "name": "branchName",
+         "location": "uri",
+         "locationName": "branchName",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 255,
+         "pattern": "(?s).+"
+        }
+       ],
+       "wrapper": "branch",
+       "lookup": "branchName",
+       "lookupKey": "name",
+       "parent": "appId"
+      },
+      "list": {
+       "name": "ListBranches",
+       "method": "GET",
+       "uri": "/apps/{appId}/branches",
+       "members": [
+        {
+         "name": "appId",
+         "location": "uri",
+         "locationName": "appId",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 20,
+         "pattern": "d[a-z0-9]+"
+        },
+        {
+         "name": "maxResults",
+         "location": "querystring",
+         "locationName": "maxResults",
+         "type": "integer",
+         "min": 0,
+         "max": 50
+        },
+        {
+         "name": "nextToken",
+         "location": "querystring",
+         "locationName": "nextToken",
+         "type": "string",
+         "max": 2000,
+         "pattern": "(?s).*"
+        }
+       ],
+       "items": "branches",
+       "itemName": "branchName",
+       "itemArn": "branchArn",
+       "inputToken": "nextToken",
+       "outputToken": "nextToken",
+       "parent": "appId"
+      },
+      "read": {
+       "name": "GetBranch",
+       "method": "GET",
+       "uri": "/apps/{appId}/branches/{branchName}",
+       "members": [
+        {
+         "name": "appId",
+         "location": "uri",
+         "locationName": "appId",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 20,
+         "pattern": "d[a-z0-9]+"
+        },
+        {
+         "name": "branchName",
+         "location": "uri",
+         "locationName": "branchName",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 255,
+         "pattern": "(?s).+"
+        }
+       ],
+       "wrapper": "branch",
+       "lookup": "branchName",
+       "lookupKey": "name",
+       "parent": "appId"
+      },
+      "update": {
+       "name": "UpdateBranch",
+       "method": "POST",
+       "uri": "/apps/{appId}/branches/{branchName}",
+       "members": [
+        {
+         "name": "appId",
+         "location": "uri",
+         "locationName": "appId",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 20,
+         "pattern": "d[a-z0-9]+"
+        },
+        {
+         "name": "backend",
+         "type": "structure",
+         "shape": "Backend"
+        },
+        {
+         "name": "backendEnvironmentArn",
+         "type": "string",
+         "min": 0,
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "basicAuthCredentials",
+         "type": "string",
+         "max": 2000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "branchName",
+         "location": "uri",
+         "locationName": "branchName",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "max": 255,
+         "pattern": "(?s).+"
+        },
+        {
+         "name": "buildSpec",
+         "type": "string",
+         "min": 1,
+         "max": 25000,
+         "pattern": "(?s).+"
+        },
+        {
+         "name": "computeRoleArn",
+         "type": "string",
+         "min": 0,
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "description",
+         "type": "string",
+         "max": 1000,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "displayName",
+         "type": "string",
+         "max": 255,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "enableAutoBuild",
+         "type": "boolean"
+        },
+        {
+         "name": "enableBasicAuth",
+         "type": "boolean"
+        },
+        {
+         "name": "enableNotification",
+         "type": "boolean"
+        },
+        {
+         "name": "enablePerformanceMode",
+         "type": "boolean"
+        },
+        {
+         "name": "enablePullRequestPreview",
+         "type": "boolean"
+        },
+        {
+         "name": "enableSkewProtection",
+         "type": "boolean"
+        },
+        {
+         "name": "environmentVariables",
+         "type": "map",
+         "shape": "EnvironmentVariables"
+        },
+        {
+         "name": "framework",
+         "type": "string",
+         "max": 255,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "pullRequestEnvironmentName",
+         "type": "string",
+         "max": 20,
+         "pattern": "(?s).*"
+        },
+        {
+         "name": "stage",
+         "type": "string",
+         "enum": [
+          "PRODUCTION",
+          "BETA",
+          "DEVELOPMENT",
+          "EXPERIMENTAL",
+          "PULL_REQUEST"
+         ]
+        },
+        {
+         "name": "ttl",
+         "type": "string",
+         "min": 0,
+         "max": 32,
+         "pattern": "\\d*"
+        }
+       ],
+       "wrapper": "branch",
+       "lookup": "branchName",
+       "lookupKey": "name",
+       "parent": "appId",
+       "editable": [
+        "buildSpec",
+        "description",
+        "displayName",
+        "enableAutoBuild",
+        "enableNotification",
+        "enablePullRequestPreview",
+        "environmentVariables",
+        "framework",
+        "stage",
+        "ttl"
+       ]
+      }
+     }
+    }
+   ],
+   "tagging": {
+    "list-tags": {
+     "name": "ListTagsForResource",
+     "method": "GET",
+     "uri": "/tags/{resourceArn}",
+     "members": [
+      {
+       "name": "resourceArn",
+       "location": "uri",
+       "locationName": "resourceArn",
+       "type": "string",
+       "required": true,
+       "min": 0,
+       "max": 2048,
+       "pattern": "^arn:aws:amplify:.*"
+      }
+     ],
+     "lookup": "resourceArn",
+     "lookupKey": "arn"
+    },
+    "tag": {
+     "name": "TagResource",
+     "method": "POST",
+     "uri": "/tags/{resourceArn}",
+     "members": [
+      {
+       "name": "resourceArn",
+       "location": "uri",
+       "locationName": "resourceArn",
+       "type": "string",
+       "required": true,
+       "min": 0,
+       "max": 2048,
+       "pattern": "^arn:aws:amplify:.*"
+      },
+      {
+       "name": "tags",
+       "type": "map",
+       "required": true,
+       "min": 0,
+       "max": 50,
+       "shape": "TagMap"
+      }
+     ],
+     "lookup": "resourceArn",
+     "lookupKey": "arn"
+    },
+    "untag": {
+     "name": "UntagResource",
+     "method": "DELETE",
+     "uri": "/tags/{resourceArn}",
+     "members": [
+      {
+       "name": "resourceArn",
+       "location": "uri",
+       "locationName": "resourceArn",
+       "type": "string",
+       "required": true,
+       "min": 0,
+       "max": 2048,
+       "pattern": "^arn:aws:amplify:.*"
+      },
+      {
+       "name": "tagKeys",
+       "location": "querystring",
+       "locationName": "tagKeys",
+       "type": "list",
+       "element": "string",
+       "required": true,
+       "min": 1,
+       "max": 50
+      }
+     ],
+     "lookup": "resourceArn",
+     "lookupKey": "arn"
+    }
+   },
+   "bounds": [
+    "Apps and branches are configuration metadata: no repository connection, OAuth or access token, build, deployment, hosting or domain is created. oauthToken, accessToken and basic-auth credentials are refused.",
+    "Deleting an app with branches is refused until the branches are deleted."
+   ],
+   "source": {
+    "package": "botocore",
+    "version": "1.41.6",
+    "file": "botocore/data/amplify/2017-07-25/service-2.json",
+    "sha256": "602c55d9c517a1233f2fb956013b3b38b3ffeae4d9063f189a847364719b08a5",
+    "license": "Apache-2.0"
+   },
+   "inputShapes": {
+    "AutoBranchCreationConfig": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "basicAuthCredentials",
+       "shape": "BasicAuthCredentials"
+      },
+      {
+       "name": "buildSpec",
+       "shape": "BuildSpec"
+      },
+      {
+       "name": "enableAutoBuild",
+       "shape": "EnableAutoBuild"
+      },
+      {
+       "name": "enableBasicAuth",
+       "shape": "EnableBasicAuth"
+      },
+      {
+       "name": "enablePerformanceMode",
+       "shape": "EnablePerformanceMode"
+      },
+      {
+       "name": "enablePullRequestPreview",
+       "shape": "EnablePullRequestPreview"
+      },
+      {
+       "name": "environmentVariables",
+       "shape": "EnvironmentVariables"
+      },
+      {
+       "name": "framework",
+       "shape": "Framework"
+      },
+      {
+       "name": "pullRequestEnvironmentName",
+       "shape": "PullRequestEnvironmentName"
+      },
+      {
+       "name": "stage",
+       "shape": "Stage"
+      }
+     ]
+    },
+    "Backend": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "stackArn",
+       "shape": "StackArn"
+      }
+     ]
+    },
+    "BasicAuthCredentials": {
+     "type": "string",
+     "max": 2000
+    },
+    "BuildComputeType": {
+     "type": "string",
+     "enum": [
+      "STANDARD_8GB",
+      "LARGE_16GB",
+      "XLARGE_72GB"
+     ]
+    },
+    "BuildSpec": {
+     "type": "string",
+     "min": 1,
+     "max": 25000
+    },
+    "CacheConfig": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "type",
+       "shape": "CacheConfigType",
+       "required": true
+      }
+     ]
+    },
+    "CacheConfigType": {
+     "type": "string",
+     "enum": [
+      "AMPLIFY_MANAGED",
+      "AMPLIFY_MANAGED_NO_COOKIES"
+     ]
+    },
+    "Condition": {
+     "type": "string",
+     "min": 0,
+     "max": 2048
+    },
+    "CustomRule": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "condition",
+       "shape": "Condition"
+      },
+      {
+       "name": "source",
+       "shape": "Source",
+       "required": true
+      },
+      {
+       "name": "status",
+       "shape": "Status"
+      },
+      {
+       "name": "target",
+       "shape": "Target",
+       "required": true
+      }
+     ]
+    },
+    "CustomRules": {
+     "type": "list",
+     "member": {
+      "shape": "CustomRule"
+     }
+    },
+    "EnableAutoBuild": {
+     "type": "boolean"
+    },
+    "EnableBasicAuth": {
+     "type": "boolean"
+    },
+    "EnablePerformanceMode": {
+     "type": "boolean"
+    },
+    "EnablePullRequestPreview": {
+     "type": "boolean"
+    },
+    "EnvKey": {
+     "type": "string",
+     "max": 255
+    },
+    "EnvValue": {
+     "type": "string",
+     "max": 5500
+    },
+    "EnvironmentVariables": {
+     "type": "map",
+     "key": {
+      "shape": "EnvKey"
+     },
+     "value": {
+      "shape": "EnvValue"
+     }
+    },
+    "Framework": {
+     "type": "string",
+     "max": 255
+    },
+    "JobConfig": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "buildComputeType",
+       "shape": "BuildComputeType",
+       "required": true
+      }
+     ]
+    },
+    "PullRequestEnvironmentName": {
+     "type": "string",
+     "max": 20
+    },
+    "Source": {
+     "type": "string",
+     "min": 1,
+     "max": 2048
+    },
+    "StackArn": {
+     "type": "string",
+     "min": 20,
+     "max": 2048
+    },
+    "Stage": {
+     "type": "string",
+     "enum": [
+      "PRODUCTION",
+      "BETA",
+      "DEVELOPMENT",
+      "EXPERIMENTAL",
+      "PULL_REQUEST"
+     ]
+    },
+    "Status": {
+     "type": "string",
+     "min": 3,
+     "max": 7
+    },
+    "TagKey": {
+     "type": "string",
+     "min": 1,
+     "max": 128
+    },
+    "TagMap": {
+     "type": "map",
+     "key": {
+      "shape": "TagKey"
+     },
+     "value": {
+      "shape": "TagValue"
+     },
+     "min": 0,
+     "max": 50
+    },
+    "TagValue": {
+     "type": "string",
+     "max": 256
+    },
+    "Target": {
+     "type": "string",
+     "min": 1,
+     "max": 2048
+    }
+   }
+  },
+  {
+   "model": "ecr",
+   "title": "Amazon Elastic Container Registry",
+   "serviceId": "ECR",
+   "apiVersion": "2015-09-21",
+   "protocol": "json",
+   "jsonVersion": "1.1",
+   "targetPrefix": "AmazonEC2ContainerRegistry_V20150921",
+   "signingName": "ecr",
+   "iamPrefix": "ecr",
+   "account": "000000000000",
+   "accountMembers": [
+    "registryId"
+   ],
+   "issues": [
+    111
+   ],
+   "operations": [
+    "CreateRepository",
+    "DeleteRepository",
+    "DescribeRepositories",
+    "ListTagsForResource",
+    "PutImageScanningConfiguration",
+    "PutImageTagMutability",
+    "TagResource",
+    "UntagResource"
+   ],
+   "officialOperations": 58,
+   "resources": [
+    {
+     "kind": "repository",
+     "arnMember": "repositoryArn",
+     "nameMember": "repositoryName",
+     "arnWire": "repositoryArn",
+     "nameWire": "repositoryName",
+     "limit": 100,
+     "operations": {
+      "create": {
+       "name": "CreateRepository",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "encryptionConfiguration",
+         "type": "structure",
+         "shape": "EncryptionConfiguration"
+        },
+        {
+         "name": "imageScanningConfiguration",
+         "type": "structure",
+         "shape": "ImageScanningConfiguration"
+        },
+        {
+         "name": "imageTagMutability",
+         "type": "string",
+         "enum": [
+          "MUTABLE",
+          "IMMUTABLE",
+          "IMMUTABLE_WITH_EXCLUSION",
+          "MUTABLE_WITH_EXCLUSION"
+         ]
+        },
+        {
+         "name": "imageTagMutabilityExclusionFilters",
+         "type": "list",
+         "element": "structure",
+         "min": 1,
+         "max": 5,
+         "shape": "ImageTagMutabilityExclusionFilters"
+        },
+        {
+         "name": "registryId",
+         "type": "string",
+         "pattern": "[0-9]{12}"
+        },
+        {
+         "name": "repositoryName",
+         "type": "string",
+         "required": true,
+         "min": 2,
+         "max": 256,
+         "pattern": "(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*"
+        },
+        {
+         "name": "tags",
+         "type": "list",
+         "element": "structure",
+         "shape": "TagList"
+        }
+       ],
+       "wrapper": "repository"
+      },
+      "delete": {
+       "name": "DeleteRepository",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "force",
+         "type": "boolean"
+        },
+        {
+         "name": "registryId",
+         "type": "string",
+         "pattern": "[0-9]{12}"
+        },
+        {
+         "name": "repositoryName",
+         "type": "string",
+         "required": true,
+         "min": 2,
+         "max": 256,
+         "pattern": "(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*"
+        }
+       ],
+       "wrapper": "repository",
+       "lookup": "repositoryName",
+       "lookupKey": "name"
+      },
+      "describe": {
+       "name": "DescribeRepositories",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "maxResults",
+         "type": "integer",
+         "min": 1,
+         "max": 1000
+        },
+        {
+         "name": "nextToken",
+         "type": "string"
+        },
+        {
+         "name": "registryId",
+         "type": "string",
+         "pattern": "[0-9]{12}"
+        },
+        {
+         "name": "repositoryNames",
+         "type": "list",
+         "element": "string",
+         "min": 1,
+         "max": 100
+        }
+       ],
+       "items": "repositories",
+       "itemName": "repositoryName",
+       "itemArn": "repositoryArn",
+       "names": "repositoryNames",
+       "inputToken": "nextToken",
+       "outputToken": "nextToken"
+      },
+      "list": {
+       "name": "DescribeRepositories",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "maxResults",
+         "type": "integer",
+         "min": 1,
+         "max": 1000
+        },
+        {
+         "name": "nextToken",
+         "type": "string"
+        },
+        {
+         "name": "registryId",
+         "type": "string",
+         "pattern": "[0-9]{12}"
+        },
+        {
+         "name": "repositoryNames",
+         "type": "list",
+         "element": "string",
+         "min": 1,
+         "max": 100
+        }
+       ],
+       "items": "repositories",
+       "itemName": "repositoryName",
+       "itemArn": "repositoryArn",
+       "names": "repositoryNames",
+       "inputToken": "nextToken",
+       "outputToken": "nextToken"
+      },
+      "update": {
+       "name": "PutImageScanningConfiguration",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "imageScanningConfiguration",
+         "type": "structure",
+         "required": true,
+         "shape": "ImageScanningConfiguration"
+        },
+        {
+         "name": "registryId",
+         "type": "string",
+         "pattern": "[0-9]{12}"
+        },
+        {
+         "name": "repositoryName",
+         "type": "string",
+         "required": true,
+         "min": 2,
+         "max": 256,
+         "pattern": "(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*"
+        }
+       ],
+       "lookup": "repositoryName",
+       "lookupKey": "name",
+       "editable": [
+        "imageScanningConfiguration"
+       ]
+      }
+     }
+    }
+   ],
+   "tagging": {
+    "list-tags": {
+     "name": "ListTagsForResource",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "resourceArn",
+       "type": "string",
+       "required": true
+      }
+     ],
+     "lookup": "resourceArn",
+     "lookupKey": "arn"
+    },
+    "tag": {
+     "name": "TagResource",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "resourceArn",
+       "type": "string",
+       "required": true
+      },
+      {
+       "name": "tags",
+       "type": "list",
+       "element": "structure",
+       "required": true,
+       "shape": "TagList"
+      }
+     ],
+     "lookup": "resourceArn",
+     "lookupKey": "arn"
+    },
+    "untag": {
+     "name": "UntagResource",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "resourceArn",
+       "type": "string",
+       "required": true
+      },
+      {
+       "name": "tagKeys",
+       "type": "list",
+       "element": "string",
+       "required": true
+      }
+     ],
+     "lookup": "resourceArn",
+     "lookupKey": "arn"
+    }
+   },
+   "bounds": [
+    "Repositories hold no images: image push/pull, layers, registry authorization tokens and scanning are not implemented; force therefore has no further effect."
+   ],
+   "source": {
+    "package": "botocore",
+    "version": "1.41.6",
+    "file": "botocore/data/ecr/2015-09-21/service-2.json",
+    "sha256": "6d0949a8353d74260494d22b105d0a852e5de43504f0793cd41997993bc7727f",
+    "license": "Apache-2.0"
+   },
+   "inputShapes": {
+    "EncryptionConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "encryptionType",
+       "shape": "EncryptionType",
+       "required": true
+      },
+      {
+       "name": "kmsKey",
+       "shape": "KmsKey"
+      }
+     ]
+    },
+    "EncryptionType": {
+     "type": "string",
+     "enum": [
+      "AES256",
+      "KMS",
+      "KMS_DSSE"
+     ]
+    },
+    "ImageScanningConfiguration": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "scanOnPush",
+       "shape": "ScanOnPushFlag"
+      }
+     ]
+    },
+    "ImageTagMutabilityExclusionFilter": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "filter",
+       "shape": "ImageTagMutabilityExclusionFilterValue",
+       "required": true
+      },
+      {
+       "name": "filterType",
+       "shape": "ImageTagMutabilityExclusionFilterType",
+       "required": true
+      }
+     ]
+    },
+    "ImageTagMutabilityExclusionFilterType": {
+     "type": "string",
+     "enum": [
+      "WILDCARD"
+     ]
+    },
+    "ImageTagMutabilityExclusionFilterValue": {
+     "type": "string",
+     "min": 1,
+     "max": 128
+    },
+    "ImageTagMutabilityExclusionFilters": {
+     "type": "list",
+     "member": {
+      "shape": "ImageTagMutabilityExclusionFilter"
+     },
+     "min": 1,
+     "max": 5
+    },
+    "KmsKey": {
+     "type": "string",
+     "min": 1,
+     "max": 2048
+    },
+    "ScanOnPushFlag": {
+     "type": "boolean"
+    },
+    "Tag": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Key",
+       "shape": "TagKey",
+       "required": true
+      },
+      {
+       "name": "Value",
+       "shape": "TagValue",
+       "required": true
+      }
+     ]
+    },
+    "TagKey": {
+     "type": "string"
+    },
+    "TagList": {
+     "type": "list",
+     "member": {
+      "shape": "Tag"
+     }
+    },
+    "TagValue": {
+     "type": "string"
+    }
+   }
+  },
+  {
+   "model": "elasticache",
+   "title": "Amazon ElastiCache",
+   "serviceId": "ElastiCache",
+   "apiVersion": "2015-02-02",
+   "protocol": "query",
+   "signingName": "elasticache",
+   "iamPrefix": "elasticache",
+   "account": "000000000000",
+   "issues": [
+    125
+   ],
+   "operations": [
+    "AddTagsToResource",
+    "CreateCacheParameterGroup",
+    "CreateCacheSubnetGroup",
+    "CreateUser",
+    "DeleteCacheParameterGroup",
+    "DeleteCacheSubnetGroup",
+    "DeleteUser",
+    "DescribeCacheParameterGroups",
+    "DescribeCacheSubnetGroups",
+    "DescribeUsers",
+    "ListTagsForResource",
+    "ModifyCacheSubnetGroup",
+    "ModifyUser",
+    "RemoveTagsFromResource"
+   ],
+   "officialOperations": 75,
+   "resources": [
+    {
+     "kind": "cacheParameterGroup",
+     "arnMember": "ARN",
+     "nameMember": "CacheParameterGroupName",
+     "arnWire": "ARN",
+     "nameWire": "CacheParameterGroupName",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateCacheParameterGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheParameterGroupFamily",
+         "type": "string",
+         "required": true,
+         "key": "CacheParameterGroupFamily"
+        },
+        {
+         "name": "CacheParameterGroupName",
+         "type": "string",
+         "required": true,
+         "key": "CacheParameterGroupName"
+        },
+        {
+         "name": "Description",
+         "type": "string",
+         "required": true,
+         "key": "Description"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        }
+       ],
+       "wrapper": "CacheParameterGroup",
+       "output": "CreateCacheParameterGroupResult",
+       "resultWrapper": "CreateCacheParameterGroupResult"
+      },
+      "delete": {
+       "name": "DeleteCacheParameterGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheParameterGroupName",
+         "type": "string",
+         "required": true,
+         "key": "CacheParameterGroupName"
+        }
+       ],
+       "lookup": "CacheParameterGroupName",
+       "lookupKey": "name"
+      },
+      "describe": {
+       "name": "DescribeCacheParameterGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheParameterGroupName",
+         "type": "string",
+         "key": "CacheParameterGroupName"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "CacheParameterGroups",
+       "itemName": "CacheParameterGroupName",
+       "itemArn": "ARN",
+       "names": "CacheParameterGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "CacheParameterGroupsMessage",
+       "resultWrapper": "DescribeCacheParameterGroupsResult"
+      },
+      "list": {
+       "name": "DescribeCacheParameterGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheParameterGroupName",
+         "type": "string",
+         "key": "CacheParameterGroupName"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "CacheParameterGroups",
+       "itemName": "CacheParameterGroupName",
+       "itemArn": "ARN",
+       "names": "CacheParameterGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "CacheParameterGroupsMessage",
+       "resultWrapper": "DescribeCacheParameterGroupsResult"
+      }
+     }
+    },
+    {
+     "kind": "cacheSubnetGroup",
+     "arnMember": "ARN",
+     "nameMember": "CacheSubnetGroupName",
+     "arnWire": "ARN",
+     "nameWire": "CacheSubnetGroupName",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateCacheSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheSubnetGroupDescription",
+         "type": "string",
+         "required": true,
+         "key": "CacheSubnetGroupDescription"
+        },
+        {
+         "name": "CacheSubnetGroupName",
+         "type": "string",
+         "required": true,
+         "key": "CacheSubnetGroupName"
+        },
+        {
+         "name": "SubnetIds",
+         "type": "list",
+         "element": "string",
+         "required": true,
+         "key": "SubnetIds",
+         "itemKey": "SubnetIdentifier"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        }
+       ],
+       "wrapper": "CacheSubnetGroup",
+       "output": "CreateCacheSubnetGroupResult",
+       "resultWrapper": "CreateCacheSubnetGroupResult"
+      },
+      "delete": {
+       "name": "DeleteCacheSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheSubnetGroupName",
+         "type": "string",
+         "required": true,
+         "key": "CacheSubnetGroupName"
+        }
+       ],
+       "lookup": "CacheSubnetGroupName",
+       "lookupKey": "name"
+      },
+      "describe": {
+       "name": "DescribeCacheSubnetGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheSubnetGroupName",
+         "type": "string",
+         "key": "CacheSubnetGroupName"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "CacheSubnetGroups",
+       "itemName": "CacheSubnetGroupName",
+       "itemArn": "ARN",
+       "names": "CacheSubnetGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "CacheSubnetGroupMessage",
+       "resultWrapper": "DescribeCacheSubnetGroupsResult"
+      },
+      "list": {
+       "name": "DescribeCacheSubnetGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheSubnetGroupName",
+         "type": "string",
+         "key": "CacheSubnetGroupName"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "CacheSubnetGroups",
+       "itemName": "CacheSubnetGroupName",
+       "itemArn": "ARN",
+       "names": "CacheSubnetGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "CacheSubnetGroupMessage",
+       "resultWrapper": "DescribeCacheSubnetGroupsResult"
+      },
+      "update": {
+       "name": "ModifyCacheSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "CacheSubnetGroupDescription",
+         "type": "string",
+         "key": "CacheSubnetGroupDescription"
+        },
+        {
+         "name": "CacheSubnetGroupName",
+         "type": "string",
+         "required": true,
+         "key": "CacheSubnetGroupName"
+        },
+        {
+         "name": "SubnetIds",
+         "type": "list",
+         "element": "string",
+         "key": "SubnetIds",
+         "itemKey": "SubnetIdentifier"
+        }
+       ],
+       "wrapper": "CacheSubnetGroup",
+       "lookup": "CacheSubnetGroupName",
+       "lookupKey": "name",
+       "output": "ModifyCacheSubnetGroupResult",
+       "resultWrapper": "ModifyCacheSubnetGroupResult",
+       "editable": [
+        "CacheSubnetGroupDescription",
+        "SubnetIds"
+       ]
+      }
+     }
+    },
+    {
+     "kind": "user",
+     "arnMember": "ARN",
+     "nameMember": "UserId",
+     "arnWire": "ARN",
+     "nameWire": "UserId",
+     "limit": 100,
+     "operations": {
+      "create": {
+       "name": "CreateUser",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AccessString",
+         "type": "string",
+         "required": true,
+         "pattern": ".*\\S.*",
+         "key": "AccessString"
+        },
+        {
+         "name": "AuthenticationMode",
+         "type": "structure",
+         "key": "AuthenticationMode",
+         "shape": "AuthenticationMode"
+        },
+        {
+         "name": "Engine",
+         "type": "string",
+         "required": true,
+         "pattern": "[a-zA-Z]*",
+         "key": "Engine"
+        },
+        {
+         "name": "NoPasswordRequired",
+         "type": "boolean",
+         "key": "NoPasswordRequired"
+        },
+        {
+         "name": "Passwords",
+         "type": "list",
+         "element": "string",
+         "min": 1,
+         "key": "Passwords",
+         "itemKey": "member"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        },
+        {
+         "name": "UserId",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "pattern": "[a-zA-Z][a-zA-Z0-9\\-]*",
+         "key": "UserId"
+        },
+        {
+         "name": "UserName",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "key": "UserName"
+        }
+       ],
+       "output": "User",
+       "resultWrapper": "CreateUserResult"
+      },
+      "delete": {
+       "name": "DeleteUser",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "UserId",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "pattern": "[a-zA-Z][a-zA-Z0-9\\-]*",
+         "key": "UserId"
+        }
+       ],
+       "lookup": "UserId",
+       "lookupKey": "name",
+       "output": "User",
+       "resultWrapper": "DeleteUserResult"
+      },
+      "describe": {
+       "name": "DescribeUsers",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "Engine",
+         "type": "string",
+         "pattern": "[a-zA-Z]*",
+         "key": "Engine"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "member"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "UserId",
+         "type": "string",
+         "min": 1,
+         "pattern": "[a-zA-Z][a-zA-Z0-9\\-]*",
+         "key": "UserId"
+        }
+       ],
+       "items": "Users",
+       "itemName": "UserId",
+       "itemArn": "ARN",
+       "names": "UserId",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DescribeUsersResult",
+       "resultWrapper": "DescribeUsersResult"
+      },
+      "list": {
+       "name": "DescribeUsers",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "Engine",
+         "type": "string",
+         "pattern": "[a-zA-Z]*",
+         "key": "Engine"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "member"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "UserId",
+         "type": "string",
+         "min": 1,
+         "pattern": "[a-zA-Z][a-zA-Z0-9\\-]*",
+         "key": "UserId"
+        }
+       ],
+       "items": "Users",
+       "itemName": "UserId",
+       "itemArn": "ARN",
+       "names": "UserId",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DescribeUsersResult",
+       "resultWrapper": "DescribeUsersResult"
+      },
+      "update": {
+       "name": "ModifyUser",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AccessString",
+         "type": "string",
+         "pattern": ".*\\S.*",
+         "key": "AccessString"
+        },
+        {
+         "name": "AppendAccessString",
+         "type": "string",
+         "pattern": ".*\\S.*",
+         "key": "AppendAccessString"
+        },
+        {
+         "name": "AuthenticationMode",
+         "type": "structure",
+         "key": "AuthenticationMode",
+         "shape": "AuthenticationMode"
+        },
+        {
+         "name": "Engine",
+         "type": "string",
+         "pattern": "[a-zA-Z]*",
+         "key": "Engine"
+        },
+        {
+         "name": "NoPasswordRequired",
+         "type": "boolean",
+         "key": "NoPasswordRequired"
+        },
+        {
+         "name": "Passwords",
+         "type": "list",
+         "element": "string",
+         "min": 1,
+         "key": "Passwords",
+         "itemKey": "member"
+        },
+        {
+         "name": "UserId",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "pattern": "[a-zA-Z][a-zA-Z0-9\\-]*",
+         "key": "UserId"
+        }
+       ],
+       "lookup": "UserId",
+       "lookupKey": "name",
+       "output": "User",
+       "resultWrapper": "ModifyUserResult",
+       "editable": [
+        "AccessString",
+        "AppendAccessString",
+        "AuthenticationMode",
+        "Engine",
+        "NoPasswordRequired",
+        "Passwords"
+       ]
+      }
+     }
+    }
+   ],
+   "tagging": {
+    "list-tags": {
+     "name": "ListTagsForResource",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "ResourceName",
+       "type": "string",
+       "required": true,
+       "key": "ResourceName"
+      }
+     ],
+     "lookup": "ResourceName",
+     "lookupKey": "name",
+     "output": "TagListMessage",
+     "resultWrapper": "ListTagsForResourceResult",
+     "tagsKey": "TagList"
+    },
+    "tag": {
+     "name": "AddTagsToResource",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "ResourceName",
+       "type": "string",
+       "required": true,
+       "key": "ResourceName"
+      },
+      {
+       "name": "Tags",
+       "type": "list",
+       "element": "structure",
+       "required": true,
+       "key": "Tags",
+       "itemKey": "Tag",
+       "shape": "TagList"
+      }
+     ],
+     "lookup": "ResourceName",
+     "lookupKey": "name",
+     "output": "TagListMessage",
+     "resultWrapper": "AddTagsToResourceResult"
+    },
+    "untag": {
+     "name": "RemoveTagsFromResource",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "ResourceName",
+       "type": "string",
+       "required": true,
+       "key": "ResourceName"
+      },
+      {
+       "name": "TagKeys",
+       "type": "list",
+       "element": "string",
+       "required": true,
+       "key": "TagKeys",
+       "itemKey": "member"
+      }
+     ],
+     "lookup": "ResourceName",
+     "lookupKey": "name",
+     "output": "TagListMessage",
+     "resultWrapper": "RemoveTagsFromResourceResult"
+    }
+   },
+   "bounds": [
+    "Cache parameter groups, cache subnet groups and IAM-authenticated users are stored configuration served over the Query protocol: no cache cluster, replication group, serverless cache, global datastore, snapshot, security group or reserved node exists, and CreateCacheCluster, CreateReplicationGroup, CreateServerlessCache, CreateSnapshot and every other official operation return UnknownOperationException with HTTP 501.",
+    "User groups are not implemented: a group references users, requires the account's default user and must drop a deleted user, none of which the stored model expresses, so CreateUserGroup, ModifyUserGroup, DescribeUserGroups and DeleteUserGroup return UnknownOperationException with HTTP 501 and users always report no UserGroupIds.",
+    "Users must use iam authentication and the engine valkey or redis: passwords and NoPasswordRequired are refused so no password is stored, the user name must equal the user ID (the ElastiCache rule for IAM-enabled users), and the default user is refused and not pre-created. Access strings are stored without parsing, and AppendAccessString is not implemented. MinimumEngineVersion is 6.0 for redis and 7.2 for valkey as documented; DeleteUser returns the user with status deleting.",
+    "Parameter values are not modeled: ModifyCacheParameterGroup, ResetCacheParameterGroup, DescribeCacheParameters, DescribeEngineDefaultParameters and DescribeCacheEngineVersions are not implemented, and default parameter groups and the default cache subnet group are not pre-created. A parameter group family must be one of the documented values and is not checked against engine versions; names are stored as given and IsGlobal is always false.",
+    "A cache subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, Outpost or supported network type, and the CacheSubnetQuotaExceededFault limit of 20 is a local limit. Cache subnet group names are 1 to 255 letters, digits or hyphens and are stored in lowercase.",
+    "Describe operations refuse Marker values that were not issued for the request, accept MaxRecords from 20 to 100 for parameter and subnet groups and fail with the operation's not-found fault for an unknown name; DescribeUsers refuses Filters and a MaxRecords below 1. Resource counts per Region (50 parameter groups, 50 subnet groups, 100 users) are local limits.",
+    "Tags apply to the three resource kinds by ARN (arn:aws:elasticache:region:account:parametergroup:name, subnetgroup:name and user:id). Tag keys are required and must not start with aws:. AddTagsToResource and RemoveTagsFromResource return an empty TagList, removing a missing key succeeds instead of failing with TagNotFound, and a well-formed ARN of an unknown resource fails with CacheClusterNotFound, the first not-found fault the official tag operations model; a malformed ARN fails with InvalidARN. More than 50 tags in one request fail with TagQuotaPerResourceExceeded, but adding tags that bring the total beyond 50 fails with InvalidParameterValue."
+   ],
+   "source": {
+    "package": "botocore",
+    "version": "1.41.6",
+    "file": "botocore/data/elasticache/2015-02-02/service-2.json",
+    "sha256": "5698cce11f244ad4eebd85d527665123e98095d322df66118c481486db97e62d",
+    "license": "Apache-2.0"
+   },
+   "xmlShapes": {
+    "Authentication": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "PasswordCount",
+       "element": "PasswordCount",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "Type",
+       "element": "Type",
+       "shape": "AuthenticationType"
+      }
+     ]
+    },
+    "AuthenticationType": {
+     "type": "string"
+    },
+    "AvailabilityZone": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Name",
+       "element": "Name",
+       "shape": "String"
+      }
+     ]
+    },
+    "Boolean": {
+     "type": "boolean"
+    },
+    "CacheParameterGroup": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ARN",
+       "element": "ARN",
+       "shape": "String"
+      },
+      {
+       "name": "CacheParameterGroupFamily",
+       "element": "CacheParameterGroupFamily",
+       "shape": "String"
+      },
+      {
+       "name": "CacheParameterGroupName",
+       "element": "CacheParameterGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "Description",
+       "element": "Description",
+       "shape": "String"
+      },
+      {
+       "name": "IsGlobal",
+       "element": "IsGlobal",
+       "shape": "Boolean"
+      }
+     ]
+    },
+    "CacheParameterGroupList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "CacheParameterGroup",
+      "shape": "CacheParameterGroup"
+     }
+    },
+    "CacheParameterGroupsMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheParameterGroups",
+       "element": "CacheParameterGroups",
+       "shape": "CacheParameterGroupList"
+      },
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      }
+     ]
+    },
+    "CacheSubnetGroup": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ARN",
+       "element": "ARN",
+       "shape": "String"
+      },
+      {
+       "name": "CacheSubnetGroupDescription",
+       "element": "CacheSubnetGroupDescription",
+       "shape": "String"
+      },
+      {
+       "name": "CacheSubnetGroupName",
+       "element": "CacheSubnetGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "Subnets",
+       "element": "Subnets",
+       "shape": "SubnetList"
+      },
+      {
+       "name": "SupportedNetworkTypes",
+       "element": "SupportedNetworkTypes",
+       "shape": "NetworkTypeList"
+      },
+      {
+       "name": "VpcId",
+       "element": "VpcId",
+       "shape": "String"
+      }
+     ]
+    },
+    "CacheSubnetGroupMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheSubnetGroups",
+       "element": "CacheSubnetGroups",
+       "shape": "CacheSubnetGroups"
+      },
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      }
+     ]
+    },
+    "CacheSubnetGroups": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "CacheSubnetGroup",
+      "shape": "CacheSubnetGroup"
+     }
+    },
+    "CreateCacheParameterGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheParameterGroup",
+       "element": "CacheParameterGroup",
+       "shape": "CacheParameterGroup"
+      }
+     ]
+    },
+    "CreateCacheSubnetGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheSubnetGroup",
+       "element": "CacheSubnetGroup",
+       "shape": "CacheSubnetGroup"
+      }
+     ]
+    },
+    "DescribeUsersResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      },
+      {
+       "name": "Users",
+       "element": "Users",
+       "shape": "UserList"
+      }
+     ]
+    },
+    "EngineType": {
+     "type": "string"
+    },
+    "IntegerOptional": {
+     "type": "integer"
+    },
+    "ModifyCacheSubnetGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "CacheSubnetGroup",
+       "element": "CacheSubnetGroup",
+       "shape": "CacheSubnetGroup"
+      }
+     ]
+    },
+    "NetworkType": {
+     "type": "string"
+    },
+    "NetworkTypeList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "member",
+      "shape": "NetworkType"
+     }
+    },
+    "String": {
+     "type": "string"
+    },
+    "Subnet": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "SubnetAvailabilityZone",
+       "element": "SubnetAvailabilityZone",
+       "shape": "AvailabilityZone"
+      },
+      {
+       "name": "SubnetIdentifier",
+       "element": "SubnetIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "SubnetOutpost",
+       "element": "SubnetOutpost",
+       "shape": "SubnetOutpost"
+      },
+      {
+       "name": "SupportedNetworkTypes",
+       "element": "SupportedNetworkTypes",
+       "shape": "NetworkTypeList"
+      }
+     ]
+    },
+    "SubnetList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "Subnet",
+      "shape": "Subnet"
+     }
+    },
+    "SubnetOutpost": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "SubnetOutpostArn",
+       "element": "SubnetOutpostArn",
+       "shape": "String"
+      }
+     ]
+    },
+    "Tag": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Key",
+       "element": "Key",
+       "shape": "String"
+      },
+      {
+       "name": "Value",
+       "element": "Value",
+       "shape": "String"
+      }
+     ]
+    },
+    "TagList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "Tag",
+      "shape": "Tag"
+     }
+    },
+    "TagListMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "TagList",
+       "element": "TagList",
+       "shape": "TagList"
+      }
+     ]
+    },
+    "User": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ARN",
+       "element": "ARN",
+       "shape": "String"
+      },
+      {
+       "name": "AccessString",
+       "element": "AccessString",
+       "shape": "String"
+      },
+      {
+       "name": "Authentication",
+       "element": "Authentication",
+       "shape": "Authentication"
+      },
+      {
+       "name": "Engine",
+       "element": "Engine",
+       "shape": "EngineType"
+      },
+      {
+       "name": "MinimumEngineVersion",
+       "element": "MinimumEngineVersion",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      },
+      {
+       "name": "UserGroupIds",
+       "element": "UserGroupIds",
+       "shape": "UserGroupIdList"
+      },
+      {
+       "name": "UserId",
+       "element": "UserId",
+       "shape": "String"
+      },
+      {
+       "name": "UserName",
+       "element": "UserName",
+       "shape": "String"
+      }
+     ]
+    },
+    "UserGroupId": {
+     "type": "string"
+    },
+    "UserGroupIdList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "member",
+      "shape": "UserGroupId"
+     }
+    },
+    "UserList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "member",
+      "shape": "User"
+     }
+    }
+   },
+   "inputShapes": {
+    "AuthenticationMode": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Passwords",
+       "shape": "PasswordListInput"
+      },
+      {
+       "name": "Type",
+       "shape": "InputAuthenticationType"
+      }
+     ]
+    },
+    "InputAuthenticationType": {
+     "type": "string",
+     "enum": [
+      "password",
+      "no-password-required",
+      "iam"
+     ]
+    },
+    "PasswordListInput": {
+     "type": "list",
+     "member": {
+      "key": "member",
+      "shape": "String"
+     },
+     "min": 1
+    },
+    "String": {
+     "type": "string"
+    },
+    "Tag": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Key",
+       "shape": "String"
+      },
+      {
+       "name": "Value",
+       "shape": "String"
+      }
+     ]
+    },
+    "TagList": {
+     "type": "list",
+     "member": {
+      "key": "Tag",
+      "shape": "Tag"
+     }
+    }
+   }
+  },
+  {
+   "model": "memorydb",
+   "title": "Amazon MemoryDB",
+   "serviceId": "MemoryDB",
+   "apiVersion": "2021-01-01",
+   "protocol": "json",
+   "jsonVersion": "1.1",
+   "targetPrefix": "AmazonMemoryDB",
+   "signingName": "memorydb",
+   "iamPrefix": "memorydb",
+   "account": "000000000000",
+   "issues": [
+    127
+   ],
+   "operations": [
+    "CreateParameterGroup",
+    "CreateSubnetGroup",
+    "CreateUser",
+    "DeleteParameterGroup",
+    "DeleteSubnetGroup",
+    "DeleteUser",
+    "DescribeParameterGroups",
+    "DescribeSubnetGroups",
+    "DescribeUsers",
+    "ListTags",
+    "TagResource",
+    "UntagResource",
+    "UpdateSubnetGroup",
+    "UpdateUser"
+   ],
+   "officialOperations": 45,
+   "resources": [
+    {
+     "kind": "parameterGroup",
+     "arnMember": "ARN",
+     "nameMember": "Name",
+     "arnWire": "ARN",
+     "nameWire": "Name",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateParameterGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "Description",
+         "type": "string"
+        },
+        {
+         "name": "Family",
+         "type": "string",
+         "required": true
+        },
+        {
+         "name": "ParameterGroupName",
+         "type": "string",
+         "required": true
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "max": 200,
+         "shape": "TagList"
+        }
+       ],
+       "wrapper": "ParameterGroup"
+      },
+      "delete": {
+       "name": "DeleteParameterGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "ParameterGroupName",
+         "type": "string",
+         "required": true
+        }
+       ],
+       "wrapper": "ParameterGroup",
+       "lookup": "ParameterGroupName",
+       "lookupKey": "name"
+      },
+      "list": {
+       "name": "DescribeParameterGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "MaxResults",
+         "type": "integer"
+        },
+        {
+         "name": "NextToken",
+         "type": "string"
+        },
+        {
+         "name": "ParameterGroupName",
+         "type": "string"
+        }
+       ],
+       "items": "ParameterGroups",
+       "itemName": "Name",
+       "itemArn": "ARN",
+       "inputToken": "NextToken",
+       "outputToken": "NextToken"
+      }
+     }
+    },
+    {
+     "kind": "subnetGroup",
+     "arnMember": "ARN",
+     "nameMember": "Name",
+     "arnWire": "ARN",
+     "nameWire": "Name",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "Description",
+         "type": "string"
+        },
+        {
+         "name": "SubnetGroupName",
+         "type": "string",
+         "required": true
+        },
+        {
+         "name": "SubnetIds",
+         "type": "list",
+         "element": "string",
+         "required": true
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "max": 200,
+         "shape": "TagList"
+        }
+       ],
+       "wrapper": "SubnetGroup"
+      },
+      "delete": {
+       "name": "DeleteSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "SubnetGroupName",
+         "type": "string",
+         "required": true
+        }
+       ],
+       "wrapper": "SubnetGroup",
+       "lookup": "SubnetGroupName",
+       "lookupKey": "name"
+      },
+      "list": {
+       "name": "DescribeSubnetGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "MaxResults",
+         "type": "integer"
+        },
+        {
+         "name": "NextToken",
+         "type": "string"
+        },
+        {
+         "name": "SubnetGroupName",
+         "type": "string"
+        }
+       ],
+       "items": "SubnetGroups",
+       "itemName": "Name",
+       "itemArn": "ARN",
+       "inputToken": "NextToken",
+       "outputToken": "NextToken"
+      },
+      "update": {
+       "name": "UpdateSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "Description",
+         "type": "string"
+        },
+        {
+         "name": "SubnetGroupName",
+         "type": "string",
+         "required": true
+        },
+        {
+         "name": "SubnetIds",
+         "type": "list",
+         "element": "string"
+        }
+       ],
+       "wrapper": "SubnetGroup",
+       "lookup": "SubnetGroupName",
+       "lookupKey": "name",
+       "editable": [
+        "Description",
+        "SubnetIds"
+       ]
+      }
+     }
+    },
+    {
+     "kind": "user",
+     "arnMember": "ARN",
+     "nameMember": "Name",
+     "arnWire": "ARN",
+     "nameWire": "Name",
+     "limit": 100,
+     "operations": {
+      "create": {
+       "name": "CreateUser",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AccessString",
+         "type": "string",
+         "required": true,
+         "pattern": ".*\\S.*"
+        },
+        {
+         "name": "AuthenticationMode",
+         "type": "structure",
+         "required": true,
+         "shape": "AuthenticationMode"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "max": 200,
+         "shape": "TagList"
+        },
+        {
+         "name": "UserName",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "pattern": "[a-zA-Z][a-zA-Z0-9\\-]*"
+        }
+       ],
+       "wrapper": "User"
+      },
+      "delete": {
+       "name": "DeleteUser",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "UserName",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "pattern": "[a-zA-Z][a-zA-Z0-9\\-]*"
+        }
+       ],
+       "wrapper": "User",
+       "lookup": "UserName",
+       "lookupKey": "name"
+      },
+      "list": {
+       "name": "DescribeUsers",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure"
+        },
+        {
+         "name": "MaxResults",
+         "type": "integer"
+        },
+        {
+         "name": "NextToken",
+         "type": "string"
+        },
+        {
+         "name": "UserName",
+         "type": "string",
+         "min": 1,
+         "pattern": "[a-zA-Z][a-zA-Z0-9\\-]*"
+        }
+       ],
+       "items": "Users",
+       "itemName": "Name",
+       "itemArn": "ARN",
+       "inputToken": "NextToken",
+       "outputToken": "NextToken"
+      },
+      "update": {
+       "name": "UpdateUser",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "AccessString",
+         "type": "string",
+         "pattern": ".*\\S.*"
+        },
+        {
+         "name": "AuthenticationMode",
+         "type": "structure",
+         "shape": "AuthenticationMode"
+        },
+        {
+         "name": "UserName",
+         "type": "string",
+         "required": true,
+         "min": 1,
+         "pattern": "[a-zA-Z][a-zA-Z0-9\\-]*"
+        }
+       ],
+       "wrapper": "User",
+       "lookup": "UserName",
+       "lookupKey": "name",
+       "editable": [
+        "AccessString",
+        "AuthenticationMode"
+       ]
+      }
+     }
+    }
+   ],
+   "tagging": {
+    "list-tags": {
+     "name": "ListTags",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "ResourceArn",
+       "type": "string",
+       "required": true
+      }
+     ],
+     "lookup": "ResourceArn",
+     "lookupKey": "arn"
+    },
+    "tag": {
+     "name": "TagResource",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "ResourceArn",
+       "type": "string",
+       "required": true
+      },
+      {
+       "name": "Tags",
+       "type": "list",
+       "element": "structure",
+       "required": true,
+       "max": 200,
+       "shape": "TagList"
+      }
+     ],
+     "lookup": "ResourceArn",
+     "lookupKey": "arn"
+    },
+    "untag": {
+     "name": "UntagResource",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "ResourceArn",
+       "type": "string",
+       "required": true
+      },
+      {
+       "name": "TagKeys",
+       "type": "list",
+       "element": "string",
+       "required": true
+      }
+     ],
+     "lookup": "ResourceArn",
+     "lookupKey": "arn"
+    }
+   },
+   "bounds": [
+    "Parameter groups, subnet groups and IAM-authenticated users are stored configuration: no cluster, shard, node, snapshot, ACL or multi-Region cluster exists, and CreateCluster, CreateACL, CreateSnapshot and the other data-plane APIs return UnknownOperationException with HTTP 501.",
+    "Users must use iam authentication; password authentication is refused so no password is stored. The default user, default parameter groups and the open-access ACL are not pre-created, and parameter values (DescribeParameters, UpdateParameterGroup, ResetParameterGroup) are not implemented.",
+    "Parameter group families, subnet IDs and access strings are stored without validation; subnet groups report no VPC or Availability Zone. Describe filters by name return an empty list for an unknown name instead of a not-found fault, and the Filters member is refused. TagResource and UntagResource return no TagList, and removing a missing tag key succeeds."
+   ],
+   "source": {
+    "package": "botocore",
+    "version": "1.41.6",
+    "file": "botocore/data/memorydb/2021-01-01/service-2.json",
+    "sha256": "f873dbcdcc745d031046e810add6b6177de4fd3618428be46fc2aa1add65aef3",
+    "license": "Apache-2.0"
+   },
+   "inputShapes": {
+    "AuthenticationMode": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Passwords",
+       "shape": "PasswordListInput"
+      },
+      {
+       "name": "Type",
+       "shape": "InputAuthenticationType"
+      }
+     ]
+    },
+    "InputAuthenticationType": {
+     "type": "string",
+     "enum": [
+      "password",
+      "iam"
+     ]
+    },
+    "PasswordListInput": {
+     "type": "list",
+     "member": {
+      "shape": "String"
+     },
+     "min": 1
+    },
+    "String": {
+     "type": "string"
+    },
+    "Tag": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Key",
+       "shape": "String"
+      },
+      {
+       "name": "Value",
+       "shape": "String"
+      }
+     ]
+    },
+    "TagList": {
+     "type": "list",
+     "member": {
+      "shape": "Tag"
+     },
+     "max": 200
+    }
+   }
+  },
+  {
+   "model": "rds",
+   "title": "Amazon Relational Database Service",
+   "serviceId": "RDS",
+   "apiVersion": "2014-10-31",
+   "protocol": "query",
+   "signingName": "rds",
+   "iamPrefix": "rds",
+   "account": "000000000000",
+   "issues": [
+    130
+   ],
+   "operations": [
+    "AddTagsToResource",
+    "CreateDBClusterParameterGroup",
+    "CreateDBParameterGroup",
+    "CreateDBSubnetGroup",
+    "CreateOptionGroup",
+    "DeleteDBClusterParameterGroup",
+    "DeleteDBParameterGroup",
+    "DeleteDBSubnetGroup",
+    "DeleteOptionGroup",
+    "DescribeDBClusterParameterGroups",
+    "DescribeDBParameterGroups",
+    "DescribeDBSubnetGroups",
+    "DescribeOptionGroups",
+    "ListTagsForResource",
+    "ModifyDBSubnetGroup",
+    "RemoveTagsFromResource"
+   ],
+   "officialOperations": 163,
+   "resources": [
+    {
+     "kind": "dbSubnetGroup",
+     "arnMember": "DBSubnetGroupArn",
+     "nameMember": "DBSubnetGroupName",
+     "arnWire": "DBSubnetGroupArn",
+     "nameWire": "DBSubnetGroupName",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateDBSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBSubnetGroupDescription",
+         "type": "string",
+         "required": true,
+         "key": "DBSubnetGroupDescription"
+        },
+        {
+         "name": "DBSubnetGroupName",
+         "type": "string",
+         "required": true,
+         "key": "DBSubnetGroupName"
+        },
+        {
+         "name": "SubnetIds",
+         "type": "list",
+         "element": "string",
+         "required": true,
+         "key": "SubnetIds",
+         "itemKey": "SubnetIdentifier"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        }
+       ],
+       "wrapper": "DBSubnetGroup",
+       "output": "CreateDBSubnetGroupResult",
+       "resultWrapper": "CreateDBSubnetGroupResult"
+      },
+      "delete": {
+       "name": "DeleteDBSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBSubnetGroupName",
+         "type": "string",
+         "required": true,
+         "key": "DBSubnetGroupName"
+        }
+       ],
+       "lookup": "DBSubnetGroupName",
+       "lookupKey": "name"
+      },
+      "describe": {
+       "name": "DescribeDBSubnetGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBSubnetGroupName",
+         "type": "string",
+         "key": "DBSubnetGroupName"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "DBSubnetGroups",
+       "itemName": "DBSubnetGroupName",
+       "itemArn": "DBSubnetGroupArn",
+       "names": "DBSubnetGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DBSubnetGroupMessage",
+       "resultWrapper": "DescribeDBSubnetGroupsResult"
+      },
+      "list": {
+       "name": "DescribeDBSubnetGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBSubnetGroupName",
+         "type": "string",
+         "key": "DBSubnetGroupName"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "DBSubnetGroups",
+       "itemName": "DBSubnetGroupName",
+       "itemArn": "DBSubnetGroupArn",
+       "names": "DBSubnetGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DBSubnetGroupMessage",
+       "resultWrapper": "DescribeDBSubnetGroupsResult"
+      },
+      "update": {
+       "name": "ModifyDBSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBSubnetGroupDescription",
+         "type": "string",
+         "key": "DBSubnetGroupDescription"
+        },
+        {
+         "name": "DBSubnetGroupName",
+         "type": "string",
+         "required": true,
+         "key": "DBSubnetGroupName"
+        },
+        {
+         "name": "SubnetIds",
+         "type": "list",
+         "element": "string",
+         "required": true,
+         "key": "SubnetIds",
+         "itemKey": "SubnetIdentifier"
+        }
+       ],
+       "wrapper": "DBSubnetGroup",
+       "lookup": "DBSubnetGroupName",
+       "lookupKey": "name",
+       "output": "ModifyDBSubnetGroupResult",
+       "resultWrapper": "ModifyDBSubnetGroupResult",
+       "editable": [
+        "DBSubnetGroupDescription",
+        "SubnetIds"
+       ]
+      }
+     }
+    },
+    {
+     "kind": "dbParameterGroup",
+     "arnMember": "DBParameterGroupArn",
+     "nameMember": "DBParameterGroupName",
+     "arnWire": "DBParameterGroupArn",
+     "nameWire": "DBParameterGroupName",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateDBParameterGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBParameterGroupFamily",
+         "type": "string",
+         "required": true,
+         "key": "DBParameterGroupFamily"
+        },
+        {
+         "name": "DBParameterGroupName",
+         "type": "string",
+         "required": true,
+         "key": "DBParameterGroupName"
+        },
+        {
+         "name": "Description",
+         "type": "string",
+         "required": true,
+         "key": "Description"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        }
+       ],
+       "wrapper": "DBParameterGroup",
+       "output": "CreateDBParameterGroupResult",
+       "resultWrapper": "CreateDBParameterGroupResult"
+      },
+      "delete": {
+       "name": "DeleteDBParameterGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBParameterGroupName",
+         "type": "string",
+         "required": true,
+         "key": "DBParameterGroupName"
+        }
+       ],
+       "lookup": "DBParameterGroupName",
+       "lookupKey": "name"
+      },
+      "describe": {
+       "name": "DescribeDBParameterGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBParameterGroupName",
+         "type": "string",
+         "key": "DBParameterGroupName"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "DBParameterGroups",
+       "itemName": "DBParameterGroupName",
+       "itemArn": "DBParameterGroupArn",
+       "names": "DBParameterGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DBParameterGroupsMessage",
+       "resultWrapper": "DescribeDBParameterGroupsResult"
+      },
+      "list": {
+       "name": "DescribeDBParameterGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBParameterGroupName",
+         "type": "string",
+         "key": "DBParameterGroupName"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "DBParameterGroups",
+       "itemName": "DBParameterGroupName",
+       "itemArn": "DBParameterGroupArn",
+       "names": "DBParameterGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DBParameterGroupsMessage",
+       "resultWrapper": "DescribeDBParameterGroupsResult"
+      }
+     }
+    },
+    {
+     "kind": "dbClusterParameterGroup",
+     "arnMember": "DBClusterParameterGroupArn",
+     "nameMember": "DBClusterParameterGroupName",
+     "arnWire": "DBClusterParameterGroupArn",
+     "nameWire": "DBClusterParameterGroupName",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateDBClusterParameterGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBClusterParameterGroupName",
+         "type": "string",
+         "required": true,
+         "key": "DBClusterParameterGroupName"
+        },
+        {
+         "name": "DBParameterGroupFamily",
+         "type": "string",
+         "required": true,
+         "key": "DBParameterGroupFamily"
+        },
+        {
+         "name": "Description",
+         "type": "string",
+         "required": true,
+         "key": "Description"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        }
+       ],
+       "wrapper": "DBClusterParameterGroup",
+       "output": "CreateDBClusterParameterGroupResult",
+       "resultWrapper": "CreateDBClusterParameterGroupResult"
+      },
+      "delete": {
+       "name": "DeleteDBClusterParameterGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBClusterParameterGroupName",
+         "type": "string",
+         "required": true,
+         "key": "DBClusterParameterGroupName"
+        }
+       ],
+       "lookup": "DBClusterParameterGroupName",
+       "lookupKey": "name"
+      },
+      "describe": {
+       "name": "DescribeDBClusterParameterGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBClusterParameterGroupName",
+         "type": "string",
+         "key": "DBClusterParameterGroupName"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "DBClusterParameterGroups",
+       "itemName": "DBClusterParameterGroupName",
+       "itemArn": "DBClusterParameterGroupArn",
+       "names": "DBClusterParameterGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DBClusterParameterGroupsMessage",
+       "resultWrapper": "DescribeDBClusterParameterGroupsResult"
+      },
+      "list": {
+       "name": "DescribeDBClusterParameterGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "DBClusterParameterGroupName",
+         "type": "string",
+         "key": "DBClusterParameterGroupName"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        }
+       ],
+       "items": "DBClusterParameterGroups",
+       "itemName": "DBClusterParameterGroupName",
+       "itemArn": "DBClusterParameterGroupArn",
+       "names": "DBClusterParameterGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "DBClusterParameterGroupsMessage",
+       "resultWrapper": "DescribeDBClusterParameterGroupsResult"
+      }
+     }
+    },
+    {
+     "kind": "optionGroup",
+     "arnMember": "OptionGroupArn",
+     "nameMember": "OptionGroupName",
+     "arnWire": "OptionGroupArn",
+     "nameWire": "OptionGroupName",
+     "limit": 20,
+     "operations": {
+      "create": {
+       "name": "CreateOptionGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "EngineName",
+         "type": "string",
+         "required": true,
+         "key": "EngineName"
+        },
+        {
+         "name": "MajorEngineVersion",
+         "type": "string",
+         "required": true,
+         "key": "MajorEngineVersion"
+        },
+        {
+         "name": "OptionGroupDescription",
+         "type": "string",
+         "required": true,
+         "key": "OptionGroupDescription"
+        },
+        {
+         "name": "OptionGroupName",
+         "type": "string",
+         "required": true,
+         "key": "OptionGroupName"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        }
+       ],
+       "wrapper": "OptionGroup",
+       "output": "CreateOptionGroupResult",
+       "resultWrapper": "CreateOptionGroupResult"
+      },
+      "delete": {
+       "name": "DeleteOptionGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "OptionGroupName",
+         "type": "string",
+         "required": true,
+         "key": "OptionGroupName"
+        }
+       ],
+       "lookup": "OptionGroupName",
+       "lookupKey": "name"
+      },
+      "describe": {
+       "name": "DescribeOptionGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "EngineName",
+         "type": "string",
+         "key": "EngineName"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "MajorEngineVersion",
+         "type": "string",
+         "key": "MajorEngineVersion"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "OptionGroupName",
+         "type": "string",
+         "key": "OptionGroupName"
+        }
+       ],
+       "items": "OptionGroupsList",
+       "itemName": "OptionGroupName",
+       "itemArn": "OptionGroupArn",
+       "names": "OptionGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "OptionGroups",
+       "resultWrapper": "DescribeOptionGroupsResult"
+      },
+      "list": {
+       "name": "DescribeOptionGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "EngineName",
+         "type": "string",
+         "key": "EngineName"
+        },
+        {
+         "name": "Filters",
+         "type": "list",
+         "element": "structure",
+         "key": "Filters",
+         "itemKey": "Filter"
+        },
+        {
+         "name": "MajorEngineVersion",
+         "type": "string",
+         "key": "MajorEngineVersion"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "OptionGroupName",
+         "type": "string",
+         "key": "OptionGroupName"
+        }
+       ],
+       "items": "OptionGroupsList",
+       "itemName": "OptionGroupName",
+       "itemArn": "OptionGroupArn",
+       "names": "OptionGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "OptionGroups",
+       "resultWrapper": "DescribeOptionGroupsResult"
+      }
+     }
+    }
+   ],
+   "tagging": {
+    "list-tags": {
+     "name": "ListTagsForResource",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "Filters",
+       "type": "list",
+       "element": "structure",
+       "key": "Filters",
+       "itemKey": "Filter"
+      },
+      {
+       "name": "ResourceName",
+       "type": "string",
+       "required": true,
+       "key": "ResourceName"
+      }
+     ],
+     "lookup": "ResourceName",
+     "lookupKey": "name",
+     "output": "TagListMessage",
+     "resultWrapper": "ListTagsForResourceResult",
+     "tagsKey": "TagList"
+    },
+    "tag": {
+     "name": "AddTagsToResource",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "ResourceName",
+       "type": "string",
+       "required": true,
+       "key": "ResourceName"
+      },
+      {
+       "name": "Tags",
+       "type": "list",
+       "element": "structure",
+       "required": true,
+       "key": "Tags",
+       "itemKey": "Tag",
+       "shape": "TagList"
+      }
+     ],
+     "lookup": "ResourceName",
+     "lookupKey": "name"
+    },
+    "untag": {
+     "name": "RemoveTagsFromResource",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "ResourceName",
+       "type": "string",
+       "required": true,
+       "key": "ResourceName"
+      },
+      {
+       "name": "TagKeys",
+       "type": "list",
+       "element": "string",
+       "required": true,
+       "key": "TagKeys",
+       "itemKey": "member"
+      }
+     ],
+     "lookup": "ResourceName",
+     "lookupKey": "name"
+    }
+   },
+   "bounds": [
+    "DB subnet groups, DB parameter groups, DB cluster parameter groups and option groups are stored configuration served over the Query protocol: no DB instance, cluster, proxy, snapshot, event subscription, network or database engine exists, and CreateDBInstance, CreateDBCluster, CreateDBSnapshot and every other official operation return UnknownOperationException with HTTP 501.",
+    "Parameter and option values are not modeled: ModifyDBParameterGroup, ResetDBParameterGroup, DescribeDBParameters, the cluster equivalents, CopyDBParameterGroup, ModifyOptionGroup and DescribeOptionGroupOptions are not implemented. Default parameter, option and subnet groups are not pre-created, and parameter group families, major engine versions and subnet IDs are stored without checking that they exist.",
+    "A subnet group needs 2 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs and is not checked for Availability Zone coverage; it reports no VPC, Availability Zone, Outpost, status or network type. DB subnet group and DB (cluster) parameter group names are stored in lowercase as documented, \"default\" subnet groups are refused, and option groups accept only the documented EngineName values.",
+    "Describe operations and ListTagsForResource refuse a non-empty Filters list (an empty one means no filter), Describe operations accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name, and DescribeOptionGroups refuses OptionGroupName together with EngineName or MajorEngineVersion. Tag keys are 1 to 128 and values at most 256 characters of letters, digits, spaces and _.:/=+-@, and neither may start with aws: or rds:. Tag operations on an unknown ARN fail with DBInstanceNotFound, the first not-found fault the official tag operations model."
+   ],
+   "source": {
+    "package": "botocore",
+    "version": "1.41.6",
+    "file": "botocore/data/rds/2014-10-31/service-2.json",
+    "sha256": "076092a7a8e134cc2efdb6d1f261a67860ec61e75019f89cbdb5c3ece51159af",
+    "license": "Apache-2.0"
+   },
+   "xmlShapes": {
+    "AvailabilityZone": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Name",
+       "element": "Name",
+       "shape": "String"
+      }
+     ]
+    },
+    "Boolean": {
+     "type": "boolean"
+    },
+    "CreateDBClusterParameterGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBClusterParameterGroup",
+       "element": "DBClusterParameterGroup",
+       "shape": "DBClusterParameterGroup"
+      }
+     ]
+    },
+    "CreateDBParameterGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBParameterGroup",
+       "element": "DBParameterGroup",
+       "shape": "DBParameterGroup"
+      }
+     ]
+    },
+    "CreateDBSubnetGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBSubnetGroup",
+       "element": "DBSubnetGroup",
+       "shape": "DBSubnetGroup"
+      }
+     ]
+    },
+    "CreateOptionGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "OptionGroup",
+       "element": "OptionGroup",
+       "shape": "OptionGroup"
+      }
+     ]
+    },
+    "DBClusterParameterGroup": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBClusterParameterGroupArn",
+       "element": "DBClusterParameterGroupArn",
+       "shape": "String"
+      },
+      {
+       "name": "DBClusterParameterGroupName",
+       "element": "DBClusterParameterGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "DBParameterGroupFamily",
+       "element": "DBParameterGroupFamily",
+       "shape": "String"
+      },
+      {
+       "name": "Description",
+       "element": "Description",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBClusterParameterGroupList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBClusterParameterGroup",
+      "shape": "DBClusterParameterGroup"
+     }
+    },
+    "DBClusterParameterGroupsMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBClusterParameterGroups",
+       "element": "DBClusterParameterGroups",
+       "shape": "DBClusterParameterGroupList"
+      },
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBParameterGroup": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBParameterGroupArn",
+       "element": "DBParameterGroupArn",
+       "shape": "String"
+      },
+      {
+       "name": "DBParameterGroupFamily",
+       "element": "DBParameterGroupFamily",
+       "shape": "String"
+      },
+      {
+       "name": "DBParameterGroupName",
+       "element": "DBParameterGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "Description",
+       "element": "Description",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBParameterGroupList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBParameterGroup",
+      "shape": "DBParameterGroup"
+     }
+    },
+    "DBParameterGroupsMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBParameterGroups",
+       "element": "DBParameterGroups",
+       "shape": "DBParameterGroupList"
+      },
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBSecurityGroupMembership": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBSecurityGroupName",
+       "element": "DBSecurityGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBSecurityGroupMembershipList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBSecurityGroup",
+      "shape": "DBSecurityGroupMembership"
+     }
+    },
+    "DBSubnetGroup": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBSubnetGroupArn",
+       "element": "DBSubnetGroupArn",
+       "shape": "String"
+      },
+      {
+       "name": "DBSubnetGroupDescription",
+       "element": "DBSubnetGroupDescription",
+       "shape": "String"
+      },
+      {
+       "name": "DBSubnetGroupName",
+       "element": "DBSubnetGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "SubnetGroupStatus",
+       "element": "SubnetGroupStatus",
+       "shape": "String"
+      },
+      {
+       "name": "Subnets",
+       "element": "Subnets",
+       "shape": "SubnetList"
+      },
+      {
+       "name": "SupportedNetworkTypes",
+       "element": "SupportedNetworkTypes",
+       "shape": "StringList"
+      },
+      {
+       "name": "VpcId",
+       "element": "VpcId",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBSubnetGroupMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBSubnetGroups",
+       "element": "DBSubnetGroups",
+       "shape": "DBSubnetGroups"
+      },
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      }
+     ]
+    },
+    "DBSubnetGroups": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "DBSubnetGroup",
+      "shape": "DBSubnetGroup"
+     }
+    },
+    "IntegerOptional": {
+     "type": "integer"
+    },
+    "ModifyDBSubnetGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBSubnetGroup",
+       "element": "DBSubnetGroup",
+       "shape": "DBSubnetGroup"
+      }
+     ]
+    },
+    "Option": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "DBSecurityGroupMemberships",
+       "element": "DBSecurityGroupMemberships",
+       "shape": "DBSecurityGroupMembershipList"
+      },
+      {
+       "name": "OptionDescription",
+       "element": "OptionDescription",
+       "shape": "String"
+      },
+      {
+       "name": "OptionName",
+       "element": "OptionName",
+       "shape": "String"
+      },
+      {
+       "name": "OptionSettings",
+       "element": "OptionSettings",
+       "shape": "OptionSettingConfigurationList"
+      },
+      {
+       "name": "OptionVersion",
+       "element": "OptionVersion",
+       "shape": "String"
+      },
+      {
+       "name": "Permanent",
+       "element": "Permanent",
+       "shape": "Boolean"
+      },
+      {
+       "name": "Persistent",
+       "element": "Persistent",
+       "shape": "Boolean"
+      },
+      {
+       "name": "Port",
+       "element": "Port",
+       "shape": "IntegerOptional"
+      },
+      {
+       "name": "VpcSecurityGroupMemberships",
+       "element": "VpcSecurityGroupMemberships",
+       "shape": "VpcSecurityGroupMembershipList"
+      }
+     ]
+    },
+    "OptionGroup": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AllowsVpcAndNonVpcInstanceMemberships",
+       "element": "AllowsVpcAndNonVpcInstanceMemberships",
+       "shape": "Boolean"
+      },
+      {
+       "name": "CopyTimestamp",
+       "element": "CopyTimestamp",
+       "shape": "TStamp"
+      },
+      {
+       "name": "EngineName",
+       "element": "EngineName",
+       "shape": "String"
+      },
+      {
+       "name": "MajorEngineVersion",
+       "element": "MajorEngineVersion",
+       "shape": "String"
+      },
+      {
+       "name": "OptionGroupArn",
+       "element": "OptionGroupArn",
+       "shape": "String"
+      },
+      {
+       "name": "OptionGroupDescription",
+       "element": "OptionGroupDescription",
+       "shape": "String"
+      },
+      {
+       "name": "OptionGroupName",
+       "element": "OptionGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "Options",
+       "element": "Options",
+       "shape": "OptionsList"
+      },
+      {
+       "name": "SourceAccountId",
+       "element": "SourceAccountId",
+       "shape": "String"
+      },
+      {
+       "name": "SourceOptionGroup",
+       "element": "SourceOptionGroup",
+       "shape": "String"
+      },
+      {
+       "name": "VpcId",
+       "element": "VpcId",
+       "shape": "String"
+      }
+     ]
+    },
+    "OptionGroups": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      },
+      {
+       "name": "OptionGroupsList",
+       "element": "OptionGroupsList",
+       "shape": "OptionGroupsList"
+      }
+     ]
+    },
+    "OptionGroupsList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "OptionGroup",
+      "shape": "OptionGroup"
+     }
+    },
+    "OptionSetting": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "AllowedValues",
+       "element": "AllowedValues",
+       "shape": "String"
+      },
+      {
+       "name": "ApplyType",
+       "element": "ApplyType",
+       "shape": "String"
+      },
+      {
+       "name": "DataType",
+       "element": "DataType",
+       "shape": "String"
+      },
+      {
+       "name": "DefaultValue",
+       "element": "DefaultValue",
+       "shape": "String"
+      },
+      {
+       "name": "Description",
+       "element": "Description",
+       "shape": "String"
+      },
+      {
+       "name": "IsCollection",
+       "element": "IsCollection",
+       "shape": "Boolean"
+      },
+      {
+       "name": "IsModifiable",
+       "element": "IsModifiable",
+       "shape": "Boolean"
+      },
+      {
+       "name": "Name",
+       "element": "Name",
+       "shape": "String"
+      },
+      {
+       "name": "Value",
+       "element": "Value",
+       "shape": "PotentiallySensitiveOptionSettingValue"
+      }
+     ]
+    },
+    "OptionSettingConfigurationList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "OptionSetting",
+      "shape": "OptionSetting"
+     }
+    },
+    "OptionsList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "Option",
+      "shape": "Option"
+     }
+    },
+    "Outpost": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Arn",
+       "element": "Arn",
+       "shape": "String"
+      }
+     ]
+    },
+    "PotentiallySensitiveOptionSettingValue": {
+     "type": "string"
+    },
+    "String": {
+     "type": "string"
+    },
+    "StringList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "member",
+      "shape": "String"
+     }
+    },
+    "Subnet": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "SubnetAvailabilityZone",
+       "element": "SubnetAvailabilityZone",
+       "shape": "AvailabilityZone"
+      },
+      {
+       "name": "SubnetIdentifier",
+       "element": "SubnetIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "SubnetOutpost",
+       "element": "SubnetOutpost",
+       "shape": "Outpost"
+      },
+      {
+       "name": "SubnetStatus",
+       "element": "SubnetStatus",
+       "shape": "String"
+      }
+     ]
+    },
+    "SubnetList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "Subnet",
+      "shape": "Subnet"
+     }
+    },
+    "TStamp": {
+     "type": "timestamp"
+    },
+    "Tag": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Key",
+       "element": "Key",
+       "shape": "String"
+      },
+      {
+       "name": "Value",
+       "element": "Value",
+       "shape": "String"
+      }
+     ]
+    },
+    "TagList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "Tag",
+      "shape": "Tag"
+     }
+    },
+    "TagListMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "TagList",
+       "element": "TagList",
+       "shape": "TagList"
+      }
+     ]
+    },
+    "VpcSecurityGroupMembership": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Status",
+       "element": "Status",
+       "shape": "String"
+      },
+      {
+       "name": "VpcSecurityGroupId",
+       "element": "VpcSecurityGroupId",
+       "shape": "String"
+      }
+     ]
+    },
+    "VpcSecurityGroupMembershipList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "VpcSecurityGroupMembership",
+      "shape": "VpcSecurityGroupMembership"
+     }
+    }
+   },
+   "inputShapes": {
+    "String": {
+     "type": "string"
+    },
+    "Tag": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Key",
+       "shape": "String"
+      },
+      {
+       "name": "Value",
+       "shape": "String"
+      }
+     ]
+    },
+    "TagList": {
+     "type": "list",
+     "member": {
+      "key": "Tag",
+      "shape": "Tag"
+     }
+    }
+   }
+  },
+  {
+   "model": "redshift",
+   "title": "Amazon Redshift",
+   "serviceId": "Redshift",
+   "apiVersion": "2012-12-01",
+   "protocol": "query",
+   "signingName": "redshift",
+   "iamPrefix": "redshift",
+   "account": "000000000000",
+   "issues": [
+    77
+   ],
+   "operations": [
+    "CreateClusterParameterGroup",
+    "CreateClusterSubnetGroup",
+    "CreateTags",
+    "DeleteClusterParameterGroup",
+    "DeleteClusterSubnetGroup",
+    "DeleteTags",
+    "DescribeClusterParameterGroups",
+    "DescribeClusterSubnetGroups",
+    "ModifyClusterSubnetGroup"
+   ],
+   "officialOperations": 141,
+   "resources": [
+    {
+     "kind": "clusterParameterGroup",
+     "nameMember": "ParameterGroupName",
+     "nameWire": "ParameterGroupName",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateClusterParameterGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "Description",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "Description"
+        },
+        {
+         "name": "ParameterGroupFamily",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "ParameterGroupFamily"
+        },
+        {
+         "name": "ParameterGroupName",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "ParameterGroupName"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        }
+       ],
+       "wrapper": "ClusterParameterGroup",
+       "output": "CreateClusterParameterGroupResult",
+       "resultWrapper": "CreateClusterParameterGroupResult"
+      },
+      "delete": {
+       "name": "DeleteClusterParameterGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "ParameterGroupName",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "ParameterGroupName"
+        }
+       ],
+       "lookup": "ParameterGroupName",
+       "lookupKey": "name"
+      },
+      "describe": {
+       "name": "DescribeClusterParameterGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "Marker",
+         "type": "string",
+         "max": 2147483647,
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "ParameterGroupName",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ParameterGroupName"
+        },
+        {
+         "name": "TagKeys",
+         "type": "list",
+         "element": "string",
+         "key": "TagKeys",
+         "itemKey": "TagKey"
+        },
+        {
+         "name": "TagValues",
+         "type": "list",
+         "element": "string",
+         "key": "TagValues",
+         "itemKey": "TagValue"
+        }
+       ],
+       "items": "ParameterGroups",
+       "itemName": "ParameterGroupName",
+       "names": "ParameterGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "ClusterParameterGroupsMessage",
+       "resultWrapper": "DescribeClusterParameterGroupsResult"
+      },
+      "list": {
+       "name": "DescribeClusterParameterGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "Marker",
+         "type": "string",
+         "max": 2147483647,
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "ParameterGroupName",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ParameterGroupName"
+        },
+        {
+         "name": "TagKeys",
+         "type": "list",
+         "element": "string",
+         "key": "TagKeys",
+         "itemKey": "TagKey"
+        },
+        {
+         "name": "TagValues",
+         "type": "list",
+         "element": "string",
+         "key": "TagValues",
+         "itemKey": "TagValue"
+        }
+       ],
+       "items": "ParameterGroups",
+       "itemName": "ParameterGroupName",
+       "names": "ParameterGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "ClusterParameterGroupsMessage",
+       "resultWrapper": "DescribeClusterParameterGroupsResult"
+      }
+     },
+     "arnTemplate": "arn:{partition}:redshift:{region}:{account}:parametergroup:{name}",
+     "tagsWire": "Tags"
+    },
+    {
+     "kind": "clusterSubnetGroup",
+     "nameMember": "ClusterSubnetGroupName",
+     "nameWire": "ClusterSubnetGroupName",
+     "limit": 50,
+     "operations": {
+      "create": {
+       "name": "CreateClusterSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "ClusterSubnetGroupName",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "ClusterSubnetGroupName"
+        },
+        {
+         "name": "Description",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "Description"
+        },
+        {
+         "name": "SubnetIds",
+         "type": "list",
+         "element": "string",
+         "required": true,
+         "key": "SubnetIds",
+         "itemKey": "SubnetIdentifier"
+        },
+        {
+         "name": "Tags",
+         "type": "list",
+         "element": "structure",
+         "key": "Tags",
+         "itemKey": "Tag",
+         "shape": "TagList"
+        }
+       ],
+       "wrapper": "ClusterSubnetGroup",
+       "output": "CreateClusterSubnetGroupResult",
+       "resultWrapper": "CreateClusterSubnetGroupResult"
+      },
+      "delete": {
+       "name": "DeleteClusterSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "ClusterSubnetGroupName",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "ClusterSubnetGroupName"
+        }
+       ],
+       "lookup": "ClusterSubnetGroupName",
+       "lookupKey": "name"
+      },
+      "describe": {
+       "name": "DescribeClusterSubnetGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "ClusterSubnetGroupName",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ClusterSubnetGroupName"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "max": 2147483647,
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "TagKeys",
+         "type": "list",
+         "element": "string",
+         "key": "TagKeys",
+         "itemKey": "TagKey"
+        },
+        {
+         "name": "TagValues",
+         "type": "list",
+         "element": "string",
+         "key": "TagValues",
+         "itemKey": "TagValue"
+        }
+       ],
+       "items": "ClusterSubnetGroups",
+       "itemName": "ClusterSubnetGroupName",
+       "names": "ClusterSubnetGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "ClusterSubnetGroupMessage",
+       "resultWrapper": "DescribeClusterSubnetGroupsResult"
+      },
+      "list": {
+       "name": "DescribeClusterSubnetGroups",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "ClusterSubnetGroupName",
+         "type": "string",
+         "max": 2147483647,
+         "key": "ClusterSubnetGroupName"
+        },
+        {
+         "name": "Marker",
+         "type": "string",
+         "max": 2147483647,
+         "key": "Marker"
+        },
+        {
+         "name": "MaxRecords",
+         "type": "integer",
+         "key": "MaxRecords"
+        },
+        {
+         "name": "TagKeys",
+         "type": "list",
+         "element": "string",
+         "key": "TagKeys",
+         "itemKey": "TagKey"
+        },
+        {
+         "name": "TagValues",
+         "type": "list",
+         "element": "string",
+         "key": "TagValues",
+         "itemKey": "TagValue"
+        }
+       ],
+       "items": "ClusterSubnetGroups",
+       "itemName": "ClusterSubnetGroupName",
+       "names": "ClusterSubnetGroupName",
+       "inputToken": "Marker",
+       "outputToken": "Marker",
+       "output": "ClusterSubnetGroupMessage",
+       "resultWrapper": "DescribeClusterSubnetGroupsResult"
+      },
+      "update": {
+       "name": "ModifyClusterSubnetGroup",
+       "method": "POST",
+       "uri": "/",
+       "members": [
+        {
+         "name": "ClusterSubnetGroupName",
+         "type": "string",
+         "required": true,
+         "max": 2147483647,
+         "key": "ClusterSubnetGroupName"
+        },
+        {
+         "name": "Description",
+         "type": "string",
+         "max": 2147483647,
+         "key": "Description"
+        },
+        {
+         "name": "SubnetIds",
+         "type": "list",
+         "element": "string",
+         "required": true,
+         "key": "SubnetIds",
+         "itemKey": "SubnetIdentifier"
+        }
+       ],
+       "wrapper": "ClusterSubnetGroup",
+       "lookup": "ClusterSubnetGroupName",
+       "lookupKey": "name",
+       "output": "ModifyClusterSubnetGroupResult",
+       "resultWrapper": "ModifyClusterSubnetGroupResult",
+       "editable": [
+        "Description",
+        "SubnetIds"
+       ]
+      }
+     },
+     "arnTemplate": "arn:{partition}:redshift:{region}:{account}:subnetgroup:{name}",
+     "tagsWire": "Tags"
+    }
+   ],
+   "tagging": {
+    "tag": {
+     "name": "CreateTags",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "ResourceName",
+       "type": "string",
+       "required": true,
+       "max": 2147483647,
+       "key": "ResourceName"
+      },
+      {
+       "name": "Tags",
+       "type": "list",
+       "element": "structure",
+       "required": true,
+       "key": "Tags",
+       "itemKey": "Tag",
+       "shape": "TagList"
+      }
+     ],
+     "lookup": "ResourceName",
+     "lookupKey": "name"
+    },
+    "untag": {
+     "name": "DeleteTags",
+     "method": "POST",
+     "uri": "/",
+     "members": [
+      {
+       "name": "ResourceName",
+       "type": "string",
+       "required": true,
+       "max": 2147483647,
+       "key": "ResourceName"
+      },
+      {
+       "name": "TagKeys",
+       "type": "list",
+       "element": "string",
+       "required": true,
+       "key": "TagKeys",
+       "itemKey": "TagKey"
+      }
+     ],
+     "lookup": "ResourceName",
+     "lookupKey": "name"
+    }
+   },
+   "bounds": [
+    "Cluster parameter groups and cluster subnet groups are stored configuration served over the Query protocol: no cluster, snapshot, node, endpoint, data share, integration or warehouse exists, and CreateCluster, CreateClusterSnapshot, RestoreFromClusterSnapshot and every other official operation return UnknownOperationException with HTTP 501.",
+    "Snapshot schedules, scheduled actions, usage limits, event subscriptions, HSM certificates and configurations, snapshot copy grants, authentication profiles and cluster security groups are not implemented: they need a cluster, a topic, a key, an IAM role or a schedule grammar the stored model cannot evaluate, so their APIs return UnknownOperationException with HTTP 501.",
+    "Parameter values are not modeled: ModifyClusterParameterGroup, ResetClusterParameterGroup, DescribeClusterParameters and DescribeDefaultClusterParameters are not implemented, and default parameter groups and the default subnet group are not pre-created. A parameter group family is stored without checking that it exists. Parameter group names are 1 to 255 letters, digits or hyphens, start with a letter, contain no trailing or consecutive hyphens and are stored in lowercase.",
+    "A subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, subnet status, group status or supported IP address type; the 20-subnet limit is returned as ClusterSubnetQuotaExceededFault. Subnet group names are 1 to 255 letters, digits or hyphens, are stored in lowercase and must not be Default.",
+    "Describe operations refuse TagKeys, TagValues and Marker values that were not issued for the request, accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name. Resource counts per Region (50 parameter groups and 50 subnet groups) are local limits.",
+    "CreateTags and DeleteTags apply to the two resource kinds by ARN (arn:aws:redshift:region:account:parametergroup:name and subnetgroup:name) and fail with ResourceNotFoundFault for any other ARN; tags appear on the group descriptions. Tag keys are required and must not start with aws:. Removing a missing key succeeds, and DescribeTags is not implemented."
+   ],
+   "source": {
+    "package": "botocore",
+    "version": "1.41.6",
+    "file": "botocore/data/redshift/2012-12-01/service-2.json",
+    "sha256": "bf29aeee27ea37e232acd8e3485a61b3380e2ac076fb23c028a13b7e53564fac",
+    "license": "Apache-2.0"
+   },
+   "xmlShapes": {
+    "AvailabilityZone": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Name",
+       "element": "Name",
+       "shape": "String"
+      },
+      {
+       "name": "SupportedPlatforms",
+       "element": "SupportedPlatforms",
+       "shape": "SupportedPlatformsList"
+      }
+     ]
+    },
+    "ClusterParameterGroup": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Description",
+       "element": "Description",
+       "shape": "String"
+      },
+      {
+       "name": "ParameterGroupFamily",
+       "element": "ParameterGroupFamily",
+       "shape": "String"
+      },
+      {
+       "name": "ParameterGroupName",
+       "element": "ParameterGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "Tags",
+       "element": "Tags",
+       "shape": "TagList"
+      }
+     ]
+    },
+    "ClusterParameterGroupsMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      },
+      {
+       "name": "ParameterGroups",
+       "element": "ParameterGroups",
+       "shape": "ParameterGroupList"
+      }
+     ]
+    },
+    "ClusterSubnetGroup": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ClusterSubnetGroupName",
+       "element": "ClusterSubnetGroupName",
+       "shape": "String"
+      },
+      {
+       "name": "Description",
+       "element": "Description",
+       "shape": "String"
+      },
+      {
+       "name": "SubnetGroupStatus",
+       "element": "SubnetGroupStatus",
+       "shape": "String"
+      },
+      {
+       "name": "Subnets",
+       "element": "Subnets",
+       "shape": "SubnetList"
+      },
+      {
+       "name": "SupportedClusterIpAddressTypes",
+       "element": "SupportedClusterIpAddressTypes",
+       "shape": "ValueStringList"
+      },
+      {
+       "name": "Tags",
+       "element": "Tags",
+       "shape": "TagList"
+      },
+      {
+       "name": "VpcId",
+       "element": "VpcId",
+       "shape": "String"
+      }
+     ]
+    },
+    "ClusterSubnetGroupMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ClusterSubnetGroups",
+       "element": "ClusterSubnetGroups",
+       "shape": "ClusterSubnetGroups"
+      },
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      }
+     ]
+    },
+    "ClusterSubnetGroups": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ClusterSubnetGroup",
+      "shape": "ClusterSubnetGroup"
+     }
+    },
+    "CreateClusterParameterGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ClusterParameterGroup",
+       "element": "ClusterParameterGroup",
+       "shape": "ClusterParameterGroup"
+      }
+     ]
+    },
+    "CreateClusterSubnetGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ClusterSubnetGroup",
+       "element": "ClusterSubnetGroup",
+       "shape": "ClusterSubnetGroup"
+      }
+     ]
+    },
+    "ModifyClusterSubnetGroupResult": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ClusterSubnetGroup",
+       "element": "ClusterSubnetGroup",
+       "shape": "ClusterSubnetGroup"
+      }
+     ]
+    },
+    "ParameterGroupList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "ClusterParameterGroup",
+      "shape": "ClusterParameterGroup"
+     }
+    },
+    "String": {
+     "type": "string"
+    },
+    "Subnet": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "SubnetAvailabilityZone",
+       "element": "SubnetAvailabilityZone",
+       "shape": "AvailabilityZone"
+      },
+      {
+       "name": "SubnetIdentifier",
+       "element": "SubnetIdentifier",
+       "shape": "String"
+      },
+      {
+       "name": "SubnetStatus",
+       "element": "SubnetStatus",
+       "shape": "String"
+      }
+     ]
+    },
+    "SubnetList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "Subnet",
+      "shape": "Subnet"
+     }
+    },
+    "SupportedPlatform": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Name",
+       "element": "Name",
+       "shape": "String"
+      }
+     ]
+    },
+    "SupportedPlatformsList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "SupportedPlatform",
+      "shape": "SupportedPlatform"
+     }
+    },
+    "Tag": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Key",
+       "element": "Key",
+       "shape": "String"
+      },
+      {
+       "name": "Value",
+       "element": "Value",
+       "shape": "String"
+      }
+     ]
+    },
+    "TagList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "Tag",
+      "shape": "Tag"
+     }
+    },
+    "ValueStringList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "item",
+      "shape": "String"
+     }
+    }
+   },
+   "inputShapes": {
+    "String": {
+     "type": "string",
+     "max": 2147483647
+    },
+    "Tag": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Key",
+       "shape": "String"
+      },
+      {
+       "name": "Value",
+       "shape": "String"
+      }
+     ]
+    },
+    "TagList": {
+     "type": "list",
+     "member": {
+      "key": "Tag",
+      "shape": "Tag"
+     }
+    }
+   }
+  }
+ ]
+}
