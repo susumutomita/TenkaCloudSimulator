@@ -1,47 +1,33 @@
 {
   "version": 1,
-  "base_sha": "cca160ef6d925479da9c1de2071eb6b60f6e99f4",
+  "base_sha": "4d7883d343ee2ad4acf6af833b258d9d52d9651e",
   "changes": [
     {
       "path": ".github/workflows/actions.lock",
-      "sha256": "82072909529f7da36839d9f409841fac83a20f1c8ca8a0192842522ab213f638",
+      "sha256": "b9c34a479ad8de917fa031d4d6de38e96c9c8db0b8f2baa4fe3c6bdc12fe8a48",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the upload-artifact version and commit in the existing Actions lockfile; no runtime or model input changes.",
-      "models": []
-    },
-    {
-      "path": ".github/workflows/battle-hosts.yml",
-      "sha256": "a2dacb525a857117c9ff1ebef160bdb0d2d17d88fdd07a1ed72b3e189adc6ab0",
-      "disposition": "formal-infrastructure",
-      "reason": "Updates only the upload-artifact action version in existing evidence retention steps; commands, inputs and permissions remain unchanged.",
+      "reason": "Updates only the download-artifact version and commit in the existing Actions lockfile; no runtime or model input changes.",
       "models": []
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "52da5a3b54e3a9f0cb515d4f00173cc89d34103fd69624e2946763959672cbce",
+      "sha256": "da49747edd3731bfaa2b79aaf29265462251a8714fd5969481532ff2a8c8b1d7",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the upload-artifact action version in existing evidence retention steps; commands, inputs and permissions remain unchanged.",
+      "reason": "Updates only the download-artifact action version in existing validation or packaging steps; commands, inputs and permissions remain unchanged.",
       "models": []
     },
     {
       "path": ".github/workflows/formal.yml",
-      "sha256": "d18a9e2e9748cd83ba5c0187ccafe3ec49d1d510af88eb77fdaee94f810d43cc",
+      "sha256": "f61e181786fb2afc6a89d3dfa869361a4753da4f1c92396694260e26f78811ce",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the upload-artifact action version in existing evidence retention steps; commands, inputs and permissions remain unchanged.",
+      "reason": "Updates only the download-artifact action version in existing validation or packaging steps; commands, inputs and permissions remain unchanged.",
       "models": []
     },
     {
       "path": ".github/workflows/release.yml",
-      "sha256": "18646a7c75f544e52cd2cc945a007853923bbd8096222275862f1ba9d4850307",
+      "sha256": "25d761d5a78dab3b890cd778175f8de59c76493e162bdb291baa1268aea0d612",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the upload-artifact action version in existing evidence retention steps; commands, inputs and permissions remain unchanged.",
-      "models": []
-    },
-    {
-      "path": ".github/workflows/sakura-sdk.yml",
-      "sha256": "02f63f64bc9dd9761f75765594fe75d8165deb3adda49133243d38db88b8173a",
-      "disposition": "formal-infrastructure",
-      "reason": "Updates only the upload-artifact action version in existing evidence retention steps; commands, inputs and permissions remain unchanged.",
+      "reason": "Updates only the download-artifact action version in existing validation or packaging steps; commands, inputs and permissions remain unchanged.",
       "models": []
     }
   ]
