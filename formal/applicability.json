@@ -1,54 +1,40 @@
 {
   "version": 1,
-  "base_sha": "ca10c828f5c56bf716458cfc6df9c32b20dd21c2",
+  "base_sha": "1d13f77db1ec44abcf72ee0c02609ad7cb19bf53",
   "changes": [
     {
       "path": ".github/workflows/actions.lock",
-      "sha256": "c077c041ff998d6e166a2b667edb9e131d002b8e3bcccd9a3cb8cfe7515ddb97",
+      "sha256": "5c84f5271f8b55f95b910974401049bd4d5d3760bf37c6296aa2d7548716faf0",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the checkout action version and commit in the existing Actions lockfile; no runtime or model input changes.",
+      "reason": "Updates the pinned setup-go action reference and commit only; no simulator or model inputs change.",
       "models": []
     },
     {
       "path": ".github/workflows/battle-hosts.yml",
-      "sha256": "c169584bc9d021af3f63f1a400a05d9c35c3249cc18bbd2259f63489f1e55415",
+      "sha256": "259612bdcfc5683920b1c836e9d27acba15f19d7eb12af6fb7470e74b95ece9f",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
+      "reason": "Updates only the setup-go action version; the Go toolchain, Battle test commands and runner targets remain unchanged.",
       "models": []
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "967aa1e3b6ae5d97909e189dcb276836fca0586ef4f07c0cedbd90d4a65b912d",
+      "sha256": "4ce5ff0593a76985dbdf2a1bcbd70671efa773da0ac20c1e4b0c91f8f9c1d11c",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
-      "models": []
-    },
-    {
-      "path": ".github/workflows/formal.yml",
-      "sha256": "13d2bf48bdab67662afb1e1068a6b931552dfed76b895808b35c990ea0da0a5a",
-      "disposition": "formal-infrastructure",
-      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
+      "reason": "Updates only the setup-go action version in existing jobs; Go version pins and validation commands do not change.",
       "models": []
     },
     {
       "path": ".github/workflows/release.yml",
-      "sha256": "1f3a1e1d65c01340a15d4a392d1f9633820271ae7a90cf4dae59651861761fae",
+      "sha256": "ba84b62efa9c4fa22daa807e36d585e50cfa6c20147af438e74c9914d038db52",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
+      "reason": "Updates only the setup-go action version; artifact build commands and release model remain unchanged.",
       "models": []
     },
     {
       "path": ".github/workflows/sakura-sdk.yml",
-      "sha256": "450c974c05cf359bbf5be2fd27601dafb23c100f6197f10ad4b1a50fca7c1a8a",
+      "sha256": "4a3b422449b8fee7e5fea06be3635514216b0af328510cfe7db05fa411ab5097",
       "disposition": "formal-infrastructure",
-      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
-      "models": []
-    },
-    {
-      "path": ".github/workflows/verify-actions-lock.yml",
-      "sha256": "d805eeedfa5cb2c024003bac6a723c935d02cef3099ac2b23b0497207e6675ac",
-      "disposition": "formal-infrastructure",
-      "reason": "Updates only the checkout action version in existing verification or packaging steps; refs, event configuration, inputs and permissions are unchanged by the revision.",
+      "reason": "Updates only the setup-go action version; the Go toolchain and Sakura SDK validation commands do not change.",
       "models": []
     }
   ]
