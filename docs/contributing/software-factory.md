@@ -124,16 +124,32 @@ into a claim that a new HEAD passed.
 ## Executed acceptance gate (agent-neutral pilot)
 
 The original ledger above checks cooperative declarations. New findings must also
-name `"acceptance": ["sqs-lifecycle"]`, and an otherwise successful review must
+name a registered suite matching its provider/operation (for example
+`"acceptance": ["sqs-lifecycle"]` for SQS or
+`"acceptance": ["gcp-dns-atomic-lifecycle"]` for DNS), and an otherwise successful review must
 supply `"acceptance_report": "/absolute/local/report.json"`. A missing, old-HEAD,
 altered or skipped receipt cannot transition a job to ready. Failed reviews still
 return the existing bounded retry state. Old persisted findings without an
 acceptance suite cannot become ready: reconcile through the existing owner, never
 replace a lost ledger with an empty one or automatically reset a denial.
 
-The current registered pilot is **SQS lifecycle only**. Do not assign this suite
-to an unrelated finding as its acceptance. Register a reviewed suite with named
-required tests before starting another service. Additional full `make before-commit`,
+This DNS-only source registers **SQS lifecycle and Cloud DNS atomic lifecycle**.
+The canonical allowlist is `scripts/factory_acceptance.py`; registration is not
+proof of a passing service, integration, SDK or full gate. No Azure Queue suite
+is registered in this branch. Do not assign either suite to unrelated work.
+Register a reviewed suite with named required tests before starting another service.
+
+| Suite | Provider / required test | Evidence scope |
+| --- | --- | --- |
+| `sqs-lifecycle` | `aws` / `TestSQSFactoryFidelityLifecycle` | SQS Go gateway/SQLite lifecycle |
+| `gcp-dns-atomic-lifecycle` | `gcp-dns` / `TestCloudDNSFactoryAtomicLifecycle` | DNS leaf HTTP/SQLite lifecycle, not composed routing or host authentication |
+
+The DNS suite checks nine operations, replacement rollback, exact retry/winner
+RRset values, project/subject isolation, restart, scoped paging and cleanup.
+Its exact allowed paths are enumerated in `validate_scope`: DNS leaf Go files
+only. It cannot authorize model artifacts, router, SDK runner, docs or formal
+files. See the [DNS scope and evidence](../acceptance/gcp-cloud-dns.md).
+Additional full `make before-commit`,
 E2E, formal, independent security/code review and remote CI remain required as
 applicable. Passing this pilot alone is not a merge approval.
 
@@ -149,6 +165,13 @@ applicable. Passing this pilot alone is not a merge approval.
 
 5. Independent reviewer reruns the gate on that HEAD, examines the oracle/diff and
    records that report alongside all other required checks in the ledger review.
+
+The commands above run **all registered suites** by default. A focused DNS run
+may explicitly use `--suite gcp-dns-atomic-lifecycle` on both execution and
+verification. A focused receipt does not replace the default all-suite gate;
+verification must name the same suite set as execution. Never omit a required
+suite or lower thresholds to obtain a passing report.
+
 
 Commands are a reviewed in-code allowlist, not shell strings from issue text.
 The executor disables Go module downloads and strips cloud credential/proxy
@@ -178,9 +201,11 @@ issue-finder and issue-fixer prompts offer the same division of work; neither
 Claude-specific hooks nor new permissions are installed. Existing approved agent
 dispatch remains external to this offline executor.
 
-Pilot findings are mechanically limited to the five SQS lifecycle operations and
-SQS handler/store/test files. An EC2/UI/shared-core finding cannot borrow a passing
-SQS receipt. Ready also compares declared paths with the actual base-to-candidate
+Suite scopes are mechanically limited: SQS covers its five lifecycle operations
+and handler/store/test paths; DNS covers its nine explicitly named operations
+and exact leaf Go paths. An EC2/UI/shared-core or composed-router finding cannot
+borrow either receipt. Combining suite names does not lend one provider the
+other provider's scope. Ready also compares declared paths with the actual base-to-candidate
 Git diff. Git environment overrides and ambient Go overlays/workspaces/config are
 removed from evidence execution; `GO` selects one explicit executable, not shell
 arguments. Already-active legacy ledger jobs need owner reconciliation; this

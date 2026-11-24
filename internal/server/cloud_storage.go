@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	azureblob "github.com/susumutomita/TenkaCloudSimulator/internal/azure/blob"
 	gcpappengine "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/appengine"
 	gcpcatalog "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/catalog"
+	gcpdns "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/dns"
 	gcpstorage "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/storage"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/provider"
 )
@@ -55,6 +57,15 @@ func registerCloudStorage(db *sql.DB, registry *provider.Registry, cfg CloudStor
 	if err != nil {
 		return nil, nil, err
 	}
+	// DNS uses the same host-configured project and trusted exercise actor.
+	dns, err := gcpdns.New(db, gcpdns.Config{Project: cfg.GCPProject, Owner: cfg.GCPOwner,
+		Subject: func(ctx context.Context) (string, bool) {
+			actor, ok := provider.ActorFromContext(ctx)
+			return actor.ExerciseIdentity, ok
+		}})
+	if err != nil {
+		return nil, nil, err
+	}
 	// App Engine shares the configured project and owner. Deployments copy
 	// Python sources from Cloud Storage objects of that project.
 	appEngine, err := gcpappengine.New(db, gcpappengine.Config{Project: cfg.GCPProject, Owner: cfg.GCPOwner,
@@ -78,6 +89,10 @@ func registerCloudStorage(db *sql.DB, registry *provider.Registry, cfg CloudStor
 	storage := gcp
 	gcp = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
+		// Match literal v1 route syntax only, preserving the escaped tail for
+		// the leaf to validate. Lookalike names/versions retain existing routing.
+		case r.URL.EscapedPath() == "/dns/v1" || strings.HasPrefix(r.URL.EscapedPath(), "/dns/v1/"):
+			dns.ServeHTTP(w, r)
 		case appEngine.Owns(r):
 			appEngine.ServeHTTP(w, r)
 		case catalog.Owns(r):
