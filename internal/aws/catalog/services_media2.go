@@ -68,8 +68,13 @@ func mediaConnectGateway(input map[string]any) error {
 // ipv4CIDR reports whether a value is an IPv4 CIDR range.
 func ipv4CIDR(value any) bool {
 	text, _ := value.(string)
-	ip, _, err := net.ParseCIDR(text)
-	return err == nil && ip.To4() != nil
+	ip, network, err := net.ParseCIDR(text)
+	if err != nil || ip.To4() == nil {
+		return false
+	}
+	// To4 accepts IPv4-mapped IPv6 addresses, but their CIDR mask is 128-bit.
+	_, bits := network.Mask.Size()
+	return bits == net.IPv4len*8
 }
 
 // mediaConnectNetworkInterface derives the interface type from its configuration

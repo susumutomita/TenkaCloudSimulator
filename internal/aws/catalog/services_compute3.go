@@ -305,7 +305,7 @@ var pcs = &Service{
 	Bounds: []string{
 		"Clusters, compute node groups and queues are stored configuration records that stay CREATING: no Slurm controller, accounting database, REST endpoint, compute instance, launch or network interface exists, a cluster reports no endpoints or authKey, and no job can be submitted. RegisterComputeNodeGroupInstance, which PCS itself calls for the nodes it launches, and UpdateCluster return UnknownOperationException with HTTP 501.",
 		"UpdateCluster is not implemented because its slurmConfiguration is a partial update of nested settings (scale-down time, custom settings, accounting, Slurm REST) that the stored model would replace as a whole. Compute node group and queue updates replace each supplied member as a whole, and the cluster name or ID of a child operation may be either, as the official identifier pattern allows.",
-		"Subnets, security groups, launch templates, AMIs, instance profiles, instance types and the compute node groups a queue names are stored without being resolved: nothing checks that they exist, that subnets share a VPC with the cluster, or that a queue's compute node groups belong to its cluster. A compute node group's scaling minimum must not exceed its maximum, and a SPOT purchase option is the only one that accepts spotOptions. Deleting a cluster that still has compute node groups or queues, and deleting a compute node group that a queue names, behave as stored dependents: the first is refused with ConflictException, the second is not checked.",
+		"CreateQueue requires one or more computeNodeGroupConfigurations entries. UpdateQueue retains its separate replacement semantics. Subnets, security groups, launch templates, AMIs, instance profiles, instance types and the compute node groups a queue names are stored without being resolved: nothing checks that they exist, that subnets share a VPC with the cluster, or that a queue's compute node groups belong to its cluster. A compute node group's scaling minimum must not exceed its maximum, and a SPOT purchase option is the only one that accepts spotOptions. Deleting a cluster that still has compute node groups or queues, and deleting a compute node group that a queue names, behave as stored dependents: the first is refused with ConflictException, the second is not checked.",
 		"Names are 3 to 40 characters for clusters and 3 to 25 for compute node groups and queues, begin with a letter and hold letters, digits and hyphens; the official pattern's pcs_ exclusion is implied by that rule. The scheduler type is SLURM with a version stored as given. ARN shapes (cluster/pcs_id, computenodegroup/pcs_id, queue/pcs_id) are inferred. Resource counts per Region (20 clusters, 50 compute node groups and 50 queues per cluster) are local limits.",
 	},
 }
@@ -345,7 +345,14 @@ func pcsNodeGroupMerged(document, _ map[string]any) error {
 }
 
 func pcsQueue(input map[string]any) error {
-	return pcsName(input, "queueName", 25)
+	if err := pcsName(input, "queueName", 25); err != nil {
+		return err
+	}
+	groups, _ := input["computeNodeGroupConfigurations"].([]any)
+	if len(groups) == 0 {
+		return invalid("CreateQueue requires at least one compute node group configuration.")
+	}
+	return nil
 }
 
 var (

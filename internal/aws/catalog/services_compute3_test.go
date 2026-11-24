@@ -353,7 +353,8 @@ func TestPCSClustersNodeGroupsAndQueues(t *testing.T) {
 	if q["clusterId"] != id || q["status"] != "CREATING" || q["arn"] != "arn:aws:pcs:us-east-1:000000000000:queue/"+qid {
 		t.Fatalf("queue %v", q)
 	}
-	expect(t, h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": "hpc", "queueName": "main"}), 400, "ConflictException")
+	expect(t, h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": "hpc", "queueName": "main",
+		"computeNodeGroupConfigurations": []any{map[string]any{"computeNodeGroupId": gid}}}), 400, "ConflictException")
 	expect(t, h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": "hpc", "queueName": "1"}), 400, "ValidationException")
 	expect(t, h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": "hpc", "queueName": "9queue"}), 400, "ValidationException")
 	expect(t, h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": "hpc", "queueName": "9queue"}), 400, "ValidationException")

@@ -4,7 +4,7 @@
   "changes": [
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "196b44167acd91bcc3b26737d6bf1ac7ed0afc00429c8305348bbf5b2ee33faa",
+      "sha256": "d1cd665b9257f7e15f316f12274db953545547c6571438cecdfedcf352c0aee6",
       "disposition": "documentation",
       "reason": "Generated service table listing the newly added services with their bound operations and bounds.",
       "models": []
@@ -112,6 +112,13 @@
           "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
         }
       ]
+    },
+    {
+      "path": "internal/aws/catalog/media_ipv4_contract_test.go",
+      "sha256": "35b12681b9f11df5f99798df7c00ca74ac4f81c6ebff6957595dc7f00bd95e2c",
+      "disposition": "test-support",
+      "reason": "MediaConnect and MediaLive reject IPv4-mapped IPv6 in explicitly IPv4 CIDR inputs without changing other persisted values.",
+      "models": []
     },
     {
       "path": "internal/aws/catalog/models/aiops.json",
@@ -1106,6 +1113,13 @@
       ]
     },
     {
+      "path": "internal/aws/catalog/pcs_queue_contract_test.go",
+      "sha256": "c17534fe15921e8cc5fe4f679950cc1e85cb7dff1ba4553c40b60ae5b96d1718",
+      "disposition": "test-support",
+      "reason": "PCS creation requires an actual nonempty node group configuration; reject without persistence. Update omission and empty replacement stay unchanged.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/query_test.go",
       "sha256": "aa7e80a216a8b4c29d7744fb967a10f69eadc18267dfdba1a475fac89e3e38fb",
       "disposition": "test-support",
@@ -1245,7 +1259,7 @@
     },
     {
       "path": "internal/aws/catalog/services_compute3.go",
-      "sha256": "cfaaca04adb5b1dca94b2b04e9a110db07069afd664ff01bcfe2f06f7a3d5e89",
+      "sha256": "c506f0c6a9dc7f6b2fc0ab1b3203fc21134fe902d50226a1f82c14164854c013",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1263,7 +1277,7 @@
     },
     {
       "path": "internal/aws/catalog/services_compute3_test.go",
-      "sha256": "2b6a5113ad47c7c4e03615d510a27006a1a882b9a55d6d4749f26cc5cc677c93",
+      "sha256": "99224782e5060464a73d1892180ce23f08499eed477e15095c53040d215b60dc",
       "disposition": "test-support",
       "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
       "models": []
@@ -1381,7 +1395,7 @@
     },
     {
       "path": "internal/aws/catalog/services_media2.go",
-      "sha256": "31f39fda0eb9c7dc93698743e81bba324f557150a98dc2447a12a022782bfbe1",
+      "sha256": "14130c570f6332c5aaf2e72655daa731f9309417ff1758b11b4e369a2999bcd9",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1925,7 +1939,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/pcs.json",
-      "sha256": "18ee63eeb9fa526e34bdc9caf2c1a3443dd0132559ab1e361a937e8476b9c272",
+      "sha256": "2df1a98bb6a052003225156d9ed38179ed62764b92b417e1a24d47c36d4de09e",
       "disposition": "presentation",
       "reason": "Generated pcs reference.",
       "models": []
