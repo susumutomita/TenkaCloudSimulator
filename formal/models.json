@@ -19016,6 +19016,182 @@
    ]
   },
   {
+   "id": "CloudDNSConsoleScope",
+   "model": "formal/CloudDNSConsoleScope.tla",
+   "config": "formal/CloudDNSConsoleScope.cfg",
+   "bounds": "Two principals, initial scope and two switches, two pending discovery replies and at most two read tickets per scope; nondeterministic out-of-order delivery.",
+   "properties": [
+    "TypeOK",
+    "CapabilityAuthorized",
+    "OnlyCurrentDiscovery",
+    "OnlyCurrentReadVisible",
+    "NoStaleContinuation"
+   ],
+   "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection.",
+   "source_scope": [
+    "internal/server/server.go",
+    "internal/server/web/app.js",
+    "tools/console/src/console-navigation.mjs",
+    "tools/console/src/gcp-console-shell.jsx",
+    "tools/console/src/gcp-dns-requests.mjs",
+    "tools/console/src/gcp-dns.jsx",
+    "tools/console/src/main.jsx"
+   ],
+   "mutants": [
+    {
+     "id": "AllowUntrusted",
+     "edits": [
+      {
+       "old": "    trusted /\\ principal = \"owner\" /\\ ~handoff\nReadAllowed",
+       "new": "    principal = \"owner\" /\\ ~handoff\nReadAllowed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CapabilityAuthorized"
+    },
+    {
+     "id": "AllowHandoff",
+     "edits": [
+      {
+       "old": "    trusted /\\ principal = \"owner\" /\\ ~handoff\nReadAllowed",
+       "new": "    trusted /\\ principal = \"owner\"\nReadAllowed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CapabilityAuthorized"
+    },
+    {
+     "id": "AllowNonOwner",
+     "edits": [
+      {
+       "old": "    trusted /\\ principal = \"owner\" /\\ ~handoff\nReadAllowed",
+       "new": "    trusted /\\ ~handoff\nReadAllowed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CapabilityAuthorized"
+    },
+    {
+     "id": "ReuseSamePrincipal",
+     "edits": [
+      {
+       "old": "SameEpoch(value) == value.epoch = scope.epoch",
+       "new": "SameEpoch(value) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyCurrentDiscovery"
+    },
+    {
+     "id": "ExposeStaleRead",
+     "edits": [
+      {
+       "old": "PublishActive(id) == id = ticket",
+       "new": "PublishActive(id) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyCurrentReadVisible"
+    },
+    {
+     "id": "ContinueStaleRead",
+     "edits": [
+      {
+       "old": "ContinueActive(id) == id = ticket",
+       "new": "ContinueActive(id) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoStaleContinuation"
+    }
+   ]
+  },
+  {
+   "id": "CloudDNSAtomicChange",
+   "model": "formal/CloudDNSAtomicChange.tla",
+   "config": "formal/CloudDNSAtomicChange.cfg",
+   "bounds": "Two projects/subjects, one zone slot per project, generations 1..2, protected apex plus two paired fixture keys, abstract IP and TTL, at most three global commits and normal history bound two with deletion-only cleanup.",
+   "properties": [
+    "TypeOK",
+    "NoOrphanRecords",
+    "AtomicPair",
+    "ApexPreserved",
+    "PendingInvisible",
+    "DeniedStateUnchanged",
+    "OnlyOwnerCommits",
+    "ExactDeletionRequired",
+    "CommittedStateMatchesIntent",
+    "OtherProjectUnchanged",
+    "HistoryPrefixPreserved",
+    "ReceiptSequenceExact",
+    "NonemptyDeletionRefused",
+    "CleanupAdmissibleAtQuota"
+   ],
+   "limits": "Storage-only projection. Paired fixture, not a production-wide invariant. DeniedStateUnchanged refers only to Abort. Fixed trusted owner map abstracts migration. No HTTP/router, SQL/Go refinement, crash, budgets, liveness, serving, SDK or Terraform claim.",
+   "source_scope": [
+    "internal/gcp/dns/engine.go",
+    "internal/gcp/dns/model.go",
+    "internal/gcp/dns/operations.go",
+    "internal/gcp/dns/pagination.go",
+    "internal/gcp/dns/records.go",
+    "internal/gcp/dns/store.go"
+   ],
+   "mutants": [
+    {
+     "id": "AcceptPreviousPairedState",
+     "edits": [
+      {
+       "old": "tx.candidatePair = tx.expectedPair",
+       "new": "(tx.candidatePair = tx.expectedPair \\/ tx.candidatePair = tx.before[tx.project].pair)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CommittedStateMatchesIntent"
+    },
+    {
+     "id": "AcceptMissingNewestReceipt",
+     "edits": [
+      {
+       "old": "/\\ tx.candidateHistory = tx.expectedHistory",
+       "new": "/\\ (tx.candidateHistory = tx.expectedHistory \\/ tx.candidateHistory = SubSeq(tx.expectedHistory,1,Len(tx.expectedHistory)-1))",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CommittedStateMatchesIntent"
+    }
+   ]
+  },
+  {
+   "id": "CloudDNSChildToken",
+   "model": "formal/CloudDNSChildToken.tla",
+   "config": "formal/CloudDNSChildToken.cfg",
+   "bounds": "Two projects/subjects (owner aliasing allowed), one zone slot per project, generations 1..2 and all genuinely issued project/generation pairs.",
+   "properties": [
+    "TypeOK",
+    "NoOldGenerationReuse"
+   ],
+   "limits": "Child collection paging only, not managedZones. Omits transaction phase and the storage-empty deletion guard to overapproximate possible token traces. No HMAC, encoding, filter, HTTP, SDK or Terraform claim.",
+   "source_scope": [
+    "internal/gcp/dns/engine.go",
+    "internal/gcp/dns/model.go",
+    "internal/gcp/dns/operations.go",
+    "internal/gcp/dns/pagination.go"
+   ],
+   "mutants": [
+    {
+     "id": "AcceptOldGeneration",
+     "edits": [
+      {
+       "old": "/\\ token.project = p /\\ token.generation = zones[p].generation",
+       "new": "/\\ token.project = p",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoOldGenerationReuse"
+    }
+   ]
+  },
+  {
    "id": "SakuraServerReadEpoch",
    "model": "formal/SakuraServerReadEpoch.tla",
    "config": "formal/SakuraServerReadEpoch.cfg",

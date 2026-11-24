@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "9652f0344ab9d7e57aa30595fab5c3ed52c57cd8",
+  "base_sha": "8d49004ecac8bc5e731c338c85b6a19c741c7fcc",
   "changes": [
     {
       "path": "cmd/simulator/main.go",
@@ -154,9 +154,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "d94961ae25ea5a3240f26994b99faa57ec6666e6650912bdd793e61d36459f6b",
+      "sha256": "487c38061c6548bd23e7d2d78686f2d01f14f381e068b66aaa1dae8072414eec",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves existing models and controls; updates the Sakura startup abstraction scope prose and adds five mutation controls, plus bounded read-epoch wording.",
+      "reason": "Preserves existing models and controls; updates the Sakura startup abstraction scope prose and adds five mutation controls, plus bounded read-epoch wording. Existing Cloud DNS: Adds the two reviewed Cloud DNS registrations and preserves all 113 previously registered main models. Also includes the scoped DNS console projection and its removal guards.",
       "models": []
     },
     {
@@ -285,9 +285,9 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "25ea364de4c91bd0757ac64435d426f2eddb30d02462c715dbb12fc3c9725474",
+      "sha256": "f9e32c094dea5cefe2b1cc01becf1964674ec28a45b2eb5e5b740e35a52c901b",
       "disposition": "modeled",
-      "reason": "Only changed Sakura provider composition and scoped publication path; other provider logic and authentication are not modeled.",
+      "reason": "Only changed Sakura provider composition and scoped publication path; other provider logic and authentication are not modeled. Existing Cloud DNS: Publishes the Cloud DNS console capability only for the trusted local owner outside scoped handoffs.",
       "models": [
         {
           "id": "SakuraStartupAdmission",
@@ -298,14 +298,21 @@
             "RegistrationRequiresSchema"
           ],
           "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
+        },
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "CapabilityAuthorized"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
         }
       ]
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "b81b33074d8b80a00ac358ee08d3f37db4d76e4fc3f5a1451c04cfda15ae01ea",
+      "sha256": "240a3efbf1dfe8f542c0614ed8c14464b1aed1d26c91d4d76e4521c0821c1f0d",
       "disposition": "modeled",
-      "reason": "Embedded bundle includes the exact guarded Server view and current-context response projection.",
+      "reason": "Embedded bundle includes the exact guarded Server view and current-context response projection. Existing Cloud DNS: Rebuilt console embeds the scoped DNS visibility and local request-cancellation behavior in the bound UI changes.",
       "models": [
         {
           "id": "SakuraServerReadEpoch",
@@ -315,6 +322,15 @@
             "NoDifferentServer"
           ],
           "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        },
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentDiscovery",
+            "OnlyCurrentReadVisible",
+            "NoStaleContinuation"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
         }
       ]
     },
@@ -327,31 +343,31 @@
     },
     {
       "path": "scripts/factory_acceptance.py",
-      "sha256": "c674a558f5cf9491757b2127542c06a9ebfc23829eede1f3aca7afe8391a5863",
+      "sha256": "272723ee144d849767521b773dfc180cb6bfd10705a919d7b4181e69ee7e1aec",
       "disposition": "validation-tooling",
-      "reason": "Adds opt-in Sakura Server metadata acceptance with a pinned oracle, leaving the existing SQS and DescribeSubnets defaults unchanged.",
+      "reason": "Adds opt-in Sakura Server metadata acceptance with a pinned oracle, leaving the existing SQS and DescribeSubnets defaults unchanged. Existing Cloud DNS: Registers opt-in Cloud DNS acceptance, retaining existing SQS and DescribeSubnets defaults, oracle and scope checks.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "5ebfb2601e6db37308bd12f2c3912334e138db7cb0c9fbbf2ab8e49f5495def9",
+      "sha256": "1235543f01717c50c8bd062e15130948e341079c95aef509808f2ef7601add4a",
       "disposition": "formal-infrastructure",
-      "reason": "Makes the five additional Sakura startup mutation controls mandatory in the exact inventory. Does not alter runtime.",
+      "reason": "Makes the five additional Sakura startup mutation controls mandatory in the exact inventory. Does not alter runtime. Existing Cloud DNS: Pins both reviewed Cloud DNS models, their checked properties, exact source scopes and three sensitivity controls, preserving all existing pins. Also includes the scoped DNS console projection and its removal guards.",
       "models": []
     },
     {
       "path": "scripts/test-factory-acceptance.py",
-      "sha256": "cd39d888756e83b6215cf3766a6a1aed506e3c20c6b0bbfd0a3c1394c16f9e69",
+      "sha256": "293f739e78c9f271e6d9545c6ec8ed7f832b68f231b4144e868214c9d46bf42d",
       "disposition": "test-support",
-      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
+      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here. Existing Cloud DNS: Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
       "disposition": "formal-infrastructure",
-      "reason": "Checks preservation of required registration and rejects removed Sakura scope, properties or controls with an isolated model fixture. Also retains the scoped console read-selection model and its six controls.",
+      "reason": "Checks preservation of required registration and rejects removed Sakura scope, properties or controls with an isolated model fixture. Also retains the scoped console read-selection model and its six controls. Existing Cloud DNS: Checks exact model inventory and rejects removal of Cloud DNS scope, properties or registered controls with isolated fixtures. Also includes the scoped DNS console projection and its removal guards.",
       "models": [],
-      "sha256": "6e7491951797eaf9510635161654dcecbead98f89d4b9c1f010139c70f5a8663"
+      "sha256": "cc0a7db3e6791c3bdca31f1fdfd108972ead2a0dfb1245198068e065eee51ce2"
     },
     {
       "path": "scripts/test-native-provenance.py",
@@ -411,23 +427,23 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "04c47b429fc98cb81b0d8a64b03b093e0f2806a53638a785504e127c9bc56c57",
+      "sha256": "6e47f6912774937fa3597550a41a75f4128c65b49017c5c862d16ceb0783d31e",
       "disposition": "presentation",
-      "reason": "Generated package digest index, not program behavior.",
+      "reason": "Generated package digest index, not program behavior. Existing Cloud DNS: Generated digest indexes of embedded console assets, not program behavior.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "1f3ffa41edd5abba2b4e6dacb45b98b15a8bee3232692f0eb0bbd240abff67b5",
+      "sha256": "b714262026a6a7a647ef5d14a7ea77ff0a001c6d79fa2738c0320d1f400b2ccd",
       "disposition": "presentation",
-      "reason": "Generated bundle input provenance, not program behavior.",
+      "reason": "Generated bundle input provenance, not program behavior. Existing Cloud DNS: Generated console input provenance, not program behavior.",
       "models": []
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "25d79bb4ac81bb36c2d484cc212649994726491c1828201c4f523a7439b50496",
+      "sha256": "491578eb618b604460b6236812bb561fad3ca29305961cda3830941fe01694b4",
       "disposition": "modeled",
-      "reason": "Uses explicit enabled Server capability and does not infer permission or readiness from Disk or region.",
+      "reason": "Uses explicit enabled Server capability and does not infer permission or readiness from Disk or region. Existing Cloud DNS: Projects DNS availability from the exact capability and the active discovery principal and epoch.",
       "models": [
         {
           "id": "SakuraServerReadEpoch",
@@ -435,14 +451,21 @@
             "NoUnadvertisedMount"
           ],
           "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        },
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentDiscovery"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
         }
       ]
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "743f5018c55ce7e961f0001ac2d06852594955910aa5caa0c8d3ee4f94443a93",
+      "sha256": "9b3673f056b72b0815c4fe735341509c2041ba41ab3da1002cf1e239114da013",
       "disposition": "modeled",
-      "reason": "Does not mount the Server view unless its own capability is enabled and valid; binds session to the Sakura context.",
+      "reason": "Does not mount the Server view unless its own capability is enabled and valid; binds session to the Sakura context. Existing Cloud DNS: Combines fresh backend discovery and effective principal/epoch before mounting DNS, preventing reuse after returning to the same principal.",
       "models": [
         {
           "id": "SakuraServerReadEpoch",
@@ -451,6 +474,13 @@
             "OnlyCurrentResult"
           ],
           "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        },
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentDiscovery"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
         }
       ]
     },

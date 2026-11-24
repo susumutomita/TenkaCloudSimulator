@@ -32445,7 +32445,7 @@
       "imports": []
     },
     "src/gcp-console-shell.jsx": {
-      "bytes": 2978,
+      "bytes": 3109,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -33146,7 +33146,7 @@
       "format": "esm"
     },
     "src/console-navigation.mjs": {
-      "bytes": 10794,
+      "bytes": 11833,
       "imports": [
         {
           "path": "src/sakura-server-read.mjs",
@@ -33539,8 +33539,44 @@
       ],
       "format": "esm"
     },
+    "src/gcp-dns-requests.mjs": {
+      "bytes": 2764,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/gcp-dns.jsx": {
+      "bytes": 9968,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/gcp-console-shell.jsx",
+          "kind": "import-statement",
+          "original": "./gcp-console-shell.jsx"
+        },
+        {
+          "path": "src/gcp-dns-requests.mjs",
+          "kind": "import-statement",
+          "original": "./gcp-dns-requests.mjs"
+        },
+        {
+          "path": "src/gcp-storage.css",
+          "kind": "import-statement",
+          "original": "./gcp-storage.css"
+        }
+      ],
+      "format": "esm"
+    },
     "src/main.jsx": {
-      "bytes": 50367,
+      "bytes": 51856,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -33846,6 +33882,11 @@
           "path": "src/gcp-appengine.jsx",
           "kind": "import-statement",
           "original": "./gcp-appengine.jsx"
+        },
+        {
+          "path": "src/gcp-dns.jsx",
+          "kind": "import-statement",
+          "original": "./gcp-dns.jsx"
         },
         {
           "path": "src/console-navigation.mjs",
@@ -34521,7 +34562,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 46098
+          "bytesInOutput": 46877
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -36519,7 +36560,7 @@
           "bytesInOutput": 2333
         },
         "node_modules/@codemirror/state/dist/index.js": {
-          "bytesInOutput": 47277
+          "bytesInOutput": 47286
         },
         "node_modules/style-mod/src/style-mod.js": {
           "bytesInOutput": 2232
@@ -36819,7 +36860,7 @@
           "bytesInOutput": 27755
         },
         "src/gcp-console-shell.jsx": {
-          "bytesInOutput": 2868
+          "bytesInOutput": 2943
         },
         "src/gcp-storage.css": {
           "bytesInOutput": 0
@@ -36909,7 +36950,7 @@
           "bytesInOutput": 64
         },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 9002
+          "bytesInOutput": 9726
         },
         "src/console-home.jsx": {
           "bytesInOutput": 9688
@@ -36943,9 +36984,15 @@
         },
         "src/gcp-appengine.css": {
           "bytesInOutput": 0
+        },
+        "src/gcp-dns.jsx": {
+          "bytesInOutput": 9788
+        },
+        "src/gcp-dns-requests.mjs": {
+          "bytesInOutput": 1673
         }
       },
-      "bytes": 2419842
+      "bytes": 2432890
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],
