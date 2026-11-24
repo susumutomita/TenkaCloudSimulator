@@ -213,11 +213,11 @@ var kinesisVideo = &Service{
 	},
 	Ops: []Op{
 		{Name: "CreateStream", Kind: Create, Resource: "stream", Check: kinesisVideoStream},
-		{Name: "DescribeStream", Kind: Read, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}},
+		{Name: "DescribeStream", Kind: Read, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}, Check: kinesisVideoStreamSelector},
 		{Name: "ListStreams", Kind: List, Resource: "stream"},
-		{Name: "UpdateStream", Kind: Update, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}, Token: "CurrentVersion",
+		{Name: "UpdateStream", Kind: Update, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}, Check: kinesisVideoStreamSelector, Token: "CurrentVersion",
 			Fields: []string{"DeviceName", "MediaType"}},
-		{Name: "UpdateDataRetention", Kind: Update, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}, Token: "CurrentVersion",
+		{Name: "UpdateDataRetention", Kind: Update, Resource: "stream", Lookup: "StreamName", LookupAlt: []string{"StreamARN"}, Check: kinesisVideoStreamSelector, Token: "CurrentVersion",
 			Accept: []string{"Operation", "DataRetentionChangeInHours"}, Merged: kinesisVideoRetention},
 		{Name: "DeleteStream", Kind: Delete, Resource: "stream", Lookup: "StreamARN", Token: "CurrentVersion"},
 		{Name: "CreateSignalingChannel", Kind: Create, Resource: "channel", Check: kinesisVideoChannel},
@@ -236,6 +236,16 @@ var kinesisVideo = &Service{
 		"Updates require CurrentVersion, which must equal the stored Version or the request fails with VersionMismatchException; every successful update gives the resource a new Version. UpdateDataRetention adds or subtracts the change from the retention in hours, which must stay from 0 to 87600. DeleteStream and DeleteSignalingChannel delete the latest version, or refuse with VersionMismatchException a CurrentVersion that is not the stored Version; ListStreams and ListSignalingChannels refuse the name condition. Only SINGLE_MASTER channels can be created.",
 		"Tags are read and changed through TagResource, UntagResource and ListTagsForResource by ARN; TagStream, UntagStream and ListTagsForStream are not bound. A tag count above 50 reached through TagResource fails with ClientLimitExceededException and a channel count above the simulator limit fails the same way, because the engine cannot name the more specific modeled exceptions.",
 	},
+}
+
+// kinesisVideoStreamSelector rejects a request with no stream identifier.
+func kinesisVideoStreamSelector(input map[string]any) error {
+	name, _ := input["StreamName"].(string)
+	arn, _ := input["StreamARN"].(string)
+	if name == "" && arn == "" {
+		return Failure("InvalidArgumentException", "StreamName or StreamARN is required.")
+	}
+	return nil
 }
 
 // kinesisVideoStream applies the documented retention range.

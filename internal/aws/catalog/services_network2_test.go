@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/url"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -390,5 +391,39 @@ func TestKinesisVideoUnboundOperationsReturn501(t *testing.T) {
 	for _, path := range []string{"/getDataEndpoint", "/getSignalingChannelEndpoint", "/tagStream", "/untagStream", "/listTagsForStream",
 		"/updateStreamStorageConfiguration", "/describeNotificationConfiguration", "/updateImageGenerationConfiguration"} {
 		expect(t, h.rest("kinesisvideo", "POST", path, map[string]any{}), 501, "UnknownOperationException")
+	}
+}
+
+func TestKinesisVideoOperationsRequireStreamIdentifier(t *testing.T) {
+	h := newHarness(t, kinesisVideo)
+	const name = "catalog-selector-fixture"
+	created := h.rest("kinesisvideo", "POST", "/createStream", map[string]any{"StreamName": name})
+	expect(t, created, 200, "")
+	arn := str(created.body["StreamARN"])
+	for _, tc := range []struct {
+		path string
+		req  map[string]any
+	}{
+		{"/describeStream", map[string]any{}},
+		{"/updateStream", map[string]any{"MediaType": "video/h264"}},
+		{"/updateDataRetention", map[string]any{"Operation": "INCREASE_DATA_RETENTION", "DataRetentionChangeInHours": 1}},
+	} {
+		t.Run(tc.path, func(t *testing.T) {
+			before := h.rest("kinesisvideo", "POST", "/describeStream", map[string]any{"StreamName": name})
+			expect(t, before, 200, "")
+			if tc.path != "/describeStream" {
+				tc.req["CurrentVersion"] = before.body["StreamInfo"].(map[string]any)["Version"]
+			}
+			expect(t, h.rest("kinesisvideo", "POST", tc.path, tc.req), 400, "InvalidArgumentException")
+			after := h.rest("kinesisvideo", "POST", "/describeStream", map[string]any{"StreamARN": arn})
+			expect(t, after, 200, "")
+			if !reflect.DeepEqual(before.body["StreamInfo"], after.body["StreamInfo"]) {
+				t.Fatalf("rejected request altered the stream: before %v, after %v", before.body, after.body)
+			}
+			tc.req["StreamName"] = "missing-selector-fixture"
+			expect(t, h.rest("kinesisvideo", "POST", tc.path, tc.req), 404, "ResourceNotFoundException")
+			tc.req["StreamName"], tc.req["StreamARN"] = name, arn
+			expect(t, h.rest("kinesisvideo", "POST", tc.path, tc.req), 200, "")
+		})
 	}
 }
