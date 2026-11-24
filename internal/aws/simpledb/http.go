@@ -23,7 +23,7 @@ type Scope struct{ Account, Region string }
 // and resource. It must not treat dummy AWS signing fields as authentication.
 type Authorize func(context.Context, string, string) bool
 
-// NewHTTPHandler implements only the five bounded Query operations. The caller
+// NewHTTPHandler implements the bounded local Query operations. The caller
 // retains authentication, dispatch, region validation and database ownership.
 func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +70,7 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			allowed[k] = true
 		}
 		switch action {
-		case "CreateDomain", "DeleteDomain":
+		case "CreateDomain", "DeleteDomain", "DomainMetadata":
 			allowed["DomainName"] = true
 		case "ListDomains":
 			allowed["MaxNumberOfDomains"] = true
@@ -216,6 +216,10 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			err = s.CreateDomain(r.Context(), sc.Account, sc.Region, domain)
 		case "DeleteDomain":
 			err = s.DeleteDomain(r.Context(), sc.Account, sc.Region, domain)
+		case "DomainMetadata":
+			var stats DomainStats
+			stats, err = s.DomainMetadata(r.Context(), sc.Account, sc.Region, domain)
+			out.Domain = &stats
 		case "ListDomains":
 			var ds []string
 			var next string
@@ -304,6 +308,7 @@ type queryResponse struct {
 	Namespace string       `xml:"xmlns,attr"`
 	List      *queryList   `xml:"ListDomainsResult,omitempty"`
 	Get       *queryGet    `xml:"GetAttributesResult,omitempty"`
+	Domain    *DomainStats `xml:"DomainMetadataResult,omitempty"`
 	Errors    *queryErrors `xml:"Errors,omitempty"`
 	Metadata  struct {
 		ID string `xml:"RequestId"`

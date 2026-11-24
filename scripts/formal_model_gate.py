@@ -2995,6 +2995,19 @@ REQUIRED_SOURCE_SCOPES['SimpleDBQueryAdmission'] = {
 }
 
 
+BASE_MODELS.add('SimpleDBDomainMetadata')
+BASE_INVARIANTS['SimpleDBDomainMetadata'] = {
+    'TypeOK', 'ReadRequiresDomainAuthority', 'ExactCommittedTotals',
+}
+REQUIRED_MUTANTS['SimpleDBDomainMetadata'] = {
+    'CountMetadataKeysPerItem', 'LoseMetadataValueBytes', 'AdmitDeniedMetadataRead',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBDomainMetadata'] = {
+    'internal/aws/simpledb/metadata.go',
+    'internal/aws/simpledb/http.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

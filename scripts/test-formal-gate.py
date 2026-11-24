@@ -602,6 +602,10 @@ class FormalGateTests(unittest.TestCase):
 
     def test_simpledb_registry_requires_every_model_property_control_and_exact_scope(self):
         expected = {
+            'SimpleDBDomainMetadata': (
+                'TypeOK ReadRequiresDomainAuthority ExactCommittedTotals',
+                'CountMetadataKeysPerItem LoseMetadataValueBytes AdmitDeniedMetadataRead',
+                'internal/aws/simpledb/metadata.go internal/aws/simpledb/http.go'),
             'SimpleDBLifecycle': (
                 'TypeOK NoOrphans PendingInvisible RefusalUnchanged AuthorizedCommit PeerFrame CommittedExact DurableAck RestartExact DeleteEmpty CreateIdempotent PutSetExact',
                 'PublishStagedSimpleDB LoseExistingSimpleDBValuesOnAppend',

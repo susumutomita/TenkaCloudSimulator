@@ -19094,6 +19094,57 @@
      "expect_invariant": "ConfiguredScopeBinding"
     }
    ]
+  },
+  {
+   "id": "SimpleDBDomainMetadata",
+   "model": "formal/SimpleDBDomainMetadata.tla",
+   "config": "formal/SimpleDBDomainMetadata.cfg",
+   "bounds": "Two item names, two attribute names, five possible attribute pairs, and three value byte widths; one scoped read over fixed committed rows.",
+   "properties": [
+    "TypeOK",
+    "ReadRequiresDomainAuthority",
+    "ExactCommittedTotals"
+   ],
+   "limits": "One already-selected immutable local snapshot, symbolic byte weights and typed admission; no SQL snapshot isolation, cancellation, wall clock, raw Query/XML, IAM policy evaluation, SDK or Go refinement.",
+   "source_scope": [
+    "internal/aws/simpledb/metadata.go",
+    "internal/aws/simpledb/http.go"
+   ],
+   "mutants": [
+    {
+     "id": "CountMetadataKeysPerItem",
+     "edits": [
+      {
+       "old": "newKeys == KeySet(vs) \\ seen",
+       "new": "newKeys == KeySet(vs)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactCommittedTotals"
+    },
+    {
+     "id": "LoseMetadataValueBytes",
+     "edits": [
+      {
+       "old": "valueSize' = valueSize + SumValues(vs)",
+       "new": "valueSize' = valueSize",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactCommittedTotals"
+    },
+    {
+     "id": "AdmitDeniedMetadataRead",
+     "edits": [
+      {
+       "old": "/\\ phase = \"init\" /\\ wellFormed /\\ allowed /\\ exists",
+       "new": "/\\ phase = \"init\" /\\ wellFormed /\\ exists",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReadRequiresDomainAuthority"
+    }
+   ]
   }
  ]
 }

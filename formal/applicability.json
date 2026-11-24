@@ -17,6 +17,40 @@
       "models": []
     },
     {
+      "path": "formal/SimpleDBDomainMetadata.cfg",
+      "sha256": "a0f12725650dd6b0e5a217ba75cf62a6a6a05c4b5d10375b00a4289fe96a224c",
+      "disposition": "modeled",
+      "reason": "Pins metadata aggregate, typed admission, and result invariants for the bounded model.",
+      "models": [
+        {
+          "id": "SimpleDBDomainMetadata",
+          "properties": [
+            "TypeOK",
+            "ReadRequiresDomainAuthority",
+            "ExactCommittedTotals"
+          ],
+          "limits": "One already-selected immutable local snapshot, symbolic byte weights and typed admission; no SQL snapshot isolation, cancellation, wall clock, raw Query/XML, IAM policy evaluation, SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/SimpleDBDomainMetadata.tla",
+      "sha256": "b435d5d85b5e55d50a6ec6181ebe5cf40abaac838425b2bb83fff081f40bd21c",
+      "disposition": "modeled",
+      "reason": "Bounded abstract committed-row metadata aggregation; no claim of Go or SQLite refinement.",
+      "models": [
+        {
+          "id": "SimpleDBDomainMetadata",
+          "properties": [
+            "TypeOK",
+            "ReadRequiresDomainAuthority",
+            "ExactCommittedTotals"
+          ],
+          "limits": "One already-selected immutable local snapshot, symbolic byte weights and typed admission; no SQL snapshot isolation, cancellation, wall clock, raw Query/XML, IAM policy evaluation, SDK or Go refinement."
+        }
+      ]
+    },
+    {
       "path": "formal/SimpleDBLifecycle.cfg",
       "sha256": "7c6a28ef2f406143a25710feadbe550dce86c16e4f521311b9fca2be66e4f5f4",
       "disposition": "modeled",
@@ -146,9 +180,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "8e184fc9d87f527a61f78d8c0077c70992f7abd2dfb1ff6ecc9c8e3a799ea90c",
+      "sha256": "7ff22d61e166c7e09aae047b1321f8e7fd8ce1faca65414f7ef7fc07c4b77267",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the three reviewed SimpleDB registrations and preserves all 113 current main models.",
+      "reason": "Adds the three reviewed SimpleDB registrations and preserves all 113 current main models. Adds the bounded DomainMetadata model and checks its applicability limits.",
       "models": []
     },
     {
@@ -411,9 +445,9 @@
     },
     {
       "path": "internal/aws/simpledb/http.go",
-      "sha256": "3ceac33439d29ce9f5d44611c465624bf725a62d4a8ca410afbb244d8010b5ea",
+      "sha256": "b8284b3621e80c3b3a81b6e215ad15f6bcbc040bb43244515206dd8ddeb22089",
       "disposition": "modeled",
-      "reason": "Abstract admission, one dispatch and response/payload categories; not raw protocol or exact statuses.",
+      "reason": "Abstract admission, one dispatch and response categories for the original five operations; separate DomainMetadata typed admission and results, not raw protocol/status.",
       "models": [
         {
           "id": "SimpleDBQueryAdmission",
@@ -426,6 +460,13 @@
             "EnvelopeMatchesOutcome"
           ],
           "limits": "Abstract typed guards and response categories only; no raw parser/XML/signing, IAM evaluator, routing precedence, initializer wiring, exact status/codes, pagination, SQL, SDK or Go refinement."
+        },
+        {
+          "id": "SimpleDBDomainMetadata",
+          "properties": [
+            "ReadRequiresDomainAuthority"
+          ],
+          "limits": "One already-selected immutable local snapshot, symbolic byte weights and typed admission; no SQL snapshot isolation, cancellation, wall clock, raw Query/XML, IAM policy evaluation, SDK or Go refinement."
         }
       ]
     },
@@ -461,6 +502,30 @@
           "limits": "Abstract admitted mutations and stage/commit/failure/reopen only; no SQL, HTTP/SDK, pagination, arbitrary concurrency, IAM evaluation or Go refinement."
         }
       ]
+    },
+    {
+      "path": "internal/aws/simpledb/metadata.go",
+      "sha256": "cf342630088a75c1cbd8e46833cf8599e1335671c0ff70314db9d6be0fbd6c57",
+      "disposition": "modeled",
+      "reason": "Abstract admitted DomainMetadata fold: item count/bytes, unique attribute name count/bytes, and value-pair count/bytes. SQLite isolation and timestamps remain runtime evidence.",
+      "models": [
+        {
+          "id": "SimpleDBDomainMetadata",
+          "properties": [
+            "TypeOK",
+            "ReadRequiresDomainAuthority",
+            "ExactCommittedTotals"
+          ],
+          "limits": "One already-selected immutable local snapshot, symbolic byte weights and typed admission; no SQL snapshot isolation, cancellation, wall clock, raw Query/XML, IAM policy evaluation, SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/metadata_test.go",
+      "sha256": "997a23ba0f5137a22cf9de998eef4df6aa069d617316e535072ac708d8f6351d",
+      "disposition": "test-support",
+      "reason": "Exercises metadata wire fields, empty/recreated domains, scoped replacement and refusal through real SQLite; not a formal proof.",
+      "models": []
     },
     {
       "path": "internal/aws/simpledb/pagination.go",
@@ -1341,9 +1406,9 @@
     {
       "path": "scripts/formal_model_gate.py",
       "disposition": "formal-infrastructure",
-      "reason": "Pins the three SimpleDB models, checked properties, exact source scopes and six sensitivity controls; existing pins preserved.",
+      "reason": "Pins the three SimpleDB models, checked properties, exact source scopes and six sensitivity controls; existing pins preserved. Adds the associated DomainMetadata registry controls.",
       "models": [],
-      "sha256": "f96992289a355d5a3a971f4427050b1cb913f0eda612b8f3ec9ddf0753fead3e"
+      "sha256": "0aec81ff5a5a5d2bfbcad427a96af7b67bd94d314a22dd1569d71d8b019ee25c"
     },
     {
       "path": "scripts/test-factory-acceptance.py",
@@ -1355,9 +1420,9 @@
     {
       "path": "scripts/test-formal-gate.py",
       "disposition": "formal-infrastructure",
-      "reason": "Adds specific isolated SimpleDB registration removal checks and exact inventory coverage without changing existing assertions.",
+      "reason": "Adds specific isolated SimpleDB registration removal checks and exact inventory coverage without changing existing assertions. Adds the associated DomainMetadata registry controls.",
       "models": [],
-      "sha256": "c250277068d644de3d32b5106127aaa3fd649f93c086010972e0b13b4bfda685"
+      "sha256": "37bbbef78594ac5e7e6595009f749ecfdf077975732f0f1193a11d0cf038fc7e"
     },
     {
       "path": "scripts/test-simpledb-factory-registration.py",
