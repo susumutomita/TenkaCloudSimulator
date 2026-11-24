@@ -358,7 +358,7 @@ var chimeIdentity = &Service{
 			Generate: map[string]any{"CreatedTimestamp": "$now", "LastUpdatedTimestamp": "$now"}},
 	},
 	Ops: []Op{
-		{Name: "CreateAppInstance", Kind: Create, Resource: "appInstance", Check: chimeNoTags},
+		{Name: "CreateAppInstance", Kind: Create, Resource: "appInstance", Check: chimeCreateAppInstance},
 		{Name: "DescribeAppInstance", Kind: Read, Resource: "appInstance", Lookup: "AppInstanceArn"},
 		{Name: "ListAppInstances", Kind: List, Resource: "appInstance"},
 		{Name: "UpdateAppInstance", Kind: Update, Resource: "appInstance", Lookup: "AppInstanceArn", Touch: []string{"LastUpdatedTimestamp"},
@@ -369,6 +369,18 @@ var chimeIdentity = &Service{
 		"App instances are stored records: no messaging identity can sign in and no channel, message or push endpoint exists. Admins, bots, users and their endpoints, retention settings and expiration settings return UnknownOperationException with HTTP 501, because each is keyed by an app instance ARN that the stored model cannot attach a child to.",
 		"The tag operations are not bound here: all Amazon Chime SDK models share the same tag routes and the engine serves them from the voice model only (see the chime-sdk-voice bounds), so CreateAppInstance refuses Tags. At most 25 app instances per Region exist as a simulator limit, and the ARN form app-instance/id is inferred.",
 	},
+}
+
+// CreateAppInstance's metadata limit is 1 KiB of UTF-8, not 1,024
+// Unicode code points. Preserve Identity's explicit tag refusal.
+func chimeCreateAppInstance(input map[string]any) error {
+	if err := chimeNoTags(input); err != nil {
+		return err
+	}
+	if metadata, ok := input["Metadata"].(string); ok && len(metadata) > 1024 {
+		return Failure("BadRequestException", "AppInstance metadata must be at most 1024 UTF-8 bytes.")
+	}
+	return nil
 }
 
 // chimeMediaPipelines serves Amazon Chime SDK media insights pipeline
