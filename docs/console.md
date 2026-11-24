@@ -189,22 +189,33 @@ previously pinned S3. An EC2-instance handoff shows only Console Home, EC2 (its
 instance) and Systems Manager → Session Manager. This is a session-scope restriction, not dynamic IAM-policy
 discovery; stars never grant API permission or change the session.
 
-### Read-only EC2 and VPC inspection
+### EC2 and VPC views
 
-The EC2 and VPC views list the local CloudFormation-managed resources returned
-by `DescribeInstances` and `DescribeVpcs` in the selected region. Discovery must
-advertise both read operations and `console: true` before these views appear.
-They do not implement instance launch/start/stop, VPC creation, or network edits.
-The recorded simulator runtime state is not an AWS instance-state claim or a
-probe of guest health; absent/unknown state is shown as unconfirmed. UserData,
-runtime plans, credentials and internal connection details are never displayed.
+The EC2 and VPC views list the local resources returned by `DescribeInstances` and
+`DescribeVpcs` in the selected region. Discovery must advertise both read
+operations and `console: true` before these views appear. EC2 instances stay
+read-only: there is no instance launch/start/stop or network edit. The recorded
+simulator runtime state is not an AWS instance-state claim or a probe of guest
+health; absent/unknown state is shown as unconfirmed. UserData, runtime plans,
+credentials and internal connection details are never displayed.
+
+When discovery also advertises `CreateVpc` and `DeleteVpc`, the VPC view adds
+**Create VPC** and **Delete VPC**. **Create VPC** follows the AWS "VPC only" form:
+an optional Name tag and a manual IPv4 CIDR (`/16`–`/28`). "VPC and more", IPAM,
+IPv6 and dedicated tenancy are shown disabled. The server validates the request;
+a refusal such as `InvalidVpc.Range` stays on the form as an error and creates
+nothing. A created VPC is selected in the refreshed list. **Delete VPC** is enabled
+only for a VPC whose **Managed by** column says EC2, and requires typing `delete`.
+CloudFormation-managed VPCs show why deletion is disabled: delete their stack.
+Subnets, route tables, gateways and VPC attribute edits are not available.
 
 Lists are bounded by the API and must fail rather than silently truncate. A read
 failure clears previous data and is shown as an error, not an empty-success
-result. Switching identity, region or service discards old in-flight responses.
-The initial read API is for the local operator/exercise-identity context, not a
-new STS participant authorization surface. Each team's isolated process/database
-remains the tenancy boundary.
+result. Switching identity, region or service discards old in-flight responses,
+and is blocked while a create or delete is in progress. The EC2 API uses the
+local operator/exercise-identity context, not a new STS participant
+authorization surface; a console session bound to one instance never shows VPC.
+Each team's isolated process/database remains the tenancy boundary.
 
 ### Session Manager for the handed-off instance
 

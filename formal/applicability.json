@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "cca160ef6d925479da9c1de2071eb6b60f6e99f4",
+  "base_sha": "9652f0344ab9d7e57aa30595fab5c3ed52c57cd8",
   "changes": [
     {
       "path": "docs/acceptance/gcp-cloud-dns.md",
@@ -96,9 +96,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "81115b00038ed56d452f465f5b6177eb3005d6b5b99c521042ad152a44c420dd",
+      "sha256": "68aa547dbb001bcc4040a7a670b7719c3e683e897c692dd0069e9cad4059daf1",
       "disposition": "formal-infrastructure",
-      "reason": "Partitions the DNS registration into storage and child-token models, preserving both original controls and adding one generation control; legacy registrations unchanged.",
+      "reason": "Adds the two reviewed Cloud DNS registrations and preserves all 113 previously registered main models.",
       "models": []
     },
     {
@@ -286,17 +286,31 @@
     },
     {
       "path": "scripts/factory_acceptance.py",
-      "sha256": "89b83b6aa7e184cee4518f04f3e1f6ba2dbe7dedd33422296a77b0677d427c92",
+      "sha256": "44c6dfc249a6e5bd2071df5ae80ee377bea87f6e3437ed538db4d93d15b3310b",
       "disposition": "validation-tooling",
-      "reason": "Adds the reviewed offline DNS leaf acceptance registration; it is developer tooling and does not change authorization or provider runtime behavior.",
+      "reason": "Registers opt-in Cloud DNS acceptance, retaining existing SQS and DescribeSubnets defaults, oracle and scope checks.",
       "models": []
     },
     {
+      "path": "scripts/formal_model_gate.py",
+      "disposition": "formal-infrastructure",
+      "reason": "Pins both reviewed Cloud DNS models, their checked properties, exact source scopes and three sensitivity controls, preserving all existing pins.",
+      "models": [],
+      "sha256": "580bbaa84b81a57947ec7abf9c6c5be671f10983e6aef949624b0a553bb8f092"
+    },
+    {
       "path": "scripts/test-factory-acceptance.py",
-      "sha256": "dadda38addc942a86024c4dcb87ff1ba93a14da6392b56e670fe5ba7efc0c20b",
+      "sha256": "d6e1e69e2d944ef1435f2d3374da6596c2e500a10603016aae2e30e4231d043d",
       "disposition": "test-support",
       "reason": "Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
       "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "disposition": "formal-infrastructure",
+      "reason": "Checks exact model inventory and rejects removal of Cloud DNS scope, properties or registered controls with isolated fixtures.",
+      "models": [],
+      "sha256": "2a1787b057d8ece9dd71a33677732fc70e3eb1d0910d484405a490c9d2b8af6d"
     }
   ]
 }

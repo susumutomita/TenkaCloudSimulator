@@ -2900,6 +2900,86 @@ REQUIRED_SOURCE_SCOPES['CFNParameterRuleAdmission'] = {
 }
 
 
+BASE_MODELS.add('EC2VPCOwnership')
+BASE_INVARIANTS['EC2VPCOwnership'] = {
+    'NoAdoption',
+    'FailureRollsBack',
+    'NativeNeverDeletesStackVPC',
+    'NativeDeleteExact',
+    'NativeCreateOwned',
+    'StackDeleteSparesNative',
+    'QuotaBound',
+    'DescribeExact',
+    'TypeOK',
+}
+REQUIRED_MUTANTS['EC2VPCOwnership'] = {
+    'SkipCreateAuthorization',
+    'SkipDeleteAuthorization',
+    'DeleteStackVPC',
+    'DeleteOtherRegion',
+    'OverwriteExistingVPC',
+    'AdoptOtherOwnerVPC',
+    'StackDeleteRemovesNative',
+    'IgnoreNativeQuota',
+    'MislabelStackVPC',
+    'DescribeOtherRegion',
+}
+REQUIRED_SOURCE_SCOPES['EC2VPCOwnership'] = {
+    'internal/aws/ec2_vpc.go',
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_network.go',
+    'internal/aws/ec2_network_cloudformation.go',
+    'internal/aws/ssm.go',
+    'internal/server/server.go',
+}
+
+
+BASE_MODELS.add('CloudDNSAtomicChange')
+BASE_INVARIANTS['CloudDNSAtomicChange'] = {
+    'TypeOK',
+    'NoOrphanRecords',
+    'AtomicPair',
+    'ApexPreserved',
+    'PendingInvisible',
+    'DeniedStateUnchanged',
+    'OnlyOwnerCommits',
+    'ExactDeletionRequired',
+    'CommittedStateMatchesIntent',
+    'OtherProjectUnchanged',
+    'HistoryPrefixPreserved',
+    'ReceiptSequenceExact',
+    'NonemptyDeletionRefused',
+    'CleanupAdmissibleAtQuota',
+}
+REQUIRED_MUTANTS['CloudDNSAtomicChange'] = {
+    'AcceptPreviousPairedState',
+    'AcceptMissingNewestReceipt',
+}
+REQUIRED_SOURCE_SCOPES['CloudDNSAtomicChange'] = {
+    'internal/gcp/dns/engine.go',
+    'internal/gcp/dns/model.go',
+    'internal/gcp/dns/operations.go',
+    'internal/gcp/dns/pagination.go',
+    'internal/gcp/dns/records.go',
+    'internal/gcp/dns/store.go',
+}
+
+BASE_MODELS.add('CloudDNSChildToken')
+BASE_INVARIANTS['CloudDNSChildToken'] = {
+    'TypeOK',
+    'NoOldGenerationReuse',
+}
+REQUIRED_MUTANTS['CloudDNSChildToken'] = {
+    'AcceptOldGeneration',
+}
+REQUIRED_SOURCE_SCOPES['CloudDNSChildToken'] = {
+    'internal/gcp/dns/engine.go',
+    'internal/gcp/dns/model.go',
+    'internal/gcp/dns/operations.go',
+    'internal/gcp/dns/pagination.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

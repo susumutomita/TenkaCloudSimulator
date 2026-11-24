@@ -132,7 +132,7 @@ func TestEC2ReadWireGuards(t *testing.T) {
 		{"get", "GET", "/", "Action=DescribeVpcs&Version=2016-11-15", "", "", 400},
 		{"query", "POST", "/?other=1", "Action=DescribeVpcs&Version=2016-11-15", "", "", 400},
 		{"malformed", "POST", "/", "Action=%xx", "", "", 400},
-		{"large", "POST", "/", strings.Repeat("a", 8193), "", "", 400},
+		{"large", "POST", "/", "Action=DescribeVpcs&Version=2016-11-15&x=" + strings.Repeat("a", ec2QueryBytes), "", "", 400},
 		{"empty", "POST", "/", "Action=DescribeVpcs&Version=2016-11-15", "", "", 200},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

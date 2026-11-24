@@ -131,69 +131,156 @@ class AcceptanceTests(unittest.TestCase):
     def test_empty_duplicate_suites_refused(self):
         for suites in [[],['sqs-lifecycle']*2]:
             with self.assertRaises(ValueError):gate.verify(self.path,self.head,suites,self.root)
-class CloudDNSRegistrationTests(unittest.TestCase):
-    suite = 'gcp-dns-atomic-lifecycle'
+    def test_subnet_registration_binds_fixed_command_and_scope(self):
+        suite = 'ec2-describe-subnets'
+        spec = gate.SUITES[suite]
+        self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run',
+                                       '^TestEC2DescribeSubnetsContract$', './internal/aws'])
+        vpc_dispatch = 'internal/aws/ec2_vpc.go'
+        gate.validate_scope([suite], 'aws', 'DescribeSubnets',
+                            ['internal/aws/ec2_read.go', vpc_dispatch])
+        for operation, path in (('CreateVpc', vpc_dispatch),
+                                ('DeleteVpc', vpc_dispatch),
+                                ('DeleteMessage', vpc_dispatch),
+                                ('CreateSubnet', 'internal/aws/ec2_read.go'),
+                                ('DescribeSubnets', 'internal/aws/sqs_store.go'),
+                                ('DeleteMessage', 'internal/aws/ec2_read.go'),
+                                ('DescribeSubnets', 'internal/server/server.go')):
+            with self.subTest(operation=operation, path=path), self.assertRaises(ValueError):
+                gate.validate_scope([suite, 'sqs-lifecycle'], 'aws', operation, [path])
 
-    def test_fixed_command_provider_operations_and_leaf_scope(self):
+    def test_subnet_oracle_and_named_result_cannot_be_substituted(self):
+        suite = 'ec2-describe-subnets'
+        spec = dict(gate.SUITES[suite])
+        name, pinned = spec['oracle']
+        self.assertEqual(pinned, '6443bc90b6fec1c7b8bf277cc090b00f6dd431fac3481d120fdefa0ccb09b2d9')
+        spec['oracle'] = name, gate.digest(b'fixed fixture')
+        oracle = self.root / name
+        oracle.parent.mkdir(parents=True, exist_ok=True)
+        with patch.dict(gate.SUITES, {suite: spec}):
+            for data in (None, b'changed fixture', b'fixed fixture'):
+                if data is not None:
+                    oracle.write_bytes(data)
+                if data == b'fixed fixture':
+                    gate.verify_suite_oracles(self.root, [suite])
+                else:
+                    with self.assertRaisesRegex(ValueError, 'oracle changed or missing'):
+                        gate.verify_suite_oracles(self.root, [suite])
+        package = spec['package']
+        def log(test, outcome):
+            return b'\n'.join(json.dumps(event).encode() for event in (
+                {'Action': 'run', 'Package': package, 'Test': test},
+                {'Action': outcome, 'Package': package, 'Test': test},
+                {'Action': 'pass', 'Package': package},
+            ))
+        gate.verdict(log(spec['test'], 'pass'), suite, 0)
+        for result in (log('OtherTest', 'pass'), log(spec['test'], 'skip'), log(spec['test'], 'fail')):
+            with self.assertRaises(ValueError):
+                gate.verdict(result, suite, 0)
+
+class CloudDNSFactoryRegistrationTests(unittest.TestCase):
+    suite = 'gcp-dns-atomic-lifecycle'
+    paths = {
+        'internal/gcp/dns/engine.go', 'internal/gcp/dns/model.go',
+        'internal/gcp/dns/records.go', 'internal/gcp/dns/store.go',
+        'internal/gcp/dns/operations.go', 'internal/gcp/dns/pagination.go',
+        'internal/gcp/dns/factory_lifecycle_test.go', 'internal/gcp/dns/factory_sqlfault_test.go',
+        'internal/gcp/dns/factory_observation_test.go', 'internal/gcp/dns/dns_test.go',
+        'internal/gcp/dns/sql_faults_test.go',
+    }
+
+    def test_dns_is_opt_in_and_existing_defaults_unchanged(self):
+        self.assertEqual(gate.DEFAULT_SUITES, ('sqs-lifecycle', 'ec2-describe-subnets'))
+        for argv, wanted in (
+            (['factory_acceptance.py'], ['sqs-lifecycle', 'ec2-describe-subnets']),
+            (['factory_acceptance.py', '--suite', self.suite], [self.suite]),
+        ):
+            with patch.object(sys, 'argv', argv), patch.object(gate, 'run') as run, patch('builtins.print'):
+                gate.main()
+                self.assertEqual(run.call_args.args[2], wanted)
         spec = gate.SUITES[self.suite]
         self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run',
-                                      '^TestCloudDNSFactoryAtomicLifecycle$', './internal/gcp/dns'])
+                                       '^TestCloudDNSFactoryAtomicLifecycle$', './internal/gcp/dns'])
+        self.assertEqual(spec['provider'], 'gcp-dns')
         self.assertEqual(spec['test'], 'TestCloudDNSFactoryAtomicLifecycle')
         self.assertEqual(spec['package'], 'github.com/susumutomita/TenkaCloudSimulator/internal/gcp/dns')
-        self.assertEqual(spec['provider'], 'gcp-dns')
+        self.assertEqual(gate.GCP_DNS_LEAF_PATHS, self.paths)
         self.assertEqual(spec['operations'], [
-            'dns.managedZones.create', 'dns.managedZones.get', 'dns.managedZones.list', 'dns.managedZones.delete',
-            'dns.changes.create', 'dns.changes.get', 'dns.changes.list',
-            'dns.resourceRecordSets.get', 'dns.resourceRecordSets.list'])
-        for operation in spec['operations']:
-            gate.validate_scope([self.suite], 'gcp-dns', operation, [
-                'internal/gcp/dns/engine.go', 'internal/gcp/dns/model.go',
-                'internal/gcp/dns/records.go', 'internal/gcp/dns/store.go',
-                'internal/gcp/dns/operations.go', 'internal/gcp/dns/pagination.go',
-                'internal/gcp/dns/factory_lifecycle_test.go', 'internal/gcp/dns/factory_sqlfault_test.go',
-                'internal/gcp/dns/factory_observation_test.go',
-                'internal/gcp/dns/dns_test.go', 'internal/gcp/dns/sql_faults_test.go'])
+            'dns.managedZones.create', 'dns.managedZones.get', 'dns.managedZones.list',
+            'dns.managedZones.delete', 'dns.changes.create', 'dns.changes.get',
+            'dns.changes.list', 'dns.resourceRecordSets.get', 'dns.resourceRecordSets.list',
+        ])
 
-    def test_no_cross_provider_or_shared_integration_authority(self):
-        all_suites = [self.suite, 'sqs-lifecycle']
-        for suites, provider, operation, path in [
-            (['sqs-lifecycle'], 'gcp-dns', 'dns.changes.create', 'internal/gcp/dns/engine.go'),
-            (all_suites, 'gcp-dns', 'dns.changes.create', 'internal/aws/sqs_store.go'),
-            (all_suites, 'aws', 'DeleteMessage', 'internal/gcp/dns/engine.go'),
-            ([self.suite], 'gcp', 'dns.changes.create', 'internal/gcp/dns/engine.go'),
-            ([self.suite], 'gcp-dns', 'dns.policies.create', 'internal/gcp/dns/engine.go'),
-        ]:
-            with self.subTest(provider=provider, path=path), self.assertRaises(ValueError):
-                gate.validate_scope(suites, provider, operation, [path])
-        for path in ['internal/gcp/storage/store.go', 'internal/gcp/appengine/engine.go',
-                     'internal/gcp/dns/unknown.go', 'internal/gcp/dns/nested/engine.go',
-                     'internal/gcp/dns/../storage/store.go', 'internal/gcp/dns/model.json',
-                     'internal/server/cloud_storage.go', 'internal/provider/registry.go',
-                     'test/e2e/gcp_dns_sdk.py', 'test/e2e/check.py', 'tools/gcpmodels/dns.py',
-                     'formal/models.json', 'formal/applicability.json', 'formal/CloudDNSAtomicChange.tla',
-                     'docs/gcp-dns.md', 'README.md', 'scripts/factory_acceptance.py']:
-            with self.subTest(path=path), self.assertRaises(ValueError):
-                gate.validate_scope(all_suites, 'gcp-dns', 'dns.changes.create', [path])
+    def test_mixed_receipt_cannot_widen_operation_or_paths(self):
+        suites = [*gate.DEFAULT_SUITES, self.suite]
+        leaf = 'internal/gcp/dns/engine.go'
+        for operation in gate.SUITES[self.suite]['operations']:
+            gate.validate_scope(suites, 'gcp-dns', operation, sorted(self.paths))
+        gate.validate_scope(suites, 'aws', 'SendMessage', ['internal/aws/sqs.go'])
+        gate.validate_scope(suites, 'aws', 'DescribeSubnets', ['internal/aws/ec2_read.go'])
+        for provider, operation, paths in (
+            ('gcp', 'dns.changes.create', [leaf]),
+            ('aws', 'dns.changes.create', [leaf]),
+            ('gcp-dns', 'dns.policies.create', [leaf]),
+            ('aws', 'SendMessage', ['internal/aws/sqs.go', leaf]),
+            ('aws', 'DescribeSubnets', [leaf]),
+            ('gcp-dns', 'dns.changes.create', [leaf, 'internal/server/cloud_storage.go']),
+            ('gcp-dns', 'dns.changes.create', ['internal/gcp/dns/new_unreviewed.go']),
+            ('gcp-dns', 'dns.changes.create', ['internal/gcp/dns/nested/engine.go']),
+            ('gcp-dns', 'dns.changes.create', ['scripts/factory_acceptance.py']),
+            ('gcp-dns', 'dns.changes.create', ['formal/applicability.json']),
+            ('gcp-dns', 'dns.changes.create', ['test/e2e/gcp_dns_sdk.py']),
+        ):
+            with self.subTest(provider=provider, operation=operation, paths=paths):
+                with self.assertRaises(ValueError):
+                    gate.validate_scope(suites, provider, operation, paths)
 
-    def test_requires_exact_test_and_package_not_another_passing_suite(self):
+    def test_receipt_requires_actual_primary_result(self):
+        package = 'github.com/susumutomita/TenkaCloudSimulator/internal/gcp/dns'
+        test = 'TestCloudDNSFactoryAtomicLifecycle'
+        run = dict(Action='run', Package=package, Test=test)
+        success = dict(Action='pass', Package=package, Test=test)
+        end = dict(Action='pass', Package=package)
+        def verdict(events):
+            log = ('\n'.join(map(json.dumps, events)) + '\n').encode()
+            gate.verdict(log, self.suite, 0)
+        verdict([run, success, end])
+        for wrong in ([end], [run, success], [run, success, success, end],
+                      [run, dict(success, Action='skip'), end],
+                      [run, dict(success, Test='AnotherTest'), end],
+                      [run, dict(success, Package='wrong'), end]):
+            with self.assertRaises(ValueError):
+                verdict(wrong)
+
+    def test_each_frozen_leaf_oracle_is_checked(self):
         spec = gate.SUITES[self.suite]
-        events = [dict(Action='run', Package=spec['package'], Test=spec['test']),
-                  dict(Action='pass', Package=spec['package'], Test=spec['test']),
-                  dict(Action='pass', Package=spec['package'])]
-        def encode(items):
-            return ('\n'.join(json.dumps(e) for e in items) + '\n').encode()
-        gate.verdict(encode(events), self.suite, 0)
-        for items in [[], events[2:], events[:2], events + events]:
-            with self.assertRaises(ValueError):
-                gate.verdict(encode(items), self.suite, 0)
-        for field, value in [('Action', 'skip'), ('Action', 'fail'),
-                             ('Test', 'TestSQSFactoryFidelityLifecycle'), ('Package', 'foreign')]:
-            bad = copy.deepcopy(events)
-            bad[1][field] = value
-            with self.assertRaises(ValueError):
-                gate.verdict(encode(bad), self.suite, 0)
-        for code in [1, -1]:
-            with self.assertRaises(ValueError):
-                gate.verdict(encode(events), self.suite, code)
+        actual = (spec['oracle'], *spec['support_oracles'])
+        self.assertEqual(actual, (
+            ('internal/gcp/dns/factory_lifecycle_test.go',
+             'dfd5becd421b289cd942e388579e82c656fad37fb2096f609ebf547f1c961d7e'),
+            ('internal/gcp/dns/factory_observation_test.go',
+             '7a3ce38d150e7bc6cb6f0148b8446359e963c55c03e5750a81fa2f7924dfee00'),
+            ('internal/gcp/dns/factory_sqlfault_test.go',
+             'b9271b011769868f03da4753733b9e92b1c57fec1779ccdc19adad495d72b0e8'),
+        ))
+        root = Path('/synthetic-factory-fixture')
+        data = {root / name: name.encode() for name, _ in actual}
+        pins = [(name, gate.digest(data[root / name])) for name, _ in actual]
+        mock_spec = {**spec, 'oracle': pins[0], 'support_oracles': tuple(pins[1:])}
+        with patch.dict(gate.SUITES, {self.suite: mock_spec}), patch.object(
+                Path, 'is_file', autospec=True, return_value=True), patch.object(
+                Path, 'is_symlink', autospec=True, return_value=False), patch.object(
+                Path, 'read_bytes', autospec=True, side_effect=data.__getitem__):
+            gate.verify_suite_oracles(root, [self.suite])
+            for name, _ in pins:
+                path = root / name
+                before = data[path]
+                data[path] = b'changed oracle'
+                try:
+                    with self.assertRaisesRegex(ValueError, 'registered suite oracle changed or missing'):
+                        gate.verify_suite_oracles(root, [self.suite])
+                finally:
+                    data[path] = before
+
 
 if __name__=='__main__':unittest.main()

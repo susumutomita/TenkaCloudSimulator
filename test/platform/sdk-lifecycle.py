@@ -15,6 +15,8 @@ from cloudformation_ssm_parameters import client
 # unittest.main discovers these four tests alongside StackLifecycle. The existing
 # required platform-audit PR job invokes this runner; failures share its exit code.
 from ec2_network_contract import NetworkContract
+# Native CreateVpc/DeleteVpc SDK lifecycle and CFN/native ownership separation.
+from ec2_native_vpc import NativeVpc
 
 
 def template(description):
