@@ -38,10 +38,24 @@
       "models": []
     },
     {
+      "path": "internal/aws/catalog/billing_request_contract_test.go",
+      "sha256": "671930c9a45c50bf42949fba59f5cd112e7bc2e90a40ce0390a5981ccdfea5d7",
+      "disposition": "test-support",
+      "reason": "Cost Category month-start and Data Exports SELECT boundary regression, including no partial mutation.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/chime_identity_metadata_contract_test.go",
       "sha256": "bd75696933827474c5ee2db520f6a137906733453c3c8bc8fef3a6687adfbf98",
       "disposition": "test-support",
       "reason": "Chime SDK Identity CreateAppInstance UTF-8 metadata boundary and no-write refusal regression.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/cleanrooms_methods_contract_test.go",
+      "sha256": "ab7b6ea59ef7bdee99fae56b3091e9ff38e3ccba783e5517319de7be38197e31",
+      "disposition": "test-support",
+      "reason": "Clean Rooms distinct analysis method selection and refusal without partial mutation.",
       "models": []
     },
     {
@@ -1128,7 +1142,7 @@
     },
     {
       "path": "internal/aws/catalog/services_analytics2.go",
-      "sha256": "15ded824e4ceace0367ce2e9fb862b212bd107db8ec6db19918a0cc5c6265879",
+      "sha256": "cfdaf90207d6fc28a7d2c0d5be437e2738293d389f771a6011c18d0d42931506",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1446,7 +1460,7 @@
     },
     {
       "path": "internal/aws/catalog/services_ops2.go",
-      "sha256": "4b08e96c42feaa2cac2cffa3fa205c78871bbd3ce2cbbed68041f6ef1917b23b",
+      "sha256": "894bf484dbb5089403a65a6b6324f9d0ece1cfb3e1ead38e78e12b3b9b302039",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [

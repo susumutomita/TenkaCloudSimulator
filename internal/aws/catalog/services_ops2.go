@@ -386,7 +386,8 @@ var costExplorer = &Service{
 // month start), defaults it to the current month and checks the rules list.
 func ceCostCategory(input map[string]any) error {
 	if start, ok := input["EffectiveStart"].(string); ok {
-		if !ceStart.MatchString(start) {
+		_, err := time.Parse(time.RFC3339, start)
+		if !ceStart.MatchString(start) || err != nil {
 			return invalid("EffectiveStart must be the first day of a month at 00:00:00 UTC.")
 		}
 	} else {
@@ -515,7 +516,8 @@ func bcmExport(input map[string]any) error {
 	export, _ := input["Export"].(map[string]any)
 	query, _ := export["DataQuery"].(map[string]any)
 	statement, _ := query["QueryStatement"].(string)
-	if !strings.HasPrefix(strings.ToLower(strings.TrimSpace(statement)), "select") {
+	fields := strings.Fields(statement)
+	if len(fields) < 2 || strings.ToLower(fields[0]) != "select" {
 		return invalid("QueryStatement must be a SELECT statement.")
 	}
 	return nil

@@ -121,8 +121,19 @@ func cleanRoomsTable(input map[string]any) error {
 			return Failure("ValidationException", "Snowflake table references name a secret and are not supported.")
 		}
 	}
-	if methods, ok := input["selectedAnalysisMethods"].([]any); ok && len(methods) < 2 {
-		return Failure("ValidationException", "When selectedAnalysisMethods is configured, specify at least two analysis methods.")
+	// Interpret the documented selection of at least two methods as a set.
+	if methods, ok := input["selectedAnalysisMethods"].([]any); ok {
+		seen := make(map[string]bool, len(methods))
+		for _, method := range methods {
+			name, _ := method.(string)
+			if seen[name] {
+				return Failure("ValidationException", "selectedAnalysisMethods must not repeat an analysis method.")
+			}
+			seen[name] = true
+		}
+		if len(seen) < 2 {
+			return Failure("ValidationException", "When selectedAnalysisMethods is configured, specify at least two distinct analysis methods.")
+		}
 	}
 	return nil
 }
