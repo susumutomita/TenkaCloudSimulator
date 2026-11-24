@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "9652f0344ab9d7e57aa30595fab5c3ed52c57cd8",
+  "base_sha": "8d49004ecac8bc5e731c338c85b6a19c741c7fcc",
   "changes": [
     {
       "path": "formal/S3MultipartConsolePaging.cfg",
@@ -40,14 +40,14 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "1135ef99376986befde3b6dc1559810a2a59eb4ee401e42f50369f5a779c40d9",
+      "sha256": "229b85506f51b14779a3ddeed3fa541907fe21cbddda57002504dff9fda9130d",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the ListParts paging model and five sensitivity controls without changing any of the 113 existing entries.",
+      "reason": "Registers the ListParts paging model and five sensitivity controls without changing any of the 116 existing entries.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "a51fb07182fab0df5b070d33ea0b01d6bf89ae19d4540dd17e7834c8544270a0",
+      "sha256": "1472cd606f250639b7dccecf9e3429b6046571b4b9d19269f4ce4de87d7d6074",
       "disposition": "modeled",
       "reason": "Rebuilt embedded client includes exact ListParts helper and view changes. The binding covers only the changed S3 listing logic, not unrelated bundle code.",
       "models": [
@@ -65,14 +65,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "0f71dc8239800991ae423792c8e9170f0b8c51f4ba0f1831fa16bb44936fee99",
+      "sha256": "7b3f686421cecdd4db2a4ae827e8f14a07ae740cc1898db18bd31c5ac381b864",
       "disposition": "formal-infrastructure",
       "reason": "Pins the ListParts paging model, its five invariants, exact mutation edits and expected invariants, and its exact three source files without changing prior model pins.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "641f4afe5d0fe671a5a2a1c854879fee8fd084e6985ff2f7be135500895761bd",
+      "sha256": "8bb399a358636e8fd2be4f0f6f402a1c99909faf1dc9b0967aada949e1761c6d",
       "disposition": "formal-infrastructure",
       "reason": "Adds ListParts paging to the explicit inventory and detects removed model artifacts, changed invariants/scopes, and same-ID mutation substitutions; shared tests detect removed controls.",
       "models": []
@@ -81,19 +81,19 @@
       "path": "test/e2e/s3_multipart_paging.py",
       "sha256": "4a6440a618024ddaac44276bb354d3dec52165e5930c84cf559d8281b81e32ed",
       "disposition": "test-support",
-      "reason": "Opt-in real local Chromium and SDK acceptance for multipart two-page results, review, expected completion refusal and cleanup. Requires independently isolated loopback runner.",
+      "reason": "Opt-in real local Chromium and SDK acceptance for multipart two-page results and visible last-row refresh, review, expected completion refusal, Console Save part, SDK readback and cleanup. Requires independently isolated loopback runner.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "cf2936fb30d03c0b63097c904a1e45dc166ef854e679cc7dfa82fd96d047a82f",
+      "sha256": "23e605b4b95428f73a65d7e941cf70f30f682cfc2d0f3ee337d327ff831b3207",
       "disposition": "presentation",
       "reason": "Generated hash manifest records the rebuilt embedded console bundle; it does not change control flow.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "173e1a29a8a4b4efa81ac82b30035c37e7e5b74f6aaaaef252d43ba7fc5020af",
+      "sha256": "e24cefcfe2f06eadadd22889af20e7e5b33e333b3fef064e6f56bbb8e18b0799",
       "disposition": "presentation",
       "reason": "Generated provenance records the S3 listing helper and view in the app.js input graph; it does not change control flow.",
       "models": []

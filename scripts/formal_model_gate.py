@@ -2934,6 +2934,79 @@ REQUIRED_SOURCE_SCOPES['EC2VPCOwnership'] = {
 }
 
 
+BASE_MODELS.add('CloudDNSAtomicChange')
+BASE_INVARIANTS['CloudDNSAtomicChange'] = {
+    'TypeOK',
+    'NoOrphanRecords',
+    'AtomicPair',
+    'ApexPreserved',
+    'PendingInvisible',
+    'DeniedStateUnchanged',
+    'OnlyOwnerCommits',
+    'ExactDeletionRequired',
+    'CommittedStateMatchesIntent',
+    'OtherProjectUnchanged',
+    'HistoryPrefixPreserved',
+    'ReceiptSequenceExact',
+    'NonemptyDeletionRefused',
+    'CleanupAdmissibleAtQuota',
+}
+REQUIRED_MUTANTS['CloudDNSAtomicChange'] = {
+    'AcceptPreviousPairedState',
+    'AcceptMissingNewestReceipt',
+}
+REQUIRED_SOURCE_SCOPES['CloudDNSAtomicChange'] = {
+    'internal/gcp/dns/engine.go',
+    'internal/gcp/dns/model.go',
+    'internal/gcp/dns/operations.go',
+    'internal/gcp/dns/pagination.go',
+    'internal/gcp/dns/records.go',
+    'internal/gcp/dns/store.go',
+}
+
+BASE_MODELS.add('CloudDNSChildToken')
+BASE_INVARIANTS['CloudDNSChildToken'] = {
+    'TypeOK',
+    'NoOldGenerationReuse',
+}
+REQUIRED_MUTANTS['CloudDNSChildToken'] = {
+    'AcceptOldGeneration',
+}
+REQUIRED_SOURCE_SCOPES['CloudDNSChildToken'] = {
+    'internal/gcp/dns/engine.go',
+    'internal/gcp/dns/model.go',
+    'internal/gcp/dns/operations.go',
+    'internal/gcp/dns/pagination.go',
+}
+
+
+BASE_MODELS.add('CloudDNSConsoleScope')
+BASE_INVARIANTS['CloudDNSConsoleScope'] = {
+    'TypeOK',
+    'CapabilityAuthorized',
+    'OnlyCurrentDiscovery',
+    'OnlyCurrentReadVisible',
+    'NoStaleContinuation',
+}
+REQUIRED_MUTANTS['CloudDNSConsoleScope'] = {
+    'AllowUntrusted',
+    'AllowHandoff',
+    'AllowNonOwner',
+    'ReuseSamePrincipal',
+    'ExposeStaleRead',
+    'ContinueStaleRead',
+}
+REQUIRED_SOURCE_SCOPES['CloudDNSConsoleScope'] = {
+    'internal/server/server.go',
+    'internal/server/web/app.js',
+    'tools/console/src/console-navigation.mjs',
+    'tools/console/src/gcp-console-shell.jsx',
+    'tools/console/src/gcp-dns-requests.mjs',
+    'tools/console/src/gcp-dns.jsx',
+    'tools/console/src/main.jsx',
+}
+
+
 BASE_MODELS.add('S3MultipartConsolePaging')
 BASE_INVARIANTS['S3MultipartConsolePaging'] = {
     'TypeOK',

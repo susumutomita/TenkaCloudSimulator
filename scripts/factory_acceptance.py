@@ -34,7 +34,36 @@ SUITES = {
         'oracle': ('internal/aws/ec2_describe_subnets_contract_test.go',
                    '6443bc90b6fec1c7b8bf277cc090b00f6dd431fac3481d120fdefa0ccb09b2d9'),
     },
+    'gcp-dns-atomic-lifecycle': {
+        'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestCloudDNSFactoryAtomicLifecycle$', './internal/gcp/dns'],
+        'test': 'TestCloudDNSFactoryAtomicLifecycle',
+        'provider': 'gcp-dns',
+        'operations': ['dns.managedZones.create', 'dns.managedZones.get', 'dns.managedZones.list',
+                       'dns.managedZones.delete', 'dns.changes.create', 'dns.changes.get',
+                       'dns.changes.list', 'dns.resourceRecordSets.get', 'dns.resourceRecordSets.list'],
+        'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/gcp/dns',
+        'scope': 'Cloud DNS leaf HTTP/SQLite atomic lifecycle; not host auth, router, official SDK, console, formal validation, DNS serving/propagation, Google IAM or whole-service compatibility',
+        'oracle': ('internal/gcp/dns/factory_lifecycle_test.go',
+                   'dfd5becd421b289cd942e388579e82c656fad37fb2096f609ebf547f1c961d7e'),
+        'support_oracles': (
+            ('internal/gcp/dns/factory_observation_test.go',
+             '7a3ce38d150e7bc6cb6f0148b8446359e963c55c03e5750a81fa2f7924dfee00'),
+            ('internal/gcp/dns/factory_sqlfault_test.go',
+             'b9271b011769868f03da4753733b9e92b1c57fec1779ccdc19adad495d72b0e8'),
+        ),
+    },
 }
+
+# Keep existing no-argument SQS and DescribeSubnets checks; DNS is explicit.
+DEFAULT_SUITES = ('sqs-lifecycle', 'ec2-describe-subnets')
+GCP_DNS_LEAF_PATHS = frozenset({
+    'internal/gcp/dns/engine.go', 'internal/gcp/dns/model.go',
+    'internal/gcp/dns/records.go', 'internal/gcp/dns/store.go',
+    'internal/gcp/dns/operations.go', 'internal/gcp/dns/pagination.go',
+    'internal/gcp/dns/factory_lifecycle_test.go', 'internal/gcp/dns/factory_sqlfault_test.go',
+    'internal/gcp/dns/factory_observation_test.go', 'internal/gcp/dns/dns_test.go',
+    'internal/gcp/dns/sql_faults_test.go',
+})
 
 
 def require(ok, reason):
@@ -71,6 +100,8 @@ def validate_scope(suites, provider, operation, paths):
             require(sqs_covered, 'SQS pilot does not cover claimed path: ' + path)
         if 'ec2-describe-subnets' in matching:
             require(subnet_covered, 'DescribeSubnets pilot does not cover claimed path: ' + path)
+        if 'gcp-dns-atomic-lifecycle' in matching:
+            require(path in GCP_DNS_LEAF_PATHS, 'Cloud DNS leaf suite does not cover claimed path: ' + path)
 
 
 def candidate_paths(base, head, root=ROOT):
@@ -101,9 +132,10 @@ def source_hash(root):
 
 def verify_suite_oracles(root, suites):
     for suite in suites:
-        oracle = SUITES[suite].get('oracle')
-        if oracle is not None:
-            name, pinned = oracle
+        spec = SUITES[suite]
+        oracle = spec.get('oracle')
+        pinned_oracles = (() if oracle is None else (oracle,)) + spec.get('support_oracles', ())
+        for name, pinned in pinned_oracles:
             path = root / name
             require(path.is_file() and not path.is_symlink() and digest(path.read_bytes()) == pinned,
                     'registered suite oracle changed or missing: ' + name)
@@ -213,7 +245,7 @@ def main():
     p.add_argument('--suite', choices=sorted(SUITES), action='append')
     p.add_argument('--verify', action='store_true')
     args = p.parse_args()
-    suites = args.suite or list(SUITES)
+    suites = args.suite or list(DEFAULT_SUITES)
     if args.verify:
         verify(args.output, clean_head(ROOT), suites)
     else:
