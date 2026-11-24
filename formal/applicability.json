@@ -154,6 +154,13 @@
       "models": []
     },
     {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "d008baffa67bc57853eb2e3021e56d9db962899a702788b9e146bb6ec9146bd9",
+      "disposition": "presentation",
+      "reason": "Adds only read-only Sakura Server List reference and existing navigation group placement. No runtime or authorization changes.",
+      "models": []
+    },
+    {
       "path": "scripts/factory_acceptance.py",
       "sha256": "c674a558f5cf9491757b2127542c06a9ebfc23829eede1f3aca7afe8391a5863",
       "disposition": "validation-tooling",
@@ -180,6 +187,20 @@
       "reason": "Checks preservation of required registration and rejects removed Sakura scope, properties or controls with an isolated model fixture.",
       "models": [],
       "sha256": "441daf8268f4a3dc21fcce44a00d1158fa70395ea3a0e1589f79bbf22f28ddc9"
+    },
+    {
+      "path": "test/e2e/test_openapi_parameters.py",
+      "sha256": "4e8cd48bfb4263e6052142e7bdbd695d77dcc38f6e21b8c2276e9f1013b3e970",
+      "disposition": "test-support",
+      "reason": "Adds only SakuraListServers to the projected exact operation inventory.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "4625ddc310544ef07fdcb5fa67c602148fd9854a8af490c2a0a85bbceac667f6",
+      "disposition": "test-support",
+      "reason": "Pins the Server List schema and tag and verifies complete preservation of earlier reference content.",
+      "models": []
     },
     {
       "path": "test/sdk/sakura/server_inprocess_test.go",

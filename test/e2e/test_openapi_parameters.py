@@ -74,10 +74,10 @@ NATIVE_OPERATION_IDS = {'AddPermission',
  'S3MultipartUpload',
  'UpdateFunctionCode',
  'awsRegionalOperation'}
-SAKURA_OPERATION_IDS = {'SakuraListDisks', 'SakuraCreateDisk', 'SakuraGetDisk', 'SakuraUpdateDisk', 'SakuraDeleteDisk'}
+SAKURA_OPERATION_IDS = {'SakuraListDisks', 'SakuraCreateDisk', 'SakuraGetDisk', 'SakuraUpdateDisk', 'SakuraDeleteDisk', 'SakuraListServers'}
 
 def validate_reference_inventory(ids):
-    if len(ids) != 67 or len(set(ids)) != 67 or set(ids) != NATIVE_OPERATION_IDS | SAKURA_OPERATION_IDS:
+    if len(ids) != 68 or len(set(ids)) != 68 or set(ids) != NATIVE_OPERATION_IDS | SAKURA_OPERATION_IDS:
         raise ValueError('native and Sakura operation inventory changed')
 
 
@@ -202,8 +202,8 @@ class ParameterLists(unittest.TestCase):
                  'AzureListBlobs', 'AzureDeleteContainer', 'AzurePutBlob', 'AzureGetBlob',
                  'AzureGetBlobProperties', 'AzureDeleteBlob'}
         validate_reference_inventory(ids)
-        self.assertEqual(len(ids), 67)
-        self.assertEqual(len(set(ids)), 67)
+        self.assertEqual(len(ids), 68)
+        self.assertEqual(len(set(ids)), 68)
         self.assertEqual({name for name in ids if name.startswith(('GCP', 'Azure'))}, added)
         self.assertEqual(len(set(ids) - added - SAKURA_OPERATION_IDS), 44)
         for item in repaired['paths'].values():
