@@ -50,10 +50,10 @@ var b2bi = &Service{
 			Fields: []string{"name", "status", "fileFormat", "mappingTemplate", "ediType", "sampleDocument", "inputConversion", "mapping",
 				"outputConversion", "sampleDocuments"}},
 		{Name: "DeleteTransformer", Kind: Delete, Resource: "transformer", Lookup: "transformerId"},
-		{Name: "CreatePartnership", Kind: Create, Resource: "partnership"},
+		{Name: "CreatePartnership", Kind: Create, Resource: "partnership", Check: b2biPartnershipCapabilities},
 		{Name: "GetPartnership", Kind: Read, Resource: "partnership", Lookup: "partnershipId"},
 		{Name: "ListPartnerships", Kind: List, Resource: "partnership", Filters: map[string]string{"profileId": "profileId"}},
-		{Name: "UpdatePartnership", Kind: Update, Resource: "partnership", Lookup: "partnershipId", Touch: []string{"modifiedAt"},
+		{Name: "UpdatePartnership", Kind: Update, Resource: "partnership", Lookup: "partnershipId", Check: b2biPartnershipCapabilities, Touch: []string{"modifiedAt"},
 			Fields: []string{"name", "capabilities", "capabilityOptions"}},
 		{Name: "DeletePartnership", Kind: Delete, Resource: "partnership", Lookup: "partnershipId"},
 		{Name: "TagResource", Kind: Tag, Lookup: "ResourceARN"},
@@ -67,6 +67,18 @@ var b2bi = &Service{
 		"A partnership stores the profileId and capability IDs it was given without checking that the profile or capabilities exist, and deleting a profile, capability or transformer does not check for partnerships or capabilities that mention it. The official name patterns, lengths and enumerations are validated. clientToken is accepted and replays the original resource for identical input.",
 		"Tags apply to the four resource kinds by ARN (arn:aws:b2bi:region:account:profiles/id, capabilities/id, transformers/id, partnerships/id).",
 	},
+}
+
+// AWS requires a partnership to have at least one trading capability. The
+// model requires the member on create but does not limit the size of the list.
+// On update an omitted member preserves the existing associations.
+func b2biPartnershipCapabilities(input map[string]any) error {
+	if supplied, ok := input["capabilities"]; ok {
+		if capabilities, ok := supplied.([]any); !ok || len(capabilities) == 0 {
+			return Failure("ValidationException", "Specify at least one trading capability for the partnership.")
+		}
+	}
+	return nil
 }
 
 // qBusiness serves Amazon Q Business applications, indexes, retrievers as

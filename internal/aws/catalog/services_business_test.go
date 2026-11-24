@@ -89,7 +89,7 @@ func TestB2BILifecycleOfEveryResource(t *testing.T) {
 	partnership := call("CreatePartnership", map[string]any{"profileId": profileID, "name": "p1", "email": "partner@example.com", "capabilities": []any{capabilityID}})
 	expect(t, partnership, 200, "")
 	partnershipID := str(partnership.body["partnershipId"])
-	other := call("CreatePartnership", map[string]any{"profileId": "p-other", "name": "p2", "email": "partner@example.com", "capabilities": []any{}})
+	other := call("CreatePartnership", map[string]any{"profileId": "p-other", "name": "p2", "email": "partner@example.com", "capabilities": []any{"ca-other"}})
 	expect(t, other, 200, "")
 	if n := len(items(t, call("ListPartnerships", map[string]any{"profileId": profileID}), "partnerships")); n != 1 {
 		t.Fatalf("filtered partnerships %d", n)
