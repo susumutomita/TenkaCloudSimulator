@@ -53,10 +53,10 @@ var batch = &Service{
 		{Name: "UpdateComputeEnvironment", Kind: Update, Resource: "computeEnvironment", Lookup: "computeEnvironment",
 			Fields: []string{"state", "unmanagedvCpus", "serviceRole", "updatePolicy", "context"}, Merged: batchUpdateComputeEnvironment},
 		{Name: "DeleteComputeEnvironment", Kind: Delete, Resource: "computeEnvironment", Lookup: "computeEnvironment"},
-		{Name: "CreateJobQueue", Kind: Create, Resource: "jobQueue", Check: batchJobQueue},
+		{Name: "CreateJobQueue", Kind: Create, Resource: "jobQueue", Check: batchCreateJobQueue},
 		{Name: "DescribeJobQueues", Kind: List, Resource: "jobQueue", Names: "jobQueues"},
 		{Name: "UpdateJobQueue", Kind: Update, Resource: "jobQueue", Lookup: "jobQueue",
-			Fields: []string{"state", "schedulingPolicyArn", "priority", "computeEnvironmentOrder", "serviceEnvironmentOrder", "jobStateTimeLimitActions"}, Check: batchJobQueue},
+			Fields: []string{"state", "schedulingPolicyArn", "priority", "computeEnvironmentOrder", "serviceEnvironmentOrder", "jobStateTimeLimitActions"}, Check: batchJobQueue, Merged: batchUpdateJobQueue},
 		{Name: "DeleteJobQueue", Kind: Delete, Resource: "jobQueue", Lookup: "jobQueue"},
 		{Name: "CreateServiceEnvironment", Kind: Create, Resource: "serviceEnvironment", Check: batchServiceEnvironment},
 		{Name: "DescribeServiceEnvironments", Kind: List, Resource: "serviceEnvironment", Names: "serviceEnvironments"},
@@ -72,7 +72,7 @@ var batch = &Service{
 		"Job definitions are not implemented: RegisterJobDefinition numbers revisions as name:revision and DeregisterJobDefinition marks a revision INACTIVE instead of deleting it, which the stored model does not express, so RegisterJobDefinition, DeregisterJobDefinition and DescribeJobDefinitions return HTTP 501. UpdateConsumableResource is not implemented: its SET, ADD and SUBTRACT quantity operations need the in-use accounting of running jobs, so total quantities are fixed at creation and availableQuantity always equals totalQuantity.",
 		"Describe operations fail with ClientException (HTTP 400) when a named compute environment, job queue, service environment or scheduling policy does not exist, where AWS omits it from the result; Describe by name accepts a name or an ARN. ListConsumableResources filters are refused, and createdAt of a consumable resource is not reported because the stored clock is not epoch milliseconds.",
 		"References are stored without being resolved: the compute environments and service environments of a job queue order, subnets, security groups, launch templates, instance roles, service roles, EKS clusters and Spot fleet roles are not checked, a queue is VALID at once even if its compute environments are not, and UpdateComputeEnvironment changes only state, unmanagedvCpus, serviceRole, updatePolicy and context (computeResources updates are refused). A schedulingPolicyArn must name a stored scheduling policy, but deleting a scheduling policy, compute environment or service environment that a queue still uses succeeds, and a compute environment need not be DISABLED before deletion.",
-		"Names are 1 to 128 letters, digits, hyphens or underscores. A compute environment's containerOrchestrationType is ECS, or EKS when eksConfiguration is given; MANAGED compute environments require computeResources, unmanagedvCpus applies only to UNMANAGED ones, and Fargate compute resources refuse ec2KeyPair and instanceRole. A job queue holds at most three compute environments. Fair-share policies accept computeReservation 0 to 99 and shareDecaySeconds 0 to 604800. Each Region holds at most 50 resources of each kind (local limit). Tags apply to every kind by ARN.",
+		"Names are 1 to 128 letters, digits, hyphens or underscores. A compute environment's containerOrchestrationType is ECS, or EKS when eksConfiguration is given; MANAGED compute environments require computeResources, UNMANAGED creation requires a nonblank serviceRole reference, unmanagedvCpus applies only to UNMANAGED ones, and Fargate compute resources refuse ec2KeyPair and instanceRole. A job queue holds at most three compute environments and cannot use both order families. On update, an empty order can clear the old family while setting the other in the same request. Fair-share policies accept computeReservation 0 to 99 and shareDecaySeconds 0 to 604800. Each Region holds at most 50 resources of each kind (local limit). Tags apply to every kind by ARN.",
 	},
 }
 
@@ -134,6 +134,10 @@ func batchComputeEnvironment(input map[string]any) error {
 		if hasResources {
 			return invalid("computeResources applies only to a MANAGED compute environment.")
 		}
+		role, _ := input["serviceRole"].(string)
+		if strings.TrimSpace(role) == "" {
+			return invalid("serviceRole is required for an UNMANAGED compute environment.")
+		}
 	}
 	if kind, _ := resources["type"].(string); kind == "FARGATE" || kind == "FARGATE_SPOT" {
 		for _, member := range []string{"ec2KeyPair", "instanceRole"} {
@@ -156,6 +160,29 @@ func batchComputeEnvironment(input map[string]any) error {
 func batchUpdateComputeEnvironment(document, supplied map[string]any) error {
 	if _, ok := supplied["unmanagedvCpus"]; ok && document["type"] != "UNMANAGED" {
 		return invalid("unmanagedvCpus is only supported for an UNMANAGED compute environment.")
+	}
+	return nil
+}
+
+func batchCreateJobQueue(input map[string]any) error {
+	if _, compute := input["computeEnvironmentOrder"]; compute {
+		if _, service := input["serviceEnvironmentOrder"]; service {
+			return invalid("computeEnvironmentOrder and serviceEnvironmentOrder cannot both be supplied.")
+		}
+	}
+	return batchJobQueue(input)
+}
+
+func batchUpdateJobQueue(document, supplied map[string]any) error {
+	_, computeChanged := supplied["computeEnvironmentOrder"]
+	_, serviceChanged := supplied["serviceEnvironmentOrder"]
+	if !computeChanged && !serviceChanged {
+		return nil
+	}
+	compute, _ := document["computeEnvironmentOrder"].([]any)
+	service, _ := document["serviceEnvironmentOrder"].([]any)
+	if len(compute) != 0 && len(service) != 0 {
+		return invalid("computeEnvironmentOrder and serviceEnvironmentOrder cannot both be populated.")
 	}
 	return nil
 }

@@ -111,7 +111,7 @@ func TestBatchComputeEnvironmentsQueuesAndServiceEnvironments(t *testing.T) {
 	expect(t, h.rest("batch", "POST", "/v1/createcomputeenvironment", fargate("instanceRole", 0)), 400, "ClientException")
 	expect(t, h.rest("batch", "POST", "/v1/createcomputeenvironment", fargate("", 17)), 400, "ClientException")
 	expect(t, h.rest("batch", "POST", "/v1/createcomputeenvironment", fargate("", 16)), 200, "")
-	eks := h.rest("batch", "POST", "/v1/createcomputeenvironment", map[string]any{"computeEnvironmentName": "eks", "type": "UNMANAGED", "unmanagedvCpus": 4, "eksConfiguration": map[string]any{"eksClusterArn": "arn:aws:eks:us-east-1:000000000000:cluster/c", "kubernetesNamespace": "batch"}})
+	eks := h.rest("batch", "POST", "/v1/createcomputeenvironment", map[string]any{"computeEnvironmentName": "eks", "type": "UNMANAGED", "serviceRole": "arn:aws:iam::000000000000:role/batch", "unmanagedvCpus": 4, "eksConfiguration": map[string]any{"eksClusterArn": "arn:aws:eks:us-east-1:000000000000:cluster/c", "kubernetesNamespace": "batch"}})
 	expect(t, eks, 200, "")
 	all := h.rest("batch", "POST", "/v1/describecomputeenvironments", map[string]any{}).body["computeEnvironments"].([]any)
 	if len(all) != 3 || all[2].(map[string]any)["containerOrchestrationType"] != "EKS" {
@@ -471,4 +471,36 @@ func TestServerlessRepositoryApplicationsAndPolicies(t *testing.T) {
 	expect(t, h.rest("serverlessrepo", "PUT", path+"/versions/1.0.0", map[string]any{"templateBody": "{}"}), 501, "UnknownOperationException")
 	expect(t, h.rest("serverlessrepo", "GET", path+"/versions", nil), 501, "UnknownOperationException")
 	expect(t, h.rest("serverlessrepo", "POST", path+"/unshare", map[string]any{"organizationId": "o-1"}), 501, "UnknownOperationException")
+}
+
+func TestBatchDocumentedCreateConfigurationConstraints(t *testing.T) {
+	h := newHarness(t, batch)
+	for _, role := range []map[string]any{
+		{"computeEnvironmentName": "unmanaged-without-role", "type": "UNMANAGED"},
+		{"computeEnvironmentName": "unmanaged-blank-role", "type": "UNMANAGED", "serviceRole": "  "},
+	} {
+		expect(t, h.rest("batch", "POST", "/v1/createcomputeenvironment", role), 400, "ClientException")
+	}
+	expect(t, h.rest("batch", "POST", "/v1/createcomputeenvironment", map[string]any{"computeEnvironmentName": "unmanaged-with-role", "type": "UNMANAGED", "serviceRole": "arn:aws:iam::000000000000:role/batch"}), 200, "")
+
+	ce := []any{map[string]any{"order": 1, "computeEnvironment": "ce"}}
+	se := []any{map[string]any{"order": 1, "serviceEnvironment": "se"}}
+	expect(t, h.rest("batch", "POST", "/v1/createjobqueue", map[string]any{"jobQueueName": "mixed", "priority": 1, "computeEnvironmentOrder": ce, "serviceEnvironmentOrder": se}), 400, "ClientException")
+	expect(t, h.rest("batch", "POST", "/v1/createjobqueue", map[string]any{"jobQueueName": "mixed-empty", "priority": 1, "computeEnvironmentOrder": []any{}, "serviceEnvironmentOrder": se}), 400, "ClientException")
+	expect(t, h.rest("batch", "POST", "/v1/createjobqueue", map[string]any{"jobQueueName": "q", "priority": 1, "computeEnvironmentOrder": ce}), 200, "")
+	expect(t, h.rest("batch", "POST", "/v1/updatejobqueue", map[string]any{"jobQueue": "q", "serviceEnvironmentOrder": se, "priority": 2}), 400, "ClientException")
+	get := func() map[string]any {
+		r := h.rest("batch", "POST", "/v1/describejobqueues", map[string]any{"jobQueues": []any{"q"}})
+		expect(t, r, 200, "")
+		return r.body["jobQueues"].([]any)[0].(map[string]any)
+	}
+	if q := get(); len(q["computeEnvironmentOrder"].([]any)) != 1 || fmt.Sprint(q["priority"]) != "1" || q["serviceEnvironmentOrder"] != nil {
+		t.Fatalf("rejection changed persisted queue: %v", q)
+	}
+	expect(t, h.rest("batch", "POST", "/v1/updatejobqueue", map[string]any{"jobQueue": "q", "computeEnvironmentOrder": []any{}, "serviceEnvironmentOrder": se}), 200, "")
+	if q := get(); len(q["computeEnvironmentOrder"].([]any)) != 0 || len(q["serviceEnvironmentOrder"].([]any)) != 1 {
+		t.Fatalf("clear+replace did not switch queue family: %v", q)
+	}
+	expect(t, h.rest("batch", "POST", "/v1/updatejobqueue", map[string]any{"jobQueue": "q", "priority": 3}), 200, "")
+	expect(t, h.rest("batch", "POST", "/v1/updatejobqueue", map[string]any{"jobQueue": "q", "serviceEnvironmentOrder": []any{}, "computeEnvironmentOrder": ce}), 200, "")
 }
