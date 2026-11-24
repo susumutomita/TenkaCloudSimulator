@@ -31,6 +31,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/catalog/aiops_topic_contract_test.go",
+      "sha256": "ad4c1cb67eb1a03807f3dc12af4e3e71def4ec6e83b6006398e92f9815f9396c",
+      "disposition": "test-support",
+      "reason": "AiOps stored SNS topic identifier format and invalid create/update refusal.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/b2bi_partnership_capability_contract_test.go",
       "sha256": "e736c2cddf95fb3d85330c28f47905178213edf1083572ea1d17f1c8b2554985",
       "disposition": "test-support",
@@ -81,6 +88,13 @@
           "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
         }
       ]
+    },
+    {
+      "path": "internal/aws/catalog/emr_image_contract_test.go",
+      "sha256": "3d70b8d83f0950405c0622ce381c628a66d393be54fd4321c571dcc1055fc044",
+      "disposition": "test-support",
+      "reason": "EMR Serverless same-request global and worker image conflict and refusal without mutation.",
+      "models": []
     },
     {
       "path": "internal/aws/catalog/engine.go",
@@ -1149,7 +1163,7 @@
     },
     {
       "path": "internal/aws/catalog/services_analytics2.go",
-      "sha256": "cfdaf90207d6fc28a7d2c0d5be437e2738293d389f771a6011c18d0d42931506",
+      "sha256": "d818b0d35c5f8743c4c39c346d729000b6dc0d520e25314e0dcd02c5bc3d8af0",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1467,7 +1481,7 @@
     },
     {
       "path": "internal/aws/catalog/services_ops2.go",
-      "sha256": "e2d12bbb3a387f8bb9a1bd532655391de32dd663b02a05e9954e953013479f7a",
+      "sha256": "5c1b375909fbb22fdb7e6f5194447dd8b3e4bc2b931494ee878e11002579144f",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [

@@ -338,10 +338,10 @@ var emrServerless = &Service{
 			Generate: map[string]any{"id": "$id", "state": "CREATED", "createdAt": "$now", "updatedAt": "$now"}},
 	},
 	Ops: []Op{
-		{Name: "CreateApplication", Kind: Create, Resource: "application"},
+		{Name: "CreateApplication", Kind: Create, Resource: "application", Check: emrServerlessImageScope},
 		{Name: "GetApplication", Kind: Read, Resource: "application", Lookup: "applicationId"},
 		{Name: "ListApplications", Kind: List, Resource: "application"},
-		{Name: "UpdateApplication", Kind: Update, Resource: "application", Lookup: "applicationId", Touch: []string{"updatedAt"}, Accept: []string{"clientToken"},
+		{Name: "UpdateApplication", Kind: Update, Resource: "application", Lookup: "applicationId", Touch: []string{"updatedAt"}, Accept: []string{"clientToken"}, Check: emrServerlessImageScope,
 			Fields: []string{"initialCapacity", "maximumCapacity", "autoStartConfiguration", "autoStopConfiguration", "networkConfiguration", "architecture",
 				"imageConfiguration", "workerTypeSpecifications", "interactiveConfiguration", "releaseLabel", "runtimeConfiguration", "monitoringConfiguration",
 				"schedulerConfiguration", "identityCenterConfiguration"}},
@@ -354,6 +354,21 @@ var emrServerless = &Service{
 		"Applications are stored records: no capacity is provisioned, no Spark or Hive driver exists and no job runs. An application stays CREATED, never starts or stops, and has no stateDetails. StartApplication, StopApplication, StartJobRun, CancelJobRun, job run listings, GetDashboardForJobRun and every other official operation return UnknownOperationException with HTTP 501.",
 		"The release label, network configuration, image, runtime configuration, monitoring settings, KMS key and IAM Identity Center application are stored without being resolved or checked, and the application type is stored as given. UpdateApplication replaces the supplied members and keeps the rest, and an application is deleted in any state. The limit of 50 applications per Region is local, and tags are stored from CreateApplication and by TagResource on the ARN.",
 	},
+}
+
+// emrServerlessImageScope rejects conflicting image scopes in the same request.
+func emrServerlessImageScope(input map[string]any) error {
+	if _, hasGlobal := input["imageConfiguration"]; !hasGlobal {
+		return nil
+	}
+	workers, _ := input["workerTypeSpecifications"].(map[string]any)
+	for _, worker := range workers {
+		spec, _ := worker.(map[string]any)
+		if _, hasImage := spec["imageConfiguration"]; hasImage {
+			return invalid("Specify imageConfiguration for all workers or per worker type, not both in the same request.")
+		}
+	}
+	return nil
 }
 
 // emrContainers serves virtual clusters, job templates and security

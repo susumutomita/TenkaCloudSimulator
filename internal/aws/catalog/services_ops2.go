@@ -666,11 +666,15 @@ var aiopsGroup = &Service{
 	},
 }
 
+// The catalog and native SNS construct commercial-partition ARNs. This only
+// checks their syntax; it does not look up topics or send notifications.
+var aiopsSNSTopicARN = regexp.MustCompile(`^arn:aws:sns:(?:[a-z0-9]+-)+[0-9]+:[0-9]{12}:(?:[A-Za-z0-9_-]{1,256}|[A-Za-z0-9_-]{1,251}\.fifo)$`)
+
 // aiopsGroupCheck applies the documented notification channel and key rules.
 func aiopsGroupCheck(input map[string]any) error {
 	if channel, ok := input["chatbotNotificationChannel"].(map[string]any); ok {
 		for topic := range channel {
-			if !strings.HasPrefix(topic, "arn:") || !strings.Contains(topic, ":sns:") {
+			if !aiopsSNSTopicARN.MatchString(topic) {
 				return invalid("The keys of chatbotNotificationChannel must be Amazon SNS topic ARNs.")
 			}
 		}
