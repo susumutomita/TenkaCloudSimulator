@@ -5772,6 +5772,7 @@
     "internal/aws/catalog/models/ecs.json",
     "internal/aws/catalog/models/efs.json",
     "internal/aws/catalog/models/eks.json",
+    "internal/aws/catalog/models/elasticache.json",
     "internal/aws/catalog/models/entityresolution.json",
     "internal/aws/catalog/models/events.json",
     "internal/aws/catalog/models/firehose.json",
@@ -5813,6 +5814,8 @@
     "internal/aws/catalog/models/polly.json",
     "internal/aws/catalog/models/proton.json",
     "internal/aws/catalog/models/ram.json",
+    "internal/aws/catalog/models/rds.json",
+    "internal/aws/catalog/models/redshift.json",
     "internal/aws/catalog/models/rekognition.json",
     "internal/aws/catalog/models/resiliencehub.json",
     "internal/aws/catalog/models/resource-explorer-2.json",
@@ -5852,6 +5855,7 @@
     "internal/aws/catalog/services_analytics.go",
     "internal/aws/catalog/services_compute.go",
     "internal/aws/catalog/services_data.go",
+    "internal/aws/catalog/services_data2.go",
     "internal/aws/catalog/services_developer.go",
     "internal/aws/catalog/services_edge.go",
     "internal/aws/catalog/services_integration.go",
@@ -18815,6 +18819,144 @@
       }
      ],
      "expect_invariant": "PublicationFollowsAdmission"
+    }
+   ]
+  },
+  {
+   "id": "EC2VPCOwnership",
+   "model": "formal/EC2VPCOwnership.tla",
+   "config": "formal/EC2VPCOwnership.cfg",
+   "bounds": "Two regions, two stack owners, three VPC IDs and a shared limit of two network rows. Native create, delete and describe with Boolean authorization; stack VPC creation, same-stack child creation and stack deletion. All finite schedules, no depth cutoff.",
+   "properties": [
+    "TypeOK",
+    "NoAdoption",
+    "FailureRollsBack",
+    "NativeNeverDeletesStackVPC",
+    "NativeDeleteExact",
+    "NativeCreateOwned",
+    "StackDeleteSparesNative",
+    "QuotaBound",
+    "DescribeExact"
+   ],
+   "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties.",
+   "source_scope": [
+    "internal/aws/ec2_vpc.go",
+    "internal/aws/ec2_read.go",
+    "internal/aws/ec2_network.go",
+    "internal/aws/ec2_network_cloudformation.go",
+    "internal/aws/ssm.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "SkipCreateAuthorization",
+     "edits": [
+      {
+       "old": "allow /\\ vpc[id] = Absent /\\ Used < Limit",
+       "new": "vpc[id] = Absent /\\ Used < Limit",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureRollsBack"
+    },
+    {
+     "id": "SkipDeleteAuthorization",
+     "edits": [
+      {
+       "old": "IF allow /\\ vpc[id] # Absent",
+       "new": "IF vpc[id] # Absent",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureRollsBack"
+    },
+    {
+     "id": "DeleteStackVPC",
+     "edits": [
+      {
+       "old": "/\\ vpc[id].owner = \"ec2\" /\\ ~\\E",
+       "new": "/\\ ~\\E",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NativeNeverDeletesStackVPC"
+    },
+    {
+     "id": "DeleteOtherRegion",
+     "edits": [
+      {
+       "old": "/\\ vpc[id].region = r /\\",
+       "new": "/\\",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NativeDeleteExact"
+    },
+    {
+     "id": "OverwriteExistingVPC",
+     "edits": [
+      {
+       "old": "allow /\\ vpc[id] = Absent /\\ Used < Limit",
+       "new": "allow /\\ Used < Limit",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NativeCreateOwned"
+    },
+    {
+     "id": "AdoptOtherOwnerVPC",
+     "edits": [
+      {
+       "old": "/\\ vpc[id].owner = s /\\ Used < Limit",
+       "new": "/\\ Used < Limit",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoAdoption"
+    },
+    {
+     "id": "StackDeleteRemovesNative",
+     "edits": [
+      {
+       "old": "vpc[i].owner = s THEN Absent",
+       "new": "vpc[i].owner \\in {s, \"ec2\"} THEN Absent",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StackDeleteSparesNative"
+    },
+    {
+     "id": "IgnoreNativeQuota",
+     "edits": [
+      {
+       "old": "allow /\\ vpc[id] = Absent /\\ Used < Limit",
+       "new": "allow /\\ vpc[id] = Absent",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "QuotaBound"
+    },
+    {
+     "id": "MislabelStackVPC",
+     "edits": [
+      {
+       "old": "IF vpc[i].owner = \"ec2\" THEN \"ec2\" ELSE \"cloudformation\"",
+       "new": "\"ec2\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DescribeExact"
+    },
+    {
+     "id": "DescribeOtherRegion",
+     "edits": [
+      {
+       "old": "vpc[j].region = r}",
+       "new": "TRUE}",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DescribeExact"
     }
    ]
   },

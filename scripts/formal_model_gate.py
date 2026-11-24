@@ -2900,6 +2900,101 @@ REQUIRED_SOURCE_SCOPES['CFNParameterRuleAdmission'] = {
 }
 
 
+BASE_MODELS.add('EC2VPCOwnership')
+BASE_INVARIANTS['EC2VPCOwnership'] = {
+    'NoAdoption',
+    'FailureRollsBack',
+    'NativeNeverDeletesStackVPC',
+    'NativeDeleteExact',
+    'NativeCreateOwned',
+    'StackDeleteSparesNative',
+    'QuotaBound',
+    'DescribeExact',
+    'TypeOK',
+}
+REQUIRED_MUTANTS['EC2VPCOwnership'] = {
+    'SkipCreateAuthorization',
+    'SkipDeleteAuthorization',
+    'DeleteStackVPC',
+    'DeleteOtherRegion',
+    'OverwriteExistingVPC',
+    'AdoptOtherOwnerVPC',
+    'StackDeleteRemovesNative',
+    'IgnoreNativeQuota',
+    'MislabelStackVPC',
+    'DescribeOtherRegion',
+}
+REQUIRED_SOURCE_SCOPES['EC2VPCOwnership'] = {
+    'internal/aws/ec2_vpc.go',
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_network.go',
+    'internal/aws/ec2_network_cloudformation.go',
+    'internal/aws/ssm.go',
+    'internal/server/server.go',
+}
+
+
+BASE_MODELS.add('SimpleDBLifecycle')
+BASE_INVARIANTS['SimpleDBLifecycle'] = {
+    'TypeOK',
+    'NoOrphans',
+    'PendingInvisible',
+    'RefusalUnchanged',
+    'AuthorizedCommit',
+    'PeerFrame',
+    'CommittedExact',
+    'DurableAck',
+    'RestartExact',
+    'DeleteEmpty',
+    'CreateIdempotent',
+    'PutSetExact',
+}
+REQUIRED_MUTANTS['SimpleDBLifecycle'] = {
+    'PublishStagedSimpleDB',
+    'LoseExistingSimpleDBValuesOnAppend',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBLifecycle'] = {
+    'internal/aws/simpledb/store.go',
+    'internal/aws/simpledb/domain.go',
+    'internal/aws/simpledb/item.go',
+}
+
+BASE_MODELS.add('SimpleDBPageCursor')
+BASE_INVARIANTS['SimpleDBPageCursor'] = {
+    'TypeOK',
+    'CursorBinding',
+    'ExactPage',
+    'ReadOnly',
+}
+REQUIRED_MUTANTS['SimpleDBPageCursor'] = {
+    'IncludeAnchor',
+    'AcceptPreviousEpoch',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBPageCursor'] = {
+    'internal/aws/simpledb/pagination.go',
+    'internal/aws/simpledb/store.go',
+}
+
+BASE_MODELS.add('SimpleDBQueryAdmission')
+BASE_INVARIANTS['SimpleDBQueryAdmission'] = {
+    'TypeOK',
+    'OneDispatch',
+    'MalformedNeverDispatches',
+    'TrustedAdmissionBeforeDispatch',
+    'ConfiguredScopeBinding',
+    'EnvelopeMatchesOutcome',
+}
+REQUIRED_MUTANTS['SimpleDBQueryAdmission'] = {
+    'SkipTypedDomainGuard',
+    'SelectPeerScope',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBQueryAdmission'] = {
+    'internal/aws/simpledb/validation.go',
+    'internal/aws/simpledb/http.go',
+    'internal/aws/simpledb_gateway.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

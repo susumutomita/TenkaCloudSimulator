@@ -1,0 +1,2889 @@
+{
+ "components": {
+  "schemas": {
+   "AddTagsToResourceRequest": {
+    "additionalProperties": false,
+    "description": "Required list or structure members: Tags.",
+    "patternProperties": {
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "AddTagsToResource",
+      "type": "string"
+     },
+     "ResourceName": {
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ResourceName"
+    ],
+    "title": "AddTagsToResource",
+    "type": "object"
+   },
+   "AddTagsToResourceResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "AddTagsToResourceResponse",
+    "type": "object",
+    "xml": {
+     "name": "AddTagsToResourceResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "AvailabilityZone": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateDBClusterParameterGroupRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateDBClusterParameterGroup",
+      "type": "string"
+     },
+     "DBClusterParameterGroupName": {
+      "type": "string"
+     },
+     "DBParameterGroupFamily": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "DBClusterParameterGroupName",
+     "DBParameterGroupFamily",
+     "Description"
+    ],
+    "title": "CreateDBClusterParameterGroup",
+    "type": "object"
+   },
+   "CreateDBClusterParameterGroupResponse": {
+    "properties": {
+     "CreateDBClusterParameterGroupResult": {
+      "$ref": "#/components/schemas/CreateDBClusterParameterGroupResult",
+      "xml": {
+       "name": "CreateDBClusterParameterGroupResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateDBClusterParameterGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateDBClusterParameterGroupResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "CreateDBClusterParameterGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "DBClusterParameterGroup": {
+      "$ref": "#/components/schemas/DBClusterParameterGroup"
+     }
+    },
+    "type": "object"
+   },
+   "CreateDBParameterGroupRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateDBParameterGroup",
+      "type": "string"
+     },
+     "DBParameterGroupFamily": {
+      "type": "string"
+     },
+     "DBParameterGroupName": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "DBParameterGroupFamily",
+     "DBParameterGroupName",
+     "Description"
+    ],
+    "title": "CreateDBParameterGroup",
+    "type": "object"
+   },
+   "CreateDBParameterGroupResponse": {
+    "properties": {
+     "CreateDBParameterGroupResult": {
+      "$ref": "#/components/schemas/CreateDBParameterGroupResult",
+      "xml": {
+       "name": "CreateDBParameterGroupResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateDBParameterGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateDBParameterGroupResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "CreateDBParameterGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "DBParameterGroup": {
+      "$ref": "#/components/schemas/DBParameterGroup"
+     }
+    },
+    "type": "object"
+   },
+   "CreateDBSubnetGroupRequest": {
+    "additionalProperties": false,
+    "description": "Required list or structure members: SubnetIds.",
+    "patternProperties": {
+     "^SubnetIds\\.SubnetIdentifier\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateDBSubnetGroup",
+      "type": "string"
+     },
+     "DBSubnetGroupDescription": {
+      "type": "string"
+     },
+     "DBSubnetGroupName": {
+      "type": "string"
+     },
+     "SubnetIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "DBSubnetGroupDescription",
+     "DBSubnetGroupName"
+    ],
+    "title": "CreateDBSubnetGroup",
+    "type": "object"
+   },
+   "CreateDBSubnetGroupResponse": {
+    "properties": {
+     "CreateDBSubnetGroupResult": {
+      "$ref": "#/components/schemas/CreateDBSubnetGroupResult",
+      "xml": {
+       "name": "CreateDBSubnetGroupResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateDBSubnetGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateDBSubnetGroupResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "CreateDBSubnetGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "DBSubnetGroup": {
+      "$ref": "#/components/schemas/DBSubnetGroup"
+     }
+    },
+    "type": "object"
+   },
+   "CreateOptionGroupRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateOptionGroup",
+      "type": "string"
+     },
+     "EngineName": {
+      "type": "string"
+     },
+     "MajorEngineVersion": {
+      "type": "string"
+     },
+     "OptionGroupDescription": {
+      "type": "string"
+     },
+     "OptionGroupName": {
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "EngineName",
+     "MajorEngineVersion",
+     "OptionGroupDescription",
+     "OptionGroupName"
+    ],
+    "title": "CreateOptionGroup",
+    "type": "object"
+   },
+   "CreateOptionGroupResponse": {
+    "properties": {
+     "CreateOptionGroupResult": {
+      "$ref": "#/components/schemas/CreateOptionGroupResult",
+      "xml": {
+       "name": "CreateOptionGroupResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateOptionGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateOptionGroupResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "CreateOptionGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "OptionGroup": {
+      "$ref": "#/components/schemas/OptionGroup"
+     }
+    },
+    "type": "object"
+   },
+   "DBClusterParameterGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "DBClusterParameterGroupArn": {
+      "type": "string"
+     },
+     "DBClusterParameterGroupName": {
+      "type": "string"
+     },
+     "DBParameterGroupFamily": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DBClusterParameterGroupsMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "DBClusterParameterGroups": {
+      "items": {
+       "$ref": "#/components/schemas/DBClusterParameterGroup",
+       "xml": {
+        "name": "DBClusterParameterGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "Marker": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DBParameterGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "DBParameterGroupArn": {
+      "type": "string"
+     },
+     "DBParameterGroupFamily": {
+      "type": "string"
+     },
+     "DBParameterGroupName": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DBParameterGroupsMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "DBParameterGroups": {
+      "items": {
+       "$ref": "#/components/schemas/DBParameterGroup",
+       "xml": {
+        "name": "DBParameterGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "Marker": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DBSecurityGroupMembership": {
+    "additionalProperties": false,
+    "properties": {
+     "DBSecurityGroupName": {
+      "type": "string"
+     },
+     "Status": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DBSubnetGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "DBSubnetGroupArn": {
+      "type": "string"
+     },
+     "DBSubnetGroupDescription": {
+      "type": "string"
+     },
+     "DBSubnetGroupName": {
+      "type": "string"
+     },
+     "SubnetGroupStatus": {
+      "type": "string"
+     },
+     "Subnets": {
+      "items": {
+       "$ref": "#/components/schemas/Subnet",
+       "xml": {
+        "name": "Subnet"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "SupportedNetworkTypes": {
+      "items": {
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "VpcId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DBSubnetGroupMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "DBSubnetGroups": {
+      "items": {
+       "$ref": "#/components/schemas/DBSubnetGroup",
+       "xml": {
+        "name": "DBSubnetGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "Marker": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteDBClusterParameterGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteDBClusterParameterGroup",
+      "type": "string"
+     },
+     "DBClusterParameterGroupName": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "DBClusterParameterGroupName"
+    ],
+    "title": "DeleteDBClusterParameterGroup",
+    "type": "object"
+   },
+   "DeleteDBClusterParameterGroupResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteDBClusterParameterGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteDBClusterParameterGroupResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "DeleteDBParameterGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteDBParameterGroup",
+      "type": "string"
+     },
+     "DBParameterGroupName": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "DBParameterGroupName"
+    ],
+    "title": "DeleteDBParameterGroup",
+    "type": "object"
+   },
+   "DeleteDBParameterGroupResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteDBParameterGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteDBParameterGroupResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "DeleteDBSubnetGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteDBSubnetGroup",
+      "type": "string"
+     },
+     "DBSubnetGroupName": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "DBSubnetGroupName"
+    ],
+    "title": "DeleteDBSubnetGroup",
+    "type": "object"
+   },
+   "DeleteDBSubnetGroupResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteDBSubnetGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteDBSubnetGroupResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "DeleteOptionGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteOptionGroup",
+      "type": "string"
+     },
+     "OptionGroupName": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "OptionGroupName"
+    ],
+    "title": "DeleteOptionGroup",
+    "type": "object"
+   },
+   "DeleteOptionGroupResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteOptionGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteOptionGroupResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "DescribeDBClusterParameterGroupsRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Name$": {
+      "type": "string"
+     },
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Values$": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Values\\.Value\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "DescribeDBClusterParameterGroups",
+      "type": "string"
+     },
+     "DBClusterParameterGroupName": {
+      "type": "string"
+     },
+     "Filters": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeDBClusterParameterGroups",
+    "type": "object"
+   },
+   "DescribeDBClusterParameterGroupsResponse": {
+    "properties": {
+     "DescribeDBClusterParameterGroupsResult": {
+      "$ref": "#/components/schemas/DBClusterParameterGroupsMessage",
+      "xml": {
+       "name": "DescribeDBClusterParameterGroupsResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeDBClusterParameterGroupsResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeDBClusterParameterGroupsResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "DescribeDBParameterGroupsRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Name$": {
+      "type": "string"
+     },
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Values$": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Values\\.Value\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "DescribeDBParameterGroups",
+      "type": "string"
+     },
+     "DBParameterGroupName": {
+      "type": "string"
+     },
+     "Filters": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeDBParameterGroups",
+    "type": "object"
+   },
+   "DescribeDBParameterGroupsResponse": {
+    "properties": {
+     "DescribeDBParameterGroupsResult": {
+      "$ref": "#/components/schemas/DBParameterGroupsMessage",
+      "xml": {
+       "name": "DescribeDBParameterGroupsResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeDBParameterGroupsResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeDBParameterGroupsResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "DescribeDBSubnetGroupsRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Name$": {
+      "type": "string"
+     },
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Values$": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Values\\.Value\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "DescribeDBSubnetGroups",
+      "type": "string"
+     },
+     "DBSubnetGroupName": {
+      "type": "string"
+     },
+     "Filters": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeDBSubnetGroups",
+    "type": "object"
+   },
+   "DescribeDBSubnetGroupsResponse": {
+    "properties": {
+     "DescribeDBSubnetGroupsResult": {
+      "$ref": "#/components/schemas/DBSubnetGroupMessage",
+      "xml": {
+       "name": "DescribeDBSubnetGroupsResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeDBSubnetGroupsResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeDBSubnetGroupsResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "DescribeOptionGroupsRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Name$": {
+      "type": "string"
+     },
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Values$": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Values\\.Value\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "DescribeOptionGroups",
+      "type": "string"
+     },
+     "EngineName": {
+      "type": "string"
+     },
+     "Filters": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "MajorEngineVersion": {
+      "type": "string"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "OptionGroupName": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeOptionGroups",
+    "type": "object"
+   },
+   "DescribeOptionGroupsResponse": {
+    "properties": {
+     "DescribeOptionGroupsResult": {
+      "$ref": "#/components/schemas/OptionGroups",
+      "xml": {
+       "name": "DescribeOptionGroupsResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeOptionGroupsResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeOptionGroupsResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "ErrorResponse": {
+    "properties": {
+     "Error": {
+      "properties": {
+       "Code": {
+        "type": "string"
+       },
+       "Message": {
+        "type": "string"
+       },
+       "Type": {
+        "enum": [
+         "Sender",
+         "Receiver"
+        ],
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "RequestId": {
+      "type": "string"
+     }
+    },
+    "type": "object",
+    "xml": {
+     "name": "ErrorResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Name$": {
+      "type": "string"
+     },
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Values$": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "^Filters\\.Filter\\.[1-9][0-9]*\\.Values\\.Value\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "ListTagsForResource",
+      "type": "string"
+     },
+     "Filters": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "ResourceName": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ResourceName"
+    ],
+    "title": "ListTagsForResource",
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "properties": {
+     "ListTagsForResourceResult": {
+      "$ref": "#/components/schemas/TagListMessage",
+      "xml": {
+       "name": "ListTagsForResourceResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "ListTagsForResourceResponse",
+    "type": "object",
+    "xml": {
+     "name": "ListTagsForResourceResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "ModifyDBSubnetGroupRequest": {
+    "additionalProperties": false,
+    "description": "Required list or structure members: SubnetIds.",
+    "patternProperties": {
+     "^SubnetIds\\.SubnetIdentifier\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "ModifyDBSubnetGroup",
+      "type": "string"
+     },
+     "DBSubnetGroupDescription": {
+      "type": "string"
+     },
+     "DBSubnetGroupName": {
+      "type": "string"
+     },
+     "SubnetIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "DBSubnetGroupName"
+    ],
+    "title": "ModifyDBSubnetGroup",
+    "type": "object"
+   },
+   "ModifyDBSubnetGroupResponse": {
+    "properties": {
+     "ModifyDBSubnetGroupResult": {
+      "$ref": "#/components/schemas/ModifyDBSubnetGroupResult",
+      "xml": {
+       "name": "ModifyDBSubnetGroupResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "ModifyDBSubnetGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "ModifyDBSubnetGroupResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "ModifyDBSubnetGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "DBSubnetGroup": {
+      "$ref": "#/components/schemas/DBSubnetGroup"
+     }
+    },
+    "type": "object"
+   },
+   "Option": {
+    "additionalProperties": false,
+    "properties": {
+     "DBSecurityGroupMemberships": {
+      "items": {
+       "$ref": "#/components/schemas/DBSecurityGroupMembership",
+       "xml": {
+        "name": "DBSecurityGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "OptionDescription": {
+      "type": "string"
+     },
+     "OptionName": {
+      "type": "string"
+     },
+     "OptionSettings": {
+      "items": {
+       "$ref": "#/components/schemas/OptionSetting",
+       "xml": {
+        "name": "OptionSetting"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "OptionVersion": {
+      "type": "string"
+     },
+     "Permanent": {
+      "type": "boolean"
+     },
+     "Persistent": {
+      "type": "boolean"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "VpcSecurityGroupMemberships": {
+      "items": {
+       "$ref": "#/components/schemas/VpcSecurityGroupMembership",
+       "xml": {
+        "name": "VpcSecurityGroupMembership"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "OptionGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "AllowsVpcAndNonVpcInstanceMemberships": {
+      "type": "boolean"
+     },
+     "CopyTimestamp": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "EngineName": {
+      "type": "string"
+     },
+     "MajorEngineVersion": {
+      "type": "string"
+     },
+     "OptionGroupArn": {
+      "type": "string"
+     },
+     "OptionGroupDescription": {
+      "type": "string"
+     },
+     "OptionGroupName": {
+      "type": "string"
+     },
+     "Options": {
+      "items": {
+       "$ref": "#/components/schemas/Option",
+       "xml": {
+        "name": "Option"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "SourceAccountId": {
+      "type": "string"
+     },
+     "SourceOptionGroup": {
+      "type": "string"
+     },
+     "VpcId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OptionGroups": {
+    "additionalProperties": false,
+    "properties": {
+     "Marker": {
+      "type": "string"
+     },
+     "OptionGroupsList": {
+      "items": {
+       "$ref": "#/components/schemas/OptionGroup",
+       "xml": {
+        "name": "OptionGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "OptionSetting": {
+    "additionalProperties": false,
+    "properties": {
+     "AllowedValues": {
+      "type": "string"
+     },
+     "ApplyType": {
+      "type": "string"
+     },
+     "DataType": {
+      "type": "string"
+     },
+     "DefaultValue": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "IsCollection": {
+      "type": "boolean"
+     },
+     "IsModifiable": {
+      "type": "boolean"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Outpost": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RemoveTagsFromResourceRequest": {
+    "additionalProperties": false,
+    "description": "Required list or structure members: TagKeys.",
+    "patternProperties": {
+     "^TagKeys\\.member\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "RemoveTagsFromResource",
+      "type": "string"
+     },
+     "ResourceName": {
+      "type": "string"
+     },
+     "TagKeys": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2014-10-31",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ResourceName"
+    ],
+    "title": "RemoveTagsFromResource",
+    "type": "object"
+   },
+   "RemoveTagsFromResourceResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "RemoveTagsFromResourceResponse",
+    "type": "object",
+    "xml": {
+     "name": "RemoveTagsFromResourceResponse",
+     "namespace": "http://rds.amazonaws.com/doc/2014-10-31/"
+    }
+   },
+   "ResponseMetadata": {
+    "properties": {
+     "RequestId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Subnet": {
+    "additionalProperties": false,
+    "properties": {
+     "SubnetAvailabilityZone": {
+      "$ref": "#/components/schemas/AvailabilityZone"
+     },
+     "SubnetIdentifier": {
+      "type": "string"
+     },
+     "SubnetOutpost": {
+      "$ref": "#/components/schemas/Outpost"
+     },
+     "SubnetStatus": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagListMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "TagList": {
+      "items": {
+       "$ref": "#/components/schemas/Tag",
+       "xml": {
+        "name": "Tag"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "VpcSecurityGroupMembership": {
+    "additionalProperties": false,
+    "properties": {
+     "Status": {
+      "type": "string"
+     },
+     "VpcSecurityGroupId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Relational Database Service API (2014-10-31). Every other official operation returns HTTP 501 UnknownOperationException. DB subnet groups, DB parameter groups, DB cluster parameter groups and option groups are stored configuration served over the Query protocol: no DB instance, cluster, proxy, snapshot, event subscription, network or database engine exists, and CreateDBInstance, CreateDBCluster, CreateDBSnapshot and every other official operation return UnknownOperationException with HTTP 501. Parameter and option values are not modeled: ModifyDBParameterGroup, ResetDBParameterGroup, DescribeDBParameters, the cluster equivalents, CopyDBParameterGroup, ModifyOptionGroup and DescribeOptionGroupOptions are not implemented. Default parameter, option and subnet groups are not pre-created, and parameter group families, major engine versions and subnet IDs are stored without checking that they exist. A subnet group needs 2 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs and is not checked for Availability Zone coverage; it reports no VPC, Availability Zone, Outpost, status or network type. DB subnet group and DB (cluster) parameter group names are stored in lowercase as documented, \"default\" subnet groups are refused, and option groups accept only the documented EngineName values. Describe operations and ListTagsForResource refuse a non-empty Filters list (an empty one means no filter), Describe operations accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name, and DescribeOptionGroups refuses OptionGroupName together with EngineName or MajorEngineVersion. Tag keys are 1 to 128 and values at most 256 characters of letters, digits, spaces and _.:/=+-@, and neither may start with aws: or rds:. Tag operations on an unknown ARN fail with DBInstanceNotFound, the first not-found fault the official tag operations model.",
+  "title": "Amazon Relational Database Service (simulator catalog)",
+  "version": "2014-10-31"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/#Action=AddTagsToResource": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML AddTagsToResourceResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsAddTagsToResource",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "AddTagsToResource",
+        "ResourceName": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/AddTagsToResourceRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/AddTagsToResourceResponse"
+        }
+       }
+      },
+      "description": "XML AddTagsToResourceResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AddTagsToResource",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=CreateDBClusterParameterGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateDBClusterParameterGroupResponse holding the CreateDBClusterParameterGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsCreateDBClusterParameterGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateDBClusterParameterGroup",
+        "DBClusterParameterGroupName": "example",
+        "DBParameterGroupFamily": "example",
+        "Description": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateDBClusterParameterGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateDBClusterParameterGroupResponse"
+        }
+       }
+      },
+      "description": "XML CreateDBClusterParameterGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateDBClusterParameterGroup",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=CreateDBParameterGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateDBParameterGroupResponse holding the CreateDBParameterGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsCreateDBParameterGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateDBParameterGroup",
+        "DBParameterGroupFamily": "example",
+        "DBParameterGroupName": "example",
+        "Description": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateDBParameterGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateDBParameterGroupResponse"
+        }
+       }
+      },
+      "description": "XML CreateDBParameterGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateDBParameterGroup",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=CreateDBSubnetGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateDBSubnetGroupResponse holding the CreateDBSubnetGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsCreateDBSubnetGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateDBSubnetGroup",
+        "DBSubnetGroupDescription": "example",
+        "DBSubnetGroupName": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateDBSubnetGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateDBSubnetGroupResponse"
+        }
+       }
+      },
+      "description": "XML CreateDBSubnetGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateDBSubnetGroup",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=CreateOptionGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateOptionGroupResponse holding the CreateOptionGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsCreateOptionGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateOptionGroup",
+        "EngineName": "example",
+        "MajorEngineVersion": "example",
+        "OptionGroupDescription": "example",
+        "OptionGroupName": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateOptionGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateOptionGroupResponse"
+        }
+       }
+      },
+      "description": "XML CreateOptionGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateOptionGroup",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=DeleteDBClusterParameterGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteDBClusterParameterGroupResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsDeleteDBClusterParameterGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteDBClusterParameterGroup",
+        "DBClusterParameterGroupName": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteDBClusterParameterGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteDBClusterParameterGroupResponse"
+        }
+       }
+      },
+      "description": "XML DeleteDBClusterParameterGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteDBClusterParameterGroup",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=DeleteDBParameterGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteDBParameterGroupResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsDeleteDBParameterGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteDBParameterGroup",
+        "DBParameterGroupName": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteDBParameterGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteDBParameterGroupResponse"
+        }
+       }
+      },
+      "description": "XML DeleteDBParameterGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteDBParameterGroup",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=DeleteDBSubnetGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteDBSubnetGroupResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsDeleteDBSubnetGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteDBSubnetGroup",
+        "DBSubnetGroupName": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteDBSubnetGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteDBSubnetGroupResponse"
+        }
+       }
+      },
+      "description": "XML DeleteDBSubnetGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteDBSubnetGroup",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=DeleteOptionGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteOptionGroupResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsDeleteOptionGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteOptionGroup",
+        "OptionGroupName": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteOptionGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteOptionGroupResponse"
+        }
+       }
+      },
+      "description": "XML DeleteOptionGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteOptionGroup",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=DescribeDBClusterParameterGroups": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeDBClusterParameterGroupsResponse holding the DescribeDBClusterParameterGroupsResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsDescribeDBClusterParameterGroups",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeDBClusterParameterGroups",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeDBClusterParameterGroupsRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeDBClusterParameterGroupsResponse"
+        }
+       }
+      },
+      "description": "XML DescribeDBClusterParameterGroupsResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeDBClusterParameterGroups",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=DescribeDBParameterGroups": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeDBParameterGroupsResponse holding the DescribeDBParameterGroupsResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsDescribeDBParameterGroups",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeDBParameterGroups",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeDBParameterGroupsRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeDBParameterGroupsResponse"
+        }
+       }
+      },
+      "description": "XML DescribeDBParameterGroupsResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeDBParameterGroups",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=DescribeDBSubnetGroups": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeDBSubnetGroupsResponse holding the DescribeDBSubnetGroupsResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsDescribeDBSubnetGroups",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeDBSubnetGroups",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeDBSubnetGroupsRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeDBSubnetGroupsResponse"
+        }
+       }
+      },
+      "description": "XML DescribeDBSubnetGroupsResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeDBSubnetGroups",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=DescribeOptionGroups": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeOptionGroupsResponse holding the DescribeOptionGroupsResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsDescribeOptionGroups",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeOptionGroups",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeOptionGroupsRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeOptionGroupsResponse"
+        }
+       }
+      },
+      "description": "XML DescribeOptionGroupsResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeOptionGroups",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=ListTagsForResource": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ListTagsForResourceResponse holding the ListTagsForResourceResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "ListTagsForResource",
+        "ResourceName": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/ListTagsForResourceRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+        }
+       }
+      },
+      "description": "XML ListTagsForResourceResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=ModifyDBSubnetGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ModifyDBSubnetGroupResponse holding the ModifyDBSubnetGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsModifyDBSubnetGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "ModifyDBSubnetGroup",
+        "DBSubnetGroupName": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/ModifyDBSubnetGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ModifyDBSubnetGroupResponse"
+        }
+       }
+      },
+      "description": "XML ModifyDBSubnetGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "ModifyDBSubnetGroup",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  },
+  "/#Action=RemoveTagsFromResource": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML RemoveTagsFromResourceResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "rdsRemoveTagsFromResource",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon Relational Database Service; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "rds",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "rds",
+       "enum": [
+        "rds"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "RemoveTagsFromResource",
+        "ResourceName": "example",
+        "Version": "2014-10-31"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/RemoveTagsFromResourceRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/RemoveTagsFromResourceResponse"
+        }
+       }
+      },
+      "description": "XML RemoveTagsFromResourceResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "RemoveTagsFromResource",
+    "tags": [
+     "Amazon Relational Database Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Relational Database Service API (2014-10-31). Every other official operation returns HTTP 501 UnknownOperationException. DB subnet groups, DB parameter groups, DB cluster parameter groups and option groups are stored configuration served over the Query protocol: no DB instance, cluster, proxy, snapshot, event subscription, network or database engine exists, and CreateDBInstance, CreateDBCluster, CreateDBSnapshot and every other official operation return UnknownOperationException with HTTP 501. Parameter and option values are not modeled: ModifyDBParameterGroup, ResetDBParameterGroup, DescribeDBParameters, the cluster equivalents, CopyDBParameterGroup, ModifyOptionGroup and DescribeOptionGroupOptions are not implemented. Default parameter, option and subnet groups are not pre-created, and parameter group families, major engine versions and subnet IDs are stored without checking that they exist. A subnet group needs 2 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs and is not checked for Availability Zone coverage; it reports no VPC, Availability Zone, Outpost, status or network type. DB subnet group and DB (cluster) parameter group names are stored in lowercase as documented, \"default\" subnet groups are refused, and option groups accept only the documented EngineName values. Describe operations and ListTagsForResource refuse a non-empty Filters list (an empty one means no filter), Describe operations accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name, and DescribeOptionGroups refuses OptionGroupName together with EngineName or MajorEngineVersion. Tag keys are 1 to 128 and values at most 256 characters of letters, digits, spaces and _.:/=+-@, and neither may start with aws: or rds:. Tag operations on an unknown ARN fail with DBInstanceNotFound, the first not-found fault the official tag operations model.",
+   "name": "Amazon Relational Database Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/rds/2014-10-31/service-2.json",
+  "sha256": "076092a7a8e134cc2efdb6d1f261a67860ec61e75019f89cbdb5c3ece51159af",
+  "license": "Apache-2.0"
+ }
+}

@@ -34,9 +34,9 @@ class SimpleDBRegistrationTests(unittest.TestCase):
     def log(self,events):return ('\n'.join(json.dumps(e) for e in events)+'\n').encode()
     def sdk(self):return {'factory_sdk_v1':True,'head':self.head,'status':'PASS','passed_cases':['sdk-domain-items','sdk-restart-cascade','sdk-list-pages','sdk-negative-cases'],'sdk_pins':{'boto3':'1.42.0','botocore':'1.41.6'},'binary_sha256':'a'*64,'python':gate.executable_command(['python3'])[0],'go':gate.executable_command(['go'])[0]}
     def test_union_and_default_activation(self):
-        self.assertEqual({'sqs-lifecycle',*gate.SIMPLEDB_SUITES}, set(gate.SUITES))
+        self.assertEqual({'sqs-lifecycle','ec2-describe-subnets',*gate.SIMPLEDB_SUITES}, set(gate.SUITES))
         self.assertTrue({'azure-queue-lifecycle','gcp-dns-atomic-lifecycle'}.isdisjoint(gate.SUITES))
-        self.assertEqual(gate.DEFAULT_SUITES,('sqs-lifecycle',))
+        self.assertEqual(gate.DEFAULT_SUITES,('sqs-lifecycle','ec2-describe-subnets'))
         self.assertFalse((self.root/'internal/azure/queue').exists())
         self.assertFalse((self.root/'internal/gcp/dns').exists())
         self.assertEqual(gate.source_hash(self.root),gate.legacy_source_hash(self.root))

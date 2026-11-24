@@ -39,8 +39,8 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveDynamoDB(w, r)
 		return
 	}
-	if isEC2Read(r) {
-		g.serveEC2Read(w, r)
+	if isEC2(r) {
+		g.serveEC2(w, r)
 		return
 	}
 	if isCloudFrontVpcOrigin(r) {

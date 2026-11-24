@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "2bd05417a13bdfc5d947b5ced09306a826e8f93a",
+  "base_sha": "9652f0344ab9d7e57aa30595fab5c3ed52c57cd8",
   "changes": [
     {
       "path": "docs/contributing/simpledb-factory-registration.md",
@@ -146,9 +146,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "4c2618fc3cf4ea6ac54e4737fe01476bbefc20a4643da61739f23d7d677de308",
+      "sha256": "8e184fc9d87f527a61f78d8c0077c70992f7abd2dfb1ff6ecc9c8e3a799ea90c",
       "disposition": "formal-infrastructure",
-      "reason": "Additive canonical model registry; previous entries remain byte-for-byte.",
+      "reason": "Adds the three reviewed SimpleDB registrations and preserves all 113 current main models.",
       "models": []
     },
     {
@@ -579,7 +579,7 @@
     },
     {
       "path": "internal/aws/ssm.go",
-      "sha256": "4ab07e78047bed677dae6d909afa87adcebafb40c4a1c3dfc26c056a097e7be4",
+      "sha256": "4e73843980f04de9f22e0b3fb9753e2bc201c800039d36f137dd22db0111cd76",
       "disposition": "modeled",
       "reason": "Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered.",
       "models": [
@@ -881,7 +881,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "3d5034bfa25fdfd459e232b0557eaee2e7b0d7671686fc5b48548e5f07c4527e",
+      "sha256": "f5bd1e76cb388650cd978cdf7481958d2901e071450f7a0cd1e27639a6356833",
       "disposition": "modeled",
       "reason": "Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models.",
       "models": [
@@ -1326,21 +1326,35 @@
     },
     {
       "path": "scripts/factory_acceptance.py",
-      "sha256": "6016ae6d1c5d04f36ea50d0c264cfbdddd5cb966501b8a28204621738acb6ead",
+      "sha256": "a0e1ad5700c1cc905a5e0ec75f87eb5fb4b3a194e1a9f3c36f3b9666ff8b7972",
       "disposition": "validation-tooling",
-      "reason": "Adds opt-in SimpleDB acceptance orchestration; the SQS default remains unchanged.",
+      "reason": "Reconciles opt-in SimpleDB acceptance with SQS and EC2 default suites and keeps scoped receipt validation.",
       "models": []
     },
     {
+      "path": "scripts/formal_model_gate.py",
+      "disposition": "formal-infrastructure",
+      "reason": "Pins the three SimpleDB models, checked properties, exact source scopes and six sensitivity controls; existing pins preserved.",
+      "models": [],
+      "sha256": "f96992289a355d5a3a971f4427050b1cb913f0eda612b8f3ec9ddf0753fead3e"
+    },
+    {
       "path": "scripts/test-factory-acceptance.py",
-      "sha256": "d3bce41acf1cf8babeb69672ec0ea4f17213555b4bfc18827e1128fdb90a92d9",
+      "sha256": "afed48d2fab0227cdea6056c2738df7c21ea69c868f6c248c5025463c5d04dcd",
       "disposition": "test-support",
       "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
     },
     {
+      "path": "scripts/test-formal-gate.py",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds specific isolated SimpleDB registration removal checks and exact inventory coverage without changing existing assertions.",
+      "models": [],
+      "sha256": "c250277068d644de3d32b5106127aaa3fd649f93c086010972e0b13b4bfda685"
+    },
+    {
       "path": "scripts/test-simpledb-factory-registration.py",
-      "sha256": "c5eb7168323d407662aba53b4f052d1ce4ac549b764db5c1c2eb1d5cb793feda",
+      "sha256": "8c60d4a3bfef7f416dd18dbed893674affc229fb471a8523b4dd945b58de71f1",
       "disposition": "test-support",
       "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []

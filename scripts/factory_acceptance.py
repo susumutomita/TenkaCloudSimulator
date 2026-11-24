@@ -24,12 +24,22 @@ SUITES = {
         'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/aws',
         'scope': 'Go gateway/SQLite; not SDK, UI, VM, real AWS or whole-service compatibility',
     },
+    'ec2-describe-subnets': {
+        'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestEC2DescribeSubnetsContract$', './internal/aws'],
+        'test': 'TestEC2DescribeSubnetsContract',
+        'provider': 'aws',
+        'operations': ['DescribeSubnets'],
+        'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/aws',
+        'scope': 'Go gateway/SQLite CFN-owned subnet discovery; not SDK, UI, VM, real AWS or whole-service compatibility',
+        'oracle': ('internal/aws/ec2_describe_subnets_contract_test.go',
+                   '6443bc90b6fec1c7b8bf277cc090b00f6dd431fac3481d120fdefa0ccb09b2d9'),
+    },
 }
 
 
 # Registration is distinct from activation. Preserve main's existing default;
 # SimpleDB acceptance remains explicit-only; registration is not activation.
-DEFAULT_SUITES = ('sqs-lifecycle',)
+DEFAULT_SUITES = ('sqs-lifecycle', 'ec2-describe-subnets')
 SIMPLEDB_SUITES = ('simpledb-first-oracle', 'simpledb-first-native',
                   'simpledb-first-sdk-wire', 'simpledb-first-sdk-harness-controls')
 SIMPLEDB_OPERATIONS = ['CreateDomain', 'ListDomains', 'DeleteDomain', 'PutAttributes', 'GetAttributes']
@@ -77,6 +87,12 @@ def require(ok, reason):
         raise ValueError(reason)
 
 
+def require_no_mixed_suites(suites):
+    selected = set(suites)
+    require(not selected.intersection(SIMPLEDB_SUITES) or selected <= set(SIMPLEDB_SUITES),
+            'SimpleDB suites cannot be mixed with other pilots')
+
+
 def digest(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -91,20 +107,30 @@ def git(root, *args):
 
 def validate_scope(suites, provider, operation, paths):
     require(suites and set(suites) <= set(SUITES), 'registered acceptance suites required')
-    require(any(SUITES[s]['provider'] == provider and operation in SUITES[s]['operations'] for s in suites),
-            'acceptance suite does not cover this provider/operation')
-    eligible = {name for name in suites if SUITES[name]['provider'] == provider and operation in SUITES[name]['operations']}
-    simpledb = bool(eligible.intersection(SIMPLEDB_SUITES))
-    if simpledb:
-        require(set(SIMPLEDB_SUITES) <= set(suites), 'all independent SimpleDB surfaces required, including SDK')
-    require(isinstance(paths, list) and paths and len(paths) == len(set(paths)), 'nonempty unique ownership paths required')
-    # A receipt never authorizes another service/provider or shared integration files.
-    sqs = provider == 'aws' and 'sqs-lifecycle' in eligible
+    require_no_mixed_suites(suites)
+    matching = {suite for suite in suites if SUITES[suite]['provider'] == provider and operation in SUITES[suite]['operations']}
+    require(matching, 'acceptance suite does not cover this provider/operation')
+    if matching.intersection(SIMPLEDB_SUITES):
+        require(set(suites) == set(SIMPLEDB_SUITES) and len(suites) == len(SIMPLEDB_SUITES),
+                'all independent SimpleDB surfaces required, including SDK')
+        require(isinstance(paths, list) and paths and len(paths) == len(set(paths)),
+                'nonempty unique ownership paths required')
+        for path in paths:
+            require(path in SIMPLEDB_PATHS, 'SimpleDB pilot does not cover claimed path: ' + path)
+        return
     for path in paths:
         p = Path(path)
-        sqs_path = path in ('internal/aws/sqs.go', 'internal/aws/sqs_store.go', 'formal/applicability.json') or (
+        sqs_covered = path in ('internal/aws/sqs.go', 'internal/aws/sqs_store.go', 'formal/applicability.json') or (
             p.parent.as_posix() == 'internal/aws' and p.name.startswith('sqs_') and p.name.endswith('_test.go'))
-        require((sqs and sqs_path) or (simpledb and path in SIMPLEDB_PATHS), 'acceptance suite does not cover claimed path: ' + path)
+        subnet_covered = path in (
+            'internal/aws/ec2_read.go', 'internal/aws/ec2_vpc.go',
+            'internal/aws/ec2_describe_subnets_contract_test.go',
+            'formal/applicability.json', 'scripts/factory_acceptance.py', 'scripts/test-factory-acceptance.py',
+        )
+        if 'sqs-lifecycle' in matching:
+            require(sqs_covered, 'SQS pilot does not cover claimed path: ' + path)
+        if 'ec2-describe-subnets' in matching:
+            require(subnet_covered, 'DescribeSubnets pilot does not cover claimed path: ' + path)
 
 
 def candidate_paths(base, head, root=ROOT):
@@ -133,8 +159,19 @@ def legacy_source_hash(root):
     return digest(raw)
 
 
+def verify_suite_oracles(root, suites):
+    for suite in suites:
+        oracle = SUITES[suite].get('oracle')
+        if oracle is not None:
+            name, pinned = oracle
+            path = root / name
+            require(path.is_file() and not path.is_symlink() and digest(path.read_bytes()) == pinned,
+                    'registered suite oracle changed or missing: ' + name)
+
+
 def source_hash(root, suites=None):
     selected = set(suites or DEFAULT_SUITES)
+    require_no_mixed_suites(selected)
     if not selected.intersection(SIMPLEDB_SUITES):
         return legacy_source_hash(root)  # Preserve legacy receipts and SQS provenance.
     registry = root/'test/factory/simpledb-registration.json'
@@ -152,8 +189,6 @@ def source_hash(root, suites=None):
         require(digest(file.read_bytes()) == checksum, 'SimpleDB oracle/helper changed: ' + name)
     binding = {'registration_sha256': digest(raw), 'suites': {name: SUITES[name] for name in SIMPLEDB_SUITES},
                'paths': sorted(SIMPLEDB_PATHS)}
-    if selected - set(SIMPLEDB_SUITES):
-        binding['legacy_source_sha256'] = legacy_source_hash(root)
     return digest(json.dumps(binding, sort_keys=True).encode())
 
 
@@ -211,7 +246,9 @@ def executable_command(command):
 
 def run(root, output, suites, timeout=300):
     require(suites and len(suites) == len(set(suites)) and set(suites) <= set(SUITES), 'unknown/duplicate/empty acceptance suites')
+    require_no_mixed_suites(suites)
     head = clean_head(root)
+    verify_suite_oracles(root, suites)
     pin = source_hash(root, suites)
     report = {'version': 1, 'head': head, 'source_sha256': pin, 'checks': {}, 'status': 'failed'}
     output = output.resolve()
@@ -232,10 +269,14 @@ def run(root, output, suites, timeout=300):
                 try:
                     returncode = process.wait(timeout=timeout)
                 except subprocess.TimeoutExpired:
-                    os.killpg(process.pid, signal.SIGTERM)
-                    try:
-                        process.wait(timeout=10)  # Allow SDK's finally to stop its owned CLI.
-                    except subprocess.TimeoutExpired:
+                    if suite == 'simpledb-first-sdk-wire':
+                        os.killpg(process.pid, signal.SIGTERM)
+                        try:
+                            process.wait(timeout=10)  # Allow SDK's finally to stop its owned CLI.
+                        except subprocess.TimeoutExpired:
+                            os.killpg(process.pid, signal.SIGKILL)
+                            process.wait()
+                    else:
                         os.killpg(process.pid, signal.SIGKILL)
                         process.wait()
                     returncode = -1
@@ -252,6 +293,7 @@ def run(root, output, suites, timeout=300):
             report['checks'][suite] = entry
             verdict(log, suite, returncode, head)
             entry['status'] = 'passed'
+        verify_suite_oracles(root, suites)
         require(clean_head(root) == head and source_hash(root, suites) == pin, 'inputs changed during acceptance')
         report['status'] = 'passed'
     finally:
@@ -261,11 +303,13 @@ def run(root, output, suites, timeout=300):
 
 def verify(path, head, suites, root=ROOT):
     require(suites and len(suites) == len(set(suites)) and set(suites) <= set(SUITES), 'registered acceptance suites required')
+    require_no_mixed_suites(suites)
     path = Path(path)
     report = json.loads(path.read_text())
     require(report.get('version') == 1 and report.get('head') == head and report.get('status') == 'passed', 'acceptance is not passed at candidate HEAD')
     require(clean_head(root) == head, 'review checkout is not clean candidate HEAD')
     require(report.get('source_sha256') == source_hash(root, suites), 'acceptance oracle changed')
+    verify_suite_oracles(root, suites)
     require(set(report.get('checks', {})) == set(suites), 'acceptance suite set differs')
     for suite in suites:
         entry = report['checks'][suite]

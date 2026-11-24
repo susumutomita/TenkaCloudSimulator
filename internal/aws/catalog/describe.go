@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"slices"
 	"sort"
 	"strings"
 )
@@ -19,6 +20,69 @@ type MemberDescriptor struct {
 	// Pattern is the official string pattern, so clients send a value the
 	// member accepts (for example an ID rather than a display name).
 	Pattern string `json:"pattern,omitempty"`
+	// Query protocol only. Key is the form parameter name; a list sends
+	// its elements as Key.ItemKey.N, or Key.N when Flattened, and an empty
+	// list as EmptyKey= (botocore's own name for an empty renamed list).
+	Key       string `json:"key,omitempty"`
+	ItemKey   string `json:"itemKey,omitempty"`
+	EmptyKey  string `json:"emptyKey,omitempty"`
+	Flattened bool   `json:"flattened,omitempty"`
+	// Shape names the member's official shape in the service's InputShapes
+	// when it is a structure, map or list of non-strings of a create,
+	// update, put or tag operation, so clients can validate and serialize it.
+	Shape string `json:"shape,omitempty"`
+}
+
+// InputMember references one shape from a structure member, a list element
+// or a map key or value. Name is the official member name (the key clients
+// use), Wire the JSON/REST body key when it differs, and Key the Query
+// parameter segment when it differs (for a list element: its element name).
+type InputMember struct {
+	Name      string `json:"name,omitempty"`
+	Wire      string `json:"wire,omitempty"`
+	Key       string `json:"key,omitempty"`
+	EmptyKey  string `json:"emptyKey,omitempty"`
+	Shape     string `json:"shape"`
+	Required  bool   `json:"required,omitempty"`
+	Flattened bool   `json:"flattened,omitempty"`
+}
+
+// InputShape is the documentation-free official input shape clients need
+// to validate and serialize a complex member in the service's own protocol.
+type InputShape struct {
+	Type     string        `json:"type"`
+	Members  []InputMember `json:"members,omitempty"`
+	Member   *InputMember  `json:"member,omitempty"`
+	Key      *InputMember  `json:"key,omitempty"`
+	Value    *InputMember  `json:"value,omitempty"`
+	Enum     []string      `json:"enum,omitempty"`
+	Min      *float64      `json:"min,omitempty"`
+	Max      *float64      `json:"max,omitempty"`
+	Document bool          `json:"document,omitempty"`
+	Union    bool          `json:"union,omitempty"`
+}
+
+// XMLMember is one member of a Query response structure: Name is the key
+// of the decoded object (the same key JSON protocols use) and Element the
+// XML element that carries it.
+type XMLMember struct {
+	Name      string `json:"name"`
+	Element   string `json:"element"`
+	Shape     string `json:"shape"`
+	Flattened bool   `json:"flattened,omitempty"`
+}
+
+// XMLShape tells first-party clients how to decode a Query XML response
+// unambiguously: an empty list from a missing member, a one-element list
+// from a structure, and each scalar type.
+type XMLShape struct {
+	Type    string      `json:"type"`
+	Members []XMLMember `json:"members,omitempty"`
+	// Item is a list's element (Element is "" when only flattened); Key
+	// and Value are a map entry's elements.
+	Item  *XMLMember `json:"item,omitempty"`
+	Key   *XMLMember `json:"key,omitempty"`
+	Value *XMLMember `json:"value,omitempty"`
 }
 
 // OpDescriptor tells first-party clients how to send one official operation.
@@ -58,6 +122,17 @@ type OpDescriptor struct {
 	// Fixed holds input members, by official name, that every request of
 	// this operation sends with these values.
 	Fixed map[string]any `json:"fixed,omitempty"`
+	// Query protocol only: the output shape (a key of the service's
+	// XMLShapes), its result wrapper element and, for list-tags, the
+	// decoded key that holds the tags.
+	Output        string `json:"output,omitempty"`
+	ResultWrapper string `json:"resultWrapper,omitempty"`
+	TagsKey       string `json:"tagsKey,omitempty"`
+	// Editable lists, for an update operation, the input members a client
+	// may change: every official member except those identifying the
+	// resource, fixed and account members, and resource members the bounded
+	// operation refuses (outside its reviewed fields).
+	Editable []string `json:"editable,omitempty"`
 }
 
 // ResourceDescriptor describes one reviewed resource kind. The *Member
@@ -74,6 +149,13 @@ type ResourceDescriptor struct {
 	Parent     string                  `json:"parent,omitempty"`
 	Limit      int                     `json:"limit"`
 	Ops        map[string]OpDescriptor `json:"operations"`
+	// ARNTemplate is published when the resource shape carries no ARN but
+	// the service tags resources by ARN ({partition}, {region}, {account},
+	// {name} and {id} placeholders, as the simulator forms it).
+	ARNTemplate string `json:"arnTemplate,omitempty"`
+	// TagsWire is the resource shape's tag member when the service binds no
+	// list-tags operation, so clients read tags from the description.
+	TagsWire string `json:"tagsWire,omitempty"`
 }
 
 // Descriptor is the capability entry of one catalog service.
@@ -99,6 +181,12 @@ type Descriptor struct {
 	Tagging        map[string]OpDescriptor `json:"tagging,omitempty"`
 	Bounds         []string                `json:"bounds"`
 	Source         Source                  `json:"source"`
+	// Query protocol only: the request Version and every output shape the
+	// bound operations can return.
+	XMLShapes map[string]XMLShape `json:"xmlShapes,omitempty"`
+	// InputShapes holds every shape the complex members of create, update,
+	// put and tag operations reach (see MemberDescriptor.Shape).
+	InputShapes map[string]InputShape `json:"inputShapes,omitempty"`
 }
 
 // Describe lists every catalog service for capabilities and clients.
@@ -118,20 +206,44 @@ func (b *binding) describe() Descriptor {
 		Protocol: m.Metadata.Protocol, JSONVersion: m.Metadata.JSONVersion, TargetPrefix: m.Metadata.TargetPrefix,
 		SigningName: b.signingName(), IAMPrefix: b.spec.IAMPrefix, Global: b.spec.Global, Issues: b.spec.Issues, AccountMembers: b.spec.AccountMembers,
 		Official: len(m.Routes), Bounds: b.spec.Bounds, Source: m.Source}
+	if m.Metadata.Protocol == "query" {
+		d.XMLShapes = map[string]XMLShape{}
+		for _, op := range b.spec.Ops {
+			if output := m.Operations[op.Name].Output; output != "" {
+				b.xmlShapes(output, d.XMLShapes)
+			}
+		}
+	}
 	for _, op := range b.spec.Ops {
 		d.Operations = append(d.Operations, op.Name)
 	}
 	sort.Strings(d.Operations)
+	inputs := map[string]InputShape{}
+	tagging := map[Kind]bool{}
+	for _, op := range b.spec.Ops {
+		tagging[op.Kind] = true
+	}
 	for _, res := range b.spec.Resources {
 		rd := ResourceDescriptor{Kind: res.Kind, ARNMember: res.ARNMember, NameMember: res.NameMember, IDMember: res.IDMember, Parent: res.Parent, Limit: res.Limit, Ops: map[string]OpDescriptor{},
 			ARNWire: b.resourceWire(res, res.ARNMember), NameWire: b.resourceWire(res, res.NameMember), IDWire: b.resourceWire(res, res.IDMember)}
 		if rd.Limit == 0 {
 			rd.Limit = defaultKindLimit
 		}
+		if res.ARNMember == "" && (tagging[Tag] || tagging[Untag] || tagging[ListTags]) {
+			rd.ARNTemplate = res.ARN
+		}
+		if !tagging[ListTags] {
+			shape := m.shape(res.Shape)
+			for _, name := range shape.sortedMembers() {
+				if m.isTagShape(shape.Members[name].Shape) && strings.Contains(strings.ToLower(name), "tag") {
+					rd.TagsWire = shape.Members[name].wire(name)
+				}
+			}
+		}
 		for i := range b.spec.Ops {
 			op := &b.spec.Ops[i]
 			if op.Resource == res.Kind {
-				od := b.describeOp(op, res)
+				od := b.describeOp(op, res, inputs)
 				if op.Kind == List && op.Names != "" {
 					od.Names = op.Names
 					rd.Ops["describe"] = od
@@ -152,13 +264,16 @@ func (b *binding) describe() Descriptor {
 			if d.Tagging == nil {
 				d.Tagging = map[string]OpDescriptor{}
 			}
-			d.Tagging[string(op.Kind)] = b.describeOp(op, &Resource{})
+			d.Tagging[string(op.Kind)] = b.describeOp(op, &Resource{}, inputs)
 		}
+	}
+	if len(inputs) > 0 {
+		d.InputShapes = inputs
 	}
 	return d
 }
 
-func (b *binding) describeOp(op *Op, res *Resource) OpDescriptor {
+func (b *binding) describeOp(op *Op, res *Resource, inputs map[string]InputShape) OpDescriptor {
 	official := b.model.Operations[op.Name]
 	method, uri := official.HTTP.Method, official.HTTP.RequestURI
 	if b.model.Metadata.Protocol == "json" {
@@ -175,6 +290,22 @@ func (b *binding) describeOp(op *Op, res *Resource) OpDescriptor {
 			}
 			if shape.Type == "list" {
 				md.Element = b.model.shape(shape.Member.Shape).Type
+			}
+			if complexInput(op.Kind) && (shape.Type == "structure" || shape.Type == "map" || shape.Type == "list" && b.model.shape(shape.Member.Shape).Type != "string") {
+				md.Shape = member.Shape
+				b.inputShape(member.Shape, inputs)
+			}
+			if b.model.Metadata.Protocol == "query" {
+				md.Key = b.model.memberKey(name, member)
+				if shape.Type == "list" {
+					md.Flattened = b.model.flattened(&member)
+					if !md.Flattened {
+						md.ItemKey = b.model.serialName(shape.Member, "member")
+					}
+					if own := b.model.serialName(&member, name); own != md.Key {
+						md.EmptyKey = own
+					}
+				}
 			}
 			od.Members = append(od.Members, md)
 		}
@@ -200,6 +331,19 @@ func (b *binding) describeOp(op *Op, res *Resource) OpDescriptor {
 				if shape := b.model.shape(member.Shape); shape.Type == "list" && b.model.shape(shape.Member.Shape).Type == "string" {
 					od.ValueItems, od.ValueMember = member.wire(name), b.resourceWire(res, op.ListValue)
 					break
+				}
+			}
+		}
+	}
+	if op.Kind == Update {
+		od.Editable = b.editable(op, res)
+	}
+	if b.model.Metadata.Protocol == "query" {
+		od.Output, od.ResultWrapper = official.Output, official.ResultWrapper
+		if output := b.model.Shapes[official.Output]; output != nil && op.Kind == ListTags {
+			for _, name := range output.sortedMembers() {
+				if b.model.isTagShape(output.Members[name].Shape) {
+					od.TagsKey = output.Members[name].wire(name)
 				}
 			}
 		}
@@ -287,4 +431,110 @@ func lookupKey(lookup string, res *Resource) string {
 		return "id"
 	}
 	return "name"
+}
+
+// xmlShapes registers a shape and every shape it reaches for Query decoding.
+func (b *binding) xmlShapes(name string, out map[string]XMLShape) {
+	if _, done := out[name]; done {
+		return
+	}
+	m := b.model
+	shape := m.shape(name)
+	x := XMLShape{Type: shape.Type}
+	out[name] = x
+	ref := func(r *Member, fallback string) *XMLMember {
+		b.xmlShapes(r.Shape, out)
+		return &XMLMember{Element: m.serialName(r, fallback), Shape: r.Shape}
+	}
+	switch shape.Type {
+	case "structure":
+		for _, member := range shape.sortedMembers() {
+			r := shape.Members[member]
+			b.xmlShapes(r.Shape, out)
+			x.Members = append(x.Members, XMLMember{Name: r.wire(member), Element: m.memberKey(member, r), Shape: r.Shape, Flattened: m.flattened(&r)})
+		}
+	case "list":
+		x.Item = ref(shape.Member, "member")
+	case "map":
+		x.Key, x.Value = ref(shape.Key, "key"), ref(shape.Value, "value")
+	}
+	out[name] = x
+}
+
+func complexInput(kind Kind) bool {
+	return kind == Create || kind == Update || kind == Put || kind == Tag
+}
+
+// editable lists an update operation's changeable input members.
+func (b *binding) editable(op *Op, res *Resource) []string {
+	input := b.model.Shapes[b.model.Operations[op.Name].Input]
+	if input == nil {
+		return nil
+	}
+	resource := b.model.shape(res.Shape)
+	q := &request{b: b, op: op}
+	var out []string
+	for _, name := range input.sortedMembers() {
+		if q.passive(name) || op.Fixed[name] != nil {
+			continue
+		}
+		target := name
+		if alias, ok := res.Aliases[name]; ok {
+			target = alias
+		}
+		if _, stored := resource.Members[target]; stored && !slices.Contains(op.Fields, name) {
+			continue
+		}
+		out = append(out, name)
+	}
+	return out
+}
+
+// inputShape registers a shape and every shape it reaches for clients.
+func (b *binding) inputShape(name string, inputs map[string]InputShape) {
+	if _, done := inputs[name]; done {
+		return
+	}
+	m := b.model
+	shape := m.shape(name)
+	query := m.Metadata.Protocol == "query"
+	x := InputShape{Type: shape.Type, Enum: shape.Enum, Min: shape.Min, Max: shape.Max, Document: shape.Document, Union: shape.Union}
+	inputs[name] = x
+	ref := func(r *Member, fallback string) *InputMember {
+		b.inputShape(r.Shape, inputs)
+		out := &InputMember{Shape: r.Shape}
+		if query {
+			out.Key = m.serialName(r, fallback)
+		}
+		return out
+	}
+	switch shape.Type {
+	case "structure":
+		if shape.Document {
+			break
+		}
+		for _, member := range shape.sortedMembers() {
+			r := shape.Members[member]
+			b.inputShape(r.Shape, inputs)
+			im := InputMember{Name: member, Shape: r.Shape, Required: slices.Contains(shape.Required, member)}
+			if wire := r.wire(member); wire != member {
+				im.Wire = wire
+			}
+			if query {
+				if key := m.memberKey(member, r); key != member {
+					im.Key = key
+				}
+				if own := m.serialName(&r, member); own != m.memberKey(member, r) {
+					im.EmptyKey = own
+				}
+				im.Flattened = m.flattened(&r)
+			}
+			x.Members = append(x.Members, im)
+		}
+	case "list":
+		x.Member = ref(shape.Member, "member")
+	case "map":
+		x.Key, x.Value = ref(shape.Key, "key"), ref(shape.Value, "value")
+	}
+	inputs[name] = x
 }

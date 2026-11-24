@@ -59,8 +59,9 @@ type Op struct {
 	// Bedrock ListInferenceProfiles typeEquals APPLICATION). Descriptors
 	// publish them so first-party clients send the same request as SDKs.
 	Fixed map[string]any
-	// Names is a list input member of identifiers that must all exist; the
-	// list operation then returns exactly those resources in request order.
+	// Names is a list input member of identifiers that must all exist, or a
+	// string member naming one; the list operation then returns exactly
+	// those resources in request order.
 	Names string
 	// Check validates semantic constraints the official shape cannot express.
 	Check func(input map[string]any) error
