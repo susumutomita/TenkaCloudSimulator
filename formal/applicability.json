@@ -4,7 +4,7 @@
   "changes": [
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "63f584ed56e6939b93cb28f1edc272decdb00881bf87dde2840291724fb344a2",
+      "sha256": "af0d4daa278521c72f1b8d9688e09a67f98668b4d618ff8c262dca58a2ede4fd",
       "disposition": "documentation",
       "reason": "Generated service table listing the newly added services with their bound operations and bounds.",
       "models": []
@@ -1113,6 +1113,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/catalog/quicksight_root_folder_contract_test.go",
+      "sha256": "c333e7bb0f4446b114a09b474ac17bfe2bb20f885d06db16989ddd3626fef464",
+      "disposition": "test-support",
+      "reason": "QuickSight root-folder empty parent normalization, documented default sharing, and no write on unsupported folders or permissions.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/selection.json",
       "sha256": "1d915555a1b85db9f0986cafac998ee10c1d39ef4bb2a5533e5d34b1d29ad486",
       "disposition": "modeled",
@@ -1163,7 +1170,7 @@
     },
     {
       "path": "internal/aws/catalog/services_analytics2.go",
-      "sha256": "d818b0d35c5f8743c4c39c346d729000b6dc0d520e25314e0dcd02c5bc3d8af0",
+      "sha256": "4cb3c772e6e50f378c8c606a6daa8e54cb5ccb8be370cdcc52034ca7a71639f7",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1939,7 +1946,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/quicksight.json",
-      "sha256": "77ee995cd90a82f8142491d61ee0758abeb90ef426a0a78d3647699c23be5264",
+      "sha256": "bf959fca5c45a7200b763b9a4252b0ccc440c1a769a0a0d86a4da62c12359a65",
       "disposition": "presentation",
       "reason": "Generated quicksight reference.",
       "models": []
