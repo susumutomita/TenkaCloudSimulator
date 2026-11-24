@@ -2049,7 +2049,7 @@
     {
       "path": "internal/server/web/app.js",
       "disposition": "modeled",
-      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI.",
+      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI. Includes the AppStream App blocks view, which uses the existing single-write and epoch guards for native create, exact ARN describe and delete.",
       "models": [
         {
           "id": "CatalogConsoleEpoch",
@@ -2058,10 +2058,10 @@
             "SingleWriter",
             "FailureVisible"
           ],
-          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests)."
+          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests). The model does not cover AppStream packaging form validation, S3 URI decomposition or actual browser/API interaction."
         }
       ],
-      "sha256": "bc2389497e26bf40f608b5ad4e233c766d634aa89cbb1993f36167d8fce6a03d"
+      "sha256": "f535e0be518ae52edf5926dc0e395bc9ac771265c8ef081f94c8dc718ffc0763"
     },
     {
       "path": "test/e2e/aws_catalog_console.py",
@@ -2535,22 +2535,36 @@
     {
       "path": "tools/console/bundle-digests.json",
       "disposition": "presentation",
-      "reason": "Generated Cloudscape bundle input and output digests for the catalog Edit source change.",
+      "reason": "Generated console asset digests for the bounded AppStream App blocks console and retained prior services.",
       "models": [],
-      "sha256": "29e8758bb883c40bf771737a23bd6a14255bf22b9c230d1329c8b3a468073a43"
+      "sha256": "c9d64e47fca38d235f13b08bc51d5c1069e509a9c0e694de1a035574fda5c4b4"
     },
     {
       "path": "tools/console/bundle-inputs.json",
       "disposition": "presentation",
-      "reason": "Generated Cloudscape bundle input and output digests for the catalog Edit source change.",
+      "reason": "Generated console input graph for the bounded AppStream App blocks console and retained prior services.",
       "models": [],
-      "sha256": "ace157fce9ad7a2e75e8d0de7f3a1c9f83d8f47ce1b87f89b3e3f7ac8bafde1e"
+      "sha256": "e57edcd500c2fdf665ed9aaee8cb1b26c9b1c9d938c0f5031e940cdef9314849"
+    },
+    {
+      "path": "tools/console/src/appstream-app-block.jsx",
+      "disposition": "presentation",
+      "reason": "Bounded packaging form and review presentation; native creates and epoch handling remain in the Catalog view.",
+      "models": [],
+      "sha256": "9a6b0c000930e843fb4a74a2aac7a7ca79558cadaa4d42d52222481443e98f5b"
+    },
+    {
+      "path": "tools/console/src/appstream-app-block.mjs",
+      "disposition": "presentation",
+      "reason": "Presentation-only conversion of AppStream form values to native metadata request members and an exact selected ARN; no networking, store access, or authority.",
+      "models": [],
+      "sha256": "5b722a2f1f05296b8c083ef9ca60e70f1a72643a80a627226613333d8d8ea599"
     },
     {
       "path": "tools/console/src/catalog.jsx",
-      "sha256": "d778d82a7d985d6bb7368d192fd49bcf435f661cdbdf66ea4d5ddb10ba1ca517",
+      "sha256": "b0b993900d45fb6f6f2381b7eba643decdd87f4a60d4b770c20799c1f5f0525a",
       "disposition": "modeled",
-      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI.",
+      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI. Includes the AppStream App blocks view, which uses the existing single-write and epoch guards for native create, exact ARN describe and delete.",
       "models": [
         {
           "id": "CatalogConsoleEpoch",
@@ -2559,9 +2573,16 @@
             "SingleWriter",
             "FailureVisible"
           ],
-          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests)."
+          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests). The model does not cover AppStream packaging form validation, S3 URI decomposition or actual browser/API interaction."
         }
       ]
+    },
+    {
+      "path": "tools/console/test/appstream-app-block.test.mjs",
+      "disposition": "presentation",
+      "reason": "Offline AppStream form payload and selected-ARN regression cases; no browser or live provider execution.",
+      "models": [],
+      "sha256": "5a46b65ee1477f9adf824c2d3bf5f3fa36f65d7075dfba030f7120c36b076740"
     },
     {
       "path": "tools/console/tests/catalog-edit-token.test.mjs",
@@ -2569,6 +2590,13 @@
       "disposition": "presentation",
       "reason": "Browser and Node regression evidence for the catalog Edit version and full-stack save flow.",
       "models": []
+    },
+    {
+      "path": "tools/console/tests/catalog-input.test.mjs",
+      "disposition": "presentation",
+      "reason": "Existing Catalog view harness resolves the new form conversion helper; existing API-contract assertions are unchanged.",
+      "models": [],
+      "sha256": "f1a741efb47f79646ad7ae0cab0de6b3b6d19d7406f8d9cfeac1ea50b1e51fd5"
     },
     {
       "path": "tools/console/tests/fixtures/catalog-descriptors.json",

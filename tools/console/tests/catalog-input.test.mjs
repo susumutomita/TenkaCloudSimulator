@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {transformSync} from 'esbuild';
 import * as input from '../src/catalog-input.mjs';
+import * as appBlock from '../src/appstream-app-block.mjs';
 import * as query from '../src/catalog-query.mjs';
 import * as names from '../src/catalog-names.mjs';
 
@@ -19,7 +20,7 @@ const source = fs.readFileSync(new URL('../src/catalog.jsx', import.meta.url), '
 const compiled = transformSync(source, {loader: 'jsx', format: 'cjs', target: 'es2022'}).code;
 const view = {exports: {}};
 vm.runInNewContext(compiled, {module: view, exports: view.exports, console, URLSearchParams,
-  require: id => id === './catalog-query.mjs' ? query : id === './catalog-names.mjs' ? names : id === './catalog-input.mjs' ? input : id === 'react' ? {} : id === './i18n.jsx' ? {useLocale: () => ({t: en => en})} : {}});
+  require: id => id === './catalog-query.mjs' ? query : id === './catalog-names.mjs' ? names : id === './catalog-input.mjs' ? input : id === './appstream-app-block.mjs' ? appBlock : id === 'react' ? {} : id === './i18n.jsx' ? {useLocale: () => ({t: en => en})} : {}});
 const {buildCatalogRequest, formMembers, control, convertField, fieldText, resourceARN, fieldOrder} = view.exports;
 const plain = value => JSON.parse(JSON.stringify(value));
 
@@ -164,7 +165,7 @@ test('the catalog view renders, opens a detail, edits and tags through native re
   };
   const module = {exports: {}};
   vm.runInNewContext(compiled, {module, exports: module.exports, console, URLSearchParams,
-    require: id => id === './catalog-query.mjs' ? query : id === './catalog-names.mjs' ? names : id === './catalog-input.mjs' ? input : id === 'react' ? react : id === './i18n.jsx' ? {useLocale: () => ({t: en => en})} : {}});
+    require: id => id === './catalog-query.mjs' ? query : id === './catalog-names.mjs' ? names : id === './catalog-input.mjs' ? input : id === './appstream-app-block.mjs' ? appBlock : id === 'react' ? react : id === './i18n.jsx' ? {useLocale: () => ({t: en => en})} : {}});
   const rds = service('rds');
   const sent = [];
   const xml = (action, inner) => '<' + action + 'Response><' + action + 'Result>' + inner + '</' + action + 'Result><ResponseMetadata><RequestId>r</RequestId></ResponseMetadata></' + action + 'Response>';

@@ -1,5 +1,7 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {useLocale} from './i18n.jsx';
+import AppStreamAppBlockForm from './appstream-app-block.jsx';
+import {appStreamAppBlockDetailInput,isAppStreamAppBlock} from './appstream-app-block.mjs';
 import {decodeQuery,queryBody} from './catalog-query.mjs';
 import {example,fromWire,parseComplex,parseTagLines,tagPairs,tagShape,tagValue,toWire} from './catalog-input.mjs';
 import {humanize,matches,phrase,pickColumns,plural,tableShape} from './catalog-names.mjs';
@@ -155,7 +157,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const [chosen,setChosen]=useState([]),[filter,setFilter]=useState(''),[pager,setPager]=useState({tokens:[''],index:0}),[scope,setScope]=useState({});
  const revision=useRef(0),alive=useRef(true);
  const service=(services||[]).find(s=>s.model===model);
- const resource=service?.resources.find(r=>r.kind===kind)||service?.resources[0];
+ const resource=service?.resources.find(r=>r.kind===(kind||(service?.model==='appstream'?'appBlock':'')))||service?.resources[0];
+ const appBlock=isAppStreamAppBlock(service,resource);
  const parentResource=resource?.parent?service.resources.find(r=>r.kind===resource.parent):null;
  // Required list members other than the parent and page token select what
  // the official list returns (ListControls controlType, GetResourceShares
@@ -243,7 +246,14 @@ export default function CatalogView({region,request,catalog,onSaving}){
     const describe=resource.operations.describe,list=resource.operations.list;
     // A describe operation whose names member is one string (RDS
     // DescribeDBSubnetGroups DBSubnetGroupName) reads one resource by name.
-    if(describe&&(describe.members||[]).some(m=>m.name===describe.names&&m.type==='string')){const page=await call(describe,{...parentInput(describe),[describe.names]:identity(item)});if(!valid(epoch))return null;value=(page[describe.items]||[])[0]||item}
+    if(appBlock){
+     const input=appStreamAppBlockDetailInput(resource,item);
+     if(!input)throw Error(t('App block ARN is unavailable. Reload the list.','App Block ARN がありません。一覧を更新してください。'));
+     const out=await call(list,input);if(!valid(epoch))return null;
+     value=(out[list.items]||[]).find(row=>row.Arn===item.Arn);
+     if(!value)throw Error(t('App block is no longer listed.','App Block が一覧にありません。'));
+    }
+    else if(describe&&(describe.members||[]).some(m=>m.name===describe.names&&m.type==='string')){const page=await call(describe,{...parentInput(describe),[describe.names]:identity(item)});if(!valid(epoch))return null;value=(page[describe.items]||[])[0]||item}
     else if(describe&&list?.valueItems){const page=await call(describe,{...parentInput(describe),[describe.names]:[item[list.valueMember]]});if(!valid(epoch))return null;value=(page[describe.items]||[])[0]||item}
    }
    setDetail(value);await loadTags(epoch,value);return valid(epoch)?{value,token}:null;
@@ -276,8 +286,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const createOp=resource?.operations.create;
  const fields=useMemo(()=>fieldOrder(formMembers(createOp,skipped(createOp)),resource),[createOp]);
  function openCreate(){setForm({});setFieldErrors({});setError('');setNotice('');setPage('create')}
- async function create(){
-  const op=createOp;const {input,problems}=readFields(fields,form);
+ async function create(nativeInput){
+  const op=createOp;const {input,problems}=nativeInput?{input:nativeInput,problems:{}}:readFields(fields,form);
   setFieldErrors(problems);if(Object.keys(problems).length){setError('');return}
   fresh();setBusy(true);onSaving(true);setError('');setNotice('');
   let created=false;
@@ -367,18 +377,23 @@ export default function CatalogView({region,request,catalog,onSaving}){
  if(descriptorError)return <Alert type="error">{descriptorError}</Alert>;
  if(services===null)return <Box>{t('Loading','読み込み中')}</Box>;
  if(!services.length)return <Alert type="info">{t('No catalog services are enabled.','有効なカタログサービスはありません。')}</Alert>;
- const singular=kindName(resource),many=plural(singular);
- const createLabel=t('Create ','作成: ')+phrase(singular);
+ const singular=kindName(resource),many=appBlock?t('App blocks','App Block'):plural(singular);
+ const createLabel=appBlock?t('Create app block','App Block を作成'):t('Create ','作成: ')+phrase(singular);
  const pick=chosen[0];
  const toList=e=>{e?.preventDefault?.();if(!busy)load()};
  const crumbs=last=><BreadcrumbGroup ariaLabel={t('Catalog location','カタログ内の位置')} onFollow={e=>{e.preventDefault();if(e.detail.href==='#list')toList()}}
-   items={[{text:service.title,href:'#list'},{text:many,href:'#list'},...(last?[{text:last,href:'#here'}]:[])]}/>;
+   items={[{text:service.title,href:'#list'},...(appBlock?[{text:t('Applications Manager','Applications Manager'),href:'#list'}]:[]),{text:many,href:'#list'},...(last?[{text:last,href:'#here'}]:[])]}/>;
  const alerts=<>{error&&<Alert type="error" header={t('Request failed','リクエストに失敗しました')}>{error}</Alert>}
   {notice&&<Alert type="success" dismissible onDismiss={()=>setNotice('')}>{notice}</Alert>}</>;
  const confirmModal=<Modal visible={!!confirm} onDismiss={()=>setConfirm(null)} header={t('Delete ','削除: ')+phrase(singular)}
    footer={<Box float="right"><SpaceBetween direction="horizontal" size="xs"><Button onClick={()=>setConfirm(null)}>{t('Cancel','キャンセル')}</Button><Button variant="primary" onClick={()=>remove(confirm)}>{t('Delete','削除')}</Button></SpaceBetween></Box>}>
    {t('Delete','削除')} <strong>{identity(confirm||{})}</strong>? {t('This sends ','次の操作を送信します: ')}<code>{resource.operations.delete?.name}</code>.
   </Modal>;
+ if(page==='create'&&createOp&&appBlock){
+  return <ContentLayout header={<SpaceBetween size="s">{crumbs(createLabel)}<Header variant="h1">{createLabel}</Header></SpaceBetween>}>
+    <AppStreamAppBlockForm busy={busy} error={error} onCancel={()=>{setError('');setPage('list')}} onCreate={create}/>
+   </ContentLayout>;
+ }
  if(page==='create'&&createOp){
   return <ContentLayout header={<SpaceBetween size="s">{crumbs(t('Create','作成'))}<Header variant="h1" description={<>{t('Sends ','送信する操作: ')}<code>{createOp.name}</code>{t(' to the simulator. Unlisted official members are available through SDKs.','。一覧にない公式メンバーは SDK から利用できます。')}</>}>{createLabel}</Header></SpaceBetween>}>
    <form onSubmit={e=>{e.preventDefault();create()}}><Form errorText={error||undefined} errorIconAriaLabel={t('Error','エラー')}
@@ -450,6 +465,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
     <ul className="catalog-bounds">{service.bounds.map(b=><li key={b}>{b}</li>)}</ul>
    </ExpandableSection>
    {alerts}
+   {appBlock&&crumbs()}
    <Tabs activeTabId={resource.kind} onChange={e=>{if(!busy){setKind(e.detail.activeTabId);setParent('')}}} tabs={service.resources.map(r=>({id:r.kind,label:plural(kindName(r))}))}/>
    {parentResource&&<FormField label={humanize(parentResource.kind)}><Select selectedOption={parent?{value:parent,label:parent}:null} placeholder={t('Create a parent resource first','先に親リソースを作成してください')} disabled={busy||!parents.length}
      onChange={e=>{const value=e.detail.selectedOption.value;setParent(value);load('',value)}} options={parents.map(p=>{const pk=rowKeys(parentResource);const v=p[pk.id]||p[pk.name]||p[pk.arn];return {value:v,label:p[pk.name]||v}})}/></FormField>}
